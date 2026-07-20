@@ -1,0 +1,37 @@
+.root {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 1.75rem;
+  min-width: 0;
+}
+
+.bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  max-width: 8px;
+  border-radius: 2px 2px 0 0;
+  background: var(--c-neutral-border);
+}
+
+.root[data-domain='habits'] .bar:not([data-empty]) {
+  background: var(--c-habits);
+}
+
+.root[data-domain='health'] .bar:not([data-empty]) {
+  background: var(--c-health);
+}
+
+.root[data-domain='productivity'] .bar:not([data-empty]) {
+  background: var(--c-productivity);
+}
+
+.root[data-domain='learning'] .bar:not([data-empty]) {
+  background: var(--c-learning);
+}
+
+.bar[data-empty] {
+  height: 15% !important;
+  background: var(--surface-3);
+  opacity: 0.7;
+}

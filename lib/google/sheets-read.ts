@@ -1,25 +1,12 @@
 /**
  * Lectura del Sheet DEV sin googleapis/gaxios.
- *
- * Usa JWT (crypto de Node) + fetch. Así nunca entran en el pipeline de React
- * objetos GaxiosError, Buffer de respuesta ni ArrayBuffer no clonables.
  */
-import { createSign, randomUUID } from 'node:crypto';
-
 import { sanitizeSheetValues } from '@/lib/data/plain';
 import { assertAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 
 import { getGoogleConfig } from '../data/config';
+import { fetchAccessToken, READONLY_SCOPE, SHEETS_BASE } from './auth';
 import type { ReadTabResult, SheetReadCode } from './errors';
-
-const READONLY_SCOPE = 'https://www.googleapis.com/auth/spreadsheets.readonly';
-const TOKEN_URL = 'https://oauth2.googleapis.com/token';
-const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
-
-function base64Url(input: string | Buffer): string {
-  const buf = typeof input === 'string' ? Buffer.from(input, 'utf8') : input;
-  return buf.toString('base64url');
-}
 
 function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
   if (status === 401) return 'auth-error';
@@ -28,71 +15,6 @@ function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
     return 'missing-tab';
   }
   return 'read-error';
-}
-
-/** Firma un JWT de cuenta de servicio para el scope readonly. */
-function buildServiceAccountJwt(clientEmail: string, privateKey: string): string {
-  const now = Math.floor(Date.now() / 1000);
-  const header = base64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const claim = base64Url(
-    JSON.stringify({
-      iss: clientEmail,
-      scope: READONLY_SCOPE,
-      aud: TOKEN_URL,
-      iat: now,
-      exp: now + 3600,
-      jti: randomUUID(),
-    }),
-  );
-  const unsigned = `${header}.${claim}`;
-  const signer = createSign('RSA-SHA256');
-  signer.update(unsigned);
-  signer.end();
-  const signature = base64Url(signer.sign(privateKey));
-  return `${unsigned}.${signature}`;
-}
-
-/** Intercambia el JWT por un access token. Devuelve el token o un código de error. */
-async function fetchAccessToken(
-  clientEmail: string,
-  privateKey: string,
-): Promise<{ ok: true; token: string } | { ok: false; code: SheetReadCode }> {
-  let assertion: string;
-  try {
-    assertion = buildServiceAccountJwt(clientEmail, privateKey);
-  } catch {
-    return { ok: false, code: 'auth-error' };
-  }
-
-  let response: Response;
-  try {
-    response = await fetch(TOKEN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        assertion,
-      }),
-      cache: 'no-store',
-    });
-  } catch {
-    return { ok: false, code: 'auth-error' };
-  }
-
-  const bodyText = await response.text();
-  if (!response.ok) {
-    return { ok: false, code: mapHttpStatus(response.status, bodyText) };
-  }
-
-  try {
-    const parsed = JSON.parse(bodyText) as { access_token?: unknown };
-    if (typeof parsed.access_token !== 'string' || parsed.access_token.length === 0) {
-      return { ok: false, code: 'auth-error' };
-    }
-    return { ok: true, token: parsed.access_token };
-  } catch {
-    return { ok: false, code: 'auth-error' };
-  }
 }
 
 /**
@@ -114,7 +36,7 @@ export async function readTabValues(tab: string): Promise<ReadTabResult> {
       return { ok: false, code: 'read-error' };
     }
 
-    const tokenResult = await fetchAccessToken(clientEmail, privateKey);
+    const tokenResult = await fetchAccessToken(clientEmail, privateKey, READONLY_SCOPE);
     if (!tokenResult.ok) {
       return { ok: false, code: tokenResult.code };
     }
@@ -150,7 +72,6 @@ export async function readTabValues(tab: string): Promise<ReadTabResult> {
       return { ok: false, code: 'read-error' };
     }
 
-    // Round-trip JSON para garantizar un grafo 100% plano (sin prototipos raros).
     const plain = JSON.parse(JSON.stringify(sanitizeSheetValues(values))) as (
       string | number | boolean | null
     )[][];
@@ -161,7 +82,7 @@ export async function readTabValues(tab: string): Promise<ReadTabResult> {
   }
 }
 
-/** Mapeo de fallos HTTP (exportado para pruebas; ya no usa gaxios). */
+/** Mapeo de fallos HTTP (exportado para pruebas). */
 export function mapGoogleFailure(error: unknown, tab: string): SheetReadCode {
   void tab;
   if (typeof error === 'object' && error !== null) {

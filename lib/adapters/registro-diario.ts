@@ -4,6 +4,7 @@
  * Parsea filas a registros tipados (conservando 0/false/vacío) y deriva las
  * vistas de productividad, hábitos y metas semanales.
  */
+import { AUTHORIZED_HABIT_META } from '@/lib/habits/authorized';
 import type { Domain, HabitStatus, HabitView, ProductivityView, WeeklyGoal } from '@/types';
 
 import { formatDuration } from '../format';
@@ -34,14 +35,13 @@ export interface RegistroRecord {
   habits: Record<string, Cell<boolean>>;
 }
 
-/** Hábitos del día que muestra el dashboard. */
-export const DASHBOARD_HABITS: readonly { header: string; name: string; icon: string }[] = [
-  { header: RD.bed, name: 'Tender la cama', icon: '🛏️' },
-  { header: RD.shower, name: 'Bañarme al levantarme', icon: '🚿' },
-  { header: RD.posture, name: 'Postura 5 min', icon: '🧘' },
-  { header: RD.journaling, name: 'Journaling', icon: '📓' },
-  { header: RD.gym, name: 'Gimnasio', icon: '🏋️' },
-];
+/** Los diez hábitos autorizados (misma lista blanca que la escritura). */
+export const DASHBOARD_HABITS: readonly {
+  header: string;
+  name: string;
+  icon: string;
+  weeklyGoalId?: string;
+}[] = AUTHORIZED_HABIT_META;
 
 interface WeeklyGoalDef {
   id: string;
@@ -163,8 +163,9 @@ export function registroHasData(record: RegistroRecord): boolean {
   return Object.values(record.habits).some((cell) => cell.kind === 'value' && cell.value === true);
 }
 
-function habitStatus(cell: Cell<boolean> | undefined): HabitStatus {
-  if (!cell || cell.kind !== 'value') return 'unavailable';
+function habitStatus(cell: Cell<boolean> | undefined, rowExists: boolean): HabitStatus {
+  if (!cell || cell.kind === 'empty') return rowExists ? 'pending' : 'unavailable';
+  if (cell.kind !== 'value') return 'unavailable';
   return cell.value ? 'done' : 'pending';
 }
 
@@ -172,9 +173,10 @@ function habitStatus(cell: Cell<boolean> | undefined): HabitStatus {
 export function buildHabitViews(
   latest: RegistroRecord | null,
   available: readonly RegistroRecord[],
+  rowExists = latest !== null,
 ): HabitView[] {
   return DASHBOARD_HABITS.map((def) => {
-    const status = habitStatus(latest?.habits[def.header]);
+    const status = habitStatus(latest?.habits[def.header], rowExists);
     let streak = 0;
     for (let i = available.length - 1; i >= 0; i -= 1) {
       const cell = available[i].habits[def.header];
@@ -191,6 +193,8 @@ export function buildHabitViews(
       status,
       streak,
       streakAvailable: status !== 'unavailable',
+      weeklyGoalId: def.weeklyGoalId,
+      value: status === 'done',
     };
   });
 }

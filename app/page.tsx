@@ -36,7 +36,13 @@ export default async function TodayPage() {
         <div className={styles.main}>
           <TodayAgenda />
           <PriorityTasks />
-          <HabitsToday habits={today.habits} />
+          <HabitsToday
+            habits={today.habits}
+            weekly={today.weekly}
+            targetDate={today.targetDate}
+            writable={today.writable}
+            rowExists={today.rowExists}
+          />
           <ProductivityToday productivity={today.productivity} />
         </div>
         <div className={styles.side}>

@@ -78,8 +78,9 @@ export function buildSheetToday(
   const importKind = todaySalud ? parseImportStatus(todaySalud.importStatus) : 'none';
   const healthEmptyContext = importKind === 'partial' ? 'importación parcial' : 'sin registro';
 
-  // Hábitos: siempre la fila del día objetivo (false → pending; vacío → no disponible).
-  const habits = buildHabitViews(todayRegistroRow, registroAvailable);
+  // Hábitos: siempre la fila del día objetivo (false/vacío editable → pending).
+  const rowExists = todayRegistroRow !== null;
+  const habits = buildHabitViews(todayRegistroRow, registroAvailable, rowExists);
   const doneHabits = habits.filter((habit) => habit.status === 'done').length;
   const totalHabits = DASHBOARD_HABITS.length;
 
@@ -130,6 +131,8 @@ export function buildSheetToday(
       status: hasData ? 'ready' : 'no-data',
       notice,
       targetDate: today,
+      rowExists,
+      writable: true,
       registroDate: todayRegistro?.date ?? null,
       healthDate: todaySalud?.date ?? null,
       header: {

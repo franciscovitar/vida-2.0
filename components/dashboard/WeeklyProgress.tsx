@@ -1,13 +1,43 @@
+'use client';
+
 import { Target } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { WEEKLY_HABIT_DELTA_EVENT } from '@/lib/habits/events';
 import type { WeeklyGoal } from '@/types';
 
 import styles from './WeeklyProgress.module.scss';
 
 export function WeeklyProgress({ goals }: { goals: WeeklyGoal[] }) {
+  const [source, setSource] = useState(goals);
+  const [deltas, setDeltas] = useState<Record<string, number>>({});
+
+  if (source !== goals) {
+    setSource(goals);
+    setDeltas({});
+  }
+
+  useEffect(() => {
+    const onDelta = (event: Event) => {
+      const detail = (event as CustomEvent<{ weeklyGoalId: string; delta: number }>).detail;
+      if (!detail?.weeklyGoalId || !detail.delta) return;
+      setDeltas((prev) => ({
+        ...prev,
+        [detail.weeklyGoalId]: (prev[detail.weeklyGoalId] ?? 0) + detail.delta,
+      }));
+    };
+    window.addEventListener(WEEKLY_HABIT_DELTA_EVENT, onDelta);
+    return () => window.removeEventListener(WEEKLY_HABIT_DELTA_EVENT, onDelta);
+  }, []);
+
+  const items = goals.map((goal) => ({
+    ...goal,
+    current: Math.max(0, goal.current + (deltas[goal.id] ?? 0)),
+  }));
+
   return (
     <Card aria-labelledby="weekly-title">
       <SectionHeader
@@ -18,7 +48,7 @@ export function WeeklyProgress({ goals }: { goals: WeeklyGoal[] }) {
         domain="habits"
       />
       <ul className={styles.list}>
-        {goals.map((goal) => {
+        {items.map((goal) => {
           const complete = goal.current >= goal.target;
           return (
             <li key={goal.id} className={styles.item}>

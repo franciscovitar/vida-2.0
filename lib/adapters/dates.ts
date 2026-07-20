@@ -105,10 +105,9 @@ export function isFutureDate(date: string, today: string): boolean {
   return date > today;
 }
 
-/** Lunes de la semana ISO que contiene `ymd` (YYYY-MM-DD), como `YYYY-MM-DD`. */
-export function startOfWeekMonday(ymd: string): string {
+/** Día de la semana: 0 = lunes … 6 = domingo (sin objetos Date). */
+export function weekdayMondayIndex(ymd: string): number {
   const [year, month, day] = ymd.split('-').map((part) => Number.parseInt(part, 10));
-  // Zeller-like: días desde época para conocer el día de la semana sin Date/TZ.
   const a = Math.floor((14 - month) / 12);
   const y = year - a;
   const m = month + 12 * a - 2;
@@ -120,8 +119,14 @@ export function startOfWeekMonday(ymd: string): string {
       Math.floor(y / 400) +
       Math.floor((31 * m) / 12)) %
     7;
-  // dow: 0 = domingo ... 6 = sábado. Días a restar para llegar al lunes.
-  const back = (dow + 6) % 7;
+  // dow: 0 = domingo … 6 = sábado → 0 = lunes … 6 = domingo.
+  return (dow + 6) % 7;
+}
+
+/** Lunes de la semana ISO que contiene `ymd` (YYYY-MM-DD), como `YYYY-MM-DD`. */
+export function startOfWeekMonday(ymd: string): string {
+  const [year, month, day] = ymd.split('-').map((part) => Number.parseInt(part, 10));
+  const back = weekdayMondayIndex(ymd);
   const daysSinceEpoch = daysFromCivil(year, month, day) - back;
   return toYMD(civilFromDays(daysSinceEpoch));
 }
@@ -139,4 +144,21 @@ function daysFromCivil(year: number, month: number, day: number): number {
 /** true si `date` está en el rango [start, end] inclusive (todas YYYY-MM-DD). */
 export function isWithin(date: string, start: string, end: string): boolean {
   return date >= start && date <= end;
+}
+
+/** Suma (o resta) días civiles a un `YYYY-MM-DD` sin objetos Date ni zona horaria. */
+export function addDaysYmd(ymd: string, delta: number): string {
+  const [year, month, day] = ymd.split('-').map((part) => Number.parseInt(part, 10));
+  return toYMD(civilFromDays(daysFromCivil(year, month, day) + delta));
+}
+
+/** Fecha corta para tablas: "20 jul". */
+export function formatShortDay(ymd: string): string {
+  const [year, month, day] = ymd.split('-').map((part) => Number.parseInt(part, 10));
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: AR_TZ,
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
 }

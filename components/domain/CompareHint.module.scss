@@ -1,0 +1,21 @@
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-subtle);
+}
+
+.hint[data-dir='up'] {
+  color: var(--c-habits);
+}
+
+.hint[data-dir='down'] {
+  color: var(--c-danger);
+}
+
+.prefix {
+  color: var(--text-subtle);
+  font-weight: 400;
+}

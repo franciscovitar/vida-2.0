@@ -1,0 +1,22 @@
+.wrap {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ok,
+.err {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.ok {
+  color: var(--text-muted);
+}
+
+.err {
+  color: var(--danger, #b42318);
+}

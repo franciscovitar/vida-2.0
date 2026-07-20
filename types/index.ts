@@ -260,6 +260,10 @@ export interface HabitView {
   streak: number;
   /** false cuando no hay dato del hábito (estado "no disponible"). */
   streakAvailable: boolean;
+  /** Meta semanal asociada, si aplica. */
+  weeklyGoalId?: string;
+  /** Valor booleano actual (done=true). */
+  value: boolean;
 }
 
 export interface DayHeaderView {
@@ -277,6 +281,10 @@ export interface TodayData {
   notice: string | null;
   /** Fecha civil AR de la vista Hoy (siempre hoy). */
   targetDate: string;
+  /** true si existe exactamente una fila con targetDate en Registro diario. */
+  rowExists: boolean;
+  /** true si la UI puede intentar escribir hábitos (google configurado). */
+  writable: boolean;
   /** Fecha del Registro diario usada para hábitos/productividad (null si hoy no tiene). */
   registroDate: string | null;
   /** Fecha de Salud usada (solo hoy; null si hoy no tiene salud). */

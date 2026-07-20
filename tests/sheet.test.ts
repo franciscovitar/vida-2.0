@@ -90,7 +90,7 @@ test('el false se conserva: hábito en false queda como pendiente', () => {
 
   assert.equal(gym?.status, 'done');
   assert.equal(journaling?.status, 'pending');
-  assert.equal(posture?.status, 'unavailable'); // celda vacía → no disponible
+  assert.equal(posture?.status, 'pending'); // vacío en fila existente → editable como pending
 });
 
 test('las filas futuras no cuentan como días reales', () => {

@@ -30,6 +30,7 @@ export function buildMockToday(): TodayData {
     status: habit.status,
     streak: habit.streak,
     streakAvailable: habit.status !== 'unavailable',
+    value: habit.status === 'done',
   }));
 
   const maxMinutes = Math.max(...productivity.buckets.map((bucket) => bucket.minutes), 1);
@@ -45,6 +46,8 @@ export function buildMockToday(): TodayData {
     status: 'mock',
     notice: null,
     targetDate: '2026-07-20',
+    rowExists: true,
+    writable: false,
     registroDate: '2026-07-20',
     healthDate: '2026-07-20',
     header: {

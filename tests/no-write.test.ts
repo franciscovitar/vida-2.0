@@ -4,39 +4,45 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 
 const LIB_DIR = join(process.cwd(), 'lib');
+const APP_DIR = join(process.cwd(), 'app');
 
-function libFiles(): string[] {
-  return (readdirSync(LIB_DIR, { recursive: true }) as string[])
-    .filter((entry) => entry.endsWith('.ts'))
-    .map((entry) => join(LIB_DIR, entry));
+function walkTs(dir: string): string[] {
+  return (readdirSync(dir, { recursive: true }) as string[])
+    .filter((entry) => entry.endsWith('.ts') || entry.endsWith('.tsx'))
+    .map((entry) => join(dir, entry));
 }
 
 const FORBIDDEN = [
-  /\.values\.update\b/,
   /\.values\.append\b/,
   /\.values\.batchUpdate\b/,
   /\.values\.clear\b/,
   /\.batchUpdateValues\b/,
   /spreadsheets\.batchUpdate\b/,
   /\.batchClear\b/,
+  /\/values:append\b/,
+  /\/values:batchClear\b/,
+  /\/values:clear\b/,
 ];
 
-test('la capa de datos no contiene ninguna operación de escritura', () => {
-  for (const file of libFiles()) {
+test('no existen operaciones append, insert, delete o clear en la capa de datos', () => {
+  for (const file of [...walkTs(LIB_DIR), ...walkTs(APP_DIR)]) {
     const content = readFileSync(file, 'utf8');
     for (const pattern of FORBIDDEN) {
-      assert.equal(
-        pattern.test(content),
-        false,
-        `Se encontró una operación de escritura (${pattern}) en ${file}`,
-      );
+      assert.equal(pattern.test(content), false, `Operación prohibida (${pattern}) en ${file}`);
     }
+    assert.doesNotMatch(content, /\binsertDimension\b/);
+    assert.doesNotMatch(content, /\bdeleteDimension\b/);
   }
 });
 
-test('el cliente de Google usa exclusivamente el scope de solo lectura', () => {
-  const impl = readFileSync(join(LIB_DIR, 'google', 'sheets-read.ts'), 'utf8');
-  assert.match(impl, /spreadsheets\.readonly/);
-  assert.doesNotMatch(impl, /from ['"]googleapis['"]/);
-  assert.doesNotMatch(impl, /auth\/spreadsheets(?!\.readonly)/);
+test('la lectura usa scope readonly; la escritura usa spreadsheets', () => {
+  const readImpl = readFileSync(join(LIB_DIR, 'google', 'sheets-read.ts'), 'utf8');
+  const auth = readFileSync(join(LIB_DIR, 'google', 'auth.ts'), 'utf8');
+  const writePort = readFileSync(join(LIB_DIR, 'habits', 'google-port.ts'), 'utf8');
+  assert.match(readImpl, /READONLY_SCOPE|spreadsheets\.readonly/);
+  assert.match(auth, /spreadsheets\.readonly/);
+  assert.match(auth, /auth\/spreadsheets'/);
+  assert.match(writePort, /SPREADSHEETS_SCOPE/);
+  assert.match(writePort, /method: 'PUT'/);
+  assert.doesNotMatch(writePort, /from ['"]googleapis['"]/);
 });
