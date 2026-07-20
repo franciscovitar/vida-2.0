@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "stylelint.vscode-stylelint",
+    "usernamehw.errorlens",
+    "eamodio.gitlens",
+    "editorconfig.editorconfig",
+    "ms-playwright.playwright",
+    "redhat.vscode-yaml"
+  ]
+}

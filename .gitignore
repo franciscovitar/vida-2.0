@@ -1,0 +1,36 @@
+# dependencies
+/node_modules
+
+# Next.js
+/.next
+/out
+
+# production and test output
+/build
+/dist
+/coverage
+
+# local environment files
+.env*
+!.env.example
+
+# private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# logs
+*.log
+npm-debug.log*
+
+# operating systems and editors
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel
