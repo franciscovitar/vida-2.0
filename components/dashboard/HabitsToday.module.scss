@@ -1,0 +1,49 @@
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.item[data-status='done'] .name {
+  color: var(--text-muted);
+}
+
+.item[data-status='unavailable'] .name {
+  color: var(--text-subtle);
+}
+
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--c-projects);
+}
+
+.unavailable {
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+}

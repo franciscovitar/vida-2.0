@@ -1,0 +1,27 @@
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.notice svg {
+  flex-shrink: 0;
+}
+
+.notice[data-tone='info'] {
+  color: var(--c-neutral);
+  background: var(--c-neutral-soft);
+  border-color: var(--c-neutral-border);
+}
+
+.notice[data-tone='warning'] {
+  color: var(--c-danger);
+  background: var(--c-danger-soft);
+  border-color: var(--c-danger-border);
+}

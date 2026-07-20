@@ -1,0 +1,68 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.875rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.icon {
+  display: inline-flex;
+  color: var(--domain-color);
+}
+
+.value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.unit {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-subtle);
+}
+
+.context {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.context[data-status='good'] {
+  color: var(--c-habits);
+}
+
+.context[data-status='warning'] {
+  color: var(--c-projects);
+}
+
+.context[data-status='bad'] {
+  color: var(--c-danger);
+}

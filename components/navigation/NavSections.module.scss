@@ -1,0 +1,27 @@
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.divider {
+  height: 1px;
+  margin: 0.5rem 0.25rem;
+  background: var(--border);
+}
+
+.heading {
+  padding: 0 0.625rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}

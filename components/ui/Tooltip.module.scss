@@ -1,0 +1,31 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.bubble {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 20;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--text-inverse);
+  background: var(--text);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  pointer-events: none;
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.wrapper:hover .bubble,
+.wrapper:focus-within .bubble {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}

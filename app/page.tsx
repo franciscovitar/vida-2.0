@@ -1,13 +1,50 @@
+import { DailySummary } from '@/components/dashboard/DailySummary';
+import { DayHeader } from '@/components/dashboard/DayHeader';
+import { FocusCard } from '@/components/dashboard/FocusCard';
+import { HabitsToday } from '@/components/dashboard/HabitsToday';
+import { HealthSleep } from '@/components/dashboard/HealthSleep';
+import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
+import { PriorityTasks } from '@/components/dashboard/PriorityTasks';
+import { ProductivityToday } from '@/components/dashboard/ProductivityToday';
+import { QuickInbox } from '@/components/dashboard/QuickInbox';
+import { TodayAgenda } from '@/components/dashboard/TodayAgenda';
+import { WeeklyProgress } from '@/components/dashboard/WeeklyProgress';
+import { getTodayData } from '@/lib/data/source';
+
 import styles from './page.module.scss';
 
-export default function HomePage() {
+/** La vista Hoy se renderiza por request para leer datos frescos del Sheet DEV. */
+export const dynamic = 'force-dynamic';
+/** googleapis requiere APIs de Node.js (crypto, Buffer); no ejecutar en Edge. */
+export const runtime = 'nodejs';
+
+export default async function TodayPage() {
+  const today = await getTodayData();
+
   return (
-    <main className={styles.main}>
-      <section className={styles.card}>
-        <p className={styles.eyebrow}>Next.js · React · TypeScript · SCSS</p>
-        <h1>Professional web template</h1>
-        <p>Replace this page with your project while keeping the quality tooling in place.</p>
-      </section>
-    </main>
+    <div className={styles.page}>
+      <DayHeader header={today.header} />
+
+      {today.notice ? <IntegrationNotice status={today.status} message={today.notice} /> : null}
+
+      <div className={styles.top}>
+        <FocusCard />
+        <DailySummary summary={today.summary} />
+      </div>
+
+      <div className={styles.columns}>
+        <div className={styles.main}>
+          <TodayAgenda />
+          <PriorityTasks />
+          <HabitsToday habits={today.habits} />
+          <ProductivityToday productivity={today.productivity} />
+        </div>
+        <div className={styles.side}>
+          <HealthSleep health={today.health} />
+          <WeeklyProgress goals={today.weekly} />
+          <QuickInbox />
+        </div>
+      </div>
+    </div>
   );
 }

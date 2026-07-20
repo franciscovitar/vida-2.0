@@ -1,0 +1,32 @@
+.box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  padding: 0;
+  color: transparent;
+  cursor: pointer;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.box:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.box[data-checked='true'] {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.box:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

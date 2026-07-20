@@ -1,0 +1,43 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  display: none;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  height: 100svh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  padding: 1rem 0.75rem;
+  overflow-y: auto;
+}
+
+.foot {
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.note {
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+}
+
+@media (width >= 1024px) {
+  .sidebar {
+    display: flex;
+  }
+}

@@ -1,0 +1,58 @@
+import type { Task } from '@/types';
+
+/** Tareas simuladas de universidad, Genova y Vida 2.0. */
+export const tasks: Task[] = [
+  {
+    id: 'task-1',
+    title: 'Entregar TP de Sistemas Operativos',
+    projectId: 'proj-facultad',
+    projectName: 'Cursada 2º cuatrimestre',
+    area: 'Facultad',
+    domain: 'learning',
+    priority: 'high',
+    dueDate: '2026-07-20',
+    status: 'in-progress',
+  },
+  {
+    id: 'task-2',
+    title: 'Revisar pull request de Genova',
+    projectId: 'proj-genova',
+    projectName: 'Genova',
+    area: 'Trabajo',
+    domain: 'productivity',
+    priority: 'high',
+    dueDate: '2026-07-20',
+    status: 'todo',
+  },
+  {
+    id: 'task-3',
+    title: 'Definir esquema de datos de Vida 2.0',
+    projectId: 'proj-vida2',
+    projectName: 'Vida 2.0',
+    area: 'Personal',
+    domain: 'projects',
+    priority: 'medium',
+    dueDate: '2026-07-21',
+    status: 'todo',
+  },
+  {
+    id: 'task-4',
+    title: 'Planificar semana de entrenamiento',
+    area: 'Personal',
+    domain: 'habits',
+    priority: 'low',
+    dueDate: '2026-07-22',
+    status: 'todo',
+  },
+  {
+    id: 'task-5',
+    title: 'Leer capítulo 4 de arquitectura limpia',
+    projectId: 'proj-aprendizaje',
+    projectName: 'Aprendizaje continuo',
+    area: 'Aprendizaje',
+    domain: 'learning',
+    priority: 'medium',
+    dueDate: '2026-07-23',
+    status: 'todo',
+  },
+];
