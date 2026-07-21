@@ -22,7 +22,8 @@ import { buildTrendsPageData } from '@/lib/adapters/trends';
 import { RD, REGISTRO_DIARIO_HEADERS, SAL, SALUD_HEADERS } from '@/lib/google/constants';
 import { buildMockDomainRecords } from '@/lib/mock-data/domain-history';
 import { periodWindow } from '@/lib/periods';
-import { ALLOWED_SPREADSHEET_ID, isAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { isResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { resolveSpreadsheetTarget } from '@/lib/google/spreadsheet-target-core';
 
 function rowFor(headers: readonly string[], values: Record<string, unknown>): unknown[] {
   return headers.map((header) => (header in values ? values[header] : ''));
@@ -293,9 +294,18 @@ test('T15. copiar genera texto válido para 7, 30 y 90 días', () => {
   }
 });
 
-test('T16. producción continúa rechazada', () => {
-  assert.equal(isAllowedSpreadsheetId(ALLOWED_SPREADSHEET_ID), true);
-  assert.equal(isAllowedSpreadsheetId('1ProductionXXXXXXXX'), false);
+test('T16. producción sin allow no habilita escrituras', () => {
+  const prod = resolveSpreadsheetTarget({
+    GOOGLE_SHEETS_TARGET: 'prod',
+    GOOGLE_SHEETS_DEV_ID: 'dev-id',
+    GOOGLE_SHEETS_PROD_ID: '1ProductionXXXXXXXX',
+    GOOGLE_SHEETS_ALLOW_PROD_WRITES: 'false',
+    VERCEL_ENV: 'production',
+  });
+  assert.equal(prod.ok, true);
+  if (!prod.ok) return;
+  assert.equal(prod.writesAllowed, false);
+  assert.equal(isResolvedSpreadsheetId('1ProductionXXXXXXXX', 'dev-id'), false);
 });
 
 test('T17. escritura permanece limitada a los diez hábitos', () => {
@@ -303,7 +313,7 @@ test('T17. escritura permanece limitada a los diez hábitos', () => {
   const toggle = readFileSync(join(process.cwd(), 'lib', 'habits', 'toggle.ts'), 'utf8');
   assert.match(auth, /AUTHORIZED_HABIT_NAMES/);
   assert.match(toggle, /isAuthorizedHabitName/);
-  assert.match(toggle, /isAllowedSpreadsheetId/);
+  assert.match(toggle, /writesAllowed/);
 });
 
 test('T18. mock funciona sin credenciales', () => {

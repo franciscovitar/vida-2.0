@@ -1,10 +1,16 @@
 /**
  * Lógica de toggle de hábito: validación + read-check-write-verify.
  * No es una transacción perfecta; minimiza la ventana de concurrencia.
+ *
+ * El spreadsheet se toma solo del target resuelto (servidor). Nunca desde el cliente.
  */
 import { todayInBuenosAires } from '@/lib/adapters/dates';
 import { getGoogleConfig } from '@/lib/data/config';
-import { ALLOWED_SPREADSHEET_ID, isAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import type {
+  SpreadsheetTargetEnv,
+  SpreadsheetTargetOk,
+} from '@/lib/google/spreadsheet-target-core';
+import { assertResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 
 import { isAuthorizedHabitName } from './authorized';
 import {
@@ -49,13 +55,45 @@ function assertPlainBooleans(input: ToggleHabitInput): ToggleHabitFailure | null
   return null;
 }
 
+function resolveWriteTarget(
+  options: ToggleHabitPortOptions | undefined,
+  operationId: string,
+): SpreadsheetTargetOk | ToggleHabitFailure {
+  if (options?.resolved) {
+    return options.resolved;
+  }
+
+  const cfg = getGoogleConfig(options?.env ?? process.env);
+  if (!cfg.ok) {
+    return fail('unauthorized-spreadsheet', operationId);
+  }
+
+  return {
+    ok: true,
+    target: cfg.config.target,
+    spreadsheetId: cfg.config.spreadsheetId,
+    allowProdWrites: cfg.config.allowProdWrites,
+    writesAllowed: cfg.config.writesAllowed,
+  };
+}
+
+export type ToggleHabitPortOptions = {
+  today?: string;
+  /**
+   * Target ya resuelto (tests / servidor). Nunca un spreadsheetId suelto del cliente.
+   */
+  resolved?: SpreadsheetTargetOk;
+  /** Env inyectable en tests para getGoogleConfig. */
+  env?: SpreadsheetTargetEnv;
+};
+
 /**
  * Ejecuta el toggle contra un puerto de Sheet (real o mock de pruebas).
  */
 export async function toggleHabitWithPort(
   input: ToggleHabitInput,
   port: HabitSheetPort,
-  options?: { today?: string; spreadsheetId?: string },
+  options?: ToggleHabitPortOptions,
 ): Promise<ToggleHabitResult> {
   const operationId = input.operationId;
   const basic = assertPlainBooleans(input);
@@ -65,14 +103,20 @@ export async function toggleHabitWithPort(
     return fail('unauthorized-column', operationId);
   }
 
-  let sheetId = options?.spreadsheetId;
-  if (!sheetId) {
-    const cfg = getGoogleConfig();
-    if (!cfg.ok) return fail('write-error', operationId);
-    sheetId = cfg.config.spreadsheetId;
+  const resolvedOrFail = resolveWriteTarget(options, operationId);
+  if (!('target' in resolvedOrFail)) {
+    return resolvedOrFail;
+  }
+  const resolved = resolvedOrFail;
+
+  // Escritura: DEV siempre (a nivel target); PROD solo con writesAllowed.
+  if (!resolved.writesAllowed) {
+    return fail('unauthorized-spreadsheet', operationId);
   }
 
-  if (!isAllowedSpreadsheetId(sheetId) || sheetId !== ALLOWED_SPREADSHEET_ID) {
+  try {
+    assertResolvedSpreadsheetId(resolved.spreadsheetId, resolved.spreadsheetId);
+  } catch {
     return fail('unauthorized-spreadsheet', operationId);
   }
 
@@ -98,6 +142,11 @@ export async function toggleHabitWithPort(
   if (rows.kind === 'duplicate') return fail('duplicate-date', operationId);
 
   const rangeA1 = habitCellRange(rows.rowNumber, columnNumber);
+
+  // Defensa: una sola celda (sin ':').
+  if (rangeA1.includes(':')) {
+    return fail('write-error', operationId);
+  }
 
   // 1) Leer inmediatamente antes de escribir.
   const before = await port.readCell(rangeA1);

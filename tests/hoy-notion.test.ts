@@ -237,9 +237,10 @@ test('H13. no hay ninguna operación de escritura Notion', () => {
   assert.doesNotMatch(hoyUi, /Checkbox|onChange|toggleHabit|completar/i);
 });
 
-test('H14. escritura de hábitos permanece limitada al Sheet DEV', () => {
+test('H14. escritura de hábitos permanece limitada al target resuelto', () => {
   const toggle = readFileSync(join(process.cwd(), 'lib', 'habits', 'toggle.ts'), 'utf8');
-  assert.match(toggle, /isAllowedSpreadsheetId/);
+  assert.match(toggle, /writesAllowed/);
+  assert.doesNotMatch(toggle, /ALLOWED_SPREADSHEET_ID/);
   assert.match(toggle, /isAuthorizedHabitName/);
   const hoyPage = readFileSync(join(process.cwd(), 'app', '(app)', 'page.tsx'), 'utf8');
   assert.match(hoyPage, /HabitsToday/);
@@ -314,7 +315,7 @@ test('H19. pantalla Hoy funciona con vista realista (ready Notion + sheet)', () 
     notice: null,
   });
   const merged = mergeTodayWithNotion(sheet, notion, calendar);
-  assert.equal(merged.header.syncLabel, 'Sheet DEV + Notion + Calendar');
+  assert.equal(merged.header.syncLabel, 'Google Sheets + Notion + Calendar');
   assert.equal(merged.header.syncOk, true);
   assert.ok(merged.notion.activeProjects.length >= 1);
 });

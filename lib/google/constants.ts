@@ -1,5 +1,5 @@
 /**
- * Nombres exactos de pestañas y encabezados del Sheet DEV.
+ * Nombres exactos de pestañas y encabezados del Sheet de hábitos.
  *
  * La lectura es acotada: solo estas dos pestañas y solo estos encabezados
  * (mapeados por nombre). No se lee el spreadsheet completo de forma indiscriminada.

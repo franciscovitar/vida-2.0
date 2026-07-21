@@ -3,8 +3,17 @@
  *
  * No contiene secretos: solo lee `process.env` en el servidor. La clave privada
  * nunca se expone ni se registra.
+ *
+ * El Spreadsheet ID se resuelve vía GOOGLE_SHEETS_TARGET (dev|prod); nunca desde
+ * el cliente. Sin hardcodes de ID.
  */
 import type { DataSourceKind } from '@/types';
+import {
+  resolveSpreadsheetTarget,
+  type SheetsTargetName,
+  type SpreadsheetTargetEnv,
+  type SpreadsheetTargetFailReason,
+} from '@/lib/google/spreadsheet-target-core';
 
 /** Devuelve el origen de datos configurado. Por defecto, mocks. */
 export function getDataSource(): DataSourceKind {
@@ -15,10 +24,14 @@ export interface GoogleConfig {
   clientEmail: string;
   privateKey: string;
   spreadsheetId: string;
+  target: SheetsTargetName;
+  allowProdWrites: boolean;
+  writesAllowed: boolean;
 }
 
 export type GoogleConfigResult =
-  { ok: true; config: GoogleConfig } | { ok: false; reason: 'not-configured' };
+  | { ok: true; config: GoogleConfig }
+  | { ok: false; reason: SpreadsheetTargetFailReason | 'not-configured' };
 
 /**
  * Normaliza la clave privada: las variables de entorno suelen guardar los
@@ -29,16 +42,20 @@ export function normalizePrivateKey(key: string): string {
 }
 
 /**
- * Lee la configuración de Google. Devuelve `not-configured` (sin lanzar) cuando
- * falta cualquiera de las variables, para que la app siga funcionando con mocks.
+ * Lee la configuración de Google (credenciales + target resuelto).
+ * Nunca incluye IDs en mensajes de error. No hace fallback entre DEV y PROD.
  */
-export function getGoogleConfig(): GoogleConfigResult {
-  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
-  const rawKey = process.env.GOOGLE_PRIVATE_KEY;
-  const spreadsheetId = process.env.GOOGLE_SHEETS_DEV_ID?.trim();
+export function getGoogleConfig(env: SpreadsheetTargetEnv = process.env): GoogleConfigResult {
+  const clientEmail = env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
+  const rawKey = env.GOOGLE_PRIVATE_KEY;
 
-  if (!clientEmail || !rawKey || rawKey.trim() === '' || !spreadsheetId) {
+  if (!clientEmail || !rawKey || rawKey.trim() === '') {
     return { ok: false, reason: 'not-configured' };
+  }
+
+  const target = resolveSpreadsheetTarget(env);
+  if (!target.ok) {
+    return { ok: false, reason: target.reason };
   }
 
   return {
@@ -46,7 +63,10 @@ export function getGoogleConfig(): GoogleConfigResult {
     config: {
       clientEmail,
       privateKey: normalizePrivateKey(rawKey),
-      spreadsheetId,
+      spreadsheetId: target.spreadsheetId,
+      target: target.target,
+      allowProdWrites: target.allowProdWrites,
+      writesAllowed: target.writesAllowed,
     },
   };
 }

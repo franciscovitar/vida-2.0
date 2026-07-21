@@ -31,7 +31,7 @@ import {
   buildMockCalendarRawEvents,
 } from '@/lib/mock-data/google-calendar';
 import { getNotionDataSource } from '@/lib/notion/config';
-import { ALLOWED_SPREADSHEET_ID, isAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { isResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 
 const TODAY = '2026-07-20';
 
@@ -319,10 +319,10 @@ test('C18. no existen operaciones de escritura Calendar', () => {
   assert.match(CALENDAR_READONLY_SCOPE, /calendar\.events\.readonly$/);
 });
 
-test('C19. Sheet DEV y Notion continúan funcionando', () => {
+test('C19. Google Sheets y Notion continúan funcionando', () => {
   assert.ok(getDataSource() === 'mock' || getDataSource() === 'google');
   assert.ok(getNotionDataSource() === 'mock' || getNotionDataSource() === 'notion');
-  assert.equal(isAllowedSpreadsheetId(ALLOWED_SPREADSHEET_ID), true);
+  assert.equal(isResolvedSpreadsheetId('dev-id', 'dev-id'), true);
   assert.equal(parseAgendaView('30'), '30');
   assert.equal(parseAgendaView('nope'), 'today');
 });

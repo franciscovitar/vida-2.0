@@ -19,7 +19,6 @@ import {
   sessionJwtContainsSecrets,
 } from '@/lib/auth/authorize';
 import { unauthorizedSessionFailure, verifySessionCore } from '@/lib/auth/session-core';
-import { ALLOWED_SPREADSHEET_ID } from '@/lib/validation/spreadsheet-id';
 
 const ALLOWED_1 = 'correo1@gmail.com';
 const ALLOWED_2 = 'correo2@gmail.com';
@@ -310,9 +309,9 @@ test('13. Server Action autorizada mantiene escritura solo DEV', async () => {
   assert.match(action, /googleHabitSheetPort/);
 
   const toggle = readFileSync(join(process.cwd(), 'lib/habits/toggle.ts'), 'utf8');
-  assert.match(toggle, /ALLOWED_SPREADSHEET_ID/);
-  assert.match(toggle, /isAllowedSpreadsheetId/);
-  assert.equal(ALLOWED_SPREADSHEET_ID.includes('prod') === false || true, true);
+  assert.match(toggle, /writesAllowed/);
+  assert.match(toggle, /assertResolvedSpreadsheetId|resolved/);
+  assert.doesNotMatch(toggle, /ALLOWED_SPREADSHEET_ID/);
 });
 
 test('14. Proxy no provoca bucles', () => {

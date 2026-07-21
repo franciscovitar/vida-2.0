@@ -19,7 +19,8 @@ import { buildMockNotionDashboard } from '@/lib/mock-data/notion';
 import { taskDateKind } from '@/lib/notion/classify';
 import { buildHoyNotionView, suggestNextActions } from '@/lib/notion/hoy';
 import { summarizeProjects, summarizeTasks } from '@/lib/notion/summaries';
-import { ALLOWED_SPREADSHEET_ID, isAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { isResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { resolveSpreadsheetTarget } from '@/lib/google/spreadsheet-target-core';
 import type { CalendarEvent, CalendarTodayPreview } from '@/types/calendar';
 import type { NotionDashboardData, NotionTask } from '@/types/notion';
 
@@ -440,9 +441,16 @@ test('HC26. no existe ninguna operación Calendar de escritura', () => {
   assert.match(CALENDAR_READONLY_SCOPE, /calendar\.events\.readonly$/);
 });
 
-test('HC27. escritura de hábitos sigue limitada al Sheet DEV', () => {
-  assert.equal(isAllowedSpreadsheetId(ALLOWED_SPREADSHEET_ID), true);
-  assert.equal(isAllowedSpreadsheetId('prod-sheet-id'), false);
+test('HC27. escritura de hábitos sigue limitada al target resuelto', () => {
+  assert.equal(isResolvedSpreadsheetId('dev-id', 'dev-id'), true);
+  assert.equal(isResolvedSpreadsheetId('prod-sheet-id', 'dev-id'), false);
+  const previewProd = resolveSpreadsheetTarget({
+    GOOGLE_SHEETS_TARGET: 'prod',
+    GOOGLE_SHEETS_DEV_ID: 'dev-id',
+    GOOGLE_SHEETS_PROD_ID: 'prod-sheet-id',
+    VERCEL_ENV: 'preview',
+  });
+  assert.equal(previewProd.ok, false);
 });
 
 test('HC28. / funciona con Calendar real (contrato cableado)', () => {
@@ -463,7 +471,7 @@ test('HC29. / funciona con fallback Calendar', () => {
   assert.equal(merged.calendar.todayEvents.length, 0);
   assert.ok(merged.calendar.notice);
   assert.ok(merged.sources.some((s) => s.id === 'calendar' && s.mode === 'fallback'));
-  assert.notEqual(merged.header.syncLabel, 'Sheet DEV + Notion + Calendar');
+  assert.notEqual(merged.header.syncLabel, 'Google Sheets + Notion + Calendar');
 });
 
 test('HC30. móvil no tiene scroll horizontal en Hoy', () => {

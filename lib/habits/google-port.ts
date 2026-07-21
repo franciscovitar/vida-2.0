@@ -1,11 +1,11 @@
 /**
  * Implementación real del puerto de hábitos: una sola celda, scope spreadsheets.
- * No usa operaciones estructurales ni escritura de rangos múltiples.
+ * Lee y escribe siempre el mismo target resuelto. Sin fallback DEV↔PROD.
  */
 import 'server-only';
 
 import { getGoogleConfig } from '@/lib/data/config';
-import { assertAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { assertResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 import { REGISTRO_DIARIO_TAB } from '@/lib/google/constants';
 import { fetchAccessToken, SHEETS_BASE, SPREADSHEETS_SCOPE } from '@/lib/google/auth';
 import { sanitizeSheetValues } from '@/lib/data/plain';
@@ -18,14 +18,17 @@ function mapStatus(status: number): 'permission-error' | 'auth-error' | 'write-e
   return 'write-error';
 }
 
-async function withWriteToken(): Promise<
-  | { ok: true; token: string; spreadsheetId: string }
-  | { ok: false; code: 'not-configured' | 'auth-error' | 'permission-error' | 'write-error' }
-> {
+type AuthOk = { ok: true; token: string; spreadsheetId: string; writesAllowed: boolean };
+type AuthFail = {
+  ok: false;
+  code: 'not-configured' | 'auth-error' | 'permission-error' | 'write-error';
+};
+
+async function withSheetAuth(): Promise<AuthOk | AuthFail> {
   const config = getGoogleConfig();
   if (!config.ok) return { ok: false, code: 'not-configured' };
   try {
-    assertAllowedSpreadsheetId(config.config.spreadsheetId);
+    assertResolvedSpreadsheetId(config.config.spreadsheetId, config.config.spreadsheetId);
   } catch {
     return { ok: false, code: 'write-error' };
   }
@@ -39,12 +42,17 @@ async function withWriteToken(): Promise<
     if (token.code === 'auth-error') return { ok: false, code: 'auth-error' };
     return { ok: false, code: 'write-error' };
   }
-  return { ok: true, token: token.token, spreadsheetId: config.config.spreadsheetId };
+  return {
+    ok: true,
+    token: token.token,
+    spreadsheetId: config.config.spreadsheetId,
+    writesAllowed: config.config.writesAllowed,
+  };
 }
 
 export const googleHabitSheetPort: HabitSheetPort = {
   async readRegistroDiario() {
-    const auth = await withWriteToken();
+    const auth = await withSheetAuth();
     if (!auth.ok) return auth;
 
     const range = encodeURIComponent(REGISTRO_DIARIO_TAB);
@@ -69,7 +77,10 @@ export const googleHabitSheetPort: HabitSheetPort = {
   },
 
   async readCell(rangeA1) {
-    const auth = await withWriteToken();
+    if (rangeA1.includes(':')) {
+      return { ok: false, code: 'write-error' };
+    }
+    const auth = await withSheetAuth();
     if (!auth.ok) {
       if (auth.code === 'not-configured') return { ok: false, code: 'write-error' };
       return { ok: false, code: auth.code };
@@ -96,10 +107,17 @@ export const googleHabitSheetPort: HabitSheetPort = {
   },
 
   async writeCell(rangeA1, value) {
-    const auth = await withWriteToken();
+    if (rangeA1.includes(':')) {
+      return { ok: false, code: 'write-error' };
+    }
+    const auth = await withSheetAuth();
     if (!auth.ok) {
       if (auth.code === 'not-configured') return { ok: false, code: 'write-error' };
       return { ok: false, code: auth.code };
+    }
+    // Guard de producción: sin allow explícito no hay PUT.
+    if (!auth.writesAllowed) {
+      return { ok: false, code: 'write-error' };
     }
 
     // values.update de una sola celda (sin operaciones estructurales).

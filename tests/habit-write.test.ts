@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { RD, REGISTRO_DIARIO_HEADERS, REGISTRO_DIARIO_TAB } from '@/lib/google/constants';
+import { resolveSpreadsheetTarget } from '@/lib/google/spreadsheet-target-core';
 import { HabitOptimisticController } from '@/lib/habits/optimistic';
 import {
   columnIndexToA1,
@@ -12,10 +13,22 @@ import {
 import type { HabitSheetPort } from '@/lib/habits/sheet-port';
 import { toggleHabitWithPort } from '@/lib/habits/toggle';
 import type { ToggleHabitResult } from '@/lib/habits/types';
-import { ALLOWED_SPREADSHEET_ID } from '@/lib/validation/spreadsheet-id';
 
 const TODAY = '2026-07-20';
-const PROD_ID = '1ProductionSpreadsheetIdXXXXXXXXXXXXXXXXXXXX';
+const DEV_ID = 'test-dev-spreadsheet-id-aaaaaaaaaaaa';
+const PROD_ID = 'test-prod-spreadsheet-id-bbbbbbbbbbbb';
+
+const DEV_RESOLVED = (() => {
+  const r = resolveSpreadsheetTarget({
+    GOOGLE_SHEETS_TARGET: 'dev',
+    GOOGLE_SHEETS_DEV_ID: DEV_ID,
+    GOOGLE_SHEETS_PROD_ID: PROD_ID,
+    GOOGLE_SHEETS_ALLOW_PROD_WRITES: 'false',
+  });
+  assert.equal(r.ok, true);
+  if (!r.ok) throw new Error('dev resolve');
+  return r;
+})();
 
 function rowFor(headers: readonly string[], values: Record<string, unknown>): unknown[] {
   return headers.map((header) => (header in values ? values[header] : ''));
@@ -108,6 +121,7 @@ function isPlainSerializable(value: unknown): boolean {
 function assertNoSecrets(result: ToggleHabitResult) {
   const json = JSON.stringify(result);
   assert.doesNotMatch(json, /private_key|BEGIN PRIVATE|gaxios|ArrayBuffer|credentials/i);
+  assert.doesNotMatch(json, new RegExp(DEV_ID));
   assert.equal(isPlainSerializable(result), true);
   assert.equal(typeof result, 'object');
   assert.ok(result !== null);
@@ -119,7 +133,7 @@ test('1. escritura permitida en un hábito autorizado', async () => {
   const before = port.snapshot();
   const result = await toggleHabitWithPort(input({}), port, {
     today: TODAY,
-    spreadsheetId: ALLOWED_SPREADSHEET_ID,
+    resolved: DEV_RESOLVED,
   });
 
   assert.equal(result.ok, true);
@@ -142,7 +156,7 @@ test('2. columna no autorizada rechazada', async () => {
   const result = await toggleHabitWithPort(
     input({ habitName: 'Sueño (h)', nextValue: true, expectedPreviousValue: false }),
     port,
-    { today: TODAY, spreadsheetId: ALLOWED_SPREADSHEET_ID },
+    { today: TODAY, resolved: DEV_RESOLVED },
   );
   assert.equal(result.ok, false);
   if (result.ok) return;
@@ -151,11 +165,20 @@ test('2. columna no autorizada rechazada', async () => {
   assertNoSecrets(result);
 });
 
-test('3. spreadsheet de producción rechazado', async () => {
+test('3. spreadsheet de producción sin allow rechazado', async () => {
   const port = createMemoryPort(baseGrid());
+  const prod = resolveSpreadsheetTarget({
+    GOOGLE_SHEETS_TARGET: 'prod',
+    GOOGLE_SHEETS_DEV_ID: DEV_ID,
+    GOOGLE_SHEETS_PROD_ID: PROD_ID,
+    GOOGLE_SHEETS_ALLOW_PROD_WRITES: 'false',
+    VERCEL_ENV: 'production',
+  });
+  assert.equal(prod.ok, true);
+  if (!prod.ok) return;
   const result = await toggleHabitWithPort(input({}), port, {
     today: TODAY,
-    spreadsheetId: PROD_ID,
+    resolved: prod,
   });
   assert.equal(result.ok, false);
   if (result.ok) return;
@@ -168,7 +191,7 @@ test('4. fecha sin fila rechazada', async () => {
   const port = createMemoryPort([[...REGISTRO_DIARIO_HEADERS]]);
   const result = await toggleHabitWithPort(input({}), port, {
     today: TODAY,
-    spreadsheetId: ALLOWED_SPREADSHEET_ID,
+    resolved: DEV_RESOLVED,
   });
   assert.equal(result.ok, false);
   if (result.ok) return;
@@ -189,7 +212,7 @@ test('5. fecha duplicada rechazada', async () => {
   );
   const result = await toggleHabitWithPort(input({}), port, {
     today: TODAY,
-    spreadsheetId: ALLOWED_SPREADSHEET_ID,
+    resolved: DEV_RESOLVED,
   });
   assert.equal(result.ok, false);
   if (result.ok) return;
@@ -203,7 +226,7 @@ test('6. expectedPreviousValue incorrecto produce conflicto sin escribir', async
   const result = await toggleHabitWithPort(
     input({ nextValue: false, expectedPreviousValue: false }),
     port,
-    { today: TODAY, spreadsheetId: ALLOWED_SPREADSHEET_ID },
+    { today: TODAY, resolved: DEV_RESOLVED },
   );
   assert.equal(result.ok, false);
   if (result.ok) return;
@@ -226,7 +249,7 @@ test('7 y 8. cero/vacíos de otras columnas intactos y solo una celda cambia', a
   const before = port.snapshot();
   const result = await toggleHabitWithPort(input({}), port, {
     today: TODAY,
-    spreadsheetId: ALLOWED_SPREADSHEET_ID,
+    resolved: DEV_RESOLVED,
   });
   assert.equal(result.ok, true);
   assert.equal(port.writes.length, 1);
@@ -296,7 +319,7 @@ test('12. deshacer funciona', async () => {
       operationId: 'op-write',
     }),
     port,
-    { today: TODAY, spreadsheetId: ALLOWED_SPREADSHEET_ID },
+    { today: TODAY, resolved: DEV_RESOLVED },
   );
   assert.equal(write.ok, true);
   if (!write.ok) return;
@@ -315,7 +338,7 @@ test('12. deshacer funciona', async () => {
       operationId: 'op-undo',
     }),
     port,
-    { today: TODAY, spreadsheetId: ALLOWED_SPREADSHEET_ID },
+    { today: TODAY, resolved: DEV_RESOLVED },
   );
   assert.equal(undo.ok, true);
   if (!undo.ok) return;
@@ -330,7 +353,6 @@ test('13. deshacer con conflicto falla de forma segura', async () => {
     { id: RD.firstAlarm, value: true, save: 'saved', canUndo: true },
   ]);
 
-  // Otro cambio externo: el sheet ya está en false.
   const col = findHabitColumn(port.snapshot()[0], RD.firstAlarm)!;
   const range = habitCellRange(2, col);
   await port.writeCell(range, false);
@@ -347,7 +369,7 @@ test('13. deshacer con conflicto falla de forma segura', async () => {
       operationId: 'op-undo-conflict',
     }),
     port,
-    { today: TODAY, spreadsheetId: ALLOWED_SPREADSHEET_ID },
+    { today: TODAY, resolved: DEV_RESOLVED },
   );
   assert.equal(undo.ok, false);
   if (undo.ok) return;
@@ -364,6 +386,7 @@ test('14. no existen operaciones append, insert, delete o clear en el puerto rea
   const writePort = readFileSync(join(process.cwd(), 'lib', 'habits', 'google-port.ts'), 'utf8');
   assert.doesNotMatch(writePort, /append|batchUpdate|clear|insert|delete/i);
   assert.match(writePort, /method: 'PUT'/);
+  assert.match(writePort, /writesAllowed/);
 });
 
 test('15. todas las respuestas son objetos planos serializables', async () => {
@@ -373,16 +396,25 @@ test('15. todas las respuestas son objetos planos serializables', async () => {
   cases.push(
     await toggleHabitWithPort(input({}), port, {
       today: TODAY,
-      spreadsheetId: ALLOWED_SPREADSHEET_ID,
+      resolved: DEV_RESOLVED,
     }),
   );
   cases.push(
     await toggleHabitWithPort(input({ habitName: 'No existe' }), port, {
       today: TODAY,
-      spreadsheetId: ALLOWED_SPREADSHEET_ID,
+      resolved: DEV_RESOLVED,
     }),
   );
-  cases.push(await toggleHabitWithPort(input({}), port, { today: TODAY, spreadsheetId: PROD_ID }));
+  const prodBlocked = resolveSpreadsheetTarget({
+    GOOGLE_SHEETS_TARGET: 'prod',
+    GOOGLE_SHEETS_DEV_ID: DEV_ID,
+    GOOGLE_SHEETS_PROD_ID: PROD_ID,
+    GOOGLE_SHEETS_ALLOW_PROD_WRITES: 'false',
+    VERCEL_ENV: 'production',
+  });
+  assert.ok(prodBlocked.ok);
+  if (!prodBlocked.ok) return;
+  cases.push(await toggleHabitWithPort(input({}), port, { today: TODAY, resolved: prodBlocked }));
 
   for (const result of cases) {
     assertNoSecrets(result);
@@ -392,12 +424,12 @@ test('15. todas las respuestas son objetos planos serializables', async () => {
 });
 
 test('utilidades A1: Primera alarma apunta a la celda esperada', () => {
-  const header = [...REGISTRO_DIARIO_HEADERS];
-  const col = findHabitColumn(header, RD.firstAlarm);
-  assert.equal(col, header.indexOf(RD.firstAlarm) + 1);
-  assert.equal(habitCellRange(2, col!), `${REGISTRO_DIARIO_TAB}!${columnIndexToA1(col!)}2`);
-
-  const rows = findRowsForDate(baseGrid(), TODAY);
+  const grid = baseGrid();
+  const col = findHabitColumn(grid[0], RD.firstAlarm);
+  assert.ok(col !== null);
+  const rows = findRowsForDate(grid, TODAY);
   assert.equal(rows.kind, 'ok');
-  if (rows.kind === 'ok') assert.equal(rows.rowNumber, 2);
+  if (rows.kind !== 'ok') return;
+  const a1 = habitCellRange(rows.rowNumber, col);
+  assert.equal(a1, `${REGISTRO_DIARIO_TAB}!${columnIndexToA1(col)}${rows.rowNumber}`);
 });

@@ -14,42 +14,46 @@ Construida con Next.js App Router, React, TypeScript, SCSS y CSS Modules.
 - Resto de secciones con rutas creadas y estados vac?os cuidados.
 - Modo claro y oscuro con preferencia del sistema y selector manual (Ajustes).
 
-Notion y Google Calendar todavía **no** están conectados. La pantalla Hoy ya puede leer,
-de forma segura y solo lectura, el Google Sheet DEV (ver más abajo).
+## Google Sheets (selector DEV / canónico)
 
-## Integración Google Sheets DEV (fase 2A)
+Una sola fuente canónica final: el Sheet de producción («Sistema de hábitos y
+compromisos»). ActivityWatch, Huawei / Health Auto Export y Apps Script escriben
+**solo** en el canónico; nunca deben redirigirse al Sheet DEV.
 
-Integración **solo de lectura** con el Sheet DEV, del lado del servidor. La clave privada
-nunca llega al navegador y no existe ninguna operación de escritura.
+La app elige el Sheet con variables de servidor (nunca desde el navegador):
 
-- `DATA_SOURCE=mock` (o sin definir): usa los datos simulados.
-- `DATA_SOURCE=google`: lee las pestañas **Registro diario** y **Salud y experimentos** del
-  Sheet DEV. Si faltan credenciales o hay un error, sigue funcionando con mocks y muestra
-  un aviso discreto.
+| Entorno                          | Target | Escrituras de hábitos                          |
+| -------------------------------- | ------ | ---------------------------------------------- |
+| Local                            | `dev`  | Solo DEV (`ALLOW_PROD_WRITES` no aplica)       |
+| Vercel Preview                   | `dev`  | Solo DEV; `target=prod` se rechaza             |
+| Vercel Production (corte futuro) | `prod` | Solo si `GOOGLE_SHEETS_ALLOW_PROD_WRITES=true` |
 
-Capa de datos:
+- `DATA_SOURCE=mock` (o sin definir): datos simulados.
+- `DATA_SOURCE=google`: lee **Registro diario** y **Salud y experimentos** del target
+  resuelto. Sin fallback automático entre DEV y producción.
 
-- `lib/data`: configuración de entorno y proveedor `getTodayData` (conmutación mock/google).
-- `lib/google`: cliente de Google Sheets (solo servidor, scope `spreadsheets.readonly`).
-- `lib/adapters`: parseo de celdas, fechas (zona horaria de Argentina) y transformación.
-- `lib/validation`: validación de encabezados y del ID del spreadsheet (solo el Sheet DEV).
+### Variables
 
-### Variables de entorno
+Ver `.env.example`. Resumen:
 
-Copiá `.env.example` a `.env.local` (ignorado por Git) y completá:
+- `GOOGLE_SHEETS_TARGET`: `dev` \| `prod`
+- `GOOGLE_SHEETS_DEV_ID` / `GOOGLE_SHEETS_PROD_ID`: IDs (solo env; sin hardcode)
+- `GOOGLE_SHEETS_ALLOW_PROD_WRITES`: exactamente `true` para escribir en canónico
 
-- `DATA_SOURCE`: `mock` o `google`.
-- `GOOGLE_SERVICE_ACCOUNT_EMAIL`: email de la cuenta de servicio.
-- `GOOGLE_PRIVATE_KEY`: clave privada (con `\n` como saltos de línea).
-- `GOOGLE_SHEETS_DEV_ID`: ID del Sheet DEV (único ID permitido).
+Compatibilidad temporal: si `TARGET` está ausente y existe `GOOGLE_SHEETS_DEV_ID`,
+se usa DEV. Nunca se resuelve producción de forma implícita.
 
-### Pasos para la cuenta de servicio
+### Corte productivo (Fase 7C-D, manual)
 
-1. En Google Cloud, creá un proyecto y habilitá **Google Sheets API**.
-2. Creá una **cuenta de servicio** y una **clave JSON**.
-3. Copiá `client_email` y `private_key` del JSON a `.env.local`.
-4. Compartí el Sheet DEV con ese `client_email` en modo **Lector**.
-5. Poné `DATA_SOURCE=google` y reiniciá el servidor.
+1. Backup completo del Sheet canónico; validar la copia.
+2. Service account → Editor en el canónico (hoy puede seguir como Lector).
+3. Vercel Production: `TARGET=prod`, IDs correctos, `ALLOW_PROD_WRITES=true`.
+4. Preview y local permanecen en `TARGET=dev`.
+
+### Rollback
+
+En Vercel Production: `GOOGLE_SHEETS_TARGET=dev` (y `ALLOW_PROD_WRITES=false`).
+La app vuelve al Sheet DEV sin tocar ActivityWatch ni el canónico.
 
 ## Requisitos
 

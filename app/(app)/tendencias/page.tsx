@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 function sourceLabel(source: 'mock' | 'google'): string {
-  return source === 'mock' ? 'Mock' : 'Sheet DEV';
+  return source === 'mock' ? 'Mock' : 'Google Sheets';
 }
 
 function rhoLabel(rho: number | null): string {

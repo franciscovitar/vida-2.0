@@ -1,5 +1,5 @@
 /**
- * Punto de entrada server-only para lectura del Sheet DEV.
+ * Punto de entrada server-only para lectura del Sheet (target resuelto).
  *
  * Reexporta la implementación de `sheets-read.ts` (fetch + JWT, sin gaxios)
  * y bloquea importaciones desde componentes cliente.

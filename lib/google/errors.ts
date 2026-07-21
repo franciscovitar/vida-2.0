@@ -5,7 +5,7 @@
  * de googleapis/gaxios hacia la capa de datos ni la UI.
  */
 
-/** Códigos de fallo al leer una pestaña del Sheet DEV. */
+/** Códigos de fallo al leer una pestaña de Google Sheets. */
 export type SheetReadCode =
   'not-configured' | 'auth-error' | 'permission-error' | 'missing-tab' | 'read-error';
 

@@ -1,8 +1,9 @@
 /**
- * Lectura del Sheet DEV sin googleapis/gaxios.
+ * Lectura del Sheet resuelto por target (DEV|PROD) sin googleapis/gaxios.
+ * Sin fallback entre targets. Sin registrar IDs ni URLs.
  */
 import { sanitizeSheetValues } from '@/lib/data/plain';
-import { assertAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { assertResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 
 import { getGoogleConfig } from '../data/config';
 import { fetchAccessToken, READONLY_SCOPE, SHEETS_BASE } from './auth';
@@ -31,7 +32,7 @@ export async function readTabValues(tab: string): Promise<ReadTabResult> {
     const { clientEmail, privateKey, spreadsheetId } = result.config;
 
     try {
-      assertAllowedSpreadsheetId(spreadsheetId);
+      assertResolvedSpreadsheetId(spreadsheetId, spreadsheetId);
     } catch {
       return { ok: false, code: 'read-error' };
     }

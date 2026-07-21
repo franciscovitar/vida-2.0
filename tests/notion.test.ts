@@ -20,7 +20,7 @@ import {
 import { buildMockNotionDashboard, buildMockNotionTasks } from '@/lib/mock-data/notion';
 import { summarizeProjects, summarizeTasks, buildNotionHoyPreview } from '@/lib/notion/summaries';
 import { filterProjects, filterTasks } from '@/lib/notion/view-filters';
-import { ALLOWED_SPREADSHEET_ID, isAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { isResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 
 const TODAY = '2026-07-20';
 
@@ -267,13 +267,13 @@ test('N16. objetos entregados a la UI son serializables', () => {
 
 test('N17. Google Sheets sigue funcionando', () => {
   assert.ok(getDataSource() === 'mock' || getDataSource() === 'google');
-  assert.equal(isAllowedSpreadsheetId(ALLOWED_SPREADSHEET_ID), true);
+  assert.equal(isResolvedSpreadsheetId('dev-id', 'dev-id'), true);
 });
 
-test('N18. escritura de hábitos sigue limitada a Sheet DEV', () => {
+test('N18. escritura de hábitos sigue limitada al target resuelto', () => {
   const toggle = readFileSync(join(process.cwd(), 'lib', 'habits', 'toggle.ts'), 'utf8');
   assert.match(toggle, /isAuthorizedHabitName/);
-  assert.match(toggle, /isAllowedSpreadsheetId/);
+  assert.match(toggle, /writesAllowed/);
 });
 
 test('N19. /tareas sin overflow-x scroll de layout', () => {

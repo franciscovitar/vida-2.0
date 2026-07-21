@@ -7,6 +7,6 @@ import type { DataSourceKind, TodayStatus } from '@/types';
 export function integrationSidebarLabel(source: DataSourceKind, status: TodayStatus): string {
   if (source === 'mock' || status === 'mock') return 'Datos simulados';
   if (status === 'not-configured') return 'Sin conexión';
-  if (status === 'ready' || status === 'no-data') return 'Sheet DEV';
+  if (status === 'ready' || status === 'no-data') return 'Google Sheets';
   return 'Integración parcial';
 }

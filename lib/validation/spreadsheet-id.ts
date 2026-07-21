@@ -1,30 +1,26 @@
 /**
- * Lista blanca de spreadsheets permitidos.
+ * Validación del Spreadsheet ID contra el ID resuelto del target actual.
  *
- * En la Fase 2A la integración es exclusivamente de lectura contra el Sheet
- * DEV. Cualquier otro ID (incluido el de producción) se rechaza de forma
- * explícita para que nunca se lea ni se escriba producción por accidente.
+ * No hay whitelist hardcodeada de IDs. El único ID válido es el que devolvió
+ * resolveSpreadsheetTarget / getGoogleConfig desde variables server-only.
  */
 
-/** Único spreadsheet permitido: "Sistema de hábitos y compromisos — DEV". */
-export const ALLOWED_SPREADSHEET_ID = '1TBrEQuocPSNv9SradWea2YWQtMpOEIsHHNRJe0YACdY';
-
-/** Error tipado cuando se intenta usar un spreadsheet no permitido. */
+/** Error tipado cuando el ID no coincide con el resuelto. */
 export class DisallowedSpreadsheetError extends Error {
   constructor() {
-    super('El ID de spreadsheet no está permitido. Solo se admite el Sheet DEV.');
+    super('El ID de spreadsheet no está autorizado para el target actual.');
     this.name = 'DisallowedSpreadsheetError';
   }
 }
 
-/** true solo si el ID coincide exactamente con el Sheet DEV. */
-export function isAllowedSpreadsheetId(id: string): boolean {
-  return id === ALLOWED_SPREADSHEET_ID;
+/** true solo si candidate coincide exactamente con el ID resuelto (no vacío). */
+export function isResolvedSpreadsheetId(candidate: string, resolvedId: string): boolean {
+  return candidate.length > 0 && resolvedId.length > 0 && candidate === resolvedId;
 }
 
-/** Lanza `DisallowedSpreadsheetError` si el ID no es el Sheet DEV. */
-export function assertAllowedSpreadsheetId(id: string): void {
-  if (!isAllowedSpreadsheetId(id)) {
+/** Lanza si candidate no es el ID resuelto del target. */
+export function assertResolvedSpreadsheetId(candidate: string, resolvedId: string): void {
+  if (!isResolvedSpreadsheetId(candidate, resolvedId)) {
     throw new DisallowedSpreadsheetError();
   }
 }

@@ -26,7 +26,13 @@ test('getDataSource usa mock por defecto y solo google cuando se pide explícita
 });
 
 test('sin credenciales, la configuración de Google reporta "not-configured"', () => {
-  const keys = ['GOOGLE_SERVICE_ACCOUNT_EMAIL', 'GOOGLE_PRIVATE_KEY', 'GOOGLE_SHEETS_DEV_ID'];
+  const keys = [
+    'GOOGLE_SERVICE_ACCOUNT_EMAIL',
+    'GOOGLE_PRIVATE_KEY',
+    'GOOGLE_SHEETS_DEV_ID',
+    'GOOGLE_SHEETS_TARGET',
+    'GOOGLE_SHEETS_PROD_ID',
+  ];
   const saved = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
   try {
     for (const k of keys) delete process.env[k];

@@ -101,7 +101,7 @@ export function buildMockNotionProjects(today: string): NotionProject[] {
       name: 'Vida 2.0 web',
       status: 'Activo',
       area: rel(AREA_IDS.personal, 'Vida personal'),
-      expectedResult: 'Dashboard usable con Sheet DEV y Notion lectura.',
+      expectedResult: 'Dashboard usable con Google Sheets y Notion lectura.',
       nextAction: 'Preparar integración Notion solo lectura',
       dueDate: '2026-07-18',
       reviewDate: '2026-07-22',

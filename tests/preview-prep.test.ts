@@ -163,7 +163,7 @@ test('P18–P20. fallos parciales: capas de Hoy aíslan fuentes', () => {
   assert.match(compose + combine, /compose|combine|notion|calendar|sheet/i);
 });
 
-test('P21–P23. sin escrituras Notion/Calendar; hábitos solo DEV', () => {
+test('P21–P23. sin escrituras Notion/Calendar; hábitos solo target resuelto', () => {
   const notionClient = readFileSync(join(process.cwd(), 'lib/notion/client.ts'), 'utf8');
   assert.match(notionClient, /dataSources\.query/);
   assert.doesNotMatch(
@@ -176,7 +176,8 @@ test('P21–P23. sin escrituras Notion/Calendar; hábitos solo DEV', () => {
   assert.doesNotMatch(calendarClient, /events\.insert|events\.update|events\.delete|quickAdd/);
 
   const toggle = readFileSync(join(process.cwd(), 'lib/habits/toggle.ts'), 'utf8');
-  assert.match(toggle, /ALLOWED_SPREADSHEET_ID/);
+  assert.match(toggle, /writesAllowed/);
+  assert.doesNotMatch(toggle, /ALLOWED_SPREADSHEET_ID/);
 });
 
 test('P24. login no fuerza suppressHydrationWarning en el markup de la página', () => {

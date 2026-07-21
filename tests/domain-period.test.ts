@@ -24,7 +24,11 @@ import { HABIT_ACTIVATION_DATES, habitsMissingActivation } from '@/lib/habits/ac
 import { AUTHORIZED_HABIT_NAMES } from '@/lib/habits/authorized';
 import { buildMockDomainRecords } from '@/lib/mock-data/domain-history';
 import { periodWindow, previousPeriodWindow, parsePeriodParam } from '@/lib/periods';
-import { ALLOWED_SPREADSHEET_ID, isAllowedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
+import { resolveSpreadsheetTarget } from '@/lib/google/spreadsheet-target-core';
+import {
+  assertResolvedSpreadsheetId,
+  isResolvedSpreadsheetId,
+} from '@/lib/validation/spreadsheet-id';
 
 function rowFor(headers: readonly string[], values: Record<string, unknown>): unknown[] {
   return headers.map((header) => (header in values ? values[header] : ''));
@@ -261,9 +265,19 @@ test('12. escritura sigue limitada a los diez hábitos', () => {
   assert.match(toggle, /isAuthorizedHabitName/);
 });
 
-test('13. producción sigue rechazada', () => {
-  assert.equal(isAllowedSpreadsheetId(ALLOWED_SPREADSHEET_ID), true);
-  assert.equal(isAllowedSpreadsheetId('1ProductionXXXXXXXX'), false);
+test('13. producción sin allow sigue rechazada para escritura', () => {
+  const prod = resolveSpreadsheetTarget({
+    GOOGLE_SHEETS_TARGET: 'prod',
+    GOOGLE_SHEETS_DEV_ID: 'dev-id-test',
+    GOOGLE_SHEETS_PROD_ID: '1ProductionXXXXXXXX',
+    GOOGLE_SHEETS_ALLOW_PROD_WRITES: 'false',
+    VERCEL_ENV: 'production',
+  });
+  assert.equal(prod.ok, true);
+  if (!prod.ok) return;
+  assert.equal(prod.writesAllowed, false);
+  assert.equal(isResolvedSpreadsheetId('1ProductionXXXXXXXX', 'dev-id-test'), false);
+  assert.doesNotThrow(() => assertResolvedSpreadsheetId(prod.spreadsheetId, prod.spreadsheetId));
 });
 
 test('14. modo mock funciona sin credenciales', () => {
@@ -572,7 +586,8 @@ test('H9. escritura segura de hábitos no cambia', () => {
   const locate = readFileSync(join(process.cwd(), 'lib', 'habits', 'sheet-locate.ts'), 'utf8');
   const auth = readFileSync(join(process.cwd(), 'lib', 'habits', 'authorized.ts'), 'utf8');
   assert.match(toggle, /isAuthorizedHabitName/);
-  assert.match(toggle, /isAllowedSpreadsheetId/);
+  assert.match(toggle, /writesAllowed/);
+  assert.match(toggle, /assertResolvedSpreadsheetId|resolved/);
   assert.match(locate, /findHabitColumn/);
   assert.match(locate, /habitCellRange/);
   assert.match(auth, /AUTHORIZED_HABIT_NAMES/);

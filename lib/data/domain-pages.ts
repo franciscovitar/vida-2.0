@@ -34,13 +34,13 @@ import type { TodayData, TodayStatus } from '@/types';
 import { buildMockDomainRecords } from '@/lib/mock-data/domain-history';
 
 const NOTICES: Record<Exclude<TodayStatus, 'mock' | 'ready'>, string> = {
-  'not-configured': 'Integración con el Sheet DEV no configurada. Mostrando datos simulados.',
+  'not-configured': 'Integración con Google Sheets no configurada. Mostrando datos simulados.',
   'auth-error': 'No se pudo autenticar con Google. Mostrando datos simulados.',
-  'permission-error': 'Sin permiso de lectura en el Sheet DEV. Mostrando datos simulados.',
-  'missing-tab': 'Falta una pestaña esperada en el Sheet DEV. Mostrando datos simulados.',
-  'missing-header': 'Faltan encabezados en el Sheet DEV. Mostrando datos simulados.',
-  'no-data': 'Sin datos disponibles para hoy en el Sheet DEV.',
-  'read-error': 'No se pudieron leer los datos del Sheet DEV. Mostrando datos simulados.',
+  'permission-error': 'Sin permiso de lectura en Google Sheets. Mostrando datos simulados.',
+  'missing-tab': 'Falta una pestaña esperada en la hoja de hábitos. Mostrando datos simulados.',
+  'missing-header': 'Faltan encabezados en la hoja de hábitos. Mostrando datos simulados.',
+  'no-data': 'Sin datos disponibles para hoy en la hoja de hábitos.',
+  'read-error': 'No se pudieron leer los datos de Google Sheets. Mostrando datos simulados.',
 };
 
 export interface DomainPagesBundle {

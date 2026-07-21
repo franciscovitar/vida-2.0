@@ -238,8 +238,8 @@ test('importación parcial cuenta como dato de salud del día, sin traer el día
 
 test('etiqueta del sidebar refleja el estado real', () => {
   assert.equal(integrationSidebarLabel('mock', 'mock'), 'Datos simulados');
-  assert.equal(integrationSidebarLabel('google', 'ready'), 'Sheet DEV');
-  assert.equal(integrationSidebarLabel('google', 'no-data'), 'Sheet DEV');
+  assert.equal(integrationSidebarLabel('google', 'ready'), 'Google Sheets');
+  assert.equal(integrationSidebarLabel('google', 'no-data'), 'Google Sheets');
   assert.equal(integrationSidebarLabel('google', 'not-configured'), 'Sin conexión');
   assert.equal(integrationSidebarLabel('google', 'auth-error'), 'Integración parcial');
 });

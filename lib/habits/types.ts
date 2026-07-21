@@ -53,7 +53,7 @@ export const HABIT_WRITE_MESSAGES: Record<HabitWriteErrorCode, string> = {
   'duplicate-date': 'Hay más de una fila con la misma fecha.',
   'missing-header': 'Falta el encabezado del hábito en el Sheet.',
   conflict: 'El valor cambió en el Sheet. Actualizá e intentá de nuevo.',
-  'permission-error': 'Sin permiso de escritura en el Sheet DEV.',
+  'permission-error': 'Sin permiso de escritura en el Sheet.',
   'verification-failed': 'No se pudo verificar la escritura.',
   'write-error': 'No se pudo guardar el hábito.',
 };

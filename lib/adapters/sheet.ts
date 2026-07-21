@@ -1,5 +1,5 @@
 /**
- * Compone `TodayData` a partir de las filas crudas del Sheet DEV.
+ * Compone `TodayData` a partir de las filas crudas de Google Sheets.
  *
  * La fecha objetivo es siempre "hoy" (Argentina). Cada sección usa solo la fila
  * de esa fecha: no se sustituye silenciosamente un día anterior (p. ej. salud
@@ -140,7 +140,7 @@ export function buildSheetToday(
         fullDate: capitalize(formatArgentineFullDate(today)),
         greeting: greetingForHour(hourInBuenosAires(now)),
         syncOk: hasData,
-        syncLabel: hasData ? 'Datos del Sheet DEV' : 'Sheet DEV sin datos del día',
+        syncLabel: hasData ? 'Sincronización con Sheets' : 'Hoja de hábitos sin datos del día',
       },
       summary: {
         habits: summaryHabits,

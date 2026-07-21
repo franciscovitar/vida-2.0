@@ -7,7 +7,7 @@ import type { PeriodDays } from '@/lib/periods';
 import { periodLabel } from '@/lib/periods';
 
 function sourceLabel(source: 'mock' | 'google'): string {
-  return source === 'mock' ? 'datos simulados (mock)' : 'Google Sheet DEV';
+  return source === 'mock' ? 'datos simulados (mock)' : 'Google Sheets';
 }
 
 function statusLabel(status: string): string {
@@ -236,7 +236,7 @@ export function assertReportSafe(text: string): boolean {
     /private_key/i,
     /GOGGLE_/,
     /GOOGLE_SERVICE/,
-    /1TBrEQuocPSNv9SradWea2YWQtMpOEIsHHNRJe0YACdY/,
+    /\b1[A-Za-z0-9_-]{30,}\b/,
     /spreadsheetId/i,
     /credentials/i,
   ];

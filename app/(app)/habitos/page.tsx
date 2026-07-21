@@ -156,7 +156,7 @@ export default async function HabitosPage({
         writable={data.habits.writable}
         rowExists={data.habits.rowExists}
         title="Edición de hoy"
-        description="Solo hoy · Sheet DEV"
+        description="Solo hoy · Hoja de hábitos"
       />
     </div>
   );

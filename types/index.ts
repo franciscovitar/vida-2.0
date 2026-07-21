@@ -184,9 +184,9 @@ export interface SyncState {
 export type DataSourceKind = 'mock' | 'google';
 
 /**
- * Estado de la integración con el Sheet DEV para la vista Hoy.
+ * Estado de la integración con Google Sheets para la vista Hoy.
  * - `mock`: datos simulados (sin credenciales).
- * - `ready`: datos reales del Sheet DEV.
+ * - `ready`: datos reales del Sheet configurado (target server-side).
  * - resto: la integración eligió Google pero no pudo completarse; se muestran
  *   mocks con un aviso discreto.
  */
@@ -305,7 +305,7 @@ export interface TodayData {
   productivity: ProductivityView;
   habits: HabitView[];
   weekly: WeeklyGoal[];
-  /** Estado por fuente (Sheet DEV + Notion + Calendar). */
+  /** Estado por fuente (Google Sheets + Notion + Calendar). */
   sources: TodaySourceStatus[];
   /** Bloque Notion para Hoy (siempre plano; vacío si no hay datos). */
   notion: import('@/types/notion').HoyNotionView;

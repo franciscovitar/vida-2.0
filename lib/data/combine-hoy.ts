@@ -1,5 +1,5 @@
 /**
- * Combina Sheet DEV + Notion + Calendar en TodayData sin acoplar fallos.
+ * Combina Google Sheets + Notion + Calendar en TodayData sin acoplar fallos.
  */
 import { emptyCalendarTodayPreview } from '@/lib/calendar/summaries';
 import { isCalendarHoyUnavailable } from '@/lib/calendar/errors';
@@ -9,7 +9,7 @@ import type { CalendarTodayPreview } from '@/types/calendar';
 import type { HoyNotionView, NotionDashboardData, NotionIntegrationStatus } from '@/types/notion';
 
 function sheetSourceFromToday(today: TodayData): TodaySourceStatus {
-  const label = 'Sheet DEV';
+  const label = 'Google Sheets';
   if (today.source === 'mock' || today.status === 'mock') {
     return {
       id: 'sheet',
@@ -167,7 +167,7 @@ function combinedHeader(
     return {
       ...sheet.header,
       syncOk: true,
-      syncLabel: 'Sheet DEV + Notion + Calendar',
+      syncLabel: 'Google Sheets + Notion + Calendar',
     };
   }
 
@@ -246,7 +246,7 @@ export function todayNotionPlaceholders(): Pick<TodayData, 'sources' | 'notion' 
     sources: [
       {
         id: 'sheet',
-        label: 'Sheet DEV',
+        label: 'Google Sheets',
         ready: false,
         mode: 'mock',
         detail: null,
