@@ -73,8 +73,9 @@ function composeFromRecords(
   const todayHabits = buildHabitViews(todayRegistro, registroAvailable, rowExists);
   const todayWeekly = buildWeeklyGoals(registroAvailable, today);
 
+  const mockBase = buildMockToday();
   const todayData: TodayData = {
-    ...buildMockToday(),
+    ...mockBase,
     source: meta.source,
     status: meta.status,
     notice: meta.notice,
@@ -85,6 +86,8 @@ function composeFromRecords(
     healthDate: salud.find((r) => r.date === today && saludHasData(r))?.date ?? null,
     habits: todayHabits,
     weekly: todayWeekly,
+    sources: mockBase.sources,
+    notion: mockBase.notion,
   };
 
   const habits = buildHabitsPageData({

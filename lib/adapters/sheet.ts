@@ -7,6 +7,7 @@
  */
 import type { MetricView, TodayData } from '@/types';
 
+import { todayNotionPlaceholders } from '../data/combine-hoy';
 import { formatDuration } from '../format';
 import { formatArgentineFullDate, hourInBuenosAires } from './dates';
 import {
@@ -152,6 +153,7 @@ export function buildSheetToday(
       productivity: buildProductivityView(todayRegistro, prevRegistro),
       habits,
       weekly: buildWeeklyGoals(registroAvailable, today),
+      ...todayNotionPlaceholders(),
     },
   };
 }

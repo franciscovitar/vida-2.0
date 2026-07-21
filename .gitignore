@@ -11,8 +11,8 @@
 /coverage
 
 # local environment files
-# .env*
-# !.env.example
+.env*
+!.env.example
 
 # private keys and certificates
 *.pem

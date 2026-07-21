@@ -3,8 +3,8 @@ import { DayHeader } from '@/components/dashboard/DayHeader';
 import { FocusCard } from '@/components/dashboard/FocusCard';
 import { HabitsToday } from '@/components/dashboard/HabitsToday';
 import { HealthSleep } from '@/components/dashboard/HealthSleep';
+import { HoyNotionPanel } from '@/components/dashboard/HoyNotion';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
-import { PriorityTasks } from '@/components/dashboard/PriorityTasks';
 import { ProductivityToday } from '@/components/dashboard/ProductivityToday';
 import { QuickInbox } from '@/components/dashboard/QuickInbox';
 import { TodayAgenda } from '@/components/dashboard/TodayAgenda';
@@ -13,9 +13,9 @@ import { getTodayData } from '@/lib/data/source';
 
 import styles from './page.module.scss';
 
-/** La vista Hoy se renderiza por request para leer datos frescos del Sheet DEV. */
+/** La vista Hoy se renderiza por request para leer datos frescos. */
 export const dynamic = 'force-dynamic';
-/** googleapis requiere APIs de Node.js (crypto, Buffer); no ejecutar en Edge. */
+/** googleapis / Notion requieren APIs de Node.js; no ejecutar en Edge. */
 export const runtime = 'nodejs';
 
 export default async function TodayPage() {
@@ -34,8 +34,8 @@ export default async function TodayPage() {
 
       <div className={styles.columns}>
         <div className={styles.main}>
+          <HoyNotionPanel notion={today.notion} sources={today.sources} />
           <TodayAgenda />
-          <PriorityTasks />
           <HabitsToday
             habits={today.habits}
             weekly={today.weekly}

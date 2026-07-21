@@ -117,9 +117,69 @@ export interface NotionDashboardData {
   projectSummary: NotionProjectSummary;
 }
 
+/** Vista compacta de tarea para Hoy (sin IDs de data source). */
+export interface HoyTaskView {
+  id: string;
+  title: string;
+  status: NotionTaskStatus;
+  priority: NotionTaskPriority | null;
+  duration: NotionTaskDuration | null;
+  energy: NotionTaskEnergy | null;
+  date: string | null;
+  areaName: string | null;
+  projectName: string | null;
+  blocker: string | null;
+  relationUnavailable: boolean;
+}
+
+export interface HoyProjectView {
+  id: string;
+  name: string;
+  areaName: string | null;
+  expectedResult: string | null;
+  nextAction: string | null;
+  dueDate: string | null;
+  reviewDate: string | null;
+  relatedTaskCount: number;
+  blocker: string | null;
+  withoutNextAction: boolean;
+  blocked: boolean;
+  dueSoon: boolean;
+  relationUnavailable: boolean;
+}
+
+export interface HoySuggestedAction {
+  id: string;
+  title: string;
+  reason: string;
+  href: '/tareas' | '/proyectos';
+}
+
+export interface HoyNotionSummary {
+  dueToday: number;
+  overdue: number;
+  inProgress: number;
+  blocked: number;
+  activeProjects: number;
+  withoutNextAction: number;
+}
+
+/** Bloque Notion de la pantalla Hoy. */
+export interface HoyNotionView {
+  status: NotionIntegrationStatus;
+  source: NotionDataSourceMode;
+  notice: string | null;
+  dueToday: HoyTaskView[];
+  overdue: HoyTaskView[];
+  inProgress: HoyTaskView[];
+  blocked: HoyTaskView[];
+  activeProjects: HoyProjectView[];
+  summary: HoyNotionSummary;
+  suggestedActions: HoySuggestedAction[];
+}
+
 /**
- * Contrato preparado para la pantalla Hoy (aún no cableado a la UI).
- * Permite añadir después tareas de hoy, vencidas y proyectos activos.
+ * Preview liviano (compatible con getNotionHoyPreview).
  */
 export interface NotionHoyPreview {
   tasksDueToday: NotionTask[];

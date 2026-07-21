@@ -1,0 +1,12 @@
+.page {
+  min-width: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}

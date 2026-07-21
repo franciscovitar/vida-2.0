@@ -273,6 +273,16 @@ export interface DayHeaderView {
   syncLabel: string;
 }
 
+/** Estado discreto de una fuente en Hoy (Sheet / Notion). */
+export interface TodaySourceStatus {
+  id: 'sheet' | 'notion';
+  label: string;
+  /** true si la fuente aporta datos vivos sin fallback de error. */
+  ready: boolean;
+  mode: 'mock' | 'live' | 'fallback' | 'partial' | 'error';
+  detail: string | null;
+}
+
 /** Todo lo que necesita la vista Hoy, con su origen y estado. */
 export interface TodayData {
   source: DataSourceKind;
@@ -295,4 +305,8 @@ export interface TodayData {
   productivity: ProductivityView;
   habits: HabitView[];
   weekly: WeeklyGoal[];
+  /** Estado por fuente (Sheet DEV + Notion). */
+  sources: TodaySourceStatus[];
+  /** Bloque Notion para Hoy (siempre plano; vacío si no hay datos). */
+  notion: import('@/types/notion').HoyNotionView;
 }

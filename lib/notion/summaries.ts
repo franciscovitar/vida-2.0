@@ -1,7 +1,8 @@
 /**
  * Resúmenes y vista previa Hoy a partir de DTO Notion.
  */
-import { isProjectOverdueActive, isTaskOverdue } from '@/lib/notion/classify';
+import { isProjectOverdueActive } from '@/lib/notion/classify';
+import { isHoyOverdueTask } from '@/lib/notion/hoy';
 import type {
   NotionDashboardData,
   NotionHoyPreview,
@@ -28,7 +29,7 @@ export function summarizeTasks(tasks: readonly NotionTask[]): NotionTaskSummary 
     if (task.status === 'Bloqueada') summary.blocked += 1;
     if (task.status === 'Hecha') summary.done += 1;
     if (task.status === 'Algún día') summary.someday += 1;
-    if (isTaskOverdue(task.dateKind, task.status)) summary.overdue += 1;
+    if (isHoyOverdueTask(task)) summary.overdue += 1;
     if (task.dateKind === 'today' && task.status !== 'Hecha') summary.dueToday += 1;
   }
   return summary;
@@ -69,7 +70,7 @@ export function buildNotionHoyPreview(data: NotionDashboardData): NotionHoyPrevi
   const tasksDueToday = data.tasks.filter(
     (task) => task.dateKind === 'today' && task.status !== 'Hecha',
   );
-  const overdueTasks = data.tasks.filter((task) => isTaskOverdue(task.dateKind, task.status));
+  const overdueTasks = data.tasks.filter((task) => isHoyOverdueTask(task));
   const activeProjects = data.projects.filter((project) => project.status === 'Activo');
   const blockedProjects = data.projects.filter(
     (project) =>

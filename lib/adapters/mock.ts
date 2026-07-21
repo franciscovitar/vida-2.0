@@ -6,6 +6,7 @@
  */
 import type { HabitView, TodayData } from '@/types';
 
+import { todayNotionPlaceholders } from '../data/combine-hoy';
 import { formatDuration, formatFullDate, formatNumber, minutesToHours } from '../format';
 import {
   dailyHealth,
@@ -129,5 +130,6 @@ export function buildMockToday(): TodayData {
     },
     habits: habitViews,
     weekly: weeklyGoals,
+    ...todayNotionPlaceholders(),
   };
 }
