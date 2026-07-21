@@ -23,6 +23,64 @@ export interface GoogleCalendarEventRaw {
   end?: { date?: string | null; dateTime?: string | null; timeZone?: string | null } | null;
 }
 
+function asOptionalString(value: unknown): string | null {
+  return typeof value === 'string' ? value : null;
+}
+
+function asDateField(value: unknown): GoogleCalendarEventRaw['start'] {
+  if (!value || typeof value !== 'object') return null;
+  const record = value as Record<string, unknown>;
+  return {
+    date: asOptionalString(record.date),
+    dateTime: asOptionalString(record.dateTime),
+    timeZone: asOptionalString(record.timeZone),
+  };
+}
+
+/**
+ * Copia explícita de un ítem events.list a un objeto plano nuevo.
+ * Nunca retiene response.data ni prototipos del SDK.
+ */
+export function toPlainGoogleEvent(value: unknown): GoogleCalendarEventRaw | null {
+  if (!value || typeof value !== 'object') return null;
+  const record = value as Record<string, unknown>;
+  return {
+    id: asOptionalString(record.id),
+    summary: asOptionalString(record.summary),
+    status: asOptionalString(record.status),
+    transparency: asOptionalString(record.transparency),
+    location: asOptionalString(record.location),
+    recurringEventId: asOptionalString(record.recurringEventId),
+    start: asDateField(record.start),
+    end: asDateField(record.end),
+  };
+}
+
+/**
+ * DTO CalendarEvent como objeto nuevo 100 % JSON-plano.
+ */
+export function toPlainCalendarEvent(event: CalendarEvent): CalendarEvent {
+  return {
+    id: event.id,
+    title: event.title,
+    calendarId: event.calendarId,
+    calendarLabel: event.calendarLabel,
+    location: event.location,
+    status: event.status,
+    transparency: event.transparency,
+    blocksTime: event.blocksTime,
+    allDay: event.allDay,
+    multiDay: event.multiDay,
+    startDate: event.startDate,
+    endDate: event.endDate,
+    startTime: event.startTime,
+    endTime: event.endTime,
+    durationMinutes: event.durationMinutes,
+    recurring: event.recurring,
+    overlaps: event.overlaps,
+  };
+}
+
 export function calendarLabelFor(calendarId: string): string | null {
   if (calendarId === 'primary') return 'Principal';
   return null;
@@ -96,7 +154,7 @@ export function adaptCalendarEvent(
   const transparency = adaptTransparency(raw.transparency);
   const blocksTime = status !== 'cancelled' && transparency === 'opaque';
 
-  return {
+  return toPlainCalendarEvent({
     id:
       raw.id ??
       `${calendarId}:${time.startDate}:${time.startTime ?? 'allday'}:${raw.summary ?? ''}`,
@@ -116,10 +174,10 @@ export function adaptCalendarEvent(
     durationMinutes: time.durationMinutes,
     recurring: Boolean(raw.recurringEventId),
     overlaps: false,
-  };
+  });
 }
 
 /** Excluye cancelados del conjunto visible. */
 export function filterVisibleEvents(events: readonly CalendarEvent[]): CalendarEvent[] {
-  return events.filter((event) => event.status !== 'cancelled');
+  return events.filter((event) => event.status !== 'cancelled').map(toPlainCalendarEvent);
 }

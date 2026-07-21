@@ -1,14 +1,17 @@
 /**
- * Cliente Google Calendar: únicamente events.list (solo servidor).
+ * Cliente Google Calendar Node-only: events.list vía REST + fetch.
+ * Sin SDK de Google Calendar ni respuestas crudas no serializables.
  */
 import 'server-only';
 
-import { google } from 'googleapis';
-
-import { createCalendarOAuthClient } from '@/lib/calendar/auth';
-import type { CalendarOAuthConfig } from '@/lib/calendar/config';
-import { mapCalendarFailure, type CalendarReadCode } from '@/lib/calendar/errors';
 import type { GoogleCalendarEventRaw } from '@/lib/calendar/adapters';
+import { toPlainGoogleEvent } from '@/lib/calendar/adapters';
+import type { CalendarOAuthConfig } from '@/lib/calendar/config-resolve';
+import { mapCalendarHttpStatus, type CalendarReadCode } from '@/lib/calendar/errors';
+import { fetchCalendarAccessToken } from '@/lib/calendar/token';
+import { traceCalendarStage } from '@/lib/calendar/trace';
+
+const CALENDAR_API_BASE = 'https://www.googleapis.com/calendar/v3';
 
 export interface CalendarListParams {
   calendarId: string;
@@ -20,10 +23,14 @@ export interface CalendarListParams {
 export type CalendarListResult =
   { ok: true; events: GoogleCalendarEventRaw[] } | { ok: false; code: CalendarReadCode };
 
+interface CalendarEventsListJson {
+  items?: unknown[];
+  nextPageToken?: unknown;
+}
+
 /**
- * Lista eventos de un calendario autorizado.
+ * Lista eventos de un calendario autorizado (equivalente REST a events.list).
  * singleEvents=true, orderBy=startTime, con paginación.
- * Solo lectura vía events.list. Sin mutaciones ni APIs auxiliares de escritura.
  */
 export async function listCalendarEvents(
   config: CalendarOAuthConfig,
@@ -34,53 +41,71 @@ export async function listCalendarEvents(
   }
 
   try {
-    const auth = createCalendarOAuthClient(config);
-    const calendar = google.calendar({ version: 'v3', auth });
+    traceCalendarStage(1);
+    const tokenResult = await fetchCalendarAccessToken(config);
+    if (!tokenResult.ok) return tokenResult;
+    traceCalendarStage(3);
+
     const events: GoogleCalendarEventRaw[] = [];
     let pageToken: string | undefined;
+    traceCalendarStage(4);
 
     do {
-      const response = await calendar.events.list({
-        calendarId: params.calendarId,
-        timeMin: params.timeMin,
-        timeMax: params.timeMax,
-        singleEvents: true,
-        orderBy: 'startTime',
-        timeZone: params.timeZone,
-        pageToken,
-        maxResults: 100,
-      });
+      const url = new URL(
+        `${CALENDAR_API_BASE}/calendars/${encodeURIComponent(params.calendarId)}/events`,
+      );
+      url.searchParams.set('timeMin', params.timeMin);
+      url.searchParams.set('timeMax', params.timeMax);
+      url.searchParams.set('singleEvents', 'true');
+      url.searchParams.set('orderBy', 'startTime');
+      url.searchParams.set('timeZone', params.timeZone);
+      url.searchParams.set('maxResults', '100');
+      if (pageToken) url.searchParams.set('pageToken', pageToken);
 
-      const items = response.data.items ?? [];
-      for (const item of items) {
-        events.push({
-          id: item.id,
-          summary: item.summary,
-          status: item.status,
-          transparency: item.transparency,
-          location: item.location,
-          recurringEventId: item.recurringEventId,
-          start: item.start
-            ? {
-                date: item.start.date,
-                dateTime: item.start.dateTime,
-                timeZone: item.start.timeZone,
-              }
-            : null,
-          end: item.end
-            ? {
-                date: item.end.date,
-                dateTime: item.end.dateTime,
-                timeZone: item.end.timeZone,
-              }
-            : null,
+      let response: Response;
+      try {
+        response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${tokenResult.token}` },
+          cache: 'no-store',
         });
+      } catch {
+        return { ok: false, code: 'network-error' };
       }
-      pageToken = response.data.nextPageToken ?? undefined;
+
+      let bodyText = '';
+      try {
+        bodyText = await response.text();
+      } catch {
+        return { ok: false, code: 'network-error' };
+      }
+
+      if (!response.ok) {
+        return { ok: false, code: mapCalendarHttpStatus(response.status, bodyText) };
+      }
+
+      let parsed: CalendarEventsListJson;
+      try {
+        parsed = JSON.parse(bodyText) as CalendarEventsListJson;
+      } catch {
+        return { ok: false, code: 'read-error' };
+      }
+
+      const items = Array.isArray(parsed.items) ? parsed.items : [];
+      for (const item of items) {
+        const plain = toPlainGoogleEvent(item);
+        if (plain) events.push(plain);
+      }
+
+      pageToken =
+        typeof parsed.nextPageToken === 'string' && parsed.nextPageToken.length > 0
+          ? parsed.nextPageToken
+          : undefined;
     } while (pageToken);
 
+    traceCalendarStage(5);
     return { ok: true, events };
-  } catch (error) {
-    return { ok: false, code: mapCalendarFailure(error) };
+  } catch {
+    return { ok: false, code: 'read-error' };
   }
 }

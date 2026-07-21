@@ -3,11 +3,16 @@
  */
 import 'server-only';
 
-import { adaptCalendarEvent, filterVisibleEvents } from '@/lib/calendar/adapters';
+import {
+  adaptCalendarEvent,
+  filterVisibleEvents,
+  toPlainCalendarEvent,
+} from '@/lib/calendar/adapters';
 import { listCalendarEvents } from '@/lib/calendar/client';
-import type { CalendarOAuthConfig } from '@/lib/calendar/config';
+import type { CalendarOAuthConfig } from '@/lib/calendar/config-resolve';
 import type { CalendarReadCode } from '@/lib/calendar/errors';
 import { rangeBoundsRfc3339 } from '@/lib/calendar/time';
+import { traceCalendarStage } from '@/lib/calendar/trace';
 import type { CalendarEvent } from '@/types/calendar';
 
 export type LoadCalendarEventsResult =
@@ -16,6 +21,7 @@ export type LoadCalendarEventsResult =
 /**
  * Carga eventos solo en el rango [startYmd, endYmd] inclusive.
  * Consulta exclusivamente los calendarIds del config (sin descubrimiento).
+ * Resultado: solo DTO planos (sin SDK).
  */
 export async function loadCalendarEventsInRange(
   config: CalendarOAuthConfig,
@@ -32,13 +38,15 @@ export async function loadCalendarEventsInRange(
       timeMax,
       timeZone: config.timezone,
     });
-    if (!result.ok) return result;
+    if (!result.ok) return { ok: false, code: result.code };
 
     for (const raw of result.events) {
       const adapted = adaptCalendarEvent(raw, calendarId, config.timezone);
-      if (adapted) collected.push(adapted);
+      if (adapted) collected.push(toPlainCalendarEvent(adapted));
     }
   }
 
-  return { ok: true, events: filterVisibleEvents(collected) };
+  traceCalendarStage(6);
+  const events = filterVisibleEvents(collected).map(toPlainCalendarEvent);
+  return { ok: true, events };
 }

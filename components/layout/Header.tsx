@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 import { Brand } from './Brand';
+import { SignOutButton } from './SignOutButton';
 import styles from './Header.module.scss';
 
 export function Header() {
@@ -32,6 +33,7 @@ export function Header() {
           />
         </span>
         <ThemeToggle />
+        <SignOutButton />
       </div>
     </header>
   );

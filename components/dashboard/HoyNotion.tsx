@@ -4,6 +4,8 @@ import { AlertTriangle, CheckSquare, FolderKanban, ListChecks, Sparkles } from '
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { formatDuration } from '@/lib/format';
+import type { CalendarTodayPreview } from '@/types/calendar';
 import type { HoyNotionView, HoyProjectView, HoyTaskView } from '@/types/notion';
 import type { TodaySourceStatus } from '@/types';
 
@@ -97,9 +99,11 @@ function SourcesStrip({ sources }: { sources: TodaySourceStatus[] }) {
 export function HoyNotionPanel({
   notion,
   sources,
+  calendar,
 }: {
   notion: HoyNotionView;
   sources: TodaySourceStatus[];
+  calendar: CalendarTodayPreview;
 }) {
   const s = notion.summary;
 
@@ -117,22 +121,34 @@ export function HoyNotionPanel({
         <SectionHeader
           id="hoy-ops-title"
           title="Resumen operativo"
-          description="Urgente de Notion · solo lectura."
+          description="Compromisos, tareas y alertas · solo lectura."
           icon={ListChecks}
           domain="tasks"
         />
         <ul className={styles.summary}>
           <li>
+            <strong className="tabular">{calendar.todayEvents.length}</strong>
+            <span>Eventos</span>
+          </li>
+          <li>
+            <strong className="tabular">{formatDuration(calendar.occupiedMinutes)}</strong>
+            <span>Ocupadas</span>
+          </li>
+          <li>
+            <strong className="tabular">{calendar.conflicts.length}</strong>
+            <span>Conflictos</span>
+          </li>
+          <li>
+            <strong>{calendar.nextEvent?.title ?? '—'}</strong>
+            <span>Próximo evento</span>
+          </li>
+          <li>
             <strong className="tabular">{s.dueToday}</strong>
-            <span>Hoy</span>
+            <span>Tareas hoy</span>
           </li>
           <li>
             <strong className="tabular">{s.overdue}</strong>
             <span>Vencidas</span>
-          </li>
-          <li>
-            <strong className="tabular">{s.inProgress}</strong>
-            <span>En progreso</span>
           </li>
           <li>
             <strong className="tabular">{s.blocked}</strong>
@@ -142,12 +158,9 @@ export function HoyNotionPanel({
             <strong className="tabular">{s.activeProjects}</strong>
             <span>Proyectos</span>
           </li>
-          <li>
-            <strong className="tabular">{s.withoutNextAction}</strong>
-            <span>Sin próxima</span>
-          </li>
         </ul>
         <div className={styles.links}>
+          <Link href="/agenda?view=today">Agenda</Link>
           <Link href="/tareas">Tareas</Link>
           <Link href="/proyectos">Proyectos</Link>
           <Link href="/habitos">Hábitos</Link>

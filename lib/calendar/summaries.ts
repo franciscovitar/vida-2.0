@@ -162,8 +162,32 @@ export function buildCalendarTodayPreview(input: {
     source: input.source,
     status: input.status,
     notice: input.notice,
+    timezone,
     focus,
   };
+}
+
+/**
+ * Preview vacío seguro para Hoy cuando Calendar falla o no está configurado.
+ * No inyecta eventos mock (evita presentar simulados como reales).
+ */
+export function emptyCalendarTodayPreview(input?: {
+  today?: string;
+  source?: CalendarDataSourceMode;
+  status?: CalendarIntegrationStatus;
+  notice?: string | null;
+  timezone?: string;
+  now?: Date;
+}): CalendarTodayPreview {
+  return buildCalendarTodayPreview({
+    events: [],
+    today: input?.today ?? todayInCalendarTz(),
+    source: input?.source ?? 'mock',
+    status: input?.status ?? 'mock',
+    notice: input?.notice ?? null,
+    timezone: input?.timezone,
+    now: input?.now,
+  });
 }
 
 export function emptyAgendaData(

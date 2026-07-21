@@ -132,13 +132,17 @@ export interface CalendarFocusBlock {
   currentEvent: CalendarEventBrief | null;
   nextEvent: CalendarEventBrief | null;
   minutesUntilNext: number | null;
+  /** Minutos restantes del evento en curso (null si no hay). */
+  minutesRemaining: number | null;
   nextFreeBlock: CalendarFreeBlock | null;
   freeBlockDurationMinutes: number | null;
+  /** Minutos libres restantes hoy dentro del horario operativo (después de ahora). */
+  remainingFreeMinutes: number | null;
   status: 'in-event' | 'between-events' | 'free' | 'empty-day';
 }
 
 /**
- * Preview para integrar después en Hoy (aún no cableado a getTodayData).
+ * Preview Calendar para la pantalla Hoy (DTO plano).
  */
 export interface CalendarTodayPreview {
   currentEvent: CalendarEventBrief | null;
@@ -150,5 +154,6 @@ export interface CalendarTodayPreview {
   source: CalendarDataSourceMode;
   status: CalendarIntegrationStatus;
   notice: string | null;
+  timezone: string;
   focus: CalendarFocusBlock;
 }

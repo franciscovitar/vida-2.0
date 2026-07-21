@@ -88,6 +88,7 @@ function composeFromRecords(
     weekly: todayWeekly,
     sources: mockBase.sources,
     notion: mockBase.notion,
+    calendar: mockBase.calendar,
   };
 
   const habits = buildHabitsPageData({
@@ -192,6 +193,9 @@ export function buildDomainPagesFromGoogleResults(
 }
 
 async function loadDomainPages(periodDays: PeriodDays): Promise<DomainPagesBundle> {
+  const { requireAuthorizedSession } = await import('@/lib/auth/dal');
+  await requireAuthorizedSession();
+
   const today = todayInBuenosAires();
 
   if (getDataSource() !== 'google') {

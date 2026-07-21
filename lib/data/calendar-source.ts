@@ -1,6 +1,10 @@
 /**
  * Fuente de datos Calendar para /agenda y contratos Hoy (mock | google + fallback).
- * Independiente de Google Sheets y Notion.
+ * Server-only: lee env, OAuth refresh y consulta events.list.
+ *
+ * Hoy usa `getCalendarTodayPreview`: en modo google, un fallo NO inyecta
+ * eventos mock (aviso localizado + agenda vacía).
+ * /agenda puede seguir usando fallback mock etiquetado.
  */
 import { cache } from 'react';
 import 'server-only';
@@ -11,11 +15,16 @@ import {
   getCalendarTimezone,
   getMockCalendarIds,
 } from '@/lib/calendar/config';
-import { calendarNoticeFor, type CalendarReadCode } from '@/lib/calendar/errors';
+import {
+  calendarHoyNoticeFor,
+  calendarNoticeFor,
+  type CalendarReadCode,
+} from '@/lib/calendar/errors';
 import { buildMockCalendarEvents } from '@/lib/mock-data/google-calendar';
 import {
   buildAgendaData,
   buildCalendarTodayPreview,
+  emptyCalendarTodayPreview,
   parseAgendaView,
   viewRange,
 } from '@/lib/calendar/summaries';
@@ -82,10 +91,14 @@ async function loadAgendaUncached(view: CalendarAgendaView): Promise<CalendarAge
       source: 'google',
       status: result.events.length === 0 ? 'empty' : 'ready',
       notice: result.events.length === 0 ? calendarNoticeFor('empty') : null,
-      calendarIds: configResult.config.calendarIds,
+      calendarIds: [...configResult.config.calendarIds],
       timezone: configResult.config.timezone,
     });
-    return toPlain(data);
+    const { traceCalendarStage } = await import('@/lib/calendar/trace');
+    traceCalendarStage(7);
+    const plain = toPlain(data);
+    traceCalendarStage(8);
+    return plain;
   } catch {
     return fallbackAgenda(view, 'read-error');
   }
@@ -93,28 +106,76 @@ async function loadAgendaUncached(view: CalendarAgendaView): Promise<CalendarAge
 
 /** Agenda por vista (cache por request + vista). */
 export const getCalendarAgenda = cache(async (viewParam?: string | null) => {
+  const { requireAuthorizedSession } = await import('@/lib/auth/dal');
+  await requireAuthorizedSession();
   const view = parseAgendaView(viewParam);
   return loadAgendaUncached(view);
 });
 
-async function loadTodayPreviewUncached(): Promise<CalendarTodayPreview> {
-  const agenda = await loadAgendaUncached('today');
+function hoyFallbackPreview(code: CalendarReadCode): CalendarTodayPreview {
   return toPlain(
-    buildCalendarTodayPreview({
-      events: agenda.timelineToday,
-      today: agenda.targetDate,
-      source: agenda.source,
-      status: agenda.status,
-      notice: agenda.notice,
-      timezone: agenda.timezone,
+    emptyCalendarTodayPreview({
+      today: todayInCalendarTz(),
+      source: 'google',
+      status: code,
+      notice: calendarHoyNoticeFor(code),
+      timezone: getCalendarTimezone(),
     }),
   );
 }
 
 /**
- * Contrato preparado para Hoy / FocusCard.
- * No se usa todavía en getTodayData ni en app/page.tsx.
+ * Preview Hoy: una sola lectura Calendar por request (React cache).
+ * Fallos en modo google → vacío + aviso (sin mocks silenciosos).
  */
-export const getCalendarTodayPreview = cache(loadTodayPreviewUncached);
+async function loadTodayPreviewUncached(): Promise<CalendarTodayPreview> {
+  const { requireAuthorizedSession } = await import('@/lib/auth/dal');
+  await requireAuthorizedSession();
 
-export { parseAgendaView };
+  const mode = getCalendarDataSource();
+  if (mode !== 'google') {
+    const today = todayInCalendarTz();
+    const timezone = getCalendarTimezone();
+    const calendarIds = getMockCalendarIds();
+    const events = buildMockCalendarEvents(today, calendarIds[0] ?? 'primary');
+    return toPlain(
+      buildCalendarTodayPreview({
+        events,
+        today,
+        source: 'mock',
+        status: 'mock',
+        notice: null,
+        timezone,
+      }),
+    );
+  }
+
+  const configResult = getCalendarConfig();
+  if (!configResult.ok) {
+    return hoyFallbackPreview(configResult.reason);
+  }
+
+  try {
+    const { loadCalendarEventsInRange } = await import('@/lib/calendar/queries');
+    const today = todayInCalendarTz();
+    const range = viewRange('today', today);
+    const result = await loadCalendarEventsInRange(configResult.config, range.start, range.end);
+    if (!result.ok) return hoyFallbackPreview(result.code);
+
+    return toPlain(
+      buildCalendarTodayPreview({
+        events: result.events,
+        today,
+        source: 'google',
+        status: result.events.length === 0 ? 'empty' : 'ready',
+        notice: result.events.length === 0 ? calendarNoticeFor('empty') : null,
+        timezone: configResult.config.timezone,
+      }),
+    );
+  } catch {
+    return hoyFallbackPreview('read-error');
+  }
+}
+
+/** Contrato Calendar para Hoy / FocusCard (cache por request). */
+export const getCalendarTodayPreview = cache(loadTodayPreviewUncached);

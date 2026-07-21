@@ -31,33 +31,86 @@ export function calendarNoticeFor(code: CalendarReadCode | 'empty'): string {
   return messages[code];
 }
 
-/** Mapea fallos de googleapis/gaxios a códigos planos (nunca expone el error crudo). */
-export function mapCalendarFailure(error: unknown): CalendarReadCode {
-  if (!error || typeof error !== 'object') return 'read-error';
-  const status =
-    'status' in error && typeof (error as { status: unknown }).status === 'number'
-      ? (error as { status: number }).status
-      : 'response' in error &&
-          typeof (error as { response?: { status?: unknown } }).response?.status === 'number'
-        ? ((error as { response: { status: number } }).response.status as number)
-        : null;
-  const code =
-    'code' in error && typeof (error as { code: unknown }).code === 'string'
-      ? (error as { code: string }).code
-      : '';
-  const message =
-    'message' in error && typeof (error as { message: unknown }).message === 'string'
-      ? (error as { message: string }).message.toLowerCase()
-      : '';
+/** Avisos para Hoy: sin inyectar mocks ni afirmar datos simulados. */
+export function calendarHoyNoticeFor(code: CalendarReadCode): string {
+  const messages: Record<CalendarReadCode, string> = {
+    'not-configured': 'Integración con Google Calendar no configurada.',
+    'auth-error': 'No se pudo autenticar con Google Calendar.',
+    'permission-error': 'Sin permiso de lectura en Google Calendar.',
+    'invalid-calendar-id': 'Hay un ID de calendario inválido en la configuración.',
+    'calendar-not-found': 'No se encontró un calendario autorizado.',
+    'rate-limited': 'Google Calendar limitó la lectura temporalmente.',
+    'network-error': 'No se pudo conectar con Google Calendar.',
+    'read-error': 'No se pudieron leer los eventos de Calendar.',
+  };
+  return messages[code];
+}
 
-  if (status === 401 || code === '401' || message.includes('invalid_grant')) return 'auth-error';
-  if (status === 403 || code === '403') return 'permission-error';
-  if (status === 404 || code === '404' || message.includes('notfound')) {
+/** true si Calendar no aporta datos utilizables en Hoy (fallback / error). */
+export function isCalendarHoyUnavailable(status: string): boolean {
+  return status !== 'ready' && status !== 'empty' && status !== 'mock';
+}
+
+/** Mapea status HTTP de Calendar REST a código plano. */
+export function mapCalendarHttpStatus(status: number, bodyText = ''): CalendarReadCode {
+  const lower = bodyText.toLowerCase();
+  if (status === 401) return 'auth-error';
+  if (status === 403) return 'permission-error';
+  if (status === 404 || lower.includes('notfound') || lower.includes('not found')) {
     return 'calendar-not-found';
   }
-  if (status === 429 || code === '429') return 'rate-limited';
-  if (code === 'ETIMEDOUT' || code === 'ECONNRESET' || code === 'ENOTFOUND') {
-    return 'network-error';
+  if (status === 429) return 'rate-limited';
+  return 'read-error';
+}
+
+/**
+ * Extrae un status numérico de un error desconocido sin clonar Buffer/ArrayBuffer.
+ * Nunca retiene cause, response ni el error original.
+ */
+export function extractCalendarErrorStatus(error: unknown): number | null {
+  if (!error || typeof error !== 'object') return null;
+  try {
+    if ('status' in error && typeof (error as { status: unknown }).status === 'number') {
+      return (error as { status: number }).status;
+    }
+    if (
+      'response' in error &&
+      (error as { response?: unknown }).response &&
+      typeof (error as { response: unknown }).response === 'object'
+    ) {
+      const response = (error as { response: { status?: unknown } }).response;
+      if (typeof response.status === 'number') return response.status;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+/**
+ * Mapea fallos a códigos planos.
+ * Nunca expone Error, GaxiosError, cause, Buffer ni ArrayBuffer.
+ */
+export function mapCalendarFailure(error: unknown): CalendarReadCode {
+  const status = extractCalendarErrorStatus(error);
+  if (status !== null) return mapCalendarHttpStatus(status);
+
+  if (error && typeof error === 'object') {
+    try {
+      const code =
+        'code' in error && typeof (error as { code: unknown }).code === 'string'
+          ? (error as { code: string }).code
+          : '';
+      if (code === '401' || code === 'invalid_grant') return 'auth-error';
+      if (code === '403') return 'permission-error';
+      if (code === '404') return 'calendar-not-found';
+      if (code === '429') return 'rate-limited';
+      if (code === 'ETIMEDOUT' || code === 'ECONNRESET' || code === 'ENOTFOUND') {
+        return 'network-error';
+      }
+    } catch {
+      return 'read-error';
+    }
   }
   return 'read-error';
 }

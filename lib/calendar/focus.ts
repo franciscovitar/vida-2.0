@@ -29,21 +29,40 @@ function toBrief(event: CalendarEvent): CalendarEventBrief {
   };
 }
 
+function remainingFreeMinutesFrom(
+  freeBlocks: readonly CalendarFreeBlock[],
+  nowMinutes: number,
+): number {
+  let total = 0;
+  for (const block of freeBlocks) {
+    const start = parseTimeToMinutes(block.startTime);
+    const end = parseTimeToMinutes(block.endTime);
+    if (end <= nowMinutes) continue;
+    const clippedStart = Math.max(start, nowMinutes);
+    if (end > clippedStart) total += end - clippedStart;
+  }
+  return total;
+}
+
 export function computeFocusBlock(
   events: readonly CalendarEvent[],
   date: string,
   nowMinutes: number,
 ): CalendarFocusBlock {
   const timed = blockingTimedOnDate(events, date);
+  const freeBlocks = freeBlocksForDate(events, date);
+  const remainingFreeMinutes = remainingFreeMinutesFrom(freeBlocks, nowMinutes);
+
   if (timed.length === 0) {
-    const free = freeBlocksForDate(events, date);
-    const nextFree = free[0] ?? null;
+    const nextFree = freeBlocks[0] ?? null;
     return {
       currentEvent: null,
       nextEvent: null,
       minutesUntilNext: null,
+      minutesRemaining: null,
       nextFreeBlock: nextFree,
       freeBlockDurationMinutes: nextFree?.durationMinutes ?? null,
+      remainingFreeMinutes,
       status: 'empty-day',
     };
   }
@@ -65,7 +84,6 @@ export function computeFocusBlock(
     }
   }
 
-  const freeBlocks = freeBlocksForDate(events, date);
   const nextFree =
     freeBlocks.find(
       (block) =>
@@ -97,14 +115,21 @@ export function computeFocusBlock(
   else if (next) status = 'between-events';
   else if (timed.length === 0) status = 'empty-day';
 
+  let minutesRemaining: number | null = null;
+  if (current?.endTime) {
+    minutesRemaining = Math.max(0, parseTimeToMinutes(current.endTime) - nowMinutes);
+  }
+
   return {
     currentEvent: current ? toBrief(current) : null,
     nextEvent: next ? toBrief(next) : null,
     minutesUntilNext: next?.startTime
       ? Math.max(0, parseTimeToMinutes(next.startTime) - nowMinutes)
       : null,
+    minutesRemaining,
     nextFreeBlock: resolvedFree,
     freeBlockDurationMinutes: resolvedFree?.durationMinutes ?? null,
+    remainingFreeMinutes,
     status,
   };
 }

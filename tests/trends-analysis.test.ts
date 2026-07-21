@@ -314,14 +314,20 @@ test('T18. mock funciona sin credenciales', () => {
 });
 
 test('T19. /tendencias sin overflow-x scroll de layout', () => {
-  const css = readFileSync(join(process.cwd(), 'app', 'tendencias', 'page.module.scss'), 'utf8');
+  const css = readFileSync(
+    join(process.cwd(), 'app', '(app)', 'tendencias', 'page.module.scss'),
+    'utf8',
+  );
   assert.match(css, /min-width:\s*0/);
   assert.match(css, /overflow-x:\s*auto/);
   assert.doesNotMatch(css, /overflow-x:\s*scroll/);
 });
 
 test('T20. /analisis-ia sin overflow-x scroll de layout', () => {
-  const css = readFileSync(join(process.cwd(), 'app', 'analisis-ia', 'page.module.scss'), 'utf8');
+  const css = readFileSync(
+    join(process.cwd(), 'app', '(app)', 'analisis-ia', 'page.module.scss'),
+    'utf8',
+  );
   assert.match(css, /min-width:\s*0/);
   assert.doesNotMatch(css, /overflow-x:\s*scroll/);
 });

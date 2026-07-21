@@ -9,8 +9,9 @@ import {
   hoyNotionUnavailable,
   mergeTodayWithNotion,
 } from '@/lib/data/combine-hoy';
+import { loadTodayDataWith, mockCalendarLoader } from '@/lib/data/compose-today';
 import { isJsonPlain, toPlainTodayData } from '@/lib/data/plain';
-import { getTodayData } from '@/lib/data/source';
+import { emptyCalendarTodayPreview } from '@/lib/calendar/summaries';
 import { buildMockNotionDashboard } from '@/lib/mock-data/notion';
 import { taskDateKind } from '@/lib/notion/classify';
 import {
@@ -240,7 +241,7 @@ test('H14. escritura de hábitos permanece limitada al Sheet DEV', () => {
   const toggle = readFileSync(join(process.cwd(), 'lib', 'habits', 'toggle.ts'), 'utf8');
   assert.match(toggle, /isAllowedSpreadsheetId/);
   assert.match(toggle, /isAuthorizedHabitName/);
-  const hoyPage = readFileSync(join(process.cwd(), 'app', 'page.tsx'), 'utf8');
+  const hoyPage = readFileSync(join(process.cwd(), 'app', '(app)', 'page.tsx'), 'utf8');
   assert.match(hoyPage, /HabitsToday/);
   assert.doesNotMatch(hoyPage, /notion.*write|updateTask/i);
 });
@@ -279,22 +280,25 @@ test('H17. pantalla Hoy funciona sin tareas para hoy', () => {
 });
 
 test('H18. pantalla Hoy funciona con datos mock', async () => {
-  const prev = process.env.DATA_SOURCE;
-  const prevNotion = process.env.NOTION_DATA_SOURCE;
-  try {
-    process.env.DATA_SOURCE = 'mock';
-    process.env.NOTION_DATA_SOURCE = 'mock';
-    const data = await getTodayData();
-    assert.equal(data.source, 'mock');
-    assert.ok(data.notion.dueToday.length >= 0);
-    assert.ok(data.sources.length >= 2);
-    assert.equal(isJsonPlain(data), true);
-  } finally {
-    if (prev === undefined) delete process.env.DATA_SOURCE;
-    else process.env.DATA_SOURCE = prev;
-    if (prevNotion === undefined) delete process.env.NOTION_DATA_SOURCE;
-    else process.env.NOTION_DATA_SOURCE = prevNotion;
-  }
+  const base = buildMockNotionDashboard(TODAY);
+  const data = await loadTodayDataWith({
+    loadSheet: async () => buildMockToday(),
+    loadNotionDashboard: async () => ({
+      ...base,
+      source: 'mock',
+      status: 'mock',
+      notice: null,
+      syncedAt: '2026-07-20T12:00:00.000Z',
+      taskSummary: summarizeTasks(base.tasks),
+      projectSummary: summarizeProjects(base.projects),
+    }),
+    loadCalendar: mockCalendarLoader(),
+  });
+  assert.equal(data.source, 'mock');
+  assert.ok(data.notion.dueToday.length >= 0);
+  assert.ok(data.sources.length >= 3);
+  assert.ok(data.calendar);
+  assert.equal(isJsonPlain(data), true);
 });
 
 test('H19. pantalla Hoy funciona con vista realista (ready Notion + sheet)', () => {
@@ -304,8 +308,13 @@ test('H19. pantalla Hoy funciona con vista realista (ready Notion + sheet)', () 
   const notion = buildHoyNotionView(
     fullDashboard({ source: 'notion', status: 'ready', notice: null }),
   );
-  const merged = mergeTodayWithNotion(sheet, notion);
-  assert.equal(merged.header.syncLabel, 'Sheet DEV + Notion');
+  const calendar = emptyCalendarTodayPreview({
+    source: 'google',
+    status: 'empty',
+    notice: null,
+  });
+  const merged = mergeTodayWithNotion(sheet, notion, calendar);
+  assert.equal(merged.header.syncLabel, 'Sheet DEV + Notion + Calendar');
   assert.equal(merged.header.syncOk, true);
   assert.ok(merged.notion.activeProjects.length >= 1);
 });
@@ -315,7 +324,7 @@ test('H20. móvil no tiene scroll horizontal en Hoy Notion', () => {
     join(process.cwd(), 'components', 'dashboard', 'HoyNotion.module.scss'),
     'utf8',
   );
-  const page = readFileSync(join(process.cwd(), 'app', 'page.module.scss'), 'utf8');
+  const page = readFileSync(join(process.cwd(), 'app', '(app)', 'page.module.scss'), 'utf8');
   assert.match(css, /min-width:\s*0/);
   assert.match(page, /min-width:\s*0/);
   assert.doesNotMatch(css + page, /overflow-x:\s*scroll/);

@@ -15,7 +15,7 @@ import styles from './page.module.scss';
 
 /** La vista Hoy se renderiza por request para leer datos frescos. */
 export const dynamic = 'force-dynamic';
-/** googleapis / Notion requieren APIs de Node.js; no ejecutar en Edge. */
+/** googleapis / Notion / Calendar requieren APIs de Node.js; no ejecutar en Edge. */
 export const runtime = 'nodejs';
 
 export default async function TodayPage() {
@@ -28,14 +28,14 @@ export default async function TodayPage() {
       {today.notice ? <IntegrationNotice status={today.status} message={today.notice} /> : null}
 
       <div className={styles.top}>
-        <FocusCard />
+        <FocusCard calendar={today.calendar} />
         <DailySummary summary={today.summary} />
       </div>
 
       <div className={styles.columns}>
         <div className={styles.main}>
-          <HoyNotionPanel notion={today.notion} sources={today.sources} />
-          <TodayAgenda />
+          <HoyNotionPanel notion={today.notion} sources={today.sources} calendar={today.calendar} />
+          <TodayAgenda calendar={today.calendar} />
           <HabitsToday
             habits={today.habits}
             weekly={today.weekly}

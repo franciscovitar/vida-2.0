@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { isJsonPlain, sanitizeCell, sanitizeSheetValues, toPlainTodayData } from '@/lib/data/plain';
-import {
-  absorbGoogleFetchFailure,
-  buildTodayFromGoogleResults,
-  getTodayData,
-} from '@/lib/data/source';
+import { absorbGoogleFetchFailure, buildTodayFromGoogleResults } from '@/lib/data/sheet-today';
+import { composeHoyData, loadTodayDataWith, mockCalendarLoader } from '@/lib/data/compose-today';
 import { buildMockToday } from '@/lib/adapters/mock';
+import { emptyCalendarTodayPreview } from '@/lib/calendar/summaries';
+import { buildMockNotionDashboard } from '@/lib/mock-data/notion';
 import { mapGoogleFailure } from '@/lib/google/sheets-read';
 import { REGISTRO_DIARIO_HEADERS, SALUD_HEADERS } from '@/lib/google/constants';
+import { summarizeProjects, summarizeTasks } from '@/lib/notion/summaries';
 
 test('sanitizeCell descarta Buffer y ArrayBuffer', () => {
   assert.equal(sanitizeCell(Buffer.from('hola')), 'hola');
@@ -79,40 +79,60 @@ test('absorbGoogleFetchFailure captura Error con ArrayBuffer en cause', () => {
 });
 
 test('DATA_SOURCE=mock devuelve datos planos serializables', async () => {
-  const original = process.env.DATA_SOURCE;
-  try {
-    process.env.DATA_SOURCE = 'mock';
-    const data = await getTodayData();
-    assert.equal(data.source, 'mock');
-    assert.equal(isJsonPlain(data), true);
-    assert.doesNotThrow(() => JSON.stringify(data));
-  } finally {
-    if (original === undefined) delete process.env.DATA_SOURCE;
-    else process.env.DATA_SOURCE = original;
-  }
+  const data = await loadTodayDataWith({
+    loadSheet: async () => buildMockToday(),
+    loadNotionDashboard: async () => {
+      const base = buildMockNotionDashboard('2026-07-20');
+      return {
+        ...base,
+        source: 'mock',
+        status: 'mock',
+        notice: null,
+        syncedAt: '2026-07-20T12:00:00.000Z',
+        taskSummary: summarizeTasks(base.tasks),
+        projectSummary: summarizeProjects(base.projects),
+      };
+    },
+    loadCalendar: mockCalendarLoader(),
+  });
+  assert.equal(data.source, 'mock');
+  assert.ok(data.calendar);
+  assert.equal(data.sources.length, 3);
+  assert.equal(isJsonPlain(data), true);
+  assert.doesNotThrow(() => JSON.stringify(data));
+  assert.doesNotThrow(() => structuredClone(data));
 });
 
-test('DATA_SOURCE=google sin credenciales devuelve fallback plano', async () => {
-  const keys = [
-    'DATA_SOURCE',
-    'GOOGLE_SERVICE_ACCOUNT_EMAIL',
-    'GOOGLE_PRIVATE_KEY',
-    'GOOGLE_SHEETS_DEV_ID',
-  ] as const;
-  const saved = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
-  try {
-    process.env.DATA_SOURCE = 'google';
-    for (const k of keys.slice(1)) delete process.env[k];
-    const data = await getTodayData();
-    assert.equal(data.status, 'not-configured');
-    assert.equal(isJsonPlain(data), true);
-    assert.doesNotThrow(() => JSON.stringify(data));
-  } finally {
-    for (const k of keys) {
-      if (saved[k] === undefined) delete process.env[k];
-      else process.env[k] = saved[k];
-    }
-  }
+test('DATA_SOURCE=google sin credenciales Sheet produce fallback plano', async () => {
+  const data = await loadTodayDataWith({
+    loadSheet: async () =>
+      buildTodayFromGoogleResults(
+        { ok: false, code: 'not-configured' },
+        { ok: true, values: [[...SALUD_HEADERS]] },
+      ),
+    loadNotionDashboard: async () => null,
+    loadCalendar: mockCalendarLoader(
+      emptyCalendarTodayPreview({
+        source: 'google',
+        status: 'not-configured',
+        notice: 'Integración con Google Calendar no configurada.',
+      }),
+    ),
+  });
+  assert.equal(data.status, 'not-configured');
+  assert.equal(isJsonPlain(data), true);
+  assert.doesNotThrow(() => JSON.stringify(data));
+  assert.equal(data.calendar.status, 'not-configured');
+});
+
+test('composeHoyData produce DTO plano con tres fuentes', () => {
+  const composed = composeHoyData(
+    buildMockToday(),
+    null,
+    emptyCalendarTodayPreview({ source: 'mock', status: 'mock' }),
+  );
+  assert.equal(isJsonPlain(composed), true);
+  assert.ok(composed.sources.some((s) => s.id === 'calendar'));
 });
 
 test('buildTodayFromGoogleResults con datos válidos devuelve objeto plano', () => {

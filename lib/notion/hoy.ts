@@ -1,8 +1,11 @@
 /**
  * Vistas Notion para la pantalla Hoy (determinísticas, sin IA).
+ * Calendar solo filtra incompatibles por tiempo libre; no convierte eventos en tareas.
  */
 import { addDaysYmd } from '@/lib/adapters/dates';
+import { isCalendarHoyUnavailable } from '@/lib/calendar/errors';
 import { isTaskOverdue } from '@/lib/notion/classify';
+import type { CalendarTodayPreview } from '@/types/calendar';
 import type {
   HoyNotionView,
   HoyProjectView,
@@ -11,6 +14,7 @@ import type {
   NotionDashboardData,
   NotionProject,
   NotionTask,
+  NotionTaskDuration,
   NotionTaskPriority,
 } from '@/types/notion';
 
@@ -26,6 +30,9 @@ const PRIORITY_RANK: Record<NotionTaskPriority, number> = {
   Media: 1,
   Baja: 2,
 };
+
+/** Umbral: compromiso cercano (minutos). */
+const NEARBY_COMMITMENT_MINUTES = 15;
 
 function priorityRank(priority: NotionTaskPriority | null): number {
   return priority ? PRIORITY_RANK[priority] : 9;
@@ -103,10 +110,63 @@ export function sortActiveProjects(
 }
 
 /**
- * Hasta tres próximas acciones por reglas fijas (sin IA).
- * Orden: hoy Alta → vencida Alta → En progreso → próxima acción de proyecto → pendiente Media.
+ * Duración máxima estimada de una etiqueta Notion (null = desconocida, no inventar).
  */
-export function suggestNextActions(data: NotionDashboardData, limit = 3): HoySuggestedAction[] {
+export function taskDurationMaxMinutes(duration: NotionTaskDuration | null): number | null {
+  if (duration === '5-15 min') return 15;
+  if (duration === '30 min') return 30;
+  if (duration === '1 h') return 60;
+  if (duration === '2 h+') return 120;
+  return null;
+}
+
+/**
+ * Minutos disponibles para sugerencias a partir del preview Calendar.
+ * null = sin filtro por tiempo (Calendar no disponible o sin dato usable).
+ */
+export function availableMinutesForSuggestions(
+  calendar: CalendarTodayPreview | null | undefined,
+): number | null {
+  if (!calendar || isCalendarHoyUnavailable(calendar.status)) return null;
+
+  const { focus } = calendar;
+  if (focus.status === 'in-event') {
+    return focus.freeBlockDurationMinutes;
+  }
+  if (focus.status === 'between-events') {
+    const until = focus.minutesUntilNext;
+    const free = focus.freeBlockDurationMinutes;
+    if (until === null && free === null) return null;
+    if (until === null) return free;
+    if (free === null) return until;
+    return Math.min(until, free);
+  }
+  if (focus.status === 'free' || focus.status === 'empty-day') {
+    return focus.remainingFreeMinutes ?? focus.freeBlockDurationMinutes;
+  }
+  return focus.freeBlockDurationMinutes;
+}
+
+function taskFitsAvailableBlock(task: NotionTask, availableMinutes: number | null): boolean {
+  if (availableMinutes === null) return true;
+  const max = taskDurationMaxMinutes(task.duration);
+  if (max === null) return true;
+  return max <= availableMinutes;
+}
+
+/**
+ * Hasta tres próximas acciones por reglas fijas (sin IA).
+ * Calendar solo evita sugerencias incompatibles con el bloque libre;
+ * no oculta tareas importantes solo por existir Calendar.
+ *
+ * Orden: compromiso cercano → hoy Alta compatible → vencida Alta compatible →
+ * En progreso → próxima acción de proyecto → pendiente Media compatible.
+ */
+export function suggestNextActions(
+  data: NotionDashboardData,
+  calendar?: CalendarTodayPreview | null,
+  limit = 3,
+): HoySuggestedAction[] {
   const completedProjectIds = new Set(
     data.projects
       .filter((p) => p.status === 'Completado' || p.status === 'Cancelado')
@@ -119,6 +179,7 @@ export function suggestNextActions(data: NotionDashboardData, limit = 3): HoySug
     return true;
   });
 
+  const availableMinutes = availableMinutesForSuggestions(calendar);
   const seen = new Set<string>();
   const out: HoySuggestedAction[] = [];
 
@@ -128,8 +189,35 @@ export function suggestNextActions(data: NotionDashboardData, limit = 3): HoySug
     out.push(action);
   };
 
+  if (calendar && !isCalendarHoyUnavailable(calendar.status)) {
+    const { focus } = calendar;
+    if (focus.currentEvent) {
+      push({
+        id: `event:${focus.currentEvent.id}`,
+        title: focus.currentEvent.title,
+        reason: 'Evento en curso',
+        href: '/agenda?view=today',
+      });
+    } else if (
+      focus.nextEvent &&
+      focus.minutesUntilNext !== null &&
+      focus.minutesUntilNext <= NEARBY_COMMITMENT_MINUTES
+    ) {
+      push({
+        id: `event:${focus.nextEvent.id}`,
+        title: focus.nextEvent.title,
+        reason: 'Próximo compromiso cercano',
+        href: '/agenda?view=today',
+      });
+    }
+  }
+
   for (const task of usable) {
-    if (task.dateKind === 'today' && task.priority === 'Alta') {
+    if (
+      task.dateKind === 'today' &&
+      task.priority === 'Alta' &&
+      taskFitsAvailableBlock(task, availableMinutes)
+    ) {
       push({
         id: `task:${task.id}`,
         title: task.title,
@@ -140,7 +228,7 @@ export function suggestNextActions(data: NotionDashboardData, limit = 3): HoySug
   }
 
   for (const task of sortOverdueTasks(usable.filter(isHoyOverdueTask))) {
-    if (task.priority === 'Alta') {
+    if (task.priority === 'Alta' && taskFitsAvailableBlock(task, availableMinutes)) {
       push({
         id: `task:${task.id}`,
         title: task.title,
@@ -173,7 +261,11 @@ export function suggestNextActions(data: NotionDashboardData, limit = 3): HoySug
   }
 
   for (const task of usable) {
-    if (task.status === 'Pendiente' && task.priority === 'Media') {
+    if (
+      task.status === 'Pendiente' &&
+      task.priority === 'Media' &&
+      taskFitsAvailableBlock(task, availableMinutes)
+    ) {
       push({
         id: `task:${task.id}`,
         title: task.title,
@@ -187,7 +279,10 @@ export function suggestNextActions(data: NotionDashboardData, limit = 3): HoySug
 }
 
 /** Construye la vista Hoy a partir del dashboard Notion (una sola carga). */
-export function buildHoyNotionView(data: NotionDashboardData): HoyNotionView {
+export function buildHoyNotionView(
+  data: NotionDashboardData,
+  calendar?: CalendarTodayPreview | null,
+): HoyNotionView {
   const today = data.targetDate;
   const dueTodayTasks = data.tasks.filter(
     (task) => task.dateKind === 'today' && task.status !== 'Hecha',
@@ -233,7 +328,7 @@ export function buildHoyNotionView(data: NotionDashboardData): HoyNotionView {
       activeProjects: activeProjects.length,
       withoutNextAction,
     },
-    suggestedActions: suggestNextActions(data),
+    suggestedActions: suggestNextActions(data, calendar),
   };
 }
 

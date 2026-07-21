@@ -12,11 +12,11 @@ import {
 } from '@/lib/calendar/adapters';
 import { freeBlocksForDate, markOverlaps, occupiedMinutesForDate } from '@/lib/calendar/classify';
 import {
-  getCalendarConfig,
-  getCalendarDataSource,
   isValidCalendarId,
   parseCalendarIds,
-} from '@/lib/calendar/config';
+  resolveCalendarConfig,
+  resolveCalendarDataSource,
+} from '@/lib/calendar/config-resolve';
 import { CALENDAR_READONLY_SCOPE } from '@/lib/calendar/constants';
 import { computeFocusBlock } from '@/lib/calendar/focus';
 import {
@@ -57,9 +57,11 @@ function timedRaw(
 test('C1. modo mock funciona sin credenciales', () => {
   const prev = process.env.GOOGLE_CALENDAR_DATA_SOURCE;
   const prevId = process.env.GOOGLE_CALENDAR_CLIENT_ID;
+  assert.equal(resolveCalendarDataSource('mock'), 'mock');
+  assert.equal(resolveCalendarDataSource(undefined), 'mock');
   process.env.GOOGLE_CALENDAR_DATA_SOURCE = 'mock';
   delete process.env.GOOGLE_CALENDAR_CLIENT_ID;
-  assert.equal(getCalendarDataSource(), 'mock');
+  assert.equal(resolveCalendarDataSource(process.env.GOOGLE_CALENDAR_DATA_SOURCE), 'mock');
   const events = buildMockCalendarEvents(TODAY);
   assert.ok(events.length > 0);
   const agenda = buildAgendaData({
@@ -88,8 +90,8 @@ test('C2. modo google sin credenciales usa fallback sin 500', () => {
   try {
     process.env.GOOGLE_CALENDAR_DATA_SOURCE = 'google';
     for (const k of keys.slice(1)) delete process.env[k];
-    assert.equal(getCalendarDataSource(), 'google');
-    const config = getCalendarConfig();
+    assert.equal(resolveCalendarDataSource(process.env.GOOGLE_CALENDAR_DATA_SOURCE), 'google');
+    const config = resolveCalendarConfig(process.env);
     assert.equal(config.ok, false);
     if (!config.ok) assert.equal(config.reason, 'not-configured');
     const events = buildMockCalendarEvents(TODAY);
@@ -326,7 +328,10 @@ test('C19. Sheet DEV y Notion continúan funcionando', () => {
 });
 
 test('C20. /agenda sin overflow-x scroll de layout', () => {
-  const page = readFileSync(join(process.cwd(), 'app', 'agenda', 'page.module.scss'), 'utf8');
+  const page = readFileSync(
+    join(process.cwd(), 'app', '(app)', 'agenda', 'page.module.scss'),
+    'utf8',
+  );
   const board = readFileSync(
     join(process.cwd(), 'components', 'calendar', 'AgendaBoard.module.scss'),
     'utf8',

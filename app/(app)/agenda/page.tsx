@@ -6,7 +6,8 @@ import { AgendaViewSwitcher } from '@/components/calendar/AgendaViewSwitcher';
 import { CalendarIntegrationNotice } from '@/components/calendar/CalendarIntegrationNotice';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { formatArgentineFullDate } from '@/lib/adapters/dates';
-import { getCalendarAgenda, parseAgendaView } from '@/lib/data/calendar-source';
+import { getCalendarAgenda } from '@/lib/data/calendar-source';
+import { parseAgendaView } from '@/lib/calendar/summaries';
 
 import pageStyles from '../page.module.scss';
 import local from './page.module.scss';

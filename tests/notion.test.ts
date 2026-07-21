@@ -277,7 +277,10 @@ test('N18. escritura de hábitos sigue limitada a Sheet DEV', () => {
 });
 
 test('N19. /tareas sin overflow-x scroll de layout', () => {
-  const css = readFileSync(join(process.cwd(), 'app', 'tareas', 'page.module.scss'), 'utf8');
+  const css = readFileSync(
+    join(process.cwd(), 'app', '(app)', 'tareas', 'page.module.scss'),
+    'utf8',
+  );
   const board = readFileSync(
     join(process.cwd(), 'components', 'notion', 'NotionBoards.module.scss'),
     'utf8',
@@ -287,7 +290,10 @@ test('N19. /tareas sin overflow-x scroll de layout', () => {
 });
 
 test('N20. /proyectos sin overflow-x scroll de layout', () => {
-  const css = readFileSync(join(process.cwd(), 'app', 'proyectos', 'page.module.scss'), 'utf8');
+  const css = readFileSync(
+    join(process.cwd(), 'app', '(app)', 'proyectos', 'page.module.scss'),
+    'utf8',
+  );
   assert.match(css, /min-width:\s*0/);
   assert.doesNotMatch(css, /overflow-x:\s*scroll/);
 });

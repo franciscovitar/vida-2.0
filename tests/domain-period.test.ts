@@ -287,7 +287,7 @@ test('15. páginas de dominio no fuerzan scroll horizontal de layout', () => {
   const files = [
     'components/domain/DomainPage.module.scss',
     'components/domain/HabitMatrix.module.scss',
-    'app/page.module.scss',
+    'app/(app)/page.module.scss',
   ].map((rel) => readFileSync(join(process.cwd(), rel), 'utf8'));
   assert.ok(files.some((css) => css.includes('overflow-x: auto')));
   assert.ok(files.every((css) => !css.includes('overflow-x: scroll')));

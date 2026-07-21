@@ -1,8 +1,11 @@
 /**
- * Combina Sheet DEV + Notion en TodayData sin acoplar fallos entre fuentes.
+ * Combina Sheet DEV + Notion + Calendar en TodayData sin acoplar fallos.
  */
+import { emptyCalendarTodayPreview } from '@/lib/calendar/summaries';
+import { isCalendarHoyUnavailable } from '@/lib/calendar/errors';
 import { emptyHoyNotionView, buildHoyNotionView } from '@/lib/notion/hoy';
 import type { TodayData, TodaySourceStatus, TodayStatus } from '@/types';
+import type { CalendarTodayPreview } from '@/types/calendar';
 import type { HoyNotionView, NotionDashboardData, NotionIntegrationStatus } from '@/types/notion';
 
 function sheetSourceFromToday(today: TodayData): TodaySourceStatus {
@@ -92,18 +95,67 @@ function notionSourceFromView(notion: HoyNotionView): TodaySourceStatus {
   };
 }
 
+function calendarSourceFromPreview(calendar: CalendarTodayPreview): TodaySourceStatus {
+  const label = 'Calendar';
+  if (calendar.status === 'mock' || calendar.source === 'mock') {
+    return {
+      id: 'calendar',
+      label,
+      ready: false,
+      mode: 'mock',
+      detail: calendar.notice ?? 'Datos simulados',
+    };
+  }
+  if (calendar.status === 'ready') {
+    return {
+      id: 'calendar',
+      label,
+      ready: true,
+      mode: 'live',
+      detail: null,
+    };
+  }
+  if (calendar.status === 'empty') {
+    return {
+      id: 'calendar',
+      label,
+      ready: true,
+      mode: 'live',
+      detail: calendar.notice,
+    };
+  }
+  if (calendar.status === 'not-configured') {
+    return {
+      id: 'calendar',
+      label,
+      ready: false,
+      mode: 'error',
+      detail: calendar.notice,
+    };
+  }
+  return {
+    id: 'calendar',
+    label,
+    ready: false,
+    mode: isCalendarHoyUnavailable(calendar.status) ? 'fallback' : 'fallback',
+    detail: calendar.notice,
+  };
+}
+
 function combinedHeader(
   sheet: TodayData,
   sheetSrc: TodaySourceStatus,
   notionSrc: TodaySourceStatus,
+  calendarSrc: TodaySourceStatus,
 ): TodayData['header'] {
-  const liveCount = [sheetSrc, notionSrc].filter((s) => s.ready && s.mode === 'live').length;
-  const anyFallback = [sheetSrc, notionSrc].some(
+  const sources = [sheetSrc, notionSrc, calendarSrc];
+  const live = sources.filter((s) => s.ready && s.mode === 'live');
+  const anyFallback = sources.some(
     (s) => s.mode === 'fallback' || s.mode === 'error' || s.mode === 'partial',
   );
-  const bothMock = sheetSrc.mode === 'mock' && notionSrc.mode === 'mock';
+  const allMock = sources.every((s) => s.mode === 'mock');
 
-  if (bothMock) {
+  if (allMock) {
     return {
       ...sheet.header,
       syncOk: sheet.header.syncOk,
@@ -111,20 +163,27 @@ function combinedHeader(
     };
   }
 
-  if (liveCount === 2) {
+  if (live.length === 3) {
     return {
       ...sheet.header,
       syncOk: true,
-      syncLabel: 'Sheet DEV + Notion',
+      syncLabel: 'Sheet DEV + Notion + Calendar',
     };
   }
 
-  if (liveCount === 1) {
-    const which = sheetSrc.ready && sheetSrc.mode === 'live' ? 'Sheet DEV' : 'Notion';
+  if (live.length === 2) {
     return {
       ...sheet.header,
       syncOk: false,
-      syncLabel: `${which} · integración parcial`,
+      syncLabel: `${live.map((s) => s.label).join(' + ')} · parcial`,
+    };
+  }
+
+  if (live.length === 1) {
+    return {
+      ...sheet.header,
+      syncOk: false,
+      syncLabel: `${live[0].label} · integración parcial`,
     };
   }
 
@@ -139,20 +198,32 @@ function combinedHeader(
   return sheet.header;
 }
 
-/** Adjunta Notion a un TodayData de Sheet/mock y recalcula fuentes + sync. */
-export function mergeTodayWithNotion(sheetToday: TodayData, notion: HoyNotionView): TodayData {
+/**
+ * Adjunta Notion + Calendar a un TodayData de Sheet/mock y recalcula fuentes + sync.
+ * No afirma “todo conectado” si alguna fuente está en fallback o error.
+ */
+export function mergeTodayWithNotion(
+  sheetToday: TodayData,
+  notion: HoyNotionView,
+  calendar: CalendarTodayPreview = emptyCalendarTodayPreview(),
+): TodayData {
   const sheetSrc = sheetSourceFromToday(sheetToday);
   const notionSrc = notionSourceFromView(notion);
+  const calendarSrc = calendarSourceFromPreview(calendar);
   return {
     ...sheetToday,
     notion,
-    sources: [sheetSrc, notionSrc],
-    header: combinedHeader(sheetToday, sheetSrc, notionSrc),
+    calendar,
+    sources: [sheetSrc, notionSrc, calendarSrc],
+    header: combinedHeader(sheetToday, sheetSrc, notionSrc, calendarSrc),
   };
 }
 
-export function hoyNotionFromDashboard(data: NotionDashboardData): HoyNotionView {
-  return buildHoyNotionView(data);
+export function hoyNotionFromDashboard(
+  data: NotionDashboardData,
+  calendar?: CalendarTodayPreview | null,
+): HoyNotionView {
+  return buildHoyNotionView(data, calendar);
 }
 
 /** Vista Notion vacía segura cuando la carga falla de forma inesperada. */
@@ -166,10 +237,12 @@ export function hoyNotionUnavailable(notice: string): HoyNotionView {
 }
 
 /** Placeholders para constructores de Sheet/mock antes del merge. */
-export function todayNotionPlaceholders(): Pick<TodayData, 'sources' | 'notion'> {
+export function todayNotionPlaceholders(): Pick<TodayData, 'sources' | 'notion' | 'calendar'> {
   const notion = emptyHoyNotionView();
+  const calendar = emptyCalendarTodayPreview();
   return {
     notion,
+    calendar,
     sources: [
       {
         id: 'sheet',
@@ -181,6 +254,13 @@ export function todayNotionPlaceholders(): Pick<TodayData, 'sources' | 'notion'>
       {
         id: 'notion',
         label: 'Notion',
+        ready: false,
+        mode: 'mock',
+        detail: null,
+      },
+      {
+        id: 'calendar',
+        label: 'Calendar',
         ready: false,
         mode: 'mock',
         detail: null,

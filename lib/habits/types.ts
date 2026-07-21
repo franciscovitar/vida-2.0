@@ -4,6 +4,7 @@
  */
 
 export type HabitWriteErrorCode =
+  | 'unauthorized-session'
   | 'unauthorized-spreadsheet'
   | 'unauthorized-column'
   | 'invalid-value'
@@ -44,6 +45,7 @@ export interface ToggleHabitFailure {
 export type ToggleHabitResult = ToggleHabitSuccess | ToggleHabitFailure;
 
 export const HABIT_WRITE_MESSAGES: Record<HabitWriteErrorCode, string> = {
+  'unauthorized-session': 'Tenés que iniciar sesión para modificar hábitos.',
   'unauthorized-spreadsheet': 'El spreadsheet no está autorizado.',
   'unauthorized-column': 'Esa columna de hábito no está autorizada.',
   'invalid-value': 'El valor del hábito no es válido.',
