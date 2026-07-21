@@ -41,6 +41,12 @@ ruta protegida `/p/[slug]`. Con la flag apagada la ruta responde como no encontr
 contenido. Journaling y demás recursos privados/ocultos/legacy/excluidos no se leen. No hay
 escritura hacia Notion ni entradas nuevas en la navegación.
 
+El mapper del Registro Web reconoce el esquema técnico real de Notion (`Name`, `stableKey`,
+`sourceRef` URL, `aliases` rich_text, etc.) y mantiene compatibilidad temporal con los nombres
+editoriales anteriores. `sourceRef` se valida solo en servidor (URL Notion o relation); no hay
+fallback a la fila del catálogo. Los aliases usan el formato **un alias por línea**. Ni la URL ni
+el id interno se envían al cliente.
+
 Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`.
 
 Pendiente para 8C: activación controlada, publicación editorial, renderers especiales, navegación

@@ -1,8 +1,31 @@
 /**
- * Nombres editoriales de propiedades del Registro Web (no IDs).
- * Deben coincidir con la base Notion; no se hardcodean data source IDs.
+ * Nombres de propiedades del Registro Web (no IDs de data source).
+ * El nombre técnico es el principal; el editorial se mantiene por compatibilidad temporal.
  */
 
+export const WEB_CATALOG_PROP_NAMES = {
+  editorialName: ['Name', 'Nombre editorial'],
+  stableKey: ['stableKey', 'Clave estable'],
+  sourceRef: ['sourceRef', 'Página origen'],
+  status: ['status', 'Estado'],
+  canonical: ['canonical', 'Canónico'],
+  replacesResourceKey: ['replacesResourceKey', 'Reemplaza'],
+  section: ['section', 'Sección'],
+  slug: ['slug', 'Slug'],
+  aliases: ['aliases', 'Alias'],
+  navigationPlacement: ['navigationPlacement', 'Navegación'],
+  navigationOrder: ['navigationOrder', 'Orden'],
+  renderMode: ['renderMode', 'Renderer'],
+  privacy: ['privacy', 'Privacidad'],
+  visibleWeb: ['visibleWeb', 'Visible web'],
+  searchable: ['searchable', 'Buscable'],
+  generalAI: ['generalAI', 'IA general'],
+  reviewAI: ['reviewAI', 'IA revisión'],
+  writeMode: ['writeMode', 'Escritura'],
+  confirmation: ['confirmation', 'Confirmación'],
+} as const;
+
+/** @deprecated Preferir WEB_CATALOG_PROP_NAMES; se conserva para lecturas editoriales. */
 export const WEB_CATALOG_PROPS = {
   editorialName: 'Nombre editorial',
   stableKey: 'Clave estable',
@@ -25,9 +48,15 @@ export const WEB_CATALOG_PROPS = {
   confirmation: 'Confirmación',
 } as const;
 
+/** Hosts permitidos para sourceRef URL (solo servidor). */
+export const NOTION_SOURCE_REF_HOSTS = new Set(['www.notion.so', 'notion.so']);
+
 /** Límites seguros del lector recursivo. */
 export const WEB_CATALOG_READ_LIMITS = {
   maxDepth: 6,
   maxBlocks: 400,
   revalidateSeconds: 60,
 } as const;
+
+/** Formato de slug/alias compartido con el validador. */
+export const WEB_CATALOG_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

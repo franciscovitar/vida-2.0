@@ -7,11 +7,17 @@ import { test } from 'node:test';
 
 import { loadValidatedWebCatalogWithPort } from '@/lib/web-catalog/catalog-load';
 import {
+  extractNotionPageIdFromUrl,
   mapCatalogRawPage,
+  mapCatalogRawPageResult,
   mapCatalogRawPages,
+  parseCatalogAliases,
   parseNotionSourceRef,
+  resolveCatalogProp,
+  resolveSourcePageId,
   type CatalogRawPage,
 } from '@/lib/web-catalog/catalog-mapper';
+import { WEB_CATALOG_PROP_NAMES } from '@/lib/web-catalog/constants';
 import {
   getWebCatalogNotionConfig,
   isAllowedWebCatalogDataSourceId,
@@ -55,6 +61,63 @@ function number(value: number) {
 }
 function relation(ids: string[]) {
   return { type: 'relation', relation: ids.map((id) => ({ id })) };
+}
+function url(value: string | null) {
+  return { type: 'url', url: value };
+}
+
+const FIXTURE_PAGE_ID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+const FIXTURE_PAGE_ID_HEX = 'aaaaaaaabbbbccccddddeeeeeeeeeeee';
+const FIXTURE_NOTION_URL = `https://www.notion.so/Fixture-Page-${FIXTURE_PAGE_ID_HEX}`;
+
+function technicalProps(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    Name: titleProp('Guía'),
+    stableKey: rich('fixture.guide'),
+    sourceRef: url(FIXTURE_NOTION_URL),
+    status: select('published'),
+    canonical: checkbox(true),
+    replacesResourceKey: rich(''),
+    section: select('reference'),
+    slug: rich('guia'),
+    aliases: rich('guia-vieja'),
+    navigationPlacement: select('primary'),
+    navigationOrder: number(2),
+    renderMode: select('document'),
+    privacy: select('general'),
+    visibleWeb: checkbox(true),
+    searchable: checkbox(true),
+    generalAI: select('allowed'),
+    reviewAI: select('allowed'),
+    writeMode: select('none'),
+    confirmation: select('none'),
+    ...overrides,
+  };
+}
+
+function editorialProps(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    'Nombre editorial': titleProp('Guía'),
+    'Clave estable': rich('fixture.guide'),
+    'Página origen': relation([FIXTURE_PAGE_ID]),
+    Estado: select('published'),
+    Canónico: checkbox(true),
+    Reemplaza: rich(''),
+    Sección: select('reference'),
+    Slug: rich('guia'),
+    Alias: multi(['guia-vieja']),
+    Navegación: select('primary'),
+    Orden: number(2),
+    Renderer: select('document'),
+    Privacidad: select('general'),
+    'Visible web': checkbox(true),
+    Buscable: checkbox(true),
+    'IA general': select('allowed'),
+    'IA revisión': select('allowed'),
+    Escritura: select('none'),
+    Confirmación: select('none'),
+    ...overrides,
+  };
 }
 
 function rawPage(id: string, properties: Record<string, unknown>): CatalogRawPage {
@@ -148,74 +211,53 @@ function createFakePort(options: {
   };
 }
 
-test('8B-R1. mapeo válido desde respuestas simuladas', () => {
-  const page = rawPage('page-1', {
-    'Nombre editorial': titleProp('Guía'),
-    'Clave estable': rich('fixture.guide'),
-    'Página origen': relation(['aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee']),
-    Estado: select('published'),
-    Canónico: checkbox(true),
-    Reemplaza: rich(''),
-    Sección: select('reference'),
-    Slug: rich('guia'),
-    Alias: multi(['guia-vieja']),
-    Navegación: select('primary'),
-    Orden: number(2),
-    Renderer: select('document'),
-    Privacidad: select('general'),
-    'Visible web': checkbox(true),
-    Buscable: checkbox(true),
-    'IA general': select('allowed'),
-    'IA revisión': select('allowed'),
-    Escritura: select('none'),
-    Confirmación: select('none'),
-  });
+test('8B-R1. mapeo válido desde respuestas simuladas (nombres técnicos)', () => {
+  const page = rawPage('page-1', technicalProps());
   const entry = mapCatalogRawPage(page);
   assert.ok(entry);
   assert.equal(entry?.stableKey, 'fixture.guide');
   assert.equal(entry?.slug, 'guia');
-  assert.equal(entry?.sourceRef, 'notion:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+  assert.equal(entry?.sourceRef, `notion:${FIXTURE_PAGE_ID}`);
   assert.deepEqual(entry?.aliases, ['guia-vieja']);
+  assert.equal(entry?.editorialName, 'Guía');
 });
 
 test('8B-R2. paginación del catálogo acumula páginas del puerto', async () => {
   const pages = [
-    rawPage('1', {
-      'Nombre editorial': titleProp('Uno'),
-      'Clave estable': rich('k1'),
-      Estado: select('hidden'),
-      Canónico: checkbox(false),
-      Sección: select('reference'),
-      Slug: rich('uno'),
-      Alias: multi([]),
-      Navegación: select('none'),
-      Renderer: select('document'),
-      Privacidad: select('general'),
-      'Visible web': checkbox(false),
-      Buscable: checkbox(false),
-      'IA general': select('denied'),
-      'IA revisión': select('denied'),
-      Escritura: select('none'),
-      Confirmación: select('none'),
-    }),
-    rawPage('2', {
-      'Nombre editorial': titleProp('Dos'),
-      'Clave estable': rich('k2'),
-      Estado: select('hidden'),
-      Canónico: checkbox(false),
-      Sección: select('reference'),
-      Slug: rich('dos'),
-      Alias: multi([]),
-      Navegación: select('none'),
-      Renderer: select('document'),
-      Privacidad: select('general'),
-      'Visible web': checkbox(false),
-      Buscable: checkbox(false),
-      'IA general': select('denied'),
-      'IA revisión': select('denied'),
-      Escritura: select('none'),
-      Confirmación: select('none'),
-    }),
+    rawPage(
+      '1',
+      technicalProps({
+        Name: titleProp('Uno'),
+        stableKey: rich('k1'),
+        slug: rich('uno'),
+        status: select('hidden'),
+        canonical: checkbox(false),
+        aliases: rich(''),
+        navigationPlacement: select('none'),
+        visibleWeb: checkbox(false),
+        searchable: checkbox(false),
+        generalAI: select('denied'),
+        reviewAI: select('denied'),
+        sourceRef: url(`https://www.notion.so/Uno-${'11111111222233334444555555555555'}`),
+      }),
+    ),
+    rawPage(
+      '2',
+      technicalProps({
+        Name: titleProp('Dos'),
+        stableKey: rich('k2'),
+        slug: rich('dos'),
+        status: select('hidden'),
+        canonical: checkbox(false),
+        aliases: rich(''),
+        navigationPlacement: select('none'),
+        visibleWeb: checkbox(false),
+        searchable: checkbox(false),
+        generalAI: select('denied'),
+        reviewAI: select('denied'),
+        sourceRef: url(`https://www.notion.so/Dos-${'22222222333344445555666666666666'}`),
+      }),
+    ),
   ];
   const mapped = mapCatalogRawPages(pages);
   assert.equal(mapped.length, 2);
@@ -483,27 +525,25 @@ test('8B-R22. allowlist del data source solo por entorno', () => {
 });
 
 test('8B-R23. loadValidatedWebCatalogWithPort con puerto falso válido', async () => {
-  const page = rawPage('1', {
-    'Nombre editorial': titleProp('Guía'),
-    'Clave estable': rich('fixture.guide'),
-    Estado: select('hidden'),
-    Canónico: checkbox(false),
-    Sección: select('reference'),
-    Slug: rich('guia'),
-    Alias: multi([]),
-    Navegación: select('none'),
-    Renderer: select('document'),
-    Privacidad: select('general'),
-    'Visible web': checkbox(false),
-    Buscable: checkbox(false),
-    'IA general': select('denied'),
-    'IA revisión': select('denied'),
-    Escritura: select('none'),
-    Confirmación: select('none'),
-  });
+  const page = rawPage(
+    '1',
+    technicalProps({
+      status: select('hidden'),
+      canonical: checkbox(false),
+      aliases: rich(''),
+      navigationPlacement: select('none'),
+      visibleWeb: checkbox(false),
+      searchable: checkbox(false),
+      generalAI: select('denied'),
+      reviewAI: select('denied'),
+    }),
+  );
   const port = createFakePort({ pages: [page] });
   const result = await loadValidatedWebCatalogWithPort(port, 'ds-test');
   assert.equal(result.ok, true);
+  if (!result.ok) return;
+  assert.equal(result.entries.length, 1);
+  assert.equal(result.entries[0]?.sourceRef, `notion:${FIXTURE_PAGE_ID}`);
 });
 
 test('8B-R24. URLs inseguras se descartan', () => {
@@ -512,6 +552,188 @@ test('8B-R24. URLs inseguras se descartan', () => {
 });
 
 test('8B-R25. parseNotionSourceRef', () => {
-  assert.equal(parseNotionSourceRef('notion:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee')?.length, 36);
+  assert.equal(parseNotionSourceRef(`notion:${FIXTURE_PAGE_ID}`)?.length, 36);
   assert.equal(parseNotionSourceRef('https://evil'), null);
+});
+
+test('8B-R26. compatibilidad con nombres editoriales anteriores', () => {
+  const entry = mapCatalogRawPage(rawPage('ed-1', editorialProps()));
+  assert.ok(entry);
+  assert.equal(entry?.stableKey, 'fixture.guide');
+  assert.equal(entry?.sourceRef, `notion:${FIXTURE_PAGE_ID}`);
+  assert.deepEqual(entry?.aliases, ['guia-vieja']);
+});
+
+test('8B-R27. prioridad del nombre técnico cuando existen ambos', () => {
+  const page = rawPage('both-1', {
+    ...editorialProps({
+      'Clave estable': rich('editorial.key'),
+      Slug: rich('slug-editorial'),
+      'Nombre editorial': titleProp('Editorial'),
+    }),
+    ...technicalProps({
+      stableKey: rich('technical.key'),
+      slug: rich('slug-tecnico'),
+      Name: titleProp('Técnico'),
+    }),
+  });
+  assert.equal(
+    resolveCatalogProp(page, WEB_CATALOG_PROP_NAMES.stableKey),
+    page.properties.stableKey,
+  );
+  const entry = mapCatalogRawPage(page);
+  assert.equal(entry?.stableKey, 'technical.key');
+  assert.equal(entry?.slug, 'slug-tecnico');
+  assert.equal(entry?.editorialName, 'Técnico');
+});
+
+test('8B-R28. sourceRef válido como URL de Notion', () => {
+  const resolved = resolveSourcePageId(url(FIXTURE_NOTION_URL));
+  assert.deepEqual(resolved, { ok: true, pageId: FIXTURE_PAGE_ID });
+  assert.equal(extractNotionPageIdFromUrl(FIXTURE_NOTION_URL), FIXTURE_PAGE_ID);
+});
+
+test('8B-R29. sourceRef válido como relation', () => {
+  assert.deepEqual(resolveSourcePageId(relation([FIXTURE_PAGE_ID])), {
+    ok: true,
+    pageId: FIXTURE_PAGE_ID,
+  });
+});
+
+test('8B-R30. URL de host no permitido', () => {
+  assert.equal(extractNotionPageIdFromUrl(`https://evil.example/${FIXTURE_PAGE_ID_HEX}`), null);
+  assert.deepEqual(resolveSourcePageId(url(`https://evil.example/${FIXTURE_PAGE_ID_HEX}`)), {
+    ok: false,
+    code: 'invalid-source-ref',
+  });
+});
+
+test('8B-R31. URL de Notion malformada', () => {
+  assert.equal(extractNotionPageIdFromUrl('https://www.notion.so/solo-titulo'), null);
+  assert.deepEqual(
+    mapCatalogRawPageResult(
+      rawPage('bad-url', technicalProps({ sourceRef: url('https://www.notion.so/solo-titulo') })),
+    ),
+    {
+      ok: false,
+      code: 'invalid-source-ref',
+    },
+  );
+});
+
+test('8B-R32. sourceRef ausente', () => {
+  const props = technicalProps();
+  delete props.sourceRef;
+  assert.deepEqual(mapCatalogRawPageResult(rawPage('no-src', props)), {
+    ok: false,
+    code: 'missing-source-ref',
+  });
+});
+
+test('8B-R33. no se usa el ID de la propia fila del catálogo', () => {
+  const catalogRowId = 'catalog-row-should-never-be-content';
+  const props = technicalProps();
+  delete props.sourceRef;
+  const result = mapCatalogRawPageResult(rawPage(catalogRowId, props));
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.code, 'missing-source-ref');
+  assert.equal(mapCatalogRawPage(rawPage(catalogRowId, props)), null);
+});
+
+test('8B-R34. aliases rich_text con un alias', () => {
+  assert.deepEqual(parseCatalogAliases(rich('unico-alias')), {
+    ok: true,
+    aliases: ['unico-alias'],
+  });
+});
+
+test('8B-R35. aliases rich_text con varios alias, uno por línea', () => {
+  assert.deepEqual(parseCatalogAliases(rich('alias-uno\nalias-dos\nalias-tres')), {
+    ok: true,
+    aliases: ['alias-uno', 'alias-dos', 'alias-tres'],
+  });
+});
+
+test('8B-R36. aliases rich_text omite líneas vacías', () => {
+  assert.deepEqual(parseCatalogAliases(rich('alias-a\n\n  \nalias-b\n')), {
+    ok: true,
+    aliases: ['alias-a', 'alias-b'],
+  });
+});
+
+test('8B-R37. alias inválido no se acepta', () => {
+  assert.deepEqual(parseCatalogAliases(rich('valido\n/invalido')), {
+    ok: false,
+    code: 'invalid-alias',
+  });
+  assert.deepEqual(
+    mapCatalogRawPageResult(rawPage('bad-alias', technicalProps({ aliases: rich('/malo') }))),
+    { ok: false, code: 'invalid-alias' },
+  );
+});
+
+test('8B-R38. aliases como multi_select (compatibilidad)', () => {
+  assert.deepEqual(parseCatalogAliases(multi(['legacy-a', 'legacy-b'])), {
+    ok: true,
+    aliases: ['legacy-a', 'legacy-b'],
+  });
+});
+
+test('8B-R39. ausencia de URL o ID interno en el DTO público mapeado', () => {
+  const entry = mapCatalogRawPage(rawPage('dto-1', technicalProps()));
+  assert.ok(entry);
+  const json = JSON.stringify(entry);
+  assert.equal(json.includes(FIXTURE_NOTION_URL), false);
+  assert.equal(json.includes('https://'), false);
+  assert.equal(json.includes('www.notion.so'), false);
+  assert.equal(entry?.sourceRef.startsWith('notion:'), true);
+});
+
+test('8B-R40. catálogo realista válido solo con datos ficticios', async () => {
+  const pages = [
+    rawPage(
+      'row-a',
+      technicalProps({
+        Name: titleProp('Doc A'),
+        stableKey: rich('fixture.doc-a'),
+        slug: rich('doc-a'),
+        aliases: rich('doc-a-old'),
+        status: select('hidden'),
+        canonical: checkbox(false),
+        navigationPlacement: select('none'),
+        visibleWeb: checkbox(false),
+        searchable: checkbox(false),
+        generalAI: select('denied'),
+        reviewAI: select('denied'),
+        sourceRef: url(`https://notion.so/${'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}`),
+      }),
+    ),
+    rawPage(
+      'row-b',
+      technicalProps({
+        Name: titleProp('Doc B'),
+        stableKey: rich('fixture.doc-b'),
+        slug: rich('doc-b'),
+        aliases: rich(''),
+        status: select('hidden'),
+        canonical: checkbox(false),
+        navigationPlacement: select('none'),
+        visibleWeb: checkbox(false),
+        searchable: checkbox(false),
+        generalAI: select('denied'),
+        reviewAI: select('denied'),
+        sourceRef: url(`https://www.notion.so/Doc-B-${'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}`),
+      }),
+    ),
+  ];
+  const port = createFakePort({ pages });
+  const result = await loadValidatedWebCatalogWithPort(port, 'ds-fixture');
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  assert.equal(result.entries.length, 2);
+  for (const entry of result.entries) {
+    assert.equal(entry.sourceRef.includes('https'), false);
+    assert.match(entry.sourceRef, /^notion:[0-9a-f-]{36}$/);
+  }
 });

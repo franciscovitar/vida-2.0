@@ -76,6 +76,16 @@ Completado en el cierre técnico (sin activar la flag ni publicar filas):
 - Renderer documental genérico.
 - Ruta dinámica autenticada `/p/[slug]` protegida por flag y política.
 
+### Esquema Notion (compatibilidad del mapper)
+
+El mapper prioriza nombres técnicos reales (`Name`, `stableKey`, `sourceRef`, `aliases`, …) y
+acepta temporalmente los nombres editoriales previos (`Nombre editorial`, `Clave estable`, …).
+
+- `sourceRef`: URL de Notion como formato principal (resolución solo servidor); relation como
+  compatibilidad. Sin fallback a la fila del catálogo. URL e id no se envían al cliente.
+- `aliases`: rich_text con **un alias por línea**; multi_select sigue soportado temporalmente.
+  Alias inválidos rechazan la fila (no se aceptan en silencio).
+
 Sigue fuera de alcance hasta 8C:
 
 - Activar `WEB_CATALOG_ENABLED` o publicar recursos.
