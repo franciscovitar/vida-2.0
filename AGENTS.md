@@ -43,6 +43,21 @@
 - Avoid any; use precise types and narrowing.
 - Review the final diff and never claim a check passed unless it was executed.
 
+## Vida 2.0 invariants
+
+- Keep one source of truth per datum: Notion for content and definitions, Sheets for metrics,
+  Calendar for time, and the web for derived views and bounded functions.
+- Never delete, archive, merge, move, or change system architecture without explicit approval.
+- Never read Journaling automatically. Private access must be explicit, temporary, and scoped.
+- Never expose secrets, provider tokens, emails, source references, or internal identifiers to the
+  client, logs, documentation, or commits.
+- Never hardcode real Web Catalog rows in production code or tests.
+- Do not turn derived views into new sources of truth.
+- Keep critical privacy, authorization, renderer, and write barriers in code even when the same
+  rules are documented in Notion.
+- A catalog entry may select only a renderer registered in code; external text is never executable.
+- New catalog resources are drafts by default and never become visible through discovery alone.
+
 ## Completion criteria
 
 - The requested behavior is implemented without unrelated changes.

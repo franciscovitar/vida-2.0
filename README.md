@@ -1,90 +1,110 @@
 # Vida 2.0
 
-Aplicaci?n web personal para centralizar mi sistema **Vida 2.0**: h?bitos, salud, sue?o,
-productividad, proyectos, tareas, aprendizaje y m?s, en una sola interfaz.
+Aplicación web personal para centralizar Vida 2.0: hábitos, salud, sueño, productividad,
+proyectos, tareas, aprendizaje y otras áreas en una sola interfaz autenticada.
 
 Construida con Next.js App Router, React, TypeScript, SCSS y CSS Modules.
 
-## Estado actual (fase 1)
+## Estado actual
 
-- Interfaz y estructura completas con **datos simulados**, tipados y separados de la UI
-  (`lib/mock-data` + `types`).
-- Pantalla **Hoy** desarrollada: foco del d?a, resumen, agenda, tareas, h?bitos, salud,
-  productividad, progreso semanal y captura r?pida.
-- Resto de secciones con rutas creadas y estados vac?os cuidados.
-- Modo claro y oscuro con preferencia del sistema y selector manual (Ajustes).
+Production usa integraciones reales y separa cada fuente por responsabilidad:
+
+- **Google Sheets:** hábitos, salud, sueño, productividad y métricas derivadas.
+- **Notion:** Áreas, Proyectos y Tareas, actualmente en solo lectura.
+- **Google Calendar:** eventos y bloques de tiempo, en solo lectura.
+- **Web:** vistas derivadas y funciones específicas; no es una fuente de verdad paralela.
+
+También existen mocks tipados para desarrollo, pruebas y fallbacks etiquetados. La pantalla Hoy
+compone las tres integraciones. Hábitos permite una escritura controlada sobre el día actual en
+Sheets; Notion y Calendar no tienen escritura desde la web.
+
+Notion todavía no expone páginas ni bloques completos: la integración actual solo consulta los
+data sources autorizados de Áreas, Proyectos y Tareas. El futuro Registro Web está en preparación.
+La subetapa 8B.1 incorpora únicamente su contrato tipado, validaciones, índice de resolución y una
+feature flag apagada; no conecta Notion, rutas, navegación ni UI.
+
+## Registro Web (8B.1)
+
+El código de `lib/web-catalog` define:
+
+- contrato editorial con identidad estable, slugs, alias, navegación y políticas;
+- repositorio abstracto de solo lectura;
+- registro cerrado de renderers permitidos;
+- validación determinística de colisiones y configuraciones inseguras;
+- índice puro de resolución por slug o alias;
+- barreras para recursos privados, de sistema, legacy y excluidos.
+
+`WEB_CATALOG_ENABLED` está desactivada por defecto y solo acepta el valor exacto `true`. En 8B.1
+la flag no se consume desde rutas o componentes, por lo que no cambia el comportamiento visible.
+No existen filas reales del catálogo en código ni una conexión del catálogo con Notion.
 
 ## Google Sheets (selector DEV / canónico)
 
-Una sola fuente canónica final: el Sheet de producción («Sistema de hábitos y
-compromisos»). ActivityWatch, Huawei / Health Auto Export y Apps Script escriben
-**solo** en el canónico; nunca deben redirigirse al Sheet DEV.
+La fuente cuantitativa canónica es el Sheet de Production. Los productores externos continúan
+escribiendo solo allí y nunca deben redirigirse al Sheet DEV.
 
-La app elige el Sheet con variables de servidor (nunca desde el navegador):
+La app elige el Sheet con variables de servidor, nunca desde el navegador:
 
-| Entorno                          | Target | Escrituras de hábitos                          |
-| -------------------------------- | ------ | ---------------------------------------------- |
-| Local                            | `dev`  | Solo DEV (`ALLOW_PROD_WRITES` no aplica)       |
-| Vercel Preview                   | `dev`  | Solo DEV; `target=prod` se rechaza             |
-| Vercel Production (corte futuro) | `prod` | Solo si `GOOGLE_SHEETS_ALLOW_PROD_WRITES=true` |
+| Entorno           | Target | Escrituras de hábitos                          |
+| ----------------- | ------ | ---------------------------------------------- |
+| Local             | `dev`  | Solo DEV                                       |
+| Vercel Preview    | `dev`  | Solo DEV; `target=prod` se rechaza             |
+| Vercel Production | `prod` | Solo si `GOOGLE_SHEETS_ALLOW_PROD_WRITES=true` |
 
-- `DATA_SOURCE=mock` (o sin definir): datos simulados.
-- `DATA_SOURCE=google`: lee **Registro diario** y **Salud y experimentos** del target
-  resuelto. Sin fallback automático entre DEV y producción.
+- `DATA_SOURCE=mock` o ausente: datos simulados.
+- `DATA_SOURCE=google`: lee las pestañas operativas del target resuelto.
+- No existe fallback automático entre DEV y Production.
 
 ### Variables
 
 Ver `.env.example`. Resumen:
 
-- `GOOGLE_SHEETS_TARGET`: `dev` \| `prod`
-- `GOOGLE_SHEETS_DEV_ID` / `GOOGLE_SHEETS_PROD_ID`: IDs (solo env; sin hardcode)
-- `GOOGLE_SHEETS_ALLOW_PROD_WRITES`: exactamente `true` para escribir en canónico
+- `GOOGLE_SHEETS_TARGET`: `dev` o `prod`.
+- `GOOGLE_SHEETS_DEV_ID` / `GOOGLE_SHEETS_PROD_ID`: referencias solo de entorno.
+- `GOOGLE_SHEETS_ALLOW_PROD_WRITES`: exactamente `true` para escribir en el canónico.
 
-Compatibilidad temporal: si `TARGET` está ausente y existe `GOOGLE_SHEETS_DEV_ID`,
-se usa DEV. Nunca se resuelve producción de forma implícita.
-
-### Corte productivo (Fase 7C-D, manual)
-
-1. Backup completo del Sheet canónico; validar la copia.
-2. Service account → Editor en el canónico (hoy puede seguir como Lector).
-3. Vercel Production: `TARGET=prod`, IDs correctos, `ALLOW_PROD_WRITES=true`.
-4. Preview y local permanecen en `TARGET=dev`.
+Si el target está ausente y existe la referencia DEV, se usa DEV por compatibilidad temporal.
+Nunca se resuelve Production de forma implícita.
 
 ### Rollback
 
-En Vercel Production: `GOOGLE_SHEETS_TARGET=dev` (y `ALLOW_PROD_WRITES=false`).
-La app vuelve al Sheet DEV sin tocar ActivityWatch ni el canónico.
+El rollback técnico conserva la referencia DEV y deshabilita escrituras productivas. No toca los
+productores externos ni modifica las hojas.
 
 ## Requisitos
 
-- Node.js 24
-- npm 11
+- Node.js 24.
+- npm 11.
 
 ## Uso
 
 1. `npm ci`: instala dependencias desde `package-lock.json`.
-2. `npm run dev`: servidor local en `http://localhost:3000`.
-3. `npm run verify`: validaciones est?ticas y build de producci?n.
+2. `npm run dev`: inicia el servidor local.
+3. `npm test`: ejecuta las pruebas con `node:test` y `tsx`.
+4. `npm run verify`: ejecuta validaciones estáticas y el build de Production.
 
 ## Comandos
 
 - `npm run dev`: servidor local.
 - `npm run lint` / `npm run lint:fix`: ESLint para JavaScript y TypeScript.
 - `npm run stylelint` / `npm run stylelint:fix`: Stylelint para CSS y SCSS.
-- `npm run typecheck`: comprobaci?n estricta de TypeScript.
-- `npm run format` / `npm run format:check`: escritura o verificaci?n con Prettier.
-- `npm run check`: todas las validaciones est?ticas.
-- `npm test`: pruebas de la capa de datos (reglas de celdas, fechas, validaciones).
-- `npm run verify`: validaciones est?ticas y build de producci?n.
+- `npm run typecheck`: comprobación estricta de TypeScript.
+- `npm run format` / `npm run format:check`: escritura o verificación con Prettier.
+- `npm run check`: todas las validaciones estáticas.
+- `npm test`: suite de `node:test`.
+- `npm run verify`: validaciones estáticas y build de Production.
 
 ## Estructura
 
-- `app/`: rutas del App Router (una por secci?n) sobre un layout compartido.
-- `components/layout`: shell de la aplicaci?n (sidebar, header, navegaci?n m?vil).
-- `components/navigation`: navegaci?n y enlaces con estado activo.
-- `components/dashboard`: secciones de la pantalla Hoy.
-- `components/ui`: componentes reutilizables (tarjetas, m?tricas, badges, etc.).
+- `app/`: rutas del App Router sobre un layout compartido.
+- `components/layout`: shell de la aplicación.
+- `components/navigation`: navegación y enlaces con estado activo.
+- `components/dashboard`: secciones de Hoy.
+- `components/ui`: componentes reutilizables.
+- `lib/web-catalog`: contrato operativo de 8B.1, sin conexión externa.
+- `lib/notion`: lectura autorizada de Áreas, Proyectos y Tareas.
 - `lib/mock-data`: datos simulados por dominio.
-- `lib/constants`: navegaci?n y colores sem?nticos.
+- `lib/constants`: navegación y colores semánticos actuales.
+- `docs/adr`: decisiones de arquitectura.
 - `theme/`: proveedor de tema claro/oscuro.
 - `types/`: contratos de dominio.
