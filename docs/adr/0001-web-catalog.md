@@ -66,12 +66,19 @@ Descartado porque mezcla el contrato con una mutación externa y adelanta 8B.2/8
 - Ninguna referencia de origen se entrega al cliente.
 - No se incluyen filas reales, identificadores, URLs privadas, correos, tokens ni secretos.
 
-## Fuera de 8B.1
+## Fuera de 8B.1 / cubierto en el cierre técnico 8B
 
-- Crear Registro Web en Notion.
-- Implementar un repositorio real.
-- Leer páginas, bloques o subpáginas.
-- Crear rutas dinámicas, navegación o UI.
-- Publicar módulos actualmente incompletos.
-- Habilitar escrituras.
+Completado en el cierre técnico (sin activar la flag ni publicar filas):
+
+- Repositorio Notion de solo lectura del Registro Web.
+- Lectura recursiva acotada de páginas y bloques autorizados.
+- Modelo normalizado de contenido independiente del SDK.
+- Renderer documental genérico.
+- Ruta dinámica autenticada `/p/[slug]` protegida por flag y política.
+
+Sigue fuera de alcance hasta 8C:
+
+- Activar `WEB_CATALOG_ENABLED` o publicar recursos.
+- Navegación dinámica, búsqueda y renderers especiales.
+- Lectura de Journaling o escritura en Notion.
 - Cambiar Vercel o variables reales.

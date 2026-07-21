@@ -18,25 +18,33 @@ También existen mocks tipados para desarrollo, pruebas y fallbacks etiquetados.
 compone las tres integraciones. Hábitos permite una escritura controlada sobre el día actual en
 Sheets; Notion y Calendar no tienen escritura desde la web.
 
-Notion todavía no expone páginas ni bloques completos: la integración actual solo consulta los
-data sources autorizados de Áreas, Proyectos y Tareas. El futuro Registro Web está en preparación.
-La subetapa 8B.1 incorpora únicamente su contrato tipado, validaciones, índice de resolución y una
-feature flag apagada; no conecta Notion, rutas, navegación ni UI.
+Notion consulta los data sources autorizados de Áreas, Proyectos y Tareas. El Registro Web tiene
+contrato tipado, repositorio Notion de solo lectura y ruta `/p/[slug]` detrás de una feature flag
+apagada: no publica contenido mientras los recursos sigan ocultos.
 
-## Registro Web (8B.1)
+## Registro Web (8B)
 
 El código de `lib/web-catalog` define:
 
 - contrato editorial con identidad estable, slugs, alias, navegación y políticas;
-- repositorio abstracto de solo lectura;
+- repositorio Notion de solo lectura (sin create/update/delete);
 - registro cerrado de renderers permitidos;
 - validación determinística de colisiones y configuraciones inseguras;
 - índice puro de resolución por slug o alias;
-- barreras para recursos privados, de sistema, legacy y excluidos.
+- lector recursivo acotado de bloques y modelo normalizado de contenido;
+- barreras para recursos privados, de sistema, legacy y excluidos;
+- ruta dinámica protegida `/p/[slug]` (autenticación + flag + política).
 
-`WEB_CATALOG_ENABLED` está desactivada por defecto y solo acepta el valor exacto `true`. En 8B.1
-la flag no se consume desde rutas o componentes, por lo que no cambia el comportamiento visible.
-No existen filas reales del catálogo en código ni una conexión del catálogo con Notion.
+`WEB_CATALOG_ENABLED` está desactivada por defecto y solo acepta el valor exacto `true`.
+Existe un repositorio Notion de solo lectura, lector recursivo acotado, renderer documental y la
+ruta protegida `/p/[slug]`. Con la flag apagada la ruta responde como no encontrada y no publica
+contenido. Journaling y demás recursos privados/ocultos/legacy/excluidos no se leen. No hay
+escritura hacia Notion ni entradas nuevas en la navegación.
+
+Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`.
+
+Pendiente para 8C: activación controlada, publicación editorial, renderers especiales, navegación
+y búsqueda.
 
 ## Google Sheets (selector DEV / canónico)
 
@@ -101,7 +109,9 @@ productores externos ni modifica las hojas.
 - `components/navigation`: navegación y enlaces con estado activo.
 - `components/dashboard`: secciones de Hoy.
 - `components/ui`: componentes reutilizables.
-- `lib/web-catalog`: contrato operativo de 8B.1, sin conexión externa.
+- `lib/web-catalog`: contrato, repositorio Notion read-only, lector y política del Registro Web.
+- `components/web-catalog`: renderer documental genérico.
+- `app/(app)/p/[slug]`: ruta dinámica protegida (flag apagada ⇒ no publica).
 - `lib/notion`: lectura autorizada de Áreas, Proyectos y Tareas.
 - `lib/mock-data`: datos simulados por dominio.
 - `lib/constants`: navegación y colores semánticos actuales.
