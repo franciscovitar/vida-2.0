@@ -115,6 +115,20 @@ test('L6. coincidencias parciales no autorizan', () => {
   assert.equal(isEmailAuthorized('correo1', ALLOWED_LIST), false);
 });
 
+test('L6b. coincidencia por dominio no autoriza', () => {
+  assert.equal(isEmailAuthorized('cualquiera@gmail.com', ALLOWED_LIST), false);
+  assert.equal(isEmailAuthorized('otro@gmail.com', ALLOWED_LIST), false);
+  assert.equal(
+    evaluateGoogleSignIn({
+      provider: 'google',
+      email: 'random.user@gmail.com',
+      emailVerified: true,
+      allowedEmails: ALLOWED_LIST,
+    }).ok,
+    false,
+  );
+});
+
 test('L7. lista vacía rechaza de forma segura', () => {
   assert.deepEqual(parseAllowedEmails(''), []);
   assert.deepEqual(parseAllowedEmails('  ,  ,, '), []);
@@ -429,7 +443,7 @@ test('21–22. Ningún secreto llega al HTML ni al bundle de cliente', () => {
   assert.match(envExample, /AUTH_GOOGLE_SECRET=/);
   assert.match(envExample, /AUTH_ALLOWED_EMAILS=/);
   assert.doesNotMatch(envExample, /AUTH_ALLOWED_EMAIL=/);
-  assert.match(envExample, /AUTH_TRUST_HOST=false/);
+  assert.match(envExample, /AUTH_TRUST_HOST=true/);
   assert.doesNotMatch(envExample, /ya29\.|AIza[0-9A-Za-z_-]{20,}/);
 });
 
@@ -561,6 +575,18 @@ test('dal y env marcan server-only; authorize no', () => {
     readFileSync(join(process.cwd(), 'lib/auth/session-core.ts'), 'utf8'),
     /import ['"]server-only['"]/,
   );
+});
+
+test('L10. AUTH_TRUST_HOST=true habilita trustHost (sin UntrustedHost en local)', () => {
+  const authTs = readFileSync(join(process.cwd(), 'auth.ts'), 'utf8');
+  assert.match(authTs, /trustHost:\s*process\.env\.AUTH_TRUST_HOST\s*===\s*['"]true['"]/);
+
+  const envTs = readFileSync(join(process.cwd(), 'lib/auth/env.ts'), 'utf8');
+  assert.match(envTs, /AUTH_TRUST_HOST\s*===\s*['"]true['"]/);
+
+  const flag: string = 'true';
+  assert.equal(flag === 'true', true);
+  assert.equal(flag === 'false', false);
 });
 
 test('código fuente ya no usa AUTH_ALLOWED_EMAIL singular', () => {
