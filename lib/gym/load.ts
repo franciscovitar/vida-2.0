@@ -50,8 +50,7 @@ function emptyDashboard(
   });
 }
 
-export const loadGymDashboard = cache(async (): Promise<GymDashboardData> => {
-  await requireAuthorizedSession();
+export async function loadGymDashboardData(): Promise<GymDashboardData> {
   const today = todayInBuenosAires();
   const warnings: GymParseWarning[] = [];
   const sources: GymDataSourceStatus[] = [];
@@ -332,4 +331,9 @@ export const loadGymDashboard = cache(async (): Promise<GymDashboardData> => {
     sources,
     extraWarnings: warnings,
   });
+}
+
+export const loadGymDashboard = cache(async (): Promise<GymDashboardData> => {
+  await requireAuthorizedSession();
+  return loadGymDashboardData();
 });

@@ -60,7 +60,7 @@ export interface ActionRequest<TPayload = unknown> {
   /** Estado previo esperado cuando aplica (p. ej. status de tarea). */
   expectedPrevious: string | null;
   context: {
-    source: 'web';
+    source: 'web' | 'openclaw';
     targetDate: string | null;
   };
 }

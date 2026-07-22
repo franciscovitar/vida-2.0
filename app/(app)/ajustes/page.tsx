@@ -9,6 +9,7 @@ import { ThemeControl } from '@/components/ui/ThemeControl';
 import { getCalendarConfig } from '@/lib/calendar/config';
 import { getDataSource, getGoogleConfig } from '@/lib/data/config';
 import { getNotionConfig, getNotionDataSource } from '@/lib/notion/config';
+import { getOpenClawRuntimeStatus } from '@/lib/openclaw/config';
 import { getWebCatalogNotionConfig, isWebCatalogEnabled } from '@/lib/web-catalog/config';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 
@@ -43,6 +44,7 @@ export default async function AjustesPage() {
   const calendarConfig = getCalendarConfig();
   const catalogEnabled = isWebCatalogEnabled();
   const catalogConfig = getWebCatalogNotionConfig();
+  const openClawStatus = getOpenClawRuntimeStatus();
 
   const integrations: IntegrationRow[] = [
     {
@@ -85,6 +87,23 @@ export default async function AjustesPage() {
           : 'Feature activa · falta configuración de servidor.'
         : 'Feature inactiva por defecto (WEB_CATALOG_ENABLED).',
       status: catalogEnabled ? (catalogConfig.ok ? 'Activa' : 'Activa sin config') : 'Inactiva',
+      domain: 'neutral',
+    },
+    {
+      id: 'openclaw',
+      name: 'OpenClaw API',
+      detail:
+        openClawStatus === 'ready'
+          ? 'API coordinadora habilitada · autenticación HMAC server-to-server.'
+          : openClawStatus === 'misconfigured'
+            ? 'Flag activa · falta configuración de servidor.'
+            : 'API desactivada por defecto (OPENCLAW_API_ENABLED).',
+      status:
+        openClawStatus === 'ready'
+          ? 'ready'
+          : openClawStatus === 'misconfigured'
+            ? 'misconfigured'
+            : 'disabled',
       domain: 'neutral',
     },
   ];

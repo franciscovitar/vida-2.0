@@ -134,6 +134,8 @@ export function isPublicAuthPath(pathname: string): boolean {
   if (pathname === '/login' || pathname.startsWith('/login/')) return true;
   if (pathname === '/unauthorized' || pathname.startsWith('/unauthorized/')) return true;
   if (pathname.startsWith('/api/auth')) return true;
+  // API OpenClaw: auth HMAC propia (sin cookie de usuario).
+  if (pathname === '/api/openclaw' || pathname.startsWith('/api/openclaw/')) return true;
   return false;
 }
 

@@ -10,8 +10,13 @@ export interface AuditSink {
   list(): Promise<readonly ActionAuditRecord[]>;
 }
 
-export function sanitizeActorHint(email: string): string {
-  const trimmed = email.trim().toLowerCase();
+export function sanitizeActorHint(actor: string): string {
+  const trimmed = actor.trim().toLowerCase();
+  if (trimmed.startsWith('openclaw:')) {
+    const id = trimmed.slice('openclaw:'.length);
+    if (!id) return 'openclaw:***';
+    return id.length <= 2 ? `openclaw:${id[0] ?? '*'}*` : `openclaw:${id.slice(0, 2)}***`;
+  }
   const at = trimmed.indexOf('@');
   if (at <= 0) return 'user';
   const local = trimmed.slice(0, at);

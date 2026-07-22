@@ -79,12 +79,18 @@ en local — **nunca** como fallback silencioso en Preview/Production.
 
 Para lectura operativa alineada con escritura real en Preview: `NOTION_DATA_SOURCE=notion`
 (configurar en Vercel desde Work; no desde el código). Ver `docs/phase-8e-external-setup.md`
-y `docs/adr/0002-safe-writes-runtime.md`. No crea eventos reales de Calendar. OpenClaw fuera
-de alcance.
+y `docs/adr/0002-safe-writes-runtime.md`. No crea eventos reales de Calendar.
+
+### API OpenClaw (8F.1)
+
+API HMAC server-to-server en `/api/openclaw/v1` **desactivada por defecto**
+(`OPENCLAW_API_ENABLED`). OpenClaw solo lee contexto autorizado y crea propuestas `pending`;
+no ejecuta escrituras finales ni aprueba. Ver `docs/openclaw-api.md` y
+`docs/adr/0003-openclaw-api.md`.
 
 Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`.
 
-Pendiente: activación controlada del catálogo/escrituras por Work, OpenClaw.
+Pendiente: activación controlada del catálogo/escrituras/OpenClaw por Work.
 
 ## Google Sheets (selector DEV / canónico)
 

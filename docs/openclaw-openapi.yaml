@@ -1,0 +1,152 @@
+openapi: 3.1.0
+info:
+  title: Vida 2.0 OpenClaw API
+  version: v1
+  description: >
+    API server-to-server para OpenClaw. HMAC-SHA256. Desactivada por defecto.
+    Sin secretos ni valores reales en este documento.
+servers:
+  - url: /api/openclaw/v1
+security:
+  - VidaHmac: []
+paths:
+  /health:
+    get:
+      operationId: health
+      summary: Health sin consultar fuentes externas
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Auth fallida
+        '404':
+          description: API desactivada
+  /capabilities:
+    get:
+      operationId: capabilities
+      summary: Catálogo de operaciones
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Auth fallida
+        '404':
+          description: API desactivada
+  /read:
+    post:
+      operationId: read
+      summary: Lectura tipada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [operation, input]
+              properties:
+                operation:
+                  type: string
+                  enum:
+                    - system.overview
+                    - areas.list
+                    - areas.get
+                    - tasks.list
+                    - projects.list
+                    - calendar.upcoming
+                    - gym.summary
+                    - approvals.list
+                    - documents.search
+                    - document.get
+                input:
+                  type: object
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Input u operación inválida
+        '401':
+          description: Auth fallida
+        '403':
+          description: Forbidden / flag
+        '404':
+          description: API desactivada o recurso
+  /proposals:
+    post:
+      operationId: createProposal
+      summary: Crear propuesta pending
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - operation
+                - idempotencyKey
+                - reason
+                - expectedChange
+                - risk
+                - reversible
+                - payload
+              properties:
+                operation:
+                  type: string
+                  enum:
+                    - task.create.propose
+                    - task.change-status.propose
+                    - inbox.capture.propose
+                    - gym.session.create.propose
+                    - calendar.block.propose
+                idempotencyKey:
+                  type: string
+                reason:
+                  type: string
+                expectedChange:
+                  type: string
+                risk:
+                  type: string
+                  enum: [low, medium, high]
+                reversible:
+                  type: boolean
+                payload:
+                  type: object
+                targetKey:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Propuesta creada o replay
+        '400':
+          description: Input inválido
+        '401':
+          description: Auth fallida
+        '403':
+          description: Escrituras/propuestas no habilitadas
+        '404':
+          description: API desactivada
+  /proposals/{key}:
+    get:
+      operationId: getProposal
+      summary: Obtener propuesta por clave opaca
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Auth fallida
+        '404':
+          description: API desactivada o propuesta ausente
+components:
+  securitySchemes:
+    VidaHmac:
+      type: apiKey
+      in: header
+      name: X-Vida-Signature
+      description: >
+        Requiere además X-Vida-Key-Id, X-Vida-Timestamp y X-Vida-Request-Id.
+        Firma = HMAC-SHA256(secret, timestamp + LF + METHOD + LF + pathname + LF + sha256(body)).
