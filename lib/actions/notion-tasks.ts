@@ -17,7 +17,6 @@ import {
   relationProp,
   richTextProp,
   selectProp,
-  statusProp,
   titleProp,
   type NotionActionsClient,
 } from '@/lib/actions/notion-client';
@@ -160,7 +159,7 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
 
       const properties: Record<string, unknown> = {
         [TASK_PROPS.title]: titleProp(payload.title),
-        [TASK_PROPS.status]: statusProp('Pendiente'),
+        [TASK_PROPS.status]: selectProp('Pendiente'),
         [TASK_PROPS.priority]: selectProp(payload.priority),
         [TASK_PROPS.area]: relationProp([areaPage.id]),
       };
@@ -237,7 +236,7 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
         return { ok: false, code: 'conflict', message: 'Estado previo distinto al esperado.' };
       }
       const updated = await deps.client.updatePage(page.id, {
-        [TASK_PROPS.status]: statusProp(nextStatus),
+        [TASK_PROPS.status]: selectProp(nextStatus),
       });
       if (!updated.ok) {
         return { ok: false, code: 'failed', message: updated.message };

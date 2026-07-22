@@ -33,7 +33,7 @@ import { createNotionTaskWritePort } from '@/lib/actions/notion-tasks';
 import { opaqueKey } from '@/lib/actions/opaque';
 import { portHasDestructiveMethods } from '@/lib/actions/ports';
 import { buildWriteRuntime } from '@/lib/actions/runtime';
-import { NOTION_DATABASES, AREA_PROPS, PROJECT_PROPS } from '@/lib/notion/constants';
+import { NOTION_DATABASES, AREA_PROPS, PROJECT_PROPS, TASK_PROPS } from '@/lib/notion/constants';
 import { isForbiddenActionType } from '@/lib/actions/policy';
 import type { ActionRequest, ActionResult, ConfirmationMode } from '@/types/actions';
 import type { NotionRawPage } from '@/lib/notion/adapters';
@@ -408,6 +408,14 @@ test('8E1r-06. tarea creada y verificada', async () => {
   assert.ok(snap);
   assert.equal(snap?.title, 'Correr');
   assert.equal(snap?.status, 'Pendiente');
+  // Estado canónico es select (no status); el payload escrito debe usar select.
+  const raw = [...fake.pages.values()].find((page) => page.id.startsWith('task-'));
+  const estado = raw?.properties[TASK_PROPS.status] as {
+    select?: { name?: string };
+    status?: unknown;
+  };
+  assert.equal(estado?.select?.name, 'Pendiente');
+  assert.equal(estado?.status, undefined);
 });
 
 test('8E1r-07. idempotencia evita duplicar tarea entre dos instancias', async () => {
@@ -466,6 +474,13 @@ test('8E1r-08. cambio de estado con verificación', async () => {
   assert.equal(updated.ok, true);
   const snap = await tasks.getTask(created.key);
   assert.equal(snap?.status, 'Hecha');
+  const raw = [...fake.pages.values()].find((page) => page.id.startsWith('task-'));
+  const estado = raw?.properties[TASK_PROPS.status] as {
+    select?: { name?: string };
+    status?: unknown;
+  };
+  assert.equal(estado?.select?.name, 'Hecha');
+  assert.equal(estado?.status, undefined);
 });
 
 test('8E1r-09. conflicto de estado previo', async () => {
