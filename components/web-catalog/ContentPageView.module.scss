@@ -122,3 +122,9 @@
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
+.unavailable {
+  color: var(--text-muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 0.15em;
+}

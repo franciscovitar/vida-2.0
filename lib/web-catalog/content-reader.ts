@@ -4,8 +4,10 @@
  */
 import { WEB_CATALOG_READ_LIMITS } from '@/lib/web-catalog/constants';
 import { adaptCatalogBlock } from '@/lib/web-catalog/content-adapters';
-import { parseNotionSourceRef } from '@/lib/web-catalog/catalog-mapper';
+import { parseNotionSourceRef, normalizeNotionPageId } from '@/lib/web-catalog/catalog-mapper';
+import { buildSourcePageIndex, type SourcePageIndex } from '@/lib/web-catalog/links';
 import type { WebCatalogNotionPort } from '@/lib/web-catalog/notion-port';
+import { canLoadWebCatalogContent, usesGenericDocumentRenderer } from '@/lib/web-catalog/policy';
 import type { ContentBlock, ContentPage, PublicContentPolicy } from '@/types/content';
 import type { WebCatalogEntry, WebCatalogRouteIndex } from '@/types/web-catalog';
 import type { NotionReadCode } from '@/lib/notion/errors';
@@ -22,15 +24,13 @@ function publicPolicy(entry: WebCatalogEntry): PublicContentPolicy {
   };
 }
 
-function resolveChildSlug(title: string | null, index: WebCatalogRouteIndex): string | null {
-  if (!title) return null;
-  const normalized = title.trim().toLowerCase().replace(/\s+/g, '-');
-  const hit = index.routes[normalized];
-  if (!hit) return null;
-  const canonical = Object.values(index.routes).find(
-    (route) => route.stableKey === hit.stableKey && route.matchedBy === 'slug',
-  );
-  return canonical?.matchedValue ?? null;
+/** Resuelve child_page por ID de bloque/página en el índice del catálogo (no por título). */
+function resolveChildSlugFromBlockId(blockId: string, sourceIndex: SourcePageIndex): string | null {
+  const pageId = normalizeNotionPageId(blockId) ?? blockId.toLowerCase();
+  const entry = sourceIndex.get(pageId) ?? sourceIndex.get(blockId.toLowerCase());
+  if (!entry) return null;
+  if (!canLoadWebCatalogContent(entry) || !usesGenericDocumentRenderer(entry)) return null;
+  return entry.slug;
 }
 
 async function readBlocksRecursive(
@@ -38,7 +38,7 @@ async function readBlocksRecursive(
   blockId: string,
   depth: number,
   state: { count: number; visited: Set<string> },
-  index: WebCatalogRouteIndex,
+  sourceIndex: SourcePageIndex,
 ): Promise<{ ok: true; blocks: ContentBlock[] } | { ok: false; code: NotionReadCode }> {
   if (depth > WEB_CATALOG_READ_LIMITS.maxDepth) return { ok: true, blocks: [] };
   if (state.visited.has(blockId)) return { ok: true, blocks: [] };
@@ -55,21 +55,14 @@ async function readBlocksRecursive(
 
     let children: ContentBlock[] = [];
     if (raw.has_children && depth < WEB_CATALOG_READ_LIMITS.maxDepth) {
-      const childResult = await readBlocksRecursive(port, raw.id, depth + 1, state, index);
+      const childResult = await readBlocksRecursive(port, raw.id, depth + 1, state, sourceIndex);
       if (!childResult.ok) return childResult;
       children = childResult.blocks;
     }
 
-    const payload = raw.raw[raw.type];
-    const title =
-      payload && typeof payload === 'object' && 'title' in payload
-        ? typeof (payload as { title?: unknown }).title === 'string'
-          ? (payload as { title: string }).title
-          : null
-        : null;
-    const childSlug = raw.type === 'child_page' ? resolveChildSlug(title, index) : null;
-    // Solo enlazar child pages autorizadas por el índice del catálogo.
-    out.push(adaptCatalogBlock(raw, i, children, childSlug));
+    const childSlug =
+      raw.type === 'child_page' ? resolveChildSlugFromBlockId(raw.id, sourceIndex) : null;
+    out.push(adaptCatalogBlock(raw, i, children, childSlug, sourceIndex));
   }
 
   return { ok: true, blocks: out };
@@ -78,7 +71,8 @@ async function readBlocksRecursive(
 export async function readWebCatalogContentPage(
   port: WebCatalogNotionPort,
   entry: WebCatalogEntry,
-  index: WebCatalogRouteIndex,
+  _index: WebCatalogRouteIndex,
+  catalogEntries: readonly WebCatalogEntry[] = [],
 ): Promise<ContentReadResult> {
   const pageId = parseNotionSourceRef(entry.sourceRef);
   if (!pageId) return { ok: false, code: 'invalid-source' };
@@ -86,8 +80,9 @@ export async function readWebCatalogContentPage(
   const meta = await port.retrievePageMeta(pageId);
   if (!meta.ok) return meta;
 
+  const sourceIndex = buildSourcePageIndex(catalogEntries.length > 0 ? catalogEntries : [entry]);
   const state = { count: 0, visited: new Set<string>() };
-  const blocksResult = await readBlocksRecursive(port, pageId, 0, state, index);
+  const blocksResult = await readBlocksRecursive(port, pageId, 0, state, sourceIndex);
   if (!blocksResult.ok) return blocksResult;
 
   const childPages = blocksResult.blocks
@@ -104,6 +99,7 @@ export async function readWebCatalogContentPage(
     icon: meta.icon,
     lastEditedAt: meta.lastEditedAt,
     renderMode: entry.renderMode,
+    section: entry.section,
     policy: publicPolicy(entry),
     blocks: blocksResult.blocks,
     childPages,

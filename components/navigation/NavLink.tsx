@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { domainVars } from '@/lib/constants/domains';
-import type { NavItem } from '@/lib/constants/navigation';
+import { NAV_ICON_MAP, type NavItemData } from '@/lib/constants/navigation';
 
 import styles from './NavLink.module.scss';
 
 interface NavLinkProps {
-  item: NavItem;
+  item: NavItemData;
   onNavigate?: () => void;
 }
 
@@ -21,7 +21,7 @@ function isActive(pathname: string, href: string): boolean {
 export function NavLink({ item, onNavigate }: NavLinkProps) {
   const pathname = usePathname();
   const active = isActive(pathname, item.href);
-  const Icon = item.icon;
+  const Icon = NAV_ICON_MAP[item.icon];
 
   return (
     <Link

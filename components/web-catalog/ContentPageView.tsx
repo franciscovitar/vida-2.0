@@ -8,15 +8,33 @@ function Texts({ parts }: { parts: readonly ContentText[] }) {
   if (parts.length === 0) return null;
   return (
     <>
-      {parts.map((part, index) =>
-        part.href ? (
-          <a key={`${part.plain}-${index}`} href={part.href} rel="noopener noreferrer">
-            {part.plain}
-          </a>
-        ) : (
-          <span key={`${part.plain}-${index}`}>{part.plain}</span>
-        ),
-      )}
+      {parts.map((part, index) => {
+        if (part.href) {
+          return (
+            <a
+              key={`${part.plain}-${index}`}
+              href={part.href}
+              {...(part.external
+                ? { target: '_blank', rel: 'noopener noreferrer' }
+                : { rel: 'noopener noreferrer' })}
+            >
+              {part.plain}
+            </a>
+          );
+        }
+        if (part.unavailable) {
+          return (
+            <span
+              key={`${part.plain}-${index}`}
+              className={styles.unavailable}
+              title="Contenido no disponible"
+            >
+              {part.plain}
+            </span>
+          );
+        }
+        return <span key={`${part.plain}-${index}`}>{part.plain}</span>;
+      })}
     </>
   );
 }
@@ -106,9 +124,17 @@ function BlockView({ block }: { block: ContentBlock }) {
         </pre>
       );
     case 'bookmark':
-      return block.link ? (
+      if (block.link?.unavailable) {
+        return <p className={styles.unavailable}>Contenido no disponible</p>;
+      }
+      return block.link?.url ? (
         <p className={styles.bookmark}>
-          <a href={block.link.url} rel="noopener noreferrer">
+          <a
+            href={block.link.url}
+            {...(block.link.external
+              ? { target: '_blank', rel: 'noopener noreferrer' }
+              : { rel: 'noopener noreferrer' })}
+          >
             {block.link.label ?? block.link.url}
           </a>
         </p>

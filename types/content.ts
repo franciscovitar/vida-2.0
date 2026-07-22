@@ -3,7 +3,7 @@
  * Independiente del SDK de Notion. Seguro para serializar hacia la UI.
  */
 
-import type { RenderMode, WebCatalogPolicy } from '@/types/web-catalog';
+import type { RenderMode, WebCatalogPolicy, WebCatalogSection } from '@/types/web-catalog';
 
 /** Política pública sanitizada: sin modos de escritura internos. */
 export type PublicContentPolicy = Pick<
@@ -14,11 +14,17 @@ export type PublicContentPolicy = Pick<
 export interface ContentText {
   plain: string;
   href: string | null;
+  /** Enlace Notion bloqueado por política: texto sin href. */
+  unavailable?: boolean;
+  /** Enlace externo HTTPS (abrir en nueva pestaña). */
+  external?: boolean;
 }
 
 export interface ContentLink {
   url: string;
   label: string | null;
+  external?: boolean;
+  unavailable?: boolean;
 }
 
 export interface ContentAsset {
@@ -72,6 +78,8 @@ export interface ContentPage {
   icon: string | null;
   lastEditedAt: string | null;
   renderMode: RenderMode;
+  /** Sección editorial sanitizada (sin IDs). */
+  section: WebCatalogSection;
   policy: PublicContentPolicy;
   blocks: readonly ContentBlock[];
   childPages: readonly { slug: string; title: string }[];

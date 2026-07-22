@@ -86,9 +86,10 @@ acepta temporalmente los nombres editoriales previos (`Nombre editorial`, `Clave
 - `aliases`: rich_text con **un alias por línea**; multi_select sigue soportado temporalmente.
   Alias inválidos rechazan la fila (no se aceptan en silencio).
 
-Sigue fuera de alcance hasta 8C:
+Sigue fuera de alcance de 8B / cubierto parcialmente en 8C:
 
-- Activar `WEB_CATALOG_ENABLED` o publicar recursos.
-- Navegación dinámica, búsqueda y renderers especiales.
-- Lectura de Journaling o escritura en Notion.
+- 8C (código, flag apagada): enlaces internos seguros, navegación dinámica, breadcrumbs,
+  búsqueda `/buscar`, rutas fijas aprendizaje/compras por clave estable.
+- Activar `WEB_CATALOG_ENABLED` o publicar recursos (sigue pendiente).
+- Paneles especiales Áreas/Facultad/Salud/Gimnasio, escritura Notion, OpenClaw (8D).
 - Cambiar Vercel o variables reales.

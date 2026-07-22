@@ -4,11 +4,17 @@ import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Brand } from '@/components/layout/Brand';
+import type { NavItemData } from '@/lib/constants/navigation';
 
 import { NavSections } from './NavSections';
 import styles from './MobileNav.module.scss';
 
-export function MobileNav() {
+interface MobileNavProps {
+  primary: readonly NavItemData[];
+  secondary: readonly NavItemData[];
+}
+
+export function MobileNav({ primary, secondary }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -57,7 +63,11 @@ export function MobileNav() {
               </button>
             </div>
             <div className={styles.body}>
-              <NavSections onNavigate={() => setOpen(false)} />
+              <NavSections
+                primary={primary}
+                secondary={secondary}
+                onNavigate={() => setOpen(false)}
+              />
             </div>
           </div>
         </div>

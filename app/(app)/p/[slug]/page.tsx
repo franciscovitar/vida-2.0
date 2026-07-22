@@ -2,11 +2,13 @@ import { FileText } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
+import { Breadcrumbs } from '@/components/web-catalog/Breadcrumbs';
 import { ContentPageView } from '@/components/web-catalog/ContentPageView';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { isWebCatalogEnabled } from '@/lib/web-catalog/config';
+import { WEB_CATALOG_SECTION_LABELS } from '@/lib/web-catalog/section-labels';
 import { resolveWebCatalogPage } from '@/lib/web-catalog/service';
 
 import pageStyles from '../../page.module.scss';
@@ -27,7 +29,6 @@ export default async function WebCatalogSlugPage({
 }) {
   await requireAuthorizedSession();
 
-  // Flag apagada: la ruta no publica contenido.
   if (!isWebCatalogEnabled()) notFound();
 
   const { slug } = await params;
@@ -66,9 +67,12 @@ export default async function WebCatalogSlugPage({
     );
   }
 
+  const sectionLabel = WEB_CATALOG_SECTION_LABELS[result.page.section];
+
   return (
     <div className={pageStyles.page}>
-      <PageHeader title={result.page.title} description="Registro Web" icon={FileText} />
+      <Breadcrumbs items={[{ label: sectionLabel }, { label: result.page.title }]} />
+      <PageHeader title={result.page.title} description={sectionLabel} icon={FileText} />
       <ContentPageView page={result.page} />
     </div>
   );

@@ -3,16 +3,19 @@ import { Plus } from 'lucide-react';
 import { MobileNav } from '@/components/navigation/MobileNav';
 import { Button } from '@/components/ui/Button';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { getAppNavigation } from '@/lib/web-catalog/service';
 
 import { Brand } from './Brand';
 import { SignOutButton } from './SignOutButton';
 import styles from './Header.module.scss';
 
-export function Header() {
+export async function Header() {
+  const nav = await getAppNavigation();
+
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <MobileNav />
+        <MobileNav primary={nav.primary} secondary={nav.secondary} />
         <div className={styles.brand}>
           <Brand />
         </div>

@@ -22,7 +22,7 @@ Notion consulta los data sources autorizados de Áreas, Proyectos y Tareas. El R
 contrato tipado, repositorio Notion de solo lectura y ruta `/p/[slug]` detrás de una feature flag
 apagada: no publica contenido mientras los recursos sigan ocultos.
 
-## Registro Web (8B)
+## Registro Web (8B / 8C)
 
 El código de `lib/web-catalog` define:
 
@@ -31,26 +31,26 @@ El código de `lib/web-catalog` define:
 - registro cerrado de renderers permitidos;
 - validación determinística de colisiones y configuraciones inseguras;
 - índice puro de resolución por slug o alias;
-- lector recursivo acotado de bloques y modelo normalizado de contenido;
-- barreras para recursos privados, de sistema, legacy y excluidos;
-- ruta dinámica protegida `/p/[slug]` (autenticación + flag + política).
+- lector recursivo acotado y modelo normalizado de contenido;
+- resolución segura de enlaces Notion → `/p/[slug]` (sin URLs internas al cliente);
+- navegación dinámica documental (flag activa) sin reemplazar módulos funcionales;
+- breadcrumbs en `/p/[slug]`;
+- búsqueda autenticada en `/buscar`;
+- rutas fijas `/aprendizaje` y `/compras` por clave estable;
+- barreras para privados, sistema, legacy y excluidos.
 
 `WEB_CATALOG_ENABLED` está desactivada por defecto y solo acepta el valor exacto `true`.
-Existe un repositorio Notion de solo lectura, lector recursivo acotado, renderer documental y la
-ruta protegida `/p/[slug]`. Con la flag apagada la ruta responde como no encontrada y no publica
-contenido. Journaling y demás recursos privados/ocultos/legacy/excluidos no se leen. No hay
-escritura hacia Notion ni entradas nuevas en la navegación.
+Con la flag apagada: menú actual, placeholders de aprendizaje/compras y `/p` / `/buscar` no
+publican contenido. Journaling permanece fuera de lector, navegación dinámica y búsqueda.
 
-El mapper del Registro Web reconoce el esquema técnico real de Notion (`Name`, `stableKey`,
-`sourceRef` URL, `aliases` rich_text, etc.) y mantiene compatibilidad temporal con los nombres
-editoriales anteriores. `sourceRef` se valida solo en servidor (URL Notion o relation); no hay
-fallback a la fila del catálogo. Los aliases usan el formato **un alias por línea**. Ni la URL ni
-el id interno se envían al cliente.
+Módulos funcionales (Hoy, Hábitos, Salud, Productividad cuantitativa, Tendencias, Agenda, Tareas,
+Proyectos, Bandeja, Ajustes) siguen en código. El catálogo gobierna páginas documentales
+(`/p/...` y claves fijas). La Productividad documental usa su slug dinámico, no `/productividad`.
 
 Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`.
 
-Pendiente para 8C: activación controlada, publicación editorial, renderers especiales, navegación
-y búsqueda.
+Pendiente para 8D: activación controlada, publicación editorial, paneles especiales (Áreas,
+Facultad, Salud, Gimnasio), escritura Notion y OpenClaw.
 
 ## Google Sheets (selector DEV / canónico)
 
