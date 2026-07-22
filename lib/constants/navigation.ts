@@ -6,6 +6,7 @@ import {
   CalendarCheck,
   CalendarClock,
   CheckSquare,
+  Dumbbell,
   FileText,
   HeartPulse,
   Inbox,
@@ -34,6 +35,7 @@ export type NavIconKey =
   | 'compras'
   | 'analisis'
   | 'areas'
+  | 'gimnasio'
   | 'bandeja'
   | 'journaling'
   | 'ajustes'
@@ -68,6 +70,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   compras: ShoppingCart,
   analisis: Brain,
   areas: Boxes,
+  gimnasio: Dumbbell,
   bandeja: Inbox,
   journaling: NotebookPen,
   ajustes: Settings,
@@ -86,6 +89,7 @@ export const primaryNav: NavItemData[] = [
   { label: 'Proyectos', href: '/proyectos', icon: 'proyectos', domain: 'projects' },
   { label: 'Tareas', href: '/tareas', icon: 'tareas', domain: 'tasks' },
   { label: 'Áreas', href: '/areas', icon: 'areas', domain: 'projects' },
+  { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },
   { label: 'Aprendizaje', href: '/aprendizaje', icon: 'aprendizaje', domain: 'learning' },
   { label: 'Compras', href: '/compras', icon: 'compras', domain: 'neutral' },
   { label: 'Análisis IA', href: '/analisis-ia', icon: 'analisis', domain: 'productivity' },

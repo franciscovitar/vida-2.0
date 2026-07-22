@@ -94,6 +94,8 @@ Sigue fuera de alcance de 8B / cubierto parcialmente en 8C:
 - Activar `WEB_CATALOG_ENABLED` o publicar recursos (sigue pendiente).
 - 8D.1 (código): paneles read-only `/areas` y `/areas/[slug]` derivados de bases
   operativas (Notion + Calendar + Sheets cuando corresponde). No sustituyen el catálogo
-  editorial; no leen Journaling; fallos parciales por fuente. Gimnasio estructurado,
-  escritura Notion, Policy Engine y OpenClaw siguen pendientes.
+  editorial; no leen Journaling; fallos parciales por fuente.
+- 8D.2 (código): `/gimnasio` read-only. Rutina desde entrada canónica `renderMode=gym`;
+  Sheets para progreso; sin escritura de sesiones. Flag apagada ⇒ estado controlado.
+  8E habilitará registro seguro, Policy Engine y OpenClaw.
 - Cambiar Vercel o variables reales.

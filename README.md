@@ -45,8 +45,9 @@ Con la flag apagada: menú actual, placeholders de aprendizaje/compras y `/p` / 
 publican contenido. Journaling permanece fuera de lector, navegación dinámica y búsqueda.
 
 Módulos funcionales (Hoy, Hábitos, Salud, Productividad cuantitativa, Tendencias, Agenda, Tareas,
-Proyectos, Áreas, Bandeja, Ajustes) siguen en código. El catálogo gobierna páginas documentales
-(`/p/...` y claves fijas). La Productividad documental usa su slug dinámico, no `/productividad`.
+Proyectos, Áreas, Gimnasio, Bandeja, Ajustes) siguen en código. El catálogo gobierna páginas
+documentales (`/p/...` y claves fijas). La Productividad documental usa su slug dinámico, no
+`/productividad`.
 
 ### Áreas (8D.1)
 
@@ -54,13 +55,19 @@ Rutas read-only `/areas` y `/areas/[slug]` para las cuatro Áreas canónicas (`f
 `genova-trabajo`, `salud`, `vida-personal`). El panel es una vista derivada: Notion sigue siendo
 la fuente canónica de Áreas/Proyectos/Tareas; Calendar y Sheets aportan contexto cuando están
 operativos. Fallos parciales se aíslan por fuente. Privacidad: sin Journaling, sin PII de
-terceros en Trabajo, sin datos clínicos/financieros sensibles. Pendiente: registro estructurado
-de Gimnasio, escrituras, aprobaciones y OpenClaw.
+terceros en Trabajo, sin datos clínicos/financieros sensibles.
+
+### Gimnasio (8D.2)
+
+Ruta read-only `/gimnasio`. Notion (entrada canónica `renderMode=gym` del Registro Web) define la
+rutina; Sheets aporta hábitos/métricas cuantitativas; Calendar aporta contexto temporal opcional.
+Sin escritura de sesiones ni formularios de registro. Con `WEB_CATALOG_ENABLED=false` el módulo
+muestra estado controlado. Pendiente 8E: registro seguro de sesiones, Policy Engine y OpenClaw.
 
 Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`.
 
-Pendiente tras 8D.1: activación controlada del catálogo, publicación editorial, Gimnasio
-estructurado, escritura Notion y OpenClaw.
+Pendiente tras 8D: activación controlada del catálogo, publicación editorial, escritura Notion/
+sesiones de Gimnasio y OpenClaw.
 
 ## Google Sheets (selector DEV / canónico)
 
@@ -131,6 +138,8 @@ productores externos ni modifica las hojas.
 - `lib/notion`: lectura autorizada de Áreas, Proyectos y Tareas.
 - `lib/areas`: composición read-only de paneles de Área (`/areas`).
 - `components/areas`: listado y panel genérico de Área.
+- `lib/gym`: resolución gym, parser de rutina, analítica y carga de `/gimnasio`.
+- `components/gym`: dashboard móvil read-only de Gimnasio.
 - `lib/mock-data`: datos simulados por dominio.
 - `lib/constants`: navegación y colores semánticos actuales.
 - `docs/adr`: decisiones de arquitectura.
