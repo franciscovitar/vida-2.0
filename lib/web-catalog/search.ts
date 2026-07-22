@@ -87,16 +87,23 @@ function snippetAround(haystack: string, needle: string): string {
 /**
  * Busca en documentos ya materializados (fixtures o índice de servidor).
  * Query vacía → sin resultados (no ejecuta búsqueda).
+ *
+ * `currentEntries` es el catálogo actual (fresco): filtra por stableKey con
+ * canSearchWebCatalogEntry para que un índice cacheado no publique recursos
+ * que ya no están autorizados.
  */
 export function searchWebCatalogDocuments(
   documents: readonly SearchableDocument[],
   rawQuery: string,
+  currentEntries: readonly WebCatalogEntry[] = [],
 ): WebCatalogSearchHit[] {
   const query = normalizeQuery(rawQuery);
   if (query === '') return [];
 
+  const authorized = filterSearchDocumentsByCurrentPolicy(documents, currentEntries);
+
   const hits: WebCatalogSearchHit[] = [];
-  for (const doc of documents) {
+  for (const doc of authorized) {
     const titleMatch = doc.title.toLowerCase().includes(query);
     const sectionLabel = WEB_CATALOG_SECTION_LABELS[doc.section];
     const sectionMatch = sectionLabel.toLowerCase().includes(query);
@@ -124,4 +131,19 @@ export function searchWebCatalogDocuments(
   }
 
   return hits;
+}
+
+/**
+ * Cruza el índice cacheado con las entradas actuales del catálogo.
+ * Sin entrada actual o con política denegada → se descarta el documento.
+ */
+export function filterSearchDocumentsByCurrentPolicy(
+  documents: readonly SearchableDocument[],
+  currentEntries: readonly WebCatalogEntry[],
+): SearchableDocument[] {
+  const byKey = new Map(currentEntries.map((entry) => [entry.stableKey, entry]));
+  return documents.filter((doc) => {
+    const current = byKey.get(doc.stableKey);
+    return current ? canSearchWebCatalogEntry(current) : false;
+  });
 }

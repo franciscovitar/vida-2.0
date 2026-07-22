@@ -35,7 +35,8 @@ El código de `lib/web-catalog` define:
 - resolución segura de enlaces Notion → `/p/[slug]` (sin URLs internas al cliente);
 - navegación dinámica documental (flag activa) sin reemplazar módulos funcionales;
 - breadcrumbs en `/p/[slug]`;
-- búsqueda autenticada en `/buscar`;
+- búsqueda autenticada en `/buscar` (índice de texto cacheable; autorización siempre
+  con el catálogo actual antes de devolver hits);
 - rutas fijas `/aprendizaje` y `/compras` por clave estable;
 - barreras para privados, sistema, legacy y excluidos.
 

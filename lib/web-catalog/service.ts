@@ -249,9 +249,18 @@ export const searchWebCatalog = cache(
     }
 
     const trimmed = query.trim();
+    // Query vacía: no carga índice ni catálogo.
     if (trimmed === '') return { ok: true, hits: [] };
 
     const documents = await loadSearchIndexCached();
-    return { ok: true, hits: searchWebCatalogDocuments(documents, trimmed) };
+
+    // Catálogo fresco (sin unstable_cache): la autorización no depende del snapshot del índice.
+    const catalog = await loadValidatedWebCatalog();
+    if (!catalog.ok) return mapCatalogFailure(catalog.code);
+
+    return {
+      ok: true,
+      hits: searchWebCatalogDocuments(documents, trimmed, catalog.entries),
+    };
   },
 );

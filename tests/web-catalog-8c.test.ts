@@ -12,7 +12,11 @@ import {
 } from '@/lib/web-catalog/links';
 import { buildAppNavigation, listNavigableCatalogEntries } from '@/lib/web-catalog/navigation';
 import { canNavigateWebCatalogEntry, canSearchWebCatalogEntry } from '@/lib/web-catalog/policy';
-import { buildSearchableDocument, searchWebCatalogDocuments } from '@/lib/web-catalog/search';
+import {
+  buildSearchableDocument,
+  searchWebCatalogDocuments,
+  type SearchableDocument,
+} from '@/lib/web-catalog/search';
 import {
   WEB_CATALOG_FIXED_ROUTES,
   WEB_CATALOG_SECTION_LABELS,
@@ -272,16 +276,18 @@ test('8C-12. breadcrumbs usan sección sanitizada', () => {
 });
 
 test('8C-13. búsqueda por título', () => {
-  const doc = buildSearchableDocument(entry(), pageFixture());
+  const published = entry();
+  const doc = buildSearchableDocument(published, pageFixture());
   assert.ok(doc);
-  const hits = searchWebCatalogDocuments([doc!], 'Documento');
+  const hits = searchWebCatalogDocuments([doc!], 'Documento', [published]);
   assert.equal(hits.length, 1);
   assert.equal(hits[0]?.href, '/p/documento-visible');
 });
 
 test('8C-14. búsqueda por contenido', () => {
-  const doc = buildSearchableDocument(entry(), pageFixture());
-  const hits = searchWebCatalogDocuments([doc!], 'productividad personal');
+  const published = entry();
+  const doc = buildSearchableDocument(published, pageFixture());
+  const hits = searchWebCatalogDocuments([doc!], 'productividad personal', [published]);
   assert.equal(hits.length, 1);
   assert.ok(hits[0]?.snippet.toLowerCase().includes('productividad'));
 });
@@ -321,9 +327,10 @@ test('8C-16. exclusión de no-searchable', () => {
 });
 
 test('8C-17. snippets limitados', () => {
+  const published = entry();
   const longBody = 'x'.repeat(500);
   const doc = buildSearchableDocument(
-    entry(),
+    published,
     pageFixture({
       blocks: [
         {
@@ -341,9 +348,11 @@ test('8C-17. snippets limitados', () => {
       ],
     }),
   );
-  const hits = searchWebCatalogDocuments([doc!], 'xxx');
+  const hits = searchWebCatalogDocuments([doc!], 'xxx', [published]);
   assert.ok(hits[0]);
   assert.ok(hits[0]!.snippet.length <= 160);
+  assert.equal(hits[0]!.href.includes('notion'), false);
+  assert.equal(JSON.stringify(hits[0]).includes(PAGE_A), false);
 });
 
 test('8C-18. /aprendizaje resuelve por clave estable', () => {
@@ -381,8 +390,9 @@ test('8C-21. ausencia de URLs e IDs internos en resolución pública', () => {
 });
 
 test('8C-22. query vacía no produce hits', () => {
-  const doc = buildSearchableDocument(entry(), pageFixture());
-  assert.deepEqual(searchWebCatalogDocuments([doc!], '   '), []);
+  const published = entry();
+  const doc = buildSearchableDocument(published, pageFixture());
+  assert.deepEqual(searchWebCatalogDocuments([doc!], '   ', [published]), []);
 });
 
 test('8C-23. claves fijas no se duplican en nav dinámica', () => {
@@ -396,4 +406,149 @@ test('8C-23. claves fijas no se duplican en nav dinámica', () => {
     listed.some((e) => e.stableKey === 'aprendizaje'),
     false,
   );
+});
+
+function staleIndexStillHas(published: WebCatalogEntry) {
+  return [buildSearchableDocument(published, pageFixture())!];
+}
+
+test('8C-24. índice stale + catálogo hidden → sin resultados', () => {
+  const wasPublished = entry();
+  const staleDocs = staleIndexStillHas(wasPublished);
+  const nowHidden = entry({ status: 'hidden', canonical: false });
+  assert.equal(searchWebCatalogDocuments(staleDocs, 'Documento', [nowHidden]).length, 0);
+});
+
+test('8C-25. índice stale + catálogo private → sin resultados', () => {
+  const wasPublished = entry();
+  const staleDocs = staleIndexStillHas(wasPublished);
+  const nowPrivate = entry({
+    privacy: 'private',
+    renderMode: 'private',
+    policy: {
+      visibleWeb: false,
+      searchable: false,
+      generalAI: 'denied',
+      reviewAI: 'explicit-authorization',
+      writeMode: 'none',
+      confirmation: 'none',
+    },
+  });
+  assert.equal(searchWebCatalogDocuments(staleDocs, 'Documento', [nowPrivate]).length, 0);
+});
+
+test('8C-26. índice stale + catálogo legacy → sin resultados', () => {
+  const wasPublished = entry();
+  const staleDocs = staleIndexStillHas(wasPublished);
+  const nowLegacy = entry({ status: 'legacy', canonical: false });
+  assert.equal(searchWebCatalogDocuments(staleDocs, 'Documento', [nowLegacy]).length, 0);
+});
+
+test('8C-27. índice stale + catálogo excluded → sin resultados', () => {
+  const wasPublished = entry();
+  const staleDocs = staleIndexStillHas(wasPublished);
+  const nowExcluded = entry({
+    status: 'excluded',
+    canonical: false,
+    privacy: 'excluded',
+    policy: {
+      visibleWeb: false,
+      searchable: false,
+      generalAI: 'denied',
+      reviewAI: 'denied',
+      writeMode: 'none',
+      confirmation: 'none',
+    },
+  });
+  assert.equal(searchWebCatalogDocuments(staleDocs, 'Documento', [nowExcluded]).length, 0);
+});
+
+test('8C-28. índice stale + searchable=false → sin resultados', () => {
+  const wasPublished = entry();
+  const staleDocs = staleIndexStillHas(wasPublished);
+  const nowClosed = entry({
+    policy: {
+      visibleWeb: true,
+      searchable: false,
+      generalAI: 'allowed',
+      reviewAI: 'allowed',
+      writeMode: 'none',
+      confirmation: 'none',
+    },
+  });
+  assert.equal(searchWebCatalogDocuments(staleDocs, 'Documento', [nowClosed]).length, 0);
+});
+
+test('8C-29. índice stale + visibleWeb=false → sin resultados', () => {
+  const wasPublished = entry();
+  const staleDocs = staleIndexStillHas(wasPublished);
+  const nowInvisible = entry({
+    policy: {
+      visibleWeb: false,
+      searchable: true,
+      generalAI: 'allowed',
+      reviewAI: 'allowed',
+      writeMode: 'none',
+      confirmation: 'none',
+    },
+  });
+  assert.equal(searchWebCatalogDocuments(staleDocs, 'Documento', [nowInvisible]).length, 0);
+});
+
+test('8C-30. índice stale + canonical=false → sin resultados', () => {
+  const wasPublished = entry();
+  const staleDocs = staleIndexStillHas(wasPublished);
+  const nowNonCanonical = entry({ canonical: false });
+  assert.equal(searchWebCatalogDocuments(staleDocs, 'Documento', [nowNonCanonical]).length, 0);
+});
+
+test('8C-31. recurso todavía publicado sigue apareciendo con índice stale', () => {
+  const stillPublished = entry();
+  const other = entry({
+    stableKey: 'fixture.other',
+    slug: 'otro-doc',
+    editorialName: 'Otro',
+    sourceRef: `notion:${PAGE_B}`,
+  });
+  const staleDocs = [
+    ...staleIndexStillHas(stillPublished),
+    buildSearchableDocument(other, pageFixture({ title: 'Otro', slug: 'otro-doc' }))!,
+  ];
+  const hits = searchWebCatalogDocuments(staleDocs, 'Documento', [stillPublished, other]);
+  assert.equal(hits.length, 1);
+  assert.equal(hits[0]?.href, '/p/documento-visible');
+});
+
+test('8C-32. Journaling en índice stale nunca aparece', () => {
+  const journaling = entry({
+    stableKey: 'fixture.private-journaling',
+    editorialName: 'Journaling',
+    privacy: 'private',
+    renderMode: 'private',
+    slug: 'private-journaling',
+    policy: {
+      visibleWeb: false,
+      searchable: false,
+      generalAI: 'denied',
+      reviewAI: 'explicit-authorization',
+      writeMode: 'none',
+      confirmation: 'none',
+    },
+  });
+  const staleDoc: SearchableDocument = {
+    stableKey: journaling.stableKey,
+    title: 'Journaling',
+    section: 'private',
+    aliases: [],
+    href: '/p/private-journaling',
+    body: 'entrada privada',
+  };
+  assert.equal(searchWebCatalogDocuments([staleDoc], 'Journaling', [journaling]).length, 0);
+  assert.equal(searchWebCatalogDocuments([staleDoc], 'Journaling', [entry()]).length, 0);
+});
+
+test('8C-33. ausente del catálogo actual se descarta del índice stale', () => {
+  const wasPublished = entry();
+  const staleDocs = staleIndexStillHas(wasPublished);
+  assert.equal(searchWebCatalogDocuments(staleDocs, 'Documento', []).length, 0);
 });

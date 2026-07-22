@@ -41,14 +41,11 @@ export function canNavigateWebCatalogEntry(entry: WebCatalogEntry): boolean {
 
 /**
  * Entrada elegible para búsqueda general autenticada.
- * Journaling/privados/sistema/legacy/excluidos quedan fuera.
+ * Journaling/privados/sistema/legacy/excluidos y no canónicos quedan fuera.
+ * Debe reevaluarse con el catálogo actual, no solo con el índice cacheado.
  */
 export function canSearchWebCatalogEntry(entry: WebCatalogEntry): boolean {
-  if (entry.status !== 'published') return false;
-  if (!entry.policy.visibleWeb) return false;
+  if (!canLoadWebCatalogContent(entry)) return false;
   if (!entry.policy.searchable) return false;
-  if (entry.privacy === 'private' || entry.privacy === 'system' || entry.privacy === 'excluded') {
-    return false;
-  }
   return true;
 }

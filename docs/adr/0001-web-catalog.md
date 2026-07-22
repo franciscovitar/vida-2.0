@@ -89,7 +89,8 @@ acepta temporalmente los nombres editoriales previos (`Nombre editorial`, `Clave
 Sigue fuera de alcance de 8B / cubierto parcialmente en 8C:
 
 - 8C (código, flag apagada): enlaces internos seguros, navegación dinámica, breadcrumbs,
-  búsqueda `/buscar`, rutas fijas aprendizaje/compras por clave estable.
+  búsqueda `/buscar` (texto cacheable + revalidación de política en cada consulta),
+  rutas fijas aprendizaje/compras por clave estable.
 - Activar `WEB_CATALOG_ENABLED` o publicar recursos (sigue pendiente).
 - Paneles especiales Áreas/Facultad/Salud/Gimnasio, escritura Notion, OpenClaw (8D).
 - Cambiar Vercel o variables reales.
