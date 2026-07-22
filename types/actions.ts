@@ -127,6 +127,14 @@ export interface ActionAuditRecord {
   errorCode: string | null;
   targetKey: string | null;
   verified: boolean | null;
+  /** Campos opcionales para ledger persistente (sanitizados). */
+  targetType?: string | null;
+  risk?: string | null;
+  reversible?: boolean | null;
+  beforeSummary?: string | null;
+  afterSummary?: string | null;
+  /** Digest determinista; no es el correo ni el UUID de Notion. */
+  idempotencyDigest?: string | null;
 }
 
 /* -------------------------------------------------------------------------- */

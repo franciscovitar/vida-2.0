@@ -1,11 +1,9 @@
 'use server';
 
 import { verifySession } from '@/lib/auth/dal';
-import { processAuditSink } from '@/lib/actions/audit';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
 import { executeAction } from '@/lib/actions/engine';
-import { processIdempotencyStore } from '@/lib/actions/idempotency';
-import { buildHandlerDeps, listProcessProposals } from '@/lib/actions/runtime';
+import { buildWriteRuntime, getWriteRuntimeStatus } from '@/lib/actions/runtime';
 import type { ActionRequest, ActionResult, ActionProposalSummary } from '@/types/actions';
 
 function ensureOperationId(value: unknown): string {
@@ -52,6 +50,8 @@ export async function runWriteAction(input: {
     };
   }
 
+  const runtime = buildWriteRuntime();
+
   return executeAction(
     {
       actionType: input.actionType as ActionRequest['actionType'],
@@ -64,9 +64,9 @@ export async function runWriteAction(input: {
     },
     {
       writesEnabled: true,
-      idempotency: processIdempotencyStore,
-      audit: processAuditSink,
-      handlers: buildHandlerDeps(),
+      idempotency: runtime.idempotency,
+      audit: runtime.audit,
+      handlers: runtime.handlers,
     },
   );
 }
@@ -83,7 +83,8 @@ export async function loadApprovalsBoard(): Promise<{
   if (!writesEnabled) {
     return { writesEnabled: false, proposals: [] };
   }
-  const proposals = await listProcessProposals();
+  const runtime = buildWriteRuntime();
+  const proposals = await runtime.handlers.proposals.list();
   return { writesEnabled: true, proposals };
 }
 
@@ -91,4 +92,13 @@ export async function getWritesEnabledFlag(): Promise<boolean> {
   const session = await verifySession();
   if (!session.ok) return false;
   return isWriteActionsEnabled();
+}
+
+/** Estado sanitizado para Ajustes / preflight (sin secretos). */
+export async function loadWriteRuntimeStatus() {
+  const session = await verifySession();
+  if (!session.ok) {
+    return null;
+  }
+  return getWriteRuntimeStatus();
 }

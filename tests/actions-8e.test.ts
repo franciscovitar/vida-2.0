@@ -704,7 +704,8 @@ test('8E1-27. auditoría sin secretos', async () => {
     }),
     { ...deps(), audit },
   );
-  const row = audit.list()[0]!;
+  const rows = await audit.list();
+  const row = rows[0]!;
   assert.equal(auditLooksSafe(row), true);
   assert.equal(sanitizeActorHint('user@example.com').includes('user@'), false);
   assert.match(sanitizeActorHint('user@example.com'), /^us\*\*\*@example\.com$/);

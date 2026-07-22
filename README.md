@@ -66,14 +66,25 @@ muestra estado controlado.
 
 ### Escrituras seguras (8E.1)
 
-Código de Policy Engine, confirmaciones, idempotencia, auditoría, Tareas, Bandeja, Gimnasio
-(sesiones), `/aprobaciones` y propuestas de Calendar **preparado y desactivado** por defecto
-(`WRITE_ACTIONS_ENABLED` solo acepta `true`). Ver `docs/phase-8e-external-setup.md` para el
-setup externo. No crea eventos reales de Calendar. OpenClaw sigue fuera de alcance.
+Policy Engine, confirmaciones, Tareas, Bandeja, Gimnasio (sesiones), `/aprobaciones` y propuestas
+de Calendar. **Desactivado por defecto** (`WRITE_ACTIONS_ENABLED` solo acepta `true`).
+
+Con la flag activa y configuración completa en Preview, el runtime conecta adaptadores reales:
+
+- Notion: tareas, Bandeja, propuestas, idempotencia y auditoría persistentes (base Acciones).
+- Sheets: Gym Sessions / Gym Sets (PUT a filas libres; sin append destructivo).
+
+La memoria de proceso queda solo para tests (`NODE_ENV=test`) o `WRITE_ACTIONS_USE_MEMORY=true`
+en local — **nunca** como fallback silencioso en Preview/Production.
+
+Para lectura operativa alineada con escritura real en Preview: `NOTION_DATA_SOURCE=notion`
+(configurar en Vercel desde Work; no desde el código). Ver `docs/phase-8e-external-setup.md`
+y `docs/adr/0002-safe-writes-runtime.md`. No crea eventos reales de Calendar. OpenClaw fuera
+de alcance.
 
 Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`.
 
-Pendiente: activación controlada del catálogo/escrituras, setup externo Work, OpenClaw.
+Pendiente: activación controlada del catálogo/escrituras por Work, OpenClaw.
 
 ## Google Sheets (selector DEV / canónico)
 

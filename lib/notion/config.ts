@@ -5,8 +5,10 @@
 import { ALLOWED_NOTION_DATA_SOURCE_IDS, NOTION_DATABASES } from '@/lib/notion/constants';
 import type { NotionDataSourceMode } from '@/types/notion';
 
-export function getNotionDataSource(): NotionDataSourceMode {
-  return process.env.NOTION_DATA_SOURCE === 'notion' ? 'notion' : 'mock';
+export function getNotionDataSource(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): NotionDataSourceMode {
+  return env.NOTION_DATA_SOURCE === 'notion' ? 'notion' : 'mock';
 }
 
 export interface NotionConfig {
@@ -29,16 +31,18 @@ export function isAllowedNotionDataSourceId(id: string): boolean {
  * Lee la configuración. Sin token → not-configured.
  * Con IDs fuera de lista blanca → forbidden-data-source.
  */
-export function getNotionConfig(): NotionConfigResult {
-  const token = process.env.NOTION_API_TOKEN?.trim();
+export function getNotionConfig(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): NotionConfigResult {
+  const token = env.NOTION_API_TOKEN?.trim();
   if (!token) return { ok: false, reason: 'not-configured' };
 
   const tasksDataSourceId =
-    process.env.NOTION_TASKS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.tasks.dataSourceId;
+    env.NOTION_TASKS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.tasks.dataSourceId;
   const projectsDataSourceId =
-    process.env.NOTION_PROJECTS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.projects.dataSourceId;
+    env.NOTION_PROJECTS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.projects.dataSourceId;
   const areasDataSourceId =
-    process.env.NOTION_AREAS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.areas.dataSourceId;
+    env.NOTION_AREAS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.areas.dataSourceId;
 
   if (
     !isAllowedNotionDataSourceId(tasksDataSourceId) ||

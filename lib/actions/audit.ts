@@ -3,9 +3,11 @@
  */
 import type { ActionAuditRecord, ActionResult, ConfirmationMode } from '@/types/actions';
 
+export type AuditAppendResult = { ok: true } | { ok: false; message: string };
+
 export interface AuditSink {
-  append(record: ActionAuditRecord): void;
-  list(): readonly ActionAuditRecord[];
+  append(record: ActionAuditRecord): Promise<AuditAppendResult>;
+  list(): Promise<readonly ActionAuditRecord[]>;
 }
 
 export function sanitizeActorHint(email: string): string {
@@ -21,10 +23,11 @@ export function sanitizeActorHint(email: string): string {
 export function createMemoryAuditSink(): AuditSink {
   const rows: ActionAuditRecord[] = [];
   return {
-    append(record) {
+    async append(record) {
       rows.push(record);
+      return { ok: true };
     },
-    list() {
+    async list() {
       return rows;
     },
   };
@@ -32,7 +35,7 @@ export function createMemoryAuditSink(): AuditSink {
 
 export const processAuditSink = createMemoryAuditSink();
 
-export function recordActionAudit(
+export async function recordActionAudit(
   sink: AuditSink,
   input: {
     actionType: string;
@@ -40,8 +43,17 @@ export function recordActionAudit(
     result: ActionResult;
     confirmationMode: ConfirmationMode | 'none';
     at?: string;
+    targetType?: string | null;
+    risk?: string | null;
+    reversible?: boolean | null;
+    beforeSummary?: string | null;
+    afterSummary?: string | null;
+    idempotencyDigest?: string | null;
   },
-): ActionAuditRecord {
+): Promise<
+  | { ok: true; record: ActionAuditRecord }
+  | { ok: false; record: ActionAuditRecord; message: string }
+> {
   const record: ActionAuditRecord = {
     actionType: input.actionType,
     actorHint: sanitizeActorHint(input.actorEmail),
@@ -52,9 +64,18 @@ export function recordActionAudit(
     errorCode: input.result.ok ? null : input.result.code,
     targetKey: input.result.target?.key ?? null,
     verified: input.result.verified,
+    targetType: input.targetType ?? input.result.target?.type ?? null,
+    risk: input.risk ?? null,
+    reversible: input.reversible ?? null,
+    beforeSummary: input.beforeSummary ?? null,
+    afterSummary: input.afterSummary ?? input.result.summary,
+    idempotencyDigest: input.idempotencyDigest ?? null,
   };
-  sink.append(record);
-  return record;
+  const appended = await sink.append(record);
+  if (!appended.ok) {
+    return { ok: false, record, message: appended.message };
+  }
+  return { ok: true, record };
 }
 
 /** Garantiza que un registro no contenga secretos obvios. */

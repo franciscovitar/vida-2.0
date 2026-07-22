@@ -5,6 +5,7 @@ import { recordActionAudit, type AuditSink } from '@/lib/actions/audit';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
 import { handleAllowedAction, type HandlerDeps } from '@/lib/actions/handlers';
 import type { IdempotencyStore } from '@/lib/actions/idempotency';
+import { idempotencyDigest } from '@/lib/actions/opaque';
 import { evaluateActionPolicy, isForbiddenActionType } from '@/lib/actions/policy';
 import type { ActionConfirmation, ActionRequest, ActionResult } from '@/types/actions';
 
@@ -15,6 +16,34 @@ export type ExecuteActionDeps = {
   audit: AuditSink;
   handlers: HandlerDeps;
 };
+
+async function auditSafe(
+  deps: ExecuteActionDeps,
+  input: {
+    actionType: string;
+    actorEmail: string;
+    result: ActionResult;
+    confirmationMode: ActionConfirmation['mode'] | 'none';
+  },
+): Promise<ActionResult> {
+  const digest = idempotencyDigest(input.actorEmail, input.actionType, input.result.idempotencyKey);
+  const audited = await recordActionAudit(deps.audit, {
+    actionType: input.actionType,
+    actorEmail: input.actorEmail,
+    result: input.result,
+    confirmationMode: input.confirmationMode,
+    idempotencyDigest: digest,
+    afterSummary: input.result.summary,
+  });
+  if (input.result.ok && !audited.ok) {
+    return {
+      ...input.result,
+      code: 'applied',
+      message: 'Escritura aplicada; la auditoría requiere revisión (no se reintentó la acción).',
+    };
+  }
+  return input.result;
+}
 
 export async function executeAction(
   request: ActionRequest,
@@ -34,7 +63,7 @@ export async function executeAction(
       summary: null,
       verified: null,
     };
-    recordActionAudit(deps.audit, {
+    await auditSafe(deps, {
       actionType: request.actionType,
       actorEmail: request.actorEmail,
       result: denied,
@@ -68,7 +97,7 @@ export async function executeAction(
       summary: null,
       verified: null,
     };
-    recordActionAudit(deps.audit, {
+    await auditSafe(deps, {
       actionType: request.actionType,
       actorEmail: request.actorEmail,
       result: mapped,
@@ -90,7 +119,7 @@ export async function executeAction(
     };
   }
 
-  const cached = deps.idempotency.get(
+  const cached = await deps.idempotency.get(
     request.actorEmail,
     request.actionType,
     request.idempotencyKey,
@@ -101,7 +130,7 @@ export async function executeAction(
       code: 'idempotent-replay',
       message: cached.ok ? 'Resultado idempotente reutilizado.' : cached.message,
     };
-    recordActionAudit(deps.audit, {
+    await auditSafe(deps, {
       actionType: request.actionType,
       actorEmail: request.actorEmail,
       result: replay,
@@ -110,7 +139,6 @@ export async function executeAction(
     return replay;
   }
 
-  // Aprobar vuelve a pasar por Policy Engine (ya evaluado arriba con confirmation reinforced).
   const handled = await handleAllowedAction({
     actionType: policy.actionType,
     payload: request.payload,
@@ -119,12 +147,17 @@ export async function executeAction(
     deps: deps.handlers,
   });
 
-  deps.idempotency.set(request.actorEmail, request.actionType, request.idempotencyKey, handled);
-  recordActionAudit(deps.audit, {
+  await deps.idempotency.set(
+    request.actorEmail,
+    request.actionType,
+    request.idempotencyKey,
+    handled,
+  );
+
+  return auditSafe(deps, {
     actionType: request.actionType,
     actorEmail: request.actorEmail,
     result: handled,
     confirmationMode: confirmation?.mode ?? 'none',
   });
-  return handled;
 }

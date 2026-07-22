@@ -73,15 +73,32 @@ estructural ni borrados.
 
 ## 4. Variables por entorno
 
-| Variable                        | Local    | Preview  | Production          |
-| ------------------------------- | -------- | -------- | ------------------- |
-| `WRITE_ACTIONS_ENABLED`         | false    | false    | false hasta validar |
-| `NOTION_INBOX_PAGE_ID`          | opcional | opcional | solo si captura     |
-| `NOTION_ACTIONS_DATA_SOURCE_ID` | opcional | opcional | solo si propuestas  |
-| `SHEETS_GYM_SESSIONS_RANGE`     | opcional | opcional | solo si gym write   |
-| `SHEETS_GYM_SETS_RANGE`         | opcional | opcional | solo si gym write   |
+| Variable                        | Local            | Preview                       | Production          |
+| ------------------------------- | ---------------- | ----------------------------- | ------------------- |
+| `WRITE_ACTIONS_ENABLED`         | false            | false                         | false hasta validar |
+| `NOTION_DATA_SOURCE`            | mock/local       | **`notion`** para prueba real | no cambiar sin plan |
+| `NOTION_INBOX_PAGE_ID`          | opcional         | opcional                      | solo si captura     |
+| `NOTION_ACTIONS_DATA_SOURCE_ID` | opcional         | opcional                      | solo si propuestas  |
+| `SHEETS_GYM_SESSIONS_RANGE`     | opcional         | opcional                      | solo si gym write   |
+| `SHEETS_GYM_SETS_RANGE`         | opcional         | opcional                      | solo si gym write   |
+| `WRITE_ACTIONS_USE_MEMORY`      | solo tests/local | **prohibido** (se ignora)     | **prohibido**       |
 
 No exponer estas variables al cliente. No hardcodear IDs en el repo.
+No configurar Vercel desde Cursor: Work debe fijar en Preview `NOTION_DATA_SOURCE=notion`
+cuando active la prueba real (además del resto de variables ya existentes).
+
+### Runtime real vs memoria
+
+| Modo        | Cuándo                                    | Propuestas / audit / idempotencia  |
+| ----------- | ----------------------------------------- | ---------------------------------- |
+| Cerrado     | Flag ausente o `false`                    | Puertos cerrados                   |
+| memory-test | `NODE_ENV=test` o memoria local explícita | Stores en memoria de proceso       |
+| real        | Flag + Preview/Production sin memoria     | Base Notion Acciones (persistente) |
+
+Idempotencia persistente: digest `sha256(actorDigest|actionType|key)` sin correo crudo.
+Auditoría persistente: filas sanitizadas en la misma base (marcador `_ledger` en payload).
+Limitación: Notion no garantiza unicidad atómica bajo concurrencia extrema; el runtime mitiga
+con consulta previa y comprobación posterior.
 
 ## 5. Recursos a compartir
 
@@ -92,7 +109,8 @@ No exponer estas variables al cliente. No hardcodear IDs en el repo.
 
 ## 6. Prueba real que debe hacer Work
 
-1. En local/dev: `WRITE_ACTIONS_ENABLED=true` + variables DEV.
+1. En Preview: `WRITE_ACTIONS_ENABLED=true`, `NOTION_DATA_SOURCE=notion`, variables DEV ya
+   configuradas; `WRITE_ACTIONS_USE_MEMORY` ausente.
 2. Crear tarea de prueba → verificar en Notion → cambiar estado → verificar.
 3. Captura en `/bandeja` → aparece en página Bandeja; texto no se pierde si falla config.
 4. Registrar sesión gym corta → fila `pending` → sets → `complete`.
