@@ -1,0 +1,87 @@
+.notice {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.input {
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+.check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.message {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.sets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.set-row {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(4, 0.7fr) auto;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+@media (width < 720px) {
+  .set-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.proposal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.proposal:last-child {
+  border-bottom: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

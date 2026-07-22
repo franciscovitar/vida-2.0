@@ -97,5 +97,8 @@ Sigue fuera de alcance de 8B / cubierto parcialmente en 8C:
   editorial; no leen Journaling; fallos parciales por fuente.
 - 8D.2 (código): `/gimnasio` read-only. Rutina desde entrada canónica `renderMode=gym`;
   Sheets para progreso; sin escritura de sesiones. Flag apagada ⇒ estado controlado.
-  8E habilitará registro seguro, Policy Engine y OpenClaw.
+- 8E.1 (código): Policy Engine + escrituras tipadas (tareas, bandeja, gym sessions,
+  propuestas/aprobaciones, propuesta Calendar sin evento real). Todo detrás de
+  `WRITE_ACTIONS_ENABLED` (default off). Setup externo en `docs/phase-8e-external-setup.md`.
+  OpenClaw sigue pendiente.
 - Cambiar Vercel o variables reales.

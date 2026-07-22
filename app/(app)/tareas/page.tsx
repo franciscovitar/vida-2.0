@@ -8,6 +8,8 @@ import boardStyles from '@/components/notion/NotionBoards.module.scss';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { TaskCreatePanel, TaskStatusPanel } from '@/components/actions/WritePanels';
+import { isWriteActionsEnabled } from '@/lib/actions/config';
 import { getNotionDashboard } from '@/lib/data/notion-source';
 import { formatArgentineFullDate } from '@/lib/adapters/dates';
 
@@ -28,6 +30,7 @@ function sourceLabel(source: 'mock' | 'notion', status: string): string {
 export default async function TareasPage() {
   const data = await getNotionDashboard();
   const s = data.taskSummary;
+  const writesEnabled = isWriteActionsEnabled();
 
   return (
     <div className={`${pageStyles.page} ${local.page}`}>
@@ -54,7 +57,11 @@ export default async function TareasPage() {
         <SectionHeader
           id="tasks-summary-title"
           title="Resumen"
-          description="Solo lectura. No se pueden completar ni editar desde la web todavía."
+          description={
+            writesEnabled
+              ? 'Escrituras habilitadas con Policy Engine y confirmación explícita.'
+              : 'Solo lectura. Escrituras desactivadas (WRITE_ACTIONS_ENABLED).'
+          }
           domain="tasks"
         />
         <ul className={boardStyles.summary}>
@@ -88,6 +95,18 @@ export default async function TareasPage() {
           </li>
         </ul>
       </Card>
+
+      <TaskCreatePanel writesEnabled={writesEnabled} />
+      {writesEnabled ? (
+        <Card>
+          <SectionHeader
+            title="Cambiar estado"
+            description="Transiciones válidas con lectura previa y verificación."
+            domain="tasks"
+          />
+          <TaskStatusPanel writesEnabled={writesEnabled} />
+        </Card>
+      ) : null}
 
       <Card aria-labelledby="tasks-list-title">
         <SectionHeader

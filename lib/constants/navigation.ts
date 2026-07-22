@@ -16,6 +16,7 @@ import {
   NotebookPen,
   Search,
   Settings,
+  ShieldCheck,
   ShoppingCart,
 } from 'lucide-react';
 
@@ -36,6 +37,7 @@ export type NavIconKey =
   | 'analisis'
   | 'areas'
   | 'gimnasio'
+  | 'aprobaciones'
   | 'bandeja'
   | 'journaling'
   | 'ajustes'
@@ -71,6 +73,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   analisis: Brain,
   areas: Boxes,
   gimnasio: Dumbbell,
+  aprobaciones: ShieldCheck,
   bandeja: Inbox,
   journaling: NotebookPen,
   ajustes: Settings,
@@ -90,6 +93,7 @@ export const primaryNav: NavItemData[] = [
   { label: 'Tareas', href: '/tareas', icon: 'tareas', domain: 'tasks' },
   { label: 'Áreas', href: '/areas', icon: 'areas', domain: 'projects' },
   { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },
+  { label: 'Aprobaciones', href: '/aprobaciones', icon: 'aprobaciones', domain: 'neutral' },
   { label: 'Aprendizaje', href: '/aprendizaje', icon: 'aprendizaje', domain: 'learning' },
   { label: 'Compras', href: '/compras', icon: 'compras', domain: 'neutral' },
   { label: 'Análisis IA', href: '/analisis-ia', icon: 'analisis', domain: 'productivity' },

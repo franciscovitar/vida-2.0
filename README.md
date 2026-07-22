@@ -62,12 +62,18 @@ terceros en Trabajo, sin datos clínicos/financieros sensibles.
 Ruta read-only `/gimnasio`. Notion (entrada canónica `renderMode=gym` del Registro Web) define la
 rutina; Sheets aporta hábitos/métricas cuantitativas; Calendar aporta contexto temporal opcional.
 Sin escritura de sesiones ni formularios de registro. Con `WEB_CATALOG_ENABLED=false` el módulo
-muestra estado controlado. Pendiente 8E: registro seguro de sesiones, Policy Engine y OpenClaw.
+muestra estado controlado.
+
+### Escrituras seguras (8E.1)
+
+Código de Policy Engine, confirmaciones, idempotencia, auditoría, Tareas, Bandeja, Gimnasio
+(sesiones), `/aprobaciones` y propuestas de Calendar **preparado y desactivado** por defecto
+(`WRITE_ACTIONS_ENABLED` solo acepta `true`). Ver `docs/phase-8e-external-setup.md` para el
+setup externo. No crea eventos reales de Calendar. OpenClaw sigue fuera de alcance.
 
 Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`.
 
-Pendiente tras 8D: activación controlada del catálogo, publicación editorial, escritura Notion/
-sesiones de Gimnasio y OpenClaw.
+Pendiente: activación controlada del catálogo/escrituras, setup externo Work, OpenClaw.
 
 ## Google Sheets (selector DEV / canónico)
 
@@ -140,6 +146,9 @@ productores externos ni modifica las hojas.
 - `components/areas`: listado y panel genérico de Área.
 - `lib/gym`: resolución gym, parser de rutina, analítica y carga de `/gimnasio`.
 - `components/gym`: dashboard móvil read-only de Gimnasio.
+- `lib/actions`: Policy Engine, payloads, motor de escritura, puertos e idempotencia.
+- `components/actions`: formularios de escritura detrás de flag.
+- `docs/phase-8e-external-setup.md`: checklist externo para Work.
 - `lib/mock-data`: datos simulados por dominio.
 - `lib/constants`: navegación y colores semánticos actuales.
 - `docs/adr`: decisiones de arquitectura.
