@@ -260,17 +260,16 @@ export function buildWriteRuntime(
   };
 }
 
-/** Lista propuestas del runtime actual (persistente en real; memoria solo en test). */
-export async function listRuntimeProposals() {
-  const runtime = buildWriteRuntime();
-  return runtime.handlers.proposals.list();
-}
-
 /**
- * @deprecated Solo tests legacy. Preferir listRuntimeProposals.
+ * Lista propuestas del runtime actual (persistente en Preview/Production real;
+ * memoria solo en test o local explícito). No usa el loader legacy de memoria fresca.
  */
-export function listProcessProposals() {
-  return createMemoryProposalPort().list();
+export async function listRuntimeProposals(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+  overrides?: Parameters<typeof buildWriteRuntime>[1],
+) {
+  const runtime = buildWriteRuntime(env, overrides);
+  return runtime.handlers.proposals.list();
 }
 
 export { getWriteRuntimeStatus, processAuditSink, processIdempotencyStore };
