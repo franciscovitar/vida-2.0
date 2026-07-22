@@ -103,7 +103,7 @@ export default async function ProyectosPage() {
         <SectionHeader
           id="areas-section-title"
           title="Áreas"
-          description="Fuente para filtros, etiquetas y agrupación. Ruta /areas pendiente."
+          description="Fuente para filtros, etiquetas y agrupación. Ver también /areas."
           domain="neutral"
         />
         <AreasSection areas={data.areas} />

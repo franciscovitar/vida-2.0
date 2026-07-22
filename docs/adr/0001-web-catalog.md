@@ -92,5 +92,8 @@ Sigue fuera de alcance de 8B / cubierto parcialmente en 8C:
   búsqueda `/buscar` (texto cacheable + revalidación de política en cada consulta),
   rutas fijas aprendizaje/compras por clave estable.
 - Activar `WEB_CATALOG_ENABLED` o publicar recursos (sigue pendiente).
-- Paneles especiales Áreas/Facultad/Salud/Gimnasio, escritura Notion, OpenClaw (8D).
+- 8D.1 (código): paneles read-only `/areas` y `/areas/[slug]` derivados de bases
+  operativas (Notion + Calendar + Sheets cuando corresponde). No sustituyen el catálogo
+  editorial; no leen Journaling; fallos parciales por fuente. Gimnasio estructurado,
+  escritura Notion, Policy Engine y OpenClaw siguen pendientes.
 - Cambiar Vercel o variables reales.

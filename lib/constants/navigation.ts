@@ -33,6 +33,7 @@ export type NavIconKey =
   | 'aprendizaje'
   | 'compras'
   | 'analisis'
+  | 'areas'
   | 'bandeja'
   | 'journaling'
   | 'ajustes'
@@ -66,6 +67,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   aprendizaje: BookOpen,
   compras: ShoppingCart,
   analisis: Brain,
+  areas: Boxes,
   bandeja: Inbox,
   journaling: NotebookPen,
   ajustes: Settings,
@@ -83,6 +85,7 @@ export const primaryNav: NavItemData[] = [
   { label: 'Agenda', href: '/agenda', icon: 'agenda', domain: 'productivity' },
   { label: 'Proyectos', href: '/proyectos', icon: 'proyectos', domain: 'projects' },
   { label: 'Tareas', href: '/tareas', icon: 'tareas', domain: 'tasks' },
+  { label: 'Áreas', href: '/areas', icon: 'areas', domain: 'projects' },
   { label: 'Aprendizaje', href: '/aprendizaje', icon: 'aprendizaje', domain: 'learning' },
   { label: 'Compras', href: '/compras', icon: 'compras', domain: 'neutral' },
   { label: 'Análisis IA', href: '/analisis-ia', icon: 'analisis', domain: 'productivity' },

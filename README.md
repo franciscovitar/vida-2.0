@@ -45,13 +45,22 @@ Con la flag apagada: menú actual, placeholders de aprendizaje/compras y `/p` / 
 publican contenido. Journaling permanece fuera de lector, navegación dinámica y búsqueda.
 
 Módulos funcionales (Hoy, Hábitos, Salud, Productividad cuantitativa, Tendencias, Agenda, Tareas,
-Proyectos, Bandeja, Ajustes) siguen en código. El catálogo gobierna páginas documentales
+Proyectos, Áreas, Bandeja, Ajustes) siguen en código. El catálogo gobierna páginas documentales
 (`/p/...` y claves fijas). La Productividad documental usa su slug dinámico, no `/productividad`.
+
+### Áreas (8D.1)
+
+Rutas read-only `/areas` y `/areas/[slug]` para las cuatro Áreas canónicas (`facultad`,
+`genova-trabajo`, `salud`, `vida-personal`). El panel es una vista derivada: Notion sigue siendo
+la fuente canónica de Áreas/Proyectos/Tareas; Calendar y Sheets aportan contexto cuando están
+operativos. Fallos parciales se aíslan por fuente. Privacidad: sin Journaling, sin PII de
+terceros en Trabajo, sin datos clínicos/financieros sensibles. Pendiente: registro estructurado
+de Gimnasio, escrituras, aprobaciones y OpenClaw.
 
 Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`.
 
-Pendiente para 8D: activación controlada, publicación editorial, paneles especiales (Áreas,
-Facultad, Salud, Gimnasio), escritura Notion y OpenClaw.
+Pendiente tras 8D.1: activación controlada del catálogo, publicación editorial, Gimnasio
+estructurado, escritura Notion y OpenClaw.
 
 ## Google Sheets (selector DEV / canónico)
 
@@ -120,6 +129,8 @@ productores externos ni modifica las hojas.
 - `components/web-catalog`: renderer documental genérico.
 - `app/(app)/p/[slug]`: ruta dinámica protegida (flag apagada ⇒ no publica).
 - `lib/notion`: lectura autorizada de Áreas, Proyectos y Tareas.
+- `lib/areas`: composición read-only de paneles de Área (`/areas`).
+- `components/areas`: listado y panel genérico de Área.
 - `lib/mock-data`: datos simulados por dominio.
 - `lib/constants`: navegación y colores semánticos actuales.
 - `docs/adr`: decisiones de arquitectura.
