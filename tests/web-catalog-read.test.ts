@@ -737,3 +737,90 @@ test('8B-R40. catálogo realista válido solo con datos ficticios', async () => 
     assert.match(entry.sourceRef, /^notion:[0-9a-f-]{36}$/);
   }
 });
+
+const FIXTURE_APP_NOTION_URL = `https://app.notion.com/workspace/Fixture-${FIXTURE_PAGE_ID_HEX}`;
+
+test('8B-R41. https://app.notion.com/... aceptada', () => {
+  assert.equal(extractNotionPageIdFromUrl(FIXTURE_APP_NOTION_URL), FIXTURE_PAGE_ID);
+  assert.deepEqual(resolveSourcePageId(url(FIXTURE_APP_NOTION_URL)), {
+    ok: true,
+    pageId: FIXTURE_PAGE_ID,
+  });
+});
+
+test('8B-R42. https://notion.so/... aceptada', () => {
+  assert.equal(
+    extractNotionPageIdFromUrl(`https://notion.so/${FIXTURE_PAGE_ID_HEX}`),
+    FIXTURE_PAGE_ID,
+  );
+});
+
+test('8B-R43. https://www.notion.so/... aceptada', () => {
+  assert.equal(extractNotionPageIdFromUrl(FIXTURE_NOTION_URL), FIXTURE_PAGE_ID);
+});
+
+test('8B-R44. https://evil.app.notion.com/... rechazada', () => {
+  assert.equal(
+    extractNotionPageIdFromUrl(`https://evil.app.notion.com/${FIXTURE_PAGE_ID_HEX}`),
+    null,
+  );
+  assert.deepEqual(resolveSourcePageId(url(`https://evil.app.notion.com/${FIXTURE_PAGE_ID_HEX}`)), {
+    ok: false,
+    code: 'invalid-source-ref',
+  });
+});
+
+test('8B-R45. https://app-notion.com/... rechazada', () => {
+  assert.equal(extractNotionPageIdFromUrl(`https://app-notion.com/${FIXTURE_PAGE_ID_HEX}`), null);
+});
+
+test('8B-R46. http://app.notion.com/... rechazada', () => {
+  assert.equal(extractNotionPageIdFromUrl(`http://app.notion.com/${FIXTURE_PAGE_ID_HEX}`), null);
+});
+
+test('8B-R47. URL con credenciales rechazada', () => {
+  assert.equal(
+    extractNotionPageIdFromUrl(`https://user:secret@app.notion.com/Fixture-${FIXTURE_PAGE_ID_HEX}`),
+    null,
+  );
+});
+
+test('8B-R48. URL con puerto no estándar rechazada', () => {
+  assert.equal(
+    extractNotionPageIdFromUrl(`https://app.notion.com:8443/Fixture-${FIXTURE_PAGE_ID_HEX}`),
+    null,
+  );
+});
+
+test('8B-R49. sourceRef e IDs no aparecen en el DTO público', async () => {
+  const entry = mapCatalogRawPage(
+    rawPage('app-dto', technicalProps({ sourceRef: url(FIXTURE_APP_NOTION_URL) })),
+  );
+  assert.ok(entry);
+  assert.equal(entry?.sourceRef, `notion:${FIXTURE_PAGE_ID}`);
+
+  const pageId = 'notion-secret-id-should-not-leak';
+  const port = createFakePort({
+    blocksById: {
+      [FIXTURE_PAGE_ID]: [
+        {
+          id: pageId,
+          type: 'paragraph',
+          has_children: false,
+          raw: { paragraph: { rich_text: [{ plain_text: 'Hola', href: null }] } },
+        },
+      ],
+    },
+  });
+  const index = requireIndex([entry!]);
+  const result = await readWebCatalogContentPage(port, entry!, index);
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const json = JSON.stringify(result.page);
+  assert.equal(json.includes(FIXTURE_APP_NOTION_URL), false);
+  assert.equal(json.includes('app.notion.com'), false);
+  assert.equal(json.includes('https://'), false);
+  assert.equal(json.includes(FIXTURE_PAGE_ID), false);
+  assert.equal(json.includes(pageId), false);
+  assert.equal(json.includes('notion:'), false);
+});

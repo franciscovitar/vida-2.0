@@ -155,6 +155,7 @@ export function normalizeNotionPageId(raw: string): string | null {
 
 /**
  * Extrae el id de página desde una URL Notion permitida.
+ * Solo HTTPS, hostname exacto, sin credenciales ni puertos no estándar.
  * No acepta otros hosts. No usa título ni slug.
  */
 export function extractNotionPageIdFromUrl(rawUrl: string): string | null {
@@ -164,7 +165,9 @@ export function extractNotionPageIdFromUrl(rawUrl: string): string | null {
   } catch {
     return null;
   }
-  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+  if (parsed.protocol !== 'https:') return null;
+  if (parsed.username !== '' || parsed.password !== '') return null;
+  if (parsed.port !== '') return null;
   if (!NOTION_SOURCE_REF_HOSTS.has(parsed.hostname.toLowerCase())) return null;
 
   const segments = parsed.pathname.split('/').filter((part) => part.length > 0);

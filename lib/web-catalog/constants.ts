@@ -48,8 +48,8 @@ export const WEB_CATALOG_PROPS = {
   confirmation: 'Confirmación',
 } as const;
 
-/** Hosts permitidos para sourceRef URL (solo servidor). */
-export const NOTION_SOURCE_REF_HOSTS = new Set(['www.notion.so', 'notion.so']);
+/** Hosts permitidos para sourceRef URL (solo servidor; comparación exacta). */
+export const NOTION_SOURCE_REF_HOSTS = new Set(['notion.so', 'www.notion.so', 'app.notion.com']);
 
 /** Límites seguros del lector recursivo. */
 export const WEB_CATALOG_READ_LIMITS = {
