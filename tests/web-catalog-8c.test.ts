@@ -365,9 +365,14 @@ test('8C-19. /compras resuelve por clave estable', () => {
   assert.equal(WEB_CATALOG_FIXED_ROUTES.compras.path, '/compras');
 });
 
-test('8C-19b. /dieta resuelve por clave estable', () => {
-  assert.equal(WEB_CATALOG_FIXED_ROUTES.dieta.stableKey, 'dieta');
+test('8C-19b. /dieta resuelve por clave estable canónica', () => {
+  assert.equal(WEB_CATALOG_FIXED_ROUTES.dieta.stableKey, 'health.diet');
   assert.equal(WEB_CATALOG_FIXED_ROUTES.dieta.path, '/dieta');
+});
+
+test('8C-19c. /norte resuelve por clave estable canónica', () => {
+  assert.equal(WEB_CATALOG_FIXED_ROUTES.norte.stableKey, 'today.north');
+  assert.equal(WEB_CATALOG_FIXED_ROUTES.norte.path, '/norte');
 });
 
 test('8C-20. recurso no publicado no es navegable ni buscable', () => {

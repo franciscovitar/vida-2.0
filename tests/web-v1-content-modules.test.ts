@@ -9,7 +9,10 @@ import {
   detectDocumentPresentation,
 } from '@/lib/web-catalog/document-overview';
 import { buildAppNavigation } from '@/lib/web-catalog/navigation';
-import { buildSearchableDocument } from '@/lib/web-catalog/search';
+import {
+  buildSearchableDocument,
+  searchWebCatalogDocuments,
+} from '@/lib/web-catalog/search';
 import { webCatalogPathFor } from '@/lib/web-catalog/section-labels';
 import { usesReadableContentRenderer } from '@/lib/web-catalog/policy';
 import type { ContentBlock, ContentPage } from '@/types/content';
@@ -189,30 +192,53 @@ test('10A-7. rutas fijas se usan también en búsqueda', () => {
   const fixed = entry({ stableKey: 'aprendizaje', slug: 'mapa-de-prueba' });
   const document = buildSearchableDocument(fixed, page([block('p', 'paragraph', 'Texto')]));
   assert.equal(webCatalogPathFor('aprendizaje', 'mapa-de-prueba'), '/aprendizaje');
-  assert.equal(webCatalogPathFor('norte', 'direccion-temporal'), '/norte');
+  assert.equal(webCatalogPathFor('today.north', 'direccion-temporal'), '/norte');
   assert.equal(webCatalogPathFor('facultad', 'facultad-documento'), '/areas/facultad');
-  assert.equal(webCatalogPathFor('dieta', 'alimentacion-canonica'), '/dieta');
+  assert.equal(webCatalogPathFor('health.diet', 'alimentacion-canonica'), '/dieta');
   assert.equal(document?.href, '/aprendizaje');
   assert.equal(webCatalogPathFor('fixture.other', 'otro'), '/p/otro');
 });
 
-test('10A-8. renderer Facultad reutiliza lectura segura sin abrir otros renderers', () => {
+test('10A-7b. búsqueda no indexa ni devuelve menciones incidentales de Journaling', () => {
+  const searchable = entry({ stableKey: 'productividad.guide', slug: 'productividad-guia' });
+  const content = page([
+    block('safe', 'paragraph', 'Hábitos: levantarse con la alarma.'),
+    block('private-reference', 'paragraph', 'Journaling: diario.'),
+  ]);
+  const document = buildSearchableDocument(searchable, content);
+  assert.ok(document);
+  assert.equal(document.body.toLowerCase().includes('journaling'), false);
+  assert.deepEqual(searchWebCatalogDocuments([document], 'Journaling', [searchable]), []);
+});
+
+test('10A-8. renderers documentales y módulos fijos reutilizan lectura segura', () => {
   assert.equal(usesReadableContentRenderer(entry({ renderMode: 'faculty' })), true);
+  assert.equal(usesReadableContentRenderer(entry({ renderMode: 'functional-module' })), true);
   assert.equal(usesReadableContentRenderer(entry({ renderMode: 'gym' })), false);
   assert.equal(usesReadableContentRenderer(entry({ renderMode: 'private' })), false);
 });
 
 test('10A-9. Norte usa una sola ruta fija y desaparece si el catálogo lo oculta', () => {
   const published = buildAppNavigation(true, [
-    entry({ stableKey: 'norte', slug: 'direccion-temporal', section: 'today' }),
+    entry({
+      stableKey: 'today.north',
+      slug: 'direccion-temporal',
+      section: 'today',
+      renderMode: 'functional-module',
+      navigationPlacement: 'none',
+      navigationOrder: null,
+    }),
   ]);
   assert.equal(published.primary.filter((item) => item.href === '/norte').length, 1);
 
   const hidden = buildAppNavigation(true, [
     entry({
-      stableKey: 'norte',
+      stableKey: 'today.north',
       slug: 'direccion-temporal',
       section: 'today',
+      renderMode: 'functional-module',
+      navigationPlacement: 'none',
+      navigationOrder: null,
       status: 'hidden',
       policy: {
         visibleWeb: false,
@@ -233,20 +259,24 @@ test('10A-9. Norte usa una sola ruta fija y desaparece si el catálogo lo oculta
 test('10A-10. Dieta usa una sola ruta fija y obedece la política del catálogo', () => {
   const published = buildAppNavigation(true, [
     entry({
-      stableKey: 'dieta',
+      stableKey: 'health.diet',
       editorialName: 'Dieta',
       slug: 'alimentacion-canonica',
       section: 'personal-systems',
+      navigationPlacement: 'none',
+      navigationOrder: null,
     }),
   ]);
   assert.equal(published.primary.filter((item) => item.href === '/dieta').length, 1);
 
   const hidden = buildAppNavigation(true, [
     entry({
-      stableKey: 'dieta',
+      stableKey: 'health.diet',
       editorialName: 'Dieta',
       slug: 'alimentacion-canonica',
       section: 'personal-systems',
+      navigationPlacement: 'none',
+      navigationOrder: null,
       status: 'hidden',
       policy: {
         visibleWeb: false,

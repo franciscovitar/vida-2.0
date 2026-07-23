@@ -4,9 +4,61 @@ import { MetricCard } from '@/components/ui/MetricCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ContentPageView } from '@/components/web-catalog/ContentPageView';
 import { GymRoutineTabs } from '@/components/gym/GymRoutineTabs';
-import type { GymDashboardData } from '@/types/gym';
+import type {
+  GymDashboardData,
+  GymDataSourceKind,
+  GymDataSourceState,
+  GymModuleStatus,
+} from '@/types/gym';
 
 import styles from './GymDashboard.module.scss';
+
+const MODULE_STATUS_LABELS: Record<GymModuleStatus, string> = {
+  ready: 'Lista',
+  'flag-disabled': 'No habilitada',
+  'not-configured': 'Sin configurar',
+  empty: 'Sin rutina',
+  ambiguous: 'Revisar rutina',
+  forbidden: 'Rutina no disponible',
+  partial: 'Disponible parcialmente',
+  error: 'Temporalmente no disponible',
+};
+
+const SOURCE_KIND_LABELS: Record<GymDataSourceKind, string> = {
+  notion: 'Rutina',
+  sheets: 'Hábitos y métricas',
+  calendar: 'Agenda',
+  sessions: 'Historial de sesiones',
+};
+
+const SOURCE_STATE_LABELS: Record<GymDataSourceState, string> = {
+  ready: 'Disponible',
+  mock: 'Simulada',
+  unavailable: 'No disponible',
+  error: 'Revisar',
+  'not-applicable': 'No aplica',
+  empty: 'Sin registros',
+  disabled: 'Desactivada',
+};
+
+function publicWarningSubject(subject: string | null): string | null {
+  if (!subject) return null;
+  const normalized = subject.toLowerCase();
+  if (normalized === 'notion') return 'Rutina';
+  if (normalized === 'sheets') return 'Métricas';
+  if (normalized === 'calendar') return 'Agenda';
+  if (normalized === 'sessions') return 'Historial';
+  return subject;
+}
+
+function publicSourceNotice(notice: string | null): string | null {
+  if (!notice) return null;
+  return notice
+    .replace(/\s*\([^)]*[A-Z][A-Z0-9_]{3,}[^)]*\)\.?/g, '.')
+    .replace(/\b[A-Z][A-Z0-9_]{3,}\b/g, 'configuración interna')
+    .replace(/\s+\./g, '.')
+    .trim();
+}
 
 export function GymDashboardView({ data }: { data: GymDashboardData }) {
   return (
@@ -14,12 +66,12 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
       <Card>
         <SectionHeader
           title={data.routine?.name ?? data.documentaryPage?.title ?? 'Gimnasio'}
-          description={data.moduleNotice ?? 'Módulo read-only de rutina y contexto.'}
+          description={data.moduleNotice ?? 'Rutina y contexto en modo solo lectura.'}
           domain="health"
         />
         <div className={styles.meta}>
           <Badge domain="health" variant="outline">
-            {data.moduleStatus}
+            {MODULE_STATUS_LABELS[data.moduleStatus]}
           </Badge>
           <span>
             Actualización:{' '}
@@ -27,7 +79,7 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
               data.documentaryPage?.lastEditedAt?.slice(0, 10) ??
               '—'}
           </span>
-          <span>Fuente: {data.routine?.sourceLabel ?? 'Notion (Registro Web)'}</span>
+          <span>Fuente: {data.routine?.sourceLabel ?? 'Rutina publicada'}</span>
           <a href={data.areaHref} className={styles.link}>
             Área Salud
           </a>
@@ -178,30 +230,34 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
         <Card>
           <SectionHeader title="Advertencias" description="No bloquean el panel." />
           <ul className={styles.notes}>
-            {data.warnings.map((warning, index) => (
-              <li key={`${warning.code}-${index}`} className={styles.warn}>
-                {warning.subject ? `${warning.subject}: ` : null}
-                {warning.message}
-              </li>
-            ))}
+            {data.warnings.map((warning, index) => {
+              const subject = publicWarningSubject(warning.subject);
+              return (
+                <li key={`${warning.code}-${index}`} className={styles.warn}>
+                  {subject ? `${subject}: ` : null}
+                  {warning.message}
+                </li>
+              );
+            })}
           </ul>
         </Card>
       ) : null}
 
       <Card>
-        <SectionHeader title="Estado de fuentes" />
+        <SectionHeader title="Estado de datos" />
         <ul className={styles.sources}>
-          {data.sources.map((source) => (
-            <li key={source.kind}>
-              <span className={styles['source-kind']}>{source.kind}</span>
-              <Badge domain="neutral" variant="outline">
-                {source.state}
-              </Badge>
-              {source.notice ? (
-                <span className={styles['source-notice']}>{source.notice}</span>
-              ) : null}
-            </li>
-          ))}
+          {data.sources.map((source) => {
+            const notice = publicSourceNotice(source.notice);
+            return (
+              <li key={source.kind}>
+                <span className={styles['source-kind']}>{SOURCE_KIND_LABELS[source.kind]}</span>
+                <Badge domain="neutral" variant="outline">
+                  {SOURCE_STATE_LABELS[source.state]}
+                </Badge>
+                {notice ? <span className={styles['source-notice']}>{notice}</span> : null}
+              </li>
+            );
+          })}
         </ul>
       </Card>
     </div>

@@ -23,6 +23,13 @@ function sourceLabel(source: 'mock' | 'google', status: string): string {
   return 'Google Calendar sin datos';
 }
 
+function publicStatusLabel(status: string, totalEvents: number): string {
+  if (status === 'empty') return 'Sin eventos en el período seleccionado';
+  if (status === 'ready') return `${totalEvents} evento${totalEvents === 1 ? '' : 's'}`;
+  if (status === 'mock') return 'Agenda simulada';
+  return 'Agenda temporalmente no disponible';
+}
+
 export default async function AgendaPage({
   searchParams,
 }: {
@@ -52,10 +59,7 @@ export default async function AgendaPage({
 
       <p className={local.meta}>
         <span>Fuente: {sourceLabel(data.source, data.status)}</span>
-        <span>Estado: {data.status}</span>
-        <span>Zona: {data.timezone}</span>
-        <span className="tabular">{data.summary.totalEvents} eventos</span>
-        <span className="tabular">Calendarios: {data.calendarCount}</span>
+        <span>{publicStatusLabel(data.status, data.summary.totalEvents)}</span>
       </p>
 
       <AgendaViewSwitcher view={data.view} />

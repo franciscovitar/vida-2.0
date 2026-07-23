@@ -27,6 +27,26 @@ export type SearchableDocument = {
   body: string;
 };
 
+/**
+ * Términos que no deben aparecer ni actuar como puerta lateral hacia contenido
+ * privado. El recurso privado sigue excluido por política; esta capa evita que
+ * una mención incidental dentro de un documento autorizado termine en snippets.
+ */
+const PRIVATE_SEARCH_TERMS = ['journaling'] as const;
+
+function containsPrivateSearchTerm(value: string): boolean {
+  const normalized = value.toLowerCase();
+  return PRIVATE_SEARCH_TERMS.some((term) => normalized.includes(term));
+}
+
+function stripPrivateSearchLines(value: string): string {
+  return value
+    .split('\n')
+    .filter((line) => !containsPrivateSearchTerm(line))
+    .join('\n')
+    .trim();
+}
+
 function collectPlain(blocks: readonly ContentBlock[]): string[] {
   const parts: string[] = [];
   for (const block of blocks) {
@@ -54,7 +74,7 @@ export function buildSearchableDocument(
   page: Pick<ContentPage, 'title' | 'blocks'>,
 ): SearchableDocument | null {
   if (!canSearchWebCatalogEntry(entry)) return null;
-  const body = collectPlain(page.blocks).join('\n');
+  const body = stripPrivateSearchLines(collectPlain(page.blocks).join('\n'));
   return {
     stableKey: entry.stableKey,
     title: page.title || entry.editorialName,
@@ -100,20 +120,24 @@ export function searchWebCatalogDocuments(
 ): WebCatalogSearchHit[] {
   const query = normalizeQuery(rawQuery);
   if (query === '') return [];
+  if (containsPrivateSearchTerm(query)) return [];
 
   const authorized = filterSearchDocumentsByCurrentPolicy(documents, currentEntries);
 
   const hits: WebCatalogSearchHit[] = [];
   for (const doc of authorized) {
+    // Vuelve a sanear el cuerpo al consultar para cubrir índices cacheados
+    // construidos antes de incorporar esta barrera de privacidad.
+    const body = stripPrivateSearchLines(doc.body);
     const titleMatch = doc.title.toLowerCase().includes(query);
     const sectionLabel = WEB_CATALOG_SECTION_LABELS[doc.section];
     const sectionMatch = sectionLabel.toLowerCase().includes(query);
     const aliasMatch = doc.aliases.some((alias) => alias.toLowerCase().includes(query));
-    const bodyMatch = doc.body.toLowerCase().includes(query);
+    const bodyMatch = body.toLowerCase().includes(query);
     if (!titleMatch && !sectionMatch && !aliasMatch && !bodyMatch) continue;
 
     const snippetSource = bodyMatch
-      ? doc.body
+      ? body
       : titleMatch
         ? doc.title
         : aliasMatch

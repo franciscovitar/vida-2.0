@@ -282,6 +282,21 @@ test('8B-R5. flag activa sin configuración reporta not-configured', () => {
   });
 });
 
+test('8B-R5b. catálogo puede usar un token documental separado', () => {
+  assert.deepEqual(
+    getWebCatalogNotionConfig({
+      NOTION_API_TOKEN: 'operational-token',
+      NOTION_WEB_CATALOG_API_TOKEN: 'readonly-token',
+      NOTION_WEB_CATALOG_DATA_SOURCE_ID: 'catalog-source',
+    }),
+    {
+      ok: true,
+      token: 'readonly-token',
+      dataSourceId: 'catalog-source',
+    },
+  );
+});
+
 test('8B-R6. recurso oculto no se lee', () => {
   assert.equal(canLoadWebCatalogContent(publishedDocument({ status: 'hidden' })), false);
 });

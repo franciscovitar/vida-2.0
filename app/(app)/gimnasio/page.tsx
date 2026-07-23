@@ -21,7 +21,7 @@ export default async function GimnasioPage() {
     <div className={styles.page}>
       <PageHeader
         title="Gimnasio"
-        description="Rutina Notion + contexto Salud + métricas Sheets. Registro seguro detrás de flag."
+        description="Rutina, contexto de salud e historial en un panel de solo lectura."
         icon={Dumbbell}
         domain="health"
       />

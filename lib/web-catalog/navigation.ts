@@ -6,7 +6,11 @@ import {
   secondaryNav as staticSecondaryNav,
   type NavItemData,
 } from '@/lib/constants/navigation';
-import { canNavigateWebCatalogEntry, isPrivateWebCatalogEntry } from '@/lib/web-catalog/policy';
+import {
+  canLoadWebCatalogContent,
+  canNavigateWebCatalogEntry,
+  isPrivateWebCatalogEntry,
+} from '@/lib/web-catalog/policy';
 import { WEB_CATALOG_FIXED_ROUTES, webCatalogPathFor } from '@/lib/web-catalog/section-labels';
 import type { Domain } from '@/types';
 import type { WebCatalogEntry, WebCatalogSection } from '@/types/web-catalog';
@@ -98,7 +102,9 @@ function fixedRouteIsNavigable(
   const fixed = Object.values(WEB_CATALOG_FIXED_ROUTES).find((route) => route.path === path);
   if (!fixed) return true;
   const entry = entriesByStableKey.get(fixed.stableKey);
-  return entry ? canNavigateWebCatalogEntry(entry) : false;
+  // Las rutas fijas ya tienen una pantalla propia. No dependen de que el
+  // recurso use el renderer documental genérico ni de navigationPlacement.
+  return entry ? canLoadWebCatalogContent(entry) : false;
 }
 
 /** Entradas documentales ordenadas para el menú. */

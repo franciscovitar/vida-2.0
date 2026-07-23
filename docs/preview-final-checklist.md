@@ -38,6 +38,7 @@ El Preview nunca debe resolver el Sheet canónico.
 
 - `WEB_CATALOG_ENABLED=true`
 - referencia del data source del Registro Web
+- `NOTION_WEB_CATALOG_API_TOKEN` con una integración documental dedicada de solo lectura
 - la integración debe tener acceso a cada página canónica que se quiera mostrar
 
 Journaling, recursos privados, legacy, de sistema y excluidos continúan cerrados por política.

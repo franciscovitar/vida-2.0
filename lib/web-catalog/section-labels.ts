@@ -20,11 +20,11 @@ export const WEB_CATALOG_SECTION_LABELS: Record<WebCatalogSection, string> = {
  * Evita colisión con módulos funcionales (p. ej. /productividad = Sheets).
  */
 export const WEB_CATALOG_FIXED_ROUTES = {
-  norte: { stableKey: 'norte', path: '/norte' },
+  norte: { stableKey: 'today.north', path: '/norte' },
   facultad: { stableKey: 'facultad', path: '/areas/facultad' },
   aprendizaje: { stableKey: 'aprendizaje', path: '/aprendizaje' },
   compras: { stableKey: 'compras', path: '/compras' },
-  dieta: { stableKey: 'dieta', path: '/dieta' },
+  dieta: { stableKey: 'health.diet', path: '/dieta' },
 } as const;
 
 export type WebCatalogFixedRouteId = keyof typeof WEB_CATALOG_FIXED_ROUTES;

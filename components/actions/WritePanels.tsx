@@ -12,7 +12,7 @@ import styles from './WritePanels.module.scss';
 export function WritesDisabledNotice() {
   return (
     <p className={styles.notice}>
-      Escrituras desactivadas (WRITE_ACTIONS_ENABLED). Las pantallas permanecen en solo lectura.
+      Esta sección permanece en modo solo lectura. El registro se habilitará en una etapa posterior.
     </p>
   );
 }

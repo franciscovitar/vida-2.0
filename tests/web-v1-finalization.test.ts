@@ -39,6 +39,7 @@ function previewEnv(): Record<string, string> {
     GOOGLE_CALENDAR_IDS: 'primary',
     GOOGLE_CALENDAR_TIMEZONE: 'America/Argentina/Cordoba',
     WEB_CATALOG_ENABLED: 'true',
+    NOTION_WEB_CATALOG_API_TOKEN: 'catalog-token-fixture',
     NOTION_WEB_CATALOG_DATA_SOURCE_ID: 'catalog-data-source-fixture',
     WRITE_ACTIONS_ENABLED: 'false',
     OPENCLAW_API_ENABLED: 'false',
@@ -114,6 +115,7 @@ test('11A-7. readiness no filtra secretos, IDs ni correos', () => {
     env.GOOGLE_PRIVATE_KEY,
     env.GOOGLE_SHEETS_DEV_ID,
     env.NOTION_API_TOKEN,
+    env.NOTION_WEB_CATALOG_API_TOKEN,
     env.NOTION_TASKS_DATA_SOURCE_ID,
     env.GOOGLE_CALENDAR_CLIENT_SECRET,
     env.GOOGLE_CALENDAR_REFRESH_TOKEN,
@@ -189,4 +191,33 @@ test('11B-5. rutas documentales muestran estados de fuente sin mocks', () => {
   assert.match(fixedRoute, /CatalogState/);
   assert.match(dynamicRoute, /isWebCatalogVisibleFailure/);
   assert.match(fixedRoute, /isWebCatalogVisibleFailure/);
+});
+
+test('11B-6. 404 global reutiliza la experiencia segura y localizada', () => {
+  const source = readFileSync(join(root, 'app/not-found.tsx'), 'utf8');
+  assert.match(source, /\.\/\(app\)\/not-found/);
+
+  const appNotFound = readFileSync(join(root, 'app/(app)/not-found.tsx'), 'utf8');
+  assert.match(appNotFound, /No encontramos este recurso/);
+  assert.match(appNotFound, /Ir a Hoy/);
+  assert.equal(appNotFound.includes('política'), false);
+});
+
+test('11B-7. Agenda no expone estados ni contadores técnicos', () => {
+  const source = readFileSync(join(root, 'app/(app)/agenda/page.tsx'), 'utf8');
+  assert.doesNotMatch(source, /Estado:\s*\{data\.status\}/);
+  assert.doesNotMatch(source, /Calendarios:\s*\{data\.calendarCount\}/);
+  assert.doesNotMatch(source, /Zona:\s*\{data\.timezone\}/);
+  assert.match(source, /Sin eventos en el período seleccionado/);
+});
+
+test('11B-8. Gimnasio traduce estados internos antes de renderizarlos', () => {
+  const source = readFileSync(join(root, 'components/gym/GymDashboard.tsx'), 'utf8');
+  assert.match(source, /MODULE_STATUS_LABELS/);
+  assert.match(source, /SOURCE_STATE_LABELS/);
+  assert.doesNotMatch(source, /\{data\.moduleStatus\}/);
+  assert.doesNotMatch(source, /\{source\.state\}/);
+
+  const writes = readFileSync(join(root, 'components/actions/WritePanels.tsx'), 'utf8');
+  assert.equal(writes.includes('(WRITE_ACTIONS_ENABLED)'), false);
 });
