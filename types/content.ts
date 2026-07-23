@@ -11,9 +11,41 @@ export type PublicContentPolicy = Pick<
   'visibleWeb' | 'searchable' | 'generalAI' | 'reviewAI'
 >;
 
+export type ContentTextColor =
+  | 'default'
+  | 'gray'
+  | 'brown'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'blue'
+  | 'purple'
+  | 'pink'
+  | 'red'
+  | 'gray_background'
+  | 'brown_background'
+  | 'orange_background'
+  | 'yellow_background'
+  | 'green_background'
+  | 'blue_background'
+  | 'purple_background'
+  | 'pink_background'
+  | 'red_background';
+
+export interface ContentTextAnnotations {
+  bold: boolean;
+  italic: boolean;
+  strikethrough: boolean;
+  underline: boolean;
+  code: boolean;
+  color: ContentTextColor;
+}
+
 export interface ContentText {
   plain: string;
   href: string | null;
+  /** Anotaciones visuales sanitizadas provenientes de Notion. */
+  annotations?: ContentTextAnnotations;
   /** Enlace Notion bloqueado por política: texto sin href. */
   unavailable?: boolean;
   /** Enlace externo HTTPS (abrir en nueva pestaña). */
@@ -55,6 +87,7 @@ export type ContentBlockType =
   | 'bookmark'
   | 'image'
   | 'child_page'
+  | 'child_database'
   | 'unsupported';
 
 export interface ContentBlock {
@@ -66,7 +99,9 @@ export interface ContentBlock {
   language: string | null;
   link: ContentLink | null;
   asset: ContentAsset | null;
+  /** Slug publicado del recurso hijo, si existe y la política permite enlazarlo. */
   childPageSlug: string | null;
+  /** Título sanitizado de child_page o child_database. */
   childPageTitle: string | null;
   children: readonly ContentBlock[];
 }

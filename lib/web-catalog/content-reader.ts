@@ -24,7 +24,7 @@ function publicPolicy(entry: WebCatalogEntry): PublicContentPolicy {
   };
 }
 
-/** Resuelve child_page por ID de bloque/página en el índice del catálogo (no por título). */
+/** Resuelve child_page/child_database por ID en el índice del catálogo (no por título). */
 function resolveChildSlugFromBlockId(blockId: string, sourceIndex: SourcePageIndex): string | null {
   const pageId = normalizeNotionPageId(blockId) ?? blockId.toLowerCase();
   const entry = sourceIndex.get(pageId) ?? sourceIndex.get(blockId.toLowerCase());
@@ -54,14 +54,17 @@ async function readBlocksRecursive(
     state.count += 1;
 
     let children: ContentBlock[] = [];
-    if (raw.has_children && depth < WEB_CATALOG_READ_LIMITS.maxDepth) {
+    const canTraverseChildren = raw.type !== 'child_page' && raw.type !== 'child_database';
+    if (raw.has_children && canTraverseChildren && depth < WEB_CATALOG_READ_LIMITS.maxDepth) {
       const childResult = await readBlocksRecursive(port, raw.id, depth + 1, state, sourceIndex);
       if (!childResult.ok) return childResult;
       children = childResult.blocks;
     }
 
     const childSlug =
-      raw.type === 'child_page' ? resolveChildSlugFromBlockId(raw.id, sourceIndex) : null;
+      raw.type === 'child_page' || raw.type === 'child_database'
+        ? resolveChildSlugFromBlockId(raw.id, sourceIndex)
+        : null;
     out.push(adaptCatalogBlock(raw, i, children, childSlug, sourceIndex));
   }
 
@@ -85,12 +88,22 @@ export async function readWebCatalogContentPage(
   const blocksResult = await readBlocksRecursive(port, pageId, 0, state, sourceIndex);
   if (!blocksResult.ok) return blocksResult;
 
-  const childPages = blocksResult.blocks
-    .filter((block) => block.type === 'child_page' && block.childPageSlug)
-    .map((block) => ({
-      slug: block.childPageSlug as string,
-      title: block.childPageTitle ?? 'Página',
-    }));
+  const childPages: { slug: string; title: string }[] = [];
+  const collectChildPages = (blocks: readonly ContentBlock[]) => {
+    for (const block of blocks) {
+      if (
+        (block.type === 'child_page' || block.type === 'child_database') &&
+        block.childPageSlug
+      ) {
+        childPages.push({
+          slug: block.childPageSlug,
+          title: block.childPageTitle ?? 'Recurso relacionado',
+        });
+      }
+      if (block.children.length > 0) collectChildPages(block.children);
+    }
+  };
+  collectChildPages(blocksResult.blocks);
 
   const page: ContentPage = {
     stableKey: entry.stableKey,

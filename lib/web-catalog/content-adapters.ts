@@ -14,10 +14,64 @@ import type {
   ContentBlockType,
   ContentLink,
   ContentText,
+  ContentTextAnnotations,
+  ContentTextColor,
 } from '@/types/content';
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+}
+
+const CONTENT_TEXT_COLORS = new Set<ContentTextColor>([
+  'default',
+  'gray',
+  'brown',
+  'orange',
+  'yellow',
+  'green',
+  'blue',
+  'purple',
+  'pink',
+  'red',
+  'gray_background',
+  'brown_background',
+  'orange_background',
+  'yellow_background',
+  'green_background',
+  'blue_background',
+  'purple_background',
+  'pink_background',
+  'red_background',
+]);
+
+function textColor(value: unknown): ContentTextColor {
+  return typeof value === 'string' && CONTENT_TEXT_COLORS.has(value as ContentTextColor)
+    ? (value as ContentTextColor)
+    : 'default';
+}
+
+function annotationsFromPart(part: Record<string, unknown>): ContentTextAnnotations | undefined {
+  const raw = asRecord(part.annotations);
+  if (!raw) return undefined;
+
+  const annotations: ContentTextAnnotations = {
+    bold: raw.bold === true,
+    italic: raw.italic === true,
+    strikethrough: raw.strikethrough === true,
+    underline: raw.underline === true,
+    code: raw.code === true,
+    color: textColor(raw.color),
+  };
+
+  const hasDecoration =
+    annotations.bold ||
+    annotations.italic ||
+    annotations.strikethrough ||
+    annotations.underline ||
+    annotations.code ||
+    annotations.color !== 'default';
+
+  return hasDecoration ? annotations : undefined;
 }
 
 function richParts(value: unknown, sourceIndex: SourcePageIndex): ContentText[] {
@@ -35,9 +89,11 @@ function richParts(value: unknown, sourceIndex: SourcePageIndex): ContentText[] 
           ? linkObj.url
           : null;
     const fields = resolvedHrefToTextFields(resolveContentHref(rawHref, sourceIndex));
+    const annotations = annotationsFromPart(part);
     parts.push({
       plain,
       href: fields.href,
+      ...(annotations ? { annotations } : {}),
       ...(fields.unavailable ? { unavailable: true } : {}),
       ...(fields.external ? { external: true } : {}),
     });
@@ -76,6 +132,7 @@ const SUPPORTED = new Set<string>([
   'bookmark',
   'image',
   'child_page',
+  'child_database',
 ]);
 
 function localIdFromNotionId(id: string, index: number): string {
@@ -152,9 +209,11 @@ export function adaptCatalogBlock(
               .join('') || null,
         }
       : null;
-  } else if (type === 'child_page') {
-    childPageTitle = typeof payload.title === 'string' ? payload.title : 'Página';
+  } else if (type === 'child_page' || type === 'child_database') {
+    childPageTitle = typeof payload.title === 'string' ? payload.title : 'Recurso relacionado';
   }
+
+  const isChildResource = type === 'child_page' || type === 'child_database';
 
   return {
     localId: localIdFromNotionId(block.id, index),
@@ -164,8 +223,8 @@ export function adaptCatalogBlock(
     language,
     link,
     asset,
-    childPageSlug: type === 'child_page' ? childPageSlug : null,
-    childPageTitle: type === 'child_page' ? childPageTitle : null,
+    childPageSlug: isChildResource ? childPageSlug : null,
+    childPageTitle: isChildResource ? childPageTitle : null,
     children,
   };
 }
