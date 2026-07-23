@@ -1,4 +1,12 @@
-import { Palette, PlugZap, Settings } from 'lucide-react';
+import {
+  CircleAlert,
+  CircleCheckBig,
+  Palette,
+  PlugZap,
+  ServerCog,
+  Settings,
+  ShieldCheck,
+} from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -6,113 +14,48 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ThemeControl } from '@/components/ui/ThemeControl';
-import { getCalendarConfig } from '@/lib/calendar/config';
-import { getDataSource, getGoogleConfig } from '@/lib/data/config';
-import { getNotionConfig, getNotionDataSource } from '@/lib/notion/config';
-import { getOpenClawRuntimeStatus } from '@/lib/openclaw/config';
-import { getWebCatalogNotionConfig, isWebCatalogEnabled } from '@/lib/web-catalog/config';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
+import { getRuntimeReadiness } from '@/lib/runtime/server-readiness';
+import type { Domain } from '@/types';
+import type { RuntimeIntegrationStatus } from '@/types/runtime';
 
 import styles from './page.module.scss';
 
 export const metadata: Metadata = { title: 'Ajustes' };
 export const dynamic = 'force-dynamic';
 
-function sanitizedEnvironment(): string {
-  const vercel = process.env.VERCEL_ENV?.trim();
-  if (vercel === 'production') return 'Production';
-  if (vercel === 'preview') return 'Preview';
-  if (vercel === 'development') return 'Development';
-  return 'Local';
-}
-
-type IntegrationRow = {
-  id: string;
-  name: string;
-  detail: string;
-  status: string;
-  domain: 'habits' | 'projects' | 'productivity' | 'neutral';
+const STATUS_LABELS: Record<RuntimeIntegrationStatus, string> = {
+  configured: 'Configurada',
+  mock: 'Simulada',
+  'safe-disabled': 'Desactivada',
+  misconfigured: 'Revisar',
 };
+
+const STATUS_DOMAINS: Record<RuntimeIntegrationStatus, Domain> = {
+  configured: 'habits',
+  mock: 'neutral',
+  'safe-disabled': 'neutral',
+  misconfigured: 'danger',
+};
+
+const ENVIRONMENT_LABELS = {
+  local: 'Local',
+  development: 'Development',
+  preview: 'Preview',
+  production: 'Production',
+} as const;
 
 export default async function AjustesPage() {
   await requireAuthorizedSession();
-
-  const sheetsSource = getDataSource();
-  const sheetsConfig = getGoogleConfig();
-  const notionSource = getNotionDataSource();
-  const notionConfig = getNotionConfig();
-  const calendarConfig = getCalendarConfig();
-  const catalogEnabled = isWebCatalogEnabled();
-  const catalogConfig = getWebCatalogNotionConfig();
-  const openClawStatus = getOpenClawRuntimeStatus();
-
-  const integrations: IntegrationRow[] = [
-    {
-      id: 'sheets',
-      name: 'Google Sheets',
-      detail:
-        sheetsSource === 'google' && sheetsConfig.ok
-          ? 'Integración operativa · lectura y escritura acotada de hábitos.'
-          : 'Modo simulado o sin configuración de servidor.',
-      status:
-        sheetsSource === 'google' && sheetsConfig.ok ? 'Operativa' : 'Simulada / no configurada',
-      domain: 'habits',
-    },
-    {
-      id: 'notion',
-      name: 'Notion',
-      detail:
-        notionSource === 'notion' && notionConfig.ok
-          ? 'Integración operativa · lectura de Áreas, Proyectos y Tareas.'
-          : 'Modo simulado o sin configuración de servidor.',
-      status:
-        notionSource === 'notion' && notionConfig.ok ? 'Operativa' : 'Simulada / no configurada',
-      domain: 'projects',
-    },
-    {
-      id: 'calendar',
-      name: 'Google Calendar',
-      detail: calendarConfig.ok
-        ? 'Integración operativa · lectura de eventos (solo lectura).'
-        : 'Modo simulado o sin configuración de servidor.',
-      status: calendarConfig.ok ? 'Operativa' : 'Simulada / no configurada',
-      domain: 'productivity',
-    },
-    {
-      id: 'web-catalog',
-      name: 'Registro Web',
-      detail: catalogEnabled
-        ? catalogConfig.ok
-          ? 'Feature activa · catálogo documental en lectura.'
-          : 'Feature activa · falta configuración de servidor.'
-        : 'Feature inactiva por defecto (WEB_CATALOG_ENABLED).',
-      status: catalogEnabled ? (catalogConfig.ok ? 'Activa' : 'Activa sin config') : 'Inactiva',
-      domain: 'neutral',
-    },
-    {
-      id: 'openclaw',
-      name: 'OpenClaw API',
-      detail:
-        openClawStatus === 'ready'
-          ? 'API coordinadora habilitada · autenticación HMAC server-to-server.'
-          : openClawStatus === 'misconfigured'
-            ? 'Flag activa · falta configuración de servidor.'
-            : 'API desactivada por defecto (OPENCLAW_API_ENABLED).',
-      status:
-        openClawStatus === 'ready'
-          ? 'ready'
-          : openClawStatus === 'misconfigured'
-            ? 'misconfigured'
-            : 'disabled',
-      domain: 'neutral',
-    },
-  ];
+  const readiness = getRuntimeReadiness();
+  const errors = readiness.preview.issues.filter((item) => item.severity === 'error');
+  const warnings = readiness.preview.issues.filter((item) => item.severity === 'warning');
 
   return (
     <div>
       <PageHeader
         title="Ajustes"
-        description="Preferencias de la aplicación y estado sanitizado de las integraciones."
+        description="Preferencias, estado sanitizado del runtime y preparación del Preview."
         icon={Settings}
         domain="neutral"
       />
@@ -129,27 +72,95 @@ export default async function AjustesPage() {
           <ThemeControl />
         </Card>
 
+        <Card aria-labelledby="runtime-title">
+          <SectionHeader
+            id="runtime-title"
+            title="Runtime"
+            description="Lectura de configuración, sin probar conectividad ni revelar valores."
+            icon={ServerCog}
+            domain="productivity"
+            action={
+              <Badge domain="neutral" variant="outline">
+                {ENVIRONMENT_LABELS[readiness.environment]}
+              </Badge>
+            }
+          />
+          <p className={styles.explainer}>
+            “Configurada” confirma que las variables requeridas son coherentes. La prueba con datos
+            reales se realiza después en el deployment de Preview.
+          </p>
+        </Card>
+
         <Card aria-labelledby="sources-title">
           <SectionHeader
             id="sources-title"
-            title="Fuentes de datos"
-            description={`Entorno: ${sanitizedEnvironment()}. Sin tokens, IDs ni correos.`}
+            title="Fuentes y capacidades"
+            description="Estado de lectura y flags sensibles del proceso actual."
             icon={PlugZap}
             domain="productivity"
           />
           <ul className={styles.sources}>
-            {integrations.map((source) => (
+            {readiness.integrations.map((source) => (
               <li key={source.id} className={styles.source}>
                 <div className={styles['source-text']}>
-                  <span className={styles['source-name']}>{source.name}</span>
-                  <span className={styles['source-detail']}>{source.detail}</span>
+                  <span className={styles['source-name']}>{source.label}</span>
+                  <span className={styles['source-detail']}>{source.summary}</span>
                 </div>
-                <Badge domain={source.domain} variant="outline">
-                  {source.status}
+                <Badge domain={STATUS_DOMAINS[source.status]} variant="outline">
+                  {STATUS_LABELS[source.status]}
                 </Badge>
               </li>
             ))}
           </ul>
+        </Card>
+
+        <Card aria-labelledby="preview-title">
+          <SectionHeader
+            id="preview-title"
+            title="Preparación de Preview"
+            description="Preflight cerrado para probar Web V1 sin tocar datos productivos."
+            icon={ShieldCheck}
+            domain={readiness.preview.ready ? 'habits' : 'projects'}
+            action={
+              <Badge domain={readiness.preview.ready ? 'habits' : 'projects'} variant="dot">
+                {readiness.preview.ready ? 'Lista' : 'Pendiente'}
+              </Badge>
+            }
+          />
+
+          {readiness.preview.ready ? (
+            <div className={styles.success}>
+              <CircleCheckBig size={18} aria-hidden="true" />
+              <p>
+                La configuración cumple el preflight. Todavía falta verificar conectividad, datos
+                reales y recorrido visual dentro del Preview.
+              </p>
+            </div>
+          ) : (
+            <div className={styles.summary}>
+              <CircleAlert size={18} aria-hidden="true" />
+              <p>
+                Hay {errors.length} bloqueo{errors.length === 1 ? '' : 's'} y {warnings.length}{' '}
+                advertencia{warnings.length === 1 ? '' : 's'} antes de certificar el Preview.
+              </p>
+            </div>
+          )}
+
+          {readiness.preview.issues.length > 0 ? (
+            <ul className={styles.issues}>
+              {readiness.preview.issues.map((item) => (
+                <li key={item.code} data-severity={item.severity}>
+                  <span className={styles['issue-code']}>{item.code}</span>
+                  <span>{item.message}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <p className={styles.command}>
+            Validación equivalente por terminal:{' '}
+            <code>npm run preview:check</code>
+          </p>
         </Card>
       </div>
     </div>

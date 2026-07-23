@@ -2,7 +2,33 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
-  max-width: 720px;
+  width: min(100%, 820px);
+  min-width: 0;
+}
+
+.explainer,
+.command {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.command {
+  margin-top: 1rem;
+}
+
+.command code,
+.issue-code {
+  font-family: var(--font-mono);
+}
+
+.command code {
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .sources {
@@ -15,13 +41,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.75rem 0;
+  padding: 0.8rem 0;
   border-top: 1px solid var(--border);
 }
 
 .source:first-child {
-  border-top: 0;
   padding-top: 0;
+  border-top: 0;
 }
 
 .source-text {
@@ -32,12 +58,88 @@
 }
 
 .source-name {
-  font-size: 0.875rem;
-  font-weight: 500;
   color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .source-detail {
-  font-size: 0.8125rem;
   color: var(--text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.success,
+.summary {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.success {
+  color: var(--c-habits);
+  background: var(--c-habits-soft);
+  border-color: var(--c-habits-border);
+}
+
+.summary {
+  color: var(--c-projects);
+  background: var(--c-projects-soft);
+  border-color: var(--c-projects-border);
+}
+
+.success svg,
+.summary svg {
+  flex: 0 0 auto;
+  margin-top: 0.08rem;
+}
+
+.issues {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.issues li {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.7fr) minmax(0, 1.6fr);
+  gap: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.79rem;
+  line-height: 1.4;
+}
+
+.issues li[data-severity='error'] {
+  border-color: var(--c-danger-border);
+  background: var(--c-danger-soft);
+}
+
+.issue-code {
+  color: var(--text);
+  font-size: 0.73rem;
+  overflow-wrap: anywhere;
+}
+
+@media (width <= 640px) {
+  .source {
+    align-items: flex-start;
+  }
+
+  .source > :last-child {
+    flex: 0 0 auto;
+  }
+
+  .issues li {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
 }

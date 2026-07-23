@@ -312,3 +312,14 @@ export interface TodayData {
   /** Preview Calendar para Hoy (siempre plano; vacío si no hay datos). */
   calendar: import('@/types/calendar').CalendarTodayPreview;
 }
+
+export type {
+  DeploymentPreflightIssue,
+  DeploymentPreflightResult,
+  DeploymentPreflightSeverity,
+  RuntimeEnvironment,
+  RuntimeIntegrationId,
+  RuntimeIntegrationStatus,
+  RuntimeIntegrationView,
+  RuntimeReadinessSnapshot,
+} from '@/types/runtime';

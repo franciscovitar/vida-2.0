@@ -22,7 +22,8 @@
     "format:check": "prettier --check .",
     "test": "node --import tsx --test \"tests/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
-    "verify": "npm run check && npm run build"
+    "verify": "npm run check && npm run build",
+    "preview:check": "tsx scripts/preview-preflight.ts"
   },
   "dependencies": {
     "@notionhq/client": "^5.23.2",
