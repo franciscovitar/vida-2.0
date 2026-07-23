@@ -24,6 +24,7 @@ export const WEB_CATALOG_FIXED_ROUTES = {
   facultad: { stableKey: 'facultad', path: '/areas/facultad' },
   aprendizaje: { stableKey: 'aprendizaje', path: '/aprendizaje' },
   compras: { stableKey: 'compras', path: '/compras' },
+  dieta: { stableKey: 'dieta', path: '/dieta' },
 } as const;
 
 export type WebCatalogFixedRouteId = keyof typeof WEB_CATALOG_FIXED_ROUTES;

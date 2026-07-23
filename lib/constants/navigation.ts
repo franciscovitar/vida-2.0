@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   ShoppingCart,
   Target,
+  UtensilsCrossed,
 } from 'lucide-react';
 
 import type { Domain } from '@/types';
@@ -39,6 +40,7 @@ export type NavIconKey =
   | 'analisis'
   | 'areas'
   | 'gimnasio'
+  | 'dieta'
   | 'aprobaciones'
   | 'bandeja'
   | 'journaling'
@@ -76,6 +78,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   analisis: Brain,
   areas: Boxes,
   gimnasio: Dumbbell,
+  dieta: UtensilsCrossed,
   aprobaciones: ShieldCheck,
   bandeja: Inbox,
   journaling: NotebookPen,
@@ -97,6 +100,7 @@ export const primaryNav: NavItemData[] = [
   { label: 'Tareas', href: '/tareas', icon: 'tareas', domain: 'tasks' },
   { label: 'Áreas', href: '/areas', icon: 'areas', domain: 'projects' },
   { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },
+  { label: 'Dieta', href: '/dieta', icon: 'dieta', domain: 'health' },
   { label: 'Aprobaciones', href: '/aprobaciones', icon: 'aprobaciones', domain: 'neutral' },
   { label: 'Aprendizaje', href: '/aprendizaje', icon: 'aprendizaje', domain: 'learning' },
   { label: 'Compras', href: '/compras', icon: 'compras', domain: 'neutral' },
