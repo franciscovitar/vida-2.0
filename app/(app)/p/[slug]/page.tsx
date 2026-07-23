@@ -3,11 +3,13 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
 import { Breadcrumbs } from '@/components/web-catalog/Breadcrumbs';
+import { CatalogState } from '@/components/web-catalog/CatalogState';
 import { ContentPageView } from '@/components/web-catalog/ContentPageView';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { isWebCatalogEnabled } from '@/lib/web-catalog/config';
+import { isWebCatalogVisibleFailure } from '@/lib/web-catalog/errors';
 import { WEB_CATALOG_SECTION_LABELS } from '@/lib/web-catalog/section-labels';
 import { resolveWebCatalogPage } from '@/lib/web-catalog/service';
 
@@ -35,14 +37,17 @@ export default async function WebCatalogSlugPage({
   const result = await resolveWebCatalogPage(slug);
 
   if (!result.ok) {
-    if (result.code === 'not-configured') {
-      return (
-        <div className={pageStyles.page}>
-          <PageHeader title="Registro Web" description={result.message} icon={FileText} />
-        </div>
-      );
-    }
-    notFound();
+    if (!isWebCatalogVisibleFailure(result.code)) notFound();
+    return (
+      <div className={pageStyles.page}>
+        <PageHeader
+          title="Registro Web"
+          description="Estado de la fuente documental"
+          icon={FileText}
+        />
+        <CatalogState title="No se pudo cargar esta página" message={result.message} code={result.code} />
+      </div>
+    );
   }
 
   if (result.kind === 'redirect') {

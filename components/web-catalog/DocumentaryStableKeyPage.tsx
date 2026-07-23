@@ -2,12 +2,14 @@ import { FileText, type LucideIcon } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
 import { Breadcrumbs } from '@/components/web-catalog/Breadcrumbs';
+import { CatalogState } from '@/components/web-catalog/CatalogState';
 import { ContentPageView } from '@/components/web-catalog/ContentPageView';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { PlaceholderPage } from '@/components/layout/PlaceholderPage';
 import { WEB_CATALOG_SECTION_LABELS } from '@/lib/web-catalog/section-labels';
 import { isWebCatalogEnabled } from '@/lib/web-catalog/config';
+import { isWebCatalogVisibleFailure } from '@/lib/web-catalog/errors';
 import {
   resolveWebCatalogPageByStableKey,
   type WebCatalogPageServiceResult,
@@ -33,14 +35,21 @@ function renderCatalogResult(
   presentation?: DocumentPresentation,
 ) {
   if (!result.ok) {
-    if (result.code === 'not-configured') {
-      return (
-        <div className={pageStyles.page}>
-          <PageHeader title={fallbackTitle} description={result.message} icon={FileText} />
-        </div>
-      );
-    }
-    notFound();
+    if (!isWebCatalogVisibleFailure(result.code)) notFound();
+    return (
+      <div className={pageStyles.page}>
+        <PageHeader
+          title={fallbackTitle}
+          description="Estado de la fuente documental"
+          icon={FileText}
+        />
+        <CatalogState
+          title={`No se pudo cargar ${fallbackTitle}`}
+          message={result.message}
+          code={result.code}
+        />
+      </div>
+    );
   }
 
   if (result.kind === 'redirect') {

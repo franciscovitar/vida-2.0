@@ -32,3 +32,13 @@ export function webCatalogNoticeFor(code: WebCatalogServiceCode): string {
   };
   return messages[code];
 }
+
+/** Errores que deben conservar semántica 404/privada. */
+export function isWebCatalogHiddenFailure(code: WebCatalogServiceCode): boolean {
+  return code === 'not-found' || code === 'forbidden-policy' || code === 'flag-disabled';
+}
+
+/** Fallos de fuente/configuración que se muestran sin inventar contenido. */
+export function isWebCatalogVisibleFailure(code: WebCatalogServiceCode): boolean {
+  return !isWebCatalogHiddenFailure(code);
+}

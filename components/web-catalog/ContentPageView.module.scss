@@ -430,6 +430,16 @@
   }
 
   .child-resource {
+    grid-template-columns: auto minmax(0, 1fr);
     padding: 0.72rem 0.78rem;
+  }
+
+  .child-resource strong,
+  .child-resource span {
+    white-space: normal;
+  }
+
+  .child-arrow {
+    display: none;
   }
 }

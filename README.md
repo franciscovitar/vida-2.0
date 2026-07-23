@@ -96,6 +96,23 @@ Variable de servidor (sin valor en el repo): `NOTION_WEB_CATALOG_DATA_SOURCE_ID`
 
 Pendiente: activación controlada del catálogo/escrituras/OpenClaw por Work.
 
+## Cierre de Web V1 y Preview
+
+La pantalla `/ajustes` usa un snapshot sanitizado y centralizado del runtime: distingue fuentes
+simuladas, configuración completa, flags apagadas de forma segura y combinaciones que requieren
+revisión. No prueba conectividad ni muestra valores de entorno.
+
+`npm run preview:check` ejecuta un preflight cerrado para Vercel Preview. Exige Sheets DEV, Notion
+y Calendar de lectura, Registro Web activo, Auth completa y capacidades avanzadas apagadas. Rechaza
+variables locales, overrides de tests, target PROD, escrituras avanzadas y OpenClaw.
+
+Las rutas documentales muestran estados explícitos ante errores de configuración, permisos, red o
+catálogo inválido, sin reemplazar el contenido con mocks. La aplicación también incluye boundary
+global, 404 contextual y navegación móvil con control de foco.
+
+La configuración y el recorrido final están documentados en
+`docs/preview-final-checklist.md`.
+
 ## Google Sheets (selector DEV / canónico)
 
 La fuente cuantitativa canónica es el Sheet de Production. Los productores externos continúan
@@ -151,6 +168,7 @@ productores externos ni modifica las hojas.
 - `npm run check`: todas las validaciones estáticas.
 - `npm test`: suite de `node:test`.
 - `npm run verify`: validaciones estáticas y build de Production.
+- `npm run preview:check`: preflight sanitizado de configuración para Vercel Preview.
 
 ## Estructura
 
@@ -160,9 +178,11 @@ productores externos ni modifica las hojas.
 - `components/dashboard`: secciones de Hoy.
 - `components/ui`: componentes reutilizables.
 - `lib/web-catalog`: contrato, repositorio Notion read-only, lector y política del Registro Web.
+- `lib/runtime`: readiness sanitizada y preflight de deployment.
 - `components/web-catalog`: renderer documental genérico y resúmenes estructurados por dominio.
 - `app/(app)/dieta`: vista documental fija para meal prep y alimentación canónica.
 - `docs/calendar-real-readonly-setup.md`: activación externa y verificación de Calendar real.
+- `docs/preview-final-checklist.md`: configuración, QA y criterio de cierre del Preview.
 - `app/(app)/p/[slug]`: ruta dinámica protegida (flag apagada ⇒ no publica).
 - `lib/notion`: lectura autorizada de Áreas, Proyectos y Tareas.
 - `lib/areas`: composición read-only de paneles de Área (`/areas`).
