@@ -7,10 +7,7 @@ import {
   type NavItemData,
 } from '@/lib/constants/navigation';
 import { canNavigateWebCatalogEntry, isPrivateWebCatalogEntry } from '@/lib/web-catalog/policy';
-import {
-  WEB_CATALOG_FIXED_ROUTES,
-  webCatalogPathFor,
-} from '@/lib/web-catalog/section-labels';
+import { WEB_CATALOG_FIXED_ROUTES, webCatalogPathFor } from '@/lib/web-catalog/section-labels';
 import type { Domain } from '@/types';
 import type { WebCatalogEntry, WebCatalogSection } from '@/types/web-catalog';
 

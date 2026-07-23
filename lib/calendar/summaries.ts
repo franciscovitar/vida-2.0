@@ -136,7 +136,6 @@ export function buildAgendaData(input: {
   };
 }
 
-
 /** Fallback real: conserva el estado de Calendar sin inyectar eventos simulados. */
 export function buildUnavailableAgendaData(input: {
   view: CalendarAgendaView;

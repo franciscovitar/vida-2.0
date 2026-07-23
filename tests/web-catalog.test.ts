@@ -207,7 +207,6 @@ test('8B18. privado no puede usar el renderer document', () => {
   );
 });
 
-
 test('8B18b. privado tampoco puede usar el renderer documental de Facultad', () => {
   assert.ok(
     issueCodes([privateJournalingFixture({ renderMode: 'faculty' })]).includes('private-unsafe'),

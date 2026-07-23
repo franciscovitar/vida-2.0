@@ -2,12 +2,7 @@ import type { Domain } from '@/types';
 import type { ContentBlock, ContentPage } from '@/types/content';
 
 export type DocumentPresentation =
-  | 'document'
-  | 'north'
-  | 'learning'
-  | 'purchases'
-  | 'diet'
-  | 'faculty';
+  'document' | 'north' | 'learning' | 'purchases' | 'diet' | 'faculty';
 
 export interface DocumentSectionSlice {
   key: string;
@@ -90,8 +85,7 @@ export function findDocumentSection(
 function paragraphTexts(blocks: readonly ContentBlock[]): string[] {
   return blocks
     .filter(
-      (block) =>
-        block.type === 'paragraph' || block.type === 'quote' || block.type === 'callout',
+      (block) => block.type === 'paragraph' || block.type === 'quote' || block.type === 'callout',
     )
     .map(plainBlockText)
     .filter(Boolean);
@@ -157,9 +151,7 @@ function compact<T>(values: readonly (T | null)[]): T[] {
 }
 
 function topLevelHeadingSet(page: ContentPage): Set<string> {
-  return new Set(
-    splitDocumentSections(page.blocks).map((section) => normalize(section.title)),
-  );
+  return new Set(splitDocumentSections(page.blocks).map((section) => normalize(section.title)));
 }
 
 function hasAll(headings: ReadonlySet<string>, values: readonly string[]): boolean {
@@ -170,12 +162,7 @@ export function detectDocumentPresentation(page: ContentPage): DocumentPresentat
   const headings = topLevelHeadingSet(page);
 
   if (
-    hasAll(headings, [
-      'Temporada actual',
-      'Objetivo principal',
-      'Prioridades',
-      'Fuera de foco',
-    ])
+    hasAll(headings, ['Temporada actual', 'Objetivo principal', 'Prioridades', 'Fuera de foco'])
   ) {
     return 'north';
   }
@@ -185,14 +172,10 @@ export function detectDocumentPresentation(page: ContentPage): DocumentPresentat
   if (hasAll(headings, ['Comprar', 'Reponer', 'Investigar antes'])) {
     return 'purchases';
   }
-  if (
-    hasAll(headings, ['Objetivo', 'Meal prep semanal', 'Lista de compra principal'])
-  ) {
+  if (hasAll(headings, ['Objetivo', 'Meal prep semanal', 'Lista de compra principal'])) {
     return 'diet';
   }
-  if (
-    hasAll(headings, ['Materias activas', 'Próximos bloques recomendados', 'Regla'])
-  ) {
+  if (hasAll(headings, ['Materias activas', 'Próximos bloques recomendados', 'Regla'])) {
     return 'faculty';
   }
   return 'document';

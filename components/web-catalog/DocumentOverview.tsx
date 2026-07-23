@@ -34,11 +34,7 @@ export function DocumentOverview({
 
       <div className={styles.grid} data-presentation={overview.presentation}>
         {overview.cards.map((item) => (
-          <Card
-            key={item.key}
-            compact
-            className={`${styles.card} ${emphasisClass(item.emphasis)}`}
-          >
+          <Card key={item.key} compact className={`${styles.card} ${emphasisClass(item.emphasis)}`}>
             <div className={styles['card-head']}>
               <h3>{item.title}</h3>
               {item.count !== null ? (

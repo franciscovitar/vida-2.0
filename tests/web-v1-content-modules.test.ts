@@ -15,11 +15,7 @@ import { usesReadableContentRenderer } from '@/lib/web-catalog/policy';
 import type { ContentBlock, ContentPage } from '@/types/content';
 import type { WebCatalogEntry } from '@/types/web-catalog';
 
-function block(
-  localId: string,
-  type: ContentBlock['type'],
-  text: string,
-): ContentBlock {
+function block(localId: string, type: ContentBlock['type'], text: string): ContentBlock {
   return {
     localId,
     type,
@@ -184,8 +180,6 @@ test('10A-6. documentos sin firma estructural conservan renderer genérico', () 
   assert.equal(buildDocumentOverview(content), null);
 });
 
-
-
 test('10A-6b. presentación forzada sin estructura no inventa un resumen', () => {
   const content = page([block('p', 'paragraph', 'Contenido libre sin secciones.')]);
   assert.equal(buildDocumentOverview(content, 'north'), null);
@@ -206,7 +200,6 @@ test('10A-8. renderer Facultad reutiliza lectura segura sin abrir otros renderer
   assert.equal(usesReadableContentRenderer(entry({ renderMode: 'gym' })), false);
   assert.equal(usesReadableContentRenderer(entry({ renderMode: 'private' })), false);
 });
-
 
 test('10A-9. Norte usa una sola ruta fija y desaparece si el catálogo lo oculta', () => {
   const published = buildAppNavigation(true, [
@@ -230,7 +223,10 @@ test('10A-9. Norte usa una sola ruta fija y desaparece si el catálogo lo oculta
       },
     }),
   ]);
-  assert.equal(hidden.primary.some((item) => item.href === '/norte'), false);
+  assert.equal(
+    hidden.primary.some((item) => item.href === '/norte'),
+    false,
+  );
 });
 
 test('10B-1. fallo Calendar real produce agenda vacía, no eventos simulados', () => {
@@ -249,12 +245,8 @@ test('10B-1. fallo Calendar real produce agenda vacía, no eventos simulados', (
   assert.ok(agenda.days.every((day) => day.events.length === 0));
 });
 
-
 test('10B-2. la rama de error de Agenda no llama al generador mock', () => {
-  const source = readFileSync(
-    join(process.cwd(), 'lib', 'data', 'calendar-source.ts'),
-    'utf8',
-  );
+  const source = readFileSync(join(process.cwd(), 'lib', 'data', 'calendar-source.ts'), 'utf8');
   const fallback = source.match(
     /function fallbackAgenda[\s\S]*?async function loadAgendaUncached/,
   )?.[0];
