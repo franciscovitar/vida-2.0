@@ -29,7 +29,7 @@ const FIXED_STABLE_KEYS: ReadonlySet<string> = new Set(
   Object.values(WEB_CATALOG_FIXED_ROUTES).map((route) => route.stableKey),
 );
 
-const FIXED_PATH_BY_STABLE_KEY = new Map(
+const FIXED_PATH_BY_STABLE_KEY: ReadonlyMap<string, string> = new Map(
   Object.values(WEB_CATALOG_FIXED_ROUTES).map((route) => [route.stableKey, route.path]),
 );
 
