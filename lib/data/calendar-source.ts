@@ -53,7 +53,7 @@ function mockAgenda(view: CalendarAgendaView): CalendarAgendaData {
       source: 'mock',
       status: 'mock',
       notice: null,
-      calendarIds,
+      calendarCount: calendarIds.length,
       timezone,
     }),
   );
@@ -96,7 +96,7 @@ async function loadAgendaUncached(view: CalendarAgendaView): Promise<CalendarAge
       source: 'google',
       status: result.events.length === 0 ? 'empty' : 'ready',
       notice: result.events.length === 0 ? calendarNoticeFor('empty') : null,
-      calendarIds: [...configResult.config.calendarIds],
+      calendarCount: configResult.config.calendarIds.length,
       timezone: configResult.config.timezone,
     });
     const { traceCalendarStage } = await import('@/lib/calendar/trace');

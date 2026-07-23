@@ -55,7 +55,7 @@ export default async function AgendaPage({
         <span>Estado: {data.status}</span>
         <span>Zona: {data.timezone}</span>
         <span className="tabular">{data.summary.totalEvents} eventos</span>
-        <span>Calendarios: {data.calendarIds.join(', ')}</span>
+        <span className="tabular">Calendarios: {data.calendarCount}</span>
       </p>
 
       <AgendaViewSwitcher view={data.view} />

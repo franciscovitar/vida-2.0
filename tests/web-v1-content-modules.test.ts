@@ -191,6 +191,7 @@ test('10A-7. rutas fijas se usan también en búsqueda', () => {
   assert.equal(webCatalogPathFor('aprendizaje', 'mapa-de-prueba'), '/aprendizaje');
   assert.equal(webCatalogPathFor('norte', 'direccion-temporal'), '/norte');
   assert.equal(webCatalogPathFor('facultad', 'facultad-documento'), '/areas/facultad');
+  assert.equal(webCatalogPathFor('dieta', 'alimentacion-canonica'), '/dieta');
   assert.equal(document?.href, '/aprendizaje');
   assert.equal(webCatalogPathFor('fixture.other', 'otro'), '/p/otro');
 });
@@ -229,6 +230,40 @@ test('10A-9. Norte usa una sola ruta fija y desaparece si el catálogo lo oculta
   );
 });
 
+test('10A-10. Dieta usa una sola ruta fija y obedece la política del catálogo', () => {
+  const published = buildAppNavigation(true, [
+    entry({
+      stableKey: 'dieta',
+      editorialName: 'Dieta',
+      slug: 'alimentacion-canonica',
+      section: 'personal-systems',
+    }),
+  ]);
+  assert.equal(published.primary.filter((item) => item.href === '/dieta').length, 1);
+
+  const hidden = buildAppNavigation(true, [
+    entry({
+      stableKey: 'dieta',
+      editorialName: 'Dieta',
+      slug: 'alimentacion-canonica',
+      section: 'personal-systems',
+      status: 'hidden',
+      policy: {
+        visibleWeb: false,
+        searchable: false,
+        generalAI: 'denied',
+        reviewAI: 'denied',
+        writeMode: 'none',
+        confirmation: 'none',
+      },
+    }),
+  ]);
+  assert.equal(
+    hidden.primary.some((item) => item.href === '/dieta'),
+    false,
+  );
+});
+
 test('10B-1. fallo Calendar real produce agenda vacía, no eventos simulados', () => {
   const agenda = buildUnavailableAgendaData({
     view: '7',
@@ -241,7 +276,7 @@ test('10B-1. fallo Calendar real produce agenda vacía, no eventos simulados', (
   assert.equal(agenda.status, 'not-configured');
   assert.equal(agenda.summary.totalEvents, 0);
   assert.equal(agenda.timelineToday.length, 0);
-  assert.equal(agenda.calendarIds.length, 0);
+  assert.equal(agenda.calendarCount, 0);
   assert.ok(agenda.days.every((day) => day.events.length === 0));
 });
 

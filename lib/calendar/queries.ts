@@ -5,6 +5,7 @@ import 'server-only';
 
 import {
   adaptCalendarEvent,
+  calendarLabelFor,
   filterVisibleEvents,
   toPlainCalendarEvent,
 } from '@/lib/calendar/adapters';
@@ -31,7 +32,7 @@ export async function loadCalendarEventsInRange(
   const { timeMin, timeMax } = rangeBoundsRfc3339(startYmd, endYmd);
   const collected: CalendarEvent[] = [];
 
-  for (const calendarId of config.calendarIds) {
+  for (const [sourceIndex, calendarId] of config.calendarIds.entries()) {
     const result = await listCalendarEvents(config, {
       calendarId,
       timeMin,
@@ -41,7 +42,12 @@ export async function loadCalendarEventsInRange(
     if (!result.ok) return { ok: false, code: result.code };
 
     for (const raw of result.events) {
-      const adapted = adaptCalendarEvent(raw, calendarId, config.timezone);
+      const adapted = adaptCalendarEvent(
+        raw,
+        calendarId,
+        config.timezone,
+        calendarLabelFor(calendarId, sourceIndex),
+      );
       if (adapted) collected.push(toPlainCalendarEvent(adapted));
     }
   }

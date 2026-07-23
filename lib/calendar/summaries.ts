@@ -106,7 +106,7 @@ export function buildAgendaData(input: {
   source: CalendarDataSourceMode;
   status: CalendarIntegrationStatus;
   notice: string | null;
-  calendarIds: string[];
+  calendarCount: number;
   timezone?: string;
   syncedAt?: string;
   now?: Date;
@@ -129,7 +129,7 @@ export function buildAgendaData(input: {
     rangeEnd: range.end,
     targetDate: input.today,
     syncedAt: input.syncedAt ?? now.toISOString(),
-    calendarIds: input.calendarIds,
+    calendarCount: Math.max(0, Math.trunc(input.calendarCount)),
     days,
     summary,
     timelineToday: sortEventsForDay(eventsTouchingDate(visible, input.today)),
@@ -151,7 +151,7 @@ export function buildUnavailableAgendaData(input: {
     source: 'google',
     status: input.status,
     notice: input.notice,
-    calendarIds: [],
+    calendarCount: 0,
     timezone: input.timezone,
   });
 }
@@ -221,6 +221,6 @@ export function emptyAgendaData(
     source: 'mock',
     status: 'empty',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
 }

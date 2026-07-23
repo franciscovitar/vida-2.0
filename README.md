@@ -39,7 +39,7 @@ El código de `lib/web-catalog` define:
 - breadcrumbs en `/p/[slug]`;
 - búsqueda autenticada en `/buscar` (índice de texto cacheable; autorización siempre
   con el catálogo actual antes de devolver hits);
-- rutas fijas `/norte`, `/aprendizaje` y `/compras` por clave estable;
+- rutas fijas `/norte`, `/aprendizaje`, `/compras` y `/dieta` por clave estable;
 - resúmenes visuales derivados para Norte, Aprendizaje, Compras, Dieta y Facultad;
 - Facultad combina su panel funcional con el contenido canónico del Registro Web;
 - barreras para privados, sistema, legacy y excluidos.
@@ -161,6 +161,8 @@ productores externos ni modifica las hojas.
 - `components/ui`: componentes reutilizables.
 - `lib/web-catalog`: contrato, repositorio Notion read-only, lector y política del Registro Web.
 - `components/web-catalog`: renderer documental genérico y resúmenes estructurados por dominio.
+- `app/(app)/dieta`: vista documental fija para meal prep y alimentación canónica.
+- `docs/calendar-real-readonly-setup.md`: activación externa y verificación de Calendar real.
 - `app/(app)/p/[slug]`: ruta dinámica protegida (flag apagada ⇒ no publica).
 - `lib/notion`: lectura autorizada de Áreas, Proyectos y Tareas.
 - `lib/areas`: composición read-only de paneles de Área (`/areas`).

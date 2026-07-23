@@ -365,6 +365,11 @@ test('8C-19. /compras resuelve por clave estable', () => {
   assert.equal(WEB_CATALOG_FIXED_ROUTES.compras.path, '/compras');
 });
 
+test('8C-19b. /dieta resuelve por clave estable', () => {
+  assert.equal(WEB_CATALOG_FIXED_ROUTES.dieta.stableKey, 'dieta');
+  assert.equal(WEB_CATALOG_FIXED_ROUTES.dieta.path, '/dieta');
+});
+
 test('8C-20. recurso no publicado no es navegable ni buscable', () => {
   const draft = entry({ status: 'draft', canonical: false });
   assert.equal(canNavigateWebCatalogEntry(draft), false);

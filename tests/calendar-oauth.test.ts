@@ -209,7 +209,7 @@ test('O13. la integración mock sigue funcionando', () => {
     source: 'mock',
     status: 'mock',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
   assert.ok(agenda.timelineToday.length > 0);
   process.env.GOOGLE_CALENDAR_DATA_SOURCE = prev;

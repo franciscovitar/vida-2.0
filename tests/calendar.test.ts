@@ -7,6 +7,7 @@ import { addDaysYmd } from '@/lib/adapters/dates';
 import {
   adaptCalendarEvent,
   adaptEventTime,
+  calendarLabelFor,
   filterVisibleEvents,
   type GoogleCalendarEventRaw,
 } from '@/lib/calendar/adapters';
@@ -71,7 +72,7 @@ test('C1. modo mock funciona sin credenciales', () => {
     source: 'mock',
     status: 'mock',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
   assert.equal(agenda.status, 'mock');
   assert.ok(agenda.timelineToday.length > 0);
@@ -102,7 +103,7 @@ test('C2. modo google sin credenciales usa fallback sin 500', () => {
       source: 'google',
       status: 'not-configured',
       notice: 'Integración con Google Calendar no configurada. Mostrando datos simulados.',
-      calendarIds: ['primary'],
+      calendarCount: 1,
     });
     assert.equal(agenda.status, 'not-configured');
     assert.ok(agenda.notice);
@@ -179,7 +180,7 @@ test('C8. evento cancelado se excluye', () => {
     source: 'mock',
     status: 'mock',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
   assert.ok(agenda.timelineToday.every((e) => e.status !== 'cancelled'));
 });
@@ -238,7 +239,7 @@ test('C14. un día sin eventos funciona', () => {
     source: 'mock',
     status: 'mock',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
   const day = agenda.days.find((d) => d.date === emptyDay);
   assert.ok(day);
@@ -267,7 +268,7 @@ test('C16. respuestas son objetos planos serializables', () => {
     source: 'mock',
     status: 'mock',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
   const preview = buildCalendarTodayPreview({
     events,
@@ -283,7 +284,16 @@ test('C16. respuestas son objetos planos serializables', () => {
 });
 
 test('C17. ningún secreto llega al DTO', () => {
-  const events = buildMockCalendarEvents(TODAY);
+  const privateCalendarId = 'personal-account@example.com';
+  const privateProviderEventId = 'provider-event-id-not-public';
+  const event = adaptCalendarEvent(
+    timedRaw(privateProviderEventId, 'Bloque privado', TODAY, '10:00', '11:00'),
+    privateCalendarId,
+    'America/Argentina/Cordoba',
+    calendarLabelFor(privateCalendarId, 1),
+  );
+  assert.ok(event);
+  const events = [event!];
   const agenda = buildAgendaData({
     events,
     view: 'today',
@@ -291,7 +301,7 @@ test('C17. ningún secreto llega al DTO', () => {
     source: 'google',
     status: 'ready',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 2,
   });
   const json = JSON.stringify(agenda);
   assert.doesNotMatch(
@@ -299,6 +309,10 @@ test('C17. ningún secreto llega al DTO', () => {
     /GOOGLE_CALENDAR_CLIENT_SECRET|refresh_token|BEGIN PRIVATE KEY|ya29\./i,
   );
   assert.doesNotMatch(json, /ejemplo_client_secret|ejemplo_refresh_token/i);
+  assert.doesNotMatch(json, /personal-account@example\.com|provider-event-id-not-public/i);
+  assert.equal(agenda.calendarCount, 2);
+  assert.equal(agenda.timelineToday[0]?.calendarLabel, 'Calendario 2');
+  assert.match(agenda.timelineToday[0]?.id ?? '', /^calendar-event-/);
 });
 
 test('C18. no existen operaciones de escritura Calendar', () => {

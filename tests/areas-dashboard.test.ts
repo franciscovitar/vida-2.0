@@ -44,7 +44,6 @@ function baseEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: 'cal-1',
     title: 'Clase Facultad',
-    calendarId: 'primary',
     calendarLabel: null,
     location: null,
     status: 'confirmed',

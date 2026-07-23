@@ -63,7 +63,6 @@ export function toPlainCalendarEvent(event: CalendarEvent): CalendarEvent {
   return {
     id: event.id,
     title: event.title,
-    calendarId: event.calendarId,
     calendarLabel: event.calendarLabel,
     location: event.location,
     status: event.status,
@@ -81,9 +80,22 @@ export function toPlainCalendarEvent(event: CalendarEvent): CalendarEvent {
   };
 }
 
-export function calendarLabelFor(calendarId: string): string | null {
+export function calendarLabelFor(calendarId: string, sourceIndex = 0): string {
   if (calendarId === 'primary') return 'Principal';
-  return null;
+  return `Calendario ${sourceIndex + 1}`;
+}
+
+/**
+ * Convierte IDs del proveedor y datos del evento en una clave opaca para la UI.
+ * No es una firma de seguridad: evita que IDs/correos internos crucen el DTO.
+ */
+export function opaqueCalendarEventId(value: string): string {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `calendar-event-${(hash >>> 0).toString(36)}`;
 }
 
 export function adaptEventTime(
@@ -146,6 +158,7 @@ export function adaptCalendarEvent(
   raw: GoogleCalendarEventRaw,
   calendarId: string,
   timeZone = CALENDAR_TIMEZONE,
+  publicCalendarLabel = calendarLabelFor(calendarId),
 ): CalendarEvent | null {
   const time = adaptEventTime(raw, timeZone);
   if (!time) return null;
@@ -155,12 +168,11 @@ export function adaptCalendarEvent(
   const blocksTime = status !== 'cancelled' && transparency === 'opaque';
 
   return toPlainCalendarEvent({
-    id:
-      raw.id ??
-      `${calendarId}:${time.startDate}:${time.startTime ?? 'allday'}:${raw.summary ?? ''}`,
+    id: opaqueCalendarEventId(
+      `${calendarId}:${raw.id ?? ''}:${time.startDate}:${time.startTime ?? 'allday'}:${raw.summary ?? ''}`,
+    ),
     title: (raw.summary ?? '').trim() || 'Sin título',
-    calendarId,
-    calendarLabel: calendarLabelFor(calendarId),
+    calendarLabel: publicCalendarLabel,
     location: raw.location?.trim() ? raw.location.trim() : null,
     status,
     transparency,

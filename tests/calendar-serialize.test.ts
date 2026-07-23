@@ -57,7 +57,7 @@ test('S4. el resultado final soporta JSON.stringify', () => {
     source: 'google',
     status: 'ready',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
   assert.doesNotThrow(() => JSON.stringify(agenda));
 });
@@ -71,7 +71,7 @@ test('S5. el resultado final soporta structuredClone', () => {
     source: 'google',
     status: 'ready',
     notice: null,
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
   const cloned = structuredClone(agenda);
   assert.equal(cloned.summary.totalEvents, agenda.summary.totalEvents);
@@ -89,7 +89,7 @@ test('S6. error de autenticación usa fallback plano y no provoca 500', () => {
     source: 'google',
     status: 'auth-error',
     notice: calendarNoticeFor('auth-error'),
-    calendarIds: ['primary'],
+    calendarCount: 1,
   });
   assert.equal(fallback.status, 'auth-error');
   assert.ok(fallback.notice);
@@ -153,5 +153,7 @@ test('S12. toPlainGoogleEvent no retiene objetos anidados del SDK', () => {
   assert.doesNotMatch(json, /__protoPollution|response/);
   const adapted = adaptCalendarEvent(plain!, 'primary');
   assert.ok(adapted);
+  assert.notEqual(adapted?.id, 'ev-1');
+  assert.equal('calendarId' in adapted!, false);
   assert.doesNotThrow(() => structuredClone(adapted));
 });

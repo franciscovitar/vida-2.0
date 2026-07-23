@@ -27,9 +27,7 @@ export type CalendarTransparency = 'opaque' | 'transparent';
 export interface CalendarEvent {
   id: string;
   title: string;
-  /** ID de calendario autorizado (p. ej. primary). */
-  calendarId: string;
-  /** Etiqueta legible; null si no aporta información extra. */
+  /** Etiqueta pública y sanitizada; nunca contiene el ID o correo del calendario. */
   calendarLabel: string | null;
   location: string | null;
   status: CalendarEventStatus;
@@ -106,7 +104,8 @@ export interface CalendarAgendaData {
   rangeEnd: string;
   targetDate: string;
   syncedAt: string;
-  calendarIds: string[];
+  /** Cantidad de calendarios consultados; no expone IDs ni correos configurados. */
+  calendarCount: number;
   days: CalendarDayGroup[];
   summary: CalendarAgendaSummary;
   timelineToday: CalendarEvent[];
