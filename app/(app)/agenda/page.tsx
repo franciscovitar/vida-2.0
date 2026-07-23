@@ -20,7 +20,7 @@ export const runtime = 'nodejs';
 function sourceLabel(source: 'mock' | 'google', status: string): string {
   if (source === 'mock' || status === 'mock') return 'Mock';
   if (status === 'ready' || status === 'empty') return 'Google Calendar';
-  return 'Calendar (fallback mock)';
+  return 'Google Calendar sin datos';
 }
 
 export default async function AgendaPage({

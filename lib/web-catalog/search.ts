@@ -4,6 +4,7 @@
 import {
   WEB_CATALOG_SEARCH_LIMITS,
   WEB_CATALOG_SECTION_LABELS,
+  webCatalogPathFor,
 } from '@/lib/web-catalog/section-labels';
 import { canSearchWebCatalogEntry } from '@/lib/web-catalog/policy';
 import type { ContentBlock, ContentPage } from '@/types/content';
@@ -59,7 +60,7 @@ export function buildSearchableDocument(
     title: page.title || entry.editorialName,
     section: entry.section,
     aliases: entry.aliases,
-    href: `/p/${entry.slug}`,
+    href: webCatalogPathFor(entry.stableKey, entry.slug),
     body,
   };
 }

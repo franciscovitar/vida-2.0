@@ -142,14 +142,15 @@ function validatePrivate(entry: WebCatalogEntry): WebCatalogValidationIssue[] {
     entry.policy.searchable ||
     entry.policy.generalAI !== 'denied' ||
     hasGeneralNavigation(entry) ||
-    entry.renderMode === 'document';
+    entry.renderMode === 'document' ||
+    entry.renderMode === 'faculty';
 
   return unsafe
     ? [
         issue(
           'private-unsafe',
           entry,
-          'Un recurso privado no puede ser visible, navegable, buscable, legible por IA general ni usar el renderer document.',
+          'Un recurso privado no puede ser visible, navegable, buscable, legible por IA general ni usar un renderer documental.',
         ),
       ]
     : [];

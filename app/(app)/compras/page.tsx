@@ -14,6 +14,7 @@ export default async function ComprasPage() {
 
   return (
     <DocumentaryStableKeyPage
+      presentation="purchases"
       stableKey={WEB_CATALOG_FIXED_ROUTES.compras.stableKey}
       placeholder={{
         title: 'Compras',

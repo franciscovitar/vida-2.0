@@ -18,6 +18,7 @@ import {
   Settings,
   ShieldCheck,
   ShoppingCart,
+  Target,
 } from 'lucide-react';
 
 import type { Domain } from '@/types';
@@ -25,6 +26,7 @@ import type { Domain } from '@/types';
 /** Clave serializable de icono (server → client). */
 export type NavIconKey =
   | 'hoy'
+  | 'norte'
   | 'habitos'
   | 'salud'
   | 'productividad'
@@ -61,6 +63,7 @@ export interface NavItem {
 
 export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   hoy: LayoutDashboard,
+  norte: Target,
   habitos: CalendarCheck,
   salud: HeartPulse,
   productividad: ListTodo,
@@ -84,6 +87,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
 /** Navegación principal de la aplicación (módulos funcionales + documentales fijos). */
 export const primaryNav: NavItemData[] = [
   { label: 'Hoy', href: '/', icon: 'hoy', domain: 'neutral' },
+  { label: 'Norte', href: '/norte', icon: 'norte', domain: 'projects' },
   { label: 'Hábitos', href: '/habitos', icon: 'habitos', domain: 'habits' },
   { label: 'Salud', href: '/salud', icon: 'salud', domain: 'health' },
   { label: 'Productividad', href: '/productividad', icon: 'productividad', domain: 'productivity' },
@@ -108,8 +112,8 @@ export const secondaryNav: NavItemData[] = [
 
 /** Ítems que aparecen en la barra inferior móvil (subconjunto priorizado). */
 export const mobileNav: NavItemData[] = [
-  primaryNav[0],
-  primaryNav[1],
-  primaryNav[3],
-  primaryNav[5],
+  primaryNav.find((item) => item.href === '/')!,
+  primaryNav.find((item) => item.href === '/habitos')!,
+  primaryNav.find((item) => item.href === '/productividad')!,
+  primaryNav.find((item) => item.href === '/agenda')!,
 ];

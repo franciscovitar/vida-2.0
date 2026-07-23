@@ -207,6 +207,13 @@ test('8B18. privado no puede usar el renderer document', () => {
   );
 });
 
+
+test('8B18b. privado tampoco puede usar el renderer documental de Facultad', () => {
+  assert.ok(
+    issueCodes([privateJournalingFixture({ renderMode: 'faculty' })]).includes('private-unsafe'),
+  );
+});
+
 test('8B19. rechaza una configuración insegura de sistema', () => {
   const systemEntry = documentEntry({
     stableKey: 'fixture.system',

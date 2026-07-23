@@ -4,9 +4,13 @@ import { notFound } from 'next/navigation';
 
 import { AreaDashboardView } from '@/components/areas/AreaDashboard';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ContentPageView } from '@/components/web-catalog/ContentPageView';
 import { Card } from '@/components/ui/Card';
 import { getCanonicalAreaDef, isAreaSlug } from '@/lib/areas/canonical';
 import { loadAreaDashboard } from '@/lib/areas/load';
+import { isWebCatalogEnabled } from '@/lib/web-catalog/config';
+import { WEB_CATALOG_FIXED_ROUTES } from '@/lib/web-catalog/section-labels';
+import { resolveWebCatalogPageByStableKey } from '@/lib/web-catalog/service';
 
 import styles from '../../page.module.scss';
 
@@ -30,7 +34,12 @@ export default async function AreaSlugPage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   if (!isAreaSlug(slug)) notFound();
 
-  const result = await loadAreaDashboard(slug);
+  const [result, facultyContent] = await Promise.all([
+    loadAreaDashboard(slug),
+    slug === 'facultad' && isWebCatalogEnabled()
+      ? resolveWebCatalogPageByStableKey(WEB_CATALOG_FIXED_ROUTES.facultad.stableKey)
+      : Promise.resolve(null),
+  ]);
   if (!result.ok) {
     if (result.code === 'notion-unavailable') {
       return (
@@ -54,6 +63,9 @@ export default async function AreaSlugPage({ params }: { params: Promise<{ slug:
         domain={result.data.summary.domain}
       />
       <AreaDashboardView data={result.data} />
+      {facultyContent?.ok && facultyContent.kind === 'document' ? (
+        <ContentPageView page={facultyContent.page} presentation="faculty" />
+      ) : null}
     </div>
   );
 }

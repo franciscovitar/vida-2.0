@@ -4,7 +4,7 @@
  *
  * Hoy usa `getCalendarTodayPreview`: en modo google, un fallo NO inyecta
  * eventos mock (aviso localizado + agenda vacía).
- * /agenda puede seguir usando fallback mock etiquetado.
+ * /agenda también falla cerrado: mantiene la vista vacía y el aviso real.
  */
 import { cache } from 'react';
 import 'server-only';
@@ -24,6 +24,7 @@ import { buildMockCalendarEvents } from '@/lib/mock-data/google-calendar';
 import {
   buildAgendaData,
   buildCalendarTodayPreview,
+  buildUnavailableAgendaData,
   emptyCalendarTodayPreview,
   parseAgendaView,
   viewRange,
@@ -39,11 +40,7 @@ function toPlain<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function mockAgenda(
-  view: CalendarAgendaView,
-  status: CalendarAgendaData['status'],
-  notice: string | null,
-): CalendarAgendaData {
+function mockAgenda(view: CalendarAgendaView): CalendarAgendaData {
   const today = todayInCalendarTz();
   const timezone = getCalendarTimezone();
   const calendarIds = getMockCalendarIds();
@@ -53,9 +50,9 @@ function mockAgenda(
       events,
       view,
       today,
-      source: status === 'mock' ? 'mock' : 'google',
-      status,
-      notice,
+      source: 'mock',
+      status: 'mock',
+      notice: null,
       calendarIds,
       timezone,
     }),
@@ -63,13 +60,21 @@ function mockAgenda(
 }
 
 function fallbackAgenda(view: CalendarAgendaView, code: CalendarReadCode): CalendarAgendaData {
-  return mockAgenda(view, code, calendarNoticeFor(code));
+  return toPlain(
+    buildUnavailableAgendaData({
+      view,
+      today: todayInCalendarTz(),
+      status: code,
+      notice: calendarNoticeFor(code),
+      timezone: getCalendarTimezone(),
+    }),
+  );
 }
 
 async function loadAgendaUncached(view: CalendarAgendaView): Promise<CalendarAgendaData> {
   const mode = getCalendarDataSource();
   if (mode !== 'google') {
-    return mockAgenda(view, 'mock', null);
+    return mockAgenda(view);
   }
 
   const configResult = getCalendarConfig();

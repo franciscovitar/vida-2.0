@@ -3,7 +3,8 @@
  */
 import { extractNotionPageIdFromUrl, parseNotionSourceRef } from '@/lib/web-catalog/catalog-mapper';
 import { NOTION_SOURCE_REF_HOSTS } from '@/lib/web-catalog/constants';
-import { canLoadWebCatalogContent, usesGenericDocumentRenderer } from '@/lib/web-catalog/policy';
+import { canLoadWebCatalogContent, usesReadableContentRenderer } from '@/lib/web-catalog/policy';
+import { webCatalogPathFor } from '@/lib/web-catalog/section-labels';
 import type { WebCatalogEntry } from '@/types/web-catalog';
 
 export type ResolvedHref =
@@ -67,8 +68,8 @@ export function resolveContentHref(
     const pageId = extractNotionPageIdFromUrl(trimmed);
     if (!pageId) return { kind: 'unavailable' };
     const entry = sourceIndex.get(pageId.toLowerCase());
-    if (entry && canLoadWebCatalogContent(entry) && usesGenericDocumentRenderer(entry)) {
-      return { kind: 'internal', href: `/p/${entry.slug}` };
+    if (entry && canLoadWebCatalogContent(entry) && usesReadableContentRenderer(entry)) {
+      return { kind: 'internal', href: webCatalogPathFor(entry.stableKey, entry.slug) };
     }
     return { kind: 'unavailable' };
   }

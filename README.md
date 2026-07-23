@@ -14,9 +14,11 @@ Production usa integraciones reales y separa cada fuente por responsabilidad:
 - **Google Calendar:** eventos y bloques de tiempo, en solo lectura.
 - **Web:** vistas derivadas y funciones específicas; no es una fuente de verdad paralela.
 
-También existen mocks tipados para desarrollo, pruebas y fallbacks etiquetados. La pantalla Hoy
-compone las tres integraciones. Hábitos permite una escritura controlada sobre el día actual en
-Sheets; Notion y Calendar no tienen escritura desde la web.
+También existen mocks tipados para desarrollo y pruebas. La pantalla Hoy compone las tres
+integraciones. Cuando Google Calendar está seleccionado como fuente real y la lectura falla,
+Agenda queda vacía con un aviso explícito: no se inyectan eventos simulados como fallback.
+Hábitos permite una escritura controlada sobre el día actual en Sheets; Notion y Calendar no
+tienen escritura desde la web.
 
 Notion consulta los data sources autorizados de Áreas, Proyectos y Tareas. El Registro Web tiene
 contrato tipado, repositorio Notion de solo lectura y ruta `/p/[slug]` detrás de una feature flag
@@ -37,7 +39,9 @@ El código de `lib/web-catalog` define:
 - breadcrumbs en `/p/[slug]`;
 - búsqueda autenticada en `/buscar` (índice de texto cacheable; autorización siempre
   con el catálogo actual antes de devolver hits);
-- rutas fijas `/aprendizaje` y `/compras` por clave estable;
+- rutas fijas `/norte`, `/aprendizaje` y `/compras` por clave estable;
+- resúmenes visuales derivados para Norte, Aprendizaje, Compras, Dieta y Facultad;
+- Facultad combina su panel funcional con el contenido canónico del Registro Web;
 - barreras para privados, sistema, legacy y excluidos.
 
 `WEB_CATALOG_ENABLED` está desactivada por defecto y solo acepta el valor exacto `true`.
@@ -156,7 +160,7 @@ productores externos ni modifica las hojas.
 - `components/dashboard`: secciones de Hoy.
 - `components/ui`: componentes reutilizables.
 - `lib/web-catalog`: contrato, repositorio Notion read-only, lector y política del Registro Web.
-- `components/web-catalog`: renderer documental genérico.
+- `components/web-catalog`: renderer documental genérico y resúmenes estructurados por dominio.
 - `app/(app)/p/[slug]`: ruta dinámica protegida (flag apagada ⇒ no publica).
 - `lib/notion`: lectura autorizada de Áreas, Proyectos y Tareas.
 - `lib/areas`: composición read-only de paneles de Área (`/areas`).

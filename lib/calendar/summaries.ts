@@ -136,6 +136,27 @@ export function buildAgendaData(input: {
   };
 }
 
+
+/** Fallback real: conserva el estado de Calendar sin inyectar eventos simulados. */
+export function buildUnavailableAgendaData(input: {
+  view: CalendarAgendaView;
+  today: string;
+  status: CalendarIntegrationStatus;
+  notice: string;
+  timezone?: string;
+}): CalendarAgendaData {
+  return buildAgendaData({
+    events: [],
+    view: input.view,
+    today: input.today,
+    source: 'google',
+    status: input.status,
+    notice: input.notice,
+    calendarIds: [],
+    timezone: input.timezone,
+  });
+}
+
 export function buildCalendarTodayPreview(input: {
   events: readonly CalendarEvent[];
   today: string;

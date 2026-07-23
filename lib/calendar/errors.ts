@@ -17,15 +17,17 @@ export type CalendarQueryResult<T> =
 
 export function calendarNoticeFor(code: CalendarReadCode | 'empty'): string {
   const messages: Record<CalendarReadCode | 'empty', string> = {
-    'not-configured': 'Integración con Google Calendar no configurada. Mostrando datos simulados.',
-    'auth-error': 'No se pudo autenticar con Google Calendar. Mostrando datos simulados.',
-    'permission-error': 'Sin permiso de lectura en Google Calendar. Mostrando datos simulados.',
+    'not-configured':
+      'Integración con Google Calendar no configurada. La agenda permanece vacía hasta resolverlo.',
+    'auth-error': 'No se pudo autenticar con Google Calendar. No se muestran eventos simulados.',
+    'permission-error':
+      'Sin permiso de lectura en Google Calendar. No se muestran eventos simulados.',
     'invalid-calendar-id':
-      'Hay un ID de calendario inválido en la configuración. Mostrando datos simulados.',
-    'calendar-not-found': 'No se encontró un calendario autorizado. Mostrando datos simulados.',
-    'rate-limited': 'Google Calendar limitó la lectura. Mostrando datos simulados.',
-    'network-error': 'No se pudo conectar con Google Calendar. Mostrando datos simulados.',
-    'read-error': 'No se pudieron leer los eventos de Calendar. Mostrando datos simulados.',
+      'Hay un ID de calendario inválido en la configuración. La agenda permanece vacía.',
+    'calendar-not-found': 'No se encontró un calendario autorizado. La agenda permanece vacía.',
+    'rate-limited': 'Google Calendar limitó la lectura temporalmente. La agenda permanece vacía.',
+    'network-error': 'No se pudo conectar con Google Calendar. La agenda permanece vacía.',
+    'read-error': 'No se pudieron leer los eventos de Calendar. La agenda permanece vacía.',
     empty: 'No hay eventos en el período seleccionado.',
   };
   return messages[code];

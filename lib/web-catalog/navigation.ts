@@ -7,7 +7,10 @@ import {
   type NavItemData,
 } from '@/lib/constants/navigation';
 import { canNavigateWebCatalogEntry, isPrivateWebCatalogEntry } from '@/lib/web-catalog/policy';
-import { WEB_CATALOG_FIXED_ROUTES } from '@/lib/web-catalog/section-labels';
+import {
+  WEB_CATALOG_FIXED_ROUTES,
+  webCatalogPathFor,
+} from '@/lib/web-catalog/section-labels';
 import type { Domain } from '@/types';
 import type { WebCatalogEntry, WebCatalogSection } from '@/types/web-catalog';
 
@@ -24,10 +27,6 @@ const SECTION_ORDER: readonly WebCatalogSection[] = [
 
 const FIXED_STABLE_KEYS: ReadonlySet<string> = new Set(
   Object.values(WEB_CATALOG_FIXED_ROUTES).map((route) => route.stableKey),
-);
-
-const FIXED_PATH_BY_STABLE_KEY: ReadonlyMap<string, string> = new Map(
-  Object.values(WEB_CATALOG_FIXED_ROUTES).map((route) => [route.stableKey, route.path]),
 );
 
 const DOCUMENTARY_SHADOW_SUFFIXES = new Set(['guia', 'documento', 'manual', 'mapa']);
@@ -127,10 +126,9 @@ export function listNavigableCatalogEntries(
 }
 
 export function catalogEntryToNavItem(entry: WebCatalogEntry): NavItemData {
-  const fixedPath = FIXED_PATH_BY_STABLE_KEY.get(entry.stableKey);
   return {
     label: entry.editorialName,
-    href: fixedPath ?? `/p/${entry.slug}`,
+    href: webCatalogPathFor(entry.stableKey, entry.slug),
     icon: 'document',
     domain: domainForSection(entry.section),
   };

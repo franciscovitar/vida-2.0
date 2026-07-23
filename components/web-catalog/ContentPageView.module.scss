@@ -1,3 +1,11 @@
+.content-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  width: min(100%, 68rem);
+  min-width: 0;
+}
+
 .article {
   display: flex;
   flex-direction: column;
@@ -396,7 +404,7 @@
   background: rgb(176 68 68 / 16%);
 }
 
-@media (max-width <= 640px) {
+@media (width <= 640px) {
   .article {
     gap: 0.85rem;
   }

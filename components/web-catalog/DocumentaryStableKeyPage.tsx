@@ -13,6 +13,7 @@ import {
   type WebCatalogPageServiceResult,
 } from '@/lib/web-catalog/service';
 import type { Domain } from '@/types';
+import type { DocumentPresentation } from '@/lib/web-catalog/document-overview';
 
 import pageStyles from '@/app/(app)/page.module.scss';
 
@@ -26,7 +27,11 @@ type PlaceholderProps = {
   preview: string[];
 };
 
-function renderCatalogResult(result: WebCatalogPageServiceResult, fallbackTitle: string) {
+function renderCatalogResult(
+  result: WebCatalogPageServiceResult,
+  fallbackTitle: string,
+  presentation?: DocumentPresentation,
+) {
   if (!result.ok) {
     if (result.code === 'not-configured') {
       return (
@@ -63,7 +68,7 @@ function renderCatalogResult(result: WebCatalogPageServiceResult, fallbackTitle:
     <div className={pageStyles.page}>
       <Breadcrumbs items={[{ label: sectionLabel }, { label: result.page.title }]} />
       <PageHeader title={result.page.title} description={sectionLabel} icon={FileText} />
-      <ContentPageView page={result.page} />
+      <ContentPageView page={result.page} presentation={presentation} />
     </div>
   );
 }
@@ -75,14 +80,16 @@ function renderCatalogResult(result: WebCatalogPageServiceResult, fallbackTitle:
 export async function DocumentaryStableKeyPage({
   stableKey,
   placeholder,
+  presentation,
 }: {
   stableKey: string;
   placeholder: PlaceholderProps;
+  presentation?: DocumentPresentation;
 }) {
   if (!isWebCatalogEnabled()) {
     return <PlaceholderPage {...placeholder} />;
   }
 
   const result = await resolveWebCatalogPageByStableKey(stableKey);
-  return renderCatalogResult(result, placeholder.title);
+  return renderCatalogResult(result, placeholder.title, presentation);
 }

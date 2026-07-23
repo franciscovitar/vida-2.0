@@ -23,6 +23,11 @@ export function usesGenericDocumentRenderer(entry: WebCatalogEntry): boolean {
   return entry.renderMode === 'document';
 }
 
+/** Renderers especiales que reutilizan la lectura normalizada y una vista segura en código. */
+export function usesReadableContentRenderer(entry: WebCatalogEntry): boolean {
+  return entry.renderMode === 'document' || entry.renderMode === 'faculty';
+}
+
 /** Protección tipada: recursos privados nunca entran al lector general. */
 export function isPrivateWebCatalogEntry(entry: WebCatalogEntry): boolean {
   return entry.privacy === 'private';

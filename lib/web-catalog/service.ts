@@ -19,7 +19,7 @@ import {
   canLoadWebCatalogContent,
   canSearchWebCatalogEntry,
   isPrivateWebCatalogEntry,
-  usesGenericDocumentRenderer,
+  usesReadableContentRenderer,
 } from '@/lib/web-catalog/policy';
 import {
   buildSearchableDocument,
@@ -87,7 +87,7 @@ async function loadDocumentForEntry(
     };
   }
 
-  if (!usesGenericDocumentRenderer(entry)) {
+  if (!usesReadableContentRenderer(entry)) {
     return {
       ok: true,
       kind: 'unimplemented-renderer',
@@ -220,7 +220,7 @@ const loadSearchIndexCached = unstable_cache(
 
     for (const entry of catalog.entries) {
       if (!canSearchWebCatalogEntry(entry)) continue;
-      if (!usesGenericDocumentRenderer(entry)) continue;
+      if (!usesReadableContentRenderer(entry)) continue;
       const content = await readWebCatalogContentPage(port, entry, catalog.index, catalog.entries);
       if (!content.ok) continue;
       const doc = buildSearchableDocument(entry, content.page);

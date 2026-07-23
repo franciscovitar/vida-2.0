@@ -6,6 +6,8 @@ import {
   contentHeadingId,
   groupAdjacentContentBlocks,
 } from '@/lib/web-catalog/content-layout';
+import { DocumentOverview } from '@/components/web-catalog/DocumentOverview';
+import type { DocumentPresentation } from '@/lib/web-catalog/document-overview';
 import type { ContentBlock, ContentPage, ContentText } from '@/types/content';
 
 import styles from './ContentPageView.module.scss';
@@ -256,31 +258,40 @@ function formatEditedAt(value: string | null): string | null {
   }).format(date);
 }
 
-export function ContentPageView({ page }: { page: ContentPage }) {
+export function ContentPageView({
+  page,
+  presentation,
+}: {
+  page: ContentPage;
+  presentation?: DocumentPresentation;
+}) {
   const outline = buildContentOutline(page.blocks);
   const editedAt = formatEditedAt(page.lastEditedAt);
 
   return (
-    <article className={styles.article} aria-label={`Contenido de ${page.title}`}>
-      <div className={styles.meta}>
-        <span>Contenido sincronizado desde Notion</span>
-        {editedAt ? <span>Actualizado {editedAt}</span> : null}
-      </div>
+    <div className={styles['content-page']}>
+      <DocumentOverview page={page} presentation={presentation} />
+      <article className={styles.article} aria-label={`Contenido de ${page.title}`}>
+        <div className={styles.meta}>
+          <span>Contenido sincronizado desde Notion</span>
+          {editedAt ? <span>Actualizado {editedAt}</span> : null}
+        </div>
 
-      {outline.length >= 3 ? (
-        <nav className={styles.toc} aria-label="Índice de esta página">
-          <p className={styles['toc-title']}>En esta página</p>
-          <ol>
-            {outline.map((item) => (
-              <li key={item.id} data-level={item.level}>
-                <a href={`#${item.id}`}>{item.label}</a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      ) : null}
+        {outline.length >= 3 ? (
+          <nav className={styles.toc} aria-label="Índice de esta página">
+            <p className={styles['toc-title']}>En esta página</p>
+            <ol>
+              {outline.map((item) => (
+                <li key={item.id} data-level={item.level}>
+                  <a href={`#${item.id}`}>{item.label}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        ) : null}
 
-      <BlockList blocks={page.blocks} />
-    </article>
+        <BlockList blocks={page.blocks} />
+      </article>
+    </div>
   );
 }

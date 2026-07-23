@@ -14,6 +14,7 @@ export default async function AprendizajePage() {
 
   return (
     <DocumentaryStableKeyPage
+      presentation="learning"
       stableKey={WEB_CATALOG_FIXED_ROUTES.aprendizaje.stableKey}
       placeholder={{
         title: 'Aprendizaje',
