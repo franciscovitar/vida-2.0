@@ -271,7 +271,7 @@
   font-weight: 620;
 }
 
-@media (max-width: 700px) {
+@media (max-width <= 700px) {
   .session {
     align-items: flex-start;
   }

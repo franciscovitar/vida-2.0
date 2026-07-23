@@ -26,10 +26,7 @@ function textClasses(part: ContentText): string | undefined {
 
 function TextPart({ part }: { part: ContentText }) {
   const content = (
-    <span
-      className={textClasses(part)}
-      data-color={part.annotations?.color ?? undefined}
-    >
+    <span className={textClasses(part)} data-color={part.annotations?.color ?? undefined}>
       {part.plain}
     </span>
   );
@@ -82,13 +79,7 @@ function ListItemView({ block }: { block: ContentBlock }) {
   );
 }
 
-function ListGroup({
-  ordered,
-  blocks,
-}: {
-  ordered: boolean;
-  blocks: readonly ContentBlock[];
-}) {
+function ListGroup({ ordered, blocks }: { ordered: boolean; blocks: readonly ContentBlock[] }) {
   const items = blocks.map((block) => <ListItemView key={block.localId} block={block} />);
   return ordered ? (
     <ol className={styles.list}>{items}</ol>
@@ -245,11 +236,7 @@ function BlockList({
     if (group.kind === 'list') {
       const first = group.blocks[0];
       return first ? (
-        <ListGroup
-          key={`list-${first.localId}`}
-          ordered={group.ordered}
-          blocks={group.blocks}
-        />
+        <ListGroup key={`list-${first.localId}`} ordered={group.ordered} blocks={group.blocks} />
       ) : null;
     }
     return <BlockView key={group.block.localId} block={group.block} />;

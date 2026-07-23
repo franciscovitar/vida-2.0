@@ -79,9 +79,10 @@ function readCodeNotice(code: SheetReadCode): string {
 
 function failureSnapshot(code: SheetReadCode): GymSessionsSnapshot {
   return {
-    state: code === 'not-configured' || code === 'permission-error' || code === 'missing-tab'
-      ? 'unavailable'
-      : 'error',
+    state:
+      code === 'not-configured' || code === 'permission-error' || code === 'missing-tab'
+        ? 'unavailable'
+        : 'error',
     notice: readCodeNotice(code),
     sessions: [],
     summaries: [],
@@ -89,7 +90,11 @@ function failureSnapshot(code: SheetReadCode): GymSessionsSnapshot {
   };
 }
 
-function mapSet(row: Row, sessionId: string, index: number): GymSet & { exerciseKey: string; exerciseName: string } {
+function mapSet(
+  row: Row,
+  sessionId: string,
+  index: number,
+): GymSet & { exerciseKey: string; exerciseName: string } {
   const exerciseKey = textCell(row[1]) ?? opaqueKey('exercise-source', `${sessionId}-${index}`);
   const exerciseName = textCell(row[2]) ?? 'Ejercicio sin nombre';
   const setIndex = integerCell(row[3]) ?? index + 1;
@@ -177,7 +182,8 @@ function summariesFromSessions(sessions: readonly SessionWithStatus[]): GymSessi
     date: session.date,
     label: session.dayLabel ?? session.routineName,
     durationMinutes: session.durationMinutes,
-    completed: status === 'complete' ? true : status === 'pending' || status === 'partial' ? false : null,
+    completed:
+      status === 'complete' ? true : status === 'pending' || status === 'partial' ? false : null,
   }));
 }
 
@@ -247,7 +253,11 @@ export function summarizeExerciseProgress(sessions: readonly GymSession[]): GymE
       latestReps: value.latestReps,
       completedSets: value.completedSets,
     }))
-    .sort((a, b) => b.latestDate.localeCompare(a.latestDate) || a.exerciseName.localeCompare(b.exerciseName, 'es'));
+    .sort(
+      (a, b) =>
+        b.latestDate.localeCompare(a.latestDate) ||
+        a.exerciseName.localeCompare(b.exerciseName, 'es'),
+    );
 }
 
 export async function loadGymSessionsSnapshot(
@@ -281,7 +291,8 @@ export async function loadGymSessionsSnapshot(
   const summaries = summariesFromSessions(mapped);
   return {
     state: sessions.length === 0 ? 'empty' : 'ready',
-    notice: sessions.length === 0 ? 'Las pestañas están listas, pero todavía no hay sesiones.' : null,
+    notice:
+      sessions.length === 0 ? 'Las pestañas están listas, pero todavía no hay sesiones.' : null,
     sessions,
     summaries,
     exerciseProgress: summarizeExerciseProgress(sessions),

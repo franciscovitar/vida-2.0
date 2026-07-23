@@ -26,9 +26,7 @@ export function contentHeadingId(block: ContentBlock): string {
 }
 
 /** Agrupa listas consecutivas para no reiniciar viñetas o numeración en cada bloque. */
-export function groupAdjacentContentBlocks(
-  blocks: readonly ContentBlock[],
-): ContentBlockGroup[] {
+export function groupAdjacentContentBlocks(blocks: readonly ContentBlock[]): ContentBlockGroup[] {
   const groups: ContentBlockGroup[] = [];
 
   for (const block of blocks) {

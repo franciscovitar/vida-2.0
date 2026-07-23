@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { adaptCatalogBlock } from '@/lib/web-catalog/content-adapters';
-import {
-  buildContentOutline,
-  groupAdjacentContentBlocks,
-} from '@/lib/web-catalog/content-layout';
+import { buildContentOutline, groupAdjacentContentBlocks } from '@/lib/web-catalog/content-layout';
 import { buildAppNavigation } from '@/lib/web-catalog/navigation';
 import type { ContentBlock } from '@/types/content';
 import type { WebCatalogEntry } from '@/types/web-catalog';
@@ -37,11 +34,7 @@ function catalogEntry(overrides: Partial<WebCatalogEntry> = {}): WebCatalogEntry
   };
 }
 
-function block(
-  localId: string,
-  type: ContentBlock['type'],
-  text = localId,
-): ContentBlock {
+function block(localId: string, type: ContentBlock['type'], text = localId): ContentBlock {
   return {
     localId,
     type,
@@ -92,8 +85,14 @@ test('9B-1. catálogo activo oculta rutas fijas documentales no publicadas', () 
     }),
   ]);
 
-  assert.equal(nav.primary.some((item) => item.href === '/aprendizaje'), false);
-  assert.equal(nav.primary.some((item) => item.href === '/compras'), false);
+  assert.equal(
+    nav.primary.some((item) => item.href === '/aprendizaje'),
+    false,
+  );
+  assert.equal(
+    nav.primary.some((item) => item.href === '/compras'),
+    false,
+  );
 });
 
 test('9B-2. ruta fija publicada aparece una sola vez con su path estable', () => {
@@ -125,7 +124,10 @@ test('9B-4. guía documental no duplica un módulo funcional existente', () => {
     }),
   ]);
   const all = [...nav.primary, ...nav.secondary];
-  assert.equal(all.some((item) => item.href === '/p/productividad-guia'), false);
+  assert.equal(
+    all.some((item) => item.href === '/p/productividad-guia'),
+    false,
+  );
   assert.equal(all.filter((item) => item.href === '/productividad').length, 1);
 });
 

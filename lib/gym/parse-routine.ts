@@ -56,7 +56,9 @@ function isWeightsSection(label: string): boolean {
 
 function supplementalKind(label: string): GymRoutineSectionKind {
   if (/movilidad|entrada\s+en\s+calor|calentamiento/i.test(label)) return 'mobility';
-  if (/despu[eé]s\s+del\s+gimnasio|recuperaci[oó]n|estiramiento|descarga\s+de\s+zonas/i.test(label)) {
+  if (
+    /despu[eé]s\s+del\s+gimnasio|recuperaci[oó]n|estiramiento|descarga\s+de\s+zonas/i.test(label)
+  ) {
     return 'recovery';
   }
   if (/cardio|aer[oó]bico|zona\s*2|f[uú]tbol/i.test(label)) return 'cardio';
@@ -88,10 +90,14 @@ export function parseExercisePrescriptionText(raw: string): ParsedPrescription {
   let targetRpe: string | null = null;
 
   const repToken = String.raw`\d+(?:\s*(?:[-–/]|a)\s*\d+)?`;
-  const setsReps = text.match(new RegExp(`(\\d+)\\s*[x×]\\s*(${repToken})(?:\\s*(por lado|por pierna))?`, 'i'));
+  const setsReps = text.match(
+    new RegExp(`(\\d+)\\s*[x×]\\s*(${repToken})(?:\\s*(por lado|por pierna))?`, 'i'),
+  );
   const seriesReps = text.match(new RegExp(`(\\d+)\\s+series?\\s+(?:de\\s+)?(${repToken})`, 'i'));
   const seriesOnly = text.match(/(?:^|[—–-]\s*)(\d+)\s+series?\b/i);
-  const carries = text.match(/(?:^|[—–-]\s*)(\d+)\s+caminatas?\s+de\s+(\d+(?:\s*[-–/]\s*\d+)?)\s*s/i);
+  const carries = text.match(
+    /(?:^|[—–-]\s*)(\d+)\s+caminatas?\s+de\s+(\d+(?:\s*[-–/]\s*\d+)?)\s*s/i,
+  );
 
   if (setsReps) {
     sets = Number(setsReps[1]);
@@ -108,14 +114,18 @@ export function parseExercisePrescriptionText(raw: string): ParsedPrescription {
   }
 
   if (sets === null && reps === null) {
-    const duration = text.match(/(?:^|[—–-]\s*)(\d+(?:\s*[-–/]\s*\d+)?)\s*(s|seg(?:undos?)?|min(?:utos?)?)(?:\s+(por lado|por pierna))?/i);
+    const duration = text.match(
+      /(?:^|[—–-]\s*)(\d+(?:\s*[-–/]\s*\d+)?)\s*(s|seg(?:undos?)?|min(?:utos?)?)(?:\s+(por lado|por pierna))?/i,
+    );
     if (duration) {
       const unit = duration[2]!.toLowerCase().startsWith('m') ? 'min' : 's';
       reps = `${normalizeRange(duration[1]!)} ${unit}${duration[3] ? ` ${duration[3]!.toLowerCase()}` : ''}`;
     }
   }
 
-  const restMatch = text.match(/descanso\s*:?\s*(\d+(?:\s*[-–/]\s*\d+)?)\s*(s|seg|segs|min|mins|m)?/i);
+  const restMatch = text.match(
+    /descanso\s*:?\s*(\d+(?:\s*[-–/]\s*\d+)?)\s*(s|seg|segs|min|mins|m)?/i,
+  );
   if (restMatch) {
     const unit = (restMatch[2] ?? 's').toLowerCase();
     const n = normalizeRange(restMatch[1]!);
@@ -129,11 +139,20 @@ export function parseExercisePrescriptionText(raw: string): ParsedPrescription {
   if (rpeMatch) targetRpe = rpeMatch[1]!;
 
   let name = text
-    .replace(new RegExp(`(?:\\s*[—–-]\\s*)?(\\d+)\\s*[x×]\\s*(${repToken})(?:\\s*(?:por lado|por pierna))?`, 'gi'), ' ')
+    .replace(
+      new RegExp(
+        `(?:\\s*[—–-]\\s*)?(\\d+)\\s*[x×]\\s*(${repToken})(?:\\s*(?:por lado|por pierna))?`,
+        'gi',
+      ),
+      ' ',
+    )
     .replace(new RegExp(`(?:\\s*[—–-]\\s*)?\\d+\\s+series?\\s+(?:de\\s+)?${repToken}`, 'gi'), ' ')
     .replace(/(?:\s*[—–-]\s*)?\d+\s+caminatas?\s+de\s+\d+(?:\s*[-–/]\s*\d+)?\s*s/gi, ' ')
     .replace(/(?:\s*[—–-]\s*)?\d+\s+series?\b/gi, ' ')
-    .replace(/(?:\s*[—–-]\s*)?\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg(?:undos?)?|min(?:utos?)?)(?:\s+(?:por lado|por pierna))?/gi, ' ')
+    .replace(
+      /(?:\s*[—–-]\s*)?\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg(?:undos?)?|min(?:utos?)?)(?:\s+(?:por lado|por pierna))?/gi,
+      ' ',
+    )
     .replace(/descanso\s*:?\s*\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg|segs|min|mins|m)?/gi, ' ')
     .replace(/rir\s*:?\s*\d+(?:\s*[-–/]\s*\d+)?/gi, ' ')
     .replace(/rpe\s*:?\s*\d+(?:\.\d+)?/gi, ' ')

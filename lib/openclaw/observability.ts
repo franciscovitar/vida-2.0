@@ -46,6 +46,5 @@ export function openClawLogLooksSafe(event: OpenClawLogEvent): boolean {
 /** Emite a stdout en una sola línea JSON sanitizada. */
 export function emitOpenClawLog(event: OpenClawLogEvent): void {
   if (!openClawLogLooksSafe(event)) return;
-  // eslint-disable-next-line no-console -- observabilidad operativa acotada
   console.info(JSON.stringify({ scope: 'openclaw', ...event }));
 }

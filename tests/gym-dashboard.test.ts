@@ -384,7 +384,6 @@ test('8D2-22. ausencia de métodos de escritura', () => {
   assert.equal(/createSession|updateSession|deleteSession|appendSet/.test(source), false);
 });
 
-
 test('9D-1. rutina real separa pesas de movilidad, cardio y descarga', () => {
   const content = page([
     textBlock('heading_1', 'Objetivo general', 'goal-h'),

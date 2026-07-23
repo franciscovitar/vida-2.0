@@ -57,12 +57,7 @@ export interface GymWorkoutDay {
   exercises: readonly GymExercisePrescription[];
 }
 
-export type GymRoutineSectionKind =
-  | 'mobility'
-  | 'recovery'
-  | 'cardio'
-  | 'planning'
-  | 'notes';
+export type GymRoutineSectionKind = 'mobility' | 'recovery' | 'cardio' | 'planning' | 'notes';
 
 /** Bloques complementarios de la rutina que no son días de pesas. */
 export interface GymRoutineSection {

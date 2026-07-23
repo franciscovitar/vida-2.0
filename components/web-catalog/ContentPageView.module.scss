@@ -396,7 +396,7 @@
   background: rgb(176 68 68 / 16%);
 }
 
-@media (max-width: 640px) {
+@media (max-width <= 640px) {
   .article {
     gap: 0.85rem;
   }

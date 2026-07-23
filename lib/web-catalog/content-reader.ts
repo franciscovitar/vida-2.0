@@ -91,10 +91,7 @@ export async function readWebCatalogContentPage(
   const childPages: { slug: string; title: string }[] = [];
   const collectChildPages = (blocks: readonly ContentBlock[]) => {
     for (const block of blocks) {
-      if (
-        (block.type === 'child_page' || block.type === 'child_database') &&
-        block.childPageSlug
-      ) {
+      if ((block.type === 'child_page' || block.type === 'child_database') && block.childPageSlug) {
         childPages.push({
           slug: block.childPageSlug,
           title: block.childPageTitle ?? 'Recurso relacionado',
