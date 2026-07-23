@@ -158,8 +158,7 @@ export default async function AjustesPage() {
           ) : null}
 
           <p className={styles.command}>
-            Validación equivalente por terminal:{' '}
-            <code>npm run preview:check</code>
+            Validación equivalente por terminal: <code>npm run preview:check</code>
           </p>
         </Card>
       </div>

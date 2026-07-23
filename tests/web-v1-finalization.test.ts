@@ -9,10 +9,7 @@ import {
   buildRuntimeReadiness,
   resolveRuntimeEnvironment,
 } from '@/lib/runtime/readiness';
-import {
-  isWebCatalogHiddenFailure,
-  isWebCatalogVisibleFailure,
-} from '@/lib/web-catalog/errors';
+import { isWebCatalogHiddenFailure, isWebCatalogVisibleFailure } from '@/lib/web-catalog/errors';
 
 const root = process.cwd();
 
@@ -170,7 +167,8 @@ test('11B-3. menú móvil controla foco, Escape, Tab y aria-controls', () => {
   assert.match(source, /aria-controls="mobile-navigation-drawer"/);
   assert.match(source, /event\.key === 'Escape'/);
   assert.match(source, /event\.key !== 'Tab'/);
-  assert.match(source, /triggerRef\.current\?\.focus\(\)/);
+  assert.match(source, /const trigger = triggerRef\.current;/);
+  assert.match(source, /trigger\?\.focus\(\)/);
   assert.match(source, /closeRef\.current\?\.focus\(\)/);
 });
 

@@ -45,7 +45,11 @@ export default async function WebCatalogSlugPage({
           description="Estado de la fuente documental"
           icon={FileText}
         />
-        <CatalogState title="No se pudo cargar esta página" message={result.message} code={result.code} />
+        <CatalogState
+          title="No se pudo cargar esta página"
+          message={result.message}
+          code={result.code}
+        />
       </div>
     );
   }

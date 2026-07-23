@@ -31,7 +31,7 @@ export function MobileNav({ primary, secondary }: MobileNavProps) {
 
   useEffect(() => {
     if (!open) return;
-
+    const trigger = triggerRef.current;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     closeRef.current?.focus();
@@ -64,7 +64,7 @@ export function MobileNav({ primary, secondary }: MobileNavProps) {
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = previousOverflow;
-      triggerRef.current?.focus();
+      trigger?.focus();
     };
   }, [open]);
 

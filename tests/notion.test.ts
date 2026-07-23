@@ -6,11 +6,7 @@ import { test } from 'node:test';
 import { getDataSource } from '@/lib/data/config';
 import { adaptProject, adaptTask, resolveRelation } from '@/lib/notion/adapters';
 import { projectDateKind, taskDateKind } from '@/lib/notion/classify';
-import {
-  NOTION_DATABASES,
-  TASK_PROPS,
-  PROJECT_PROPS,
-} from '@/lib/notion/constants';
+import { NOTION_DATABASES, TASK_PROPS, PROJECT_PROPS } from '@/lib/notion/constants';
 import {
   getNotionConfig,
   getNotionDataSource,
@@ -117,10 +113,7 @@ test('N4. un data source desconocido es rechazado', () => {
     NOTION_PROJECTS_DATA_SOURCE_ID: NOTION_DATABASES.projects.dataSourceId,
     NOTION_AREAS_DATA_SOURCE_ID: NOTION_DATABASES.areas.dataSourceId,
   };
-  assert.equal(
-    isAllowedNotionDataSourceId('00000000-0000-0000-0000-000000000000', env),
-    false,
-  );
+  assert.equal(isAllowedNotionDataSourceId('00000000-0000-0000-0000-000000000000', env), false);
 });
 
 test('N5. estados de tareas se adaptan correctamente', () => {

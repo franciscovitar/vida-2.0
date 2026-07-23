@@ -3,10 +3,7 @@
  * No consulta red, no lee archivos y nunca devuelve valores de entorno.
  */
 import { getWriteRuntimeStatus } from '@/lib/actions/config';
-import {
-  resolveCalendarConfig,
-  resolveCalendarDataSource,
-} from '@/lib/calendar/config-resolve';
+import { resolveCalendarConfig, resolveCalendarDataSource } from '@/lib/calendar/config-resolve';
 import { getGoogleConfig } from '@/lib/data/config';
 import { getNotionConfig, getNotionDataSource } from '@/lib/notion/config';
 import { getOpenClawRuntimeStatus } from '@/lib/openclaw/config';

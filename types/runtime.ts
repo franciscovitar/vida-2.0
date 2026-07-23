@@ -6,18 +6,9 @@
 export type RuntimeEnvironment = 'local' | 'development' | 'preview' | 'production';
 
 export type RuntimeIntegrationId =
-  | 'sheets'
-  | 'notion'
-  | 'calendar'
-  | 'web-catalog'
-  | 'writes'
-  | 'openclaw';
+  'sheets' | 'notion' | 'calendar' | 'web-catalog' | 'writes' | 'openclaw';
 
-export type RuntimeIntegrationStatus =
-  | 'configured'
-  | 'mock'
-  | 'safe-disabled'
-  | 'misconfigured';
+export type RuntimeIntegrationStatus = 'configured' | 'mock' | 'safe-disabled' | 'misconfigured';
 
 export interface RuntimeIntegrationView {
   id: RuntimeIntegrationId;
