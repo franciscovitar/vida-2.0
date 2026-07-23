@@ -7,7 +7,6 @@ import { getDataSource } from '@/lib/data/config';
 import { adaptProject, adaptTask, resolveRelation } from '@/lib/notion/adapters';
 import { projectDateKind, taskDateKind } from '@/lib/notion/classify';
 import {
-  ALLOWED_NOTION_DATA_SOURCE_IDS,
   NOTION_DATABASES,
   TASK_PROPS,
   PROJECT_PROPS,
@@ -93,15 +92,35 @@ test('N2. modo notion sin token usa fallback y no lanza', () => {
   process.env.NOTION_API_TOKEN = prevToken;
 });
 
-test('N3. solo los tres data sources autorizados son aceptados', () => {
-  assert.equal(ALLOWED_NOTION_DATA_SOURCE_IDS.length, 3);
-  assert.equal(isAllowedNotionDataSourceId(NOTION_DATABASES.tasks.dataSourceId), true);
-  assert.equal(isAllowedNotionDataSourceId(NOTION_DATABASES.projects.dataSourceId), true);
-  assert.equal(isAllowedNotionDataSourceId(NOTION_DATABASES.areas.dataSourceId), true);
+test('N3. solo los tres data sources configurados son aceptados', () => {
+  const env = {
+    NOTION_API_TOKEN: 'fixture-token',
+    NOTION_TASKS_DATA_SOURCE_ID: NOTION_DATABASES.tasks.dataSourceId,
+    NOTION_PROJECTS_DATA_SOURCE_ID: NOTION_DATABASES.projects.dataSourceId,
+    NOTION_AREAS_DATA_SOURCE_ID: NOTION_DATABASES.areas.dataSourceId,
+  };
+  assert.equal(isAllowedNotionDataSourceId(NOTION_DATABASES.tasks.dataSourceId, env), true);
+  assert.equal(isAllowedNotionDataSourceId(NOTION_DATABASES.projects.dataSourceId, env), true);
+  assert.equal(isAllowedNotionDataSourceId(NOTION_DATABASES.areas.dataSourceId, env), true);
+  assert.equal(getNotionConfig(env).ok, true);
+});
+
+test('N3b. Notion no usa referencias hardcodeadas como fallback', () => {
+  const config = getNotionConfig({ NOTION_API_TOKEN: 'fixture-token' });
+  assert.equal(config.ok, false);
+  if (!config.ok) assert.equal(config.reason, 'not-configured');
 });
 
 test('N4. un data source desconocido es rechazado', () => {
-  assert.equal(isAllowedNotionDataSourceId('00000000-0000-0000-0000-000000000000'), false);
+  const env = {
+    NOTION_TASKS_DATA_SOURCE_ID: NOTION_DATABASES.tasks.dataSourceId,
+    NOTION_PROJECTS_DATA_SOURCE_ID: NOTION_DATABASES.projects.dataSourceId,
+    NOTION_AREAS_DATA_SOURCE_ID: NOTION_DATABASES.areas.dataSourceId,
+  };
+  assert.equal(
+    isAllowedNotionDataSourceId('00000000-0000-0000-0000-000000000000', env),
+    false,
+  );
 });
 
 test('N5. estados de tareas se adaptan correctamente', () => {

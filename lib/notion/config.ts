@@ -1,13 +1,12 @@
 /**
  * Configuración Notion desde variables de entorno (solo servidor).
- * No registra ni expone el token.
+ * No registra ni expone tokens o referencias internas.
  */
-import { ALLOWED_NOTION_DATA_SOURCE_IDS, NOTION_DATABASES } from '@/lib/notion/constants';
 import type { NotionDataSourceMode } from '@/types/notion';
 
-export function getNotionDataSource(
-  env: Readonly<Record<string, string | undefined>> = process.env,
-): NotionDataSourceMode {
+type Env = Readonly<Record<string, string | undefined>>;
+
+export function getNotionDataSource(env: Env = process.env): NotionDataSourceMode {
   return env.NOTION_DATA_SOURCE === 'notion' ? 'notion' : 'mock';
 }
 
@@ -22,43 +21,50 @@ export type NotionConfigResult =
   | { ok: true; config: NotionConfig }
   | { ok: false; reason: 'not-configured' | 'forbidden-data-source' };
 
-/** true solo si el ID está en la lista blanca de Fase 4A. */
-export function isAllowedNotionDataSourceId(id: string): boolean {
-  return ALLOWED_NOTION_DATA_SOURCE_IDS.includes(id);
+const NOTION_ID_PATTERN =
+  /^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+
+function configuredDataSourceIds(env: Env): string[] | null {
+  const ids = [
+    env.NOTION_TASKS_DATA_SOURCE_ID?.trim(),
+    env.NOTION_PROJECTS_DATA_SOURCE_ID?.trim(),
+    env.NOTION_AREAS_DATA_SOURCE_ID?.trim(),
+  ];
+
+  if (ids.some((id) => !id)) return null;
+  const resolved = ids as string[];
+  if (resolved.some((id) => !NOTION_ID_PATTERN.test(id))) return [];
+  if (new Set(resolved.map((id) => id.toLowerCase())).size !== resolved.length) return [];
+  return resolved;
+}
+
+/** true solo si el ID coincide con una referencia explícita del entorno actual. */
+export function isAllowedNotionDataSourceId(id: string, env: Env = process.env): boolean {
+  const configured = configuredDataSourceIds(env);
+  if (!configured || configured.length !== 3) return false;
+  const normalized = id.trim().toLowerCase();
+  return configured.some((candidate) => candidate.toLowerCase() === normalized);
 }
 
 /**
- * Lee la configuración. Sin token → not-configured.
- * Con IDs fuera de lista blanca → forbidden-data-source.
+ * Lee configuración explícita. No usa IDs hardcodeados ni fallback entre recursos.
  */
-export function getNotionConfig(
-  env: Readonly<Record<string, string | undefined>> = process.env,
-): NotionConfigResult {
+export function getNotionConfig(env: Env = process.env): NotionConfigResult {
   const token = env.NOTION_API_TOKEN?.trim();
   if (!token) return { ok: false, reason: 'not-configured' };
 
-  const tasksDataSourceId =
-    env.NOTION_TASKS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.tasks.dataSourceId;
-  const projectsDataSourceId =
-    env.NOTION_PROJECTS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.projects.dataSourceId;
-  const areasDataSourceId =
-    env.NOTION_AREAS_DATA_SOURCE_ID?.trim() || NOTION_DATABASES.areas.dataSourceId;
+  const configured = configuredDataSourceIds(env);
+  if (configured === null) return { ok: false, reason: 'not-configured' };
+  if (configured.length !== 3) return { ok: false, reason: 'forbidden-data-source' };
 
-  if (
-    !isAllowedNotionDataSourceId(tasksDataSourceId) ||
-    !isAllowedNotionDataSourceId(projectsDataSourceId) ||
-    !isAllowedNotionDataSourceId(areasDataSourceId)
-  ) {
-    return { ok: false, reason: 'forbidden-data-source' };
-  }
-
+  const [tasksDataSourceId, projectsDataSourceId, areasDataSourceId] = configured;
   return {
     ok: true,
     config: {
       token,
-      tasksDataSourceId,
-      projectsDataSourceId,
-      areasDataSourceId,
+      tasksDataSourceId: tasksDataSourceId!,
+      projectsDataSourceId: projectsDataSourceId!,
+      areasDataSourceId: areasDataSourceId!,
     },
   };
 }

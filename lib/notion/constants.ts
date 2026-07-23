@@ -1,33 +1,25 @@
 /**
- * Constantes canónicas de Notion (Vida 2.0) — solo lectura.
+ * Constantes de esquema de Notion.
  *
- * Únicas bases permitidas en Fase 4A. No se consulta el workspace completo.
+ * Las referencias reales viven exclusivamente en variables de entorno. Los IDs
+ * sintéticos de `NOTION_DATABASES` se conservan solo como fixtures estables de tests.
  */
 
-/** Página raíz Vida 2.0 (referencia; no se lee en esta fase). */
-export const NOTION_ROOT_PAGE_ID = '39808627-4b6f-819e-bf92-c90cf6a7b4ab';
-
+/** @deprecated Fixtures sintéticos para tests; no usar como configuración productiva. */
 export const NOTION_DATABASES = {
   tasks: {
-    databaseId: '74d13efe-cc12-43fc-a58e-3e5baef3f8f7',
-    dataSourceId: 'a19c1f00-7c4b-4920-ae8a-63d3d4e2525a',
+    databaseId: '10000000-0000-4000-8000-000000000001',
+    dataSourceId: '20000000-0000-4000-8000-000000000001',
   },
   projects: {
-    databaseId: '6f9de902-6c44-4ac1-83dd-4976bf6104d2',
-    dataSourceId: 'a7b11d6e-f324-4fc7-af71-d2d89da71d28',
+    databaseId: '10000000-0000-4000-8000-000000000002',
+    dataSourceId: '20000000-0000-4000-8000-000000000002',
   },
   areas: {
-    databaseId: '6089edbd-7a0c-4941-bebd-d31475633be2',
-    dataSourceId: '9f166408-d1b0-4bdf-a9f4-9c6801d8b750',
+    databaseId: '10000000-0000-4000-8000-000000000003',
+    dataSourceId: '20000000-0000-4000-8000-000000000003',
   },
 } as const;
-
-/** Lista blanca de data sources consultables. */
-export const ALLOWED_NOTION_DATA_SOURCE_IDS: readonly string[] = [
-  NOTION_DATABASES.tasks.dataSourceId,
-  NOTION_DATABASES.projects.dataSourceId,
-  NOTION_DATABASES.areas.dataSourceId,
-];
 
 /** Nombres exactos de propiedades en Notion. */
 export const TASK_PROPS = {
