@@ -103,12 +103,76 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
       </Card>
 
       <Card>
-        <SectionHeader title="Sesiones estructuradas" />
-        <p className={styles.body}>{data.sessionsPendingNotice}</p>
+        <SectionHeader
+          title="Historial de sesiones"
+          description={data.sessionsPendingNotice}
+          domain="health"
+        />
         {data.sessionSummaries.length === 0 ? (
-          <p className={styles.body}>Sin historial de sesiones estructuradas.</p>
-        ) : null}
+          <p className={styles.body}>Sin sesiones registradas todavía.</p>
+        ) : (
+          <div className={styles['session-list']}>
+            {data.sessionSummaries.slice(0, 12).map((session) => (
+              <article key={session.key} className={styles.session}>
+                <div>
+                  <strong>{session.label ?? 'Entrenamiento'}</strong>
+                  <span>{session.date}</span>
+                </div>
+                <div className={styles['session-meta']}>
+                  {session.durationMinutes !== null ? (
+                    <span>{session.durationMinutes} min</span>
+                  ) : null}
+                  <Badge domain="health" variant="outline">
+                    {session.completed === true
+                      ? 'completa'
+                      : session.completed === false
+                        ? 'incompleta'
+                        : 'sin estado'}
+                  </Badge>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </Card>
+
+      {data.exerciseProgress.length > 0 ? (
+        <Card>
+          <SectionHeader
+            title="Progresión por ejercicio"
+            description="Último registro y mejor carga confirmada en Gym Sets."
+            domain="health"
+          />
+          <div className={styles['progress-list']}>
+            {data.exerciseProgress.slice(0, 16).map((exercise) => (
+              <article key={exercise.key} className={styles['progress-row']}>
+                <div>
+                  <strong>{exercise.exerciseName}</strong>
+                  <span>Último registro: {exercise.latestDate}</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>Última carga</dt>
+                    <dd>{exercise.latestLoad ?? '—'}</dd>
+                  </div>
+                  <div>
+                    <dt>Mejor carga</dt>
+                    <dd>{exercise.bestLoad ?? '—'}</dd>
+                  </div>
+                  <div>
+                    <dt>Últimas reps</dt>
+                    <dd>{exercise.latestReps ?? '—'}</dd>
+                  </div>
+                  <div>
+                    <dt>Series registradas</dt>
+                    <dd>{exercise.completedSets}</dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
+          </div>
+        </Card>
+      ) : null}
 
       {data.warnings.length > 0 ? (
         <Card>

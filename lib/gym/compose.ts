@@ -9,6 +9,7 @@ import type { ContentPage } from '@/types/content';
 import type {
   GymDashboardData,
   GymDataSourceStatus,
+  GymExerciseProgress,
   GymModuleStatus,
   GymParseWarning,
   GymReadinessContext,
@@ -24,6 +25,8 @@ export type ComposeGymInput = {
   weeklyTarget: number | null;
   readiness: Omit<GymReadinessContext, 'disclaimer'>;
   sessionSummaries: readonly GymSessionSummary[];
+  exerciseProgress?: readonly GymExerciseProgress[];
+  sessionsNotice?: string;
   sources: readonly GymDataSourceStatus[];
   extraWarnings?: readonly GymParseWarning[];
   /** Edad máxima de la rutina en días antes de avisar "desactualizada". */
@@ -100,9 +103,10 @@ export function composeGymDashboard(input: ComposeGymInput): GymDashboardData {
     readiness,
     progress: analytics.metrics,
     sessionSummaries: input.sessionSummaries,
+    exerciseProgress: input.exerciseProgress ?? [],
     sources: input.sources,
     warnings,
-    sessionsPendingNotice: GYM_SESSIONS_PENDING_NOTICE,
+    sessionsPendingNotice: input.sessionsNotice ?? GYM_SESSIONS_PENDING_NOTICE,
     targetDate: input.targetDate,
     areaHref: '/areas/salud',
   };

@@ -8,33 +8,9 @@ import { assertResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 import type { GymSessionCreatePayload } from '@/types/actions';
 import type { GymSessionRowStatus, GymSheetWritePort } from '@/lib/actions/ports';
 
-export const GYM_SESSIONS_HEADERS = [
-  'sessionId',
-  'date',
-  'routineKey',
-  'workoutDayKey',
-  'startedAt',
-  'finishedAt',
-  'durationMinutes',
-  'energyBefore',
-  'notes',
-  'status',
-  'idempotencyKey',
-  'createdAt',
-] as const;
+import { GYM_SESSIONS_HEADERS, GYM_SETS_HEADERS } from '@/lib/gym/sheet-schema';
 
-export const GYM_SETS_HEADERS = [
-  'sessionId',
-  'exerciseKey',
-  'exerciseName',
-  'setIndex',
-  'weight',
-  'reps',
-  'rir',
-  'rpe',
-  'completed',
-  'notes',
-] as const;
+export { GYM_SESSIONS_HEADERS, GYM_SETS_HEADERS } from '@/lib/gym/sheet-schema';
 
 export type SheetsValuesClient = {
   getValues(

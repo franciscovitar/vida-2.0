@@ -141,3 +141,151 @@
   color: var(--text-muted);
   font-size: 0.85rem;
 }
+
+.exercise-note {
+  margin: 0.45rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.supplemental-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.supplemental {
+  display: grid;
+  align-content: start;
+  gap: 0.65rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--surface) 95%, var(--border));
+}
+
+.supplemental-heading {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.supplemental-heading span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.supplemental-heading h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.supplemental-items {
+  display: grid;
+  gap: 0.38rem;
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.session-list,
+.progress-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.session {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.72rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+}
+
+.session > div:first-child,
+.progress-row > div:first-child {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.session strong,
+.progress-row strong {
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.session span,
+.progress-row span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.session-meta {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.progress-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(18rem, 2fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+}
+
+.progress-row dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.progress-row dl div {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.progress-row dt {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.progress-row dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 620;
+}
+
+@media (max-width: 700px) {
+  .session {
+    align-items: flex-start;
+  }
+
+  .session-meta {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .progress-row {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-row dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

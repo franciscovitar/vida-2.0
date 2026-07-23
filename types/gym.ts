@@ -57,6 +57,23 @@ export interface GymWorkoutDay {
   exercises: readonly GymExercisePrescription[];
 }
 
+export type GymRoutineSectionKind =
+  | 'mobility'
+  | 'recovery'
+  | 'cardio'
+  | 'planning'
+  | 'notes';
+
+/** Bloques complementarios de la rutina que no son días de pesas. */
+export interface GymRoutineSection {
+  key: string;
+  label: string;
+  kind: GymRoutineSectionKind;
+  order: number;
+  description: string | null;
+  items: readonly string[];
+}
+
 export interface GymRoutine {
   name: string;
   lastUpdatedAt: string | null;
@@ -64,6 +81,7 @@ export interface GymRoutine {
   presentation: 'structured' | 'documentary';
   days: readonly GymWorkoutDay[];
   notes: readonly string[];
+  supplementalSections: readonly GymRoutineSection[];
 }
 
 export interface GymSessionSummary {
@@ -72,6 +90,16 @@ export interface GymSessionSummary {
   label: string | null;
   durationMinutes: number | null;
   completed: boolean | null;
+}
+
+export interface GymExerciseProgress {
+  key: string;
+  exerciseName: string;
+  latestDate: string;
+  latestLoad: string | null;
+  bestLoad: string | null;
+  latestReps: number | null;
+  completedSets: number;
 }
 
 export interface GymProgressMetric {
@@ -112,6 +140,7 @@ export interface GymDashboardData {
   readiness: GymReadinessContext;
   progress: readonly GymProgressMetric[];
   sessionSummaries: readonly GymSessionSummary[];
+  exerciseProgress: readonly GymExerciseProgress[];
   sources: readonly GymDataSourceStatus[];
   warnings: readonly GymParseWarning[];
   /** Mensaje discreto de preparación 8E. */

@@ -15,6 +15,8 @@ import {
 import { isGymExcludedText } from '@/lib/gym/privacy';
 import { resolveCanonicalGymEntry } from '@/lib/gym/resolve';
 import { disabledGymSessionReadPort, type GymSessionReadPort } from '@/lib/gym/sessions-port';
+import { loadGymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
+import { GYM_SESSIONS_HEADERS, GYM_SETS_HEADERS } from '@/lib/gym/sheet-schema';
 import { primaryNav } from '@/lib/constants/navigation';
 import type { ContentBlock, ContentPage } from '@/types/content';
 import type { WebCatalogEntry } from '@/types/web-catalog';
@@ -380,4 +382,102 @@ test('8D2-22. ausencia de métodos de escritura', () => {
 
   const source = readFileSync(path.join(process.cwd(), 'lib/gym/sessions-port.ts'), 'utf8');
   assert.equal(/createSession|updateSession|deleteSession|appendSet/.test(source), false);
+});
+
+
+test('9D-1. rutina real separa pesas de movilidad, cardio y descarga', () => {
+  const content = page([
+    textBlock('heading_1', 'Objetivo general', 'goal-h'),
+    textBlock('paragraph', 'Mejorar fuerza y postura.', 'goal-p'),
+    textBlock('heading_1', 'Movilidad diaria', 'mob-h'),
+    textBlock('heading_2', 'Todos los días — 5 minutos', 'mob-h2'),
+    textBlock('numbered_list_item', 'Wall slides — 1x10 reps.', 'mob-1'),
+    textBlock('heading_1', 'Rutina de pesas', 'weights-h'),
+    textBlock('heading_2', 'Día 1 — Torso A', 'day-1'),
+    textBlock('paragraph', 'Objetivo: espalda y brazos.', 'day-1-note'),
+    textBlock('numbered_list_item', 'Dominadas — 5x6/10.', 'day-1-ex'),
+    textBlock('heading_2', 'Día 2 — Pierna', 'day-2'),
+    textBlock('numbered_list_item', 'Prensa — 3x6/10.', 'day-2-ex'),
+    textBlock('heading_2', 'Abdominales posturales — 7 minutos', 'abs-h'),
+    textBlock('numbered_list_item', 'Dead bug — 2x8 por lado.', 'abs-ex'),
+    textBlock('heading_3', 'Alternativa', 'alt-h'),
+    textBlock('numbered_list_item', 'Pallof press — 2x10/12 por lado.', 'alt-ex'),
+    textBlock('heading_1', 'Cardio', 'cardio-h'),
+    textBlock('bulleted_list_item', 'Bici fija zona 2: 3 x 40 min.', 'cardio-1'),
+    textBlock('heading_1', 'Planificación de descarga', 'deload-h'),
+    textBlock('bulleted_list_item', 'Reducir aproximadamente a la mitad las series.', 'deload-1'),
+  ]);
+
+  const parsed = parseGymRoutineFromContentPage(content);
+  assert.equal(parsed.routine.presentation, 'structured');
+  assert.equal(parsed.routine.days.length, 2);
+  assert.equal(parsed.routine.days[0]!.exercises[0]!.sets, 5);
+  assert.equal(parsed.routine.days[0]!.exercises[0]!.reps, '6-10');
+  assert.equal(parsed.routine.days[1]!.exercises.length, 3);
+  assert.equal(parsed.routine.days[1]!.exercises[2]!.notes, 'Alternativa');
+  assert.equal(parsed.routine.supplementalSections.length, 3);
+  assert.ok(parsed.routine.supplementalSections.some((item) => item.kind === 'mobility'));
+  assert.ok(parsed.routine.supplementalSections.some((item) => item.kind === 'cardio'));
+  assert.ok(parsed.routine.supplementalSections.some((item) => item.kind === 'planning'));
+});
+
+test('9D-2. prescripciones reales aceptan barras, segundos y series sin reps', () => {
+  const range = parseExercisePrescriptionText('Elevaciones laterales — 5x12/20.');
+  assert.equal(range.sets, 5);
+  assert.equal(range.reps, '12-20');
+  assert.equal(range.name, 'Elevaciones laterales');
+
+  const timed = parseExercisePrescriptionText('Pecho en marco de puerta — 30s por lado.');
+  assert.equal(timed.reps, '30 s por lado');
+
+  const series = parseExercisePrescriptionText('Copenhagen plank — 3 series.');
+  assert.equal(series.sets, 3);
+  assert.equal(series.reps, null);
+});
+
+test('9D-3. lectura Gym Sessions y Gym Sets arma historial sin exponer sessionId', async () => {
+  const sessions = [
+    [...GYM_SESSIONS_HEADERS],
+    [
+      'session-secret-1',
+      '2026-07-22',
+      'rutina-gimnasio',
+      'Día 1 — Torso A',
+      '2026-07-22T18:00:00-03:00',
+      '2026-07-22T18:50:00-03:00',
+      50,
+      4,
+      '',
+      'complete',
+      'idem-secret',
+      '2026-07-22T18:50:00-03:00',
+    ],
+  ];
+  const sets = [
+    [...GYM_SETS_HEADERS],
+    ['session-secret-1', 'press', 'Press de pecho', 1, 40, 10, 2, '', true, ''],
+    ['session-secret-1', 'press', 'Press de pecho', 2, 45, 8, 2, '', true, ''],
+  ];
+  const snapshot = await loadGymSessionsSnapshot(async (tab) => ({
+    ok: true,
+    values: tab === 'Gym Sessions' ? sessions : sets,
+  }));
+
+  assert.equal(snapshot.state, 'ready');
+  assert.equal(snapshot.summaries.length, 1);
+  assert.equal(snapshot.summaries[0]!.durationMinutes, 50);
+  assert.equal(snapshot.exerciseProgress[0]!.bestLoad, '45');
+  assert.equal(snapshot.exerciseProgress[0]!.completedSets, 2);
+  assert.equal(JSON.stringify(snapshot).includes('session-secret-1'), false);
+  assert.equal(JSON.stringify(snapshot).includes('idem-secret'), false);
+});
+
+test('9D-4. pestañas vacías son un estado real y no un mock', async () => {
+  const snapshot = await loadGymSessionsSnapshot(async (tab) => ({
+    ok: true,
+    values: [tab === 'Gym Sessions' ? [...GYM_SESSIONS_HEADERS] : [...GYM_SETS_HEADERS]],
+  }));
+  assert.equal(snapshot.state, 'empty');
+  assert.equal(snapshot.sessions.length, 0);
+  assert.match(snapshot.notice ?? '', /todavía no hay sesiones/i);
 });

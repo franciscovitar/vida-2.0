@@ -11,7 +11,8 @@ import { getCalendarAgenda } from '@/lib/data/calendar-source';
 import { getDomainPages } from '@/lib/data/domain-pages';
 import { composeGymDashboard } from '@/lib/gym/compose';
 import { resolveCanonicalGymEntry } from '@/lib/gym/resolve';
-import { disabledGymSessionReadPort, GYM_SESSIONS_PENDING_NOTICE } from '@/lib/gym/sessions-port';
+import { GYM_SESSIONS_PENDING_NOTICE } from '@/lib/gym/sessions-port';
+import { loadGymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
 import { getWebCatalogNotionConfig, isWebCatalogEnabled } from '@/lib/web-catalog/config';
 import { readWebCatalogContentPage } from '@/lib/web-catalog/content-reader';
 import { createWebCatalogNotionPort } from '@/lib/web-catalog/notion-port';
@@ -55,13 +56,8 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
   const warnings: GymParseWarning[] = [];
   const sources: GymDataSourceStatus[] = [];
 
-  sources.push({
-    kind: 'sessions',
-    state: 'disabled',
-    notice: GYM_SESSIONS_PENDING_NOTICE,
-  });
-
   if (!isWebCatalogEnabled()) {
+    sources.push({ kind: 'sessions', state: 'not-applicable', notice: null });
     sources.push({
       kind: 'notion',
       state: 'disabled',
@@ -81,6 +77,7 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
 
   const config = getWebCatalogNotionConfig();
   if (!config.ok) {
+    sources.push({ kind: 'sessions', state: 'not-applicable', notice: null });
     sources.push({
       kind: 'notion',
       state: 'unavailable',
@@ -191,10 +188,37 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
   let coverage: string | null = null;
   let commitments: string[] = [];
 
-  const [pagesResult, agendaResult] = await Promise.allSettled([
+  const [pagesResult, agendaResult, sessionsResult] = await Promise.allSettled([
     getDomainPages(7),
     getCalendarAgenda('7'),
+    loadGymSessionsSnapshot(),
   ]);
+
+  let sessionSummaries: GymDashboardData['sessionSummaries'] = [];
+  let exerciseProgress: GymDashboardData['exerciseProgress'] = [];
+  let sessionsNotice = GYM_SESSIONS_PENDING_NOTICE;
+
+  if (sessionsResult.status === 'fulfilled') {
+    const snapshot = sessionsResult.value;
+    sessionSummaries = snapshot.summaries;
+    exerciseProgress = snapshot.exerciseProgress;
+    sessionsNotice =
+      snapshot.state === 'ready'
+        ? 'Historial leído desde Gym Sessions y Gym Sets.'
+        : (snapshot.notice ?? GYM_SESSIONS_PENDING_NOTICE);
+    sources.push({ kind: 'sessions', state: snapshot.state, notice: snapshot.notice });
+  } else {
+    sources.push({
+      kind: 'sessions',
+      state: 'error',
+      notice: 'No se pudo leer el historial estructurado.',
+    });
+    warnings.push({
+      code: 'source-down',
+      message: 'El historial de sesiones no está disponible.',
+      subject: 'sessions',
+    });
+  }
 
   if (pagesResult.status === 'fulfilled') {
     const pages = pagesResult.value;
@@ -308,10 +332,23 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
     });
   }
 
-  const sessionSummaries = await disabledGymSessionReadPort.listSessions({
-    from: today,
-    to: today,
-  });
+  if (sessionSummaries.length > 0) {
+    const byDate = new Map(activityDays.map((day) => [day.date, day]));
+    for (const session of sessionSummaries) {
+      if (session.completed !== true) continue;
+      const existing = byDate.get(session.date);
+      byDate.set(session.date, {
+        date: session.date,
+        trained: true,
+        durationMinutes: session.durationMinutes ?? existing?.durationMinutes ?? null,
+      });
+    }
+    activityDays = [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+    const latest = sessionSummaries.find((session) => session.completed === true);
+    if (latest) {
+      recentExercise = `${latest.label ?? 'Sesión'} · ${latest.date}`;
+    }
+  }
 
   return composeGymDashboard({
     targetDate: today,
@@ -328,6 +365,8 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
       coverage,
     },
     sessionSummaries,
+    exerciseProgress,
+    sessionsNotice,
     sources,
     extraWarnings: warnings,
   });
