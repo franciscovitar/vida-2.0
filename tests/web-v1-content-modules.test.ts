@@ -9,10 +9,7 @@ import {
   detectDocumentPresentation,
 } from '@/lib/web-catalog/document-overview';
 import { buildAppNavigation } from '@/lib/web-catalog/navigation';
-import {
-  buildSearchableDocument,
-  searchWebCatalogDocuments,
-} from '@/lib/web-catalog/search';
+import { buildSearchableDocument, searchWebCatalogDocuments } from '@/lib/web-catalog/search';
 import { webCatalogPathFor } from '@/lib/web-catalog/section-labels';
 import { usesReadableContentRenderer } from '@/lib/web-catalog/policy';
 import type { ContentBlock, ContentPage } from '@/types/content';

@@ -21,8 +21,7 @@ export function getWebCatalogNotionConfig(
   // Permite separar la lectura documental de las capacidades operativas de
   // Notion. El fallback conserva compatibilidad hasta configurar una
   // integración dedicada de solo lectura.
-  const token =
-    env.NOTION_WEB_CATALOG_API_TOKEN?.trim() || env.NOTION_API_TOKEN?.trim();
+  const token = env.NOTION_WEB_CATALOG_API_TOKEN?.trim() || env.NOTION_API_TOKEN?.trim();
   const dataSourceId = env.NOTION_WEB_CATALOG_DATA_SOURCE_ID?.trim();
   if (!token || !dataSourceId) return { ok: false, reason: 'not-configured' };
   return { ok: true, token, dataSourceId };

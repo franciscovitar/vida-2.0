@@ -15,9 +15,7 @@ export default function AppNotFound() {
         <div className={styles.copy}>
           <p className={styles.eyebrow}>Página no disponible</p>
           <h1 id="not-found-title">No encontramos este recurso</h1>
-          <p>
-            Puede que la dirección haya cambiado o que el contenido ya no esté disponible.
-          </p>
+          <p>Puede que la dirección haya cambiado o que el contenido ya no esté disponible.</p>
           <div className={styles.actions}>
             <Button href="/" variant="primary" iconLeft={Home}>
               Ir a Hoy
