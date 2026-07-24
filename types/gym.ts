@@ -177,3 +177,102 @@ export interface GymSession {
   exercises: readonly GymExerciseResult[];
   note: string | null;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Modelo interactivo local — no implica escritura                            */
+/* -------------------------------------------------------------------------- */
+
+export type GymEnergyLevel = 1 | 2 | 3 | 4 | 5;
+
+export type GymSessionDraftState = 'draft' | 'in-progress' | 'ready';
+
+export interface GymSessionDraftSet {
+  /** Clave determinista local; nunca es un ID del proveedor. */
+  key: string;
+  setNumber: number;
+  targetReps: string | null;
+  targetRir: string | null;
+  targetRpe: string | null;
+  weight: number | null;
+  reps: number | null;
+  rir: number | null;
+  rpe: number | null;
+  completed: boolean;
+  note: string | null;
+}
+
+export interface GymSessionDraftExercise {
+  key: string;
+  exerciseKey: string;
+  exerciseName: string;
+  order: number;
+  targetSets: number | null;
+  targetReps: string | null;
+  targetRir: string | null;
+  targetRpe: string | null;
+  prescriptionNotes: string | null;
+  sets: readonly GymSessionDraftSet[];
+  note: string | null;
+}
+
+export interface GymSessionDraft {
+  key: string;
+  state: GymSessionDraftState;
+  date: string;
+  routineKey: string;
+  routineName: string;
+  workoutDayKey: string;
+  workoutDayLabel: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  durationMinutes: number | null;
+  energyBefore: GymEnergyLevel | null;
+  note: string | null;
+  exercises: readonly GymSessionDraftExercise[];
+}
+
+export interface GymSessionMetrics {
+  totalExercises: number;
+  plannedSets: number;
+  completedSets: number;
+  completionRate: number | null;
+  totalReps: number;
+  volumeLoad: number;
+  averageRir: number | null;
+  averageRpe: number | null;
+  durationMinutes: number | null;
+}
+
+export type GymSessionIssueSeverity = 'error' | 'warning';
+
+export type GymSessionIssueCode =
+  | 'invalid-date'
+  | 'routine-required'
+  | 'workout-day-required'
+  | 'no-exercises'
+  | 'no-sets'
+  | 'no-completed-sets'
+  | 'invalid-time-pair'
+  | 'invalid-time-order'
+  | 'invalid-duration'
+  | 'invalid-energy'
+  | 'duplicate-set-number'
+  | 'invalid-weight'
+  | 'invalid-reps'
+  | 'invalid-rir'
+  | 'invalid-rpe'
+  | 'empty-completed-set';
+
+export interface GymSessionIssue {
+  code: GymSessionIssueCode;
+  severity: GymSessionIssueSeverity;
+  message: string;
+  exerciseKey: string | null;
+  setKey: string | null;
+}
+
+export interface GymSessionValidation {
+  ready: boolean;
+  issues: readonly GymSessionIssue[];
+  metrics: GymSessionMetrics;
+}
