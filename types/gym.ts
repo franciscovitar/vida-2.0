@@ -135,7 +135,11 @@ export interface GymDashboardData {
   readiness: GymReadinessContext;
   progress: readonly GymProgressMetric[];
   sessionSummaries: readonly GymSessionSummary[];
+  /** Sesiones completas sanitizadas para analítica local de solo lectura. */
+  sessions?: readonly GymSession[];
   exerciseProgress: readonly GymExerciseProgress[];
+  /** Objetivo semanal confirmado cuando existe. */
+  weeklyTarget?: number | null;
   sources: readonly GymDataSourceStatus[];
   warnings: readonly GymParseWarning[];
   /** Mensaje discreto de preparación 8E. */

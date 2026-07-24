@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Card';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ContentPageView } from '@/components/web-catalog/ContentPageView';
+import { GymProgressInsights } from '@/components/gym/GymProgressInsights';
 import { GymRoutineTabs } from '@/components/gym/GymRoutineTabs';
 import type {
   GymDashboardData,
@@ -153,6 +154,13 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
           ))}
         </div>
       </Card>
+
+      <GymProgressInsights
+        sessions={data.sessions ?? []}
+        summaries={data.sessionSummaries}
+        weeklyTarget={data.weeklyTarget ?? null}
+        today={data.targetDate}
+      />
 
       <Card>
         <SectionHeader

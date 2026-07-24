@@ -19,7 +19,12 @@ import { createWebCatalogNotionPort } from '@/lib/web-catalog/notion-port';
 import { loadValidatedWebCatalog } from '@/lib/web-catalog/notion-repository';
 import { RD } from '@/lib/google/constants';
 import type { ContentPage } from '@/types/content';
-import type { GymDashboardData, GymDataSourceStatus, GymParseWarning } from '@/types/gym';
+import type {
+  GymDashboardData,
+  GymDataSourceStatus,
+  GymParseWarning,
+  GymSession,
+} from '@/types/gym';
 import type { GymActivityDay } from '@/lib/gym/analytics';
 
 function isProductionRuntime(): boolean {
@@ -195,12 +200,14 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
   ]);
 
   let sessionSummaries: GymDashboardData['sessionSummaries'] = [];
+  let sessions: readonly GymSession[] = [];
   let exerciseProgress: GymDashboardData['exerciseProgress'] = [];
   let sessionsNotice = GYM_SESSIONS_PENDING_NOTICE;
 
   if (sessionsResult.status === 'fulfilled') {
     const snapshot = sessionsResult.value;
     sessionSummaries = snapshot.summaries;
+    sessions = snapshot.sessions;
     exerciseProgress = snapshot.exerciseProgress;
     sessionsNotice =
       snapshot.state === 'ready'
@@ -365,6 +372,7 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
       coverage,
     },
     sessionSummaries,
+    sessions,
     exerciseProgress,
     sessionsNotice,
     sources,

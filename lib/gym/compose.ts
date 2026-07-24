@@ -13,6 +13,7 @@ import type {
   GymModuleStatus,
   GymParseWarning,
   GymReadinessContext,
+  GymSession,
   GymSessionSummary,
 } from '@/types/gym';
 
@@ -25,6 +26,7 @@ export type ComposeGymInput = {
   weeklyTarget: number | null;
   readiness: Omit<GymReadinessContext, 'disclaimer'>;
   sessionSummaries: readonly GymSessionSummary[];
+  sessions?: readonly GymSession[];
   exerciseProgress?: readonly GymExerciseProgress[];
   sessionsNotice?: string;
   sources: readonly GymDataSourceStatus[];
@@ -103,7 +105,9 @@ export function composeGymDashboard(input: ComposeGymInput): GymDashboardData {
     readiness,
     progress: analytics.metrics,
     sessionSummaries: input.sessionSummaries,
+    sessions: input.sessions ?? [],
     exerciseProgress: input.exerciseProgress ?? [],
+    weeklyTarget: input.weeklyTarget,
     sources: input.sources,
     warnings,
     sessionsPendingNotice: input.sessionsNotice ?? GYM_SESSIONS_PENDING_NOTICE,
