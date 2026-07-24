@@ -21,7 +21,7 @@ export default async function GimnasioPage() {
     <div className={styles.page}>
       <PageHeader
         title="Gimnasio"
-        description="Rutina, contexto de salud e historial en un panel de solo lectura."
+        description="Rutina, contexto, historial y borrador móvil de sesiones."
         icon={Dumbbell}
         domain="health"
       />
