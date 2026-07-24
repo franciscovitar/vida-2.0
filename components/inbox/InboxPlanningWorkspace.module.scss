@@ -1,0 +1,174 @@
+.workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+.safety-notice {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.form {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.9rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.field > span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+}
+
+.textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.input:focus-visible,
+.textarea:focus-visible,
+.filter-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.actions,
+.queue-top,
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.touch-button,
+.filter-button {
+  min-height: 44px;
+}
+
+.filter-button {
+  flex: 1 1 8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--text-muted);
+  padding: 0.55rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.filter-button[data-active='true'] {
+  border-color: var(--accent);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 650;
+}
+
+.message,
+.empty,
+.body {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.message,
+.body {
+  color: var(--text);
+}
+
+.queue {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.85rem;
+}
+
+.queue-item {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.72rem;
+  background: var(--surface);
+}
+
+.queue-item[data-reviewed='true'] {
+  opacity: 0.72;
+}
+
+.queue-top > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.queue-top > span {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.link {
+  width: fit-content;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+@media (width < 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width < 620px) {
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .touch-button {
+    width: 100%;
+  }
+
+  .queue-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

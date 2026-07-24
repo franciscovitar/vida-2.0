@@ -2,15 +2,16 @@ import { Boxes } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import styles from '@/components/domain/DomainPage.module.scss';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { AreasSection } from '@/components/notion/AreasSection';
 import { NotionIntegrationNotice } from '@/components/notion/NotionIntegrationNotice';
-import { ProjectsBoard } from '@/components/notion/ProjectsBoard';
 import boardStyles from '@/components/notion/NotionBoards.module.scss';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { ProjectsBoard } from '@/components/notion/ProjectsBoard';
+import { ProjectReviewWorkspace } from '@/components/projects/ProjectReviewWorkspace';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { getNotionDashboard } from '@/lib/data/notion-source';
 import { formatArgentineFullDate } from '@/lib/adapters/dates';
+import { getNotionDashboard } from '@/lib/data/notion-source';
 
 import pageStyles from '../page.module.scss';
 import local from './page.module.scss';
@@ -54,7 +55,7 @@ export default async function ProyectosPage() {
         <SectionHeader
           id="projects-summary-title"
           title="Resumen"
-          description="Solo lectura. Sin edición desde la web."
+          description="Datos reales con revisiones operativas preparadas de forma local."
           domain="projects"
         />
         <ul className={boardStyles.summary}>
@@ -88,6 +89,12 @@ export default async function ProyectosPage() {
           </li>
         </ul>
       </Card>
+
+      <ProjectReviewWorkspace
+        projects={data.projects}
+        areas={data.areas}
+        targetDate={data.targetDate}
+      />
 
       <Card aria-labelledby="projects-list-title">
         <SectionHeader

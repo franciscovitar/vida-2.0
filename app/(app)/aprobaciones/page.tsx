@@ -1,8 +1,8 @@
 import { ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 
-import { ApprovalsPanel } from '@/components/actions/ApprovalsPanel';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ReviewWorkspace } from '@/components/reviews/ReviewWorkspace';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
 import { listRuntimeProposals } from '@/lib/actions/runtime';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
@@ -22,11 +22,11 @@ export default async function AprobacionesPage() {
     <div className={styles.page}>
       <PageHeader
         title="Aprobaciones"
-        description="Propuestas y decisiones. Calendar solo como propuesta, sin eventos reales."
+        description="Revisión local de riesgo, reversibilidad y evidencia. No ejecuta acciones."
         icon={ShieldCheck}
         domain="neutral"
       />
-      <ApprovalsPanel writesEnabled={writesEnabled} initialProposals={proposals} />
+      <ReviewWorkspace initialProposals={proposals} />
     </div>
   );
 }

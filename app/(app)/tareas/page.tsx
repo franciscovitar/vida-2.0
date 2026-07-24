@@ -2,16 +2,15 @@ import { CheckSquare } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import styles from '@/components/domain/DomainPage.module.scss';
-import { NotionIntegrationNotice } from '@/components/notion/NotionIntegrationNotice';
-import { TasksBoard } from '@/components/notion/TasksBoard';
-import boardStyles from '@/components/notion/NotionBoards.module.scss';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { NotionIntegrationNotice } from '@/components/notion/NotionIntegrationNotice';
+import boardStyles from '@/components/notion/NotionBoards.module.scss';
+import { TasksBoard } from '@/components/notion/TasksBoard';
+import { TaskPlanningWorkspace } from '@/components/tasks/TaskPlanningWorkspace';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { TaskCreatePanel, TaskStatusPanel } from '@/components/actions/WritePanels';
-import { isWriteActionsEnabled } from '@/lib/actions/config';
-import { getNotionDashboard } from '@/lib/data/notion-source';
 import { formatArgentineFullDate } from '@/lib/adapters/dates';
+import { getNotionDashboard } from '@/lib/data/notion-source';
 
 import pageStyles from '../page.module.scss';
 import local from './page.module.scss';
@@ -30,7 +29,6 @@ function sourceLabel(source: 'mock' | 'notion', status: string): string {
 export default async function TareasPage() {
   const data = await getNotionDashboard();
   const s = data.taskSummary;
-  const writesEnabled = isWriteActionsEnabled();
 
   return (
     <div className={`${pageStyles.page} ${local.page}`}>
@@ -57,11 +55,7 @@ export default async function TareasPage() {
         <SectionHeader
           id="tasks-summary-title"
           title="Resumen"
-          description={
-            writesEnabled
-              ? 'Escrituras habilitadas con Policy Engine y confirmación explícita.'
-              : 'Solo lectura. Escrituras desactivadas (WRITE_ACTIONS_ENABLED).'
-          }
+          description="Datos reales de Notion con planificación local sin escrituras."
           domain="tasks"
         />
         <ul className={boardStyles.summary}>
@@ -96,17 +90,12 @@ export default async function TareasPage() {
         </ul>
       </Card>
 
-      <TaskCreatePanel writesEnabled={writesEnabled} />
-      {writesEnabled ? (
-        <Card>
-          <SectionHeader
-            title="Cambiar estado"
-            description="Transiciones válidas con lectura previa y verificación."
-            domain="tasks"
-          />
-          <TaskStatusPanel writesEnabled={writesEnabled} />
-        </Card>
-      ) : null}
+      <TaskPlanningWorkspace
+        tasks={data.tasks}
+        projects={data.projects}
+        areas={data.areas}
+        targetDate={data.targetDate}
+      />
 
       <Card aria-labelledby="tasks-list-title">
         <SectionHeader
