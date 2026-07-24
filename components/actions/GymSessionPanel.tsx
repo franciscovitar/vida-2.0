@@ -3,6 +3,7 @@
 import { Check, Clock3, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { LocalDraftStatus } from '@/components/local-drafts/LocalDraftStatus';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -12,6 +13,18 @@ import {
   deriveGymSessionDraftState,
   validateGymSessionDraft,
 } from '@/lib/gym/session-model';
+import {
+  isArrayOf,
+  isBoolean,
+  isFiniteNumber,
+  isNullableFiniteNumber,
+  isNullableString,
+  isOneOf,
+  isRecord,
+  isString,
+} from '@/lib/local-drafts/guards';
+import { LOCAL_DRAFT_KEYS } from '@/lib/local-drafts/storage';
+import { useLocalDraftBackup } from '@/lib/local-drafts/use-local-draft-backup';
 import type {
   GymRoutine,
   GymSessionDraft,
@@ -76,6 +89,85 @@ function makeDraft(
   return result.ok ? result.draft : null;
 }
 
+const SESSION_STATES = ['draft', 'in-progress', 'ready'] as const;
+
+function isGymSetBackup(value: unknown): value is GymSessionDraftSet {
+  return (
+    isRecord(value) &&
+    isString(value.key, 240) &&
+    isFiniteNumber(value.setNumber, 1, 30) &&
+    isNullableString(value.targetReps, 120) &&
+    isNullableString(value.targetRir, 120) &&
+    isNullableString(value.targetRpe, 120) &&
+    isNullableFiniteNumber(value.weight, 0, 1_000) &&
+    isNullableFiniteNumber(value.reps, 0, 200) &&
+    isNullableFiniteNumber(value.rir, 0, 10) &&
+    isNullableFiniteNumber(value.rpe, 1, 10) &&
+    isBoolean(value.completed) &&
+    isNullableString(value.note, 1_000)
+  );
+}
+
+function isGymExerciseBackup(value: unknown): value is GymSessionDraftExercise {
+  return (
+    isRecord(value) &&
+    isString(value.key, 240) &&
+    isString(value.exerciseKey, 240) &&
+    isString(value.exerciseName, 240) &&
+    isFiniteNumber(value.order, 0, 100) &&
+    isNullableFiniteNumber(value.targetSets, 0, 30) &&
+    isNullableString(value.targetReps, 120) &&
+    isNullableString(value.targetRir, 120) &&
+    isNullableString(value.targetRpe, 120) &&
+    isNullableString(value.prescriptionNotes, 1_000) &&
+    isArrayOf(value.sets, 30, isGymSetBackup) &&
+    isNullableString(value.note, 1_000)
+  );
+}
+
+function isGymSessionBackup(value: unknown): value is GymSessionDraft {
+  return (
+    isRecord(value) &&
+    isString(value.key, 240) &&
+    isOneOf(value.state, SESSION_STATES) &&
+    isString(value.date, 10) &&
+    isString(value.routineKey, 240) &&
+    isString(value.routineName, 240) &&
+    isString(value.workoutDayKey, 240) &&
+    isString(value.workoutDayLabel, 240) &&
+    isNullableString(value.startedAt, 40) &&
+    isNullableString(value.finishedAt, 40) &&
+    isNullableFiniteNumber(value.durationMinutes, 0, 720) &&
+    (value.energyBefore === null || isFiniteNumber(value.energyBefore, 1, 5)) &&
+    isNullableString(value.note, 2_000) &&
+    isArrayOf(value.exercises, 40, isGymExerciseBackup)
+  );
+}
+
+function hasGymDraftContent(value: GymSessionDraft | null): boolean {
+  if (!value) return false;
+  return Boolean(
+    value.startedAt ||
+    value.finishedAt ||
+    value.durationMinutes !== null ||
+    value.energyBefore !== null ||
+    value.note ||
+    value.exercises.some(
+      (exercise) =>
+        exercise.note ||
+        exercise.sets.some(
+          (set) =>
+            set.completed ||
+            set.weight !== null ||
+            set.reps !== null ||
+            set.rir !== null ||
+            set.rpe !== null ||
+            set.note,
+        ),
+    ),
+  );
+}
+
 function nextSet(exercise: GymSessionDraftExercise): GymSessionDraftSet {
   const setNumber = Math.max(0, ...exercise.sets.map((set) => set.setNumber)) + 1;
 
@@ -114,6 +206,27 @@ export function GymSessionPanel({
   const [message, setMessage] = useState<string | null>(null);
 
   const validation = useMemo(() => (draft ? validateGymSessionDraft(draft) : null), [draft]);
+  const localDraft = useLocalDraftBackup<GymSessionDraft | null>({
+    key: LOCAL_DRAFT_KEYS.gym,
+    value: draft,
+    validate: (value): value is GymSessionDraft | null =>
+      value === null || isGymSessionBackup(value),
+    hasContent: hasGymDraftContent,
+    acceptRestored: (value) =>
+      value !== null &&
+      value.routineKey === routine?.name &&
+      days.some((day) => day.key === value.workoutDayKey),
+    onRestore: (value) => {
+      if (!value) return;
+      setDayKey(value.workoutDayKey);
+      setDate(value.date);
+      setDraft(value);
+      setShowValidation(false);
+      setMessage('Borrador recuperado de este navegador.');
+    },
+    onClear: () => replaceDraft(dayKey, date),
+  });
+  const hasPersistedGymContent = hasGymDraftContent(draft);
 
   function replaceDraft(nextDayKey: string, nextDate: string) {
     if (!routine) return;
@@ -202,6 +315,11 @@ export function GymSessionPanel({
           ? 'Bloqueo de etapa activo: esta interfaz no envía datos aunque el entorno reporte escrituras.'
           : 'Modo borrador local: Sheets, Notion y Calendar permanecen sin cambios.'}
       </p>
+      <LocalDraftStatus
+        controller={localDraft}
+        hasContent={hasPersistedGymContent}
+        label="entrenamiento"
+      />
 
       <form
         className={styles.form}

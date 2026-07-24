@@ -1,12 +1,16 @@
 'use client';
 
 import { ClipboardCheck, ShieldCheck, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { LocalDraftStatus } from '@/components/local-drafts/LocalDraftStatus';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { isArrayOf, isBoolean, isOneOf, isRecord, isString } from '@/lib/local-drafts/guards';
+import { LOCAL_DRAFT_KEYS } from '@/lib/local-drafts/storage';
+import { useLocalDraftBackup } from '@/lib/local-drafts/use-local-draft-backup';
 import type { ActionProposalSummary } from '@/types/actions';
 
 import styles from './ReviewWorkspace.module.scss';
@@ -31,11 +35,49 @@ const DECISION_LABELS: Record<ReviewDecision, string> = {
   'needs-info': 'Pedir más información',
 };
 
+const REVIEW_DECISIONS = [
+  'pending',
+  'recommend-approve',
+  'recommend-reject',
+  'needs-info',
+] as const;
+const REVIEW_RISKS = ['low', 'medium', 'high'] as const;
+
 const RISK_LABELS: Record<ReviewRisk, string> = {
   low: 'bajo',
   medium: 'medio',
   high: 'alto',
 };
+
+interface ReviewWorkspaceBackup {
+  proposalDecisions: Record<string, ReviewDecision>;
+  reviews: LocalReview[];
+}
+
+function isLocalReview(value: unknown): value is LocalReview {
+  return (
+    isRecord(value) &&
+    isString(value.key, 120) &&
+    isString(value.name, 160) &&
+    isString(value.reason, 1_200) &&
+    isString(value.expectedChange, 1_200) &&
+    isOneOf(value.risk, REVIEW_RISKS) &&
+    isBoolean(value.reversible) &&
+    isOneOf(value.decision, REVIEW_DECISIONS)
+  );
+}
+
+function isReviewBackup(value: unknown): value is ReviewWorkspaceBackup {
+  if (!isRecord(value) || !isRecord(value.proposalDecisions)) return false;
+  const decisions = Object.entries(value.proposalDecisions);
+  return (
+    decisions.length <= 100 &&
+    decisions.every(
+      ([key, decision]) => isString(key, 160) && isOneOf(decision, REVIEW_DECISIONS),
+    ) &&
+    isArrayOf(value.reviews, 100, isLocalReview)
+  );
+}
 
 export function ReviewWorkspace({
   initialProposals,
@@ -52,6 +94,31 @@ export function ReviewWorkspace({
   const [reviews, setReviews] = useState<LocalReview[]>([]);
   const [message, setMessage] = useState<string | null>(null);
 
+  const backupValue = useMemo<ReviewWorkspaceBackup>(
+    () => ({ proposalDecisions, reviews }),
+    [proposalDecisions, reviews],
+  );
+  const localDraft = useLocalDraftBackup({
+    key: LOCAL_DRAFT_KEYS.reviews,
+    value: backupValue,
+    validate: isReviewBackup,
+    hasContent: (value) =>
+      value.reviews.length > 0 ||
+      Object.values(value.proposalDecisions).some((item) => item !== 'pending'),
+    onRestore: (value) => {
+      setProposalDecisions(value.proposalDecisions);
+      setReviews(value.reviews);
+      setMessage('Revisiones recuperadas de este navegador.');
+    },
+    onClear: () => {
+      setProposalDecisions({});
+      setReviews([]);
+      setMessage('Copia local eliminada.');
+    },
+  });
+  const hasLocalReviews =
+    reviews.length > 0 || Object.values(proposalDecisions).some((item) => item !== 'pending');
+
   return (
     <div className={styles.workspace}>
       <Card>
@@ -65,6 +132,11 @@ export function ReviewWorkspace({
           No se escribió ningún dato externo. Las decisiones son recomendaciones locales y no
           aprueban, rechazan ni ejecutan propuestas.
         </p>
+        <LocalDraftStatus
+          controller={localDraft}
+          hasContent={hasLocalReviews}
+          label="centro de revisión"
+        />
 
         {initialProposals.length === 0 ? (
           <p className={styles.empty}>

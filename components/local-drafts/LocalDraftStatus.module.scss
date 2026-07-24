@@ -1,0 +1,52 @@
+.status {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--surface-2) 92%, var(--border));
+}
+
+.status[data-state='restored'],
+.status[data-state='saved'] {
+  border-color: var(--border-strong);
+}
+
+.status[data-state='error'] {
+  border-style: dashed;
+}
+
+.status-main {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  color: var(--text);
+}
+
+.status-main > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.status-main strong {
+  font-size: 0.86rem;
+}
+
+.status-main span,
+.status small {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.clear-button {
+  width: fit-content;
+  min-height: 44px;
+}
+
+@media (width < 560px) {
+  .clear-button {
+    width: 100%;
+  }
+}

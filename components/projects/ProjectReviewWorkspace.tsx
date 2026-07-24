@@ -3,10 +3,20 @@
 import { ClipboardCheck, RotateCcw, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { LocalDraftStatus } from '@/components/local-drafts/LocalDraftStatus';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import {
+  isArrayOf,
+  isNullableString,
+  isOneOf,
+  isRecord,
+  isString,
+} from '@/lib/local-drafts/guards';
+import { LOCAL_DRAFT_KEYS } from '@/lib/local-drafts/storage';
+import { useLocalDraftBackup } from '@/lib/local-drafts/use-local-draft-backup';
 import type { NotionArea, NotionProject } from '@/types/notion';
 
 import styles from './ProjectReviewWorkspace.module.scss';
@@ -24,6 +34,8 @@ interface LocalProjectReview {
   note: string | null;
 }
 
+const PROJECT_DECISIONS = ['continue', 'wait', 'block', 'prepare-close', 'review-later'] as const;
+
 const DECISION_LABELS: Record<ProjectDecision, string> = {
   continue: 'Continuar',
   wait: 'Poner en espera',
@@ -31,6 +43,24 @@ const DECISION_LABELS: Record<ProjectDecision, string> = {
   'prepare-close': 'Preparar cierre',
   'review-later': 'Revisar más adelante',
 };
+
+function isProjectReview(value: unknown): value is LocalProjectReview {
+  return (
+    isRecord(value) &&
+    isString(value.key, 120) &&
+    isString(value.projectName, 240) &&
+    isString(value.currentStatus, 80) &&
+    isOneOf(value.decision, PROJECT_DECISIONS) &&
+    isNullableString(value.nextAction, 500) &&
+    isNullableString(value.blocker, 500) &&
+    isNullableString(value.reviewDate, 10) &&
+    isNullableString(value.note, 1_000)
+  );
+}
+
+function isProjectReviewBackup(value: unknown): value is LocalProjectReview[] {
+  return isArrayOf(value, 100, isProjectReview);
+}
 
 export function ProjectReviewWorkspace({
   projects,
@@ -49,6 +79,21 @@ export function ProjectReviewWorkspace({
   const [note, setNote] = useState('');
   const [reviews, setReviews] = useState<LocalProjectReview[]>([]);
   const [message, setMessage] = useState<string | null>(null);
+
+  const localDraft = useLocalDraftBackup({
+    key: LOCAL_DRAFT_KEYS.projects,
+    value: reviews,
+    validate: isProjectReviewBackup,
+    hasContent: (value) => value.length > 0,
+    onRestore: (value) => {
+      setReviews(value);
+      setMessage('Revisiones recuperadas de este navegador.');
+    },
+    onClear: () => {
+      setReviews([]);
+      setMessage('Copia local eliminada.');
+    },
+  });
 
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === projectId) ?? null,
@@ -85,6 +130,11 @@ export function ProjectReviewWorkspace({
           No se escribió ningún dato externo. Esta revisión prepara decisiones; no cambia Notion ni
           crea tareas.
         </p>
+        <LocalDraftStatus
+          controller={localDraft}
+          hasContent={reviews.length > 0}
+          label="revisión de proyectos"
+        />
 
         {projects.length === 0 ? (
           <p className={styles.empty}>No hay proyectos disponibles para revisar.</p>

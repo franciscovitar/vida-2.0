@@ -3,10 +3,21 @@
 import { Check, Inbox, RotateCcw, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { LocalDraftStatus } from '@/components/local-drafts/LocalDraftStatus';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import {
+  isArrayOf,
+  isBoolean,
+  isNullableString,
+  isOneOf,
+  isRecord,
+  isString,
+} from '@/lib/local-drafts/guards';
+import { LOCAL_DRAFT_KEYS } from '@/lib/local-drafts/storage';
+import { useLocalDraftBackup } from '@/lib/local-drafts/use-local-draft-backup';
 
 import styles from './InboxPlanningWorkspace.module.scss';
 
@@ -31,11 +42,31 @@ const KIND_LABELS: Record<CaptureKind, string> = {
   waiting: 'Esperando',
 };
 
+const CAPTURE_KINDS = ['idea', 'task', 'reference', 'waiting'] as const;
+const CAPTURE_URGENCIES = ['low', 'normal', 'high'] as const;
+
 const URGENCY_LABELS: Record<CaptureUrgency, string> = {
   low: 'Baja',
   normal: 'Normal',
   high: 'Alta',
 };
+
+function isLocalCapture(value: unknown): value is LocalCapture {
+  return (
+    isRecord(value) &&
+    isString(value.key, 120) &&
+    isString(value.text, 1_500) &&
+    isNullableString(value.link, 2_000) &&
+    isOneOf(value.kind, CAPTURE_KINDS) &&
+    isOneOf(value.urgency, CAPTURE_URGENCIES) &&
+    isString(value.createdAt, 40) &&
+    isBoolean(value.reviewed)
+  );
+}
+
+function isInboxBackup(value: unknown): value is LocalCapture[] {
+  return isArrayOf(value, 200, isLocalCapture);
+}
 
 function validHttpsLink(value: string): boolean {
   if (!value.trim()) return true;
@@ -61,6 +92,21 @@ export function InboxPlanningWorkspace() {
   const [captures, setCaptures] = useState<LocalCapture[]>([]);
   const [filter, setFilter] = useState<CaptureFilter>('all');
   const [message, setMessage] = useState<string | null>(null);
+
+  const localDraft = useLocalDraftBackup({
+    key: LOCAL_DRAFT_KEYS.inbox,
+    value: captures,
+    validate: isInboxBackup,
+    hasContent: (value) => value.length > 0,
+    onRestore: (value) => {
+      setCaptures(value);
+      setMessage('Cola recuperada de este navegador.');
+    },
+    onClear: () => {
+      setCaptures([]);
+      setMessage('Copia local eliminada.');
+    },
+  });
 
   const visible = useMemo(() => {
     if (filter === 'pending') return captures.filter((item) => !item.reviewed);
@@ -88,9 +134,14 @@ export function InboxPlanningWorkspace() {
           domain="neutral"
         />
         <p className={styles['safety-notice']}>
-          No se escribió ningún dato externo. La cola existe solo en esta pestaña y no sincroniza
-          con Notion.
+          No se escribió ningún dato externo. La cola se guarda solo en este navegador y no
+          sincroniza con Notion.
         </p>
+        <LocalDraftStatus
+          controller={localDraft}
+          hasContent={captures.length > 0}
+          label="cola de capturas"
+        />
         <form
           className={styles.form}
           onSubmit={(event) => {

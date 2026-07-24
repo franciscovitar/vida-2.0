@@ -3,10 +3,20 @@
 import { ClipboardCheck, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { LocalDraftStatus } from '@/components/local-drafts/LocalDraftStatus';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import {
+  isArrayOf,
+  isNullableString,
+  isOneOf,
+  isRecord,
+  isString,
+} from '@/lib/local-drafts/guards';
+import { LOCAL_DRAFT_KEYS } from '@/lib/local-drafts/storage';
+import { useLocalDraftBackup } from '@/lib/local-drafts/use-local-draft-backup';
 import type {
   NotionArea,
   NotionProject,
@@ -27,6 +37,7 @@ const TASK_STATUSES: readonly NotionTaskStatus[] = [
   'Algún día',
 ];
 
+const TASK_PRIORITIES: readonly NotionTaskPriority[] = ['Alta', 'Media', 'Baja'];
 const TASK_DURATIONS: readonly NotionTaskDuration[] = ['5-15 min', '30 min', '1 h', '2 h+'];
 const TASK_ENERGIES: readonly NotionTaskEnergy[] = ['Baja', 'Media', 'Alta'];
 
@@ -48,6 +59,45 @@ interface LocalStatusReview {
   currentStatus: NotionTaskStatus;
   nextStatus: NotionTaskStatus;
   reason: string | null;
+}
+
+interface TaskWorkspaceBackup {
+  drafts: LocalTaskDraft[];
+  statusReviews: LocalStatusReview[];
+}
+
+function isTaskDraft(value: unknown): value is LocalTaskDraft {
+  return (
+    isRecord(value) &&
+    isString(value.key, 120) &&
+    isString(value.title, 200) &&
+    isOneOf(value.priority, TASK_PRIORITIES) &&
+    isString(value.areaName, 200) &&
+    isNullableString(value.projectName, 200) &&
+    isNullableString(value.date, 10) &&
+    (value.duration === null || isOneOf(value.duration, TASK_DURATIONS)) &&
+    (value.energy === null || isOneOf(value.energy, TASK_ENERGIES)) &&
+    isNullableString(value.note, 1_000)
+  );
+}
+
+function isStatusReview(value: unknown): value is LocalStatusReview {
+  return (
+    isRecord(value) &&
+    isString(value.key, 120) &&
+    isString(value.taskTitle, 200) &&
+    isOneOf(value.currentStatus, TASK_STATUSES) &&
+    isOneOf(value.nextStatus, TASK_STATUSES) &&
+    isNullableString(value.reason, 1_000)
+  );
+}
+
+function isTaskWorkspaceBackup(value: unknown): value is TaskWorkspaceBackup {
+  return (
+    isRecord(value) &&
+    isArrayOf(value.drafts, 100, isTaskDraft) &&
+    isArrayOf(value.statusReviews, 100, isStatusReview)
+  );
 }
 
 function suggestedNextStatus(status: NotionTaskStatus): NotionTaskStatus {
@@ -86,6 +136,28 @@ export function TaskPlanningWorkspace({
   const [statusReviews, setStatusReviews] = useState<LocalStatusReview[]>([]);
   const [taskMessage, setTaskMessage] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  const backupValue = useMemo<TaskWorkspaceBackup>(
+    () => ({ drafts, statusReviews }),
+    [drafts, statusReviews],
+  );
+  const localDraft = useLocalDraftBackup({
+    key: LOCAL_DRAFT_KEYS.tasks,
+    value: backupValue,
+    validate: isTaskWorkspaceBackup,
+    hasContent: (value) => value.drafts.length > 0 || value.statusReviews.length > 0,
+    onRestore: (value) => {
+      setDrafts(value.drafts);
+      setStatusReviews(value.statusReviews);
+      setTaskMessage('Plan local recuperado de este navegador.');
+    },
+    onClear: () => {
+      setDrafts([]);
+      setStatusReviews([]);
+      setTaskMessage('Copia local eliminada.');
+    },
+  });
+  const hasLocalPlan = drafts.length > 0 || statusReviews.length > 0;
 
   const selectedArea = useMemo(
     () => areas.find((area) => area.id === areaId) ?? null,
@@ -133,9 +205,14 @@ export function TaskPlanningWorkspace({
           domain="tasks"
         />
         <p className={styles['safety-notice']}>
-          No se escribió ningún dato externo. Los borradores viven únicamente en esta pantalla y se
-          pierden al recargar.
+          No se escribió ningún dato externo. Los borradores se guardan solo en este navegador y no
+          se sincronizan con Notion.
         </p>
+        <LocalDraftStatus
+          controller={localDraft}
+          hasContent={hasLocalPlan}
+          label="plan de tareas"
+        />
         <form
           className={styles.form}
           onSubmit={(event) => {
