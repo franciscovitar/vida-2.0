@@ -5,7 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   const parsed = await parseAndAuthenticateOpenClawRequest(request, {
-    requireJsonBody: true,
+    method: 'POST',
+    pathname: '/api/openclaw/v1/proposals',
+    body: 'json',
   });
   if (!parsed.ok) return parsed.response;
 

@@ -3,7 +3,8 @@ info:
   title: Vida 2.0 OpenClaw API
   version: v1
   description: >
-    API server-to-server para OpenClaw. HMAC-SHA256. Desactivada por defecto.
+    API server-to-server para OpenClaw. HMAC-SHA256 v2 con request ID firmado.
+    Métodos, paths y query usan un contrato cerrado. Desactivada por defecto.
     Sin secretos ni valores reales en este documento.
 servers:
   - url: /api/openclaw/v1
@@ -113,4 +114,5 @@ components:
       name: X-Vida-Signature
       description: >
         Requiere además X-Vida-Key-Id, X-Vida-Timestamp y X-Vida-Request-Id.
-        Firma = HMAC-SHA256(secret, timestamp + LF + METHOD + LF + pathname + LF + sha256(body)).
+        Canonical v2 = vida2-openclaw-hmac-v2 + LF + timestamp + LF + requestId
+        + LF + METHOD + LF + pathname + LF + sha256(body). No se admite query.

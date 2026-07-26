@@ -5,7 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   const parsed = await parseAndAuthenticateOpenClawRequest(request, {
-    requireJsonBody: false,
+    method: 'GET',
+    pathname: /^\/api\/openclaw\/v1\/proposals\/[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/,
+    body: 'none',
   });
   if (!parsed.ok) return parsed.response;
 

@@ -11,6 +11,10 @@ import {
 } from '@/lib/openclaw/config';
 import { emitOpenClawLog, buildOpenClawLogEvent } from '@/lib/openclaw/observability';
 import { resolveOpenClawRateLimitPort } from '@/lib/openclaw/rate-limit';
+import {
+  validateOpenClawRouteContract,
+  type OpenClawRouteContract,
+} from '@/lib/openclaw/route-contract';
 import type { OpenClawErrorCode, OpenClawErrorResponse } from '@/types/openclaw';
 
 export const OPENCLAW_SECURITY_HEADERS: Record<string, string> = {
@@ -18,6 +22,8 @@ export const OPENCLAW_SECURITY_HEADERS: Record<string, string> = {
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'no-referrer',
 };
+
+const JSON_CONTENT_TYPE_PATTERN = /^application\/json(?:\s*;\s*charset=utf-8)?$/i;
 
 export function openClawError(
   status: number,
@@ -43,51 +49,81 @@ export type OpenClawParsedRequest = {
   startedAt: number;
 };
 
+function hasUnexpectedBody(request: Request): boolean {
+  const contentLength = request.headers.get('content-length');
+  const transferEncoding = request.headers.get('transfer-encoding');
+  return (
+    request.body !== null ||
+    transferEncoding !== null ||
+    (contentLength !== null && contentLength !== '0')
+  );
+}
+
 export async function parseAndAuthenticateOpenClawRequest(
   request: Request,
-  options: { requireJsonBody: boolean },
+  contract: OpenClawRouteContract,
 ): Promise<{ ok: true; value: OpenClawParsedRequest } | { ok: false; response: NextResponse }> {
   const startedAt = Date.now();
-  const requestIdHeader = request.headers.get('x-vida-request-id');
-  const fallbackId = requestIdHeader?.trim() || 'unknown';
 
   if (!isOpenClawApiEnabled()) {
     return {
       ok: false,
-      response: openClawError(404, fallbackId, 'api-disabled', 'API OpenClaw desactivada.'),
+      response: openClawError(404, 'unknown', 'api-disabled', 'API OpenClaw desactivada.'),
+    };
+  }
+
+  const target = validateOpenClawRouteContract(
+    { method: request.method, url: request.url },
+    contract,
+  );
+  if (!target.ok) {
+    return {
+      ok: false,
+      response: openClawError(target.status, 'unknown', target.code, target.message),
     };
   }
 
   const contentType = request.headers.get('content-type') ?? '';
-  const method = request.method.toUpperCase();
   let rawBody = '';
 
-  if (method !== 'GET' && method !== 'HEAD') {
-    if (options.requireJsonBody && !contentType.toLowerCase().includes('application/json')) {
+  if (contract.body === 'none') {
+    if (hasUnexpectedBody(request)) {
+      return {
+        ok: false,
+        response: openClawError(
+          400,
+          'unknown',
+          'invalid-input',
+          'Body no permitido para esta ruta.',
+        ),
+      };
+    }
+  } else {
+    if (!JSON_CONTENT_TYPE_PATTERN.test(contentType)) {
       return {
         ok: false,
         response: openClawError(
           415,
-          fallbackId,
+          'unknown',
           'invalid-content-type',
           'Content-Type application/json requerido.',
         ),
       };
     }
+
     const buf = Buffer.from(await request.arrayBuffer());
     if (buf.byteLength > OPENCLAW_MAX_BODY_BYTES) {
       return {
         ok: false,
-        response: openClawError(413, fallbackId, 'body-too-large', 'Body demasiado grande.'),
+        response: openClawError(413, 'unknown', 'body-too-large', 'Body demasiado grande.'),
       };
     }
     rawBody = buf.toString('utf8');
   }
 
-  const url = new URL(request.url);
   const auth = verifyOpenClawRequest({
-    method,
-    pathname: url.pathname,
+    method: target.method,
+    pathname: target.pathname,
     rawBody,
     keyIdHeader: request.headers.get('x-vida-key-id'),
     timestampHeader: request.headers.get('x-vida-timestamp'),
@@ -96,10 +132,15 @@ export async function parseAndAuthenticateOpenClawRequest(
   });
 
   if (!auth.ok) {
-    const status = auth.code === 'api-disabled' ? 404 : 401;
+    if (auth.code === 'api-disabled') {
+      return {
+        ok: false,
+        response: openClawError(404, 'unknown', 'api-disabled', 'API OpenClaw desactivada.'),
+      };
+    }
     return {
       ok: false,
-      response: openClawError(status, fallbackId, auth.code, auth.message),
+      response: openClawError(401, 'unknown', 'unauthorized', 'Autenticación inválida.'),
     };
   }
 
@@ -125,7 +166,7 @@ export async function parseAndAuthenticateOpenClawRequest(
         response: openClawError(400, requestId, 'invalid-json', 'JSON inválido.'),
       };
     }
-  } else if (options.requireJsonBody) {
+  } else if (contract.body === 'json') {
     return {
       ok: false,
       response: openClawError(400, requestId, 'invalid-json', 'Body JSON requerido.'),

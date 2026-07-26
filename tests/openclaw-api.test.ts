@@ -15,6 +15,7 @@ import { buildWriteRuntime } from '@/lib/actions/runtime';
 import { isPublicAuthPath } from '@/lib/auth/authorize';
 import {
   buildCanonicalString,
+  OPENCLAW_HMAC_PROTOCOL,
   signCanonical,
   signaturesMatch,
   verifyOpenClawRequest,
@@ -31,6 +32,7 @@ import {
 import { buildOpenClawLogEvent, openClawLogLooksSafe } from '@/lib/openclaw/observability';
 import { isOpenClawProposeOperation, parseOpenClawProposalRequest } from '@/lib/openclaw/proposals';
 import { createMemoryOpenClawRateLimitPort } from '@/lib/openclaw/rate-limit';
+import { validateOpenClawRouteContract } from '@/lib/openclaw/route-contract';
 import {
   clampOpenClawLimit,
   decodeOpenClawCursor,
@@ -63,11 +65,13 @@ function signedHeaders(input: {
   requestId?: string;
 }) {
   const timestamp = input.timestamp ?? String(Date.now());
+  const requestId = input.requestId ?? 'req-1';
   const rawBody = input.rawBody ?? '';
   const signature = signCanonical(
     SECRET,
     buildCanonicalString({
       timestamp,
+      requestId,
       method: input.method,
       pathname: input.pathname,
       rawBody,
@@ -77,7 +81,7 @@ function signedHeaders(input: {
     timestamp,
     signature,
     keyId: input.keyId ?? KEY_ID,
-    requestId: input.requestId ?? 'req-1',
+    requestId,
     rawBody,
   };
 }
@@ -122,6 +126,28 @@ test('openclaw: health path pública en proxy (sin cookie)', () => {
   assert.equal(isPublicAuthPath('/api/openclaw/v1/read'), true);
 });
 
+test('openclaw: canonical HMAC v2 incluye protocolo, request ID y body hash', () => {
+  const canonical = buildCanonicalString({
+    timestamp: '1760000000000',
+    requestId: 'req-fixed',
+    method: 'post',
+    pathname: '/api/openclaw/v1/read',
+    rawBody: '{}',
+  });
+
+  assert.equal(
+    canonical,
+    [
+      OPENCLAW_HMAC_PROTOCOL,
+      '1760000000000',
+      'req-fixed',
+      'POST',
+      '/api/openclaw/v1/read',
+      '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a',
+    ].join('\n'),
+  );
+});
+
 test('openclaw: firma válida', () => {
   const signed = signedHeaders({ method: 'GET', pathname: '/api/openclaw/v1/health' });
   const decision = verifyOpenClawRequest({
@@ -151,7 +177,28 @@ test('openclaw: firma inválida', () => {
     requestIdHeader: signed.requestId,
   });
   assert.equal(decision.ok, false);
-  if (!decision.ok) assert.equal(decision.code, 'invalid-signature');
+  if (!decision.ok) assert.equal(decision.code, 'unauthorized');
+});
+
+test('openclaw: request ID modificado invalida la firma', () => {
+  const signed = signedHeaders({
+    method: 'GET',
+    pathname: '/api/openclaw/v1/health',
+    requestId: 'req-original',
+  });
+  const decision = verifyOpenClawRequest({
+    env: envEnabled(),
+    method: 'GET',
+    pathname: '/api/openclaw/v1/health',
+    rawBody: '',
+    keyIdHeader: signed.keyId,
+    timestampHeader: signed.timestamp,
+    signatureHeader: signed.signature,
+    requestIdHeader: 'req-distinto',
+  });
+
+  assert.equal(decision.ok, false);
+  if (!decision.ok) assert.equal(decision.code, 'unauthorized');
 });
 
 test('openclaw: timestamp vencido', () => {
@@ -172,7 +219,7 @@ test('openclaw: timestamp vencido', () => {
     requestIdHeader: signed.requestId,
   });
   assert.equal(decision.ok, false);
-  if (!decision.ok) assert.equal(decision.code, 'expired-request');
+  if (!decision.ok) assert.equal(decision.code, 'unauthorized');
 });
 
 test('openclaw: key ID desconocida', () => {
@@ -191,10 +238,14 @@ test('openclaw: key ID desconocida', () => {
   if (!decision.ok) assert.equal(decision.code, 'unauthorized');
 });
 
-test('openclaw: comparación timing-safe', () => {
-  assert.equal(signaturesMatch('abcd', 'abcd'), true);
-  assert.equal(signaturesMatch('abcd', 'abce'), false);
-  assert.equal(signaturesMatch('abcd', 'abc'), false);
+test('openclaw: comparación timing-safe exige hex lowercase exacto', () => {
+  const a = 'a'.repeat(64);
+  const b = `${'a'.repeat(63)}b`;
+  assert.equal(signaturesMatch(a, a), true);
+  assert.equal(signaturesMatch(a, b), false);
+  assert.equal(signaturesMatch(a, a.toUpperCase()), false);
+  assert.equal(signaturesMatch(a, ` ${a}`), false);
+  assert.equal(signaturesMatch(a, 'a'.repeat(63)), false);
 });
 
 test('openclaw: request ID ausente', () => {
@@ -210,6 +261,139 @@ test('openclaw: request ID ausente', () => {
     requestIdHeader: null,
   });
   assert.equal(decision.ok, false);
+});
+
+test('openclaw: headers HMAC usan gramáticas y longitudes cerradas', () => {
+  const pathname = '/api/openclaw/v1/health';
+  const verifySigned = (input: {
+    requestId?: string;
+    keyId?: string;
+    timestamp?: string;
+    signature?: string;
+  }) => {
+    const signed = signedHeaders({
+      method: 'GET',
+      pathname,
+      requestId: input.requestId,
+      timestamp: input.timestamp,
+    });
+    return verifyOpenClawRequest({
+      env: envEnabled(),
+      method: 'GET',
+      pathname,
+      rawBody: '',
+      keyIdHeader: input.keyId ?? signed.keyId,
+      timestampHeader: signed.timestamp,
+      signatureHeader: input.signature ?? signed.signature,
+      requestIdHeader: signed.requestId,
+    });
+  };
+
+  for (const requestId of ['con espacio', 'a'.repeat(129), 'linea\nnueva']) {
+    assert.equal(verifySigned({ requestId }).ok, false);
+  }
+  for (const keyId of [` ${KEY_ID}`, 'a'.repeat(65)]) {
+    assert.equal(verifySigned({ keyId }).ok, false);
+  }
+
+  const now = String(Date.now());
+  for (const timestamp of [`+${now}`, `${now}.0`, Number(now).toExponential()]) {
+    assert.equal(verifySigned({ timestamp }).ok, false);
+  }
+
+  const valid = signedHeaders({ method: 'GET', pathname });
+  assert.equal(verifySigned({ signature: valid.signature.toUpperCase() }).ok, false);
+  assert.equal(verifySigned({ signature: ` ${valid.signature}` }).ok, false);
+  assert.equal(verifySigned({ signature: valid.signature.slice(1) }).ok, false);
+});
+
+test('openclaw: errores de credenciales son externamente indistinguibles', () => {
+  const signed = signedHeaders({ method: 'GET', pathname: '/api/openclaw/v1/health' });
+  const unknownKey = verifyOpenClawRequest({
+    env: envEnabled(),
+    method: 'GET',
+    pathname: '/api/openclaw/v1/health',
+    rawBody: '',
+    keyIdHeader: 'other',
+    timestampHeader: signed.timestamp,
+    signatureHeader: signed.signature,
+    requestIdHeader: signed.requestId,
+  });
+  const badSignature = verifyOpenClawRequest({
+    env: envEnabled(),
+    method: 'GET',
+    pathname: '/api/openclaw/v1/health',
+    rawBody: '',
+    keyIdHeader: signed.keyId,
+    timestampHeader: signed.timestamp,
+    signatureHeader: '0'.repeat(64),
+    requestIdHeader: signed.requestId,
+  });
+
+  assert.equal(unknownKey.ok, false);
+  assert.equal(badSignature.ok, false);
+  if (!unknownKey.ok && !badSignature.ok) {
+    assert.equal(unknownKey.code, 'unauthorized');
+    assert.equal(badSignature.code, 'unauthorized');
+    assert.equal(unknownKey.message, badSignature.message);
+  }
+});
+
+test('openclaw: contrato de ruta rechaza método, path y query no canónicos', () => {
+  const contract = {
+    method: 'GET',
+    pathname: '/api/openclaw/v1/health',
+    body: 'none',
+  } as const;
+
+  assert.equal(
+    validateOpenClawRouteContract(
+      { method: 'GET', url: 'https://example.test/api/openclaw/v1/health' },
+      contract,
+    ).ok,
+    true,
+  );
+  assert.equal(
+    validateOpenClawRouteContract(
+      { method: 'POST', url: 'https://example.test/api/openclaw/v1/health' },
+      contract,
+    ).ok,
+    false,
+  );
+  assert.equal(
+    validateOpenClawRouteContract(
+      { method: 'GET', url: 'https://example.test/api/openclaw/v1/health?debug=1' },
+      contract,
+    ).ok,
+    false,
+  );
+  assert.equal(
+    validateOpenClawRouteContract(
+      { method: 'GET', url: 'https://example.test/api/openclaw/v1/health/' },
+      contract,
+    ).ok,
+    false,
+  );
+
+  const dynamic = {
+    method: 'GET',
+    pathname: /^\/api\/openclaw\/v1\/proposals\/[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/,
+    body: 'none',
+  } as const;
+  assert.equal(
+    validateOpenClawRouteContract(
+      { method: 'GET', url: 'https://example.test/api/openclaw/v1/proposals/key-1' },
+      dynamic,
+    ).ok,
+    true,
+  );
+  assert.equal(
+    validateOpenClawRouteContract(
+      { method: 'GET', url: 'https://example.test/api/openclaw/v1/proposals/%2F' },
+      dynamic,
+    ).ok,
+    false,
+  );
 });
 
 test('openclaw: body max y límites', () => {

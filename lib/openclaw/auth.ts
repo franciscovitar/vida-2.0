@@ -1,6 +1,6 @@
 /**
  * Autenticación HMAC-SHA256 server-to-server para OpenClaw.
- * Sin cookies de usuario. Nunca registrar firma ni secreto.
+ * Sin cookies de usuario. Nunca registrar firma, canonical string ni secreto.
  */
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
@@ -10,102 +10,136 @@ import {
   OPENCLAW_MAX_TIMESTAMP_SKEW_MS,
   openClawActorId,
 } from '@/lib/openclaw/config';
-import type { OpenClawAuthDecision } from '@/types/openclaw';
+import type { OpenClawAuthDecision, OpenClawErrorCode } from '@/types/openclaw';
 
-// OpenClawAuthDecision reused by callers via re-export if needed.
+export const OPENCLAW_HMAC_PROTOCOL = 'vida2-openclaw-hmac-v2' as const;
+export const OPENCLAW_MAX_REQUEST_ID_LENGTH = 128;
+export const OPENCLAW_MAX_KEY_ID_LENGTH = 64;
+
+const REQUEST_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+const KEY_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+const TIMESTAMP_PATTERN = /^[0-9]{13}$/;
+const SIGNATURE_PATTERN = /^[0-9a-f]{64}$/;
+
 export type { OpenClawAuthDecision };
 
-export function sha256Hex(input: string | Buffer): string {
+export function isValidOpenClawRequestId(value: string): boolean {
+  return REQUEST_ID_PATTERN.test(value);
+}
+
+export function isValidOpenClawKeyId(value: string): boolean {
+  return KEY_ID_PATTERN.test(value);
+}
+
+export function isValidOpenClawTimestamp(value: string): boolean {
+  return TIMESTAMP_PATTERN.test(value);
+}
+
+export function isValidOpenClawSignature(value: string): boolean {
+  return SIGNATURE_PATTERN.test(value);
+}
+
+export function sha256Hex(input: string | Buffer | Uint8Array): string {
   return createHash('sha256').update(input).digest('hex');
 }
 
 export function buildCanonicalString(input: {
   timestamp: string;
+  requestId: string;
   method: string;
   pathname: string;
-  rawBody: string;
+  rawBody: string | Buffer | Uint8Array;
 }): string {
   const bodyHash = sha256Hex(input.rawBody);
-  return `${input.timestamp}\n${input.method.toUpperCase()}\n${input.pathname}\n${bodyHash}`;
+  return [
+    OPENCLAW_HMAC_PROTOCOL,
+    input.timestamp,
+    input.requestId,
+    input.method.toUpperCase(),
+    input.pathname,
+    bodyHash,
+  ].join('\n');
 }
 
 export function signCanonical(secret: string, canonical: string): string {
   return createHmac('sha256', secret).update(canonical).digest('hex');
 }
 
-export function signaturesMatch(expectedHex: string, provided: string): boolean {
+export function signaturesMatch(expectedHex: string, providedHex: string): boolean {
   try {
-    const a = Buffer.from(expectedHex, 'utf8');
-    const b = Buffer.from(provided.trim(), 'utf8');
-    if (a.length !== b.length) return false;
-    return timingSafeEqual(a, b);
+    if (!isValidOpenClawSignature(expectedHex) || !isValidOpenClawSignature(providedHex)) {
+      return false;
+    }
+    return timingSafeEqual(Buffer.from(expectedHex, 'hex'), Buffer.from(providedHex, 'hex'));
   } catch {
     return false;
   }
+}
+
+function unauthorized(): {
+  ok: false;
+  code: OpenClawErrorCode;
+  message: string;
+} {
+  return {
+    ok: false,
+    code: 'unauthorized',
+    message: 'Autenticación inválida.',
+  };
 }
 
 export function verifyOpenClawRequest(input: {
   env?: Readonly<Record<string, string | undefined>>;
   method: string;
   pathname: string;
-  rawBody: string;
+  rawBody: string | Buffer | Uint8Array;
   keyIdHeader: string | null;
   timestampHeader: string | null;
   signatureHeader: string | null;
   requestIdHeader: string | null;
   nowMs?: number;
-}):
-  | { ok: true; keyId: string; actorId: string; requestId: string }
-  | { ok: false; code: import('@/types/openclaw').OpenClawErrorCode; message: string } {
+}): OpenClawAuthDecision {
   const env = input.env ?? process.env;
   if (!isOpenClawApiEnabled(env)) {
     return { ok: false, code: 'api-disabled', message: 'API OpenClaw desactivada.' };
   }
 
-  const requestId = input.requestIdHeader?.trim() ?? '';
-  if (!requestId) {
-    return { ok: false, code: 'unauthorized', message: 'X-Vida-Request-Id requerido.' };
-  }
+  const requestId = input.requestIdHeader ?? '';
+  if (!isValidOpenClawRequestId(requestId)) return unauthorized();
 
   const config = getOpenClawApiConfig(env);
   if (!config.ok) {
-    return {
-      ok: false,
-      code: config.reason === 'flag-disabled' ? 'api-disabled' : 'unauthorized',
-      message: 'API OpenClaw no configurada.',
-    };
+    return config.reason === 'flag-disabled'
+      ? { ok: false, code: 'api-disabled', message: 'API OpenClaw desactivada.' }
+      : unauthorized();
   }
 
-  const keyId = input.keyIdHeader?.trim() ?? '';
-  if (!keyId || keyId !== config.keyId) {
-    return { ok: false, code: 'unauthorized', message: 'Key ID desconocida.' };
-  }
+  const keyId = input.keyIdHeader ?? '';
+  if (!isValidOpenClawKeyId(keyId) || keyId !== config.keyId) return unauthorized();
 
-  const timestampRaw = input.timestampHeader?.trim() ?? '';
-  const timestampMs = Number(timestampRaw);
-  if (!timestampRaw || !Number.isFinite(timestampMs)) {
-    return { ok: false, code: 'unauthorized', message: 'Timestamp inválido.' };
-  }
+  const timestampRaw = input.timestampHeader ?? '';
+  if (!isValidOpenClawTimestamp(timestampRaw)) return unauthorized();
+
+  const timestampMs = Number.parseInt(timestampRaw, 10);
+  if (!Number.isSafeInteger(timestampMs)) return unauthorized();
+
   const now = input.nowMs ?? Date.now();
   if (Math.abs(now - timestampMs) > OPENCLAW_MAX_TIMESTAMP_SKEW_MS) {
-    return { ok: false, code: 'expired-request', message: 'Timestamp fuera de ventana.' };
+    return unauthorized();
   }
 
-  const signature = input.signatureHeader?.trim() ?? '';
-  if (!signature) {
-    return { ok: false, code: 'invalid-signature', message: 'Firma ausente.' };
-  }
+  const signature = input.signatureHeader ?? '';
+  if (!isValidOpenClawSignature(signature)) return unauthorized();
 
   const canonical = buildCanonicalString({
     timestamp: timestampRaw,
+    requestId,
     method: input.method,
     pathname: input.pathname,
     rawBody: input.rawBody,
   });
   const expected = signCanonical(config.secret, canonical);
-  if (!signaturesMatch(expected, signature)) {
-    return { ok: false, code: 'invalid-signature', message: 'Firma inválida.' };
-  }
+  if (!signaturesMatch(expected, signature)) return unauthorized();
 
   return { ok: true, keyId, actorId: openClawActorId(keyId), requestId };
 }

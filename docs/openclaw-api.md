@@ -35,33 +35,45 @@ OpenClaw --HMAC--> /api/openclaw/v1/{health,capabilities,read}
 
 Con la flag apagada o una combinación inválida: **404** uniforme (`api-disabled`).
 
-## Firma HMAC-SHA256
+## Firma HMAC-SHA256 v2
 
-Headers:
+Headers y gramáticas cerradas:
 
-- `X-Vida-Key-Id`
-- `X-Vida-Timestamp` (epoch ms)
-- `X-Vida-Signature` (hex HMAC)
-- `X-Vida-Request-Id`
+- `X-Vida-Key-Id`: 1–64 caracteres ASCII, `[A-Za-z0-9._-]`;
+- `X-Vida-Timestamp`: exactamente 13 dígitos de epoch ms;
+- `X-Vida-Signature`: exactamente 64 caracteres hexadecimales lowercase;
+- `X-Vida-Request-Id`: 1–128 caracteres ASCII, `[A-Za-z0-9._:-]`.
 
 Canonical string:
 
 ```text
-timestamp + "\n" + METHOD + "\n" + pathname + "\n" + sha256Hex(rawBody)
+vida2-openclaw-hmac-v2
+timestamp
+requestId
+METHOD
+pathname
+sha256Hex(rawBody)
 ```
 
-Para GET, `rawBody` es cadena vacía.
+El request ID está firmado. Método, pathname y ausencia de query se validan contra el
+contrato exacto de cada handler. No se recortan ni normalizan silenciosamente headers
+de autenticación.
 
-Reglas actuales:
+Para GET, el body está prohibido y el hash corresponde a la cadena vacía. Para POST,
+solo se acepta `application/json` o `application/json; charset=utf-8`.
 
-- comparación timing-safe;
+Reglas implementadas en 3A:
+
+- comparación timing-safe sobre 32 bytes;
 - skew máximo de cinco minutos;
-- body máximo declarado de 64 KiB;
-- JSON obligatorio en POST;
+- errores de credenciales uniformes;
+- paths, métodos y query fail-closed;
 - respuestas con `Cache-Control: no-store`;
-- sin stack traces ni secretos.
+- sin stack traces, canonical strings ni secretos.
 
-Replay protection y rate limit distribuido siguen pendientes y bloquean la activación.
+La lectura limitada por stream y el hash garantizado sobre bytes originales se completan
+en 3B. Replay protection y rate limit distribuido siguen pendientes y bloquean la
+activación.
 
 ## Lecturas declaradas
 

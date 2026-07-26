@@ -24,7 +24,9 @@ const READ_OPS = new Set<OpenClawReadOperation>([
 
 export async function POST(request: Request) {
   const parsed = await parseAndAuthenticateOpenClawRequest(request, {
-    requireJsonBody: true,
+    method: 'POST',
+    pathname: '/api/openclaw/v1/read',
+    body: 'json',
   });
   if (!parsed.ok) return parsed.response;
 

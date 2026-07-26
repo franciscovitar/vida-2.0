@@ -38,8 +38,10 @@ no implica soporte actual.
 - Health no expone el estado global de escrituras.
 - Las rutas de propuestas no importan ni construyen componentes de escritura.
 - Una key firmada válida recibe `403` sin crear ni consultar propuestas.
-- El Preview continúa bloqueado por readiness hasta completar replay protection,
-  rate limit distribuido, lectores dedicados y QA.
+- El transporte usa canonical HMAC v2 con request ID firmado, headers de gramática
+  cerrada y contratos exactos de método, path y query.
+- El Preview continúa bloqueado por readiness hasta completar body streaming,
+  replay protection, rate limit distribuido, lectores dedicados y QA.
 
 ## Rollback
 

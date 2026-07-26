@@ -114,7 +114,7 @@ export type OpenClawRequestContext = {
 };
 
 export type OpenClawAuthDecision =
-  | { ok: true; keyId: string; actorId: string }
+  | { ok: true; keyId: string; actorId: string; requestId: string }
   | { ok: false; code: OpenClawErrorCode; message: string };
 
 export type OpenClawRuntimeStatus = 'disabled' | 'read-only' | 'misconfigured';
