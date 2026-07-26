@@ -173,11 +173,14 @@ export function buildPreviewPreflight(env: Env): DeploymentPreflightResult {
   }
 
   if (exactTrue(env.OPENCLAW_API_ENABLED)) {
+    const openClawStatus = getOpenClawRuntimeStatus(env);
     issues.push(
       issue(
         'openclaw-enabled',
         'error',
-        'OPENCLAW_API_ENABLED debe permanecer false hasta la fase de OpenClaw.',
+        openClawStatus === 'read-only'
+          ? 'OpenClaw read-only está configurado, pero todavía no está certificado para este Preview.'
+          : 'OpenClaw requiere OPENCLAW_ACCESS_MODE=read-only y credenciales HMAC completas.',
       ),
     );
   }
@@ -372,14 +375,14 @@ function openClawIntegration(env: Env): RuntimeIntegrationView {
     };
   }
 
+  const readOnly = status === 'read-only';
   return {
     id: 'openclaw',
     label: 'OpenClaw API',
-    status: status === 'ready' ? 'configured' : 'misconfigured',
-    summary:
-      status === 'ready'
-        ? 'API HMAC configurada; permanece fuera del alcance de Web V1.'
-        : 'Feature activa con configuración incompleta.',
+    status: readOnly ? 'configured' : 'misconfigured',
+    summary: readOnly
+      ? 'Contrato HMAC read-only configurado; la activación sigue bloqueada hasta completar el hardening.'
+      : 'Feature activa con modo de acceso o credenciales incompletas.',
     blocking: true,
   };
 }

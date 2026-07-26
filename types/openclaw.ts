@@ -4,7 +4,9 @@
 export const OPENCLAW_API_VERSION = 'v1' as const;
 export type OpenClawApiVersion = typeof OPENCLAW_API_VERSION;
 
-export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-22' as const;
+export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-26' as const;
+
+export type OpenClawAccessMode = 'disabled' | 'read-only' | 'full';
 
 export type OpenClawReadOperation =
   | 'system.overview'
@@ -115,4 +117,4 @@ export type OpenClawAuthDecision =
   | { ok: true; keyId: string; actorId: string }
   | { ok: false; code: OpenClawErrorCode; message: string };
 
-export type OpenClawRuntimeStatus = 'disabled' | 'ready' | 'misconfigured';
+export type OpenClawRuntimeStatus = 'disabled' | 'read-only' | 'misconfigured';

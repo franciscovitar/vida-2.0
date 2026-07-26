@@ -21,8 +21,10 @@ import {
 } from '@/lib/openclaw/auth';
 import { listOpenClawCapabilities } from '@/lib/openclaw/capabilities';
 import {
+  getOpenClawApiConfig,
   getOpenClawRuntimeStatus,
   isOpenClawApiEnabled,
+  resolveOpenClawAccessMode,
   OPENCLAW_MAX_BODY_BYTES,
   OPENCLAW_MAX_LIST_LIMIT,
 } from '@/lib/openclaw/config';
@@ -44,6 +46,7 @@ const SECRET = 'oc_test_secret_value_32chars_min!!';
 function envEnabled(extra: Record<string, string> = {}) {
   return {
     OPENCLAW_API_ENABLED: 'true',
+    OPENCLAW_ACCESS_MODE: 'read-only',
     OPENCLAW_API_KEY_ID: KEY_ID,
     OPENCLAW_API_SECRET: SECRET,
     NODE_ENV: 'test',
@@ -83,6 +86,20 @@ test('openclaw: flag apagada por defecto', () => {
   assert.equal(isOpenClawApiEnabled({}), false);
   assert.equal(isOpenClawApiEnabled({ OPENCLAW_API_ENABLED: 'TRUE' }), false);
   assert.equal(getOpenClawRuntimeStatus({}), 'disabled');
+});
+
+test('openclaw: access mode explícito y fail-closed', () => {
+  assert.equal(resolveOpenClawAccessMode({}), 'disabled');
+  assert.equal(resolveOpenClawAccessMode({ OPENCLAW_ACCESS_MODE: 'read-only' }), 'read-only');
+  assert.equal(resolveOpenClawAccessMode({ OPENCLAW_ACCESS_MODE: 'full' }), 'full');
+  assert.equal(resolveOpenClawAccessMode({ OPENCLAW_ACCESS_MODE: 'unknown' }), 'invalid');
+  assert.equal(isOpenClawApiEnabled({ OPENCLAW_API_ENABLED: 'true' }), false);
+  assert.equal(getOpenClawRuntimeStatus({ OPENCLAW_API_ENABLED: 'true' }), 'misconfigured');
+  assert.equal(getOpenClawRuntimeStatus(envEnabled()), 'read-only');
+
+  const full = getOpenClawApiConfig(envEnabled({ OPENCLAW_ACCESS_MODE: 'full' }));
+  assert.equal(full.ok, false);
+  if (!full.ok) assert.equal(full.reason, 'access-mode-unsupported');
 });
 
 test('openclaw: flag apagada → verify api-disabled', () => {
@@ -227,11 +244,37 @@ test('openclaw: areas solo canónicas', () => {
 
 test('openclaw: approvals solo lectura en capabilities', () => {
   const caps = listOpenClawCapabilities();
+  const proposalIds = [
+    'task.create.propose',
+    'task.change-status.propose',
+    'inbox.capture.propose',
+    'gym.session.create.propose',
+    'calendar.block.propose',
+  ];
+
   assert.ok(caps.some((item) => item.id === 'approvals.list' && item.kind === 'read'));
+  for (const id of proposalIds) {
+    assert.ok(caps.some((item) => item.id === id && item.kind === 'forbidden'));
+  }
+  assert.equal(caps.filter((item) => item.kind === 'proposal').length, 0);
   assert.ok(caps.some((item) => item.id === 'proposal.approve' && item.kind === 'forbidden'));
   assert.ok(caps.some((item) => item.id === 'task.create' && item.kind === 'forbidden'));
   assert.ok(caps.some((item) => item.id === 'gym.session.create' && item.kind === 'forbidden'));
   assert.ok(caps.some((item) => item.id === 'calendar.event.create' && item.kind === 'forbidden'));
+});
+
+test('openclaw: health y capabilities exponen solo el contrato read-only', () => {
+  const root = process.cwd();
+  const health = readFileSync(path.join(root, 'app/api/openclaw/v1/health/route.ts'), 'utf8');
+  const capabilities = readFileSync(
+    path.join(root, 'app/api/openclaw/v1/capabilities/route.ts'),
+    'utf8',
+  );
+
+  assert.equal(health.includes('writesEnabled'), false);
+  assert.match(health, /accessMode/);
+  assert.match(capabilities, /accessMode/);
+  assert.match(capabilities, /item\.kind === 'proposal'/);
 });
 
 test('openclaw: Journaling forbidden y actor sanitizado', () => {
@@ -332,7 +375,7 @@ test('openclaw: logs y status sin secretos', () => {
   });
   assert.equal(openClawLogLooksSafe(event), true);
   assert.equal(JSON.stringify(event).includes(SECRET), false);
-  assert.equal(getOpenClawRuntimeStatus(envEnabled()), 'ready');
+  assert.equal(getOpenClawRuntimeStatus(envEnabled()), 'read-only');
   assert.equal(getOpenClawRuntimeStatus({ OPENCLAW_API_ENABLED: 'true' }), 'misconfigured');
 });
 

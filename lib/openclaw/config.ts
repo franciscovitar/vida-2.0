@@ -1,7 +1,7 @@
 /**
  * Feature flag y configuración OpenClaw (solo servidor).
  */
-import type { OpenClawRuntimeStatus } from '@/types/openclaw';
+import type { OpenClawAccessMode, OpenClawRuntimeStatus } from '@/types/openclaw';
 
 export const OPENCLAW_MAX_BODY_BYTES = 64 * 1024;
 export const OPENCLAW_MAX_TIMESTAMP_SKEW_MS = 5 * 60 * 1000;
@@ -9,10 +9,21 @@ export const OPENCLAW_MAX_LIST_LIMIT = 50;
 export const OPENCLAW_MAX_CALENDAR_DAYS = 31;
 export const OPENCLAW_DEFAULT_RATE_PER_MINUTE = 60;
 
+export type OpenClawAccessModeResolution = OpenClawAccessMode | 'invalid';
+
+export function resolveOpenClawAccessMode(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): OpenClawAccessModeResolution {
+  const value = env.OPENCLAW_ACCESS_MODE?.trim();
+  if (!value || value === 'disabled') return 'disabled';
+  if (value === 'read-only' || value === 'full') return value;
+  return 'invalid';
+}
+
 export function isOpenClawApiEnabled(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): boolean {
-  return env.OPENCLAW_API_ENABLED === 'true';
+  return env.OPENCLAW_API_ENABLED === 'true' && resolveOpenClawAccessMode(env) === 'read-only';
 }
 
 export type OpenClawApiConfig =
@@ -21,14 +32,26 @@ export type OpenClawApiConfig =
       keyId: string;
       secret: string;
       ratePerMinute: number;
+      accessMode: 'read-only';
     }
-  | { ok: false; reason: 'flag-disabled' | 'misconfigured' };
+  | {
+      ok: false;
+      reason:
+        'flag-disabled' | 'access-mode-disabled' | 'access-mode-unsupported' | 'misconfigured';
+    };
 
 export function getOpenClawApiConfig(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): OpenClawApiConfig {
-  if (!isOpenClawApiEnabled(env)) {
+  if (env.OPENCLAW_API_ENABLED !== 'true') {
     return { ok: false, reason: 'flag-disabled' };
+  }
+  const accessMode = resolveOpenClawAccessMode(env);
+  if (accessMode === 'disabled') {
+    return { ok: false, reason: 'access-mode-disabled' };
+  }
+  if (accessMode !== 'read-only') {
+    return { ok: false, reason: 'access-mode-unsupported' };
   }
   const keyId = env.OPENCLAW_API_KEY_ID?.trim() ?? '';
   const secret = env.OPENCLAW_API_SECRET?.trim() ?? '';
@@ -40,16 +63,16 @@ export function getOpenClawApiConfig(
     Number.isFinite(rawRate) && rawRate > 0
       ? Math.min(Math.floor(rawRate), 300)
       : OPENCLAW_DEFAULT_RATE_PER_MINUTE;
-  return { ok: true, keyId, secret, ratePerMinute };
+  return { ok: true, keyId, secret, ratePerMinute, accessMode };
 }
 
 /** Estado sanitizado para Ajustes (sin key ID ni secretos). */
 export function getOpenClawRuntimeStatus(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): OpenClawRuntimeStatus {
-  if (!isOpenClawApiEnabled(env)) return 'disabled';
+  if (env.OPENCLAW_API_ENABLED !== 'true') return 'disabled';
   const config = getOpenClawApiConfig(env);
-  return config.ok ? 'ready' : 'misconfigured';
+  return config.ok ? 'read-only' : 'misconfigured';
 }
 
 export function openClawActorId(keyId: string): string {

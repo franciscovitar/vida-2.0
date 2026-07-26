@@ -1,33 +1,39 @@
-# OpenClaw API (8F.1)
+# OpenClaw API — contrato read-only del Bloque 2
 
 API versionada server-to-server para el coordinador conversacional OpenClaw.
-OpenClaw **no** es fuente de verdad y **no** accede a Notion, Sheets, Calendar ni credenciales.
-Solo habla con esta API; Vida 2.0 aplica auth, privacidad, Policy Engine, idempotencia y auditoría.
+
+OpenClaw **no** es fuente de verdad y **no** accede directamente a Notion, Sheets,
+Calendar ni credenciales. Solo habla con esta API; Vida 2.0 aplica autenticación,
+privacidad, límites y observabilidad.
+
+Durante el Bloque 2 la única capacidad habilitable es la lectura sanitizada.
 
 ## Arquitectura
 
-```
-OpenClaw  --HMAC-->  /api/openclaw/v1/*  -->  loaders / proposal.create (8E)
-                                              |
-                                              v
-                                         /aprobaciones (usuario)
+```text
+OpenClaw --HMAC--> /api/openclaw/v1/{health,capabilities,read}
+                                     |
+                                     v
+                         lectores sanitizados de Vida 2.0
 ```
 
-- Flag: `OPENCLAW_API_ENABLED` (default `false`; solo el literal `true` habilita).
-- Escrituras finales: **prohibidas**. Solo `proposal.create` → estado `pending`.
-- Aprobar/rechazar: exclusivamente web autenticada.
+- Flag: `OPENCLAW_API_ENABLED` (default `false`).
+- Modo obligatorio: `OPENCLAW_ACCESS_MODE=read-only`.
+- `full` queda reservado para una fase futura y actualmente falla cerrado.
+- Propuestas y escrituras permanecen prohibidas durante todo el Bloque 2.
+- Production continúa apagada hasta QA y autorización explícita.
 
 ## Endpoints
 
-| Método | Ruta                               | Descripción                             |
-| ------ | ---------------------------------- | --------------------------------------- |
-| GET    | `/api/openclaw/v1/health`          | Estado sin consultar fuentes            |
-| GET    | `/api/openclaw/v1/capabilities`    | Operaciones read / proposal / forbidden |
-| POST   | `/api/openclaw/v1/read`            | Lecturas tipadas                        |
-| POST   | `/api/openclaw/v1/proposals`       | Crear propuesta                         |
-| GET    | `/api/openclaw/v1/proposals/{key}` | Consultar propuesta opaca               |
+| Método | Ruta                               | Bloque 2                      |
+| ------ | ---------------------------------- | ----------------------------- |
+| GET    | `/api/openclaw/v1/health`          | Estado sanitizado             |
+| GET    | `/api/openclaw/v1/capabilities`    | Reads y operaciones forbidden |
+| POST   | `/api/openclaw/v1/read`            | Lecturas tipadas              |
+| POST   | `/api/openclaw/v1/proposals`       | Bloqueada en modo read-only   |
+| GET    | `/api/openclaw/v1/proposals/{key}` | Bloqueada en modo read-only   |
 
-Con flag apagada: **404** uniforme (`api-disabled`).
+Con la flag apagada o una combinación inválida: **404** uniforme (`api-disabled`).
 
 ## Firma HMAC-SHA256
 
@@ -36,90 +42,92 @@ Headers:
 - `X-Vida-Key-Id`
 - `X-Vida-Timestamp` (epoch ms)
 - `X-Vida-Signature` (hex HMAC)
-- `X-Vida-Request-Id` (obligatorio)
+- `X-Vida-Request-Id`
 
 Canonical string:
 
-```
+```text
 timestamp + "\n" + METHOD + "\n" + pathname + "\n" + sha256Hex(rawBody)
 ```
 
 Para GET, `rawBody` es cadena vacía.
 
-Ejemplo (Node):
+Reglas actuales:
 
-```js
-import { createHash, createHmac } from 'node:crypto';
+- comparación timing-safe;
+- skew máximo de cinco minutos;
+- body máximo declarado de 64 KiB;
+- JSON obligatorio en POST;
+- respuestas con `Cache-Control: no-store`;
+- sin stack traces ni secretos.
 
-function sign({ secret, timestamp, method, pathname, rawBody }) {
-  const bodyHash = createHash('sha256').update(rawBody).digest('hex');
-  const canonical = `${timestamp}\n${method.toUpperCase()}\n${pathname}\n${bodyHash}`;
-  return createHmac('sha256', secret).update(canonical).digest('hex');
-}
-```
+Replay protection y rate limit distribuido siguen pendientes y bloquean la activación.
 
-Reglas: timing-safe compare; skew ±5 minutos; body máx. 64 KB; JSON en POST.
+## Lecturas declaradas
 
-Actor interno: `openclaw:<keyId>`. Auditoría usa hint ofuscado (`openclaw:ab***`).
+- `system.overview`
+- `areas.list`
+- `areas.get`
+- `tasks.list`
+- `projects.list`
+- `calendar.upcoming`
+- `gym.summary`
+- `approvals.list`
+- `documents.search`
+- `document.get`
 
-## Lecturas
+Límites generales:
 
-`system.overview`, `areas.list`, `areas.get`, `tasks.list`, `projects.list`,
-`calendar.upcoming` (máx. 31 días), `gym.summary`, `approvals.list`,
-`documents.search`, `document.get`.
+- listados de hasta 50;
+- Calendar hasta 31 días;
+- sin IDs internos de Notion;
+- sin Journaling;
+- sin contenido `hidden`, `legacy`, `private` o excluido;
+- enlaces internos mediante slugs autorizados.
 
-Límites: listados máx. 50; sin IDs Notion; sin Journaling/privados/legacy/hidden;
-enlaces internos `/p/[slug]`.
+Los lectores server-to-server y la política `generalAI` todavía deben endurecerse antes
+de habilitar el Preview.
 
-## Propuestas
+## Propuestas y escrituras
 
-Operaciones: `task.create.propose`, `task.change-status.propose`,
-`inbox.capture.propose`, `gym.session.create.propose`, `calendar.block.propose`.
+Las operaciones `*.propose`, la consulta de propuestas, aprobar/rechazar y cualquier
+escritura final se anuncian como `forbidden`.
 
-Requiere `WRITE_ACTIONS_ENABLED=true` y base de acciones configurada para persistir.
-Estado inicial `pending`. No crea eventos Calendar. No permite approve/reject.
+Una firma HMAC válida no concede permisos de escritura. `WRITE_ACTIONS_ENABLED` no
+debe ampliar el contrato OpenClaw.
 
-## Idempotencia
+El aislamiento físico de las rutas se completa en la Etapa 2.
 
-- Transporte: `X-Vida-Request-Id` (observabilidad / correlación).
-- Dominio: `idempotencyKey` en body de propuestas → ledger 8E.
-- Notion no garantiza unicidad atómica bajo concurrencia extrema.
+## Variables
 
-## Errores
+| Variable                       | Default    | Bloque 2                       |
+| ------------------------------ | ---------- | ------------------------------ |
+| `OPENCLAW_API_ENABLED`         | `false`    | `true` solo después del QA     |
+| `OPENCLAW_ACCESS_MODE`         | `disabled` | Únicamente `read-only`         |
+| `OPENCLAW_API_KEY_ID`          | —          | Solo servidor y por entorno    |
+| `OPENCLAW_API_SECRET`          | —          | Solo servidor y por entorno    |
+| `OPENCLAW_API_RATE_PER_MINUTE` | `60`       | Pendiente de store distribuido |
+| `OPENCLAW_RATE_LIMIT_MODE`     | cerrado    | `memory` solo para tests/local |
 
-```json
-{
-  "ok": false,
-  "requestId": "...",
-  "error": { "code": "invalid-signature", "message": "...", "retryable": false }
-}
-```
+La combinación incompleta, desconocida o `full` falla cerrada.
 
-Sin stack traces ni secretos.
+## QA futuro
 
-## Variables (Work)
-
-| Variable                       | Default | Notas                     |
-| ------------------------------ | ------- | ------------------------- |
-| `OPENCLAW_API_ENABLED`         | false   | Exactamente `true`        |
-| `OPENCLAW_API_KEY_ID`          | —       | Solo servidor             |
-| `OPENCLAW_API_SECRET`          | —       | Solo servidor             |
-| `OPENCLAW_API_RATE_PER_MINUTE` | 60      | Límite local opcional     |
-| `OPENCLAW_RATE_LIMIT_MODE`     | cerrado | `memory` solo tests/local |
-
-No configurar desde Cursor. Preview primero. Production con escrituras desactivadas.
-
-## Prueba real (Work)
-
-1. Preview: `OPENCLAW_API_ENABLED=true` + key/secret.
-2. Health + capabilities firmados.
-3. Read `system.overview` / `areas.list`.
-4. Crear propuesta Calendar → aparece en `/aprobaciones` como pending.
-5. Confirmar que no hay evento Calendar ni approve vía API.
-6. Apagar flag → 404.
+1. Mantener API apagada durante el desarrollo.
+2. Desplegar primero un Preview de la rama.
+3. Usar key y secret exclusivos de Preview.
+4. Habilitar `OPENCLAW_ACCESS_MODE=read-only`.
+5. Verificar `health`, `capabilities` y las lecturas firmadas.
+6. Confirmar que propuestas y escrituras permanecen bloqueadas.
+7. Probar replay, rate limit, privacidad, logs y cero escrituras.
+8. Apagar flag y confirmar 404.
 
 ## Restauración
 
 1. `OPENCLAW_API_ENABLED=false`.
-2. Rotar secreto si se filtró.
-3. No borrar historial de propuestas; marcar `failed`/`expired` si hace falta.
+2. `OPENCLAW_ACCESS_MODE=disabled`.
+3. Revocar la key HMAC del entorno afectado.
+4. Retirar cualquier bypass machine-to-machine de Preview.
+
+No es necesario rotar credenciales de Notion, Sheets o Calendar porque OpenClaw nunca
+debe recibirlas.

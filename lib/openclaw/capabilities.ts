@@ -1,5 +1,5 @@
 /**
- * Catálogo de capacidades OpenClaw (contratos resumidos).
+ * Catálogo de capacidades OpenClaw para el contrato read-only del Bloque 2.
  */
 import type { OpenClawCapability } from '@/types/openclaw';
 
@@ -57,28 +57,28 @@ export function listOpenClawCapabilities(): readonly OpenClawCapability[] {
     },
     {
       id: 'task.create.propose',
-      kind: 'proposal',
-      description: 'Crea propuesta pending de nueva tarea.',
+      kind: 'forbidden',
+      description: 'Bloqueada durante el modo read-only.',
     },
     {
       id: 'task.change-status.propose',
-      kind: 'proposal',
-      description: 'Crea propuesta pending de cambio de estado.',
+      kind: 'forbidden',
+      description: 'Bloqueada durante el modo read-only.',
     },
     {
       id: 'inbox.capture.propose',
-      kind: 'proposal',
-      description: 'Crea propuesta pending de captura en Bandeja.',
+      kind: 'forbidden',
+      description: 'Bloqueada durante el modo read-only.',
     },
     {
       id: 'gym.session.create.propose',
-      kind: 'proposal',
-      description: 'Crea propuesta pending de sesión de gimnasio.',
+      kind: 'forbidden',
+      description: 'Bloqueada durante el modo read-only.',
     },
     {
       id: 'calendar.block.propose',
-      kind: 'proposal',
-      description: 'Crea propuesta pending de bloque Calendar (sin evento real).',
+      kind: 'forbidden',
+      description: 'Bloqueada durante el modo read-only.',
     },
     {
       id: 'proposal.approve',

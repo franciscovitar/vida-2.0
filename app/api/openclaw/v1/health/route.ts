@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { isWriteActionsEnabled } from '@/lib/actions/config';
-import { isOpenClawApiEnabled } from '@/lib/openclaw/config';
+import { getOpenClawApiConfig, isOpenClawApiEnabled } from '@/lib/openclaw/config';
 import {
   finishOpenClawOk,
   OPENCLAW_SECURITY_HEADERS,
@@ -18,14 +17,15 @@ export async function GET(request: Request) {
   });
   if (!parsed.ok) return parsed.response;
 
+  const config = getOpenClawApiConfig();
   const body = {
     ok: true as const,
     requestId: parsed.value.requestId,
     version: OPENCLAW_API_VERSION,
     enabled: isOpenClawApiEnabled(),
+    accessMode: config.ok ? config.accessMode : 'disabled',
     status: 'ready' as const,
     serverTime: new Date().toISOString(),
-    writesEnabled: isWriteActionsEnabled(),
     capabilitiesVersion: OPENCLAW_CAPABILITIES_VERSION,
   };
 
