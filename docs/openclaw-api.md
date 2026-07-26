@@ -92,7 +92,19 @@ Replay protection implementada en 3C:
 - Preview y Production fallan cerrados hasta conectar un store distribuido en 3D;
 - una reserva ocurre después del rate limit y antes de interpretar JSON.
 
-El rate limit distribuido sigue pendiente y bloquea la activación.
+Etapa 3D-A implementa el adaptador distribuido:
+
+- Upstash Redis mediante REST server-to-server, sin conexiones TCP persistentes;
+- replay atómico con un único script `EVAL`;
+- rate limit fijo por minuto con `INCR` + `EXPIRE` atómicos;
+- claves opacas, separadas por entorno y sin key IDs en texto claro;
+- timeout de tres segundos y respuestas remotas no confiables validadas;
+- token únicamente en `Authorization`, nunca en URL, body, logs o errores;
+- Preview/Production fallan cerrados si falta el store o cualquier control;
+- memoria permanece limitada a tests y desarrollo local explícito.
+
+La infraestructura real y sus variables siguen sin configurarse. OpenClaw permanece
+apagado hasta completar la conexión controlada del store y el QA de Preview.
 
 ## Lecturas declaradas
 

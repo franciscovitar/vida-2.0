@@ -7,6 +7,7 @@ info:
     Métodos, paths y query usan un contrato cerrado. El body se lee con límite real
     de 64 KiB, hash de bytes originales, UTF-8 estricto y JSON sin claves duplicadas.
     Replay usa fingerprints opacos con TTL de 15 minutos y falla cerrado sin store.
+    Replay y rate limit admiten un store Upstash Redis REST atómico por entorno.
     Desactivada por defecto. Sin secretos ni valores reales en este documento.
 servers:
   - url: /api/openclaw/v1

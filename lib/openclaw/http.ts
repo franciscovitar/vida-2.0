@@ -163,9 +163,21 @@ export async function parseAndAuthenticateOpenClawRequest(
   if (config.ok) {
     const rate = await resolveOpenClawRateLimitPort().allow(auth.keyId, config.ratePerMinute);
     if (!rate.ok) {
+      if (rate.reason === 'rate-limited') {
+        return {
+          ok: false,
+          response: openClawError(429, requestId, 'rate-limited', 'Límite de tasa excedido.', true),
+        };
+      }
       return {
         ok: false,
-        response: openClawError(429, requestId, 'rate-limited', 'Límite de tasa excedido.', true),
+        response: openClawError(
+          503,
+          requestId,
+          'security-control-unavailable',
+          'Control de seguridad no disponible.',
+          true,
+        ),
       };
     }
   }

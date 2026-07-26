@@ -44,8 +44,10 @@ no implica soporte actual.
   UTF-8 inválido, streams truncados y claves JSON duplicadas.
 - Replay reserva fingerprints opacos por request ID y canonical durante 15 minutos.
 - Duplicados responden `409`; un store ausente o caído responde `503` fail-closed.
-- El Preview continúa bloqueado hasta conectar el store distribuido, completar
-  rate limit distribuido, lectores dedicados y QA.
+- El adaptador distribuido usa Upstash Redis REST y scripts atómicos para replay y
+  rate limit; no se habilita con configuración parcial.
+- El Preview continúa bloqueado hasta conectar la infraestructura real, completar
+  lectores dedicados y QA.
 
 ## Rollback
 
