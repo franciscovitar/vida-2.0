@@ -3,7 +3,10 @@ import {
   finishOpenClawOk,
   parseAndAuthenticateOpenClawRequest,
 } from '@/lib/openclaw/http';
-import { validateOpenClawReadBoundary } from '@/lib/openclaw/read-boundary';
+import {
+  validateOpenClawReadBoundary,
+  validateOpenClawSerializedResponseSize,
+} from '@/lib/openclaw/read-boundary';
 import { validateOpenClawReadEnvelope } from '@/lib/openclaw/read-contract';
 import { executeOpenClawRead } from '@/lib/openclaw/reads';
 import type { OpenClawErrorCode, OpenClawReadResponse } from '@/types/openclaw';
@@ -34,13 +37,12 @@ export async function POST(request: Request) {
     return finishOpenClawError(parsed.value, 'read', 400, validation.code, validation.message);
   }
 
-  const { operation, input } = validation.value;
-  const result = await executeOpenClawRead(operation, input);
+  const result = await executeOpenClawRead(validation.value);
   if (!result.ok) {
     const mapped = mapReadFailure(result.code);
     return finishOpenClawError(
       parsed.value,
-      operation,
+      validation.value.operation,
       mapped.status,
       mapped.code,
       result.message,
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
   if (!boundary.ok) {
     return finishOpenClawError(
       parsed.value,
-      operation,
+      validation.value.operation,
       500,
       'internal-error',
       'La respuesta no superó la frontera de seguridad.',
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
     ok: true,
     requestId: parsed.value.requestId,
     generatedAt: new Date().toISOString(),
-    operation,
+    operation: validation.value.operation,
     dataFreshness: result.dataFreshness,
     sources: result.sources,
     warnings: result.warnings,
@@ -80,7 +82,20 @@ export async function POST(request: Request) {
     data: result.data,
   };
 
-  return finishOpenClawOk(parsed.value, operation, response, {
+  const sizeCheck = validateOpenClawSerializedResponseSize(response);
+  if (!sizeCheck.ok) {
+    return finishOpenClawError(
+      parsed.value,
+      validation.value.operation,
+      500,
+      'internal-error',
+      'La respuesta no superó la frontera de seguridad.',
+    );
+  }
+
+  return finishOpenClawOk(parsed.value, validation.value.operation, response, {
     itemCount: result.itemCount,
+    sourceCount: result.sources.length,
+    dataFreshness: result.dataFreshness,
   });
 }

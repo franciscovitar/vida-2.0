@@ -1,8 +1,11 @@
+import { resolveOpenClawAccessMode } from '@/lib/openclaw/config';
 import { resolveOpenClawSecurityStoreConfig } from '@/lib/openclaw/security-store';
 import type {
+  OpenClawApiStatus,
   OpenClawReadAvailability,
   OpenClawReadOperation,
   OpenClawReadiness,
+  OpenClawReadinessStatus,
   OpenClawSourceReadiness,
 } from '@/types/openclaw';
 
@@ -25,9 +28,18 @@ function combine(values: readonly OpenClawSourceReadiness[]): OpenClawReadAvaila
   return 'unavailable';
 }
 
+function resolveApiStatus(env: Readonly<Record<string, string | undefined>>): OpenClawApiStatus {
+  if (env.OPENCLAW_API_ENABLED !== 'true') return 'disabled';
+  const accessMode = resolveOpenClawAccessMode(env);
+  if (accessMode !== 'read-only') return 'misconfigured';
+  if (!has(env.OPENCLAW_API_KEY_ID) || !has(env.OPENCLAW_API_SECRET)) return 'misconfigured';
+  return 'read-only';
+}
+
 export function getOpenClawReadiness(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): OpenClawReadiness {
+  const apiStatus = resolveApiStatus(env);
   const store = resolveOpenClawSecurityStoreConfig(env);
   const distributed =
     env.OPENCLAW_RATE_LIMIT_MODE === 'upstash' &&
@@ -81,20 +93,24 @@ export function getOpenClawReadiness(
     'projects.list': combine([notion]),
     'calendar.upcoming': combine([calendar]),
     'gym.summary': combine([notion, sheets, catalog]),
-    'approvals.list': 'ready',
+    // Sin lector read-only de propuestas: no anunciar ready ni devolver [].
+    'approvals.list': 'unavailable',
     'documents.search': combine([catalog]),
     'document.get': combine([catalog]),
   };
 
-  const values = Object.values(readers);
-  const status =
-    securityControls === 'blocked'
-      ? 'blocked'
-      : values.every((value) => value === 'ready')
-        ? 'ready'
-        : 'degraded';
+  let status: OpenClawReadinessStatus;
+  if (apiStatus === 'disabled') {
+    status = 'disabled';
+  } else if (apiStatus === 'misconfigured' || securityControls === 'blocked') {
+    status = 'blocked';
+  } else {
+    const values = Object.values(readers);
+    status = values.every((value) => value === 'ready') ? 'ready' : 'degraded';
+  }
 
   return {
+    apiStatus,
     status,
     securityControls,
     sources: { notion, sheets, calendar, catalog },

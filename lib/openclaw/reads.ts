@@ -6,7 +6,6 @@ import 'server-only';
 import { composeAreaDashboard, composeAreasIndex } from '@/lib/areas/compose';
 import { getCanonicalAreaDef, isAreaSlug } from '@/lib/areas/canonical';
 import { opaqueKey } from '@/lib/actions/opaque';
-import { listRuntimeProposals } from '@/lib/actions/runtime';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
 import { getCalendarAgenda } from '@/lib/data/calendar-source';
 import { getDataSource } from '@/lib/data/config';
@@ -25,14 +24,8 @@ import {
 } from '@/lib/web-catalog/service';
 import { getNotionDataSource } from '@/lib/notion/config';
 import { getCalendarDataSource } from '@/lib/calendar/config';
-import type { OpenClawDataFreshness, OpenClawReadOperation } from '@/types/openclaw';
+import type { OpenClawDataFreshness, OpenClawReadRequest } from '@/types/openclaw';
 import type { AreaSlug } from '@/types/areas';
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
 
 function freshnessFromSources(sources: readonly string[]): OpenClawDataFreshness {
   if (sources.includes('mock')) return 'mock';
@@ -101,37 +94,37 @@ export type OpenClawReadResult =
   | { ok: false; code: string; message: string; retryable?: boolean };
 
 export async function executeOpenClawRead(
-  operation: OpenClawReadOperation,
-  input: unknown,
+  request: OpenClawReadRequest,
 ): Promise<OpenClawReadResult> {
-  const body = asRecord(input) ?? {};
+  const { operation, input } = request;
 
   if (operation === 'system.overview') {
-    const [notion, agenda, proposals, gym] = await Promise.all([
+    const [notion, agenda, gym] = await Promise.all([
       loadNotionDashboard(),
       getCalendarAgenda('7'),
-      listRuntimeProposals(),
       loadGymDashboardData(),
     ]);
-    const pending = proposals.filter((row) => row.status === 'pending');
     const sources = [
       notion.source === 'mock' ? 'mock' : 'notion',
       agenda.source === 'mock' ? 'mock' : 'calendar',
       getDataSource() === 'mock' ? 'mock' : 'sheets',
       getNotionDataSource(),
       getCalendarDataSource(),
+      'proposals-unavailable',
     ];
     const upcomingTasks = notion.tasks
       .filter((task) => task.status !== 'Hecha')
       .slice(0, 10)
       .map(sanitizeTask);
+    const warnings = [notion.notice, agenda.notice, gym.moduleNotice].filter(
+      (value): value is string => Boolean(value),
+    );
+    warnings.push('Fuente de propuestas no disponible en modo read-only.');
     return {
       ok: true,
       dataFreshness: freshnessFromSources(sources),
       sources,
-      warnings: [notion.notice, agenda.notice, gym.moduleNotice].filter((value): value is string =>
-        Boolean(value),
-      ),
+      warnings,
       nextCursor: null,
       itemCount: upcomingTasks.length,
       data: {
@@ -140,6 +133,7 @@ export async function executeOpenClawRead(
           sheets: getDataSource(),
           calendar: agenda.status,
           writesEnabled: isWriteActionsEnabled(),
+          proposals: 'unavailable',
         },
         areasCount: notion.areas.length,
         activeProjects: notion.projects.filter((project) => project.status === 'Activo').length,
@@ -161,7 +155,7 @@ export async function executeOpenClawRead(
           hasRoutine: Boolean(gym.routine),
           sessionsStructured: false,
         },
-        pendingProposals: pending.length,
+        pendingProposals: null,
       },
     };
   }
@@ -187,12 +181,7 @@ export async function executeOpenClawRead(
   }
 
   if (operation === 'areas.get') {
-    const slugRaw =
-      typeof body.slug === 'string'
-        ? body.slug
-        : typeof body.areaKey === 'string'
-          ? body.areaKey.replace(/^area\./, '')
-          : '';
+    const slugRaw = 'slug' in input ? input.slug : input.areaKey.replace(/^area\./, '');
     if (
       !isCanonicalAreaSlugInput(slugRaw) ||
       !isAreaSlug(slugRaw) ||
@@ -242,23 +231,25 @@ export async function executeOpenClawRead(
   if (operation === 'tasks.list') {
     const notion = await loadNotionDashboard();
     let tasks = [...notion.tasks];
-    if (typeof body.status === 'string' && body.status.trim()) {
-      tasks = tasks.filter((task) => task.status === body.status);
+    if (input.status) {
+      tasks = tasks.filter((task) => task.status === input.status);
     }
-    if (typeof body.areaKey === 'string' && body.areaKey.trim()) {
-      tasks = tasks.filter((task) => task.area && opaqueKey('area', task.area.id) === body.areaKey);
-    }
-    if (typeof body.projectKey === 'string' && body.projectKey.trim()) {
+    if (input.areaKey) {
       tasks = tasks.filter(
-        (task) => task.project && opaqueKey('proj', task.project.id) === body.projectKey,
+        (task) => task.area && opaqueKey('area', task.area.id) === input.areaKey,
       );
     }
-    if (typeof body.dueBefore === 'string' && body.dueBefore.trim()) {
-      const dueBefore = body.dueBefore;
+    if (input.projectKey) {
+      tasks = tasks.filter(
+        (task) => task.project && opaqueKey('proj', task.project.id) === input.projectKey,
+      );
+    }
+    if (input.dueBefore) {
+      const dueBefore = input.dueBefore;
       tasks = tasks.filter((task) => task.date && task.date <= dueBefore);
     }
-    const limit = clampOpenClawLimit(body.limit);
-    const offset = decodeOpenClawCursor(body.cursor);
+    const limit = clampOpenClawLimit(input.limit);
+    const offset = decodeOpenClawCursor(input.cursor);
     const slice = tasks.slice(offset, offset + limit).map(sanitizeTask);
     const nextOffset = offset + slice.length;
     return {
@@ -275,16 +266,16 @@ export async function executeOpenClawRead(
   if (operation === 'projects.list') {
     const notion = await loadNotionDashboard();
     let projects = [...notion.projects];
-    if (typeof body.status === 'string' && body.status.trim()) {
-      projects = projects.filter((project) => project.status === body.status);
+    if (input.status) {
+      projects = projects.filter((project) => project.status === input.status);
     }
-    if (typeof body.areaKey === 'string' && body.areaKey.trim()) {
+    if (input.areaKey) {
       projects = projects.filter(
-        (project) => project.area && opaqueKey('area', project.area.id) === body.areaKey,
+        (project) => project.area && opaqueKey('area', project.area.id) === input.areaKey,
       );
     }
-    const limit = clampOpenClawLimit(body.limit);
-    const offset = decodeOpenClawCursor(body.cursor);
+    const limit = clampOpenClawLimit(input.limit);
+    const offset = decodeOpenClawCursor(input.cursor);
     const slice = projects.slice(offset, offset + limit).map(sanitizeProject);
     const nextOffset = offset + slice.length;
     return {
@@ -299,7 +290,7 @@ export async function executeOpenClawRead(
   }
 
   if (operation === 'calendar.upcoming') {
-    const validated = validateCalendarUpcomingDays(body.days);
+    const validated = validateCalendarUpcomingDays(input.days);
     if (!validated.ok) {
       return {
         ok: false,
@@ -364,40 +355,16 @@ export async function executeOpenClawRead(
   }
 
   if (operation === 'approvals.list') {
-    const statusFilter =
-      typeof body.status === 'string' && body.status.trim() ? body.status.trim() : undefined;
-    const proposals = await listRuntimeProposals();
-    const filtered = statusFilter
-      ? proposals.filter((row) => row.status === statusFilter)
-      : proposals;
-    const limit = clampOpenClawLimit(body.limit, 50);
-    const slice = filtered.slice(0, limit).map((row) => ({
-      key: row.key,
-      name: row.name,
-      actionType: row.actionType,
-      status: row.status,
-      risk: row.risk,
-      reversible: row.reversible,
-      reason: row.reason,
-      expectedChange: row.expectedChange,
-      createdAt: row.createdAt,
-    }));
     return {
-      ok: true,
-      data: { proposals: slice },
-      dataFreshness: 'live',
-      sources: ['proposals'],
-      warnings: [],
-      nextCursor: null,
-      itemCount: slice.length,
+      ok: false,
+      code: 'source-unavailable',
+      message: 'Fuente de propuestas no disponible en modo read-only.',
+      retryable: false,
     };
   }
 
   if (operation === 'documents.search') {
-    const query = typeof body.query === 'string' ? body.query : '';
-    if (query.length > 200) {
-      return { ok: false, code: 'invalid-input', message: 'Query documental demasiado larga.' };
-    }
+    const query = input.query;
     const result = await searchWebCatalogForGeneralAI(query);
     if (!result.ok) {
       return {
@@ -425,11 +392,7 @@ export async function executeOpenClawRead(
   }
 
   if (operation === 'document.get') {
-    const slug = typeof body.slug === 'string' ? body.slug : '';
-    if (!slug.trim()) {
-      return { ok: false, code: 'invalid-input', message: 'slug requerido.' };
-    }
-    const result = await resolveWebCatalogPageForGeneralAI(slug);
+    const result = await resolveWebCatalogPageForGeneralAI(input.slug);
     if (!result.ok) {
       return {
         ok: false,

@@ -559,6 +559,10 @@ test('openclaw: logs y status sin secretos', () => {
   });
   assert.equal(openClawLogLooksSafe(event), true);
   assert.equal(JSON.stringify(event).includes(SECRET), false);
+  assert.equal(JSON.stringify(event).includes(KEY_ID), false);
+  assert.equal(JSON.stringify(event).includes('proposalCreated'), false);
+  assert.match(event.requestTrace, /^[0-9a-f]{32}$/);
+  assert.match(event.clientTrace, /^[0-9a-f]{32}$/);
   assert.equal(getOpenClawRuntimeStatus(envEnabled()), 'read-only');
   assert.equal(getOpenClawRuntimeStatus({ OPENCLAW_API_ENABLED: 'true' }), 'misconfigured');
 });

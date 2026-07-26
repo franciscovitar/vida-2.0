@@ -49,6 +49,10 @@ no implica soporte actual.
 - Preview usa infraestructura distribuida real; Production continúa sin configurar.
 - Los lectores aplican schemas cerrados, política `generalAI`, readiness sanitizado y
   una frontera de salida que falla cerrada ante datos no autorizados.
+- OpenClaw no construye el runtime de escrituras para listar propuestas; sin un
+  lector read-only dedicado, `approvals.list` queda `unavailable`.
+- La autorización `generalAI` de `document.get` usa catálogo fresco, no el TTL
+  de `unstable_cache`, antes de revelar redirects o leer bloques.
 
 ## Rollback
 

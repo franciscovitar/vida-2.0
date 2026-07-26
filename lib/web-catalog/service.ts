@@ -16,6 +16,7 @@ import { buildAppNavigation } from '@/lib/web-catalog/navigation';
 import { createWebCatalogNotionPort } from '@/lib/web-catalog/notion-port';
 import { loadValidatedWebCatalog } from '@/lib/web-catalog/notion-repository';
 import {
+  authorizeFreshGeneralAIEntry,
   canLoadWebCatalogContent,
   canSearchWebCatalogEntry,
   canUseWebCatalogEntryInGeneralAI,
@@ -171,7 +172,8 @@ export const resolveWebCatalogPage = cache(
 
 /**
  * Resolución exclusiva para OpenClaw/IA general.
- * La política se comprueba antes de revelar redirects o leer bloques.
+ * La autorización final usa catálogo fresco (no el snapshot de unstable_cache)
+ * antes de revelar redirects o leer bloques.
  */
 export const resolveWebCatalogPageForGeneralAI = cache(
   async (rawSlug: string): Promise<WebCatalogPageServiceResult> => {
@@ -192,7 +194,8 @@ export const resolveWebCatalogPageForGeneralAI = cache(
       };
     }
 
-    const catalog = await loadCatalogForRequest();
+    // Catálogo fresco: revocar generalAI no debe esperar el TTL del cache.
+    const catalog = await loadValidatedWebCatalog();
     if (!catalog.ok) return mapCatalogFailure(catalog.code);
 
     const resolution = resolveWebCatalogPath(catalog.index, rawSlug);
@@ -200,19 +203,16 @@ export const resolveWebCatalogPageForGeneralAI = cache(
       return { ok: false, code: 'not-found', message: webCatalogNoticeFor('not-found') };
     }
 
-    const entry = catalog.entries.find((item) => item.stableKey === resolution.stableKey);
-    if (!entry) {
-      return { ok: false, code: 'not-found', message: webCatalogNoticeFor('not-found') };
-    }
-
-    if (!canUseWebCatalogEntryInGeneralAI(entry)) {
+    const authorized = authorizeFreshGeneralAIEntry(resolution.stableKey, catalog.entries);
+    if (!authorized.ok) {
       return {
         ok: false,
-        code: 'forbidden-policy',
-        message: webCatalogNoticeFor('forbidden-policy'),
+        code: authorized.code,
+        message: webCatalogNoticeFor(authorized.code),
       };
     }
 
+    const entry = authorized.entry;
     if (resolution.matchedBy === 'alias' && resolution.matchedValue !== entry.slug) {
       return { ok: true, kind: 'redirect', slug: entry.slug };
     }

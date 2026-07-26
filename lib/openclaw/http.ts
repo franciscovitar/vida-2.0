@@ -22,7 +22,11 @@ import {
   validateOpenClawRouteContract,
   type OpenClawRouteContract,
 } from '@/lib/openclaw/route-contract';
-import type { OpenClawErrorCode, OpenClawErrorResponse } from '@/types/openclaw';
+import type {
+  OpenClawDataFreshness,
+  OpenClawErrorCode,
+  OpenClawErrorResponse,
+} from '@/types/openclaw';
 
 export const OPENCLAW_SECURITY_HEADERS: Record<string, string> = {
   'Cache-Control': 'no-store',
@@ -253,7 +257,11 @@ export function finishOpenClawOk(
   parsed: OpenClawParsedRequest,
   operation: string,
   body: unknown,
-  meta?: { itemCount?: number; proposalCreated?: boolean },
+  meta?: {
+    itemCount?: number;
+    sourceCount?: number;
+    dataFreshness?: OpenClawDataFreshness | null;
+  },
 ): NextResponse {
   emitOpenClawLog(
     buildOpenClawLogEvent({
@@ -263,7 +271,8 @@ export function finishOpenClawOk(
       durationMs: Date.now() - parsed.startedAt,
       result: 'ok',
       itemCount: meta?.itemCount ?? null,
-      proposalCreated: meta?.proposalCreated,
+      sourceCount: meta?.sourceCount ?? null,
+      dataFreshness: meta?.dataFreshness ?? null,
     }),
   );
   return NextResponse.json(body, { status: 200, headers: OPENCLAW_SECURITY_HEADERS });

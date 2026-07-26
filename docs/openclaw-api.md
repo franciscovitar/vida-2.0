@@ -134,10 +134,14 @@ Cierre conjunto 3E–3G:
 - cada operación usa un schema cerrado, sin coerciones ni campos desconocidos;
 - cursores, límites, estados, fechas, slugs y claves opacas se validan estrictamente;
 - `documents.search` y `document.get` exigen `policy.generalAI=allowed`;
-- una frontera de salida rechaza IDs internos, secretos, URLs externas, Journaling,
-  objetos no planos, ciclos, profundidad excesiva y respuestas mayores a 256 KiB;
-- health y capabilities publican readiness sanitizado sin consultar fuentes;
+- una frontera de salida rechaza IDs internos, secretos, correos en texto, URLs
+  externas, Journaling, objetos no planos, ciclos y profundidad excesiva;
+- el tamaño máximo de 256 KiB se mide sobre el JSON completo de la respuesta;
+- health y capabilities publican readiness sanitizado (apiStatus, status,
+  securityControls) sin consultar fuentes;
 - las respuestas incluyen `itemCount` además de freshness, sources y cursor;
+- `approvals.list` permanece en el contrato pero responde `source-unavailable`
+  hasta existir un lector read-only aislado;
 - propuestas y escrituras continúan físicamente bloqueadas.
 
 ## Propuestas y escrituras

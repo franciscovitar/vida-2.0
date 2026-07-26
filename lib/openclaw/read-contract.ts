@@ -4,20 +4,36 @@ import {
   isCanonicalAreaSlugInput,
   isOpenClawReadOperation,
 } from '@/lib/openclaw/read-input';
-import type { OpenClawReadOperation } from '@/types/openclaw';
+import type {
+  OpenClawAreaSlug,
+  OpenClawCanonicalAreaKey,
+  OpenClawProjectStatus,
+  OpenClawProposalStatus,
+  OpenClawReadRequest,
+  OpenClawTaskStatus,
+} from '@/types/openclaw';
 
-export type ValidatedOpenClawRead = {
-  operation: OpenClawReadOperation;
-  input: Record<string, unknown>;
-};
+export type ValidatedOpenClawRead = OpenClawReadRequest;
 
 export type OpenClawReadValidation =
   | { ok: true; value: ValidatedOpenClawRead }
   | { ok: false; code: 'invalid-operation' | 'invalid-input'; message: string };
 
-const TASK_STATUSES = new Set(['Pendiente', 'En progreso', 'Bloqueada', 'Hecha', 'Algún día']);
-const PROJECT_STATUSES = new Set(['Activo', 'En espera', 'Bloqueado', 'Completado', 'Cancelado']);
-const PROPOSAL_STATUSES = new Set([
+const TASK_STATUSES = new Set<OpenClawTaskStatus>([
+  'Pendiente',
+  'En progreso',
+  'Bloqueada',
+  'Hecha',
+  'Algún día',
+]);
+const PROJECT_STATUSES = new Set<OpenClawProjectStatus>([
+  'Activo',
+  'En espera',
+  'Bloqueado',
+  'Completado',
+  'Cancelado',
+]);
+const PROPOSAL_STATUSES = new Set<OpenClawProposalStatus>([
   'pending',
   'approved',
   'rejected',
@@ -29,6 +45,7 @@ const OPAQUE_AREA = /^area-[a-z0-9]{1,16}$/;
 const OPAQUE_PROJECT = /^proj-[a-z0-9]{1,16}$/;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const CURSOR = /^[A-Za-z0-9_-]{1,32}$/;
+const CANONICAL_AREA_KEY = /^area\.(facultad|genova-trabajo|salud|vida-personal)$/;
 
 function record(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -83,10 +100,26 @@ function pagination(input: Record<string, unknown>): OpenClawReadValidation | nu
   return null;
 }
 
+function emptyInput(
+  operation: 'system.overview' | 'areas.list' | 'gym.summary',
+  input: Record<string, unknown>,
+): OpenClawReadValidation {
+  return Object.keys(input).length === 0
+    ? { ok: true, value: { operation, input: {} } }
+    : fail('La operación no acepta input.');
+}
+
+/**
+ * Valida el envelope de lectura. `unknown` solo vive en la frontera;
+ * el resultado es una unión discriminada tipada.
+ */
 export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValidation {
   const envelope = record(value);
   if (!envelope || !only(envelope, ['operation', 'input'])) {
     return fail('Envelope de lectura inválido.');
+  }
+  if (!('input' in envelope)) {
+    return fail('input es obligatorio.');
   }
   if (typeof envelope.operation !== 'string' || !isOpenClawReadOperation(envelope.operation)) {
     return {
@@ -96,7 +129,7 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
     };
   }
 
-  const input = envelope.input === undefined ? {} : record(envelope.input);
+  const input = record(envelope.input);
   if (!input) return fail('input debe ser un objeto JSON.');
   const operation = envelope.operation;
 
@@ -105,9 +138,7 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
     operation === 'areas.list' ||
     operation === 'gym.summary'
   ) {
-    return Object.keys(input).length === 0
-      ? { ok: true, value: { operation, input: {} } }
-      : fail('La operación no acepta input.');
+    return emptyInput(operation, input);
   }
 
   if (operation === 'areas.get') {
@@ -120,29 +151,30 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
       if (typeof input.slug !== 'string' || !isCanonicalAreaSlugInput(input.slug)) {
         return fail('Área no canónica.');
       }
-      return { ok: true, value: { operation, input: { slug: input.slug } } };
+      return {
+        ok: true,
+        value: { operation, input: { slug: input.slug as OpenClawAreaSlug } },
+      };
     }
 
-    if (
-      typeof input.areaKey !== 'string' ||
-      !/^area\.(facultad|genova-trabajo|salud|vida-personal)$/.test(input.areaKey)
-    ) {
+    if (typeof input.areaKey !== 'string' || !CANONICAL_AREA_KEY.test(input.areaKey)) {
       return fail('areaKey canónica inválida.');
     }
     return {
       ok: true,
-      value: { operation, input: { slug: input.areaKey.slice(5) } },
+      value: { operation, input: { areaKey: input.areaKey as OpenClawCanonicalAreaKey } },
     };
   }
 
   if (operation === 'tasks.list') {
-    if (!only(input, ['status', 'areaKey', 'projectKey', 'dueBefore', 'limit', 'cursor']))
+    if (!only(input, ['status', 'areaKey', 'projectKey', 'dueBefore', 'limit', 'cursor'])) {
       return fail('Campos no permitidos.');
+    }
     const pageError = pagination(input);
     if (pageError) return pageError;
     if (
       'status' in input &&
-      (typeof input.status !== 'string' || !TASK_STATUSES.has(input.status))
+      (typeof input.status !== 'string' || !TASK_STATUSES.has(input.status as OpenClawTaskStatus))
     ) {
       return fail('status de tarea inválido.');
     }
@@ -155,12 +187,28 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
     if (
       'projectKey' in input &&
       (typeof input.projectKey !== 'string' || !OPAQUE_PROJECT.test(input.projectKey))
-    )
+    ) {
       return fail('projectKey opaca inválida.');
+    }
     if ('dueBefore' in input && !validDate(input.dueBefore)) {
       return fail('dueBefore debe ser una fecha ISO válida.');
     }
-    return { ok: true, value: { operation, input: { ...input } } };
+    return {
+      ok: true,
+      value: {
+        operation,
+        input: {
+          ...(typeof input.status === 'string'
+            ? { status: input.status as OpenClawTaskStatus }
+            : {}),
+          ...(typeof input.areaKey === 'string' ? { areaKey: input.areaKey } : {}),
+          ...(typeof input.projectKey === 'string' ? { projectKey: input.projectKey } : {}),
+          ...(typeof input.dueBefore === 'string' ? { dueBefore: input.dueBefore } : {}),
+          ...(typeof input.limit === 'number' ? { limit: input.limit } : {}),
+          ...(typeof input.cursor === 'string' ? { cursor: input.cursor } : {}),
+        },
+      },
+    };
   }
 
   if (operation === 'projects.list') {
@@ -171,28 +219,44 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
     if (pageError) return pageError;
     if (
       'status' in input &&
-      (typeof input.status !== 'string' || !PROJECT_STATUSES.has(input.status))
-    )
+      (typeof input.status !== 'string' ||
+        !PROJECT_STATUSES.has(input.status as OpenClawProjectStatus))
+    ) {
       return fail('status de proyecto inválido.');
+    }
     if (
       'areaKey' in input &&
       (typeof input.areaKey !== 'string' || !OPAQUE_AREA.test(input.areaKey))
     ) {
       return fail('areaKey opaca inválida.');
     }
-    return { ok: true, value: { operation, input: { ...input } } };
+    return {
+      ok: true,
+      value: {
+        operation,
+        input: {
+          ...(typeof input.status === 'string'
+            ? { status: input.status as OpenClawProjectStatus }
+            : {}),
+          ...(typeof input.areaKey === 'string' ? { areaKey: input.areaKey } : {}),
+          ...(typeof input.limit === 'number' ? { limit: input.limit } : {}),
+          ...(typeof input.cursor === 'string' ? { cursor: input.cursor } : {}),
+        },
+      },
+    };
   }
 
   if (operation === 'calendar.upcoming') {
     if (!only(input, ['days'])) return fail('Campos no permitidos.');
-    const days = input.days ?? 7;
+    const days = 'days' in input ? input.days : 7;
     if (
       typeof days !== 'number' ||
       !Number.isSafeInteger(days) ||
       days < 1 ||
       days > OPENCLAW_MAX_CALENDAR_DAYS
-    )
+    ) {
       return fail(`days debe ser un entero entre 1 y ${OPENCLAW_MAX_CALENDAR_DAYS}.`);
+    }
     return { ok: true, value: { operation, input: { days } } };
   }
 
@@ -201,10 +265,23 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
     if ('limit' in input && !validLimit(input.limit)) return fail('limit inválido.');
     if (
       'status' in input &&
-      (typeof input.status !== 'string' || !PROPOSAL_STATUSES.has(input.status))
-    )
+      (typeof input.status !== 'string' ||
+        !PROPOSAL_STATUSES.has(input.status as OpenClawProposalStatus))
+    ) {
       return fail('status de propuesta inválido.');
-    return { ok: true, value: { operation, input: { ...input } } };
+    }
+    return {
+      ok: true,
+      value: {
+        operation,
+        input: {
+          ...(typeof input.status === 'string'
+            ? { status: input.status as OpenClawProposalStatus }
+            : {}),
+          ...(typeof input.limit === 'number' ? { limit: input.limit } : {}),
+        },
+      },
+    };
   }
 
   if (operation === 'documents.search') {
@@ -213,8 +290,9 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
       typeof input.query !== 'string' ||
       input.query.trim().length < 1 ||
       input.query.trim().length > 120
-    )
+    ) {
       return fail('query debe tener entre 1 y 120 caracteres.');
+    }
     return {
       ok: true,
       value: { operation, input: { query: input.query.trim() } },
@@ -227,8 +305,9 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
       typeof input.slug !== 'string' ||
       input.slug.length > 80 ||
       !SLUG.test(input.slug)
-    )
+    ) {
       return fail('slug documental inválido.');
+    }
     return { ok: true, value: { operation, input: { slug: input.slug } } };
   }
 

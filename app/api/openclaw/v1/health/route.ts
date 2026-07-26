@@ -28,6 +28,7 @@ export async function GET(request: Request) {
     version: OPENCLAW_API_VERSION,
     enabled: isOpenClawApiEnabled(),
     accessMode: config.ok ? config.accessMode : 'disabled',
+    apiStatus: readiness.apiStatus,
     status: readiness.status,
     securityControls: readiness.securityControls,
     readers: readiness.readers,

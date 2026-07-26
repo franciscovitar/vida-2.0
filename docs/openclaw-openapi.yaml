@@ -8,7 +8,7 @@ info:
     de 64 KiB, hash de bytes originales, UTF-8 estricto y JSON sin claves duplicadas.
     Replay y rate limit usan Upstash Redis REST con operaciones atómicas, claves
     opacas y TTL. Cada lectura tiene schema cerrado, política generalAI y frontera
-    de salida de 256 KiB. Desactivada por defecto.
+    de salida de 256 KiB sobre la respuesta completa. Desactivada por defecto.
 servers:
   - url: /api/openclaw/v1
 security:
@@ -45,25 +45,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties: false
-              required: [operation, input]
-              properties:
-                operation:
-                  type: string
-                  enum:
-                    - system.overview
-                    - areas.list
-                    - areas.get
-                    - tasks.list
-                    - projects.list
-                    - calendar.upcoming
-                    - gym.summary
-                    - approvals.list
-                    - documents.search
-                    - document.get
-                input:
-                  type: object
+              $ref: '#/components/schemas/OpenClawReadEnvelope'
       responses:
         '200':
           description: DTO sanitizado con freshness, sources, warnings, cursor e itemCount
@@ -124,3 +106,185 @@ components:
         Requiere además X-Vida-Key-Id, X-Vida-Timestamp y X-Vida-Request-Id.
         Canonical v2 = vida2-openclaw-hmac-v2 + LF + timestamp + LF + requestId
         + LF + METHOD + LF + pathname + LF + sha256(body). No se admite query.
+  schemas:
+    OpenClawEmptyInput:
+      type: object
+      additionalProperties: false
+      properties: {}
+    OpenClawReadEnvelope:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: system.overview
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: areas.list
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: areas.get
+            input:
+              oneOf:
+                - type: object
+                  additionalProperties: false
+                  required: [slug]
+                  properties:
+                    slug:
+                      type: string
+                      enum: [facultad, genova-trabajo, salud, vida-personal]
+                - type: object
+                  additionalProperties: false
+                  required: [areaKey]
+                  properties:
+                    areaKey:
+                      type: string
+                      enum:
+                        - area.facultad
+                        - area.genova-trabajo
+                        - area.salud
+                        - area.vida-personal
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: tasks.list
+            input:
+              type: object
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  enum: [Pendiente, En progreso, Bloqueada, Hecha, Algún día]
+                areaKey:
+                  type: string
+                  pattern: '^area-[a-z0-9]{1,16}$'
+                projectKey:
+                  type: string
+                  pattern: '^proj-[a-z0-9]{1,16}$'
+                dueBefore:
+                  type: string
+                  format: date
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                cursor:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]{1,32}$'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: projects.list
+            input:
+              type: object
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  enum: [Activo, En espera, Bloqueado, Completado, Cancelado]
+                areaKey:
+                  type: string
+                  pattern: '^area-[a-z0-9]{1,16}$'
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                cursor:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]{1,32}$'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: calendar.upcoming
+            input:
+              type: object
+              additionalProperties: false
+              properties:
+                days:
+                  type: integer
+                  minimum: 1
+                  maximum: 31
+                  default: 7
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: gym.summary
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: approvals.list
+            input:
+              type: object
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  enum: [pending, approved, rejected, applied, failed, expired]
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: documents.search
+            input:
+              type: object
+              additionalProperties: false
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  minLength: 1
+                  maxLength: 120
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: document.get
+            input:
+              type: object
+              additionalProperties: false
+              required: [slug]
+              properties:
+                slug:
+                  type: string
+                  minLength: 1
+                  maxLength: 80
+                  pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'

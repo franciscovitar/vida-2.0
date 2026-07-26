@@ -4,7 +4,7 @@
 export const OPENCLAW_API_VERSION = 'v1' as const;
 export type OpenClawApiVersion = typeof OPENCLAW_API_VERSION;
 
-export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-26-final' as const;
+export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-26-correction' as const;
 
 export type OpenClawAccessMode = 'disabled' | 'read-only' | 'full';
 
@@ -19,6 +19,54 @@ export type OpenClawReadOperation =
   | 'approvals.list'
   | 'documents.search'
   | 'document.get';
+
+export type OpenClawAreaSlug = 'facultad' | 'genova-trabajo' | 'salud' | 'vida-personal';
+export type OpenClawCanonicalAreaKey = `area.${OpenClawAreaSlug}`;
+
+export type OpenClawTaskStatus = 'Pendiente' | 'En progreso' | 'Bloqueada' | 'Hecha' | 'Algún día';
+export type OpenClawProjectStatus =
+  'Activo' | 'En espera' | 'Bloqueado' | 'Completado' | 'Cancelado';
+export type OpenClawProposalStatus =
+  'pending' | 'approved' | 'rejected' | 'applied' | 'failed' | 'expired';
+
+/** Objeto JSON vacío exacto (sin propiedades). */
+export type OpenClawEmptyInput = Record<string, never>;
+
+export type OpenClawAreasGetInput =
+  { slug: OpenClawAreaSlug } | { areaKey: OpenClawCanonicalAreaKey };
+
+export type OpenClawTasksListInput = {
+  status?: OpenClawTaskStatus;
+  areaKey?: string;
+  projectKey?: string;
+  dueBefore?: string;
+  limit?: number;
+  cursor?: string;
+};
+
+export type OpenClawProjectsListInput = {
+  status?: OpenClawProjectStatus;
+  areaKey?: string;
+  limit?: number;
+  cursor?: string;
+};
+
+export type OpenClawCalendarUpcomingInput = {
+  days?: number;
+};
+
+export type OpenClawApprovalsListInput = {
+  status?: OpenClawProposalStatus;
+  limit?: number;
+};
+
+export type OpenClawDocumentsSearchInput = {
+  query: string;
+};
+
+export type OpenClawDocumentGetInput = {
+  slug: string;
+};
 
 export type OpenClawProposeOperation =
   | 'task.create.propose'
@@ -59,17 +107,27 @@ export type OpenClawErrorResponse = {
   error: OpenClawApiError;
 };
 
-export type OpenClawReadRequest = {
-  operation: OpenClawReadOperation;
-  input: unknown;
-};
+export type OpenClawReadRequest =
+  | { operation: 'system.overview'; input: OpenClawEmptyInput }
+  | { operation: 'areas.list'; input: OpenClawEmptyInput }
+  | { operation: 'areas.get'; input: OpenClawAreasGetInput }
+  | { operation: 'tasks.list'; input: OpenClawTasksListInput }
+  | { operation: 'projects.list'; input: OpenClawProjectsListInput }
+  | { operation: 'calendar.upcoming'; input: OpenClawCalendarUpcomingInput }
+  | { operation: 'gym.summary'; input: OpenClawEmptyInput }
+  | { operation: 'approvals.list'; input: OpenClawApprovalsListInput }
+  | { operation: 'documents.search'; input: OpenClawDocumentsSearchInput }
+  | { operation: 'document.get'; input: OpenClawDocumentGetInput };
 
 export type OpenClawDataFreshness = 'live' | 'cached' | 'mock' | 'partial' | 'unavailable';
 export type OpenClawReadAvailability = 'ready' | 'degraded' | 'unavailable';
 export type OpenClawSourceReadiness = 'ready' | 'mock' | 'unavailable';
+export type OpenClawApiStatus = 'disabled' | 'misconfigured' | 'read-only';
+export type OpenClawReadinessStatus = 'disabled' | 'blocked' | 'degraded' | 'ready';
 
 export type OpenClawReadiness = {
-  status: 'ready' | 'degraded' | 'blocked';
+  apiStatus: OpenClawApiStatus;
+  status: OpenClawReadinessStatus;
   securityControls: 'ready' | 'blocked';
   sources: {
     notion: OpenClawSourceReadiness;
