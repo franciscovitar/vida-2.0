@@ -183,6 +183,27 @@ test('openclaw store: Preview sin configuración distribuida falla cerrado', asy
   );
 });
 
+test('openclaw store: Vercel nunca selecciona memoria aunque NODE_ENV sea test', async () => {
+  const env = {
+    NODE_ENV: 'test',
+    VERCEL_ENV: 'preview',
+    OPENCLAW_RATE_LIMIT_MODE: 'memory',
+    OPENCLAW_REPLAY_MODE: 'memory',
+  };
+
+  assert.deepEqual(await resolveOpenClawRateLimitPort(env).allow('k', 60), {
+    ok: false,
+    reason: 'security-control-unavailable',
+  });
+  assert.deepEqual(
+    await resolveOpenClawReplayPort(env).reserve(
+      { requestKey: 'a'.repeat(64), canonicalKey: 'b'.repeat(64) },
+      900,
+    ),
+    { ok: false, reason: 'security-control-unavailable' },
+  );
+});
+
 test('openclaw store: Authorization queda solo en header y nunca en URL/body', async () => {
   const calls: Array<{ url: string; init: RequestInit }> = [];
   const port = createUpstashOpenClawRateLimitPort(CONFIG, redisFetch(1, calls));

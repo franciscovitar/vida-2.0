@@ -110,8 +110,14 @@ export function resolveOpenClawRateLimitPort(
 ): OpenClawRateLimitPort {
   const mode = env.OPENCLAW_RATE_LIMIT_MODE?.trim();
 
+  if (env.VERCEL_ENV) {
+    if (mode !== 'upstash') return unavailableRateLimitPort;
+    const config = resolveOpenClawSecurityStoreConfig(env);
+    return config.ok ? createUpstashOpenClawRateLimitPort(config.value) : unavailableRateLimitPort;
+  }
+
   if (env.NODE_ENV === 'test') return memoryRateLimitPort;
-  if (mode === 'memory' && env.NODE_ENV !== 'production' && !env.VERCEL_ENV) {
+  if (mode === 'memory' && env.NODE_ENV !== 'production') {
     return memoryRateLimitPort;
   }
 

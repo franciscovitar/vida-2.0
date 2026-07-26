@@ -104,8 +104,14 @@ export function resolveOpenClawReplayPort(
 ): OpenClawReplayPort {
   const mode = env.OPENCLAW_REPLAY_MODE?.trim();
 
+  if (env.VERCEL_ENV) {
+    if (mode !== 'upstash') return unavailableReplayPort;
+    const config = resolveOpenClawSecurityStoreConfig(env);
+    return config.ok ? createUpstashOpenClawReplayPort(config.value) : unavailableReplayPort;
+  }
+
   if (env.NODE_ENV === 'test') return memoryReplayPort;
-  if (mode === 'memory' && env.NODE_ENV !== 'production' && !env.VERCEL_ENV) {
+  if (mode === 'memory' && env.NODE_ENV !== 'production') {
     return memoryReplayPort;
   }
 
