@@ -20,6 +20,8 @@ test('B1-LOCAL-UI-1. la persistencia usa solo localStorage y no APIs externas', 
   assert.match(hook, /window\.localStorage/);
   assert.equal(hook.includes('fetch('), false);
   assert.equal(hook.includes('runWriteAction'), false);
+  assert.equal(hook.includes('skipInitialSaveRef'), false);
+  assert.match(hook, /lastSerializedRef\.current = JSON\.stringify\(result\.value\)/);
   assert.equal(storage.includes('Notion'), false);
 });
 

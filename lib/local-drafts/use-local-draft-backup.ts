@@ -52,7 +52,6 @@ export function useLocalDraftBackup<T>({
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const readyRef = useRef(false);
-  const skipInitialSaveRef = useRef(false);
   const lastSerializedRef = useRef<string | null>(null);
   const callbacksRef = useRef({ validate, hasContent, onRestore, onClear, acceptRestored });
 
@@ -65,7 +64,6 @@ export function useLocalDraftBackup<T>({
       const callbacks = callbacksRef.current;
       const storage = getBrowserStorage();
 
-      skipInitialSaveRef.current = true;
       readyRef.current = true;
 
       if (!storage) {
@@ -105,10 +103,6 @@ export function useLocalDraftBackup<T>({
 
   useEffect(() => {
     if (!readyRef.current) return;
-    if (skipInitialSaveRef.current) {
-      skipInitialSaveRef.current = false;
-      return;
-    }
 
     const timer = window.setTimeout(() => {
       const callbacks = callbacksRef.current;

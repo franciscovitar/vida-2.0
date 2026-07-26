@@ -149,9 +149,11 @@ export function runBlock1FinalQa(root = process.cwd()): Block1QaCheck[] {
         hook?.includes('window.setTimeout(() =>') &&
         hook.includes('}, 0)') &&
         hook.includes('}, 300)') &&
-        hook.includes('window.clearTimeout(timer)'),
+        hook.includes('window.clearTimeout(timer)') &&
+        hook.includes('lastSerializedRef.current = JSON.stringify(result.value)') &&
+        !hook.includes('skipInitialSaveRef'),
       ),
-      detail: 'La recuperación no fuerza setState síncrono y el guardado usa debounce.',
+      detail: 'La recuperación no bloquea la primera modificación y el autoguardado usa debounce.',
     },
     {
       id: 'manual-clear',
