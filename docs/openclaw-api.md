@@ -96,7 +96,9 @@ escritura final se anuncian como `forbidden`.
 Una firma HMAC válida no concede permisos de escritura. `WRITE_ACTIONS_ENABLED` no
 debe ampliar el contrato OpenClaw.
 
-El aislamiento físico de las rutas se completa en la Etapa 2.
+El aislamiento físico está completo: las dos rutas de propuestas solo autentican la
+solicitud y responden `403 forbidden`. No importan parsers de propuestas, repositorios,
+Policy Engine, auditoría, idempotencia ni runtime de escrituras.
 
 ## Variables
 

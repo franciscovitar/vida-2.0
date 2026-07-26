@@ -404,14 +404,42 @@ test('openclaw: health route no consulta fuentes (código)', () => {
   assert.match(health, /capabilitiesVersion/);
 });
 
-test('openclaw: rutas no exponen approve/reject ni create directo', () => {
-  const proposalsRoute = readFileSync(
-    path.join(process.cwd(), 'app/api/openclaw/v1/proposals/route.ts'),
-    'utf8',
-  );
-  assert.equal(
-    /proposal\.approve|task\.create'|gym\.session\.create'/i.test(proposalsRoute),
-    false,
-  );
-  assert.match(proposalsRoute, /createOpenClawProposal/);
+test('openclaw: rutas de propuestas están físicamente aisladas de escrituras', () => {
+  const routePaths = [
+    'app/api/openclaw/v1/proposals/route.ts',
+    'app/api/openclaw/v1/proposals/[key]/route.ts',
+  ];
+
+  for (const routePath of routePaths) {
+    const source = readFileSync(path.join(process.cwd(), routePath), 'utf8');
+    for (const forbidden of [
+      '@/lib/openclaw/proposals',
+      'createOpenClawProposal',
+      'getOpenClawProposal',
+      'parseOpenClawProposalRequest',
+      'buildWriteRuntime',
+      'executeAction',
+      'WRITE_ACTIONS_ENABLED',
+      'finishOpenClawOk',
+    ]) {
+      assert.equal(source.includes(forbidden), false, `${routePath}: ${forbidden}`);
+    }
+    assert.match(source, /parseAndAuthenticateOpenClawRequest/);
+    assert.match(source, /finishOpenClawError/);
+    assert.match(source, /403/);
+    assert.match(source, /'forbidden'/);
+    assert.match(source, /modo read-only/);
+  }
+});
+
+test('openclaw: OpenAPI no ofrece éxito ni payload para propuestas en read-only', () => {
+  const yaml = readFileSync(path.join(process.cwd(), 'docs/openclaw-openapi.yaml'), 'utf8');
+  const proposalSection = yaml.slice(yaml.indexOf('  /proposals:'));
+
+  assert.match(proposalSection, /deprecated: true/);
+  assert.match(proposalSection, /Operación bloqueada en modo read-only/);
+  assert.equal(proposalSection.includes('Propuesta creada o replay'), false);
+  assert.equal(proposalSection.includes('Obtener propuesta por clave opaca'), false);
+  assert.equal(proposalSection.includes('idempotencyKey'), false);
+  assert.equal(proposalSection.includes("        '200':"), false);
 });
