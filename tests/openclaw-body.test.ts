@@ -10,7 +10,7 @@ import {
 import { OPENCLAW_MAX_BODY_BYTES } from '@/lib/openclaw/config';
 
 function requestLike(input: {
-  body: ReadableStream<Uint8Array> | null;
+  body: ReadableStream<Uint8Array<ArrayBuffer>> | null;
   contentLength?: string;
 }): Pick<Request, 'headers' | 'body'> {
   const headers = new Headers();
@@ -20,8 +20,10 @@ function requestLike(input: {
   return { headers, body: input.body };
 }
 
-function streamFromChunks(chunks: Uint8Array[]): ReadableStream<Uint8Array> {
-  return new ReadableStream<Uint8Array>({
+function streamFromChunks(
+  chunks: Uint8Array<ArrayBuffer>[],
+): ReadableStream<Uint8Array<ArrayBuffer>> {
+  return new ReadableStream<Uint8Array<ArrayBuffer>>({
     start(controller) {
       for (const chunk of chunks) controller.enqueue(chunk);
       controller.close();
@@ -36,7 +38,7 @@ test('openclaw body: Content-Length inválido o excesivo rechaza antes de leer',
       getReaderCalls += 1;
       throw new Error('no debe leerse');
     },
-  } as unknown as ReadableStream<Uint8Array>;
+  } as unknown as ReadableStream<Uint8Array<ArrayBuffer>>;
 
   const invalid = await readOpenClawBodyBytes(
     requestLike({ body, contentLength: '+10' }),
@@ -85,7 +87,7 @@ test('openclaw body: Content-Length discordante falla cerrado', async () => {
 });
 
 test('openclaw body: un stream truncado o fallido no produce body parcial', async () => {
-  const body = new ReadableStream<Uint8Array>({
+  const body = new ReadableStream<Uint8Array<ArrayBuffer>>({
     start(controller) {
       controller.enqueue(new TextEncoder().encode('{"a":'));
       controller.error(new Error('truncado'));

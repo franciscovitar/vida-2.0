@@ -8,6 +8,7 @@ export const OPENCLAW_MAX_TIMESTAMP_SKEW_MS = 5 * 60 * 1000;
 export const OPENCLAW_MAX_LIST_LIMIT = 50;
 export const OPENCLAW_MAX_CALENDAR_DAYS = 31;
 export const OPENCLAW_DEFAULT_RATE_PER_MINUTE = 60;
+export const OPENCLAW_REPLAY_TTL_SECONDS = 15 * 60;
 
 export type OpenClawAccessModeResolution = OpenClawAccessMode | 'invalid';
 

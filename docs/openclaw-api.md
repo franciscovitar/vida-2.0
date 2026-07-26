@@ -81,7 +81,18 @@ Reglas implementadas en 3B:
 - JSON truncado, inválido o con claves duplicadas se rechaza;
 - errores de lectura no entregan bodies parciales al reader.
 
-Replay protection y rate limit distribuido siguen pendientes y bloquean la activación.
+Replay protection implementada en 3C:
+
+- se reservan dos fingerprints SHA-256 opacos: request ID y canonical firmado;
+- la reserva es atómica dentro del port;
+- TTL fijo de 15 minutos;
+- un duplicado responde `409 replay-detected`;
+- store ausente o caído responde `503 security-control-unavailable`;
+- memoria solo se admite en tests o desarrollo local explícito;
+- Preview y Production fallan cerrados hasta conectar un store distribuido en 3D;
+- una reserva ocurre después del rate limit y antes de interpretar JSON.
+
+El rate limit distribuido sigue pendiente y bloquea la activación.
 
 ## Lecturas declaradas
 

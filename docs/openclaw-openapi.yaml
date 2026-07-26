@@ -6,6 +6,7 @@ info:
     API server-to-server para OpenClaw. HMAC-SHA256 v2 con request ID firmado.
     Métodos, paths y query usan un contrato cerrado. El body se lee con límite real
     de 64 KiB, hash de bytes originales, UTF-8 estricto y JSON sin claves duplicadas.
+    Replay usa fingerprints opacos con TTL de 15 minutos y falla cerrado sin store.
     Desactivada por defecto. Sin secretos ni valores reales en este documento.
 servers:
   - url: /api/openclaw/v1

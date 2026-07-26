@@ -42,6 +42,8 @@ export type OpenClawErrorCode =
   | 'source-unavailable'
   | 'conflict'
   | 'rate-limited'
+  | 'replay-detected'
+  | 'security-control-unavailable'
   | 'flag-disabled'
   | 'internal-error';
 
@@ -113,8 +115,19 @@ export type OpenClawRequestContext = {
   receivedAt: string;
 };
 
+export type OpenClawReplayKeys = {
+  requestKey: string;
+  canonicalKey: string;
+};
+
 export type OpenClawAuthDecision =
-  | { ok: true; keyId: string; actorId: string; requestId: string }
+  | {
+      ok: true;
+      keyId: string;
+      actorId: string;
+      requestId: string;
+      replayKeys: OpenClawReplayKeys;
+    }
   | { ok: false; code: OpenClawErrorCode; message: string };
 
 export type OpenClawRuntimeStatus = 'disabled' | 'read-only' | 'misconfigured';

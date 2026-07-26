@@ -10,7 +10,7 @@ import {
   OPENCLAW_MAX_TIMESTAMP_SKEW_MS,
   openClawActorId,
 } from '@/lib/openclaw/config';
-import type { OpenClawAuthDecision, OpenClawErrorCode } from '@/types/openclaw';
+import type { OpenClawAuthDecision, OpenClawErrorCode, OpenClawReplayKeys } from '@/types/openclaw';
 
 export const OPENCLAW_HMAC_PROTOCOL = 'vida2-openclaw-hmac-v2' as const;
 export const OPENCLAW_MAX_REQUEST_ID_LENGTH = 128;
@@ -74,6 +74,24 @@ export function signaturesMatch(expectedHex: string, providedHex: string): boole
   } catch {
     return false;
   }
+}
+
+export function buildOpenClawReplayKeys(input: {
+  environment: string;
+  keyId: string;
+  requestId: string;
+  signature: string;
+}): OpenClawReplayKeys {
+  const namespace = `${OPENCLAW_HMAC_PROTOCOL}\n${input.environment}`;
+  return {
+    requestKey: sha256Hex(`${namespace}\nrequest\n${input.keyId}\n${input.requestId}`),
+    canonicalKey: sha256Hex(`${namespace}\ncanonical\n${input.keyId}\n${input.signature}`),
+  };
+}
+
+function resolveReplayEnvironment(env: Readonly<Record<string, string | undefined>>): string {
+  const value = env.VERCEL_ENV ?? env.NODE_ENV ?? 'unknown';
+  return /^[a-z0-9-]{1,32}$/.test(value) ? value : 'unknown';
 }
 
 function unauthorized(): {
@@ -141,5 +159,16 @@ export function verifyOpenClawRequest(input: {
   const expected = signCanonical(config.secret, canonical);
   if (!signaturesMatch(expected, signature)) return unauthorized();
 
-  return { ok: true, keyId, actorId: openClawActorId(keyId), requestId };
+  return {
+    ok: true,
+    keyId,
+    actorId: openClawActorId(keyId),
+    requestId,
+    replayKeys: buildOpenClawReplayKeys({
+      environment: resolveReplayEnvironment(env),
+      keyId,
+      requestId,
+      signature,
+    }),
+  };
 }

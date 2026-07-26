@@ -42,7 +42,9 @@ no implica soporte actual.
   cerrada y contratos exactos de método, path y query.
 - Los POST leen como máximo 64 KiB por stream, firman bytes originales y rechazan
   UTF-8 inválido, streams truncados y claves JSON duplicadas.
-- El Preview continúa bloqueado por readiness hasta completar replay protection,
+- Replay reserva fingerprints opacos por request ID y canonical durante 15 minutos.
+- Duplicados responden `409`; un store ausente o caído responde `503` fail-closed.
+- El Preview continúa bloqueado hasta conectar el store distribuido, completar
   rate limit distribuido, lectores dedicados y QA.
 
 ## Rollback

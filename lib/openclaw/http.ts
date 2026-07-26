@@ -13,9 +13,11 @@ import {
   getOpenClawApiConfig,
   isOpenClawApiEnabled,
   OPENCLAW_MAX_BODY_BYTES,
+  OPENCLAW_REPLAY_TTL_SECONDS,
 } from '@/lib/openclaw/config';
 import { emitOpenClawLog, buildOpenClawLogEvent } from '@/lib/openclaw/observability';
 import { resolveOpenClawRateLimitPort } from '@/lib/openclaw/rate-limit';
+import { resolveOpenClawReplayPort } from '@/lib/openclaw/replay';
 import {
   validateOpenClawRouteContract,
   type OpenClawRouteContract,
@@ -90,7 +92,7 @@ export async function parseAndAuthenticateOpenClawRequest(
   }
 
   const contentType = request.headers.get('content-type') ?? '';
-  let rawBodyBytes = EMPTY_BODY;
+  let rawBodyBytes: Uint8Array<ArrayBufferLike> = EMPTY_BODY;
 
   if (contract.body === 'none') {
     if (hasUnexpectedBody(request)) {
@@ -166,6 +168,29 @@ export async function parseAndAuthenticateOpenClawRequest(
         response: openClawError(429, requestId, 'rate-limited', 'Límite de tasa excedido.', true),
       };
     }
+  }
+
+  const replay = await resolveOpenClawReplayPort().reserve(
+    auth.replayKeys,
+    OPENCLAW_REPLAY_TTL_SECONDS,
+  );
+  if (!replay.ok) {
+    if (replay.reason === 'replay-detected') {
+      return {
+        ok: false,
+        response: openClawError(409, requestId, 'replay-detected', 'Solicitud duplicada.'),
+      };
+    }
+    return {
+      ok: false,
+      response: openClawError(
+        503,
+        requestId,
+        'security-control-unavailable',
+        'Control de seguridad no disponible.',
+        true,
+      ),
+    };
   }
 
   let rawBody = '';
