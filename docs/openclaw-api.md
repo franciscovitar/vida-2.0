@@ -71,9 +71,17 @@ Reglas implementadas en 3A:
 - respuestas con `Cache-Control: no-store`;
 - sin stack traces, canonical strings ni secretos.
 
-La lectura limitada por stream y el hash garantizado sobre bytes originales se completan
-en 3B. Replay protection y rate limit distribuido siguen pendientes y bloquean la
-activación.
+Reglas implementadas en 3B:
+
+- `Content-Length` inválido o superior a 64 KiB se rechaza antes de leer;
+- el stream se cancela al superar 64 KiB;
+- una longitud declarada discordante falla cerrada;
+- HMAC calcula el hash sobre los bytes originales;
+- UTF-8 se decodifica en modo fatal, sin reemplazos silenciosos;
+- JSON truncado, inválido o con claves duplicadas se rechaza;
+- errores de lectura no entregan bodies parciales al reader.
+
+Replay protection y rate limit distribuido siguen pendientes y bloquean la activación.
 
 ## Lecturas declaradas
 

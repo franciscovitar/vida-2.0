@@ -5,6 +5,11 @@ import { NextResponse } from 'next/server';
 
 import { verifyOpenClawRequest } from '@/lib/openclaw/auth';
 import {
+  decodeOpenClawUtf8,
+  parseOpenClawJsonStrict,
+  readOpenClawBodyBytes,
+} from '@/lib/openclaw/body';
+import {
   getOpenClawApiConfig,
   isOpenClawApiEnabled,
   OPENCLAW_MAX_BODY_BYTES,
@@ -24,6 +29,7 @@ export const OPENCLAW_SECURITY_HEADERS: Record<string, string> = {
 };
 
 const JSON_CONTENT_TYPE_PATTERN = /^application\/json(?:\s*;\s*charset=utf-8)?$/i;
+const EMPTY_BODY = new Uint8Array(0);
 
 export function openClawError(
   status: number,
@@ -84,7 +90,7 @@ export async function parseAndAuthenticateOpenClawRequest(
   }
 
   const contentType = request.headers.get('content-type') ?? '';
-  let rawBody = '';
+  let rawBodyBytes = EMPTY_BODY;
 
   if (contract.body === 'none') {
     if (hasUnexpectedBody(request)) {
@@ -111,20 +117,26 @@ export async function parseAndAuthenticateOpenClawRequest(
       };
     }
 
-    const buf = Buffer.from(await request.arrayBuffer());
-    if (buf.byteLength > OPENCLAW_MAX_BODY_BYTES) {
+    const read = await readOpenClawBodyBytes(request, OPENCLAW_MAX_BODY_BYTES);
+    if (!read.ok) {
+      if (read.reason === 'body-too-large') {
+        return {
+          ok: false,
+          response: openClawError(413, 'unknown', 'body-too-large', 'Body demasiado grande.'),
+        };
+      }
       return {
         ok: false,
-        response: openClawError(413, 'unknown', 'body-too-large', 'Body demasiado grande.'),
+        response: openClawError(400, 'unknown', 'invalid-input', 'Body no legible.'),
       };
     }
-    rawBody = buf.toString('utf8');
+    rawBodyBytes = read.bytes;
   }
 
   const auth = verifyOpenClawRequest({
     method: target.method,
     pathname: target.pathname,
-    rawBody,
+    rawBody: rawBodyBytes,
     keyIdHeader: request.headers.get('x-vida-key-id'),
     timestampHeader: request.headers.get('x-vida-timestamp'),
     signatureHeader: request.headers.get('x-vida-signature'),
@@ -156,21 +168,35 @@ export async function parseAndAuthenticateOpenClawRequest(
     }
   }
 
+  let rawBody = '';
   let json: unknown | null = null;
-  if (rawBody) {
-    try {
-      json = JSON.parse(rawBody) as unknown;
-    } catch {
+
+  if (contract.body === 'json') {
+    if (rawBodyBytes.byteLength === 0) {
+      return {
+        ok: false,
+        response: openClawError(400, requestId, 'invalid-json', 'Body JSON requerido.'),
+      };
+    }
+
+    const decoded = decodeOpenClawUtf8(rawBodyBytes);
+    if (!decoded.ok) {
       return {
         ok: false,
         response: openClawError(400, requestId, 'invalid-json', 'JSON inválido.'),
       };
     }
-  } else if (contract.body === 'json') {
-    return {
-      ok: false,
-      response: openClawError(400, requestId, 'invalid-json', 'Body JSON requerido.'),
-    };
+
+    const strictJson = parseOpenClawJsonStrict(decoded.text);
+    if (!strictJson.ok) {
+      return {
+        ok: false,
+        response: openClawError(400, requestId, 'invalid-json', 'JSON inválido.'),
+      };
+    }
+
+    rawBody = decoded.text;
+    json = strictJson.value;
   }
 
   return {

@@ -40,8 +40,10 @@ no implica soporte actual.
 - Una key firmada válida recibe `403` sin crear ni consultar propuestas.
 - El transporte usa canonical HMAC v2 con request ID firmado, headers de gramática
   cerrada y contratos exactos de método, path y query.
-- El Preview continúa bloqueado por readiness hasta completar body streaming,
-  replay protection, rate limit distribuido, lectores dedicados y QA.
+- Los POST leen como máximo 64 KiB por stream, firman bytes originales y rechazan
+  UTF-8 inválido, streams truncados y claves JSON duplicadas.
+- El Preview continúa bloqueado por readiness hasta completar replay protection,
+  rate limit distribuido, lectores dedicados y QA.
 
 ## Rollback
 
