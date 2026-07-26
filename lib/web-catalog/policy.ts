@@ -58,3 +58,12 @@ export function canSearchWebCatalogEntry(entry: WebCatalogEntry): boolean {
   if (!entry.policy.searchable) return false;
   return true;
 }
+
+/**
+ * OpenClaw solo puede usar recursos autorizados explícitamente para IA general.
+ * `limited`, `explicit-authorization` y `denied` fallan cerrados.
+ */
+export function canUseWebCatalogEntryInGeneralAI(entry: WebCatalogEntry): boolean {
+  if (!canLoadWebCatalogContent(entry)) return false;
+  return entry.policy.generalAI === 'allowed';
+}

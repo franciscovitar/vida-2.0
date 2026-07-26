@@ -4,7 +4,7 @@
 export const OPENCLAW_API_VERSION = 'v1' as const;
 export type OpenClawApiVersion = typeof OPENCLAW_API_VERSION;
 
-export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-26' as const;
+export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-26-final' as const;
 
 export type OpenClawAccessMode = 'disabled' | 'read-only' | 'full';
 
@@ -65,6 +65,20 @@ export type OpenClawReadRequest = {
 };
 
 export type OpenClawDataFreshness = 'live' | 'cached' | 'mock' | 'partial' | 'unavailable';
+export type OpenClawReadAvailability = 'ready' | 'degraded' | 'unavailable';
+export type OpenClawSourceReadiness = 'ready' | 'mock' | 'unavailable';
+
+export type OpenClawReadiness = {
+  status: 'ready' | 'degraded' | 'blocked';
+  securityControls: 'ready' | 'blocked';
+  sources: {
+    notion: OpenClawSourceReadiness;
+    sheets: OpenClawSourceReadiness;
+    calendar: OpenClawSourceReadiness;
+    catalog: OpenClawSourceReadiness;
+  };
+  readers: Record<OpenClawReadOperation, OpenClawReadAvailability>;
+};
 
 export type OpenClawReadResponse<T = unknown> = {
   ok: true;
@@ -75,6 +89,7 @@ export type OpenClawReadResponse<T = unknown> = {
   sources: readonly string[];
   warnings: readonly string[];
   nextCursor: string | null;
+  itemCount: number;
   data: T;
 };
 
@@ -104,6 +119,7 @@ export type OpenClawCapability = {
   id: string;
   kind: 'read' | 'proposal' | 'forbidden';
   description: string;
+  availability?: OpenClawReadAvailability;
 };
 
 export type OpenClawRequestContext = {

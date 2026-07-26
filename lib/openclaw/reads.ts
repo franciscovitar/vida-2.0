@@ -19,7 +19,10 @@ import {
   isCanonicalAreaSlugInput,
   validateCalendarUpcomingDays,
 } from '@/lib/openclaw/read-input';
-import { resolveWebCatalogPage, searchWebCatalog } from '@/lib/web-catalog/service';
+import {
+  resolveWebCatalogPageForGeneralAI,
+  searchWebCatalogForGeneralAI,
+} from '@/lib/web-catalog/service';
 import { getNotionDataSource } from '@/lib/notion/config';
 import { getCalendarDataSource } from '@/lib/calendar/config';
 import type { OpenClawDataFreshness, OpenClawReadOperation } from '@/types/openclaw';
@@ -395,7 +398,7 @@ export async function executeOpenClawRead(
     if (query.length > 200) {
       return { ok: false, code: 'invalid-input', message: 'Query documental demasiado larga.' };
     }
-    const result = await searchWebCatalog(query);
+    const result = await searchWebCatalogForGeneralAI(query);
     if (!result.ok) {
       return {
         ok: false,
@@ -426,7 +429,7 @@ export async function executeOpenClawRead(
     if (!slug.trim()) {
       return { ok: false, code: 'invalid-input', message: 'slug requerido.' };
     }
-    const result = await resolveWebCatalogPage(slug);
+    const result = await resolveWebCatalogPageForGeneralAI(slug);
     if (!result.ok) {
       return {
         ok: false,

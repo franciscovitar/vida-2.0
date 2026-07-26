@@ -6,6 +6,7 @@ import {
   OPENCLAW_SECURITY_HEADERS,
   parseAndAuthenticateOpenClawRequest,
 } from '@/lib/openclaw/http';
+import { getOpenClawReadiness } from '@/lib/openclaw/readiness';
 import { OPENCLAW_API_VERSION, OPENCLAW_CAPABILITIES_VERSION } from '@/types/openclaw';
 
 export const runtime = 'nodejs';
@@ -20,13 +21,16 @@ export async function GET(request: Request) {
   if (!parsed.ok) return parsed.response;
 
   const config = getOpenClawApiConfig();
+  const readiness = getOpenClawReadiness();
   const body = {
     ok: true as const,
     requestId: parsed.value.requestId,
     version: OPENCLAW_API_VERSION,
     enabled: isOpenClawApiEnabled(),
     accessMode: config.ok ? config.accessMode : 'disabled',
-    status: 'ready' as const,
+    status: readiness.status,
+    securityControls: readiness.securityControls,
+    readers: readiness.readers,
     serverTime: new Date().toISOString(),
     capabilitiesVersion: OPENCLAW_CAPABILITIES_VERSION,
   };

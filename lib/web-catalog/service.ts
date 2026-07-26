@@ -18,6 +18,7 @@ import { loadValidatedWebCatalog } from '@/lib/web-catalog/notion-repository';
 import {
   canLoadWebCatalogContent,
   canSearchWebCatalogEntry,
+  canUseWebCatalogEntryInGeneralAI,
   isPrivateWebCatalogEntry,
   usesReadableContentRenderer,
 } from '@/lib/web-catalog/policy';
@@ -78,8 +79,13 @@ async function loadDocumentForEntry(
   entry: WebCatalogEntry,
   catalogEntries: readonly WebCatalogEntry[],
   index: Parameters<typeof readWebCatalogContentPage>[2],
+  audience: 'web' | 'general-ai' = 'web',
 ): Promise<WebCatalogPageServiceResult> {
-  if (isPrivateWebCatalogEntry(entry) || !canLoadWebCatalogContent(entry)) {
+  if (
+    isPrivateWebCatalogEntry(entry) ||
+    !canLoadWebCatalogContent(entry) ||
+    (audience === 'general-ai' && !canUseWebCatalogEntryInGeneralAI(entry))
+  ) {
     return {
       ok: false,
       code: 'forbidden-policy',
@@ -163,6 +169,58 @@ export const resolveWebCatalogPage = cache(
   },
 );
 
+/**
+ * Resolución exclusiva para OpenClaw/IA general.
+ * La política se comprueba antes de revelar redirects o leer bloques.
+ */
+export const resolveWebCatalogPageForGeneralAI = cache(
+  async (rawSlug: string): Promise<WebCatalogPageServiceResult> => {
+    if (!isWebCatalogEnabled()) {
+      return {
+        ok: false,
+        code: 'flag-disabled',
+        message: webCatalogNoticeFor('flag-disabled'),
+      };
+    }
+
+    const config = getWebCatalogNotionConfig();
+    if (!config.ok) {
+      return {
+        ok: false,
+        code: 'not-configured',
+        message: webCatalogNoticeFor('not-configured'),
+      };
+    }
+
+    const catalog = await loadCatalogForRequest();
+    if (!catalog.ok) return mapCatalogFailure(catalog.code);
+
+    const resolution = resolveWebCatalogPath(catalog.index, rawSlug);
+    if (!resolution) {
+      return { ok: false, code: 'not-found', message: webCatalogNoticeFor('not-found') };
+    }
+
+    const entry = catalog.entries.find((item) => item.stableKey === resolution.stableKey);
+    if (!entry) {
+      return { ok: false, code: 'not-found', message: webCatalogNoticeFor('not-found') };
+    }
+
+    if (!canUseWebCatalogEntryInGeneralAI(entry)) {
+      return {
+        ok: false,
+        code: 'forbidden-policy',
+        message: webCatalogNoticeFor('forbidden-policy'),
+      };
+    }
+
+    if (resolution.matchedBy === 'alias' && resolution.matchedValue !== entry.slug) {
+      return { ok: true, kind: 'redirect', slug: entry.slug };
+    }
+
+    return loadDocumentForEntry(entry, catalog.entries, catalog.index, 'general-ai');
+  },
+);
+
 /** Resuelve una ruta fija documental por clave estable. */
 export const resolveWebCatalogPageByStableKey = cache(
   async (stableKey: string): Promise<WebCatalogPageServiceResult> => {
@@ -233,6 +291,33 @@ const loadSearchIndexCached = unstable_cache(
   { revalidate: WEB_CATALOG_SEARCH_LIMITS.revalidateSeconds },
 );
 
+const loadGeneralAISearchIndexCached = unstable_cache(
+  async (): Promise<SearchableDocument[]> => {
+    if (!isWebCatalogEnabled()) return [];
+    const config = getWebCatalogNotionConfig();
+    if (!config.ok) return [];
+    const catalog = await loadValidatedWebCatalog();
+    if (!catalog.ok) return [];
+
+    const port = createWebCatalogNotionPort(config.token);
+    const documents: SearchableDocument[] = [];
+
+    for (const entry of catalog.entries) {
+      if (!canSearchWebCatalogEntry(entry)) continue;
+      if (!canUseWebCatalogEntryInGeneralAI(entry)) continue;
+      if (!usesReadableContentRenderer(entry)) continue;
+      const content = await readWebCatalogContentPage(port, entry, catalog.index, catalog.entries);
+      if (!content.ok) continue;
+      const doc = buildSearchableDocument(entry, content.page);
+      if (doc) documents.push(doc);
+    }
+
+    return documents;
+  },
+  ['web-catalog-general-ai-search-index'],
+  { revalidate: WEB_CATALOG_SEARCH_LIMITS.revalidateSeconds },
+);
+
 export const searchWebCatalog = cache(
   async (
     query: string,
@@ -261,6 +346,39 @@ export const searchWebCatalog = cache(
     return {
       ok: true,
       hits: searchWebCatalogDocuments(documents, trimmed, catalog.entries),
+    };
+  },
+);
+
+export const searchWebCatalogForGeneralAI = cache(
+  async (
+    query: string,
+  ): Promise<
+    | { ok: true; hits: WebCatalogSearchHit[] }
+    | { ok: false; code: WebCatalogServiceCode; message: string }
+  > => {
+    if (!isWebCatalogEnabled()) {
+      return {
+        ok: false,
+        code: 'flag-disabled',
+        message: webCatalogNoticeFor('flag-disabled'),
+      };
+    }
+
+    const trimmed = query.trim();
+    if (trimmed === '') return { ok: true, hits: [] };
+
+    const documents = await loadGeneralAISearchIndexCached();
+    const catalog = await loadValidatedWebCatalog();
+    if (!catalog.ok) return mapCatalogFailure(catalog.code);
+
+    const currentEntries = catalog.entries.filter(
+      (entry) => canSearchWebCatalogEntry(entry) && canUseWebCatalogEntryInGeneralAI(entry),
+    );
+
+    return {
+      ok: true,
+      hits: searchWebCatalogDocuments(documents, trimmed, currentEntries),
     };
   },
 );

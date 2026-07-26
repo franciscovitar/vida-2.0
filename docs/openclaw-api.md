@@ -103,8 +103,9 @@ Etapa 3D-A implementa el adaptador distribuido:
 - Preview/Production fallan cerrados si falta el store o cualquier control;
 - memoria permanece limitada a tests y desarrollo local explícito.
 
-La infraestructura real y sus variables siguen sin configurarse. OpenClaw permanece
-apagado hasta completar la conexión controlada del store y el QA de Preview.
+La infraestructura Upstash quedó conectada y validada únicamente en Preview. El store
+acepta reservas atómicas con claves opacas y TTL; Production continúa sin estas
+variables. OpenClaw permanece apagado hasta la activación controlada final.
 
 ## Lecturas declaradas
 
@@ -128,8 +129,16 @@ Límites generales:
 - sin contenido `hidden`, `legacy`, `private` o excluido;
 - enlaces internos mediante slugs autorizados.
 
-Los lectores server-to-server y la política `generalAI` todavía deben endurecerse antes
-de habilitar el Preview.
+Cierre conjunto 3E–3G:
+
+- cada operación usa un schema cerrado, sin coerciones ni campos desconocidos;
+- cursores, límites, estados, fechas, slugs y claves opacas se validan estrictamente;
+- `documents.search` y `document.get` exigen `policy.generalAI=allowed`;
+- una frontera de salida rechaza IDs internos, secretos, URLs externas, Journaling,
+  objetos no planos, ciclos, profundidad excesiva y respuestas mayores a 256 KiB;
+- health y capabilities publican readiness sanitizado sin consultar fuentes;
+- las respuestas incluyen `itemCount` además de freshness, sources y cursor;
+- propuestas y escrituras continúan físicamente bloqueadas.
 
 ## Propuestas y escrituras
 
@@ -151,8 +160,11 @@ Policy Engine, auditoría, idempotencia ni runtime de escrituras.
 | `OPENCLAW_ACCESS_MODE`         | `disabled` | Únicamente `read-only`         |
 | `OPENCLAW_API_KEY_ID`          | —          | Solo servidor y por entorno    |
 | `OPENCLAW_API_SECRET`          | —          | Solo servidor y por entorno    |
-| `OPENCLAW_API_RATE_PER_MINUTE` | `60`       | Pendiente de store distribuido |
-| `OPENCLAW_RATE_LIMIT_MODE`     | cerrado    | `memory` solo para tests/local |
+| `OPENCLAW_API_RATE_PER_MINUTE` | `60`       | Límite distribuido             |
+| `OPENCLAW_RATE_LIMIT_MODE`     | cerrado    | `upstash` en Vercel            |
+| `OPENCLAW_REPLAY_MODE`         | cerrado    | `upstash` en Vercel            |
+| `UPSTASH_REDIS_REST_URL`       | —          | Solo servidor y por entorno    |
+| `UPSTASH_REDIS_REST_TOKEN`     | —          | Sensitive, nunca en respuestas |
 
 La combinación incompleta, desconocida o `full` falla cerrada.
 

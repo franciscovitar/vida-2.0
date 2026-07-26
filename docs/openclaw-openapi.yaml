@@ -6,9 +6,9 @@ info:
     API server-to-server para OpenClaw. HMAC-SHA256 v2 con request ID firmado.
     Métodos, paths y query usan un contrato cerrado. El body se lee con límite real
     de 64 KiB, hash de bytes originales, UTF-8 estricto y JSON sin claves duplicadas.
-    Replay usa fingerprints opacos con TTL de 15 minutos y falla cerrado sin store.
-    Replay y rate limit admiten un store Upstash Redis REST atómico por entorno.
-    Desactivada por defecto. Sin secretos ni valores reales en este documento.
+    Replay y rate limit usan Upstash Redis REST con operaciones atómicas, claves
+    opacas y TTL. Cada lectura tiene schema cerrado, política generalAI y frontera
+    de salida de 256 KiB. Desactivada por defecto.
 servers:
   - url: /api/openclaw/v1
 security:
@@ -17,7 +17,7 @@ paths:
   /health:
     get:
       operationId: health
-      summary: Health sin consultar fuentes externas
+      summary: Health y readiness de configuración sin consultar fuentes
       responses:
         '200':
           description: OK
@@ -28,7 +28,7 @@ paths:
   /capabilities:
     get:
       operationId: capabilities
-      summary: Catálogo de operaciones
+      summary: Catálogo de operaciones con disponibilidad sanitizada
       responses:
         '200':
           description: OK
@@ -39,13 +39,14 @@ paths:
   /read:
     post:
       operationId: read
-      summary: Lectura tipada
+      summary: Lectura tipada con input y output cerrados
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              additionalProperties: false
               required: [operation, input]
               properties:
                 operation:
@@ -65,15 +66,19 @@ paths:
                   type: object
       responses:
         '200':
-          description: OK
+          description: DTO sanitizado con freshness, sources, warnings, cursor e itemCount
         '400':
           description: Input u operación inválida
         '401':
           description: Auth fallida
         '403':
-          description: Forbidden / flag
+          description: Forbidden, flag o política generalAI
         '404':
           description: API desactivada o recurso
+        '500':
+          description: La salida no superó la frontera de seguridad
+        '503':
+          description: Fuente o control de seguridad no disponible
   /proposals:
     post:
       operationId: proposalsForbidden

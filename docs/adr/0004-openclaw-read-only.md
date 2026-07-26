@@ -46,8 +46,9 @@ no implica soporte actual.
 - Duplicados responden `409`; un store ausente o caído responde `503` fail-closed.
 - El adaptador distribuido usa Upstash Redis REST y scripts atómicos para replay y
   rate limit; no se habilita con configuración parcial.
-- El Preview continúa bloqueado hasta conectar la infraestructura real, completar
-  lectores dedicados y QA.
+- Preview usa infraestructura distribuida real; Production continúa sin configurar.
+- Los lectores aplican schemas cerrados, política `generalAI`, readiness sanitizado y
+  una frontera de salida que falla cerrada ante datos no autorizados.
 
 ## Rollback
 
