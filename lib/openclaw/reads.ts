@@ -7,7 +7,7 @@ import { composeAreaDashboard, composeAreasIndex } from '@/lib/areas/compose';
 import { getCanonicalAreaDef, isAreaSlug } from '@/lib/areas/canonical';
 import { opaqueKey } from '@/lib/actions/opaque';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
-import { getCalendarAgenda } from '@/lib/data/calendar-source';
+import { getCalendarAgendaForTrustedService } from '@/lib/data/calendar-source';
 import { getDataSource } from '@/lib/data/config';
 import { loadGymDashboardData } from '@/lib/gym/load';
 import { loadNotionDashboard } from '@/lib/notion/dashboard';
@@ -101,7 +101,7 @@ export async function executeOpenClawRead(
   if (operation === 'system.overview') {
     const [notion, agenda, gym] = await Promise.all([
       loadNotionDashboard(),
-      getCalendarAgenda('7'),
+      getCalendarAgendaForTrustedService('7'),
       loadGymDashboardData(),
     ]);
     const sources = [
@@ -190,7 +190,10 @@ export async function executeOpenClawRead(
       return { ok: false, code: 'invalid-input', message: 'Área no canónica.' };
     }
     const slug = slugRaw as AreaSlug;
-    const [notion, agenda] = await Promise.all([loadNotionDashboard(), getCalendarAgenda('7')]);
+    const [notion, agenda] = await Promise.all([
+      loadNotionDashboard(),
+      getCalendarAgendaForTrustedService('7'),
+    ]);
     const data = composeAreaDashboard({
       slug,
       notion,
@@ -300,7 +303,7 @@ export async function executeOpenClawRead(
     }
     const days = validated.days;
     const view = days <= 1 ? 'today' : days <= 7 ? '7' : '30';
-    const agenda = await getCalendarAgenda(view);
+    const agenda = await getCalendarAgendaForTrustedService(view);
     const events = agenda.days.flatMap((day) =>
       day.events.map((event) => ({
         key: opaqueKey('cal', event.id),

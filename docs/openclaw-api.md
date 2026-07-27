@@ -143,6 +143,9 @@ Cierre conjunto 3E–3G:
 - `approvals.list` permanece en el contrato pero responde `source-unavailable`
   hasta existir un lector read-only aislado;
 - propuestas y escrituras continúan físicamente bloqueadas.
+- Calendar en OpenClaw usa un lector server-to-server dedicado (sin cookies);
+  `/agenda` sigue exigiendo sesión web. Ambos reutilizan el mismo loader de
+  solo lectura y los mismos fallos cerrados.
 
 ## Propuestas y escrituras
 

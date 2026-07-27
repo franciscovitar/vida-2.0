@@ -53,6 +53,9 @@ no implica soporte actual.
   lector read-only dedicado, `approvals.list` queda `unavailable`.
 - La autorización `generalAI` de `document.get` usa catálogo fresco, no el TTL
   de `unstable_cache`, antes de revelar redirects o leer bloques.
+- Las lecturas Calendar de OpenClaw usan `getCalendarAgendaForTrustedService`
+  (HMAC server-to-server, sin cookies). `/agenda` sigue protegida por sesión
+  vía `getCalendarAgenda`. Ambas reutilizan el mismo loader de solo lectura.
 
 ## Rollback
 
