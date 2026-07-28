@@ -90,6 +90,11 @@ function previewEnv(): Record<string, string> {
     NODE_ENV: 'production',
     VERCEL_ENV: 'preview',
     WRITE_ACTIONS_ENABLED: 'true',
+    WRITE_COORDINATION_MODE: 'upstash',
+    WRITE_PROPOSAL_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString('base64'),
+    UPSTASH_REDIS_REST_URL: 'https://example.upstash.io',
+    UPSTASH_REDIS_REST_TOKEN: 'test-token-16chars',
+    GOOGLE_CALENDAR_WRITE_ID: 'primary',
     NOTION_DATA_SOURCE: 'notion',
     NOTION_API_TOKEN: 'secret_test_token',
     NOTION_ACTIONS_DATA_SOURCE_ID: ACTIONS_DS,
@@ -146,9 +151,29 @@ test('aprobaciones: flag activa carga propuesta persistente en la carga inicial'
       expectedChange: 'e',
       risk: 'low',
       reversible: true,
-      sanitizedPayload: {},
+      payload: {
+        title: 'Visible',
+        priority: 'Media',
+        areaKey: 'area.salud',
+        projectKey: null,
+        date: null,
+        duration: null,
+        energy: null,
+        note: null,
+      },
     },
-    { key: 'prop-visible', idempotencyKey: 'vis-1', createdAt: '2026-07-22' },
+    {
+      key: 'prop-visible',
+      idempotencyKey: 'vis-1',
+      createdAt: '2026-07-22',
+      expiresAt: '2026-07-23T12:00:00.000Z',
+      payloadDigest: 'd-vis',
+      contractVersion: 'vida2-writes-v1',
+      source: 'web',
+      beforeDigest: null,
+      diff: null,
+      encryptedPayloadKey: 'enc-vis',
+    },
   );
 
   const proposals = await loadApprovalsInitialProposals(previewEnv(), {
@@ -168,16 +193,33 @@ test('aprobaciones: dos instancias/runtime reconstruidos ven la misma propuesta'
   await runtimeA.handlers.proposals.create(
     {
       name: 'Cross-request',
-      proposedActionType: 'calendar.block.propose',
-      targetType: 'calendar-block',
+      proposedActionType: 'calendar.hold.create',
+      targetType: 'calendar-hold',
       targetKey: null,
       reason: 'focus',
       expectedChange: '60m',
       risk: 'medium',
       reversible: true,
-      sanitizedPayload: { title: 'Deep work' },
+      payload: {
+        title: 'Deep work',
+        start: '2027-07-23T10:00:00.000Z',
+        end: '2027-07-23T11:00:00.000Z',
+        note: null,
+        relatedTaskKey: null,
+      },
     },
-    { key: 'prop-cross', idempotencyKey: 'cross-1', createdAt: '2026-07-22' },
+    {
+      key: 'prop-cross',
+      idempotencyKey: 'cross-1',
+      createdAt: '2026-07-22',
+      expiresAt: '2026-07-23T12:00:00.000Z',
+      payloadDigest: 'd-cross',
+      contractVersion: 'vida2-writes-v1',
+      source: 'web',
+      beforeDigest: null,
+      diff: null,
+      encryptedPayloadKey: 'enc-cross',
+    },
   );
 
   const fromB = await listRuntimeProposals(previewEnv(), { notionClient: shared });
@@ -197,8 +239,9 @@ test('aprobaciones: camino real no depende de memoria legacy', () => {
     path.join(process.cwd(), 'app/(app)/aprobaciones/page.tsx'),
     'utf8',
   );
-  assert.match(pageSource, /listRuntimeProposals/);
+  assert.match(pageSource, /loadApprovalsBoard|listRuntimeProposals/);
   assert.equal(/listProcessProposals/.test(pageSource), false);
+  assert.match(pageSource, /ApprovalsPanel/);
 
   const runtime = buildWriteRuntime(previewEnv(), {
     notionClient: createSharedFakeClient(),

@@ -32,11 +32,13 @@ import { createNotionInboxWritePort } from '@/lib/actions/notion-inbox';
 import { createNotionTaskWritePort } from '@/lib/actions/notion-tasks';
 import { opaqueKey } from '@/lib/actions/opaque';
 import { portHasDestructiveMethods } from '@/lib/actions/ports';
+import { requestFromEmail } from '@/lib/actions/request';
 import { buildWriteRuntime } from '@/lib/actions/runtime';
 import { NOTION_DATABASES, AREA_PROPS, PROJECT_PROPS, TASK_PROPS } from '@/lib/notion/constants';
 import { isForbiddenActionType } from '@/lib/actions/policy';
 import type { ActionRequest, ActionResult, ConfirmationMode } from '@/types/actions';
 import type { NotionRawPage } from '@/lib/notion/adapters';
+import { randomBytes } from 'node:crypto';
 
 const explicit: { mode: ConfirmationMode; acknowledged: boolean; phrase: string | null } = {
   mode: 'explicit',
@@ -260,6 +262,11 @@ function previewEnv(extra: Record<string, string> = {}): Record<string, string> 
     NODE_ENV: 'production',
     VERCEL_ENV: 'preview',
     WRITE_ACTIONS_ENABLED: 'true',
+    WRITE_COORDINATION_MODE: 'upstash',
+    WRITE_PROPOSAL_ENCRYPTION_KEY: randomBytes(32).toString('base64'),
+    UPSTASH_REDIS_REST_URL: 'https://example.upstash.io',
+    UPSTASH_REDIS_REST_TOKEN: 'test-token-16chars',
+    GOOGLE_CALENDAR_WRITE_ID: 'primary',
     NOTION_DATA_SOURCE: 'notion',
     NOTION_API_TOKEN: 'secret_test_token',
     NOTION_TASKS_DATA_SOURCE_ID: NOTION_DATABASES.tasks.dataSourceId,
@@ -279,15 +286,14 @@ function request(
     actorEmail?: string;
   },
 ): ActionRequest {
-  return {
+  return requestFromEmail(partial.actorEmail ?? 'work@example.com', {
     actionType: partial.actionType,
-    actorEmail: partial.actorEmail ?? 'work@example.com',
     payload: partial.payload,
     idempotencyKey: partial.idempotencyKey,
     confirmation: explicit,
     expectedPrevious: partial.expectedPrevious ?? null,
     context: { source: 'web', targetDate: null },
-  };
+  });
 }
 
 test('8E1r-01. flag apagada no construye clientes reales', () => {
@@ -308,7 +314,7 @@ test('8E1r-02. configuración incompleta falla cerrada', async () => {
     },
     { notionClient: fake },
   );
-  assert.equal(runtime.mode, 'real');
+  assert.equal(runtime.mode, 'misconfigured');
   const inbox = await runtime.handlers.inbox.appendCapture(
     {
       text: 'hola',
@@ -332,6 +338,7 @@ test('8E1r-02. configuración incompleta falla cerrada', async () => {
   });
   assert.equal(status.inbox, 'misconfigured');
   assert.ok(status.issues.includes('inbox-page-missing'));
+  assert.ok(status.issues.includes('encryption-key-missing'));
   assert.equal(JSON.stringify(status).includes('secret_'), false);
 });
 
@@ -581,16 +588,33 @@ test('8E1r-13. propuesta se persiste', async () => {
   const created = await repo.create(
     {
       name: 'Bloque calendar',
-      proposedActionType: 'calendar.block.propose',
-      targetType: 'calendar-block',
+      proposedActionType: 'calendar.hold.create',
+      targetType: 'calendar-hold',
       targetKey: null,
       reason: 'Enfocar',
       expectedChange: '60m',
       risk: 'medium',
       reversible: true,
-      sanitizedPayload: { title: 'Deep work' },
+      payload: {
+        title: 'Deep work',
+        start: '2027-07-23T10:00:00.000Z',
+        end: '2027-07-23T11:00:00.000Z',
+        note: null,
+        relatedTaskKey: null,
+      },
     },
-    { key: 'prop-1', idempotencyKey: 'p1', createdAt: '2026-07-22' },
+    {
+      key: 'prop-1',
+      idempotencyKey: 'p1',
+      createdAt: '2026-07-22',
+      expiresAt: '2026-07-23T12:00:00.000Z',
+      payloadDigest: 'digest-1',
+      contractVersion: 'vida2-writes-v1',
+      source: 'web',
+      beforeDigest: null,
+      diff: null,
+      encryptedPayloadKey: 'enc-1',
+    },
   );
   assert.equal(created.key, 'prop-1');
   assert.equal(created.status, 'pending');
@@ -614,9 +638,29 @@ test('8E1r-14. approvals board lista desde repositorio persistente', async () =>
       expectedChange: 'e',
       risk: 'low',
       reversible: true,
-      sanitizedPayload: {},
+      payload: {
+        title: 'Tarea propuesta',
+        priority: 'Media',
+        areaKey: 'area.salud',
+        projectKey: null,
+        date: null,
+        duration: null,
+        energy: null,
+        note: null,
+      },
     },
-    { key: 'prop-a', idempotencyKey: 'pa', createdAt: '2026-07-22' },
+    {
+      key: 'prop-a',
+      idempotencyKey: 'pa',
+      createdAt: '2026-07-22',
+      expiresAt: '2026-07-23T12:00:00.000Z',
+      payloadDigest: 'digest-a',
+      contractVersion: 'vida2-writes-v1',
+      source: 'web',
+      beforeDigest: null,
+      diff: null,
+      encryptedPayloadKey: 'enc-a',
+    },
   );
   const list = await repo.list('pending');
   assert.equal(list.length, 1);
@@ -639,14 +683,35 @@ test('8E1r-15. approve/reject actualiza Notion', async () => {
       expectedChange: 'e',
       risk: 'low',
       reversible: true,
-      sanitizedPayload: {},
+      payload: {
+        title: 'Decidir tarea',
+        priority: 'Media',
+        areaKey: 'area.salud',
+        projectKey: null,
+        date: null,
+        duration: null,
+        energy: null,
+        note: null,
+      },
     },
-    { key: 'prop-d', idempotencyKey: 'pd', createdAt: '2026-07-22' },
+    {
+      key: 'prop-d',
+      idempotencyKey: 'pd',
+      createdAt: '2026-07-22',
+      expiresAt: '2026-07-23T12:00:00.000Z',
+      payloadDigest: 'digest-d',
+      contractVersion: 'vida2-writes-v1',
+      source: 'web',
+      beforeDigest: null,
+      diff: null,
+      encryptedPayloadKey: 'enc-d',
+    },
   );
-  const approved = await repo.updateStatus('prop-d', 'approved', {
+  const applied = await repo.updateStatus('prop-d', 'applied', {
     decidedAt: '2026-07-22',
+    appliedAt: '2026-07-22',
   });
-  assert.equal(approved?.status, 'approved');
+  assert.equal(applied?.status, 'applied');
   const rejected = await repo.updateStatus('prop-d', 'rejected', {
     decidedAt: '2026-07-22',
   });

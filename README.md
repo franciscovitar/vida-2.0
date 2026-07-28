@@ -83,7 +83,9 @@ en local — **nunca** como fallback silencioso en Preview/Production.
 
 Para lectura operativa alineada con escritura real en Preview: `NOTION_DATA_SOURCE=notion`
 (configurar en Vercel desde Work; no desde el código). Ver `docs/phase-8e-external-setup.md`
-y `docs/adr/0002-safe-writes-runtime.md`. No crea eventos reales de Calendar.
+y `docs/adr/0002-safe-writes-runtime.md` y `docs/adr/0005-reversible-writes.md`
+(saga, leases, AES-GCM, rollback ownership-scoped). Ver `docs/block-3-reversible-writes.md`.
+No crea eventos reales de Calendar.
 
 ### API OpenClaw (8F.1)
 

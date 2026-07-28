@@ -77,13 +77,15 @@ test('B1-WEB-8. las cuatro rutas usan los nuevos workspaces locales', () => {
   const reviewPage = source('app', '(app)', 'aprobaciones', 'page.tsx');
 
   assert.match(taskPage, /TaskPlanningWorkspace/);
-  assert.equal(taskPage.includes('TaskCreatePanel'), false);
-  assert.equal(taskPage.includes('TaskStatusPanel'), false);
+  assert.match(taskPage, /TaskCreatePanel/);
+  assert.match(taskPage, /TaskStatusPanel/);
   assert.match(projectPage, /ProjectReviewWorkspace/);
   assert.match(inboxPage, /InboxPlanningWorkspace/);
+  assert.match(inboxPage, /InboxCapturePanel/);
   assert.equal(inboxPage.includes('QuickInbox'), false);
   assert.match(reviewPage, /ReviewWorkspace/);
-  assert.equal(reviewPage.includes('ApprovalsPanel'), false);
+  assert.match(reviewPage, /ApprovalsPanel/);
+  assert.match(reviewPage, /CalendarHoldPanel/);
 });
 
 test('B1-WEB-9. controles móviles respetan targets táctiles de 44 px', () => {

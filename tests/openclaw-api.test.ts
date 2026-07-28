@@ -11,6 +11,7 @@ import { executeAction } from '@/lib/actions/engine';
 import { createMemoryIdempotencyStore } from '@/lib/actions/idempotency';
 import { createMemoryProposalPort } from '@/lib/actions/memory-ports';
 import { portHasDestructiveMethods } from '@/lib/actions/ports';
+import { requestFromOpenClawKeyId } from '@/lib/actions/request';
 import { buildWriteRuntime } from '@/lib/actions/runtime';
 import { isPublicAuthPath } from '@/lib/auth/authorize';
 import {
@@ -406,6 +407,7 @@ test('openclaw: body max y límites', () => {
 test('openclaw: operación no registrada / propose set cerrado', () => {
   assert.equal(isOpenClawProposeOperation('task.create'), false);
   assert.equal(isOpenClawProposeOperation('task.create.propose'), true);
+  assert.equal(isOpenClawProposeOperation('calendar.hold.create.propose'), true);
   assert.equal(isOpenClawProposeOperation('proposal.approve'), false);
   assert.equal(isOpenClawReadOperation('system.overview'), true);
   assert.equal(isOpenClawReadOperation('task.create'), false);
@@ -426,14 +428,14 @@ test('openclaw: areas solo canónicas', () => {
   assert.equal(isCanonicalAreaSlugInput('salud'), true);
 });
 
-test('openclaw: approvals solo lectura en capabilities', () => {
-  const caps = listOpenClawCapabilities();
+test('openclaw: approvals solo lectura en capabilities (flags off)', () => {
+  const caps = listOpenClawCapabilities({});
   const proposalIds = [
     'task.create.propose',
     'task.change-status.propose',
     'inbox.capture.propose',
     'gym.session.create.propose',
-    'calendar.block.propose',
+    'calendar.hold.create.propose',
   ];
 
   assert.ok(caps.some((item) => item.id === 'approvals.list' && item.kind === 'read'));
@@ -444,6 +446,7 @@ test('openclaw: approvals solo lectura en capabilities', () => {
   assert.ok(caps.some((item) => item.id === 'proposal.approve' && item.kind === 'forbidden'));
   assert.ok(caps.some((item) => item.id === 'task.create' && item.kind === 'forbidden'));
   assert.ok(caps.some((item) => item.id === 'gym.session.create' && item.kind === 'forbidden'));
+  assert.ok(caps.some((item) => item.id === 'calendar.hold.create' && item.kind === 'forbidden'));
   assert.ok(caps.some((item) => item.id === 'calendar.event.create' && item.kind === 'forbidden'));
 });
 
@@ -474,22 +477,30 @@ test('openclaw: propuesta calendar pending + board memoria', async () => {
     { proposals },
   ).handlers;
   const applied = await executeAction(
-    {
+    requestFromOpenClawKeyId('test', {
       actionType: 'proposal.create',
-      actorEmail: 'openclaw:test',
       payload: {
-        title: 'Deep work',
-        date: '2026-07-23',
-        startTime: '10:00',
-        endTime: '11:00',
+        name: 'Calendar: Deep work',
+        proposedActionType: 'calendar.hold.create',
+        targetType: 'calendar-hold',
+        targetKey: null,
         reason: 'Enfoque',
-        relatedTaskKey: null,
+        expectedChange: '60m',
+        risk: 'medium',
+        reversible: true,
+        payload: {
+          title: 'Deep work',
+          start: '2027-07-23T10:00:00.000Z',
+          end: '2027-07-23T11:00:00.000Z',
+          note: 'Enfoque',
+          relatedTaskKey: null,
+        },
       },
       idempotencyKey: 'oc-cal-direct',
       confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
       expectedPrevious: null,
       context: { source: 'openclaw', targetDate: null },
-    },
+    }),
     {
       writesEnabled: true,
       idempotency: createMemoryIdempotencyStore(),
@@ -513,35 +524,42 @@ test('openclaw: misma idempotencyKey no duplica', async () => {
     { proposals },
   ).handlers;
   const payload = {
-    title: 'Bloque',
-    date: '2026-07-23',
-    startTime: '09:00',
-    endTime: '10:00',
+    name: 'Calendar: Bloque',
+    proposedActionType: 'calendar.hold.create' as const,
+    targetType: 'calendar-hold' as const,
+    targetKey: null,
     reason: 'r',
-    relatedTaskKey: null,
+    expectedChange: '60m',
+    risk: 'medium' as const,
+    reversible: true,
+    payload: {
+      title: 'Bloque',
+      start: '2027-07-23T09:00:00.000Z',
+      end: '2027-07-23T10:00:00.000Z',
+      note: 'r',
+      relatedTaskKey: null,
+    },
   };
   const first = await executeAction(
-    {
+    requestFromOpenClawKeyId('k', {
       actionType: 'proposal.create',
-      actorEmail: 'openclaw:k',
       payload,
       idempotencyKey: 'same-oc',
       confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
       expectedPrevious: null,
       context: { source: 'openclaw', targetDate: null },
-    },
+    }),
     { writesEnabled: true, idempotency: idem, audit, handlers },
   );
   const second = await executeAction(
-    {
+    requestFromOpenClawKeyId('k', {
       actionType: 'proposal.create',
-      actorEmail: 'openclaw:k',
       payload,
       idempotencyKey: 'same-oc',
       confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
       expectedPrevious: null,
       context: { source: 'openclaw', targetDate: null },
-    },
+    }),
     { writesEnabled: true, idempotency: idem, audit, handlers },
   );
   assert.equal(first.ok, true);
@@ -592,7 +610,7 @@ test('openclaw: health route no consulta fuentes (código)', () => {
   assert.match(health, /capabilitiesVersion/);
 });
 
-test('openclaw: rutas de propuestas están físicamente aisladas de escrituras', () => {
+test('openclaw: rutas de propuestas fallan cerradas sin flags (sin construir runtime)', () => {
   const routePaths = [
     'app/api/openclaw/v1/proposals/route.ts',
     'app/api/openclaw/v1/proposals/[key]/route.ts',
@@ -600,23 +618,15 @@ test('openclaw: rutas de propuestas están físicamente aisladas de escrituras',
 
   for (const routePath of routePaths) {
     const source = readFileSync(path.join(process.cwd(), routePath), 'utf8');
-    for (const forbidden of [
-      '@/lib/openclaw/proposals',
-      'createOpenClawProposal',
-      'getOpenClawProposal',
-      'parseOpenClawProposalRequest',
-      'buildWriteRuntime',
-      'executeAction',
-      'WRITE_ACTIONS_ENABLED',
-      'finishOpenClawOk',
-    ]) {
-      assert.equal(source.includes(forbidden), false, `${routePath}: ${forbidden}`);
-    }
+    assert.match(source, /isOpenClawProposalsEnabled/);
     assert.match(source, /parseAndAuthenticateOpenClawRequest/);
     assert.match(source, /finishOpenClawError/);
     assert.match(source, /403/);
     assert.match(source, /'forbidden'/);
     assert.match(source, /modo read-only/);
+    // El runtime de escrituras solo se construye dentro de lib/openclaw/proposals.
+    assert.equal(source.includes('buildWriteRuntime'), false);
+    assert.equal(source.includes('executeAction'), false);
   }
 });
 
