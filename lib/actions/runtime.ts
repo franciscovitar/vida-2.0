@@ -6,11 +6,31 @@ import {
   allowMemoryWritePorts,
   assertNotionLiveForWrites,
   getWriteActionsConfig,
+  getWriteApprovalTtlSeconds,
+  getWriteContractVersion,
+  getWriteCoordinationMode,
+  getWriteProposalEncryptionKey,
+  getWriteRollbackWindowSeconds,
   getWriteRuntimeStatus,
   isWriteActionsEnabled,
 } from '@/lib/actions/config';
+import {
+  createMemoryWriteCoordination,
+  createUpstashWriteCoordination,
+  resolveWriteCoordinationConfig,
+  type WriteCoordinationPort,
+} from '@/lib/actions/coordination';
+import {
+  createMemoryEncryptedPayloadStore,
+  type EncryptedPayloadStore,
+} from '@/lib/actions/encryption';
 import { createGymSheetWritePortFromEnv } from '@/lib/actions/gym-sheets';
 import type { HandlerDeps } from '@/lib/actions/handlers';
+import {
+  createCalendarHoldWritePortFromEnv,
+  createMemoryCalendarHoldPort,
+  createNotConfiguredCalendarHoldPort,
+} from '@/lib/actions/calendar-hold';
 import {
   createMemoryGymPort,
   createMemoryInboxPort,
@@ -30,12 +50,14 @@ import type { IdempotencyStore } from '@/lib/actions/idempotency';
 import { createMemoryAuditSink, processAuditSink } from '@/lib/actions/audit';
 import { createMemoryIdempotencyStore, processIdempotencyStore } from '@/lib/actions/idempotency';
 import type {
+  CalendarHoldWritePort,
   GymSheetWritePort,
   NotionInboxWritePort,
   NotionTaskWritePort,
   ProposalRepositoryPort,
 } from '@/lib/actions/ports';
 import { getNotionConfig } from '@/lib/notion/config';
+import { randomBytes } from 'node:crypto';
 
 function notConfiguredTaskPort(message: string): NotionTaskWritePort {
   return {
@@ -51,6 +73,9 @@ function notConfiguredTaskPort(message: string): NotionTaskWritePort {
     async resolveAreaProjectCompatibility() {
       return { ok: false, message };
     },
+    async archiveOwnedTask() {
+      return { ok: false, code: 'not-configured', message };
+    },
   };
 }
 
@@ -63,6 +88,12 @@ function notConfiguredInboxPort(message: string): NotionInboxWritePort {
         message,
         preserveText: true,
       };
+    },
+    async archiveCapture() {
+      return { ok: false, code: 'not-configured', message };
+    },
+    async verifyCapture() {
+      return { ok: false, message };
     },
   };
 }
@@ -81,7 +112,14 @@ function notConfiguredGymPort(message: string): GymSheetWritePort {
     async setSessionStatus() {
       return { ok: false, message };
     },
+    async markReverted() {
+      return { ok: false, message };
+    },
   };
+}
+
+function notConfiguredCalendar(message: string): CalendarHoldWritePort {
+  return createNotConfiguredCalendarHoldPort(message);
 }
 
 function notConfiguredProposals(message: string): ProposalRepositoryPort {
@@ -105,8 +143,10 @@ export type WriteRuntimeBundle = {
   handlers: HandlerDeps;
   idempotency: IdempotencyStore;
   audit: AuditSink;
+  coordination: WriteCoordinationPort | null;
+  encryptionStore: EncryptedPayloadStore | null;
   status: ReturnType<typeof getWriteRuntimeStatus>;
-  mode: 'closed' | 'memory-test' | 'real';
+  mode: 'closed' | 'memory-test' | 'real' | 'misconfigured';
 };
 
 /**
@@ -124,6 +164,8 @@ export function buildWriteRuntime(
   overrides?: Partial<HandlerDeps> & {
     idempotency?: IdempotencyStore;
     audit?: AuditSink;
+    coordination?: WriteCoordinationPort;
+    encryptionStore?: EncryptedPayloadStore;
     notionClient?: import('@/lib/actions/notion-client').NotionActionsClient;
   },
 ): WriteRuntimeBundle {
@@ -135,27 +177,46 @@ export function buildWriteRuntime(
       status,
       idempotency: overrides?.idempotency ?? createMemoryIdempotencyStore(),
       audit: overrides?.audit ?? createMemoryAuditSink(),
+      coordination: null,
+      encryptionStore: null,
       handlers: {
         tasks: overrides?.tasks ?? notConfiguredTaskPort('Escrituras desactivadas.'),
         inbox: overrides?.inbox ?? notConfiguredInboxPort('Escrituras desactivadas.'),
         gym: overrides?.gym ?? notConfiguredGymPort('Escrituras desactivadas.'),
         proposals: overrides?.proposals ?? notConfiguredProposals('Escrituras desactivadas.'),
+        calendar: overrides?.calendar ?? notConfiguredCalendar('Escrituras desactivadas.'),
+        encryptionStore: undefined,
+        encryptionKey: null,
+        coordination: undefined,
         now: overrides?.now,
       },
     };
   }
 
   if (allowMemoryWritePorts(env)) {
+    const encryptionKey =
+      overrides?.encryptionKey ?? getWriteProposalEncryptionKey(env) ?? randomBytes(32);
+    const encryptionStore = overrides?.encryptionStore ?? createMemoryEncryptedPayloadStore();
+    const coordination = overrides?.coordination ?? createMemoryWriteCoordination();
     return {
       mode: 'memory-test',
       status,
       idempotency: overrides?.idempotency ?? processIdempotencyStore,
       audit: overrides?.audit ?? processAuditSink,
+      coordination,
+      encryptionStore,
       handlers: {
         tasks: overrides?.tasks ?? createMemoryTaskPort(),
         inbox: overrides?.inbox ?? createMemoryInboxPort(),
         gym: overrides?.gym ?? createMemoryGymPort(),
         proposals: overrides?.proposals ?? createMemoryProposalPort(),
+        calendar: overrides?.calendar ?? createMemoryCalendarHoldPort(),
+        encryptionStore,
+        encryptionKey,
+        coordination,
+        approvalTtlSeconds: getWriteApprovalTtlSeconds(env),
+        rollbackWindowSeconds: getWriteRollbackWindowSeconds(env),
+        contractVersion: getWriteContractVersion(env),
         now: overrides?.now,
       },
     };
@@ -165,24 +226,34 @@ export function buildWriteRuntime(
   const config = getWriteActionsConfig(env);
   const notion = getNotionConfig(env);
   const token = env.NOTION_API_TOKEN?.trim() ?? '';
+  const encryptionKey = overrides?.encryptionKey ?? getWriteProposalEncryptionKey(env);
+  const coordinationMode = getWriteCoordinationMode(env);
+  const upstash = resolveWriteCoordinationConfig(env, getWriteContractVersion(env));
 
-  if (!config.ok) {
+  // Real mode requires upstash coordination + encryption key or fail closed.
+  if (!config.ok || !encryptionKey || coordinationMode !== 'upstash' || !upstash.ok) {
     return {
-      mode: 'closed',
+      mode: 'misconfigured',
       status,
       idempotency: overrides?.idempotency ?? createMemoryIdempotencyStore(),
       audit: overrides?.audit ?? createMemoryAuditSink(),
+      coordination: null,
+      encryptionStore: null,
       handlers: {
-        tasks: notConfiguredTaskPort('Escrituras desactivadas.'),
-        inbox: notConfiguredInboxPort('Escrituras desactivadas.'),
-        gym: notConfiguredGymPort('Escrituras desactivadas.'),
-        proposals: notConfiguredProposals('Escrituras desactivadas.'),
+        tasks: notConfiguredTaskPort('Runtime de escrituras mal configurado.'),
+        inbox: notConfiguredInboxPort('Runtime de escrituras mal configurado.'),
+        gym: notConfiguredGymPort('Runtime de escrituras mal configurado.'),
+        proposals: notConfiguredProposals('Runtime de escrituras mal configurado.'),
+        calendar: notConfiguredCalendar('Runtime de escrituras mal configurado.'),
+        encryptionKey: null,
         now: overrides?.now,
       },
     };
   }
 
   const client = overrides?.notionClient ?? (token ? createNotionActionsClient(token) : null);
+  const coordination = overrides?.coordination ?? createUpstashWriteCoordination(upstash.value);
+  const encryptionStore = overrides?.encryptionStore ?? createMemoryEncryptedPayloadStore();
 
   let tasks: NotionTaskWritePort;
   if (overrides?.tasks) {
@@ -224,6 +295,14 @@ export function buildWriteRuntime(
     });
   }
 
+  let calendar: CalendarHoldWritePort;
+  if (overrides?.calendar) {
+    calendar = overrides.calendar;
+  } else {
+    // Env stub: fail-closed sin GOOGLE_CALENDAR_WRITE_ID; sin cliente Google en runtime default.
+    calendar = createCalendarHoldWritePortFromEnv(env);
+  }
+
   let proposals: ProposalRepositoryPort;
   let idempotency: IdempotencyStore;
   let audit: AuditSink;
@@ -241,8 +320,6 @@ export function buildWriteRuntime(
       overrides?.proposals ?? notConfiguredProposals('Base de acciones/propuestas no configurada.');
     idempotency = overrides?.idempotency ?? createMemoryIdempotencyStore();
     audit = overrides?.audit ?? createMemoryAuditSink();
-    // Sin ledger: no usar process* en Preview/Production. Stores vacíos locales
-    // solo rechazan/no persisten entre instancias — status ya marca unavailable.
   }
 
   return {
@@ -250,11 +327,20 @@ export function buildWriteRuntime(
     status,
     idempotency,
     audit,
+    coordination,
+    encryptionStore,
     handlers: {
       tasks,
       inbox,
       gym,
       proposals,
+      calendar,
+      encryptionStore,
+      encryptionKey,
+      coordination,
+      approvalTtlSeconds: getWriteApprovalTtlSeconds(env),
+      rollbackWindowSeconds: getWriteRollbackWindowSeconds(env),
+      contractVersion: getWriteContractVersion(env),
       now: overrides?.now,
     },
   };

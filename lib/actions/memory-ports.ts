@@ -1,6 +1,7 @@
 /**
  * Implementaciones en memoria para tests y entornos sin fuentes reales.
  */
+import { createHash } from 'node:crypto';
 import type {
   ActionProposalSummary,
   GymSessionCreatePayload,
@@ -14,6 +15,8 @@ import type {
   GymSessionRowStatus,
   NotionInboxWritePort,
   NotionTaskWritePort,
+  OwnershipProof,
+  ProposalCreateMeta,
   ProposalRepositoryPort,
   TaskSnapshot,
 } from '@/lib/actions/ports';
@@ -24,17 +27,24 @@ function opaque(prefix: string, seed: string): string {
   return `${prefix}-${hash.toString(36)}`;
 }
 
+function ownershipToken(seed: string): OwnershipProof {
+  return createHash('sha256').update(`own:${seed}`).digest('hex').slice(0, 24);
+}
+
 export function createMemoryTaskPort(options?: {
   areaProjectMap?: Record<string, string>;
   failVerify?: boolean;
-}): NotionTaskWritePort & { tasks: Map<string, TaskSnapshot> } {
-  const tasks = new Map<string, TaskSnapshot>();
+}): NotionTaskWritePort & {
+  tasks: Map<string, TaskSnapshot & { ownership: OwnershipProof; archived?: boolean }>;
+} {
+  const tasks = new Map<string, TaskSnapshot & { ownership: OwnershipProof; archived?: boolean }>();
   const areaProjectMap = options?.areaProjectMap ?? {};
 
   return {
     tasks,
     async createTask(payload: TaskCreatePayload, meta) {
       const key = opaque('task', meta.idempotencyKey + payload.title);
+      const ownership = ownershipToken(key + meta.idempotencyKey);
       tasks.set(key, {
         key,
         title: payload.title,
@@ -44,22 +54,23 @@ export function createMemoryTaskPort(options?: {
         projectAreaKey: payload.projectKey
           ? (areaProjectMap[payload.projectKey] ?? payload.areaKey)
           : null,
+        ownership,
       });
-      return { ok: true, key };
+      return { ok: true, key, ownership };
     },
     async getTask(key) {
-      return tasks.get(key) ?? null;
+      const task = tasks.get(key);
+      if (!task || task.archived) return null;
+      return task;
     },
     async updateTaskStatus(key, nextStatus, expectedPrevious) {
       const task = tasks.get(key);
-      if (!task) return { ok: false, code: 'not-found', message: 'Tarea no encontrada.' };
+      if (!task || task.archived)
+        return { ok: false, code: 'not-found', message: 'Tarea no encontrada.' };
       if (task.status !== expectedPrevious) {
         return { ok: false, code: 'conflict', message: 'Estado previo distinto al esperado.' };
       }
       task.status = nextStatus;
-      if (options?.failVerify) {
-        // leave status wrong for verify path — caller re-reads
-      }
       return { ok: true };
     },
     async resolveAreaProjectCompatibility(areaKey, projectKey) {
@@ -70,13 +81,25 @@ export function createMemoryTaskPort(options?: {
       }
       return { ok: true };
     },
+    async archiveOwnedTask(key, ownershipProof) {
+      const task = tasks.get(key);
+      if (!task) return { ok: false, code: 'not-found', message: 'Tarea no encontrada.' };
+      if (task.ownership !== ownershipProof) {
+        return { ok: false, code: 'ownership-mismatch', message: 'Ownership inválido.' };
+      }
+      task.archived = true;
+      return { ok: true };
+    },
   };
 }
 
-export function createMemoryInboxPort(options?: {
-  fail?: boolean;
-}): NotionInboxWritePort & { captures: InboxCapturePayload[] } {
-  const captures: InboxCapturePayload[] = [];
+export function createMemoryInboxPort(options?: { fail?: boolean }): NotionInboxWritePort & {
+  captures: Map<string, InboxCapturePayload & { ownership: OwnershipProof; archived?: boolean }>;
+} {
+  const captures = new Map<
+    string,
+    InboxCapturePayload & { ownership: OwnershipProof; archived?: boolean }
+  >();
   return {
     captures,
     async appendCapture(payload, meta) {
@@ -88,8 +111,24 @@ export function createMemoryInboxPort(options?: {
           preserveText: true,
         };
       }
-      captures.push(payload);
-      return { ok: true, key: opaque('inbox', meta.idempotencyKey) };
+      const key = opaque('inbox', meta.idempotencyKey);
+      const ownership = ownershipToken(key + meta.idempotencyKey);
+      captures.set(key, { ...payload, ownership });
+      return { ok: true, key, ownership };
+    },
+    async archiveCapture(key, ownership) {
+      const row = captures.get(key);
+      if (!row) return { ok: false, code: 'not-found', message: 'Captura no encontrada.' };
+      if (row.ownership !== ownership) {
+        return { ok: false, code: 'ownership-mismatch', message: 'Ownership inválido.' };
+      }
+      row.archived = true;
+      return { ok: true };
+    },
+    async verifyCapture(key) {
+      const row = captures.get(key);
+      if (!row) return { ok: true, present: false };
+      return { ok: true, present: !row.archived };
     },
   };
 }
@@ -141,8 +180,17 @@ export function createMemoryGymPort(options?: {
       row.status = status;
       return { ok: true };
     },
+    async markReverted(sessionId) {
+      const row = sessions.get(sessionId);
+      if (!row) return { ok: false, message: 'Sesión ausente.' };
+      row.status = 'reverted';
+      return { ok: true };
+    },
   };
 }
+
+/** Re-export: implementación canónica en calendar-hold.ts. */
+export { createMemoryCalendarHoldPort } from '@/lib/actions/calendar-hold';
 
 export function createMemoryProposalPort(): ProposalRepositoryPort & {
   rows: Map<string, ActionProposalSummary>;
@@ -150,7 +198,7 @@ export function createMemoryProposalPort(): ProposalRepositoryPort & {
   const rows = new Map<string, ActionProposalSummary>();
   return {
     rows,
-    async create(payload: ProposalCreatePayload, meta) {
+    async create(payload: ProposalCreatePayload, meta: ProposalCreateMeta) {
       const summary: ActionProposalSummary = {
         key: meta.key,
         name: payload.name,
@@ -158,7 +206,7 @@ export function createMemoryProposalPort(): ProposalRepositoryPort & {
         targetType: payload.targetType,
         targetKey: payload.targetKey,
         status: 'pending',
-        confirmationMode: 'explicit',
+        confirmationMode: meta.confirmationMode ?? 'explicit',
         risk: payload.risk,
         reversible: payload.reversible,
         reason: payload.reason,
@@ -169,6 +217,17 @@ export function createMemoryProposalPort(): ProposalRepositoryPort & {
         decidedAt: null,
         appliedAt: null,
         resultCode: null,
+        expiresAt: meta.expiresAt,
+        executionStartedAt: null,
+        rollbackDeadline: null,
+        rolledBackAt: null,
+        payloadDigest: meta.payloadDigest,
+        contractVersion: meta.contractVersion,
+        source: meta.source,
+        beforeDigest: meta.beforeDigest,
+        diff: meta.diff,
+        encryptedPayloadKey: meta.encryptedPayloadKey,
+        ownershipDigest: null,
       };
       rows.set(meta.key, summary);
       return summary;

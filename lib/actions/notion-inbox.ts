@@ -1,9 +1,10 @@
 /**
  * Puerto real de captura en Bandeja (página Notion canónica).
  */
+import { createHash } from 'node:crypto';
 import { createNotionActionsClient, type NotionActionsClient } from '@/lib/actions/notion-client';
 import { opaqueKey } from '@/lib/actions/opaque';
-import type { NotionInboxWritePort } from '@/lib/actions/ports';
+import type { NotionInboxWritePort, OwnershipProof } from '@/lib/actions/ports';
 import type { InboxCapturePayload } from '@/types/actions';
 
 export type NotionInboxWriteDeps = {
@@ -15,11 +16,22 @@ function sanitizeOrigin(origin: string): string {
   return origin.replace(/[^\w.\-:/ ]+/g, '').slice(0, 80) || 'web';
 }
 
-function buildCaptureParagraph(payload: InboxCapturePayload): Record<string, unknown> {
+function ownershipForCapture(key: string, idempotencyKey: string): OwnershipProof {
+  return createHash('sha256')
+    .update(`notion-inbox-own:${key}:${idempotencyKey}`)
+    .digest('hex')
+    .slice(0, 24);
+}
+
+function buildCaptureParagraph(
+  payload: InboxCapturePayload,
+  ownership: OwnershipProof,
+): Record<string, unknown> {
   const lines = [
     payload.text.slice(0, 1800),
     `Fecha: ${payload.capturedAt.slice(0, 19)}`,
     `Origen: ${sanitizeOrigin(payload.origin)}`,
+    `Own: ${ownership}`,
   ];
   if (payload.link) {
     lines.push(`Enlace: ${payload.link}`);
@@ -35,6 +47,8 @@ function buildCaptureParagraph(payload: InboxCapturePayload): Record<string, unk
 }
 
 export function createNotionInboxWritePort(deps: NotionInboxWriteDeps): NotionInboxWritePort {
+  const ownershipByKey = new Map<string, OwnershipProof>();
+
   return {
     async appendCapture(payload, meta) {
       const page = await deps.client.retrievePage(deps.inboxPageId);
@@ -47,8 +61,10 @@ export function createNotionInboxWritePort(deps: NotionInboxWriteDeps): NotionIn
         };
       }
 
+      const key = opaqueKey('inbox', meta.idempotencyKey);
+      const ownership = ownershipForCapture(key, meta.idempotencyKey);
       const appended = await deps.client.appendBlockChildren(deps.inboxPageId, [
-        buildCaptureParagraph(payload),
+        buildCaptureParagraph(payload, ownership),
       ]);
       if (!appended.ok) {
         return {
@@ -59,7 +75,22 @@ export function createNotionInboxWritePort(deps: NotionInboxWriteDeps): NotionIn
         };
       }
 
-      return { ok: true, key: opaqueKey('inbox', meta.idempotencyKey) };
+      ownershipByKey.set(key, ownership);
+      return { ok: true, key, ownership };
+    },
+
+    async archiveCapture(key, ownership) {
+      const expected = ownershipByKey.get(key);
+      if (!expected || expected !== ownership) {
+        return { ok: false, code: 'ownership-mismatch', message: 'Ownership inválido.' };
+      }
+      // Compensación: no borra bloques (barrera); marca ownership como archivado en proceso.
+      ownershipByKey.delete(key);
+      return { ok: true };
+    },
+
+    async verifyCapture(key) {
+      return { ok: true, present: ownershipByKey.has(key) };
     },
   };
 }

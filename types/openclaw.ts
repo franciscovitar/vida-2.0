@@ -4,7 +4,7 @@
 export const OPENCLAW_API_VERSION = 'v1' as const;
 export type OpenClawApiVersion = typeof OPENCLAW_API_VERSION;
 
-export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-26-correction' as const;
+export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-28-proposals' as const;
 
 export type OpenClawAccessMode = 'disabled' | 'read-only' | 'full';
 
@@ -73,6 +73,8 @@ export type OpenClawProposeOperation =
   | 'task.change-status.propose'
   | 'inbox.capture.propose'
   | 'gym.session.create.propose'
+  | 'calendar.hold.create.propose'
+  /** @deprecated Usar calendar.hold.create.propose */
   | 'calendar.block.propose';
 
 export type OpenClawErrorCode =
@@ -125,6 +127,8 @@ export type OpenClawSourceReadiness = 'ready' | 'mock' | 'unavailable';
 export type OpenClawApiStatus = 'disabled' | 'misconfigured' | 'read-only';
 export type OpenClawReadinessStatus = 'disabled' | 'blocked' | 'degraded' | 'ready';
 
+export type OpenClawProposalsComponentStatus = 'disabled' | 'ready' | 'misconfigured';
+
 export type OpenClawReadiness = {
   apiStatus: OpenClawApiStatus;
   status: OpenClawReadinessStatus;
@@ -136,6 +140,8 @@ export type OpenClawReadiness = {
     catalog: OpenClawSourceReadiness;
   };
   readers: Record<OpenClawReadOperation, OpenClawReadAvailability>;
+  /** Proposal-only (nunca approve/direct-write). Depende de ambas flags. */
+  openclawProposals: OpenClawProposalsComponentStatus;
 };
 
 export type OpenClawReadResponse<T = unknown> = {
@@ -162,6 +168,17 @@ export type OpenClawProposalRequest = {
   targetKey?: string | null;
 };
 
+export type OpenClawProposalDiffField = {
+  field: string;
+  before: string | number | boolean | null;
+  after: string | number | boolean | null;
+};
+
+export type OpenClawProposalDiff = {
+  fields: OpenClawProposalDiffField[];
+  warnings?: string[];
+};
+
 export type OpenClawProposalResponse = {
   ok: true;
   requestId: string;
@@ -171,6 +188,24 @@ export type OpenClawProposalResponse = {
   operation: OpenClawProposeOperation;
   replay: boolean;
   summary: string | null;
+  risk: 'low' | 'medium' | 'high';
+  expiresAt: string | null;
+  diff: OpenClawProposalDiff | null;
+};
+
+export type OpenClawProposalGetResponse = {
+  ok: true;
+  requestId: string;
+  generatedAt: string;
+  proposalKey: string;
+  status: string;
+  operation: string;
+  risk: 'low' | 'medium' | 'high';
+  reversible: boolean;
+  expiresAt: string | null;
+  summary: string | null;
+  diff: OpenClawProposalDiff | null;
+  source: string;
 };
 
 export type OpenClawCapability = {

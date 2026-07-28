@@ -82,6 +82,8 @@ function pageToProposal(page: NotionRawPage): ActionProposalSummary | null {
   const riskRaw = readSelectName(props[ACTIONS_PROPS.risk]);
   const risk = riskRaw === 'high' || riskRaw === 'medium' || riskRaw === 'low' ? riskRaw : 'medium';
   const targetTypeRaw = readSelectName(props[ACTIONS_PROPS.targetType]) ?? 'system';
+  const diff =
+    bag.diff && typeof bag.diff === 'object' ? (bag.diff as ActionProposalSummary['diff']) : null;
   return {
     key,
     name: title || 'Propuesta',
@@ -100,6 +102,19 @@ function pageToProposal(page: NotionRawPage): ActionProposalSummary | null {
     decidedAt: readDateStart(props[ACTIONS_PROPS.decidedAt]),
     appliedAt: readDateStart(props[ACTIONS_PROPS.appliedAt]),
     resultCode: readRichText(props[ACTIONS_PROPS.resultCode]) || null,
+    expiresAt: typeof bag.expiresAt === 'string' ? bag.expiresAt : null,
+    executionStartedAt: typeof bag.executionStartedAt === 'string' ? bag.executionStartedAt : null,
+    rollbackDeadline: typeof bag.rollbackDeadline === 'string' ? bag.rollbackDeadline : null,
+    rolledBackAt: typeof bag.rolledBackAt === 'string' ? bag.rolledBackAt : null,
+    payloadDigest: typeof bag.payloadDigest === 'string' ? bag.payloadDigest : null,
+    contractVersion:
+      typeof bag.contractVersion === 'string' ? bag.contractVersion : 'vida2-writes-v1',
+    source: typeof bag.source === 'string' ? bag.source : 'web',
+    beforeDigest: typeof bag.beforeDigest === 'string' ? bag.beforeDigest : null,
+    diff,
+    encryptedPayloadKey:
+      typeof bag.encryptedPayloadKey === 'string' ? bag.encryptedPayloadKey : null,
+    ownershipDigest: typeof bag.ownershipDigest === 'string' ? bag.ownershipDigest : null,
   };
 }
 
@@ -121,10 +136,18 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
   return {
     async create(payload: ProposalCreatePayload, meta) {
       const bag: PayloadBag = {
-        ...payload.sanitizedPayload,
         _k: meta.key,
         reason: payload.reason,
         expectedChange: payload.expectedChange,
+        expiresAt: meta.expiresAt,
+        payloadDigest: meta.payloadDigest,
+        contractVersion: meta.contractVersion,
+        source: meta.source,
+        beforeDigest: meta.beforeDigest,
+        diff: meta.diff,
+        encryptedPayloadKey: meta.encryptedPayloadKey,
+        // Nunca persistir plaintext del payload de negocio.
+        payloadKind: payload.proposedActionType,
       };
       const created = await deps.client.createPage({
         dataSourceId: deps.actionsDataSourceId,
@@ -134,7 +157,7 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
           [ACTIONS_PROPS.targetType]: selectProp(payload.targetType),
           [ACTIONS_PROPS.targetKey]: richTextProp(payload.targetKey ?? ''),
           [ACTIONS_PROPS.status]: selectProp('pending'),
-          [ACTIONS_PROPS.confirmationMode]: selectProp('explicit'),
+          [ACTIONS_PROPS.confirmationMode]: selectProp(meta.confirmationMode ?? 'explicit'),
           [ACTIONS_PROPS.risk]: selectProp(payload.risk),
           [ACTIONS_PROPS.reversible]: checkboxProp(payload.reversible),
           [ACTIONS_PROPS.payloadSanitized]: richTextProp(JSON.stringify(bag).slice(0, 1900)),
@@ -158,7 +181,7 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
           targetType: payload.targetType,
           targetKey: payload.targetKey,
           status: 'pending',
-          confirmationMode: 'explicit',
+          confirmationMode: meta.confirmationMode ?? 'explicit',
           risk: payload.risk,
           reversible: payload.reversible,
           reason: payload.reason,
@@ -169,6 +192,17 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
           decidedAt: null,
           appliedAt: null,
           resultCode: null,
+          expiresAt: meta.expiresAt,
+          executionStartedAt: null,
+          rollbackDeadline: null,
+          rolledBackAt: null,
+          payloadDigest: meta.payloadDigest,
+          contractVersion: meta.contractVersion,
+          source: meta.source,
+          beforeDigest: meta.beforeDigest,
+          diff: meta.diff,
+          encryptedPayloadKey: meta.encryptedPayloadKey,
+          ownershipDigest: null,
         }
       );
     },
@@ -188,8 +222,28 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
     async updateStatus(key, status, patch) {
       const page = findProposalPage(await allPages(), key);
       if (!page) return null;
+      const existingBag = parsePayloadBag(
+        readRichText(page.properties[ACTIONS_PROPS.payloadSanitized]),
+      );
+      const nextBag: PayloadBag = {
+        ...existingBag,
+        ...(patch.beforeDigest !== undefined ? { beforeDigest: patch.beforeDigest } : {}),
+        ...(patch.diff !== undefined ? { diff: patch.diff } : {}),
+        ...(patch.encryptedPayloadKey !== undefined
+          ? { encryptedPayloadKey: patch.encryptedPayloadKey }
+          : {}),
+        ...(patch.ownershipDigest !== undefined ? { ownershipDigest: patch.ownershipDigest } : {}),
+        ...(patch.executionStartedAt !== undefined
+          ? { executionStartedAt: patch.executionStartedAt }
+          : {}),
+        ...(patch.rollbackDeadline !== undefined
+          ? { rollbackDeadline: patch.rollbackDeadline }
+          : {}),
+        ...(patch.rolledBackAt !== undefined ? { rolledBackAt: patch.rolledBackAt } : {}),
+      };
       const properties: Record<string, unknown> = {
         [ACTIONS_PROPS.status]: selectProp(status),
+        [ACTIONS_PROPS.payloadSanitized]: richTextProp(JSON.stringify(nextBag).slice(0, 1900)),
       };
       if (patch.decidedAt !== undefined) {
         properties[ACTIONS_PROPS.decidedAt] = dateProp(patch.decidedAt);
@@ -202,6 +256,12 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
       }
       if (patch.afterSummary !== undefined) {
         properties[ACTIONS_PROPS.afterSummary] = richTextProp(patch.afterSummary ?? '');
+      }
+      if (patch.beforeSummary !== undefined) {
+        properties[ACTIONS_PROPS.beforeSummary] = richTextProp(patch.beforeSummary ?? '');
+      }
+      if (patch.targetKey !== undefined) {
+        properties[ACTIONS_PROPS.targetKey] = richTextProp(patch.targetKey ?? '');
       }
       const updated = await deps.client.updatePage(page.id, properties);
       if (!updated.ok) return null;
