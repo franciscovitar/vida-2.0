@@ -1,4 +1,4 @@
-# Block 3 — Supply chain (npm audit)
+# Block 3 ? Supply chain (npm audit)
 
 - **Fecha:** 2026-07-28 (cierre técnico)
 - **Comando:** `npm audit --omit=dev --json` (sin `npm audit fix --force`).
