@@ -1,37 +1,32 @@
-# Block 3 — Supply chain (npm audit)
+# Block 3 � Supply chain (npm audit)
 
-- **Fecha:** 2026-07-28 (cierre técnico)
+- **Fecha:** 2026-07-28 (cierre t�cnico)
 - **Comando:** `npm audit --omit=dev --json` (sin `npm audit fix --force`).
-- **Alcance:** dependencias de producción reportadas por npm (dev omitido).
-- **Bumps aplicados:** `next`/`eslint-config-next` → `16.2.12`, `sharp` → `0.35.3`
-  (dependency + `overrides.sharp: "$sharp"`), `googleapis` ya en latest `^173.0.0`.
+- **Alcance:** dependencias de producci�n reportadas por npm (dev omitido).
+- **Bumps aplicados:** `next`/`eslint-config-next` ? `16.2.12`, `sharp` ? `0.35.3`, `overrides.gaxios` ? `7.3.0`, `overrides.googleapis-common` ? `8.0.3`.
 
 ## Resumen
 
 | Severidad | Count |
 | --------- | ----: |
 | critical  |     0 |
-| high      |     6 |
+| high      |     0 |
 | moderate  |     0 |
 | low       |     0 |
 | info      |     0 |
-| **total** | **6** |
+| **total** | **0** |
 
-## Clasificación
+## Clasificaci�n posterior
 
-| Paquete             | Sev  | Directo | Rango                             | Fix disponible  | Notas / vía                      |
-| ------------------- | ---- | ------- | --------------------------------- | --------------- | -------------------------------- |
-| `brace-expansion`   | high | no      | `<=5.0.7`                         | sí (no forzado) | DoS vía expansión ilimitada      |
-| `gaxios`            | high | no      | `7.1.3`                           | sí (no forzado) | transitivo `googleapis` → rimraf |
-| `glob`              | high | no      | `4.3.0 - 10.5.0`                  | sí (no forzado) | vía minimatch                    |
-| `googleapis-common` | high | no      | `>=8.0.2-rc.0`                    | sí (no forzado) | vía gaxios                       |
-| `minimatch`         | high | no      | `2.0.0 - 10.0.2`                  | sí (no forzado) | vía brace-expansion              |
-| `rimraf`            | high | no      | `2.3.0 - 3.0.2 \| 4.2.0 - 5.0.10` | sí (no forzado) | vía glob                         |
+- `next`: resuelto en `16.2.12`.
+- `sharp`: resuelto en `0.35.3`.
+- `googleapis` permanece en `^173.0.0`, pero sus transitivas vulnerables quedaron sustituidas por overrides estables:
+  - `gaxios@7.3.0`
+  - `googleapis-common@8.0.3`
+- Resultado verificado con `npm audit --omit=dev --json`: **0 vulnerabilidades de producci�n**.
 
-**Resueltos en este cierre:** `next` (16.2.12) y `sharp` (0.35.3, sin advisory prod).
+## Pol�tica Block 3 (cierre)
 
-## Política Block 3 (cierre)
-
-- Bumps acotados aplicados; sin `npm audit fix --force`.
-- Restantes transitivos de `googleapis` quedan para corte coordinado posterior.
-- Runtime de escrituras reversibles no introduce crypto deps nuevas (`node:crypto` + Upstash REST).
+- Se aplicaron bumps expl�citos y overrides m�nimos compatibles; no se us� `npm audit fix --force`.
+- El runtime de escrituras reversibles no introduce nuevas dependencias de cifrado (`node:crypto` + Upstash REST).
+- Antes de activar writes en Preview, Work solo debe validar los cambios de esquema e integraciones externas; supply chain local qued� en verde.
