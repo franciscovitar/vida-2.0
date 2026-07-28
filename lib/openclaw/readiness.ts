@@ -1,7 +1,9 @@
+import { isOpenClawProposalsEnabled, getWriteRuntimeStatus } from '@/lib/actions/config';
 import { resolveOpenClawAccessMode } from '@/lib/openclaw/config';
 import { resolveOpenClawSecurityStoreConfig } from '@/lib/openclaw/security-store';
 import type {
   OpenClawApiStatus,
+  OpenClawProposalsComponentStatus,
   OpenClawReadAvailability,
   OpenClawReadOperation,
   OpenClawReadiness,
@@ -109,11 +111,19 @@ export function getOpenClawReadiness(
     status = values.every((value) => value === 'ready') ? 'ready' : 'degraded';
   }
 
+  let openclawProposals: OpenClawProposalsComponentStatus = 'disabled';
+  if (isOpenClawProposalsEnabled(env)) {
+    const writeStatus = getWriteRuntimeStatus(env).openclawProposals;
+    openclawProposals =
+      writeStatus === 'ready' || writeStatus === 'misconfigured' ? writeStatus : 'misconfigured';
+  }
+
   return {
     apiStatus,
     status,
     securityControls,
     sources: { notion, sheets, calendar, catalog },
     readers,
+    openclawProposals,
   };
 }

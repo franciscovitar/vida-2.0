@@ -1,22 +1,31 @@
 /**
- * Creación de propuestas vía motor 8E (sin escrituras finales).
+ * Creación de propuestas vía motor Block 3 (sin escrituras finales ni approve).
  */
-import { isWriteActionsEnabled } from '@/lib/actions/config';
+import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import { executeAction } from '@/lib/actions/engine';
-import { buildWriteRuntime, listRuntimeProposals } from '@/lib/actions/runtime';
-import type { OpenClawProposalRequest, OpenClawProposeOperation } from '@/types/openclaw';
-import type { ActionResult, AllowedActionType } from '@/types/actions';
-
-const PROPOSE_TO_ACTION: Record<
+import { requestFromOpenClawKeyId } from '@/lib/actions/request';
+import { buildWriteRuntime } from '@/lib/actions/runtime';
+import type {
+  OpenClawProposalDiff,
+  OpenClawProposalRequest,
   OpenClawProposeOperation,
-  AllowedActionType | 'calendar.block.propose'
-> = {
+} from '@/types/openclaw';
+import type {
+  ActionProposalSummary,
+  ActionResult,
+  ProposedBusinessActionType,
+} from '@/types/actions';
+
+const PROPOSE_TO_ACTION: Record<OpenClawProposeOperation, ProposedBusinessActionType> = {
   'task.create.propose': 'task.create',
   'task.change-status.propose': 'task.change-status',
   'inbox.capture.propose': 'inbox.capture',
   'gym.session.create.propose': 'gym.session.create',
-  'calendar.block.propose': 'calendar.block.propose',
+  'calendar.hold.create.propose': 'calendar.hold.create',
+  'calendar.block.propose': 'calendar.hold.create',
 };
+
+const ACTOR_BODY_KEYS = new Set(['actor', 'actorId', 'actorHash', 'actorHint', 'email', 'user']);
 
 export function isOpenClawProposeOperation(value: string): value is OpenClawProposeOperation {
   return value in PROPOSE_TO_ACTION;
@@ -28,15 +37,63 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+export function sanitizeOpenClawProposalDiff(
+  diff: ActionProposalSummary['diff'],
+): OpenClawProposalDiff | null {
+  if (!diff || !Array.isArray(diff.fields)) return null;
+  return {
+    fields: diff.fields.map((field) => ({
+      field: field.field,
+      before: field.before,
+      after: field.after,
+    })),
+    ...(diff.warnings ? { warnings: [...diff.warnings] } : {}),
+  };
+}
+
+export function toOpenClawProposalMetadata(row: ActionProposalSummary) {
+  return {
+    proposalKey: row.key,
+    status: row.status,
+    operation: row.actionType,
+    risk: row.risk,
+    reversible: row.reversible,
+    expiresAt: row.expiresAt,
+    summary: row.name,
+    diff: sanitizeOpenClawProposalDiff(row.diff),
+    source: row.source,
+  };
+}
+
 export function parseOpenClawProposalRequest(
   body: unknown,
 ): { ok: true; value: OpenClawProposalRequest } | { ok: false; message: string } {
   const record = asRecord(body);
   if (!record) return { ok: false, message: 'Body inválido.' };
+
+  for (const key of Object.keys(record)) {
+    if (ACTOR_BODY_KEYS.has(key)) {
+      return { ok: false, message: 'Actor no permitido en el body.' };
+    }
+  }
+
+  if (typeof record.actionType === 'string') {
+    return { ok: false, message: 'actionType no permitido; use operation de propuesta.' };
+  }
+
   const operation = typeof record.operation === 'string' ? record.operation : '';
+  if (
+    operation === 'proposal.approve' ||
+    operation === 'proposal.reject' ||
+    operation === 'action.rollback' ||
+    operation === 'proposal.create'
+  ) {
+    return { ok: false, message: 'Operación de control no permitida vía OpenClaw.' };
+  }
   if (!isOpenClawProposeOperation(operation)) {
     return { ok: false, message: 'Operación de propuesta no permitida.' };
   }
+
   const idempotencyKey =
     typeof record.idempotencyKey === 'string' ? record.idempotencyKey.trim() : '';
   if (!idempotencyKey) {
@@ -83,82 +140,120 @@ export function parseOpenClawProposalRequest(
   };
 }
 
+function buildCalendarHoldPayload(payload: Record<string, string | number | boolean | null>): {
+  title: string;
+  start: string;
+  end: string;
+  note: string | null;
+  relatedTaskKey: string | null;
+} {
+  if (typeof payload.start === 'string' && typeof payload.end === 'string') {
+    return {
+      title: String(payload.title ?? 'Hold propuesto'),
+      start: payload.start,
+      end: payload.end,
+      note: typeof payload.note === 'string' ? payload.note : null,
+      relatedTaskKey: typeof payload.relatedTaskKey === 'string' ? payload.relatedTaskKey : null,
+    };
+  }
+  const date = String(payload.date ?? '');
+  const startTime = String(payload.startTime ?? '10:00');
+  const endTime = String(payload.endTime ?? '11:00');
+  return {
+    title: String(payload.title ?? 'Hold propuesto'),
+    start: `${date}T${startTime}:00.000Z`,
+    end: `${date}T${endTime}:00.000Z`,
+    note: typeof payload.reason === 'string' ? payload.reason : null,
+    relatedTaskKey: typeof payload.relatedTaskKey === 'string' ? payload.relatedTaskKey : null,
+  };
+}
+
+type RuntimeOverrides = NonNullable<Parameters<typeof buildWriteRuntime>[1]>;
+
 export async function createOpenClawProposal(input: {
-  actorId: string;
+  keyId: string;
   request: OpenClawProposalRequest;
   requestId: string;
+  env?: Readonly<Record<string, string | undefined>>;
+  runtimeOverrides?: RuntimeOverrides;
 }): Promise<
   | {
       ok: true;
       proposalKey: string;
       replay: boolean;
       summary: string | null;
+      risk: 'low' | 'medium' | 'high';
+      expiresAt: string | null;
+      diff: OpenClawProposalDiff | null;
       result: ActionResult;
     }
   | { ok: false; code: string; message: string }
 > {
-  if (!isWriteActionsEnabled()) {
+  const env = input.env ?? process.env;
+  if (!isOpenClawProposalsEnabled(env)) {
     return {
       ok: false,
       code: 'flag-disabled',
-      message: 'WRITE_ACTIONS_ENABLED debe estar activo para persistir propuestas.',
+      message: 'OpenClaw proposals desactivadas.',
     };
   }
 
   const proposed = PROPOSE_TO_ACTION[input.request.operation];
-  const isCalendarBlock = input.request.operation === 'calendar.block.propose';
-  const targetType = isCalendarBlock
-    ? 'calendar-block'
+  const isCalendarHold = proposed === 'calendar.hold.create';
+  const targetType = isCalendarHold
+    ? 'calendar-hold'
     : proposed === 'inbox.capture'
       ? 'inbox'
       : proposed === 'gym.session.create'
         ? 'gym-session'
-        : typeof proposed === 'string' && proposed.startsWith('task.')
+        : proposed.startsWith('task.')
           ? 'task'
           : 'system';
 
-  const runtime = buildWriteRuntime();
-  const result = await executeAction(
-    {
-      actionType: 'proposal.create',
-      actorEmail: input.actorId,
-      payload: isCalendarBlock
-        ? {
-            title: String(input.request.payload.title ?? 'Bloque propuesto'),
-            date: String(input.request.payload.date ?? ''),
-            startTime: String(input.request.payload.startTime ?? ''),
-            endTime: String(input.request.payload.endTime ?? ''),
-            reason: input.request.reason,
-            relatedTaskKey:
-              typeof input.request.payload.relatedTaskKey === 'string'
-                ? input.request.payload.relatedTaskKey
-                : null,
-          }
-        : {
-            name: `OpenClaw: ${input.request.operation}`,
-            proposedActionType: proposed,
-            targetType,
-            targetKey: input.request.targetKey ?? null,
-            reason: input.request.reason,
-            expectedChange: input.request.expectedChange,
-            risk: input.request.risk,
-            reversible: input.request.reversible,
-            sanitizedPayload: {
-              ...input.request.payload,
+  const businessPayload = isCalendarHold
+    ? buildCalendarHoldPayload(input.request.payload)
+    : ({
+        ...input.request.payload,
+        ...(proposed === 'inbox.capture'
+          ? {
               origin: 'openclaw',
-              requestId: input.requestId,
-            },
-          },
+              text: String(input.request.payload.text ?? ''),
+              link:
+                typeof input.request.payload.link === 'string' ? input.request.payload.link : null,
+              capturedAt:
+                typeof input.request.payload.capturedAt === 'string'
+                  ? input.request.payload.capturedAt
+                  : new Date().toISOString(),
+            }
+          : {}),
+      } as never);
+
+  const runtime = buildWriteRuntime(env, input.runtimeOverrides);
+  const result = await executeAction(
+    requestFromOpenClawKeyId(input.keyId, {
+      actionType: 'proposal.create',
+      payload: {
+        name: `OpenClaw: ${input.request.operation}`,
+        proposedActionType: proposed,
+        targetType,
+        targetKey: input.request.targetKey ?? null,
+        reason: input.request.reason,
+        expectedChange: input.request.expectedChange,
+        risk: input.request.risk,
+        reversible: input.request.reversible,
+        payload: businessPayload,
+      },
       idempotencyKey: input.request.idempotencyKey,
       confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
       expectedPrevious: null,
       context: { source: 'openclaw', targetDate: null },
-    },
+    }),
     {
       writesEnabled: true,
       idempotency: runtime.idempotency,
       audit: runtime.audit,
-      handlers: runtime.handlers,
+      handlers: { ...runtime.handlers, source: 'openclaw' },
+      coordination: runtime.coordination ?? undefined,
     },
   );
 
@@ -171,16 +266,26 @@ export async function createOpenClawProposal(input: {
   }
 
   const proposalKey = result.target?.key ?? '';
+  const stored = proposalKey ? await runtime.handlers.proposals.get(proposalKey) : null;
+
   return {
     ok: true,
     proposalKey,
     replay: result.code === 'idempotent-replay',
     summary: result.summary,
+    risk: stored?.risk ?? input.request.risk,
+    expiresAt: stored?.expiresAt ?? null,
+    diff: sanitizeOpenClawProposalDiff(stored?.diff ?? null),
     result,
   };
 }
 
-export async function getOpenClawProposal(key: string) {
-  const proposals = await listRuntimeProposals();
-  return proposals.find((row) => row.key === key) ?? null;
+export async function getOpenClawProposal(
+  key: string,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+  runtimeOverrides?: RuntimeOverrides,
+): Promise<ActionProposalSummary | null> {
+  if (!isOpenClawProposalsEnabled(env)) return null;
+  const runtime = buildWriteRuntime(env, runtimeOverrides);
+  return runtime.handlers.proposals.get(key);
 }

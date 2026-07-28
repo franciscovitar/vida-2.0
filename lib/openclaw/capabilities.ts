@@ -1,9 +1,26 @@
 /**
- * Catálogo de capacidades OpenClaw para el contrato read-only del Bloque 2.
+ * Catálogo de capacidades OpenClaw (lectura + proposal-only opcional).
  */
+import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import type { OpenClawCapability } from '@/types/openclaw';
 
-export function listOpenClawCapabilities(): readonly OpenClawCapability[] {
+const PROPOSAL_TOOL_IDS = [
+  'task.create.propose',
+  'task.change-status.propose',
+  'inbox.capture.propose',
+  'gym.session.create.propose',
+  'calendar.hold.create.propose',
+] as const;
+
+export function listOpenClawCapabilities(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): readonly OpenClawCapability[] {
+  const proposalsEnabled = isOpenClawProposalsEnabled(env);
+  const proposalKind = proposalsEnabled ? ('proposal' as const) : ('forbidden' as const);
+  const proposalDescription = proposalsEnabled
+    ? 'Crea una propuesta pendiente (sin aplicar escritura final).'
+    : 'Bloqueada: OPENCLAW_PROPOSALS_ENABLED y WRITE_ACTIONS_ENABLED requeridos.';
+
   return [
     {
       id: 'system.overview',
@@ -55,31 +72,11 @@ export function listOpenClawCapabilities(): readonly OpenClawCapability[] {
       kind: 'read',
       description: 'Documento público por slug (sin Journaling ni privados).',
     },
-    {
-      id: 'task.create.propose',
-      kind: 'forbidden',
-      description: 'Bloqueada durante el modo read-only.',
-    },
-    {
-      id: 'task.change-status.propose',
-      kind: 'forbidden',
-      description: 'Bloqueada durante el modo read-only.',
-    },
-    {
-      id: 'inbox.capture.propose',
-      kind: 'forbidden',
-      description: 'Bloqueada durante el modo read-only.',
-    },
-    {
-      id: 'gym.session.create.propose',
-      kind: 'forbidden',
-      description: 'Bloqueada durante el modo read-only.',
-    },
-    {
-      id: 'calendar.block.propose',
-      kind: 'forbidden',
-      description: 'Bloqueada durante el modo read-only.',
-    },
+    ...PROPOSAL_TOOL_IDS.map((id) => ({
+      id,
+      kind: proposalKind,
+      description: proposalDescription,
+    })),
     {
       id: 'proposal.approve',
       kind: 'forbidden',
@@ -91,14 +88,34 @@ export function listOpenClawCapabilities(): readonly OpenClawCapability[] {
       description: 'Rechazo solo desde la web autenticada.',
     },
     {
+      id: 'action.rollback',
+      kind: 'forbidden',
+      description: 'Rollback solo desde la web autenticada.',
+    },
+    {
       id: 'task.create',
       kind: 'forbidden',
-      description: 'Escritura final no permitida vía OpenClaw.',
+      description: 'Escritura final no permitida vía OpenClaw (direct-write).',
+    },
+    {
+      id: 'task.change-status',
+      kind: 'forbidden',
+      description: 'Escritura final no permitida vía OpenClaw (direct-write).',
+    },
+    {
+      id: 'inbox.capture',
+      kind: 'forbidden',
+      description: 'Escritura final no permitida vía OpenClaw (direct-write).',
     },
     {
       id: 'gym.session.create',
       kind: 'forbidden',
-      description: 'Escritura final no permitida vía OpenClaw.',
+      description: 'Escritura final no permitida vía OpenClaw (direct-write).',
+    },
+    {
+      id: 'calendar.hold.create',
+      kind: 'forbidden',
+      description: 'Escritura final no permitida vía OpenClaw (direct-write).',
     },
     {
       id: 'calendar.event.create',

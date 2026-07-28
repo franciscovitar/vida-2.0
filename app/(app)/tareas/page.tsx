@@ -1,6 +1,7 @@
 import { CheckSquare } from 'lucide-react';
 import type { Metadata } from 'next';
 
+import { TaskCreatePanel, TaskStatusPanel } from '@/components/actions/WritePanels';
 import styles from '@/components/domain/DomainPage.module.scss';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { NotionIntegrationNotice } from '@/components/notion/NotionIntegrationNotice';
@@ -10,6 +11,8 @@ import { TaskPlanningWorkspace } from '@/components/tasks/TaskPlanningWorkspace'
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { formatArgentineFullDate } from '@/lib/adapters/dates';
+import { isWriteActionsEnabled } from '@/lib/actions/config';
+import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { getNotionDashboard } from '@/lib/data/notion-source';
 
 import pageStyles from '../page.module.scss';
@@ -27,6 +30,8 @@ function sourceLabel(source: 'mock' | 'notion', status: string): string {
 }
 
 export default async function TareasPage() {
+  await requireAuthorizedSession();
+  const writesEnabled = isWriteActionsEnabled();
   const data = await getNotionDashboard();
   const s = data.taskSummary;
 
@@ -40,6 +45,8 @@ export default async function TareasPage() {
       />
 
       {data.notice ? <NotionIntegrationNotice status={data.status} message={data.notice} /> : null}
+      <TaskCreatePanel writesEnabled={writesEnabled} />
+      <TaskStatusPanel writesEnabled={writesEnabled} />
 
       <p className={styles['meta-line']}>
         <span>Fuente: {sourceLabel(data.source, data.status)}</span>

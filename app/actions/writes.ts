@@ -1,18 +1,71 @@
 'use server';
 
 import { verifySession } from '@/lib/auth/dal';
+import { sanitizeActorHint } from '@/lib/actions/audit';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
 import { executeAction } from '@/lib/actions/engine';
+import { actorHashFromEmail } from '@/lib/actions/opaque';
+import { isPublicControlAction } from '@/lib/actions/policy';
 import { buildWriteRuntime, getWriteRuntimeStatus } from '@/lib/actions/runtime';
-import type { ActionRequest, ActionResult, ActionProposalSummary } from '@/types/actions';
+import type {
+  ActionDiff,
+  ActionProposalSummary,
+  ActionRequest,
+  ActionResult,
+} from '@/types/actions';
 
 function ensureOperationId(value: unknown): string {
   return typeof value === 'string' && value.trim() ? value.trim() : crypto.randomUUID();
 }
 
+function policyDenied(actionType: string, operationId: string, message: string): ActionResult {
+  return {
+    ok: false,
+    code: 'policy-denied',
+    message,
+    idempotencyKey: operationId,
+    actionType: (isPublicControlAction(actionType)
+      ? actionType
+      : 'forbidden') as ActionResult['actionType'],
+    target: null,
+    summary: null,
+    verified: null,
+  };
+}
+
+/** Resumen sanitizado para el cliente (sin ciphertext, digests internos ni ownership). */
+export type ClientProposalSummary = Omit<
+  ActionProposalSummary,
+  'encryptedPayloadKey' | 'ownershipDigest' | 'payloadDigest' | 'beforeDigest'
+> & {
+  diff: ActionDiff | null;
+};
+
+function toClientProposal(proposal: ActionProposalSummary): ClientProposalSummary {
+  const { encryptedPayloadKey, ownershipDigest, payloadDigest, beforeDigest, ...safe } = proposal;
+  void encryptedPayloadKey;
+  void ownershipDigest;
+  void payloadDigest;
+  void beforeDigest;
+  return {
+    ...safe,
+    diff: proposal.diff
+      ? {
+          fields: proposal.diff.fields.map((field) => ({
+            field: field.field,
+            before: field.before,
+            after: field.after,
+          })),
+          warnings: proposal.diff.warnings ? [...proposal.diff.warnings] : undefined,
+        }
+      : null,
+  };
+}
+
 /**
- * Única puerta Server Action de escrituras 8E.
- * No expone métodos destructivos.
+ * Única puerta Server Action de escrituras 8E / Block 3.
+ * Solo PUBLIC_CONTROL_ACTIONS; negocio vía proposal.create.
+ * No expone métodos destructivos ni email en ActionRequest.
  */
 export async function runWriteAction(input: {
   actionType: string;
@@ -50,30 +103,42 @@ export async function runWriteAction(input: {
     };
   }
 
+  if (!isPublicControlAction(input.actionType)) {
+    return policyDenied(
+      input.actionType,
+      operationId,
+      'Solo se permiten proposal.create, proposal.approve, proposal.reject y action.rollback desde la web.',
+    );
+  }
+
+  const actorHash = actorHashFromEmail(session.email);
+  const actorHint = sanitizeActorHint(session.email);
+
   const runtime = buildWriteRuntime();
 
-  return executeAction(
-    {
-      actionType: input.actionType as ActionRequest['actionType'],
-      actorEmail: session.email,
-      payload: input.payload,
-      idempotencyKey: operationId,
-      confirmation: input.confirmation,
-      expectedPrevious: input.expectedPrevious ?? null,
-      context: { source: 'web', targetDate: input.targetDate ?? null },
-    },
-    {
-      writesEnabled: true,
-      idempotency: runtime.idempotency,
-      audit: runtime.audit,
-      handlers: runtime.handlers,
-    },
-  );
+  const request: ActionRequest = {
+    actionType: input.actionType,
+    payload: input.payload,
+    idempotencyKey: operationId,
+    confirmation: input.confirmation,
+    expectedPrevious: input.expectedPrevious ?? null,
+    actorHash,
+    actorHint,
+    context: { source: 'web', targetDate: input.targetDate ?? null },
+  };
+
+  return executeAction(request, {
+    writesEnabled: true,
+    idempotency: runtime.idempotency,
+    audit: runtime.audit,
+    handlers: runtime.handlers,
+    coordination: runtime.coordination ?? undefined,
+  });
 }
 
 export async function loadApprovalsBoard(): Promise<{
   writesEnabled: boolean;
-  proposals: readonly ActionProposalSummary[];
+  proposals: readonly ClientProposalSummary[];
 }> {
   const session = await verifySession();
   if (!session.ok) {
@@ -85,7 +150,7 @@ export async function loadApprovalsBoard(): Promise<{
   }
   const runtime = buildWriteRuntime();
   const proposals = await runtime.handlers.proposals.list();
-  return { writesEnabled: true, proposals };
+  return { writesEnabled: true, proposals: proposals.map(toClientProposal) };
 }
 
 export async function getWritesEnabledFlag(): Promise<boolean> {

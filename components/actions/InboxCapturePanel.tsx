@@ -30,7 +30,7 @@ export function InboxCapturePanel({ writesEnabled }: { writesEnabled: boolean })
     <Card>
       <SectionHeader
         title="Captura persistente"
-        description="No clasifica ni convierte en tarea. No borra la captura original."
+        description="Crea una propuesta. No clasifica ni convierte en tarea."
       />
       <form
         className={styles.form}
@@ -40,15 +40,25 @@ export function InboxCapturePanel({ writesEnabled }: { writesEnabled: boolean })
             setMessage('Confirmá la captura.');
             return;
           }
-          const preserved = text;
+          const preserved = { text, link };
           start(async () => {
             const result = await runWriteAction({
-              actionType: 'inbox.capture',
+              actionType: 'proposal.create',
               payload: {
-                text,
-                link: link.trim() || null,
-                capturedAt: new Date().toISOString(),
-                origin: 'web-bandeja',
+                name: `Captura: ${preserved.text.trim().slice(0, 60)}`,
+                proposedActionType: 'inbox.capture',
+                targetType: 'inbox',
+                targetKey: null,
+                reason: 'Captura desde bandeja web',
+                expectedChange: 'Nuevo ítem en Bandeja',
+                risk: 'low',
+                reversible: true,
+                payload: {
+                  text: preserved.text,
+                  link: preserved.link.trim() || null,
+                  capturedAt: new Date().toISOString(),
+                  origin: 'web-bandeja',
+                },
               },
               confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
             });
@@ -58,7 +68,8 @@ export function InboxCapturePanel({ writesEnabled }: { writesEnabled: boolean })
               setLink('');
               setConfirm(false);
             } else {
-              setText(preserved);
+              setText(preserved.text);
+              setLink(preserved.link);
             }
           });
         }}
@@ -79,10 +90,10 @@ export function InboxCapturePanel({ writesEnabled }: { writesEnabled: boolean })
         </label>
         <label className={styles.check}>
           <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />
-          Confirmo guardar en Bandeja
+          Confirmo proponer esta captura
         </label>
         <Button type="submit" variant="primary" disabled={pending}>
-          {pending ? 'Guardando…' : 'Capturar'}
+          {pending ? 'Enviando…' : 'Proponer captura'}
         </Button>
         {message ? <p className={styles.message}>{message}</p> : null}
       </form>

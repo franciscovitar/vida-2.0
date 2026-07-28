@@ -341,7 +341,7 @@ function catalogIntegration(env: Env): RuntimeIntegrationView {
 
 function writesIntegration(env: Env): RuntimeIntegrationView {
   const status = getWriteRuntimeStatus(env);
-  if (!status.writesEnabled) {
+  if (!status.writesEnabled || status.global === 'disabled') {
     return {
       id: 'writes',
       label: 'Escrituras avanzadas',
@@ -351,14 +351,31 @@ function writesIntegration(env: Env): RuntimeIntegrationView {
     };
   }
 
-  const configured = status.issues.length === 0;
+  if (status.global === 'ready') {
+    return {
+      id: 'writes',
+      label: 'Escrituras avanzadas',
+      status: 'configured',
+      summary: `Listas (${Object.keys(status.components).length} componentes).`,
+      blocking: true,
+    };
+  }
+
+  if (status.global === 'degraded') {
+    return {
+      id: 'writes',
+      label: 'Escrituras avanzadas',
+      status: 'configured',
+      summary: `Degradadas: ${status.issues.slice(0, 3).join(', ') || 'componentes opcionales incompletos'}.`,
+      blocking: true,
+    };
+  }
+
   return {
     id: 'writes',
     label: 'Escrituras avanzadas',
-    status: configured ? 'configured' : 'misconfigured',
-    summary: configured
-      ? 'Habilitadas; requieren una fase de validación separada.'
-      : 'Habilitadas con configuración incompleta.',
+    status: 'misconfigured',
+    summary: `Mal configuradas: ${status.issues.slice(0, 3).join(', ') || 'faltan componentes críticos'}.`,
     blocking: true,
   };
 }
