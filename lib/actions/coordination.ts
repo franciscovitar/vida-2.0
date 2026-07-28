@@ -3,21 +3,25 @@
  * Namespace separado de OpenClaw: vida2:writes:<env>:<contractVersion>
  */
 import { coordinationKeyHash } from '@/lib/actions/opaque';
+import {
+  evalRedisScript,
+  executeRedisCommand,
+  resolveUpstashEnvironment,
+  resolveUpstashRestConfig,
+  type UpstashRedisCommandPart,
+  type UpstashRedisFetch,
+  type UpstashRestConfig,
+} from '@/lib/actions/upstash-rest';
 import { WRITE_CONTRACT_VERSION } from '@/types/actions';
 import type { ActionResult } from '@/types/actions';
 
-export type WriteCoordinationConfig = {
-  url: string;
-  token: string;
-  namespace: string;
-  timeoutMs: number;
-};
+export type WriteCoordinationConfig = UpstashRestConfig;
 
 export type WriteCoordinationConfigResult =
   { ok: true; value: WriteCoordinationConfig } | { ok: false };
 
-export type WriteRedisFetch = typeof fetch;
-export type WriteRedisCommandPart = string | number;
+export type WriteRedisFetch = UpstashRedisFetch;
+export type WriteRedisCommandPart = UpstashRedisCommandPart;
 
 export type ReserveIdempotencyResult =
   | { status: 'reserved' }
@@ -60,116 +64,13 @@ export interface WriteCoordinationPort {
   }): Promise<void>;
 }
 
-const DEFAULT_TIMEOUT_MS = 3_000;
-const MAX_RESPONSE_CHARS = 16 * 1024;
-const ENVIRONMENT_PATTERN = /^(development|preview|production|test)$/;
-
-function resolveEnvironment(env: Readonly<Record<string, string | undefined>>): string {
-  const candidate = env.VERCEL_ENV ?? env.NODE_ENV ?? 'unknown';
-  return ENVIRONMENT_PATTERN.test(candidate) ? candidate : 'unknown';
-}
-
-function normalizeUpstashUrl(raw: string): string | null {
-  try {
-    const url = new URL(raw);
-    if (url.protocol !== 'https:') return null;
-    if (url.username || url.password || url.search || url.hash) return null;
-    if (url.pathname !== '/' && url.pathname !== '') return null;
-    if (!url.hostname.endsWith('.upstash.io') || url.hostname === 'upstash.io') {
-      return null;
-    }
-    return url.origin;
-  } catch {
-    return null;
-  }
-}
-
 export function resolveWriteCoordinationConfig(
   env: Readonly<Record<string, string | undefined>> = process.env,
   contractVersion: string = WRITE_CONTRACT_VERSION,
 ): WriteCoordinationConfigResult {
-  const rawUrl = env.UPSTASH_REDIS_REST_URL ?? '';
-  const rawToken = env.UPSTASH_REDIS_REST_TOKEN ?? '';
-  const url = normalizeUpstashUrl(rawUrl);
-  const token = rawToken.trim();
-
-  if (!url || !token || token !== rawToken || token.length < 16 || /\s/.test(token)) {
-    return { ok: false };
-  }
-
-  const envName = resolveEnvironment(env);
+  const envName = resolveUpstashEnvironment(env);
   const version = contractVersion.trim() || WRITE_CONTRACT_VERSION;
-
-  return {
-    ok: true,
-    value: {
-      url,
-      token,
-      namespace: `vida2:writes:${envName}:${version}`,
-      timeoutMs: DEFAULT_TIMEOUT_MS,
-    },
-  };
-}
-
-async function executeWriteRedisCommand(
-  config: WriteCoordinationConfig,
-  command: readonly WriteRedisCommandPart[],
-  fetchImpl: WriteRedisFetch = fetch,
-): Promise<unknown> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), config.timeoutMs);
-
-  try {
-    const response = await fetchImpl(config.url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(command),
-      cache: 'no-store',
-      redirect: 'error',
-      signal: controller.signal,
-    });
-
-    if (!response.ok) throw new Error('write-coordination-unavailable');
-
-    const raw = await response.text();
-    if (!raw || raw.length > MAX_RESPONSE_CHARS) {
-      throw new Error('write-coordination-unavailable');
-    }
-
-    const parsed = JSON.parse(raw) as unknown;
-    if (
-      !parsed ||
-      typeof parsed !== 'object' ||
-      Array.isArray(parsed) ||
-      'error' in parsed ||
-      !('result' in parsed)
-    ) {
-      throw new Error('write-coordination-unavailable');
-    }
-
-    return (parsed as { result: unknown }).result;
-  } catch {
-    throw new Error('write-coordination-unavailable');
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-async function evalWriteRedisScript(
-  config: WriteCoordinationConfig,
-  script: string,
-  keys: readonly string[],
-  args: readonly WriteRedisCommandPart[],
-  fetchImpl: WriteRedisFetch = fetch,
-): Promise<unknown> {
-  return executeWriteRedisCommand(
-    config,
-    ['EVAL', script, keys.length, ...keys, ...args],
-    fetchImpl,
-  );
+  return resolveUpstashRestConfig(env, `vida2:writes:${envName}:${version}`);
 }
 
 function idempotencyRedisKey(
@@ -363,7 +264,7 @@ export function createUpstashWriteCoordination(
         input.actionType,
         input.idempotencyKey,
       );
-      const raw = await evalWriteRedisScript(
+      const raw = await evalRedisScript(
         config,
         RESERVE_SCRIPT,
         [key],
@@ -391,7 +292,7 @@ export function createUpstashWriteCoordination(
         input.actionType,
         input.idempotencyKey,
       );
-      const raw = await executeWriteRedisCommand(config, ['GET', key], fetchImpl);
+      const raw = await executeRedisCommand(config, ['GET', key], fetchImpl);
       if (typeof raw !== 'string' || !raw) return null;
       const parsed = parseJsonObject(raw);
       if (!parsed || parsed.state !== 'final' || !parsed.result) return null;
@@ -413,7 +314,7 @@ export function createUpstashWriteCoordination(
           String(Date.now()),
           Math.random().toString(36),
         ]);
-        const raw = await evalWriteRedisScript(
+        const raw = await evalRedisScript(
           config,
           LEASE_ACQUIRE_SCRIPT,
           [key, sibling],
@@ -432,9 +333,9 @@ export function createUpstashWriteCoordination(
     },
     async releaseProposalLease(input) {
       const key = leaseRedisKey(config.namespace, input.proposalKey, input.purpose);
-      const current = await executeWriteRedisCommand(config, ['GET', key], fetchImpl);
+      const current = await executeRedisCommand(config, ['GET', key], fetchImpl);
       if (current === input.token) {
-        await executeWriteRedisCommand(config, ['DEL', key], fetchImpl);
+        await executeRedisCommand(config, ['DEL', key], fetchImpl);
       }
     },
     async markFinal(input) {
@@ -444,7 +345,7 @@ export function createUpstashWriteCoordination(
         input.actionType,
         input.idempotencyKey,
       );
-      await evalWriteRedisScript(
+      await evalRedisScript(
         config,
         MARK_FINAL_SCRIPT,
         [key],

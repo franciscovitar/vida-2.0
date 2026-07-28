@@ -105,10 +105,18 @@ export type CalendarHoldSnapshot = {
   relatedTaskKey: string | null;
 };
 
+export type CalendarHoldCreateMeta = {
+  idempotencyKey: string;
+  ownership: OwnershipProof;
+  /** Digest used for opaque client key + provider id derivation. */
+  payloadDigest?: string;
+  contractVersion?: string;
+};
+
 export interface CalendarHoldWritePort {
   createHold(
     payload: CalendarHoldCreatePayload,
-    meta: { idempotencyKey: string; ownership: OwnershipProof },
+    meta: CalendarHoldCreateMeta,
   ): Promise<{ ok: true; key: string; ownership: OwnershipProof } | { ok: false; message: string }>;
   getHold(key: string): Promise<CalendarHoldSnapshot | null>;
   deleteHoldWithOwnership(
@@ -156,6 +164,7 @@ export interface ProposalRepositoryPort {
         | 'targetKey'
       >
     >,
+    options?: { expectedStatus?: ProposalStatus },
   ): Promise<ActionProposalSummary | null>;
 }
 

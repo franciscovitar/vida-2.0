@@ -213,8 +213,38 @@ function createFakeNotionClient(): NotionActionsClient & {
     async appendBlockChildren(blockId, children) {
       const list = blocks.get(blockId);
       if (!list) return { ok: false, message: 'Bandeja no accesible.' };
-      list.push(...children);
-      return { ok: true };
+      const blockIds: string[] = [];
+      for (const child of children) {
+        const id = `blk-${list.length + blockIds.length + 1}`;
+        list.push({ ...child, __blockId: id });
+        blockIds.push(id);
+      }
+      return { ok: true, blockIds };
+    },
+    async retrieveBlock(blockId) {
+      for (const [, list] of blocks) {
+        const found = list.find((item) => (item as { __blockId?: string }).__blockId === blockId);
+        if (!found) continue;
+        const archived = (found as { __archived?: boolean }).__archived === true;
+        const paragraph = (
+          found as { paragraph?: { rich_text?: { text?: { content?: string } }[] } }
+        ).paragraph;
+        const plainText = paragraph?.rich_text?.[0]?.text?.content ?? '';
+        return {
+          ok: true,
+          block: { id: blockId, archived, type: 'paragraph', plainText },
+        };
+      }
+      return { ok: false, message: 'missing' };
+    },
+    async archiveBlock(blockId) {
+      for (const [, list] of blocks) {
+        const found = list.find((item) => (item as { __blockId?: string }).__blockId === blockId);
+        if (!found) continue;
+        (found as { __archived?: boolean }).__archived = true;
+        return { ok: true };
+      }
+      return { ok: false, message: 'missing' };
     },
   };
   return client;
@@ -707,14 +737,73 @@ test('8E1r-15. approve/reject actualiza Notion', async () => {
       encryptedPayloadKey: 'enc-d',
     },
   );
-  const applied = await repo.updateStatus('prop-d', 'applied', {
-    decidedAt: '2026-07-22',
-    appliedAt: '2026-07-22',
-  });
+  const appliedStep = await repo.updateStatus(
+    'prop-d',
+    'executing',
+    {
+      decidedAt: '2026-07-22',
+      executionStartedAt: '2026-07-22',
+    },
+    { expectedStatus: 'pending' },
+  );
+  assert.equal(appliedStep?.status, 'executing');
+  const applied = await repo.updateStatus(
+    'prop-d',
+    'applied',
+    {
+      decidedAt: '2026-07-22',
+      appliedAt: '2026-07-22',
+    },
+    { expectedStatus: 'executing' },
+  );
   assert.equal(applied?.status, 'applied');
-  const rejected = await repo.updateStatus('prop-d', 'rejected', {
-    decidedAt: '2026-07-22',
+
+  const rejectRepo = createNotionProposalRepository({
+    client: fake,
+    actionsDataSourceId: ACTIONS_DS,
   });
+  await rejectRepo.create(
+    {
+      name: 'Rechazar',
+      proposedActionType: 'task.create',
+      targetType: 'task',
+      targetKey: null,
+      reason: 'r',
+      expectedChange: 'e',
+      risk: 'low',
+      reversible: true,
+      payload: {
+        title: 'Otra',
+        priority: 'Media',
+        areaKey: 'area.salud',
+        projectKey: null,
+        date: null,
+        duration: null,
+        energy: null,
+        note: null,
+      },
+    },
+    {
+      key: 'prop-r',
+      idempotencyKey: 'pr',
+      createdAt: '2026-07-22',
+      expiresAt: '2026-07-23T12:00:00.000Z',
+      payloadDigest: 'digest-r',
+      contractVersion: 'vida2-writes-v1',
+      source: 'web',
+      beforeDigest: null,
+      diff: null,
+      encryptedPayloadKey: 'enc-r',
+    },
+  );
+  const rejected = await rejectRepo.updateStatus(
+    'prop-r',
+    'rejected',
+    {
+      decidedAt: '2026-07-22',
+    },
+    { expectedStatus: 'pending' },
+  );
   assert.equal(rejected?.status, 'rejected');
 });
 

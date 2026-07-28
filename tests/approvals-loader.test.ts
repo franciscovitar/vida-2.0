@@ -82,6 +82,12 @@ function createSharedFakeClient(): NotionActionsClient & {
     async appendBlockChildren() {
       return { ok: false, message: 'unused' };
     },
+    async retrieveBlock() {
+      return { ok: false, message: 'unused' };
+    },
+    async archiveBlock() {
+      return { ok: false, message: 'unused' };
+    },
   };
 }
 

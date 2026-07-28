@@ -2,9 +2,10 @@
  * Puerto Calendar hold (Block 3).
  * Constraints: calendario dedicado, visibility private, sin attendees/meet/recurrence/attachments,
  * ownership en extendedProperties.private, eventId real nunca al cliente (solo clave opaca).
+ * Provider event ID determinista (multi-instance): sin Maps de proceso.
  * Tests: fake/memory; nunca llaman Google APIs.
  */
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 
 import {
   getGoogleCalendarTimezoneForWrites,
@@ -28,6 +29,8 @@ export type CalendarHoldInsertInput = {
   ownership: OwnershipProof;
   relatedTaskKey: string | null;
   timezone: string;
+  /** Deterministic Google custom event id (base32hex). */
+  providerEventId?: string;
 };
 
 export type CalendarHoldInsertResult =
@@ -56,6 +59,48 @@ export type CalendarHoldApiClient = {
   ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
 };
 
+const BASE32HEX = '0123456789abcdefghijklmnopqrstuv';
+
+/** Google custom event id: base32hex lowercase, length 5–1024. */
+export function toBase32Hex(bytes: Buffer): string {
+  let bits = 0;
+  let value = 0;
+  let out = '';
+  for (const byte of bytes) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      out += BASE32HEX[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) {
+    out += BASE32HEX[(value << (5 - bits)) & 31];
+  }
+  return out;
+}
+
+export function deriveCalendarProviderEventId(input: {
+  calendarId: string;
+  contractVersion: string;
+  clientKey: string;
+  hmacKey: Buffer;
+}): string {
+  const mac = createHmac('sha256', input.hmacKey)
+    .update(
+      `vida2-cal-hold:${input.calendarId}|${input.contractVersion}|${input.clientKey}`,
+      'utf8',
+    )
+    .digest();
+  const id = toBase32Hex(mac);
+  // Google requires 5–1024; 52 chars from 32-byte HMAC is stable and valid.
+  return id.length >= 5 ? id : id.padEnd(5, '0');
+}
+
+export function deriveCalendarHoldClientKey(idempotencyKey: string, payloadDigest: string): string {
+  return opaqueKey('hold', `${idempotencyKey}:${payloadDigest}`);
+}
+
 /** Payload conceptual que respetaría la API Google (sin enviarlo en tests). */
 export function buildPrivateHoldEventBody(input: CalendarHoldInsertInput): {
   summary: string;
@@ -72,6 +117,7 @@ export function buildPrivateHoldEventBody(input: CalendarHoldInsertInput): {
       vida2Ownership: string;
       vida2RelatedTaskKey: string;
       vida2Hold: '1';
+      vida2ClientKey: string;
     };
   };
 } {
@@ -90,6 +136,7 @@ export function buildPrivateHoldEventBody(input: CalendarHoldInsertInput): {
         vida2Ownership: input.ownership,
         vida2RelatedTaskKey: input.relatedTaskKey ?? '',
         vida2Hold: '1',
+        vida2ClientKey: '',
       },
     },
   };
@@ -115,18 +162,34 @@ export function createNotConfiguredCalendarHoldPort(message: string): CalendarHo
 
 /**
  * Memoria inyectable (tests / WRITE_ACTIONS_USE_MEMORY local).
+ * Usa la misma derivación determinista cuando se provee hmacKey+contractVersion+calendarId.
  */
-export function createMemoryCalendarHoldPort(): CalendarHoldWritePort & {
+export function createMemoryCalendarHoldPort(options?: {
+  calendarId?: string;
+  contractVersion?: string;
+  hmacKey?: Buffer;
+}): CalendarHoldWritePort & {
   holds: Map<string, CalendarHoldSnapshot & { deleted?: boolean; providerEventId?: string }>;
 } {
   const holds = new Map<
     string,
     CalendarHoldSnapshot & { deleted?: boolean; providerEventId?: string }
   >();
+  const calendarId = options?.calendarId ?? 'memory-cal';
+  const contractVersion = options?.contractVersion ?? 'vida2-writes-v1';
+  const hmacKey = options?.hmacKey ?? createHash('sha256').update('memory-hold-hmac').digest();
+
   return {
     holds,
     async createHold(payload: CalendarHoldCreatePayload, meta) {
-      const key = opaqueKey('hold', meta.idempotencyKey + payload.title);
+      const digest = meta.payloadDigest ?? createHash('sha256').update(payload.title).digest('hex');
+      const key = deriveCalendarHoldClientKey(meta.idempotencyKey, digest);
+      const providerEventId = deriveCalendarProviderEventId({
+        calendarId,
+        contractVersion: meta.contractVersion ?? contractVersion,
+        clientKey: key,
+        hmacKey,
+      });
       const snapshot: CalendarHoldSnapshot & { deleted?: boolean; providerEventId?: string } = {
         key,
         title: payload.title,
@@ -134,7 +197,7 @@ export function createMemoryCalendarHoldPort(): CalendarHoldWritePort & {
         end: payload.end,
         ownership: meta.ownership,
         relatedTaskKey: payload.relatedTaskKey ?? null,
-        providerEventId: `mem-${key}`,
+        providerEventId,
       };
       holds.set(key, snapshot);
       return { ok: true, key, ownership: meta.ownership };
@@ -167,11 +230,24 @@ export function createMemoryCalendarHoldPort(): CalendarHoldWritePort & {
 
 /**
  * Fake estructurado para tests: registra llamadas, nunca toca red.
+ * Shared across port instances for multi-instance proofs.
  */
 export function createFakeCalendarHoldApiClient(options?: {
   failInsert?: boolean;
   failDelete?: boolean;
   ownershipMismatch?: boolean;
+  /** Optional shared events map for multi-instance tests. */
+  events?: Map<
+    string,
+    {
+      title: string;
+      start: string;
+      end: string;
+      ownership: OwnershipProof;
+      relatedTaskKey: string | null;
+      deleted?: boolean;
+    }
+  >;
 }): CalendarHoldApiClient & {
   inserts: CalendarHoldInsertInput[];
   deletes: { calendarId: string; providerEventId: string; ownership: OwnershipProof }[];
@@ -187,17 +263,19 @@ export function createFakeCalendarHoldApiClient(options?: {
     }
   >;
 } {
-  const events = new Map<
-    string,
-    {
-      title: string;
-      start: string;
-      end: string;
-      ownership: OwnershipProof;
-      relatedTaskKey: string | null;
-      deleted?: boolean;
-    }
-  >();
+  const events =
+    options?.events ??
+    new Map<
+      string,
+      {
+        title: string;
+        start: string;
+        end: string;
+        ownership: OwnershipProof;
+        relatedTaskKey: string | null;
+        deleted?: boolean;
+      }
+    >();
   const inserts: CalendarHoldInsertInput[] = [];
   const deletes: { calendarId: string; providerEventId: string; ownership: OwnershipProof }[] = [];
 
@@ -207,13 +285,14 @@ export function createFakeCalendarHoldApiClient(options?: {
     events,
     async insertPrivateHold(input) {
       inserts.push(input);
-      // Enforce conceptual constraints in fake (no attendees/meet/etc. in body builder).
       const body = buildPrivateHoldEventBody(input);
       if (body.visibility !== 'private' || body.attendees.length > 0) {
         return { ok: false, message: 'Constraint violation.' };
       }
       if (options?.failInsert) return { ok: false, message: 'Fake insert failed.' };
-      const providerEventId = opaqueKey('gevt', input.title + input.start + inserts.length);
+      const providerEventId =
+        input.providerEventId ??
+        opaqueKey('gevt', input.title + input.start + String(inserts.length));
       events.set(providerEventId, {
         title: input.title,
         start: input.start,
@@ -252,27 +331,38 @@ export function createFakeCalendarHoldApiClient(options?: {
 
 /**
  * Puerto real inyectable: usa CalendarHoldApiClient (fake en tests; nunca Google en suite).
- * Mapea providerEventId → clave opaca; el cliente solo ve la clave opaca.
+ * Sin Maps de proceso: providerEventId se re-deriva desde la clave opaca + HMAC.
  */
 export function createCalendarHoldWritePort(input: {
   calendarId: string;
   timezone: string;
   client: CalendarHoldApiClient;
-}): CalendarHoldWritePort & {
-  /** Solo tests: mapa opaco → provider (nunca al cliente). */
-  opaqueToProvider: Map<string, string>;
-} {
+  contractVersion: string;
+  hmacKey: Buffer;
+}): CalendarHoldWritePort {
   const calendarId = input.calendarId.trim();
-  const opaqueToProvider = new Map<string, string>();
-  const providerToOpaque = new Map<string, string>();
+  const contractVersion = input.contractVersion.trim() || 'vida2-writes-v1';
+
+  function providerIdForKey(clientKey: string, version?: string): string {
+    return deriveCalendarProviderEventId({
+      calendarId,
+      contractVersion: version ?? contractVersion,
+      clientKey,
+      hmacKey: input.hmacKey,
+    });
+  }
 
   return {
-    opaqueToProvider,
     async createHold(payload, meta) {
       if (!calendarId) {
         return { ok: false, message: 'Calendar write ID ausente.' };
       }
+      const digest =
+        meta.payloadDigest ?? createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+      const version = meta.contractVersion ?? contractVersion;
       const ownership = meta.ownership || ownershipFromSeed(meta.idempotencyKey + payload.title);
+      const key = deriveCalendarHoldClientKey(meta.idempotencyKey, digest);
+      const providerEventId = providerIdForKey(key, version);
       const inserted = await input.client.insertPrivateHold({
         calendarId,
         title: payload.title,
@@ -282,16 +372,13 @@ export function createCalendarHoldWritePort(input: {
         ownership,
         relatedTaskKey: payload.relatedTaskKey ?? null,
         timezone: input.timezone,
+        providerEventId,
       });
       if (!inserted.ok) return inserted;
-      const key = opaqueKey('hold', meta.idempotencyKey + inserted.providerEventId);
-      opaqueToProvider.set(key, inserted.providerEventId);
-      providerToOpaque.set(inserted.providerEventId, key);
       return { ok: true, key, ownership };
     },
     async getHold(key) {
-      const providerEventId = opaqueToProvider.get(key);
-      if (!providerEventId) return null;
+      const providerEventId = providerIdForKey(key);
       const got = await input.client.getHoldByProviderId(calendarId, providerEventId);
       if (!got.ok) return null;
       return {
@@ -304,10 +391,7 @@ export function createCalendarHoldWritePort(input: {
       };
     },
     async deleteHoldWithOwnership(key, ownership) {
-      const providerEventId = opaqueToProvider.get(key);
-      if (!providerEventId) {
-        return { ok: false, code: 'not-found', message: 'Hold no encontrado.' };
-      }
+      const providerEventId = providerIdForKey(key);
       return input.client.deleteHoldByProviderId(calendarId, providerEventId, ownership);
     },
   };
@@ -320,6 +404,7 @@ export function createCalendarHoldWritePort(input: {
 export function createCalendarHoldWritePortFromEnv(
   env: Readonly<Record<string, string | undefined>> = process.env,
   client?: CalendarHoldApiClient,
+  options?: { contractVersion?: string; hmacKey?: Buffer },
 ): CalendarHoldWritePort {
   if (!isWriteActionsEnabled(env)) {
     return createNotConfiguredCalendarHoldPort('Escrituras desactivadas.');
@@ -328,7 +413,7 @@ export function createCalendarHoldWritePortFromEnv(
   if (!calendarId) {
     return createNotConfiguredCalendarHoldPort('GOOGLE_CALENDAR_WRITE_ID ausente.');
   }
-  if (!client) {
+  if (!client || !options?.hmacKey) {
     return createNotConfiguredCalendarHoldPort(
       'Cliente Calendar hold no cableado (fail-closed; sin llamadas Google).',
     );
@@ -337,5 +422,7 @@ export function createCalendarHoldWritePortFromEnv(
     calendarId,
     timezone: getGoogleCalendarTimezoneForWrites(env),
     client,
+    contractVersion: options.contractVersion ?? 'vida2-writes-v1',
+    hmacKey: options.hmacKey,
   });
 }

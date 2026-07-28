@@ -81,6 +81,14 @@ export function getGoogleCalendarWriteId(
   return id || null;
 }
 
+/** Notion Tasks rich_text property for Vida2 ownership proof. Default: "Vida2 Ownership". */
+export function getNotionTaskOwnershipProperty(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): string {
+  const raw = env.NOTION_TASK_OWNERSHIP_PROPERTY?.trim();
+  return raw || 'Vida2 Ownership';
+}
+
 export function getGoogleCalendarTimezoneForWrites(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): string {
@@ -329,25 +337,13 @@ export function getWriteRuntimeStatus(
     notionTasks = 'ready';
   }
 
-  let notionInbox: IntegrationRuntimeState = 'misconfigured';
-  if (writeConfig.ok && writeConfig.inboxPageId && tokenOk) {
-    notionInbox = 'ready';
-  } else if (!writeConfig.ok || !writeConfig.inboxPageId) {
-    issues.push('inbox-page-missing');
-  }
-
-  let sheetsGym: IntegrationRuntimeState = 'misconfigured';
-  if (writeConfig.ok && writeConfig.gymSessionsRange && writeConfig.gymSetsRange) {
-    sheetsGym = 'ready';
-  } else {
-    issues.push('gym-ranges-missing');
-  }
-
   let encryptedPayloadStore: IntegrationRuntimeState = 'misconfigured';
-  if (encryptionKey) {
+  if (encryptionKey && coordinationMode === 'upstash' && hasUpstash) {
     encryptedPayloadStore = 'ready';
-  } else {
+  } else if (!encryptionKey) {
     issues.push('encryption-key-missing');
+  } else {
+    issues.push('encrypted-payload-store-requires-upstash');
   }
 
   let coordination: IntegrationRuntimeState = 'misconfigured';
@@ -361,10 +357,32 @@ export function getWriteRuntimeStatus(
   }
 
   let calendarHold: IntegrationRuntimeState = 'misconfigured';
-  if (writeConfig.ok && writeConfig.calendarWriteId) {
+  const calendarOauth =
+    Boolean(env.GOOGLE_CALENDAR_CLIENT_ID?.trim()) &&
+    Boolean(env.GOOGLE_CALENDAR_CLIENT_SECRET?.trim()) &&
+    Boolean(env.GOOGLE_CALENDAR_REFRESH_TOKEN?.trim());
+  if (writeConfig.ok && writeConfig.calendarWriteId && calendarOauth) {
     calendarHold = 'ready';
-  } else {
+  } else if (!writeConfig.ok || !writeConfig.calendarWriteId) {
     issues.push('calendar-write-id-missing');
+  } else {
+    issues.push('calendar-oauth-missing');
+  }
+
+  let notionInbox: IntegrationRuntimeState = 'misconfigured';
+  if (writeConfig.ok && writeConfig.inboxPageId && tokenOk && coordination === 'ready') {
+    notionInbox = 'ready';
+  } else if (!writeConfig.ok || !writeConfig.inboxPageId) {
+    issues.push('inbox-page-missing');
+  } else if (coordination !== 'ready') {
+    issues.push('inbox-mapping-requires-upstash');
+  }
+
+  let sheetsGym: IntegrationRuntimeState = 'misconfigured';
+  if (writeConfig.ok && writeConfig.gymSessionsRange && writeConfig.gymSetsRange) {
+    sheetsGym = 'ready';
+  } else {
+    issues.push('gym-ranges-missing');
   }
 
   let proposalsLedger: IntegrationRuntimeState = 'misconfigured';

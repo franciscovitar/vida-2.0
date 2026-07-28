@@ -64,7 +64,7 @@ Estados terminales: `rejected`, `expired`, `failed`, `rolled-back`, `rollback-fa
 | `inbox.capture`        | `archiveCapture` + verify absent  | requerido      |
 | `gym.session.create`   | `markReverted` (filas permanecen) | no (sesión id) |
 | `calendar.hold.create` | `deleteHoldWithOwnership`         | requerido      |
-| `task.change-status`   | no automático                     | n/a            |
+| `task.change-status`   | restaurar `before` vía diff CAS   | n/a (diff)     |
 
 Calendar: solo holds creados por el sistema; duración 15 min–4 h; futuro; nunca
 `calendar.event.create`.
@@ -116,9 +116,23 @@ Issues son códigos (`encryption-key-missing`, `coordination-unavailable`, …),
 
 - Sin atomicidad multi-proveedor; `partial` / `applied-audit-pending` son estados reales.
 - Concurrencia extrema en Notion puede duplicar filas raramente (idempotencia best-effort).
-- `task.change-status` no tiene rollback automático.
 - Memory coordination no es producción.
 - OpenClaw no aprueba ni ejecuta escrituras finales.
+
+## Work schema checklist (Notion Acciones / Tareas)
+
+Antes de activar escrituras reales en Preview, verificar en Work:
+
+| Recurso                        | Requisito                                                                                                                                 |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Base **Acciones y propuestas** | Select `Status` con: `pending`, `executing`, `applied`, `rejected`, `expired`, `failed`, `rolling-back`, `rolled-back`, `rollback-failed` |
+| Acciones                       | Propiedad rich_text `Payload sanitizado` (codec multi-fragmento; sin truncar campos críticos)                                             |
+| Acciones                       | Select de `Action type` incluye acciones de negocio + control (`proposal.*`, `action.rollback`, `task.*`, …)                              |
+| Tareas                         | Propiedad rich_text de ownership: default `Vida2 Ownership` (override `NOTION_TASK_OWNERSHIP_PROPERTY`)                                   |
+| Bandeja                        | Página compartida (`NOTION_INBOX_PAGE_ID`); mapping blockId en Upstash                                                                    |
+| Calendar                       | `GOOGLE_CALENDAR_WRITE_ID` dedicado + OAuth Calendar (sin attendees/meet)                                                                 |
+| Upstash                        | REST URL/token; namespace `vida2:writes:<env>:<contract>` (payload + inbox-map + idemp/leases)                                            |
+| Cifrado                        | `WRITE_PROPOSAL_ENCRYPTION_KEY` (32 bytes base64)                                                                                         |
 
 ## Incident recovery
 
@@ -133,4 +147,5 @@ Issues son códigos (`encryption-key-missing`, `coordination-unavailable`, …),
 ## Variables (placeholders)
 
 Ver `.env.example`: `WRITE_ACTIONS_*`, `WRITE_COORDINATION_MODE`, TTL/ventana/contrato,
-`WRITE_PROPOSAL_ENCRYPTION_KEY`, `GOOGLE_CALENDAR_WRITE_ID`, Upstash, `OPENCLAW_PROPOSALS_ENABLED`.
+`WRITE_PROPOSAL_ENCRYPTION_KEY`, `GOOGLE_CALENDAR_WRITE_ID`, `NOTION_TASK_OWNERSHIP_PROPERTY`,
+Upstash, `OPENCLAW_PROPOSALS_ENABLED`.

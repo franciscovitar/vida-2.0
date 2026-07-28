@@ -5,6 +5,8 @@
 import {
   allowMemoryWritePorts,
   assertNotionLiveForWrites,
+  getGoogleCalendarWriteId,
+  getNotionTaskOwnershipProperty,
   getWriteActionsConfig,
   getWriteApprovalTtlSeconds,
   getWriteContractVersion,
@@ -22,15 +24,17 @@ import {
 } from '@/lib/actions/coordination';
 import {
   createMemoryEncryptedPayloadStore,
+  createUpstashEncryptedPayloadStore,
   type EncryptedPayloadStore,
 } from '@/lib/actions/encryption';
 import { createGymSheetWritePortFromEnv } from '@/lib/actions/gym-sheets';
 import type { HandlerDeps } from '@/lib/actions/handlers';
 import {
-  createCalendarHoldWritePortFromEnv,
+  createCalendarHoldWritePort,
   createMemoryCalendarHoldPort,
   createNotConfiguredCalendarHoldPort,
 } from '@/lib/actions/calendar-hold';
+import { createGoogleCalendarHoldApiClient } from '@/lib/actions/calendar-hold-google';
 import {
   createMemoryGymPort,
   createMemoryInboxPort,
@@ -45,6 +49,10 @@ import {
 import { createNotionActionsClient } from '@/lib/actions/notion-client';
 import { createNotionInboxWritePort } from '@/lib/actions/notion-inbox';
 import { createNotionTaskWritePort } from '@/lib/actions/notion-tasks';
+import {
+  createMemoryInboxCaptureMappingStore,
+  createUpstashInboxCaptureMappingStore,
+} from '@/lib/actions/inbox-mapping';
 import type { AuditSink } from '@/lib/actions/audit';
 import type { IdempotencyStore } from '@/lib/actions/idempotency';
 import { createMemoryAuditSink, processAuditSink } from '@/lib/actions/audit';
@@ -57,6 +65,7 @@ import type {
   ProposalRepositoryPort,
 } from '@/lib/actions/ports';
 import { getNotionConfig } from '@/lib/notion/config';
+import { resolveCalendarConfig } from '@/lib/calendar/config-resolve';
 import { randomBytes } from 'node:crypto';
 
 function notConfiguredTaskPort(message: string): NotionTaskWritePort {
@@ -228,7 +237,8 @@ export function buildWriteRuntime(
   const token = env.NOTION_API_TOKEN?.trim() ?? '';
   const encryptionKey = overrides?.encryptionKey ?? getWriteProposalEncryptionKey(env);
   const coordinationMode = getWriteCoordinationMode(env);
-  const upstash = resolveWriteCoordinationConfig(env, getWriteContractVersion(env));
+  const contractVersion = getWriteContractVersion(env);
+  const upstash = resolveWriteCoordinationConfig(env, contractVersion);
 
   // Real mode requires upstash coordination + encryption key or fail closed.
   if (!config.ok || !encryptionKey || coordinationMode !== 'upstash' || !upstash.ok) {
@@ -253,7 +263,9 @@ export function buildWriteRuntime(
 
   const client = overrides?.notionClient ?? (token ? createNotionActionsClient(token) : null);
   const coordination = overrides?.coordination ?? createUpstashWriteCoordination(upstash.value);
-  const encryptionStore = overrides?.encryptionStore ?? createMemoryEncryptedPayloadStore();
+  // Real/preview path MUST use Upstash encrypted payload store — never memory.
+  const encryptionStore =
+    overrides?.encryptionStore ?? createUpstashEncryptedPayloadStore(upstash.value);
 
   let tasks: NotionTaskWritePort;
   if (overrides?.tasks) {
@@ -268,6 +280,7 @@ export function buildWriteRuntime(
       tasksDataSourceId: notion.config.tasksDataSourceId,
       projectsDataSourceId: notion.config.projectsDataSourceId,
       areasDataSourceId: notion.config.areasDataSourceId,
+      ownershipProperty: getNotionTaskOwnershipProperty(env),
     });
   }
 
@@ -277,9 +290,12 @@ export function buildWriteRuntime(
   } else if (!client || !config.inboxPageId) {
     inbox = notConfiguredInboxPort('Bandeja no compartida o NOTION_INBOX_PAGE_ID ausente.');
   } else {
+    const mappingStore = createUpstashInboxCaptureMappingStore(upstash.value, encryptionKey);
     inbox = createNotionInboxWritePort({
       client,
       inboxPageId: config.inboxPageId,
+      mappingStore,
+      mappingTtlSeconds: getWriteRollbackWindowSeconds(env),
     });
   }
 
@@ -299,8 +315,27 @@ export function buildWriteRuntime(
   if (overrides?.calendar) {
     calendar = overrides.calendar;
   } else {
-    // Env stub: fail-closed sin GOOGLE_CALENDAR_WRITE_ID; sin cliente Google en runtime default.
-    calendar = createCalendarHoldWritePortFromEnv(env);
+    const writeId = getGoogleCalendarWriteId(env);
+    const oauth = resolveCalendarConfig(env);
+    if (!writeId || !oauth.ok) {
+      calendar = notConfiguredCalendar(
+        !writeId
+          ? 'GOOGLE_CALENDAR_WRITE_ID ausente.'
+          : 'OAuth Calendar no configurado (fail-closed).',
+      );
+    } else {
+      const googleClient = createGoogleCalendarHoldApiClient({
+        oauth: oauth.config,
+        writeCalendarId: writeId,
+      });
+      calendar = createCalendarHoldWritePort({
+        calendarId: writeId,
+        timezone: oauth.config.timezone,
+        client: googleClient,
+        contractVersion,
+        hmacKey: encryptionKey,
+      });
+    }
   }
 
   let proposals: ProposalRepositoryPort;
@@ -340,7 +375,7 @@ export function buildWriteRuntime(
       coordination,
       approvalTtlSeconds: getWriteApprovalTtlSeconds(env),
       rollbackWindowSeconds: getWriteRollbackWindowSeconds(env),
-      contractVersion: getWriteContractVersion(env),
+      contractVersion,
       now: overrides?.now,
     },
   };
@@ -359,3 +394,6 @@ export async function listRuntimeProposals(
 }
 
 export { getWriteRuntimeStatus, processAuditSink, processIdempotencyStore };
+
+// Re-export memory mapping helper for tests that build inbox ports manually.
+export { createMemoryInboxCaptureMappingStore };

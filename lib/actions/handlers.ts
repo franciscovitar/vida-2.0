@@ -41,10 +41,13 @@ import { isBusinessActionType } from '@/lib/actions/policy';
 import {
   WRITE_CONTRACT_VERSION,
   type ActionDiff,
+  type ActionProposalSummary,
   type ActionResult,
   type ActionTarget,
   type AllowedActionType,
+  type ProposalStatus,
   type ProposedBusinessActionType,
+  type TaskChangeStatusPayload,
 } from '@/types/actions';
 
 function result(partial: ActionResult): ActionResult {
@@ -85,6 +88,16 @@ export type HandlerDeps = {
   source?: 'web' | 'openclaw';
   now?: () => string;
 };
+
+async function casUpdateStatus(
+  deps: HandlerDeps,
+  key: string,
+  status: ProposalStatus,
+  patch: Parameters<ProposalRepositoryPort['updateStatus']>[2],
+  expectedStatus: ProposalStatus,
+): Promise<ActionProposalSummary | null> {
+  return deps.proposals.updateStatus(key, status, patch, { expectedStatus });
+}
 
 function fail(
   actionType: AllowedActionType,
@@ -467,7 +480,13 @@ async function executeBusinessAction(input: {
   const diff = buildCalendarHoldDiff(parsed.value);
   const beforeDigest = digestFromDiff({ fields: [] });
   const ownership = ownershipFrom(idempotencyKey + parsed.value.title);
-  const created = await deps.calendar.createHold(parsed.value, { idempotencyKey, ownership });
+  const payloadDigest = digestFromDiff(diff);
+  const created = await deps.calendar.createHold(parsed.value, {
+    idempotencyKey,
+    ownership,
+    payloadDigest,
+    contractVersion: deps.contractVersion ?? WRITE_CONTRACT_VERSION,
+  });
   if (!created.ok) {
     return {
       result: fail(actionType, idempotencyKey, 'failed', created.message, {
@@ -507,8 +526,9 @@ async function compensateBusiness(input: {
   targetKey: string | null;
   ownership: OwnershipProof | null;
   deps: HandlerDeps;
+  diff?: ActionDiff | null;
 }): Promise<{ ok: true } | { ok: false; message: string }> {
-  const { actionType, targetKey, ownership, deps } = input;
+  const { actionType, targetKey, ownership, deps, diff } = input;
   if (!targetKey) return { ok: false, message: 'Target ausente para rollback.' };
 
   if (actionType === 'task.create') {
@@ -538,7 +558,31 @@ async function compensateBusiness(input: {
     return after ? { ok: false, message: 'Hold aún presente tras rollback.' } : { ok: true };
   }
   if (actionType === 'task.change-status') {
-    return { ok: false, message: 'Rollback de cambio de estado no soportado automáticamente.' };
+    const statusField = diff?.fields.find((field) => field.field === 'status');
+    if (!statusField) {
+      return { ok: false, message: 'Diff de estado ausente para rollback.' };
+    }
+    const beforeStatus = typeof statusField.before === 'string' ? statusField.before : null;
+    const afterStatus = typeof statusField.after === 'string' ? statusField.after : null;
+    if (!beforeStatus || !afterStatus) {
+      return { ok: false, message: 'Diff de estado incompleto.' };
+    }
+    const current = await deps.tasks.getTask(targetKey);
+    if (!current) return { ok: false, message: 'Tarea no encontrada.' };
+    if (current.status !== afterStatus) {
+      return { ok: false, message: 'Conflicto: estado actual distinto al after del diff.' };
+    }
+    const updated = await deps.tasks.updateTaskStatus(
+      targetKey,
+      beforeStatus as TaskChangeStatusPayload['nextStatus'],
+      afterStatus,
+    );
+    if (!updated.ok) return { ok: false, message: updated.message };
+    const verified = await deps.tasks.getTask(targetKey);
+    if (!verified || verified.status !== beforeStatus) {
+      return { ok: false, message: 'Verificación de rollback de estado falló.' };
+    }
+    return { ok: true };
   }
   return { ok: false, message: 'Tipo no reversible.' };
 }
@@ -657,10 +701,22 @@ async function handleProposalDecide(input: {
     existing.status === 'expired' ||
     (existing.expiresAt && Date.parse(existing.expiresAt) < Date.parse(now))
   ) {
-    await deps.proposals.updateStatus(existing.key, 'expired', {
-      decidedAt: now,
-      resultCode: 'expired',
-    });
+    const expired = await casUpdateStatus(
+      deps,
+      existing.key,
+      'expired',
+      {
+        decidedAt: now,
+        resultCode: 'expired',
+      },
+      existing.status === 'pending' ? 'pending' : existing.status,
+    );
+    if (!expired && existing.status === 'pending') {
+      return fail(actionType, idempotencyKey, 'conflict', 'Conflicto de estado de propuesta.', {
+        type: 'proposal',
+        key: existing.key,
+      });
+    }
     if (existing.encryptedPayloadKey && deps.encryptionStore) {
       await deps.encryptionStore.delete(existing.encryptedPayloadKey);
     }
@@ -699,11 +755,23 @@ async function handleProposalDecide(input: {
 
   try {
     if (actionType === 'proposal.reject') {
-      await deps.proposals.updateStatus(existing.key, 'rejected', {
-        decidedAt: now,
-        resultCode: 'rejected',
-        afterSummary: 'Rechazada',
-      });
+      const rejected = await casUpdateStatus(
+        deps,
+        existing.key,
+        'rejected',
+        {
+          decidedAt: now,
+          resultCode: 'rejected',
+          afterSummary: 'Rechazada',
+        },
+        'pending',
+      );
+      if (!rejected) {
+        return fail(actionType, idempotencyKey, 'conflict', 'Conflicto de estado (reject).', {
+          type: 'proposal',
+          key: existing.key,
+        });
+      }
       if (existing.encryptedPayloadKey && deps.encryptionStore) {
         await deps.encryptionStore.delete(existing.encryptedPayloadKey);
       }
@@ -720,17 +788,35 @@ async function handleProposalDecide(input: {
     }
 
     // approve → executing → apply business
-    await deps.proposals.updateStatus(existing.key, 'executing', {
-      decidedAt: now,
-      executionStartedAt: now,
-      resultCode: 'executing',
-    });
+    const executing = await casUpdateStatus(
+      deps,
+      existing.key,
+      'executing',
+      {
+        decidedAt: now,
+        executionStartedAt: now,
+        resultCode: 'executing',
+      },
+      'pending',
+    );
+    if (!executing) {
+      return fail(actionType, idempotencyKey, 'conflict', 'Conflicto de estado (approve).', {
+        type: 'proposal',
+        key: existing.key,
+      });
+    }
 
     if (!deps.encryptionStore || !deps.encryptionKey || !existing.encryptedPayloadKey) {
-      await deps.proposals.updateStatus(existing.key, 'failed', {
-        resultCode: 'misconfigured',
-        afterSummary: 'Sin ciphertext',
-      });
+      await casUpdateStatus(
+        deps,
+        existing.key,
+        'failed',
+        {
+          resultCode: 'misconfigured',
+          afterSummary: 'Sin ciphertext',
+        },
+        'executing',
+      );
       return fail(actionType, idempotencyKey, 'misconfigured', 'Payload cifrado ausente.', {
         type: 'proposal',
         key: existing.key,
@@ -739,10 +825,16 @@ async function handleProposalDecide(input: {
 
     const envelope = await deps.encryptionStore.get(existing.encryptedPayloadKey);
     if (!envelope) {
-      await deps.proposals.updateStatus(existing.key, 'failed', {
-        resultCode: 'expired',
-        afterSummary: 'Ciphertext expirado',
-      });
+      await casUpdateStatus(
+        deps,
+        existing.key,
+        'failed',
+        {
+          resultCode: 'expired',
+          afterSummary: 'Ciphertext expirado',
+        },
+        'executing',
+      );
       return fail(actionType, idempotencyKey, 'expired', 'Payload cifrado expirado.', {
         type: 'proposal',
         key: existing.key,
@@ -756,10 +848,16 @@ async function handleProposalDecide(input: {
         payload: unknown;
       };
     } catch {
-      await deps.proposals.updateStatus(existing.key, 'failed', {
-        resultCode: 'failed',
-        afterSummary: 'Decrypt failed',
-      });
+      await casUpdateStatus(
+        deps,
+        existing.key,
+        'failed',
+        {
+          resultCode: 'failed',
+          afterSummary: 'Decrypt failed',
+        },
+        'executing',
+      );
       return fail(actionType, idempotencyKey, 'failed', 'No se pudo descifrar el payload.', {
         type: 'proposal',
         key: existing.key,
@@ -767,7 +865,13 @@ async function handleProposalDecide(input: {
     }
 
     if (!isBusinessActionType(decrypted.proposedActionType)) {
-      await deps.proposals.updateStatus(existing.key, 'failed', { resultCode: 'invalid-payload' });
+      await casUpdateStatus(
+        deps,
+        existing.key,
+        'failed',
+        { resultCode: 'invalid-payload' },
+        'executing',
+      );
       return fail(actionType, idempotencyKey, 'invalid-payload', 'Acción propuesta inválida.', {
         type: 'proposal',
         key: existing.key,
@@ -780,10 +884,16 @@ async function handleProposalDecide(input: {
       const before = await deps.tasks.getTask(p.taskKey);
       const currentDigest = before ? `status:${before.status}` : null;
       if (existing.beforeDigest && currentDigest !== existing.beforeDigest) {
-        await deps.proposals.updateStatus(existing.key, 'failed', {
-          resultCode: 'conflict',
-          afterSummary: 'beforeDigest mismatch',
-        });
+        await casUpdateStatus(
+          deps,
+          existing.key,
+          'failed',
+          {
+            resultCode: 'conflict',
+            afterSummary: 'beforeDigest mismatch',
+          },
+          'executing',
+        );
         return fail(
           actionType,
           idempotencyKey,
@@ -805,11 +915,23 @@ async function handleProposalDecide(input: {
     await deps.encryptionStore.delete(existing.encryptedPayloadKey);
 
     if (!executed.result.ok) {
-      await deps.proposals.updateStatus(existing.key, 'failed', {
-        resultCode: executed.result.code,
-        afterSummary: executed.result.message,
-        targetKey: executed.result.target?.key ?? existing.targetKey,
-      });
+      const failed = await casUpdateStatus(
+        deps,
+        existing.key,
+        'failed',
+        {
+          resultCode: executed.result.code,
+          afterSummary: executed.result.message,
+          targetKey: executed.result.target?.key ?? existing.targetKey,
+        },
+        'executing',
+      );
+      if (!failed) {
+        return fail(actionType, idempotencyKey, 'conflict', 'Conflicto al marcar failed.', {
+          type: 'proposal',
+          key: existing.key,
+        });
+      }
       return result({
         ...executed.result,
         actionType,
@@ -824,18 +946,30 @@ async function handleProposalDecide(input: {
         ? new Date(Date.parse(now) + rollbackWindow * 1000).toISOString()
         : null;
 
-    await deps.proposals.updateStatus(existing.key, 'applied', {
-      appliedAt: now,
-      resultCode: 'applied',
-      afterSummary: executed.result.summary,
-      beforeSummary: executed.beforeDigest,
-      beforeDigest: executed.beforeDigest,
-      diff: executed.diff,
-      targetKey: executed.result.target?.key ?? existing.targetKey,
-      rollbackDeadline,
-      ownershipDigest: executed.ownership,
-      encryptedPayloadKey: null,
-    });
+    const applied = await casUpdateStatus(
+      deps,
+      existing.key,
+      'applied',
+      {
+        appliedAt: now,
+        resultCode: 'applied',
+        afterSummary: executed.result.summary,
+        beforeSummary: executed.beforeDigest,
+        beforeDigest: executed.beforeDigest,
+        diff: executed.diff,
+        targetKey: executed.result.target?.key ?? existing.targetKey,
+        rollbackDeadline,
+        ownershipDigest: executed.ownership,
+        encryptedPayloadKey: null,
+      },
+      'executing',
+    );
+    if (!applied) {
+      return fail(actionType, idempotencyKey, 'conflict', 'Conflicto al marcar applied.', {
+        type: 'proposal',
+        key: existing.key,
+      });
+    }
 
     return result({
       ok: true,
@@ -923,22 +1057,53 @@ async function handleRollback(input: {
   }
 
   try {
-    await deps.proposals.updateStatus(existing.key, 'rolling-back', {
-      resultCode: 'rolling-back',
-    });
+    const rolling = await casUpdateStatus(
+      deps,
+      existing.key,
+      'rolling-back',
+      {
+        resultCode: 'rolling-back',
+      },
+      'applied',
+    );
+    if (!rolling) {
+      return fail(
+        'action.rollback',
+        idempotencyKey,
+        'conflict',
+        'Conflicto de estado (rollback).',
+        { type: 'proposal', key: existing.key },
+      );
+    }
 
     const compensated = await compensateBusiness({
       actionType: existing.actionType,
       targetKey: existing.targetKey,
       ownership: existing.ownershipDigest ?? null,
       deps,
+      diff: existing.diff,
     });
 
     if (!compensated.ok) {
-      await deps.proposals.updateStatus(existing.key, 'rollback-failed', {
-        resultCode: 'rollback-failed',
-        afterSummary: compensated.message,
-      });
+      const failed = await casUpdateStatus(
+        deps,
+        existing.key,
+        'rollback-failed',
+        {
+          resultCode: 'rollback-failed',
+          afterSummary: compensated.message,
+        },
+        'rolling-back',
+      );
+      if (!failed) {
+        return fail(
+          'action.rollback',
+          idempotencyKey,
+          'conflict',
+          'Conflicto al marcar rollback-failed.',
+          { type: 'proposal', key: existing.key },
+        );
+      }
       return result({
         ok: false,
         code: 'rollback-failed',
@@ -951,11 +1116,26 @@ async function handleRollback(input: {
       });
     }
 
-    await deps.proposals.updateStatus(existing.key, 'rolled-back', {
-      rolledBackAt: now,
-      resultCode: 'rolled-back',
-      afterSummary: 'Revertida',
-    });
+    const rolled = await casUpdateStatus(
+      deps,
+      existing.key,
+      'rolled-back',
+      {
+        rolledBackAt: now,
+        resultCode: 'rolled-back',
+        afterSummary: 'Revertida',
+      },
+      'rolling-back',
+    );
+    if (!rolled) {
+      return fail(
+        'action.rollback',
+        idempotencyKey,
+        'conflict',
+        'Conflicto al marcar rolled-back.',
+        { type: 'proposal', key: existing.key },
+      );
+    }
 
     return result({
       ok: true,

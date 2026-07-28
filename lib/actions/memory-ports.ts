@@ -20,6 +20,7 @@ import type {
   ProposalRepositoryPort,
   TaskSnapshot,
 } from '@/lib/actions/ports';
+import { assertAllowedProposalStatusTransition } from '@/lib/actions/proposal-transitions';
 
 function opaque(prefix: string, seed: string): string {
   let hash = 0;
@@ -239,9 +240,14 @@ export function createMemoryProposalPort(): ProposalRepositoryPort & {
       const all = [...rows.values()];
       return status ? all.filter((row) => row.status === status) : all;
     },
-    async updateStatus(key, status, patch) {
+    async updateStatus(key, status, patch, options) {
       const row = rows.get(key);
       if (!row) return null;
+      if (options?.expectedStatus && row.status !== options.expectedStatus) {
+        return null;
+      }
+      const transition = assertAllowedProposalStatusTransition(row.status, status);
+      if (!transition.ok) return null;
       const next = { ...row, status, ...patch };
       rows.set(key, next);
       return next;
