@@ -13,6 +13,7 @@ import type {
   GymSessionCreatePayload,
   GymSetInput,
   InboxCapturePayload,
+  InboxCaptureOrigin,
   ProposalCreatePayload,
   ProposalDecidePayload,
   RollbackPayload,
@@ -20,12 +21,12 @@ import type {
   TaskCreatePayload,
   WriteContractVersion,
 } from '@/types/actions';
-import { WRITE_CONTRACT_VERSION } from '@/types/actions';
+import { INBOX_CAPTURE_ORIGINS, WRITE_CONTRACT_VERSION } from '@/types/actions';
 
 const PRIVATE_PATTERN =
   /journal|diario\s+personal|diagn[oó]stico|historial\s+cl[ií]nico|sexualidad|<script|javascript:/i;
 
-const INBOX_ORIGINS = new Set(['web', 'openclaw', 'manual', 'import']);
+const INBOX_ORIGINS = new Set<string>(INBOX_CAPTURE_ORIGINS);
 
 function isYmd(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -203,7 +204,10 @@ export function validateInboxCapture(raw: unknown): PayloadResult<InboxCapturePa
   if (!INBOX_ORIGINS.has(originRaw)) {
     return { ok: false, message: 'Origen de captura no permitido.' };
   }
-  return { ok: true, value: { text, link, capturedAt, origin: originRaw } };
+  return {
+    ok: true,
+    value: { text, link, capturedAt, origin: originRaw as InboxCaptureOrigin },
+  };
 }
 
 function validateSet(raw: unknown, index: number): PayloadResult<GymSetInput> {

@@ -33,6 +33,7 @@ import type {
   GymSessionDraftExercise,
   GymSessionDraftSet,
 } from '@/types/gym';
+import type { GymSessionCreatePayload } from '@/types/actions';
 
 import styles from './GymSessionPanel.module.scss';
 
@@ -359,6 +360,7 @@ export function GymSessionPanel({
             setMessage('Confirmá proponer el registro de la sesión.');
             return;
           }
+          const businessPayload: GymSessionCreatePayload = built.payload;
           start(async () => {
             const result = await runWriteAction({
               actionType: 'proposal.create',
@@ -368,10 +370,10 @@ export function GymSessionPanel({
                 targetType: 'gym-session',
                 targetKey: null,
                 reason: 'Registro de sesión desde gimnasio web',
-                expectedChange: `${built.payload.sets.length} sets · ${draft.date}`,
+                expectedChange: `${businessPayload.sets.length} sets · ${draft.date}`,
                 risk: 'medium',
                 reversible: true,
-                payload: built.payload,
+                payload: businessPayload,
               },
               confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
             });

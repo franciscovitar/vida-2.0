@@ -13,6 +13,8 @@ import type {
 import type {
   ActionProposalSummary,
   ActionResult,
+  CalendarHoldCreatePayload,
+  InboxCapturePayload,
   ProposedBusinessActionType,
 } from '@/types/actions';
 
@@ -140,13 +142,9 @@ export function parseOpenClawProposalRequest(
   };
 }
 
-function buildCalendarHoldPayload(payload: Record<string, string | number | boolean | null>): {
-  title: string;
-  start: string;
-  end: string;
-  note: string | null;
-  relatedTaskKey: string | null;
-} {
+function buildCalendarHoldPayload(
+  payload: Record<string, string | number | boolean | null>,
+): CalendarHoldCreatePayload {
   if (typeof payload.start === 'string' && typeof payload.end === 'string') {
     return {
       title: String(payload.title ?? 'Hold propuesto'),
@@ -165,6 +163,18 @@ function buildCalendarHoldPayload(payload: Record<string, string | number | bool
     end: `${date}T${endTime}:00.000Z`,
     note: typeof payload.reason === 'string' ? payload.reason : null,
     relatedTaskKey: typeof payload.relatedTaskKey === 'string' ? payload.relatedTaskKey : null,
+  };
+}
+
+function buildInboxCapturePayload(
+  payload: Record<string, string | number | boolean | null>,
+): InboxCapturePayload {
+  return {
+    text: String(payload.text ?? ''),
+    link: typeof payload.link === 'string' ? payload.link : null,
+    capturedAt:
+      typeof payload.capturedAt === 'string' ? payload.capturedAt : new Date().toISOString(),
+    origin: 'openclaw',
   };
 }
 
@@ -212,21 +222,11 @@ export async function createOpenClawProposal(input: {
 
   const businessPayload = isCalendarHold
     ? buildCalendarHoldPayload(input.request.payload)
-    : ({
-        ...input.request.payload,
-        ...(proposed === 'inbox.capture'
-          ? {
-              origin: 'openclaw',
-              text: String(input.request.payload.text ?? ''),
-              link:
-                typeof input.request.payload.link === 'string' ? input.request.payload.link : null,
-              capturedAt:
-                typeof input.request.payload.capturedAt === 'string'
-                  ? input.request.payload.capturedAt
-                  : new Date().toISOString(),
-            }
-          : {}),
-      } as never);
+    : proposed === 'inbox.capture'
+      ? buildInboxCapturePayload(input.request.payload)
+      : ({
+          ...input.request.payload,
+        } as never);
 
   const runtime = buildWriteRuntime(env, input.runtimeOverrides);
   const result = await executeAction(

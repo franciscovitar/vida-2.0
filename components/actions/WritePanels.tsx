@@ -6,6 +6,11 @@ import { runWriteAction } from '@/app/actions/writes';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import type {
+  CalendarHoldCreatePayload,
+  TaskChangeStatusPayload,
+  TaskCreatePayload,
+} from '@/types/actions';
 
 import styles from './WritePanels.module.scss';
 
@@ -50,6 +55,16 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
             return;
           }
           const preserved = { title, priority, areaKey };
+          const businessPayload: TaskCreatePayload = {
+            title: preserved.title,
+            priority: preserved.priority,
+            areaKey: preserved.areaKey,
+            projectKey: null,
+            date: null,
+            duration: null,
+            energy: null,
+            note: null,
+          };
           start(async () => {
             const result = await runWriteAction({
               actionType: 'proposal.create',
@@ -62,16 +77,7 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
                 expectedChange: `Nueva tarea “${title.trim()}” en estado Pendiente`,
                 risk: 'medium',
                 reversible: true,
-                payload: {
-                  title: preserved.title,
-                  priority: preserved.priority,
-                  areaKey: preserved.areaKey,
-                  projectKey: null,
-                  date: null,
-                  duration: null,
-                  energy: null,
-                  note: null,
-                },
+                payload: businessPayload,
               },
               confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
             });
@@ -131,8 +137,10 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
 
 export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
   const [taskKey, setTaskKey] = useState('');
-  const [currentStatus, setCurrentStatus] = useState('Pendiente');
-  const [nextStatus, setNextStatus] = useState('En progreso');
+  const [currentStatus, setCurrentStatus] =
+    useState<TaskChangeStatusPayload['nextStatus']>('Pendiente');
+  const [nextStatus, setNextStatus] =
+    useState<TaskChangeStatusPayload['nextStatus']>('En progreso');
   const [confirm, setConfirm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -161,6 +169,10 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
             return;
           }
           const preserved = { taskKey, currentStatus, nextStatus };
+          const businessPayload: TaskChangeStatusPayload = {
+            taskKey: preserved.taskKey,
+            nextStatus: preserved.nextStatus,
+          };
           start(async () => {
             const result = await runWriteAction({
               actionType: 'proposal.create',
@@ -173,7 +185,7 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
                 expectedChange: `${preserved.currentStatus} → ${preserved.nextStatus}`,
                 risk: 'low',
                 reversible: true,
-                payload: { taskKey: preserved.taskKey, nextStatus: preserved.nextStatus },
+                payload: businessPayload,
               },
               expectedPrevious: preserved.currentStatus,
               confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
@@ -201,7 +213,9 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
           <select
             className={styles.input}
             value={currentStatus}
-            onChange={(e) => setCurrentStatus(e.target.value)}
+            onChange={(e) =>
+              setCurrentStatus(e.target.value as TaskChangeStatusPayload['nextStatus'])
+            }
           >
             {['Pendiente', 'En progreso', 'Bloqueada', 'Hecha', 'Algún día'].map((status) => (
               <option key={status} value={status}>
@@ -215,7 +229,7 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
           <select
             className={styles.input}
             value={nextStatus}
-            onChange={(e) => setNextStatus(e.target.value)}
+            onChange={(e) => setNextStatus(e.target.value as TaskChangeStatusPayload['nextStatus'])}
           >
             {['Pendiente', 'En progreso', 'Bloqueada', 'Hecha', 'Algún día'].map((status) => (
               <option key={status} value={status}>
@@ -272,6 +286,13 @@ export function CalendarHoldPanel({ writesEnabled }: { writesEnabled: boolean })
           const startIso = start ? new Date(start).toISOString() : '';
           const endIso = end ? new Date(end).toISOString() : '';
           const preserved = { title, start, end, note };
+          const businessPayload: CalendarHoldCreatePayload = {
+            title: preserved.title.trim(),
+            start: startIso,
+            end: endIso,
+            note: preserved.note.trim() || null,
+            relatedTaskKey: null,
+          };
           startTransition(async () => {
             const result = await runWriteAction({
               actionType: 'proposal.create',
@@ -284,13 +305,7 @@ export function CalendarHoldPanel({ writesEnabled }: { writesEnabled: boolean })
                 expectedChange: `Hold privado “${preserved.title.trim()}”`,
                 risk: 'medium',
                 reversible: true,
-                payload: {
-                  title: preserved.title.trim(),
-                  start: startIso,
-                  end: endIso,
-                  note: preserved.note.trim() || null,
-                  relatedTaskKey: null,
-                },
+                payload: businessPayload,
               },
               confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
             });

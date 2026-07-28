@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { WritesDisabledNotice } from '@/components/actions/WritePanels';
+import type { InboxCapturePayload } from '@/types/actions';
 
 import styles from './WritePanels.module.scss';
 
@@ -41,6 +42,12 @@ export function InboxCapturePanel({ writesEnabled }: { writesEnabled: boolean })
             return;
           }
           const preserved = { text, link };
+          const businessPayload: InboxCapturePayload = {
+            text: preserved.text,
+            link: preserved.link.trim() || null,
+            capturedAt: new Date().toISOString(),
+            origin: 'web',
+          };
           start(async () => {
             const result = await runWriteAction({
               actionType: 'proposal.create',
@@ -53,12 +60,7 @@ export function InboxCapturePanel({ writesEnabled }: { writesEnabled: boolean })
                 expectedChange: 'Nuevo ítem en Bandeja',
                 risk: 'low',
                 reversible: true,
-                payload: {
-                  text: preserved.text,
-                  link: preserved.link.trim() || null,
-                  capturedAt: new Date().toISOString(),
-                  origin: 'web-bandeja',
-                },
+                payload: businessPayload,
               },
               confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
             });
