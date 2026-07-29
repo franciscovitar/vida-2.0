@@ -555,6 +555,22 @@ test('8E1-19. validación de peso, reps, RIR y RPE', async () => {
 
 test('8E1-20. propuesta creada', async () => {
   const proposals = createMemoryProposalPort();
+  const d = deps({ proposals });
+  const seeded = await d.handlers.tasks.createTask(
+    {
+      title: 'Seed',
+      priority: 'Media',
+      areaKey: 'area.salud',
+      projectKey: null,
+      date: null,
+      duration: null,
+      energy: null,
+      note: null,
+    },
+    { idempotencyKey: 'seed-prop-1' },
+  );
+  assert.equal(seeded.ok, true);
+  if (!seeded.ok) return;
   const result = await executeAction(
     request({
       actionType: 'proposal.create',
@@ -563,15 +579,15 @@ test('8E1-20. propuesta creada', async () => {
         name: 'Mover tarea',
         proposedActionType: 'task.change-status',
         targetType: 'task',
-        targetKey: 'task-1',
+        targetKey: seeded.key,
         reason: 'Reorganizar',
         expectedChange: 'Pendiente → En progreso',
         risk: 'low',
         reversible: true,
-        payload: { taskKey: 'task-1', nextStatus: 'En progreso' },
+        payload: { taskKey: seeded.key, nextStatus: 'En progreso' },
       },
     }),
-    deps({ proposals }),
+    d,
   );
   assert.equal(result.ok, true);
   assert.equal((await proposals.list()).length, 1);

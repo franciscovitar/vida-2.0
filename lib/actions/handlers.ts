@@ -38,6 +38,7 @@ import type {
   ProposalRepositoryPort,
 } from '@/lib/actions/ports';
 import { isBusinessActionType } from '@/lib/actions/policy';
+import { preflightBusinessProposal } from '@/lib/actions/preflight';
 import {
   WRITE_CONTRACT_VERSION,
   type ActionDiff,
@@ -607,36 +608,17 @@ async function handleProposalCreate(input: {
     );
   }
 
-  // Read-before-write for diff preview
-  let beforeDigest: string | null = null;
-  let diff: ActionDiff | null = null;
-  if (parsed.value.proposedActionType === 'task.change-status') {
-    const p = parsed.value.payload as { taskKey: string };
-    const before = await deps.tasks.getTask(p.taskKey);
-    beforeDigest = before ? `status:${before.status}` : null;
-    if (before) {
-      diff = buildTaskChangeStatusDiff(
-        before.status,
-        parsed.value.payload as Parameters<typeof buildTaskChangeStatusDiff>[1],
-      );
-    }
-  } else if (parsed.value.proposedActionType === 'task.create') {
-    diff = buildTaskCreateDiff(parsed.value.payload as Parameters<typeof buildTaskCreateDiff>[0]);
-    beforeDigest = digestFromDiff({ fields: [] });
-  } else if (parsed.value.proposedActionType === 'inbox.capture') {
-    diff = buildInboxCaptureDiff(
-      parsed.value.payload as Parameters<typeof buildInboxCaptureDiff>[0],
-    );
-    beforeDigest = digestFromDiff({ fields: [] });
-  } else if (parsed.value.proposedActionType === 'gym.session.create') {
-    diff = buildGymSessionDiff(parsed.value.payload as Parameters<typeof buildGymSessionDiff>[0]);
-    beforeDigest = digestFromDiff({ fields: [] });
-  } else if (parsed.value.proposedActionType === 'calendar.hold.create') {
-    diff = buildCalendarHoldDiff(
-      parsed.value.payload as Parameters<typeof buildCalendarHoldDiff>[0],
-    );
-    beforeDigest = digestFromDiff({ fields: [] });
+  const preflight = await preflightBusinessProposal(
+    parsed.value.proposedActionType,
+    parsed.value.payload,
+    deps,
+  );
+  if (!preflight.ok) {
+    return fail('proposal.create', idempotencyKey, preflight.code, preflight.message);
   }
+
+  const beforeDigest = preflight.beforeDigest;
+  const diff = preflight.diff;
 
   const plaintext = JSON.stringify({
     proposedActionType: parsed.value.proposedActionType,

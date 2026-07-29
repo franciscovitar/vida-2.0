@@ -108,6 +108,16 @@ export function listForbiddenActionTypes(): readonly ForbiddenActionType[] {
   return FORBIDDEN;
 }
 
+/** Meta contractual (riesgo / reversibilidad / confirmación) de una acción permitida. */
+export function getAllowedActionMeta(actionType: AllowedActionType): {
+  confirmation: 'explicit' | 'reinforced';
+  risk: 'low' | 'medium' | 'high';
+  reversible: boolean;
+  reinforcedPhrase?: string;
+} {
+  return META[actionType];
+}
+
 export function evaluateActionPolicy(input: {
   actionType: string;
   writesEnabled: boolean;

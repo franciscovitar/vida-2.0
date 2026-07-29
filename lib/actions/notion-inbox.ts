@@ -128,6 +128,18 @@ export function createNotionInboxWritePort(deps: NotionInboxWriteDeps): NotionIn
       if (!block.ok) return { ok: true, present: false };
       return { ok: true, present: !block.block.archived };
     },
+
+    async checkReady() {
+      const page = await deps.client.retrievePage(deps.inboxPageId);
+      if (!page.ok) {
+        return {
+          ok: false,
+          code: 'unavailable' as const,
+          message: 'Bandeja no accesible o no configurada.',
+        };
+      }
+      return { ok: true };
+    },
   };
 }
 

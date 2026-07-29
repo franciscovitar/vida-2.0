@@ -82,6 +82,9 @@ function notConfiguredTaskPort(message: string): NotionTaskWritePort {
     async resolveAreaProjectCompatibility() {
       return { ok: false, message };
     },
+    async checkReady() {
+      return { ok: false, code: 'not-configured', message };
+    },
     async archiveOwnedTask() {
       return { ok: false, code: 'not-configured', message };
     },
@@ -104,6 +107,9 @@ function notConfiguredInboxPort(message: string): NotionInboxWritePort {
     async verifyCapture() {
       return { ok: false, message };
     },
+    async checkReady() {
+      return { ok: false, code: 'not-configured', message };
+    },
   };
 }
 
@@ -123,6 +129,9 @@ function notConfiguredGymPort(message: string): GymSheetWritePort {
     },
     async markReverted() {
       return { ok: false, message };
+    },
+    async checkReady() {
+      return { ok: false, code: 'not-configured', message };
     },
   };
 }

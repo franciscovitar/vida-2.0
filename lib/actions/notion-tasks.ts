@@ -125,14 +125,19 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
 
   return {
     async resolveAreaProjectCompatibility(areaKey, projectKey) {
-      if (!projectKey) return { ok: true };
       const maps = await loadMaps();
       if (!maps) {
         return { ok: false, message: 'No se pudo verificar Área–Proyecto.' };
       }
       const areaPage = resolveAreaPage(maps.areas, areaKey);
+      if (!areaPage) {
+        return { ok: false, message: 'Área no autorizada.' };
+      }
+      if (!projectKey) {
+        return { ok: true };
+      }
       const projectPage = resolveProjectPage(maps.projects, projectKey);
-      if (!areaPage || !projectPage) {
+      if (!projectPage) {
         return { ok: false, message: 'Área o Proyecto no autorizado.' };
       }
       const projectAreaIds = readRelationIds(projectPage.properties[PROJECT_PROPS.area]);
@@ -143,6 +148,26 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
         return { ok: false, message: 'Área incompatible con el Proyecto.' };
       }
       return { ok: true };
+    },
+
+    async checkReady() {
+      const maps = await loadMaps();
+      if (!maps) {
+        return {
+          ok: false,
+          code: 'unavailable' as const,
+          message: 'Áreas/Proyectos no accesibles.',
+        };
+      }
+      const activeAreas = maps.areas
+        .map((page) => adaptArea(page))
+        .filter((area) => area.status === 'Activa');
+      const tasksRes = await deps.client.queryDataSource(deps.tasksDataSourceId);
+      return {
+        ok: true as const,
+        hasAuthorizedArea: activeAreas.length > 0,
+        hasTasks: tasksRes.ok ? tasksRes.pages.length > 0 : false,
+      };
     },
 
     async createTask(payload: TaskCreatePayload, meta) {

@@ -7,8 +7,9 @@ import {
   TASK_PRIORITIES,
   TASK_STATUSES,
 } from '@/lib/notion/constants';
-import { isBusinessActionType } from '@/lib/actions/policy';
+import { getAllowedActionMeta, isBusinessActionType } from '@/lib/actions/policy';
 import type {
+  ActionTargetType,
   CalendarHoldCreatePayload,
   GymSessionCreatePayload,
   GymSetInput,
@@ -16,6 +17,7 @@ import type {
   InboxCaptureOrigin,
   ProposalCreatePayload,
   ProposalDecidePayload,
+  ProposedBusinessActionType,
   RollbackPayload,
   TaskChangeStatusPayload,
   TaskCreatePayload,
@@ -27,6 +29,14 @@ const PRIVATE_PATTERN =
   /journal|diario\s+personal|diagn[oó]stico|historial\s+cl[ií]nico|sexualidad|<script|javascript:/i;
 
 const INBOX_ORIGINS = new Set<string>(INBOX_CAPTURE_ORIGINS);
+
+const BUSINESS_TARGET_TYPE: Record<ProposedBusinessActionType, ActionTargetType> = {
+  'task.create': 'task',
+  'task.change-status': 'task',
+  'inbox.capture': 'inbox',
+  'gym.session.create': 'gym-session',
+  'calendar.hold.create': 'calendar-hold',
+};
 
 function isYmd(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -423,9 +433,29 @@ export function validateProposalCreate(raw: unknown): PayloadResult<ProposalCrea
   const reason = typeof data.reason === 'string' ? data.reason.trim() : '';
   const expectedChange = typeof data.expectedChange === 'string' ? data.expectedChange.trim() : '';
   if (!reason || !expectedChange) return { ok: false, message: 'Motivo y cambio esperados.' };
+
+  const requiredTarget = BUSINESS_TARGET_TYPE[proposedActionType];
+  const targetType = typeof data.targetType === 'string' ? data.targetType : '';
+  if (targetType !== requiredTarget) {
+    return {
+      ok: false,
+      message: `targetType debe ser “${requiredTarget}” para ${proposedActionType}.`,
+    };
+  }
+
+  const policy = getAllowedActionMeta(proposedActionType);
   const risk = data.risk;
   if (risk !== 'low' && risk !== 'medium' && risk !== 'high') {
     return { ok: false, message: 'Riesgo inválido.' };
+  }
+  if (risk !== policy.risk) {
+    return { ok: false, message: 'Riesgo incompatible con la política de la acción.' };
+  }
+  if (typeof data.reversible !== 'boolean') {
+    return { ok: false, message: 'Reversibilidad inválida.' };
+  }
+  if (data.reversible !== policy.reversible) {
+    return { ok: false, message: 'Reversibilidad incompatible con la política de la acción.' };
   }
 
   let businessPayload: ProposalCreatePayload['payload'];
@@ -456,14 +486,12 @@ export function validateProposalCreate(raw: unknown): PayloadResult<ProposalCrea
     value: {
       name,
       proposedActionType,
-      targetType: (typeof data.targetType === 'string'
-        ? data.targetType
-        : 'system') as ProposalCreatePayload['targetType'],
+      targetType: requiredTarget,
       targetKey: typeof data.targetKey === 'string' ? data.targetKey : null,
       reason,
       expectedChange,
-      risk,
-      reversible: Boolean(data.reversible),
+      risk: policy.risk,
+      reversible: policy.reversible,
       payload: businessPayload,
     },
   };

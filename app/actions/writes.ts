@@ -4,6 +4,10 @@ import { verifySession } from '@/lib/auth/dal';
 import { sanitizeActorHint } from '@/lib/actions/audit';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
 import { executeAction } from '@/lib/actions/engine';
+import {
+  buildWriteOperabilityMatrix,
+  type WriteOperabilityMatrix,
+} from '@/lib/actions/operability';
 import { actorHashFromEmail } from '@/lib/actions/opaque';
 import { isPublicControlAction } from '@/lib/actions/policy';
 import { buildWriteRuntime, getWriteRuntimeStatus } from '@/lib/actions/runtime';
@@ -166,4 +170,44 @@ export async function loadWriteRuntimeStatus() {
     return null;
   }
   return getWriteRuntimeStatus();
+}
+
+/** Matriz de operabilidad read-only (sin body del cliente, sin acciones). */
+export async function loadWriteOperabilityMatrix(): Promise<WriteOperabilityMatrix | null> {
+  const session = await verifySession();
+  if (!session.ok) return null;
+  // Con flag off: buildWriteOperabilityMatrix no hace I/O ni construye clientes.
+  if (!isWriteActionsEnabled()) {
+    return buildWriteOperabilityMatrix({
+      tasks: {
+        createTask: async () => ({ ok: false, code: 'not-configured', message: 'off' }),
+        getTask: async () => null,
+        updateTaskStatus: async () => ({ ok: false, code: 'not-configured', message: 'off' }),
+        resolveAreaProjectCompatibility: async () => ({ ok: false, message: 'off' }),
+        checkReady: async () => ({ ok: false, code: 'not-configured', message: 'off' }),
+        archiveOwnedTask: async () => ({ ok: false, code: 'not-configured', message: 'off' }),
+      },
+      inbox: {
+        appendCapture: async () => ({
+          ok: false,
+          code: 'not-configured',
+          message: 'off',
+          preserveText: true as const,
+        }),
+        archiveCapture: async () => ({ ok: false, code: 'not-configured', message: 'off' }),
+        verifyCapture: async () => ({ ok: false, message: 'off' }),
+        checkReady: async () => ({ ok: false, code: 'not-configured', message: 'off' }),
+      },
+      gym: {
+        createPendingSession: async () => ({ ok: false, message: 'off' }),
+        writeSets: async () => ({ ok: false, written: 0, message: 'off' }),
+        verifySession: async () => ({ ok: false, message: 'off' }),
+        setSessionStatus: async () => ({ ok: false, message: 'off' }),
+        markReverted: async () => ({ ok: false, message: 'off' }),
+        checkReady: async () => ({ ok: false, code: 'not-configured', message: 'off' }),
+      },
+    });
+  }
+  const runtime = buildWriteRuntime();
+  return buildWriteOperabilityMatrix(runtime.handlers);
 }

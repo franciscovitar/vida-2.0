@@ -32,18 +32,50 @@ function ownershipToken(seed: string): OwnershipProof {
   return createHash('sha256').update(`own:${seed}`).digest('hex').slice(0, 24);
 }
 
+function resolveAuthorizedAreas(
+  areaProjectMap: Record<string, string>,
+  authorizedAreas?: readonly string[],
+): Set<string> {
+  if (authorizedAreas) return new Set(authorizedAreas);
+  const fromMap = [...new Set(Object.values(areaProjectMap))];
+  if (fromMap.length > 0) return new Set(fromMap);
+  // Fixture de tests legacy (no es default de UI/productivo).
+  return new Set(['area.salud']);
+}
+
 export function createMemoryTaskPort(options?: {
   areaProjectMap?: Record<string, string>;
+  authorizedAreas?: readonly string[];
   failVerify?: boolean;
+  failReady?: boolean;
 }): NotionTaskWritePort & {
   tasks: Map<string, TaskSnapshot & { ownership: OwnershipProof; archived?: boolean }>;
+  authorizedAreas: Set<string>;
 } {
   const tasks = new Map<string, TaskSnapshot & { ownership: OwnershipProof; archived?: boolean }>();
   const areaProjectMap = options?.areaProjectMap ?? {};
+  const authorized = resolveAuthorizedAreas(areaProjectMap, options?.authorizedAreas);
 
   return {
     tasks,
+    authorizedAreas: authorized,
     async createTask(payload: TaskCreatePayload, meta) {
+      if (!authorized.has(payload.areaKey)) {
+        return { ok: false, code: 'invalid-payload', message: 'Área no autorizada.' };
+      }
+      if (payload.projectKey) {
+        const projectArea = areaProjectMap[payload.projectKey];
+        if (!projectArea) {
+          return { ok: false, code: 'invalid-payload', message: 'Proyecto no autorizado.' };
+        }
+        if (projectArea !== payload.areaKey) {
+          return {
+            ok: false,
+            code: 'invalid-payload',
+            message: 'Área incompatible con el Proyecto.',
+          };
+        }
+      }
       const key = opaque('task', meta.idempotencyKey + payload.title);
       const ownership = ownershipToken(key + meta.idempotencyKey);
       tasks.set(key, {
@@ -75,12 +107,32 @@ export function createMemoryTaskPort(options?: {
       return { ok: true };
     },
     async resolveAreaProjectCompatibility(areaKey, projectKey) {
+      if (!authorized.has(areaKey)) {
+        return { ok: false, message: 'Área no autorizada.' };
+      }
       if (!projectKey) return { ok: true };
       const projectArea = areaProjectMap[projectKey];
-      if (projectArea && projectArea !== areaKey) {
+      if (!projectArea) {
+        return { ok: false, message: 'Área o Proyecto no autorizado.' };
+      }
+      if (projectArea !== areaKey) {
         return { ok: false, message: 'Área incompatible con el Proyecto.' };
       }
       return { ok: true };
+    },
+    async checkReady() {
+      if (options?.failReady) {
+        return {
+          ok: false,
+          code: 'unavailable' as const,
+          message: 'Puerto de tareas no disponible.',
+        };
+      }
+      return {
+        ok: true as const,
+        hasAuthorizedArea: authorized.size > 0,
+        hasTasks: [...tasks.values()].some((task) => !task.archived),
+      };
     },
     async archiveOwnedTask(key, ownershipProof) {
       const task = tasks.get(key);
@@ -94,7 +146,10 @@ export function createMemoryTaskPort(options?: {
   };
 }
 
-export function createMemoryInboxPort(options?: { fail?: boolean }): NotionInboxWritePort & {
+export function createMemoryInboxPort(options?: {
+  fail?: boolean;
+  failReady?: boolean;
+}): NotionInboxWritePort & {
   captures: Map<string, InboxCapturePayload & { ownership: OwnershipProof; archived?: boolean }>;
 } {
   const captures = new Map<
@@ -131,12 +186,23 @@ export function createMemoryInboxPort(options?: { fail?: boolean }): NotionInbox
       if (!row) return { ok: true, present: false };
       return { ok: true, present: !row.archived };
     },
+    async checkReady() {
+      if (options?.failReady || options?.fail) {
+        return {
+          ok: false,
+          code: 'unavailable' as const,
+          message: 'Bandeja no accesible.',
+        };
+      }
+      return { ok: true };
+    },
   };
 }
 
 export function createMemoryGymPort(options?: {
   failSetsAfter?: number;
   failVerify?: boolean;
+  failReady?: boolean;
 }): GymSheetWritePort & {
   sessions: Map<
     string,
@@ -185,6 +251,16 @@ export function createMemoryGymPort(options?: {
       const row = sessions.get(sessionId);
       if (!row) return { ok: false, message: 'Sesión ausente.' };
       row.status = 'reverted';
+      return { ok: true };
+    },
+    async checkReady() {
+      if (options?.failReady) {
+        return {
+          ok: false,
+          code: 'misconfigured' as const,
+          message: 'Esquema Gym inválido.',
+        };
+      }
       return { ok: true };
     },
   };

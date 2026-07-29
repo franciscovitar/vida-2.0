@@ -236,6 +236,30 @@ export function createGymSheetWritePort(input: {
       if (!put.ok) return { ok: false, message: put.message };
       return { ok: true };
     },
+
+    async checkReady() {
+      const sessions = await loadSessions();
+      if (!sessions.ok) {
+        return {
+          ok: false,
+          code: sessions.message.includes('Esquema')
+            ? ('misconfigured' as const)
+            : ('unavailable' as const),
+          message: sessions.message,
+        };
+      }
+      const sets = await loadSets();
+      if (!sets.ok) {
+        return {
+          ok: false,
+          code: sets.message.includes('Esquema')
+            ? ('misconfigured' as const)
+            : ('unavailable' as const),
+          message: sets.message,
+        };
+      }
+      return { ok: true };
+    },
   };
 }
 

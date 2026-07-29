@@ -194,5 +194,24 @@ export function createGoogleCalendarHoldApiClient(
       }
       return { ok: true };
     },
+
+    async getCalendar(calendarId) {
+      if (calendarId !== writeCalendarId) {
+        return { ok: false, message: sanitizeError() };
+      }
+      const path = `/calendars/${encodeURIComponent(writeCalendarId)}`;
+      const result = await request('GET', path);
+      if (!result.ok) return result;
+      const json = result.json;
+      if (!isObject(json) || typeof json.id !== 'string' || !json.id) {
+        return { ok: false, message: sanitizeError() };
+      }
+      return {
+        ok: true,
+        id: json.id,
+        primary: json.primary === true,
+        timeZone: typeof json.timeZone === 'string' ? json.timeZone : null,
+      };
+    },
   };
 }

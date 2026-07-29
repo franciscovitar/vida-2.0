@@ -57,6 +57,16 @@ export type CalendarHoldApiClient = {
     providerEventId: string,
     ownership: OwnershipProof,
   ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
+  /** Lectura mínima del calendario (calendars.get). */
+  getCalendar(calendarId: string): Promise<
+    | {
+        ok: true;
+        id: string;
+        primary: boolean;
+        timeZone: string | null;
+      }
+    | { ok: false; message: string }
+  >;
 };
 
 const BASE32HEX = '0123456789abcdefghijklmnopqrstuv';
@@ -157,6 +167,9 @@ export function createNotConfiguredCalendarHoldPort(message: string): CalendarHo
     async deleteHoldWithOwnership() {
       return { ok: false, code: 'not-configured', message };
     },
+    async checkReady() {
+      return { ok: false, code: 'not-configured', message };
+    },
   };
 }
 
@@ -168,6 +181,7 @@ export function createMemoryCalendarHoldPort(options?: {
   calendarId?: string;
   contractVersion?: string;
   hmacKey?: Buffer;
+  failReady?: boolean;
 }): CalendarHoldWritePort & {
   holds: Map<string, CalendarHoldSnapshot & { deleted?: boolean; providerEventId?: string }>;
 } {
@@ -225,6 +239,16 @@ export function createMemoryCalendarHoldPort(options?: {
       row.deleted = true;
       return { ok: true };
     },
+    async checkReady() {
+      if (options?.failReady) {
+        return {
+          ok: false,
+          code: 'unavailable' as const,
+          message: 'Calendario dedicado no accesible.',
+        };
+      }
+      return { ok: true };
+    },
   };
 }
 
@@ -236,6 +260,8 @@ export function createFakeCalendarHoldApiClient(options?: {
   failInsert?: boolean;
   failDelete?: boolean;
   ownershipMismatch?: boolean;
+  failGetCalendar?: boolean;
+  primaryCalendar?: boolean;
   /** Optional shared events map for multi-instance tests. */
   events?: Map<
     string,
@@ -326,6 +352,20 @@ export function createFakeCalendarHoldApiClient(options?: {
       row.deleted = true;
       return { ok: true };
     },
+    async getCalendar(calendarId) {
+      if (options?.failGetCalendar) {
+        return { ok: false, message: 'Calendario dedicado no accesible.' };
+      }
+      if (!calendarId.trim()) {
+        return { ok: false, message: 'Calendario dedicado no accesible.' };
+      }
+      return {
+        ok: true,
+        id: calendarId,
+        primary: Boolean(options?.primaryCalendar),
+        timeZone: 'America/Argentina/Buenos_Aires',
+      };
+    },
   };
 }
 
@@ -393,6 +433,39 @@ export function createCalendarHoldWritePort(input: {
     async deleteHoldWithOwnership(key, ownership) {
       const providerEventId = providerIdForKey(key);
       return input.client.deleteHoldByProviderId(calendarId, providerEventId, ownership);
+    },
+
+    async checkReady() {
+      if (!calendarId) {
+        return {
+          ok: false,
+          code: 'not-configured' as const,
+          message: 'Calendar write ID ausente.',
+        };
+      }
+      const meta = await input.client.getCalendar(calendarId);
+      if (!meta.ok) {
+        return {
+          ok: false,
+          code: 'unavailable' as const,
+          message: 'Calendario dedicado no accesible.',
+        };
+      }
+      if (meta.id !== calendarId) {
+        return {
+          ok: false,
+          code: 'misconfigured' as const,
+          message: 'Calendario dedicado no coincide.',
+        };
+      }
+      if (meta.primary) {
+        return {
+          ok: false,
+          code: 'misconfigured' as const,
+          message: 'El calendario primario no está permitido.',
+        };
+      }
+      return { ok: true };
     },
   };
 }

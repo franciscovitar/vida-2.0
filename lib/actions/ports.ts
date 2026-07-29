@@ -31,6 +31,15 @@ export type AreaProjectLink = {
 
 export type OwnershipProof = string;
 
+/** Resultado sanitizado de preflight read-only de proveedores. */
+export type ProviderReadyResult =
+  | { ok: true; hasAuthorizedArea?: boolean; hasTasks?: boolean }
+  | {
+      ok: false;
+      code: 'not-configured' | 'unavailable' | 'misconfigured';
+      message: string;
+    };
+
 export interface NotionTaskWritePort {
   createTask(
     payload: TaskCreatePayload,
@@ -45,10 +54,16 @@ export interface NotionTaskWritePort {
     nextStatus: TaskChangeStatusPayload['nextStatus'],
     expectedPrevious: string,
   ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
+  /**
+   * Valida referencias Área/Proyecto antes de crear propuesta.
+   * Con projectKey null todavía exige que el área exista y esté autorizada.
+   */
   resolveAreaProjectCompatibility(
     areaKey: string,
     projectKey: string | null,
   ): Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Lectura mínima: DS de áreas accesible + presencia de área autorizada. */
+  checkReady(): Promise<ProviderReadyResult>;
   /** Rollback ownership-scoped: archiva solo si ownershipProof coincide. */
   archiveOwnedTask(
     key: string,
@@ -71,6 +86,8 @@ export interface NotionInboxWritePort {
   verifyCapture(
     key: string,
   ): Promise<{ ok: true; present: boolean } | { ok: false; message: string }>;
+  /** Lectura mínima del destino Bandeja (sin append). */
+  checkReady(): Promise<ProviderReadyResult>;
 }
 
 export type GymSessionRowStatus = 'pending' | 'complete' | 'partial' | 'failed' | 'reverted';
@@ -94,6 +111,8 @@ export interface GymSheetWritePort {
   ): Promise<{ ok: true } | { ok: false; message: string }>;
   /** Compensación: marca reverted (nunca borra filas). */
   markReverted(sessionId: string): Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Lectura de headers Gym Sessions/Sets sin escribir. */
+  checkReady(): Promise<ProviderReadyResult>;
 }
 
 export type CalendarHoldSnapshot = {
@@ -123,6 +142,8 @@ export interface CalendarHoldWritePort {
     key: string,
     ownership: OwnershipProof,
   ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
+  /** Lectura mínima del calendario dedicado (sin crear eventos). */
+  checkReady(): Promise<ProviderReadyResult>;
 }
 
 export type ProposalCreateMeta = {

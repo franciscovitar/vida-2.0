@@ -559,7 +559,7 @@ test('closure-10. double approve conflicts via CAS expectedStatus', async () => 
       proposedActionType: 'task.create',
       targetType: 'task',
       targetKey: null,
-      risk: 'low',
+      risk: 'medium',
       reversible: true,
       reason: 'r',
       expectedChange: 'e',
