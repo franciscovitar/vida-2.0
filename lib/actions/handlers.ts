@@ -555,8 +555,14 @@ async function compensateBusiness(input: {
     if (!deps.calendar || !ownership) return { ok: false, message: 'Calendar/ownership ausente.' };
     const deleted = await deps.calendar.deleteHoldWithOwnership(targetKey, ownership);
     if (!deleted.ok) return { ok: false, message: deleted.message };
-    const after = await deps.calendar.getHold(targetKey);
-    return after ? { ok: false, message: 'Hold aún presente tras rollback.' } : { ok: true };
+    const verified = await deps.calendar.verifyHoldAbsent(targetKey);
+    if (!verified.ok) {
+      return { ok: false, message: 'No se pudo verificar la ausencia del hold.' };
+    }
+    if (!verified.absent) {
+      return { ok: false, message: 'Hold todavía activo tras rollback.' };
+    }
+    return { ok: true };
   }
   if (actionType === 'task.change-status') {
     const statusField = diff?.fields.find((field) => field.field === 'status');

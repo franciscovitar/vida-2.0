@@ -141,7 +141,21 @@ export interface CalendarHoldWritePort {
   deleteHoldWithOwnership(
     key: string,
     ownership: OwnershipProof,
-  ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
+  ): Promise<
+    | { ok: true; outcome: 'deleted' | 'already-absent' }
+    | { ok: false; code: string; message: string }
+  >;
+  /**
+   * Postcondition explícita de ausencia (cancelled / 404 / 410).
+   * No colapsa errores de proveedor a absent.
+   */
+  verifyHoldAbsent(
+    key: string,
+  ): Promise<
+    | { ok: true; absent: true }
+    | { ok: true; absent: false }
+    | { ok: false; code: string; message: string }
+  >;
   /** Lectura mínima del calendario dedicado (sin crear eventos). */
   checkReady(): Promise<ProviderReadyResult>;
 }

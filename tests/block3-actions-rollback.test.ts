@@ -362,5 +362,6 @@ test('B3D-06. calendar hold constraints + owned delete rollback', async () => {
   assert.equal([...calendar.holds.values()].filter((h) => !h.deleted).length, 0);
 
   const badOwnership = await calendar.deleteHoldWithOwnership('missing', 'x');
-  assert.equal(badOwnership.ok, false);
+  assert.equal(badOwnership.ok, true);
+  if (badOwnership.ok) assert.equal(badOwnership.outcome, 'already-absent');
 });

@@ -3,6 +3,7 @@
  * Constraints: calendario dedicado, visibility private, sin attendees/meet/recurrence/attachments,
  * ownership en extendedProperties.private, eventId real nunca al cliente (solo clave opaca).
  * Provider event ID determinista (multi-instance): sin Maps de proceso.
+ * Semántica Google: cancelled tombstones ≠ activos; 404/410 ≠ error genérico.
  * Tests: fake/memory; nunca llaman Google APIs.
  */
 import { createHash, createHmac } from 'node:crypto';
@@ -36,27 +37,47 @@ export type CalendarHoldInsertInput = {
 export type CalendarHoldInsertResult =
   { ok: true; providerEventId: string } | { ok: false; message: string };
 
+/** Lookup explícito: active | deleted | absent | unavailable. */
+export type CalendarHoldLookupResult =
+  | {
+      ok: true;
+      state: 'active';
+      title: string;
+      start: string;
+      end: string;
+      ownership: OwnershipProof | null;
+      relatedTaskKey: string | null;
+    }
+  | {
+      ok: true;
+      state: 'deleted';
+    }
+  | {
+      ok: true;
+      state: 'absent';
+    }
+  | {
+      ok: false;
+      code: 'unavailable' | 'not-configured';
+      retryable: boolean;
+      message: string;
+    };
+
+export type CalendarHoldDeleteResult =
+  | { ok: true; outcome: 'deleted' | 'already-absent' }
+  | { ok: false; code: string; message: string };
+
 export type CalendarHoldApiClient = {
   insertPrivateHold(input: CalendarHoldInsertInput): Promise<CalendarHoldInsertResult>;
   getHoldByProviderId(
     calendarId: string,
     providerEventId: string,
-  ): Promise<
-    | {
-        ok: true;
-        title: string;
-        start: string;
-        end: string;
-        ownership: OwnershipProof | null;
-        relatedTaskKey: string | null;
-      }
-    | { ok: false; message: string }
-  >;
+  ): Promise<CalendarHoldLookupResult>;
   deleteHoldByProviderId(
     calendarId: string,
     providerEventId: string,
     ownership: OwnershipProof,
-  ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
+  ): Promise<CalendarHoldDeleteResult>;
   /** Lectura mínima del calendario (calendars.get). */
   getCalendar(calendarId: string): Promise<
     | {
@@ -70,6 +91,8 @@ export type CalendarHoldApiClient = {
 };
 
 const BASE32HEX = '0123456789abcdefghijklmnopqrstuv';
+
+const VERIFY_ABSENT_DELAYS_MS = [0, 150, 400, 900] as const;
 
 /** Google custom event id: base32hex lowercase, length 5–1024. */
 export function toBase32Hex(bytes: Buffer): string {
@@ -156,6 +179,13 @@ function ownershipFromSeed(seed: string): OwnershipProof {
   return createHash('sha256').update(`own:${seed}`).digest('hex').slice(0, 24);
 }
 
+function defaultSleep(ms: number): Promise<void> {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export function createNotConfiguredCalendarHoldPort(message: string): CalendarHoldWritePort {
   return {
     async createHold() {
@@ -165,6 +195,9 @@ export function createNotConfiguredCalendarHoldPort(message: string): CalendarHo
       return null;
     },
     async deleteHoldWithOwnership() {
+      return { ok: false, code: 'not-configured', message };
+    },
+    async verifyHoldAbsent() {
       return { ok: false, code: 'not-configured', message };
     },
     async checkReady() {
@@ -182,6 +215,8 @@ export function createMemoryCalendarHoldPort(options?: {
   contractVersion?: string;
   hmacKey?: Buffer;
   failReady?: boolean;
+  /** Fuerza verifyHoldAbsent a fail cerrado. */
+  failVerify?: boolean;
 }): CalendarHoldWritePort & {
   holds: Map<string, CalendarHoldSnapshot & { deleted?: boolean; providerEventId?: string }>;
 } {
@@ -231,13 +266,25 @@ export function createMemoryCalendarHoldPort(options?: {
     async deleteHoldWithOwnership(key, ownership) {
       const row = holds.get(key);
       if (!row || row.deleted) {
-        return { ok: false, code: 'not-found', message: 'Hold no encontrado.' };
+        return { ok: true, outcome: 'already-absent' };
       }
       if (row.ownership !== ownership) {
         return { ok: false, code: 'ownership-mismatch', message: 'Ownership inválido.' };
       }
       row.deleted = true;
-      return { ok: true };
+      return { ok: true, outcome: 'deleted' };
+    },
+    async verifyHoldAbsent(key) {
+      if (options?.failVerify) {
+        return {
+          ok: false,
+          code: 'unavailable',
+          message: 'No se pudo verificar la ausencia del hold.',
+        };
+      }
+      const row = holds.get(key);
+      if (!row || row.deleted) return { ok: true, absent: true };
+      return { ok: true, absent: false };
     },
     async checkReady() {
       if (options?.failReady) {
@@ -252,6 +299,17 @@ export function createMemoryCalendarHoldPort(options?: {
   };
 }
 
+export type FakeCalendarHoldEvent = {
+  title: string;
+  start: string;
+  end: string;
+  ownership: OwnershipProof;
+  relatedTaskKey: string | null;
+  /** deleted = cancelled tombstone; absent removes the map entry semantics via flag. */
+  state?: 'active' | 'cancelled' | 'absent';
+  deleted?: boolean;
+};
+
 /**
  * Fake estructurado para tests: registra llamadas, nunca toca red.
  * Shared across port instances for multi-instance proofs.
@@ -263,52 +321,55 @@ export function createFakeCalendarHoldApiClient(options?: {
   failGetCalendar?: boolean;
   primaryCalendar?: boolean;
   /** Optional shared events map for multi-instance tests. */
-  events?: Map<
-    string,
-    {
-      title: string;
-      start: string;
-      end: string;
-      ownership: OwnershipProof;
-      relatedTaskKey: string | null;
-      deleted?: boolean;
-    }
-  >;
+  events?: Map<string, FakeCalendarHoldEvent>;
+  /** Secuencia de lookups por intento (consume shifts). */
+  lookupQueue?: CalendarHoldLookupResult[];
+  /** Secuencia de resultados de DELETE HTTP (tras ownership ok). */
+  deleteQueue?: CalendarHoldDeleteResult[];
 }): CalendarHoldApiClient & {
   inserts: CalendarHoldInsertInput[];
   deletes: { calendarId: string; providerEventId: string; ownership: OwnershipProof }[];
-  events: Map<
-    string,
-    {
-      title: string;
-      start: string;
-      end: string;
-      ownership: OwnershipProof;
-      relatedTaskKey: string | null;
-      deleted?: boolean;
-    }
-  >;
+  events: Map<string, FakeCalendarHoldEvent>;
+  lookupCalls: number;
+  deleteCalls: number;
 } {
-  const events =
-    options?.events ??
-    new Map<
-      string,
-      {
-        title: string;
-        start: string;
-        end: string;
-        ownership: OwnershipProof;
-        relatedTaskKey: string | null;
-        deleted?: boolean;
-      }
-    >();
+  const events = options?.events ?? new Map<string, FakeCalendarHoldEvent>();
   const inserts: CalendarHoldInsertInput[] = [];
   const deletes: { calendarId: string; providerEventId: string; ownership: OwnershipProof }[] = [];
+  const lookupQueue = options?.lookupQueue ? [...options.lookupQueue] : [];
+  const deleteQueue = options?.deleteQueue ? [...options.deleteQueue] : [];
+  let lookupCalls = 0;
+  let deleteCalls = 0;
+
+  function resolveFromMap(providerEventId: string): CalendarHoldLookupResult {
+    const row = events.get(providerEventId);
+    if (!row || row.state === 'absent') {
+      return { ok: true, state: 'absent' };
+    }
+    if (row.deleted || row.state === 'cancelled') {
+      return { ok: true, state: 'deleted' };
+    }
+    return {
+      ok: true,
+      state: 'active',
+      title: row.title,
+      start: row.start,
+      end: row.end,
+      ownership: row.ownership,
+      relatedTaskKey: row.relatedTaskKey,
+    };
+  }
 
   return {
     inserts,
     deletes,
     events,
+    get lookupCalls() {
+      return lookupCalls;
+    },
+    get deleteCalls() {
+      return deleteCalls;
+    },
     async insertPrivateHold(input) {
       inserts.push(input);
       const body = buildPrivateHoldEventBody(input);
@@ -325,32 +386,51 @@ export function createFakeCalendarHoldApiClient(options?: {
         end: input.end,
         ownership: input.ownership,
         relatedTaskKey: input.relatedTaskKey,
+        state: 'active',
       });
       return { ok: true, providerEventId };
     },
     async getHoldByProviderId(_calendarId, providerEventId) {
-      const row = events.get(providerEventId);
-      if (!row || row.deleted) return { ok: false, message: 'Hold no encontrado.' };
-      return {
-        ok: true,
-        title: row.title,
-        start: row.start,
-        end: row.end,
-        ownership: row.ownership,
-        relatedTaskKey: row.relatedTaskKey,
-      };
+      lookupCalls += 1;
+      if (lookupQueue.length > 0) {
+        return lookupQueue.shift()!;
+      }
+      return resolveFromMap(providerEventId);
     },
     async deleteHoldByProviderId(calendarId, providerEventId, ownership) {
       deletes.push({ calendarId, providerEventId, ownership });
-      const row = events.get(providerEventId);
-      if (!row || row.deleted) {
-        return { ok: false, code: 'not-found', message: 'Hold no encontrado.' };
+      deleteCalls += 1;
+
+      const lookup = resolveFromMap(providerEventId);
+      if (lookup.ok && (lookup.state === 'deleted' || lookup.state === 'absent')) {
+        return { ok: true, outcome: 'already-absent' };
       }
-      if (options?.failDelete || options?.ownershipMismatch || row.ownership !== ownership) {
+      if (!lookup.ok) {
+        return { ok: false, code: lookup.code, message: lookup.message };
+      }
+      if (options?.ownershipMismatch || !lookup.ownership || lookup.ownership !== ownership) {
         return { ok: false, code: 'ownership-mismatch', message: 'Ownership inválido.' };
       }
-      row.deleted = true;
-      return { ok: true };
+      if (options?.failDelete) {
+        return { ok: false, code: 'failed', message: 'Fake delete failed.' };
+      }
+      if (deleteQueue.length > 0) {
+        const queued = deleteQueue.shift()!;
+        if (queued.ok && queued.outcome === 'deleted') {
+          const row = events.get(providerEventId);
+          if (row) {
+            row.state = 'cancelled';
+            row.deleted = true;
+          }
+        }
+        return queued;
+      }
+      const row = events.get(providerEventId);
+      if (row) {
+        row.state = 'cancelled';
+        row.deleted = true;
+      }
+      return { ok: true, outcome: 'deleted' };
     },
     async getCalendar(calendarId) {
       if (options?.failGetCalendar) {
@@ -379,9 +459,11 @@ export function createCalendarHoldWritePort(input: {
   client: CalendarHoldApiClient;
   contractVersion: string;
   hmacKey: Buffer;
+  sleep?: (ms: number) => Promise<void>;
 }): CalendarHoldWritePort {
   const calendarId = input.calendarId.trim();
   const contractVersion = input.contractVersion.trim() || 'vida2-writes-v1';
+  const sleep = input.sleep ?? defaultSleep;
 
   function providerIdForKey(clientKey: string, version?: string): string {
     return deriveCalendarProviderEventId({
@@ -420,7 +502,7 @@ export function createCalendarHoldWritePort(input: {
     async getHold(key) {
       const providerEventId = providerIdForKey(key);
       const got = await input.client.getHoldByProviderId(calendarId, providerEventId);
-      if (!got.ok) return null;
+      if (!got.ok || got.state !== 'active') return null;
       return {
         key,
         title: got.title,
@@ -433,6 +515,45 @@ export function createCalendarHoldWritePort(input: {
     async deleteHoldWithOwnership(key, ownership) {
       const providerEventId = providerIdForKey(key);
       return input.client.deleteHoldByProviderId(calendarId, providerEventId, ownership);
+    },
+
+    async verifyHoldAbsent(key) {
+      const providerEventId = providerIdForKey(key);
+      let lastUnavailable: { code: string; message: string } | null = null;
+
+      for (let attempt = 0; attempt < VERIFY_ABSENT_DELAYS_MS.length; attempt += 1) {
+        const delay = VERIFY_ABSENT_DELAYS_MS[attempt] ?? 0;
+        if (delay > 0) await sleep(delay);
+        const got = await input.client.getHoldByProviderId(calendarId, providerEventId);
+        if (!got.ok) {
+          lastUnavailable = { code: got.code, message: got.message };
+          if (got.retryable && attempt < VERIFY_ABSENT_DELAYS_MS.length - 1) {
+            continue;
+          }
+          return {
+            ok: false,
+            code: got.code,
+            message: 'No se pudo verificar la ausencia del hold.',
+          };
+        }
+        if (got.state === 'deleted' || got.state === 'absent') {
+          return { ok: true, absent: true };
+        }
+        // active — reintentar si quedan lecturas
+        if (attempt < VERIFY_ABSENT_DELAYS_MS.length - 1) {
+          continue;
+        }
+        return { ok: true, absent: false };
+      }
+
+      if (lastUnavailable) {
+        return {
+          ok: false,
+          code: lastUnavailable.code,
+          message: 'No se pudo verificar la ausencia del hold.',
+        };
+      }
+      return { ok: true, absent: false };
     },
 
     async checkReady() {
@@ -477,7 +598,11 @@ export function createCalendarHoldWritePort(input: {
 export function createCalendarHoldWritePortFromEnv(
   env: Readonly<Record<string, string | undefined>> = process.env,
   client?: CalendarHoldApiClient,
-  options?: { contractVersion?: string; hmacKey?: Buffer },
+  options?: {
+    contractVersion?: string;
+    hmacKey?: Buffer;
+    sleep?: (ms: number) => Promise<void>;
+  },
 ): CalendarHoldWritePort {
   if (!isWriteActionsEnabled(env)) {
     return createNotConfiguredCalendarHoldPort('Escrituras desactivadas.');
@@ -497,5 +622,6 @@ export function createCalendarHoldWritePortFromEnv(
     client,
     contractVersion: options.contractVersion ?? 'vida2-writes-v1',
     hmacKey: options.hmacKey,
+    sleep: options.sleep,
   });
 }
