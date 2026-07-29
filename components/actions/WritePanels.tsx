@@ -1,11 +1,16 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 
 import { runWriteAction } from '@/app/actions/writes';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import type {
+  TaskWriteAreaOption,
+  TaskWriteProjectOption,
+  TaskWriteTaskOption,
+} from '@/lib/actions/task-write-catalog';
 import type {
   CalendarHoldCreatePayload,
   TaskChangeStatusPayload,
@@ -13,6 +18,14 @@ import type {
 } from '@/types/actions';
 
 import styles from './WritePanels.module.scss';
+
+const TASK_STATUSES: TaskChangeStatusPayload['nextStatus'][] = [
+  'Pendiente',
+  'En progreso',
+  'Bloqueada',
+  'Hecha',
+  'Algún día',
+];
 
 export function WritesDisabledNotice() {
   return (
@@ -22,13 +35,41 @@ export function WritesDisabledNotice() {
   );
 }
 
-export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
+function ActionBlockedNotice({ message }: { message: string }) {
+  return <p className={styles.notice}>{message}</p>;
+}
+
+export function TaskCreatePanel({
+  writesEnabled,
+  areaOptions,
+  projectOptions,
+  actionReady = true,
+}: {
+  writesEnabled: boolean;
+  areaOptions: readonly TaskWriteAreaOption[];
+  projectOptions: readonly TaskWriteProjectOption[];
+  actionReady?: boolean;
+}) {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState<'Alta' | 'Media' | 'Baja'>('Media');
-  const [areaKey, setAreaKey] = useState('area.salud');
+  const [areaKey, setAreaKey] = useState('');
+  const [projectKey, setProjectKey] = useState('');
   const [confirm, setConfirm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
+
+  const effectiveAreaKey = areaOptions.some((area) => area.key === areaKey)
+    ? areaKey
+    : (areaOptions[0]?.key ?? '');
+
+  const projectsForArea = useMemo(
+    () => projectOptions.filter((project) => project.areaKey === effectiveAreaKey),
+    [projectOptions, effectiveAreaKey],
+  );
+
+  const effectiveProjectKey = projectsForArea.some((project) => project.key === projectKey)
+    ? projectKey
+    : '';
 
   if (!writesEnabled) {
     return (
@@ -39,6 +80,8 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
     );
   }
 
+  const canSubmit = actionReady && areaOptions.length > 0 && Boolean(effectiveAreaKey);
+
   return (
     <Card>
       <SectionHeader
@@ -46,20 +89,39 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
         description="Crea una propuesta (proposal.create). No escribe directo en Notion."
         domain="tasks"
       />
+      {!actionReady ? (
+        <ActionBlockedNotice message="Prerrequisitos de escritura incompletos. Revisá la matriz de operabilidad." />
+      ) : null}
+      {areaOptions.length === 0 ? (
+        <ActionBlockedNotice message="No hay áreas autorizadas disponibles. Completá el catálogo DEV antes de crear tareas." />
+      ) : null}
       <form
         className={styles.form}
         onSubmit={(event) => {
           event.preventDefault();
+          if (!canSubmit) {
+            setMessage(
+              areaOptions.length === 0
+                ? 'No hay áreas autorizadas disponibles. Completá el catálogo DEV antes de crear tareas.'
+                : 'Prerrequisitos incompletos.',
+            );
+            return;
+          }
           if (!confirm) {
             setMessage('Marcá la confirmación explícita.');
             return;
           }
-          const preserved = { title, priority, areaKey };
+          const preserved = {
+            title,
+            priority,
+            areaKey: effectiveAreaKey,
+            projectKey: effectiveProjectKey,
+          };
           const businessPayload: TaskCreatePayload = {
             title: preserved.title,
             priority: preserved.priority,
             areaKey: preserved.areaKey,
-            projectKey: null,
+            projectKey: preserved.projectKey || null,
             date: null,
             duration: null,
             energy: null,
@@ -85,10 +147,12 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
             if (result.ok) {
               setTitle('');
               setConfirm(false);
+              setProjectKey('');
             } else {
               setTitle(preserved.title);
               setPriority(preserved.priority);
               setAreaKey(preserved.areaKey);
+              setProjectKey(preserved.projectKey);
             }
           });
         }}
@@ -100,6 +164,7 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            disabled={!canSubmit}
           />
         </label>
         <label className={styles.label}>
@@ -108,6 +173,7 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
             className={styles.input}
             value={priority}
             onChange={(e) => setPriority(e.target.value as typeof priority)}
+            disabled={!canSubmit}
           >
             <option value="Alta">Alta</option>
             <option value="Media">Media</option>
@@ -115,18 +181,50 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
           </select>
         </label>
         <label className={styles.label}>
-          Área (clave)
-          <input
+          Área
+          <select
             className={styles.input}
-            value={areaKey}
-            onChange={(e) => setAreaKey(e.target.value)}
-          />
+            value={effectiveAreaKey}
+            onChange={(e) => {
+              setAreaKey(e.target.value);
+              setProjectKey('');
+            }}
+            required
+            disabled={!canSubmit}
+          >
+            {areaOptions.map((area) => (
+              <option key={area.key} value={area.key}>
+                {area.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={styles.label}>
+          Proyecto (opcional)
+          <select
+            className={styles.input}
+            value={effectiveProjectKey}
+            onChange={(e) => setProjectKey(e.target.value)}
+            disabled={!canSubmit || projectsForArea.length === 0}
+          >
+            <option value="">Sin proyecto</option>
+            {projectsForArea.map((project) => (
+              <option key={project.key} value={project.key}>
+                {project.name}
+              </option>
+            ))}
+          </select>
         </label>
         <label className={styles.check}>
-          <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={confirm}
+            onChange={(e) => setConfirm(e.target.checked)}
+            disabled={!canSubmit}
+          />
           Confirmo proponer esta tarea
         </label>
-        <Button type="submit" variant="primary" disabled={pending}>
+        <Button type="submit" variant="primary" disabled={pending || !canSubmit}>
           {pending ? 'Enviando…' : 'Crear propuesta'}
         </Button>
         {message ? <p className={styles.message}>{message}</p> : null}
@@ -135,15 +233,30 @@ export function TaskCreatePanel({ writesEnabled }: { writesEnabled: boolean }) {
   );
 }
 
-export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
+export function TaskStatusPanel({
+  writesEnabled,
+  taskOptions,
+  actionReady = true,
+}: {
+  writesEnabled: boolean;
+  taskOptions: readonly TaskWriteTaskOption[];
+  actionReady?: boolean;
+}) {
   const [taskKey, setTaskKey] = useState('');
-  const [currentStatus, setCurrentStatus] =
-    useState<TaskChangeStatusPayload['nextStatus']>('Pendiente');
   const [nextStatus, setNextStatus] =
     useState<TaskChangeStatusPayload['nextStatus']>('En progreso');
   const [confirm, setConfirm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
+
+  const effectiveTaskKey = taskOptions.some((task) => task.key === taskKey)
+    ? taskKey
+    : (taskOptions[0]?.key ?? '');
+  const selected = taskOptions.find((task) => task.key === effectiveTaskKey) ?? null;
+  const currentStatus = selected?.status ?? null;
+  const nextOptions = TASK_STATUSES.filter((status) => status !== currentStatus);
+  const effectiveNextStatus = (nextOptions.includes(nextStatus) ? nextStatus : nextOptions[0]) as
+    TaskChangeStatusPayload['nextStatus'] | undefined;
 
   if (!writesEnabled) {
     return (
@@ -158,17 +271,47 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
     );
   }
 
+  const canSubmit =
+    actionReady &&
+    Boolean(selected) &&
+    Boolean(currentStatus) &&
+    Boolean(effectiveNextStatus) &&
+    effectiveNextStatus !== currentStatus;
+
   return (
     <Card>
+      <SectionHeader
+        title="Cambiar estado"
+        description="Propone un cambio de estado sobre una tarea real del catálogo."
+        domain="tasks"
+      />
+      {!actionReady ? (
+        <ActionBlockedNotice message="Prerrequisitos de escritura incompletos. Revisá la matriz de operabilidad." />
+      ) : null}
+      {taskOptions.length === 0 ? (
+        <ActionBlockedNotice message="No hay tareas disponibles. Creá y aprobá una tarea primero." />
+      ) : null}
       <form
         className={styles.form}
         onSubmit={(event) => {
           event.preventDefault();
+          if (!canSubmit || !selected || !currentStatus || !effectiveNextStatus) {
+            setMessage(
+              taskOptions.length === 0
+                ? 'No hay tareas disponibles. Creá y aprobá una tarea primero.'
+                : 'Seleccioná una tarea y un estado distinto.',
+            );
+            return;
+          }
           if (!confirm) {
             setMessage('Confirmá el cambio.');
             return;
           }
-          const preserved = { taskKey, currentStatus, nextStatus };
+          const preserved = {
+            taskKey: selected.key,
+            currentStatus,
+            nextStatus: effectiveNextStatus,
+          };
           const businessPayload: TaskChangeStatusPayload = {
             taskKey: preserved.taskKey,
             nextStatus: preserved.nextStatus,
@@ -177,7 +320,7 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
             const result = await runWriteAction({
               actionType: 'proposal.create',
               payload: {
-                name: `Cambiar estado: ${preserved.taskKey.slice(0, 40)}`,
+                name: `Cambiar estado: ${selected.title.slice(0, 40)}`,
                 proposedActionType: 'task.change-status',
                 targetType: 'task',
                 targetKey: preserved.taskKey,
@@ -193,45 +336,41 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
             setMessage(result.message);
             if (!result.ok) {
               setTaskKey(preserved.taskKey);
-              setCurrentStatus(preserved.currentStatus);
               setNextStatus(preserved.nextStatus);
             }
           });
         }}
       >
         <label className={styles.label}>
-          Clave de tarea
-          <input
-            className={styles.input}
-            value={taskKey}
-            onChange={(e) => setTaskKey(e.target.value)}
-            required
-          />
-        </label>
-        <label className={styles.label}>
-          Estado actual esperado
+          Tarea
           <select
             className={styles.input}
-            value={currentStatus}
-            onChange={(e) =>
-              setCurrentStatus(e.target.value as TaskChangeStatusPayload['nextStatus'])
-            }
+            value={effectiveTaskKey}
+            onChange={(e) => setTaskKey(e.target.value)}
+            required
+            disabled={!actionReady || taskOptions.length === 0}
           >
-            {['Pendiente', 'En progreso', 'Bloqueada', 'Hecha', 'Algún día'].map((status) => (
-              <option key={status} value={status}>
-                {status}
+            {taskOptions.map((task) => (
+              <option key={task.key} value={task.key}>
+                {task.title}
+                {task.areaName ? ` · ${task.areaName}` : ''}
               </option>
             ))}
           </select>
         </label>
+        <p className={styles.message}>
+          Estado actual: {currentStatus ?? '—'}
+          {selected?.projectName ? ` · ${selected.projectName}` : ''}
+        </p>
         <label className={styles.label}>
           Nuevo estado
           <select
             className={styles.input}
-            value={nextStatus}
+            value={effectiveNextStatus ?? ''}
             onChange={(e) => setNextStatus(e.target.value as TaskChangeStatusPayload['nextStatus'])}
+            disabled={!actionReady || taskOptions.length === 0}
           >
-            {['Pendiente', 'En progreso', 'Bloqueada', 'Hecha', 'Algún día'].map((status) => (
+            {nextOptions.map((status) => (
               <option key={status} value={status}>
                 {status}
               </option>
@@ -239,10 +378,15 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
           </select>
         </label>
         <label className={styles.check}>
-          <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={confirm}
+            onChange={(e) => setConfirm(e.target.checked)}
+            disabled={!canSubmit}
+          />
           Confirmar propuesta de cambio de estado
         </label>
-        <Button type="submit" size="sm" disabled={pending}>
+        <Button type="submit" size="sm" disabled={pending || !canSubmit}>
           Proponer cambio
         </Button>
         {message ? <p className={styles.message}>{message}</p> : null}
@@ -251,7 +395,13 @@ export function TaskStatusPanel({ writesEnabled }: { writesEnabled: boolean }) {
   );
 }
 
-export function CalendarHoldPanel({ writesEnabled }: { writesEnabled: boolean }) {
+export function CalendarHoldPanel({
+  writesEnabled,
+  actionReady = true,
+}: {
+  writesEnabled: boolean;
+  actionReady?: boolean;
+}) {
   const [title, setTitle] = useState('');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
@@ -275,10 +425,17 @@ export function CalendarHoldPanel({ writesEnabled }: { writesEnabled: boolean })
         title="Hold de calendario"
         description="Propone un bloque privado en el calendario dedicado (sin invitados ni Meet)."
       />
+      {!actionReady ? (
+        <ActionBlockedNotice message="Calendario dedicado no operable. Revisá la matriz de operabilidad." />
+      ) : null}
       <form
         className={styles.form}
         onSubmit={(event) => {
           event.preventDefault();
+          if (!actionReady) {
+            setMessage('Calendario dedicado no operable.');
+            return;
+          }
           if (!confirm) {
             setMessage('Confirmá la propuesta.');
             return;
@@ -332,6 +489,7 @@ export function CalendarHoldPanel({ writesEnabled }: { writesEnabled: boolean })
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            disabled={!actionReady}
           />
         </label>
         <label className={styles.label}>
@@ -342,6 +500,7 @@ export function CalendarHoldPanel({ writesEnabled }: { writesEnabled: boolean })
             value={start}
             onChange={(e) => setStart(e.target.value)}
             required
+            disabled={!actionReady}
           />
         </label>
         <label className={styles.label}>
@@ -352,6 +511,7 @@ export function CalendarHoldPanel({ writesEnabled }: { writesEnabled: boolean })
             value={end}
             onChange={(e) => setEnd(e.target.value)}
             required
+            disabled={!actionReady}
           />
         </label>
         <label className={styles.label}>
@@ -361,13 +521,19 @@ export function CalendarHoldPanel({ writesEnabled }: { writesEnabled: boolean })
             rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
+            disabled={!actionReady}
           />
         </label>
         <label className={styles.check}>
-          <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={confirm}
+            onChange={(e) => setConfirm(e.target.checked)}
+            disabled={!actionReady}
+          />
           Confirmo proponer este hold privado
         </label>
-        <Button type="submit" variant="primary" disabled={pending}>
+        <Button type="submit" variant="primary" disabled={pending || !actionReady}>
           {pending ? 'Enviando…' : 'Crear propuesta'}
         </Button>
         {message ? <p className={styles.message}>{message}</p> : null}
