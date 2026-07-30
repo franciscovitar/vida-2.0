@@ -1,14 +1,16 @@
-﻿/**
+/**
  * CreaciÃ³n de propuestas vÃ­a motor Block 3 (sin escrituras finales ni approve).
  */
 import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import { executeAction } from '@/lib/actions/engine';
 import { requestFromOpenClawAgentId } from '@/lib/actions/request';
-import { isOpenClawProposalAllowed } from '@/lib/openclaw/agents';
+import { isOpenClawProposalAllowed, openClawAgentSource } from '@/lib/openclaw/agents';
 import { buildWriteRuntime } from '@/lib/actions/runtime';
 import type {
   OpenClawAgentId,
+  OpenClawApprovalsListInput,
   OpenClawProposalDiff,
+  OpenClawProposalStatus,
   OpenClawProposalRequest,
   OpenClawProposeOperation,
 } from '@/types/openclaw';
@@ -293,6 +295,56 @@ export async function createOpenClawProposal(input: {
     diff: sanitizeOpenClawProposalDiff(stored?.diff ?? null),
     result,
   };
+}
+
+export function isOpenClawProposalOwnedByAgent(
+  proposal: Pick<ActionProposalSummary, 'source'>,
+  agentId: OpenClawAgentId,
+): boolean {
+  const source = openClawAgentSource(agentId);
+  // Migración segura: la fuente global histórica pertenece únicamente al Mayordomo.
+  return proposal.source === source || (agentId === 'steward' && proposal.source === 'openclaw');
+}
+
+export function filterOpenClawOwnProposals(
+  proposals: readonly ActionProposalSummary[],
+  agentId: OpenClawAgentId,
+  input: OpenClawApprovalsListInput = {},
+): ActionProposalSummary[] {
+  const limit = Math.min(Math.max(input.limit ?? 20, 1), 50);
+  return proposals
+    .filter((proposal) => isOpenClawProposalOwnedByAgent(proposal, agentId))
+    .filter(
+      (proposal) =>
+        !input.status ||
+        proposal.status ===
+          (input.status as OpenClawProposalStatus | ActionProposalSummary['status']),
+    )
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, limit);
+}
+
+export async function listOpenClawOwnProposals(
+  agentId: OpenClawAgentId,
+  input: OpenClawApprovalsListInput,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+  runtimeOverrides?: RuntimeOverrides,
+): Promise<
+  | { ok: true; proposals: ReturnType<typeof toOpenClawProposalMetadata>[] }
+  | { ok: false; code: 'source-unavailable'; message: string }
+> {
+  if (!isOpenClawProposalsEnabled(env)) {
+    return {
+      ok: false,
+      code: 'source-unavailable',
+      message: 'Fuente de propuestas no disponible.',
+    };
+  }
+
+  const runtime = buildWriteRuntime(env, runtimeOverrides);
+  const rows = await runtime.handlers.proposals.list();
+  const own = filterOpenClawOwnProposals(rows, agentId, input);
+  return { ok: true, proposals: own.map(toOpenClawProposalMetadata) };
 }
 
 export async function getOpenClawProposal(

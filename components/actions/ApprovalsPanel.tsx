@@ -36,9 +36,13 @@ function formatInstant(value: string | null): string {
 }
 
 function sourceLabel(source: string): string {
-  if (source === 'openclaw') return 'OpenClaw';
+  if (source === 'openclaw') return 'OpenClaw · legado';
   if (source === 'web') return 'Web';
-  return 'Otro';
+  if (source === 'agent:steward') return 'Agente · Mayordomo';
+  if (source === 'agent:health-reflection') return 'Agente · Salud y reflexión';
+  if (source === 'agent:digital-order') return 'Agente · Orden digital';
+  if (source === 'agent:technical-guardian') return 'Agente · Guardián técnico';
+  return 'Origen controlado';
 }
 
 function canRollback(proposal: ClientProposalSummary): boolean {

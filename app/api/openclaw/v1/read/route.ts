@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await executeOpenClawRead(validation.value);
+  const result = await executeOpenClawRead(validation.value, parsed.value.agentId);
   if (!result.ok) {
     const mapped = mapReadFailure(result.code);
     return finishOpenClawError(

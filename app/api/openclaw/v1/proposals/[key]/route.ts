@@ -4,7 +4,11 @@ import {
   finishOpenClawOk,
   parseAndAuthenticateOpenClawRequest,
 } from '@/lib/openclaw/http';
-import { getOpenClawProposal, toOpenClawProposalMetadata } from '@/lib/openclaw/proposals';
+import {
+  getOpenClawProposal,
+  isOpenClawProposalOwnedByAgent,
+  toOpenClawProposalMetadata,
+} from '@/lib/openclaw/proposals';
 import type { OpenClawProposalGetResponse } from '@/types/openclaw';
 
 export const runtime = 'nodejs';
@@ -43,7 +47,7 @@ export async function GET(request: Request, context: { params: Promise<{ key: st
   }
 
   const proposal = await getOpenClawProposal(key);
-  if (!proposal || proposal.source !== 'openclaw') {
+  if (!proposal || !isOpenClawProposalOwnedByAgent(proposal, parsed.value.agentId)) {
     return finishOpenClawError(
       parsed.value,
       'proposals.get',

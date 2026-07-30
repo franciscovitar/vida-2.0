@@ -7,6 +7,12 @@ import { composeAreaDashboard, composeAreasIndex } from '@/lib/areas/compose';
 import { getCanonicalAreaDef, isAreaSlug } from '@/lib/areas/canonical';
 import { opaqueKey } from '@/lib/actions/opaque';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
+import { isOpenClawAreaAllowed } from '@/lib/openclaw/agents';
+import {
+  authorizeOpenClawDocumentSlug,
+  filterOpenClawDocumentHits,
+} from '@/lib/openclaw/document-policy';
+import { listOpenClawOwnProposals } from '@/lib/openclaw/proposals';
 import { getCalendarAgendaForTrustedService } from '@/lib/data/calendar-source';
 import { getDataSource } from '@/lib/data/config';
 import { loadGymDashboardData } from '@/lib/gym/load';
@@ -24,7 +30,7 @@ import {
 } from '@/lib/web-catalog/service';
 import { getNotionDataSource } from '@/lib/notion/config';
 import { getCalendarDataSource } from '@/lib/calendar/config';
-import type { OpenClawDataFreshness, OpenClawReadRequest } from '@/types/openclaw';
+import type { OpenClawAgentId, OpenClawDataFreshness, OpenClawReadRequest } from '@/types/openclaw';
 import type { AreaSlug } from '@/types/areas';
 
 function freshnessFromSources(sources: readonly string[]): OpenClawDataFreshness {
@@ -95,6 +101,7 @@ export type OpenClawReadResult =
 
 export async function executeOpenClawRead(
   request: OpenClawReadRequest,
+  agentId: OpenClawAgentId = 'steward',
 ): Promise<OpenClawReadResult> {
   const { operation, input } = request;
 
@@ -190,6 +197,9 @@ export async function executeOpenClawRead(
       return { ok: false, code: 'invalid-input', message: 'Área no canónica.' };
     }
     const slug = slugRaw as AreaSlug;
+    if (!isOpenClawAreaAllowed(agentId, slug)) {
+      return { ok: false, code: 'forbidden', message: 'Área no permitida para este agente.' };
+    }
     const [notion, agenda] = await Promise.all([
       loadNotionDashboard(),
       getCalendarAgendaForTrustedService('7'),
@@ -358,11 +368,23 @@ export async function executeOpenClawRead(
   }
 
   if (operation === 'approvals.list') {
+    const result = await listOpenClawOwnProposals(agentId, input);
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: result.code,
+        message: result.message,
+        retryable: false,
+      };
+    }
     return {
-      ok: false,
-      code: 'source-unavailable',
-      message: 'Fuente de propuestas no disponible en modo read-only.',
-      retryable: false,
+      ok: true,
+      data: { proposals: result.proposals },
+      dataFreshness: 'live',
+      sources: ['proposals-ledger'],
+      warnings: [],
+      nextCursor: null,
+      itemCount: result.proposals.length,
     };
   }
 
@@ -376,7 +398,8 @@ export async function executeOpenClawRead(
         message: result.message,
       };
     }
-    const hits = result.hits.map((hit) => ({
+    const authorizedHits = await filterOpenClawDocumentHits(agentId, result.hits);
+    const hits = authorizedHits.map((hit) => ({
       title: hit.title,
       section: hit.section,
       sectionLabel: hit.sectionLabel,
@@ -395,6 +418,10 @@ export async function executeOpenClawRead(
   }
 
   if (operation === 'document.get') {
+    const authorized = await authorizeOpenClawDocumentSlug(agentId, input.slug);
+    if (!authorized) {
+      return { ok: false, code: 'forbidden', message: 'Documento no permitido para este agente.' };
+    }
     const result = await resolveWebCatalogPageForGeneralAI(input.slug);
     if (!result.ok) {
       return {

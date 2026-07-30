@@ -11,6 +11,7 @@ import {
   type OpenClawProposeOperation,
   type OpenClawReadOperation,
 } from '@/types/openclaw';
+import type { WebCatalogEntry } from '@/types/web-catalog';
 
 const PROFILES: Readonly<Record<OpenClawAgentId, OpenClawAgentProfile>> = {
   steward: {
@@ -130,6 +131,39 @@ export function isOpenClawProposalAllowed(
     return PROFILES[agentId].allowedProposals.includes('calendar.hold.create.propose');
   }
   return PROFILES[agentId].allowedProposals.includes(operation);
+}
+
+export function isOpenClawAreaAllowed(
+  agentId: OpenClawAgentId,
+  slug: OpenClawAgentProfile['areaScopes'][number],
+): boolean {
+  return PROFILES[agentId].areaScopes.includes(slug);
+}
+
+export function isOpenClawDocumentEntryAllowed(
+  agentId: OpenClawAgentId,
+  entry: Pick<WebCatalogEntry, 'renderMode' | 'privacy' | 'section'>,
+): boolean {
+  const profile = PROFILES[agentId];
+  if (profile.documentScope === 'none') return false;
+
+  // La política generalAI del catálogo sigue siendo la primera barrera.
+  if (
+    entry.privacy === 'private' ||
+    entry.privacy === 'system' ||
+    entry.privacy === 'excluded' ||
+    entry.section === 'private' ||
+    entry.section === 'system'
+  ) {
+    return false;
+  }
+
+  if (profile.documentScope === 'general') return true;
+  return entry.renderMode === 'health' || entry.renderMode === 'gym';
+}
+
+export function openClawAgentSource(agentId: OpenClawAgentId): `agent:${OpenClawAgentId}` {
+  return `agent:${agentId}`;
 }
 
 function trim(env: Readonly<Record<string, string | undefined>>, key: string): string {
