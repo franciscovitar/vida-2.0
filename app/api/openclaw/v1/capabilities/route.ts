@@ -1,3 +1,4 @@
+import { getOpenClawAgentProfile } from '@/lib/openclaw/agents';
 import { listOpenClawCapabilities } from '@/lib/openclaw/capabilities';
 import { getOpenClawApiConfig } from '@/lib/openclaw/config';
 import { finishOpenClawOk, parseAndAuthenticateOpenClawRequest } from '@/lib/openclaw/http';
@@ -17,7 +18,8 @@ export async function GET(request: Request) {
 
   const config = getOpenClawApiConfig();
   const readiness = getOpenClawReadiness();
-  const capabilities = listOpenClawCapabilities();
+  const profile = getOpenClawAgentProfile(parsed.value.agentId);
+  const capabilities = listOpenClawCapabilities(parsed.value.agentId);
   const reads = capabilities
     .filter((item) => item.kind === 'read')
     .map((item) => ({
@@ -32,6 +34,7 @@ export async function GET(request: Request) {
       ok: true,
       requestId: parsed.value.requestId,
       capabilitiesVersion: OPENCLAW_CAPABILITIES_VERSION,
+      agent: { id: profile.id, name: profile.name },
       accessMode: config.ok ? config.accessMode : 'disabled',
       readiness,
       read: reads,

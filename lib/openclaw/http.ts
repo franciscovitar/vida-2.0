@@ -23,6 +23,7 @@ import {
   type OpenClawRouteContract,
 } from '@/lib/openclaw/route-contract';
 import type {
+  OpenClawAgentId,
   OpenClawDataFreshness,
   OpenClawErrorCode,
   OpenClawErrorResponse,
@@ -55,6 +56,7 @@ export function openClawError(
 export type OpenClawParsedRequest = {
   requestId: string;
   keyId: string;
+  agentId: OpenClawAgentId;
   actorId: string;
   rawBody: string;
   json: unknown | null;
@@ -165,7 +167,7 @@ export async function parseAndAuthenticateOpenClawRequest(
   const requestId = auth.requestId;
   const config = getOpenClawApiConfig();
   if (config.ok) {
-    const rate = await resolveOpenClawRateLimitPort().allow(auth.keyId, config.ratePerMinute);
+    const rate = await resolveOpenClawRateLimitPort().allow(auth.agentId, config.ratePerMinute);
     if (!rate.ok) {
       if (rate.reason === 'rate-limited') {
         return {
@@ -245,6 +247,7 @@ export async function parseAndAuthenticateOpenClawRequest(
     value: {
       requestId,
       keyId: auth.keyId,
+      agentId: auth.agentId,
       actorId: auth.actorId,
       rawBody,
       json,
@@ -267,7 +270,7 @@ export function finishOpenClawOk(
     buildOpenClawLogEvent({
       requestId: parsed.requestId,
       operation,
-      keyId: parsed.keyId,
+      agentId: parsed.agentId,
       durationMs: Date.now() - parsed.startedAt,
       result: 'ok',
       itemCount: meta?.itemCount ?? null,
@@ -279,7 +282,7 @@ export function finishOpenClawOk(
 }
 
 export function finishOpenClawError(
-  parsed: Pick<OpenClawParsedRequest, 'requestId' | 'keyId' | 'startedAt'>,
+  parsed: Pick<OpenClawParsedRequest, 'requestId' | 'agentId' | 'startedAt'>,
   operation: string,
   status: number,
   code: OpenClawErrorCode,
@@ -290,7 +293,7 @@ export function finishOpenClawError(
     buildOpenClawLogEvent({
       requestId: parsed.requestId,
       operation,
-      keyId: parsed.keyId,
+      agentId: parsed.agentId,
       durationMs: Date.now() - parsed.startedAt,
       result: 'error',
       errorCode: code,

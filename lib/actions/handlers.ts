@@ -86,7 +86,7 @@ export type HandlerDeps = {
   approvalTtlSeconds?: number;
   rollbackWindowSeconds?: number;
   contractVersion?: string;
-  source?: 'web' | 'openclaw';
+  source?: string;
   now?: () => string;
 };
 

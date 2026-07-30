@@ -162,7 +162,10 @@ test('openclaw: firma válida', () => {
     requestIdHeader: signed.requestId,
   });
   assert.equal(decision.ok, true);
-  if (decision.ok) assert.equal(decision.actorId, `openclaw:${KEY_ID}`);
+  if (decision.ok) {
+    assert.equal(decision.agentId, 'steward');
+    assert.equal(decision.actorId, 'agent:steward');
+  }
 });
 
 test('openclaw: firma inválida', () => {

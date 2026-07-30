@@ -1,11 +1,13 @@
-/**
- * Creación de propuestas vía motor Block 3 (sin escrituras finales ni approve).
+﻿/**
+ * CreaciÃ³n de propuestas vÃ­a motor Block 3 (sin escrituras finales ni approve).
  */
 import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import { executeAction } from '@/lib/actions/engine';
-import { requestFromOpenClawKeyId } from '@/lib/actions/request';
+import { requestFromOpenClawAgentId } from '@/lib/actions/request';
+import { isOpenClawProposalAllowed } from '@/lib/openclaw/agents';
 import { buildWriteRuntime } from '@/lib/actions/runtime';
 import type {
+  OpenClawAgentId,
   OpenClawProposalDiff,
   OpenClawProposalRequest,
   OpenClawProposeOperation,
@@ -71,7 +73,7 @@ export function parseOpenClawProposalRequest(
   body: unknown,
 ): { ok: true; value: OpenClawProposalRequest } | { ok: false; message: string } {
   const record = asRecord(body);
-  if (!record) return { ok: false, message: 'Body inválido.' };
+  if (!record) return { ok: false, message: 'Body invÃ¡lido.' };
 
   for (const key of Object.keys(record)) {
     if (ACTOR_BODY_KEYS.has(key)) {
@@ -90,10 +92,10 @@ export function parseOpenClawProposalRequest(
     operation === 'action.rollback' ||
     operation === 'proposal.create'
   ) {
-    return { ok: false, message: 'Operación de control no permitida vía OpenClaw.' };
+    return { ok: false, message: 'OperaciÃ³n de control no permitida vÃ­a OpenClaw.' };
   }
   if (!isOpenClawProposeOperation(operation)) {
-    return { ok: false, message: 'Operación de propuesta no permitida.' };
+    return { ok: false, message: 'OperaciÃ³n de propuesta no permitida.' };
   }
 
   const idempotencyKey =
@@ -109,7 +111,7 @@ export function parseOpenClawProposalRequest(
   }
   const risk = record.risk;
   if (risk !== 'low' && risk !== 'medium' && risk !== 'high') {
-    return { ok: false, message: 'risk inválido.' };
+    return { ok: false, message: 'risk invÃ¡lido.' };
   }
   if (typeof record.reversible !== 'boolean') {
     return { ok: false, message: 'reversible requerido.' };
@@ -181,7 +183,9 @@ function buildInboxCapturePayload(
 type RuntimeOverrides = NonNullable<Parameters<typeof buildWriteRuntime>[1]>;
 
 export async function createOpenClawProposal(input: {
-  keyId: string;
+  agentId?: OpenClawAgentId;
+  /** Compatibilidad de tests previos; se ignora como identidad. */
+  keyId?: string;
   request: OpenClawProposalRequest;
   requestId: string;
   env?: Readonly<Record<string, string | undefined>>;
@@ -200,11 +204,21 @@ export async function createOpenClawProposal(input: {
   | { ok: false; code: string; message: string }
 > {
   const env = input.env ?? process.env;
+  const legacyCaller = input.agentId === undefined;
+  const agentId = input.agentId ?? 'steward';
   if (!isOpenClawProposalsEnabled(env)) {
     return {
       ok: false,
       code: 'flag-disabled',
       message: 'OpenClaw proposals desactivadas.',
+    };
+  }
+
+  if (!legacyCaller && !isOpenClawProposalAllowed(agentId, input.request.operation)) {
+    return {
+      ok: false,
+      code: 'policy-denied',
+      message: 'OperaciÃ³n no permitida para este agente.',
     };
   }
 
@@ -228,9 +242,10 @@ export async function createOpenClawProposal(input: {
           ...input.request.payload,
         } as never);
 
+  const source: 'openclaw' | `agent:${string}` = legacyCaller ? 'openclaw' : `agent:${agentId}`;
   const runtime = buildWriteRuntime(env, input.runtimeOverrides);
   const result = await executeAction(
-    requestFromOpenClawKeyId(input.keyId, {
+    requestFromOpenClawAgentId(agentId, {
       actionType: 'proposal.create',
       payload: {
         name: `OpenClaw: ${input.request.operation}`,
@@ -246,13 +261,13 @@ export async function createOpenClawProposal(input: {
       idempotencyKey: input.request.idempotencyKey,
       confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
       expectedPrevious: null,
-      context: { source: 'openclaw', targetDate: null },
+      context: { source, targetDate: null },
     }),
     {
       writesEnabled: true,
       idempotency: runtime.idempotency,
       audit: runtime.audit,
-      handlers: { ...runtime.handlers, source: 'openclaw' },
+      handlers: { ...runtime.handlers, source },
       coordination: runtime.coordination ?? undefined,
     },
   );

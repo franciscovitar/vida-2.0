@@ -1,10 +1,10 @@
 /**
  * Logs sanitizados OpenClaw (sin body, secreto, firma ni contenido privado).
- * Trazas opacas: nunca se conservan requestId ni keyId crudos.
+ * Trazas opacas: nunca se conservan requestId, keyId ni credenciales crudas.
  */
 import { createHash } from 'node:crypto';
 
-import type { OpenClawDataFreshness } from '@/types/openclaw';
+import type { OpenClawAgentId, OpenClawDataFreshness } from '@/types/openclaw';
 
 const TRACE_HEX_LENGTH = 32;
 
@@ -39,20 +39,20 @@ function domainHash(domain: 'request' | 'client', value: string): string {
     .slice(0, TRACE_HEX_LENGTH);
 }
 
-/** Traza opaca determinista del request ID (nunca el valor crudo). */
 export function openClawRequestTrace(requestId: string): string {
   return domainHash('request', requestId);
 }
 
-/** Traza opaca determinista del client/key ID (nunca el valor crudo). */
-export function openClawClientTrace(keyId: string): string {
-  return domainHash('client', keyId);
+export function openClawClientTrace(agentId: string): string {
+  return domainHash('client', agentId);
 }
 
 export function buildOpenClawLogEvent(input: {
   requestId: string;
   operation: string;
-  keyId: string;
+  agentId?: OpenClawAgentId;
+  /** Compatibilidad de tests históricos; las rutas nuevas siempre envían agentId. */
+  keyId?: string;
   durationMs: number;
   result: 'ok' | 'error';
   errorCode?: string | null;
@@ -60,6 +60,7 @@ export function buildOpenClawLogEvent(input: {
   sourceCount?: number | null;
   dataFreshness?: OpenClawDataFreshness | null;
 }): OpenClawLogEvent {
+  const principal = input.agentId ?? input.keyId ?? 'unknown-agent';
   return {
     operation: input.operation,
     durationMs: Math.max(0, Math.round(input.durationMs)),
@@ -69,7 +70,7 @@ export function buildOpenClawLogEvent(input: {
     sourceCount: input.sourceCount ?? null,
     dataFreshness: input.dataFreshness ?? null,
     requestTrace: openClawRequestTrace(input.requestId),
-    clientTrace: openClawClientTrace(input.keyId),
+    clientTrace: openClawClientTrace(principal),
   };
 }
 
@@ -77,7 +78,7 @@ export function openClawLogLooksSafe(event: OpenClawLogEvent): boolean {
   const keys = Object.keys(event);
   if (keys.some((key) => !AUTHORIZED_LOG_KEYS.has(key))) return false;
   if ('proposalCreated' in event || 'requestId' in event || 'keyId' in event) return false;
-  if ('keyIdObscured' in event) return false;
+  if ('agentId' in event || 'keyIdObscured' in event) return false;
 
   if (!/^[0-9a-f]{32}$/.test(event.requestTrace)) return false;
   if (!/^[0-9a-f]{32}$/.test(event.clientTrace)) return false;
@@ -89,7 +90,6 @@ export function openClawLogLooksSafe(event: OpenClawLogEvent): boolean {
   return true;
 }
 
-/** Emite a stdout en una sola línea JSON sanitizada. */
 export function emitOpenClawLog(event: OpenClawLogEvent): void {
   if (!openClawLogLooksSafe(event)) return;
   console.info(JSON.stringify({ scope: 'openclaw', ...event }));

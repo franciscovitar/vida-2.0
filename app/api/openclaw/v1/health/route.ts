@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { getOpenClawAgentProfile } from '@/lib/openclaw/agents';
 import { getOpenClawApiConfig, isOpenClawApiEnabled } from '@/lib/openclaw/config';
 import {
   finishOpenClawOk,
@@ -22,10 +23,12 @@ export async function GET(request: Request) {
 
   const config = getOpenClawApiConfig();
   const readiness = getOpenClawReadiness();
+  const profile = getOpenClawAgentProfile(parsed.value.agentId);
   const body = {
     ok: true as const,
     requestId: parsed.value.requestId,
     version: OPENCLAW_API_VERSION,
+    agent: { id: profile.id, name: profile.name },
     enabled: isOpenClawApiEnabled(),
     accessMode: config.ok ? config.accessMode : 'disabled',
     apiStatus: readiness.apiStatus,

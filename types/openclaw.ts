@@ -4,7 +4,7 @@
 export const OPENCLAW_API_VERSION = 'v1' as const;
 export type OpenClawApiVersion = typeof OPENCLAW_API_VERSION;
 
-export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-28-proposals' as const;
+export const OPENCLAW_CAPABILITIES_VERSION = '2026-07-30-agents-v1' as const;
 
 export type OpenClawAccessMode = 'disabled' | 'read-only' | 'full';
 
@@ -76,6 +76,39 @@ export type OpenClawProposeOperation =
   | 'calendar.hold.create.propose'
   /** @deprecated Usar calendar.hold.create.propose */
   | 'calendar.block.propose';
+
+export const OPENCLAW_AGENT_IDS = [
+  'steward',
+  'health-reflection',
+  'digital-order',
+  'technical-guardian',
+] as const;
+
+export type OpenClawAgentId = (typeof OPENCLAW_AGENT_IDS)[number];
+
+export type OpenClawAgentProfile = {
+  id: OpenClawAgentId;
+  name: string;
+  allowedReads: readonly OpenClawReadOperation[];
+  allowedProposals: readonly OpenClawProposeOperation[];
+  areaScopes: readonly OpenClawAreaSlug[];
+  approvalsScope: 'own' | 'none';
+  documentScope: 'general' | 'health' | 'none';
+  maxPrivacy: 'general' | 'health' | 'technical';
+};
+
+export type OpenClawAgentCredential = {
+  agentId: OpenClawAgentId;
+  keyId: string;
+  secret: string;
+};
+
+export type OpenClawAgentCredentialsResolution =
+  | { ok: true; credentials: readonly OpenClawAgentCredential[] }
+  | {
+      ok: false;
+      reason: 'no-credentials' | 'incomplete-credentials' | 'duplicate-key-id';
+    };
 
 export type OpenClawErrorCode =
   | 'api-disabled'
@@ -218,6 +251,7 @@ export type OpenClawCapability = {
 export type OpenClawRequestContext = {
   requestId: string;
   keyId: string;
+  agentId: OpenClawAgentId;
   actorId: string;
   method: string;
   pathname: string;
@@ -233,6 +267,7 @@ export type OpenClawAuthDecision =
   | {
       ok: true;
       keyId: string;
+      agentId: OpenClawAgentId;
       actorId: string;
       requestId: string;
       replayKeys: OpenClawReplayKeys;

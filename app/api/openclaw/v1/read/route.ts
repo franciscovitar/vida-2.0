@@ -1,3 +1,4 @@
+import { isOpenClawReadAllowed } from '@/lib/openclaw/agents';
 import {
   finishOpenClawError,
   finishOpenClawOk,
@@ -35,6 +36,16 @@ export async function POST(request: Request) {
   const validation = validateOpenClawReadEnvelope(parsed.value.json);
   if (!validation.ok) {
     return finishOpenClawError(parsed.value, 'read', 400, validation.code, validation.message);
+  }
+
+  if (!isOpenClawReadAllowed(parsed.value.agentId, validation.value.operation)) {
+    return finishOpenClawError(
+      parsed.value,
+      validation.value.operation,
+      403,
+      'forbidden',
+      'Operación no permitida para este agente.',
+    );
   }
 
   const result = await executeOpenClawRead(validation.value);

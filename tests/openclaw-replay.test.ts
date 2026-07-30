@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
@@ -13,15 +13,15 @@ import {
 
 const baseKeys = buildOpenClawReplayKeys({
   environment: 'test',
-  keyId: 'oc_test_key',
+  agentId: 'steward',
   requestId: 'req-1',
   signature: 'a'.repeat(64),
 });
 
-test('openclaw replay: fingerprints son opacos, separados y determinísticos', () => {
+test('openclaw replay: fingerprints son opacos, separados y determinÃ­sticos', () => {
   const repeated = buildOpenClawReplayKeys({
     environment: 'test',
-    keyId: 'oc_test_key',
+    agentId: 'steward',
     requestId: 'req-1',
     signature: 'a'.repeat(64),
   });
@@ -30,11 +30,11 @@ test('openclaw replay: fingerprints son opacos, separados y determinísticos', (
   assert.match(baseKeys.requestKey, /^[0-9a-f]{64}$/);
   assert.match(baseKeys.canonicalKey, /^[0-9a-f]{64}$/);
   assert.notEqual(baseKeys.requestKey, baseKeys.canonicalKey);
-  assert.equal(JSON.stringify(baseKeys).includes('oc_test_key'), false);
+  assert.equal(JSON.stringify(baseKeys).includes('steward'), false);
   assert.equal(JSON.stringify(baseKeys).includes('req-1'), false);
 });
 
-test('openclaw replay: primera reserva pasa y repetición exacta se bloquea', async () => {
+test('openclaw replay: primera reserva pasa y repeticiÃ³n exacta se bloquea', async () => {
   const port = createMemoryOpenClawReplayPort();
   const first = await port.reserve(baseKeys, OPENCLAW_REPLAY_TTL_SECONDS, 1_000);
   const second = await port.reserve(baseKeys, OPENCLAW_REPLAY_TTL_SECONDS, 1_001);
@@ -71,7 +71,7 @@ test('openclaw replay: misma firma con otro request ID se bloquea', async () => 
   });
 });
 
-test('openclaw replay: TTL permite una nueva reserva después de expirar', async () => {
+test('openclaw replay: TTL permite una nueva reserva despuÃ©s de expirar', async () => {
   const port = createMemoryOpenClawReplayPort();
 
   assert.deepEqual(await port.reserve(baseKeys, 1, 1_000), { ok: true });
@@ -103,7 +103,7 @@ test('openclaw replay: store no disponible falla cerrado', async () => {
   });
 });
 
-test('openclaw replay: memoria solo se habilita en test o local explícito', () => {
+test('openclaw replay: memoria solo se habilita en test o local explÃ­cito', () => {
   const production = resolveOpenClawReplayPort({
     NODE_ENV: 'production',
     VERCEL_ENV: 'production',
@@ -117,7 +117,7 @@ test('openclaw replay: memoria solo se habilita en test o local explícito', () 
   assert.notEqual(production, local);
 });
 
-test('openclaw replay: HTTP aplica rate, replay y después parsea JSON', () => {
+test('openclaw replay: HTTP aplica rate, replay y despuÃ©s parsea JSON', () => {
   const source = readFileSync(path.join(process.cwd(), 'lib/openclaw/http.ts'), 'utf8');
   const rateIndex = source.indexOf('const rate = await resolveOpenClawRateLimitPort');
   const replayIndex = source.indexOf('const replay = await resolveOpenClawReplayPort().reserve');

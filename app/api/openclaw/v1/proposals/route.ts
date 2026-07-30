@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   }
 
   const created = await createOpenClawProposal({
-    keyId: parsed.value.keyId,
+    agentId: parsed.value.agentId,
     request: body.value,
     requestId: parsed.value.requestId,
   });

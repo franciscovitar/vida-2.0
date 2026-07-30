@@ -1,7 +1,13 @@
 /**
  * Feature flag y configuración OpenClaw (solo servidor).
  */
-import type { OpenClawAccessMode, OpenClawRuntimeStatus } from '@/types/openclaw';
+import { getOpenClawAgentCredentials } from '@/lib/openclaw/agents';
+import type {
+  OpenClawAccessMode,
+  OpenClawAgentCredential,
+  OpenClawAgentId,
+  OpenClawRuntimeStatus,
+} from '@/types/openclaw';
 
 export const OPENCLAW_MAX_BODY_BYTES = 64 * 1024;
 export const OPENCLAW_MAX_TIMESTAMP_SKEW_MS = 5 * 60 * 1000;
@@ -30,8 +36,7 @@ export function isOpenClawApiEnabled(
 export type OpenClawApiConfig =
   | {
       ok: true;
-      keyId: string;
-      secret: string;
+      credentials: readonly OpenClawAgentCredential[];
       ratePerMinute: number;
       accessMode: 'read-only';
     }
@@ -54,20 +59,27 @@ export function getOpenClawApiConfig(
   if (accessMode !== 'read-only') {
     return { ok: false, reason: 'access-mode-unsupported' };
   }
-  const keyId = env.OPENCLAW_API_KEY_ID?.trim() ?? '';
-  const secret = env.OPENCLAW_API_SECRET?.trim() ?? '';
-  if (!keyId || !secret) {
+
+  const credentialResolution = getOpenClawAgentCredentials(env);
+  if (!credentialResolution.ok) {
     return { ok: false, reason: 'misconfigured' };
   }
+
   const rawRate = Number(env.OPENCLAW_API_RATE_PER_MINUTE ?? OPENCLAW_DEFAULT_RATE_PER_MINUTE);
   const ratePerMinute =
     Number.isFinite(rawRate) && rawRate > 0
       ? Math.min(Math.floor(rawRate), 300)
       : OPENCLAW_DEFAULT_RATE_PER_MINUTE;
-  return { ok: true, keyId, secret, ratePerMinute, accessMode };
+
+  return {
+    ok: true,
+    credentials: credentialResolution.credentials,
+    ratePerMinute,
+    accessMode,
+  };
 }
 
-/** Estado sanitizado para Ajustes (sin key ID ni secretos). */
+/** Estado sanitizado para Ajustes (sin key IDs ni secretos). */
 export function getOpenClawRuntimeStatus(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): OpenClawRuntimeStatus {
@@ -76,8 +88,8 @@ export function getOpenClawRuntimeStatus(
   return config.ok ? 'read-only' : 'misconfigured';
 }
 
-export function openClawActorId(keyId: string): string {
-  return `openclaw:${keyId.trim()}`;
+export function openClawActorId(agentId: OpenClawAgentId): string {
+  return `agent:${agentId}`;
 }
 
 export function obscureKeyId(keyId: string): string {

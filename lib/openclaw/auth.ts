@@ -4,13 +4,19 @@
  */
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
+import { resolveOpenClawAgentCredential } from '@/lib/openclaw/agents';
 import {
   getOpenClawApiConfig,
   isOpenClawApiEnabled,
   OPENCLAW_MAX_TIMESTAMP_SKEW_MS,
   openClawActorId,
 } from '@/lib/openclaw/config';
-import type { OpenClawAuthDecision, OpenClawErrorCode, OpenClawReplayKeys } from '@/types/openclaw';
+import type {
+  OpenClawAgentId,
+  OpenClawAuthDecision,
+  OpenClawErrorCode,
+  OpenClawReplayKeys,
+} from '@/types/openclaw';
 
 export const OPENCLAW_HMAC_PROTOCOL = 'vida2-openclaw-hmac-v2' as const;
 export const OPENCLAW_MAX_REQUEST_ID_LENGTH = 128;
@@ -78,14 +84,14 @@ export function signaturesMatch(expectedHex: string, providedHex: string): boole
 
 export function buildOpenClawReplayKeys(input: {
   environment: string;
-  keyId: string;
+  agentId: OpenClawAgentId;
   requestId: string;
   signature: string;
 }): OpenClawReplayKeys {
-  const namespace = `${OPENCLAW_HMAC_PROTOCOL}\n${input.environment}`;
+  const namespace = `${OPENCLAW_HMAC_PROTOCOL}\n${input.environment}\nagent:${input.agentId}`;
   return {
-    requestKey: sha256Hex(`${namespace}\nrequest\n${input.keyId}\n${input.requestId}`),
-    canonicalKey: sha256Hex(`${namespace}\ncanonical\n${input.keyId}\n${input.signature}`),
+    requestKey: sha256Hex(`${namespace}\nrequest\n${input.requestId}`),
+    canonicalKey: sha256Hex(`${namespace}\ncanonical\n${input.signature}`),
   };
 }
 
@@ -133,7 +139,10 @@ export function verifyOpenClawRequest(input: {
   }
 
   const keyId = input.keyIdHeader ?? '';
-  if (!isValidOpenClawKeyId(keyId) || keyId !== config.keyId) return unauthorized();
+  if (!isValidOpenClawKeyId(keyId)) return unauthorized();
+
+  const credential = resolveOpenClawAgentCredential(keyId, env);
+  if (!credential) return unauthorized();
 
   const timestampRaw = input.timestampHeader ?? '';
   if (!isValidOpenClawTimestamp(timestampRaw)) return unauthorized();
@@ -156,17 +165,18 @@ export function verifyOpenClawRequest(input: {
     pathname: input.pathname,
     rawBody: input.rawBody,
   });
-  const expected = signCanonical(config.secret, canonical);
+  const expected = signCanonical(credential.secret, canonical);
   if (!signaturesMatch(expected, signature)) return unauthorized();
 
   return {
     ok: true,
     keyId,
-    actorId: openClawActorId(keyId),
+    agentId: credential.agentId,
+    actorId: openClawActorId(credential.agentId),
     requestId,
     replayKeys: buildOpenClawReplayKeys({
       environment: resolveReplayEnvironment(env),
-      keyId,
+      agentId: credential.agentId,
       requestId,
       signature,
     }),
