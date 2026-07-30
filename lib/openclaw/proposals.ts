@@ -3,9 +3,17 @@
  */
 import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import { executeAction } from '@/lib/actions/engine';
+import {
+  validateCalendarHoldCreate,
+  validateGymSessionCreate,
+  validateInboxCapture,
+  validateTaskChangeStatus,
+  validateTaskCreate,
+} from '@/lib/actions/payloads';
+import { getAllowedActionMeta } from '@/lib/actions/policy';
 import { requestFromOpenClawAgentId } from '@/lib/actions/request';
-import { isOpenClawProposalAllowed, openClawAgentSource } from '@/lib/openclaw/agents';
 import { buildWriteRuntime } from '@/lib/actions/runtime';
+import { isOpenClawProposalAllowed, openClawAgentSource } from '@/lib/openclaw/agents';
 import type {
   OpenClawAgentId,
   OpenClawApprovalsListInput,
@@ -44,6 +52,15 @@ const PROPOSAL_BODY_KEYS = new Set([
 
 const ACTOR_BODY_KEYS = new Set(['actor', 'actorId', 'actorHash', 'actorHint', 'email', 'user']);
 
+const CALENDAR_BLOCK_LEGACY_KEYS = new Set([
+  'title',
+  'date',
+  'startTime',
+  'endTime',
+  'reason',
+  'relatedTaskKey',
+]);
+
 export function isOpenClawProposeOperation(value: string): value is OpenClawProposeOperation {
   return value in PROPOSE_TO_ACTION;
 }
@@ -52,6 +69,18 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
+}
+
+function rejectUnknownKeys(
+  data: Record<string, unknown>,
+  allowlist: ReadonlySet<string>,
+): string | null {
+  for (const key of Object.keys(data)) {
+    if (!allowlist.has(key)) {
+      return `Campo no permitido: ${key}.`;
+    }
+  }
+  return null;
 }
 
 export function sanitizeOpenClawProposalDiff(
@@ -80,6 +109,88 @@ export function toOpenClawProposalMetadata(row: ActionProposalSummary) {
     diff: sanitizeOpenClawProposalDiff(row.diff),
     source: row.source,
   };
+}
+
+/** Fuerza origin canónico de OpenClaw antes de validar el contrato de bandeja. */
+function buildInboxCapturePayload(
+  raw: unknown,
+): { ok: true; value: InboxCapturePayload } | { ok: false; message: string } {
+  const record = asRecord(raw);
+  if (!record) return { ok: false, message: 'payload requerido.' };
+  return validateInboxCapture({
+    ...record,
+    origin: 'openclaw',
+  });
+}
+
+function parseCalendarBlockProposePayload(
+  raw: unknown,
+): { ok: true; value: CalendarHoldCreatePayload } | { ok: false; message: string } {
+  const record = asRecord(raw);
+  if (!record) return { ok: false, message: 'payload requerido.' };
+  const unknown = rejectUnknownKeys(record, CALENDAR_BLOCK_LEGACY_KEYS);
+  if (unknown) return { ok: false, message: unknown };
+
+  if (typeof record.title !== 'string') {
+    return { ok: false, message: 'Título de hold inválido.' };
+  }
+  if (typeof record.date !== 'string') {
+    return { ok: false, message: 'Bloque de Calendar inválido.' };
+  }
+  if (typeof record.startTime !== 'string' || typeof record.endTime !== 'string') {
+    return { ok: false, message: 'Bloque de Calendar inválido.' };
+  }
+  if (record.reason !== undefined && record.reason !== null && typeof record.reason !== 'string') {
+    return { ok: false, message: 'Nota no permitida.' };
+  }
+  if (
+    record.relatedTaskKey !== undefined &&
+    record.relatedTaskKey !== null &&
+    typeof record.relatedTaskKey !== 'string'
+  ) {
+    return { ok: false, message: 'Campo no permitido: relatedTaskKey.' };
+  }
+
+  const title = record.title.trim();
+  const date = record.date;
+  const startTime = record.startTime.trim();
+  const endTime = record.endTime.trim();
+  if (
+    !title ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    !/^\d{2}:\d{2}$/.test(startTime) ||
+    !/^\d{2}:\d{2}$/.test(endTime)
+  ) {
+    return { ok: false, message: 'Bloque de Calendar inválido.' };
+  }
+
+  return validateCalendarHoldCreate({
+    title,
+    start: `${date}T${startTime}:00.000Z`,
+    end: `${date}T${endTime}:00.000Z`,
+    note: typeof record.reason === 'string' ? record.reason : null,
+    relatedTaskKey: typeof record.relatedTaskKey === 'string' ? record.relatedTaskKey : null,
+  });
+}
+
+function parseOperationPayload(
+  operation: OpenClawProposeOperation,
+  raw: unknown,
+): { ok: true; value: OpenClawProposalRequest['payload'] } | { ok: false; message: string } {
+  switch (operation) {
+    case 'task.create.propose':
+      return validateTaskCreate(raw);
+    case 'task.change-status.propose':
+      return validateTaskChangeStatus(raw);
+    case 'inbox.capture.propose':
+      return buildInboxCapturePayload(raw);
+    case 'gym.session.create.propose':
+      return validateGymSessionCreate(raw);
+    case 'calendar.hold.create.propose':
+      return validateCalendarHoldCreate(raw);
+    case 'calendar.block.propose':
+      return parseCalendarBlockProposePayload(raw);
+  }
 }
 
 export function parseOpenClawProposalRequest(
@@ -131,19 +242,34 @@ export function parseOpenClawProposalRequest(
   if (typeof record.reversible !== 'boolean') {
     return { ok: false, message: 'reversible requerido.' };
   }
-  const payload = asRecord(record.payload);
-  if (!payload) return { ok: false, message: 'payload requerido.' };
-  const sanitized: Record<string, string | number | boolean | null> = {};
-  for (const [key, value] of Object.entries(payload)) {
-    if (
-      value === null ||
-      typeof value === 'string' ||
-      typeof value === 'number' ||
-      typeof value === 'boolean'
-    ) {
-      sanitized[key] = value;
-    }
+
+  const policy = getAllowedActionMeta(PROPOSE_TO_ACTION[operation]);
+  if (risk !== policy.risk) {
+    return { ok: false, message: 'Riesgo incompatible con la política de la acción.' };
   }
+  if (record.reversible !== policy.reversible) {
+    return { ok: false, message: 'Reversibilidad incompatible con la política de la acción.' };
+  }
+
+  const targetKey =
+    record.targetKey === undefined || record.targetKey === null
+      ? null
+      : typeof record.targetKey === 'string'
+        ? record.targetKey
+        : null;
+  if (
+    record.targetKey !== undefined &&
+    record.targetKey !== null &&
+    typeof record.targetKey !== 'string'
+  ) {
+    return { ok: false, message: 'targetKey inválido.' };
+  }
+
+  const parsedPayload = parseOperationPayload(operation, record.payload);
+  if (!parsedPayload.ok) {
+    return { ok: false, message: parsedPayload.message };
+  }
+
   return {
     ok: true,
     value: {
@@ -153,45 +279,9 @@ export function parseOpenClawProposalRequest(
       expectedChange,
       risk,
       reversible: record.reversible,
-      payload: sanitized,
-      targetKey: typeof record.targetKey === 'string' ? record.targetKey : null,
-    },
-  };
-}
-
-function buildCalendarHoldPayload(
-  payload: Record<string, string | number | boolean | null>,
-): CalendarHoldCreatePayload {
-  if (typeof payload.start === 'string' && typeof payload.end === 'string') {
-    return {
-      title: String(payload.title ?? 'Hold propuesto'),
-      start: payload.start,
-      end: payload.end,
-      note: typeof payload.note === 'string' ? payload.note : null,
-      relatedTaskKey: typeof payload.relatedTaskKey === 'string' ? payload.relatedTaskKey : null,
-    };
-  }
-  const date = String(payload.date ?? '');
-  const startTime = String(payload.startTime ?? '10:00');
-  const endTime = String(payload.endTime ?? '11:00');
-  return {
-    title: String(payload.title ?? 'Hold propuesto'),
-    start: `${date}T${startTime}:00.000Z`,
-    end: `${date}T${endTime}:00.000Z`,
-    note: typeof payload.reason === 'string' ? payload.reason : null,
-    relatedTaskKey: typeof payload.relatedTaskKey === 'string' ? payload.relatedTaskKey : null,
-  };
-}
-
-function buildInboxCapturePayload(
-  payload: Record<string, string | number | boolean | null>,
-): InboxCapturePayload {
-  return {
-    text: String(payload.text ?? ''),
-    link: typeof payload.link === 'string' ? payload.link : null,
-    capturedAt:
-      typeof payload.capturedAt === 'string' ? payload.capturedAt : new Date().toISOString(),
-    origin: 'openclaw',
+      payload: parsedPayload.value,
+      targetKey,
+    } as OpenClawProposalRequest,
   };
 }
 
@@ -249,13 +339,7 @@ export async function createOpenClawProposal(input: {
           ? 'task'
           : 'system';
 
-  const businessPayload = isCalendarHold
-    ? buildCalendarHoldPayload(input.request.payload)
-    : proposed === 'inbox.capture'
-      ? buildInboxCapturePayload(input.request.payload)
-      : ({
-          ...input.request.payload,
-        } as never);
+  const businessPayload = input.request.payload;
 
   const source: 'openclaw' | `agent:${string}` = legacyCaller ? 'openclaw' : `agent:${agentId}`;
   const runtime = buildWriteRuntime(env, input.runtimeOverrides);

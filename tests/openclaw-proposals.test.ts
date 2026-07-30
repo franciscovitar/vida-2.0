@@ -9,7 +9,11 @@ import { test } from 'node:test';
 import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import { createMemoryAuditSink } from '@/lib/actions/audit';
 import { createMemoryIdempotencyStore } from '@/lib/actions/idempotency';
-import { createMemoryProposalPort } from '@/lib/actions/memory-ports';
+import {
+  createMemoryGymPort,
+  createMemoryProposalPort,
+  createMemoryTaskPort,
+} from '@/lib/actions/memory-ports';
 import { listOpenClawCapabilities } from '@/lib/openclaw/capabilities';
 import { buildCanonicalString, signCanonical } from '@/lib/openclaw/auth';
 import { getOpenClawReadiness } from '@/lib/openclaw/readiness';
@@ -281,7 +285,12 @@ test('openclaw proposals: no approve vía createOpenClawProposal / parse', async
       expectedChange: 'c',
       risk: 'low',
       reversible: true,
-      payload: { text: 'no' },
+      payload: {
+        text: 'no',
+        link: null,
+        capturedAt: '2027-07-28T12:00:00.000Z',
+        origin: 'openclaw',
+      },
     },
   });
   assert.equal(denied.ok, false);
@@ -528,4 +537,591 @@ test('openclaw proposals: rutas no llaman buildWriteRuntime directamente', () =>
     assert.match(source, /isOpenClawProposalsEnabled/);
     assert.equal(source.includes('buildWriteRuntime('), false);
   }
+});
+
+const SPECIALIZED_KEYS = {
+  OPENCLAW_STEWARD_API_KEY_ID: 'steward-key',
+  OPENCLAW_STEWARD_API_SECRET: 'steward-secret-32chars-minimum!!',
+  OPENCLAW_HEALTH_REFLECTION_API_KEY_ID: 'health-key',
+  OPENCLAW_HEALTH_REFLECTION_API_SECRET: 'health-secret-32chars-minimum!!',
+  OPENCLAW_DIGITAL_ORDER_API_KEY_ID: 'digital-key',
+  OPENCLAW_DIGITAL_ORDER_API_SECRET: 'digital-secret-32chars-minimum!',
+  OPENCLAW_TECHNICAL_GUARDIAN_API_KEY_ID: 'technical-key',
+  OPENCLAW_TECHNICAL_GUARDIAN_API_SECRET: 'technical-secret-32chars-min!!',
+} as const;
+
+const PROPOSALS_HTTP_ENV = {
+  ...WRITE_MEMORY_ENV,
+  OPENCLAW_API_ENABLED: 'true',
+  OPENCLAW_ACCESS_MODE: 'read-only',
+  OPENCLAW_RATE_LIMIT_MODE: 'memory',
+  OPENCLAW_REPLAY_MODE: 'memory',
+  ...SPECIALIZED_KEYS,
+} as const;
+
+const GYM_SET = {
+  exerciseKey: 'exercise-test',
+  exerciseName: 'Sentadilla',
+  setIndex: 1,
+  weight: 60,
+  reps: 8,
+  rir: 2,
+  rpe: 8,
+  completed: true,
+  notes: null,
+} as const;
+
+const GYM_PAYLOAD = {
+  date: '2027-07-30',
+  routineKey: 'routine-test',
+  workoutDayKey: 'day-test',
+  startedAt: null,
+  finishedAt: null,
+  durationMinutes: 45,
+  energyBefore: 4,
+  notes: null,
+  sets: [GYM_SET],
+} as const;
+
+function signedWithSecret(input: {
+  secret: string;
+  keyId: string;
+  method: string;
+  pathname: string;
+  rawBody?: string;
+}) {
+  const timestamp = String(Date.now());
+  const requestId = `req-${Math.random().toString(16).slice(2)}`;
+  const rawBody = input.rawBody ?? '';
+  const signature = signCanonical(
+    input.secret,
+    buildCanonicalString({
+      timestamp,
+      requestId,
+      method: input.method,
+      pathname: input.pathname,
+      rawBody,
+    }),
+  );
+  return { timestamp, signature, keyId: input.keyId, requestId, rawBody };
+}
+
+test('openclaw proposals: matriz de capabilities de propuesta ejecutables en memoria', async () => {
+  const env = {
+    ...WRITE_MEMORY_ENV,
+    OPENCLAW_API_ENABLED: 'true',
+    OPENCLAW_ACCESS_MODE: 'read-only',
+  };
+
+  const tasks = createMemoryTaskPort({ authorizedAreas: ['area.salud'] });
+  const seeded = await tasks.createTask(
+    {
+      title: 'Tarea seed change-status',
+      priority: 'Media',
+      areaKey: 'area.salud',
+      projectKey: null,
+      date: null,
+      duration: null,
+      energy: null,
+      note: null,
+    },
+    { idempotencyKey: 'seed-change-status' },
+  );
+  assert.equal(seeded.ok, true);
+  if (!seeded.ok) return;
+
+  const fixtures: Record<
+    string,
+    { agentId: 'steward' | 'health-reflection'; body: Record<string, unknown> }
+  > = {
+    'task.create.propose': {
+      agentId: 'steward',
+      body: {
+        operation: 'task.create.propose',
+        idempotencyKey: 'matrix-task-create',
+        reason: 'Crear tarea',
+        expectedChange: 'Nueva tarea pendiente',
+        risk: 'medium',
+        reversible: true,
+        payload: {
+          title: 'Tarea matriz OpenClaw',
+          priority: 'Media',
+          areaKey: 'area.salud',
+          projectKey: null,
+          date: null,
+          duration: null,
+          energy: null,
+          note: null,
+        },
+      },
+    },
+    'task.change-status.propose': {
+      agentId: 'steward',
+      body: {
+        operation: 'task.change-status.propose',
+        idempotencyKey: 'matrix-task-status',
+        reason: 'Cambiar estado',
+        expectedChange: 'Pasar a En progreso',
+        risk: 'low',
+        reversible: true,
+        payload: {
+          taskKey: seeded.key,
+          nextStatus: 'En progreso',
+        },
+      },
+    },
+    'inbox.capture.propose': {
+      agentId: 'steward',
+      body: {
+        operation: 'inbox.capture.propose',
+        idempotencyKey: 'matrix-inbox',
+        reason: 'Captura',
+        expectedChange: 'Nueva captura',
+        risk: 'low',
+        reversible: true,
+        payload: {
+          text: 'Captura matriz',
+          link: null,
+          capturedAt: '2027-07-30T12:00:00.000Z',
+          origin: 'web',
+        },
+      },
+    },
+    'gym.session.create.propose': {
+      agentId: 'health-reflection',
+      body: {
+        operation: 'gym.session.create.propose',
+        idempotencyKey: 'matrix-gym',
+        reason: 'Registrar sesión',
+        expectedChange: 'Propuesta de sesión',
+        risk: 'medium',
+        reversible: true,
+        payload: GYM_PAYLOAD,
+      },
+    },
+    'calendar.hold.create.propose': {
+      agentId: 'steward',
+      body: {
+        operation: 'calendar.hold.create.propose',
+        idempotencyKey: 'matrix-hold',
+        reason: 'Hold',
+        expectedChange: '60m hold',
+        risk: 'medium',
+        reversible: true,
+        payload: {
+          title: 'Hold matriz',
+          start: '2027-08-01T15:00:00.000Z',
+          end: '2027-08-01T16:00:00.000Z',
+          note: null,
+          relatedTaskKey: null,
+        },
+      },
+    },
+  };
+
+  const gym = createMemoryGymPort();
+  const announced = new Set<string>();
+  for (const agentId of [
+    'steward',
+    'health-reflection',
+    'digital-order',
+    'technical-guardian',
+  ] as const) {
+    for (const cap of listOpenClawCapabilities(agentId, env)) {
+      if (cap.kind !== 'proposal') continue;
+      announced.add(cap.id);
+      const fixture = fixtures[cap.id];
+      assert.ok(fixture, `falta fixture para capability ${cap.id}`);
+      assert.equal(fixture.agentId, agentId, `${cap.id} debe pertenecer a ${agentId}`);
+
+      const parsed = parseOpenClawProposalRequest(fixture.body);
+      assert.equal(parsed.ok, true, cap.id);
+      if (!parsed.ok) continue;
+
+      const proposals = createMemoryProposalPort();
+      const created = await createOpenClawProposal({
+        agentId,
+        requestId: `req-${cap.id}`,
+        env,
+        runtimeOverrides: {
+          proposals,
+          tasks,
+          gym,
+          idempotency: createMemoryIdempotencyStore(),
+          audit: createMemoryAuditSink(),
+        },
+        request: parsed.value,
+      });
+      assert.equal(created.ok, true, cap.id);
+      if (!created.ok) continue;
+      assert.match(created.proposalKey, /^prop-/);
+      const stored = await proposals.get(created.proposalKey);
+      assert.ok(stored);
+      assert.equal(stored?.status, 'pending');
+      assert.equal(stored?.source, `agent:${agentId}`);
+      assert.equal(gym.sessions.size, 0);
+    }
+  }
+
+  assert.equal(announced.has('calendar.block.propose'), false);
+  for (const required of Object.keys(fixtures)) {
+    assert.equal(announced.has(required), true, required);
+  }
+});
+
+test('openclaw proposals: alias calendar.block.propose legacy tipado', () => {
+  const parsed = parseOpenClawProposalRequest({
+    operation: 'calendar.block.propose',
+    idempotencyKey: 'legacy-block',
+    reason: 'Compat',
+    expectedChange: 'Hold',
+    risk: 'medium',
+    reversible: true,
+    payload: {
+      title: 'Legacy hold',
+      date: '2027-08-02',
+      startTime: '10:00',
+      endTime: '11:00',
+      reason: 'foco',
+      relatedTaskKey: null,
+    },
+  });
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+  assert.equal(parsed.value.operation, 'calendar.block.propose');
+  assert.equal(parsed.value.payload.start, '2027-08-02T10:00:00.000Z');
+  assert.equal(parsed.value.payload.end, '2027-08-02T11:00:00.000Z');
+  assert.equal(parsed.value.payload.note, 'foco');
+
+  assert.equal(
+    parseOpenClawProposalRequest({
+      operation: 'calendar.block.propose',
+      idempotencyKey: 'legacy-bad',
+      reason: 'Compat',
+      expectedChange: 'Hold',
+      risk: 'medium',
+      reversible: true,
+      payload: {
+        title: 'Legacy hold',
+        date: '2027-08-02',
+        startTime: '10:00',
+        endTime: '11:00',
+        unknownField: true,
+      },
+    }).ok,
+    false,
+  );
+});
+
+test('openclaw proposals: HTTP gym.session.create.propose con ownership', async () => {
+  await withEnv({ ...PROPOSALS_HTTP_ENV }, async () => {
+    const body = JSON.stringify({
+      operation: 'gym.session.create.propose',
+      idempotencyKey: `gym-http-valid-${Date.now()}`,
+      reason: 'Registrar sesión de prueba',
+      expectedChange: 'Crear propuesta pendiente de sesión',
+      risk: 'medium',
+      reversible: true,
+      payload: GYM_PAYLOAD,
+    });
+    const signed = signedWithSecret({
+      secret: SPECIALIZED_KEYS.OPENCLAW_HEALTH_REFLECTION_API_SECRET,
+      keyId: SPECIALIZED_KEYS.OPENCLAW_HEALTH_REFLECTION_API_KEY_ID,
+      method: 'POST',
+      pathname: '/api/openclaw/v1/proposals',
+      rawBody: body,
+    });
+    const response = await postProposals(
+      new Request('https://example.test/api/openclaw/v1/proposals', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-vida-key-id': signed.keyId,
+          'x-vida-timestamp': signed.timestamp,
+          'x-vida-signature': signed.signature,
+          'x-vida-request-id': signed.requestId,
+        },
+        body,
+      }),
+    );
+    assert.equal(response.status, 200);
+    const json = (await response.json()) as {
+      ok: boolean;
+      status: string;
+      operation: string;
+      risk: string;
+      proposalKey: string;
+      diff: { fields: Array<{ field: string; after: string | number | boolean | null }> } | null;
+    };
+    assert.equal(json.ok, true);
+    assert.equal(json.status, 'pending');
+    assert.equal(json.operation, 'gym.session.create.propose');
+    assert.equal(json.risk, 'medium');
+    assert.match(json.proposalKey, /^prop-/);
+    assert.equal(json.diff?.fields.find((field) => field.field === 'sets')?.after, 1);
+
+    const parsedSets = parseOpenClawProposalRequest(JSON.parse(body));
+    assert.equal(parsedSets.ok, true);
+    if (parsedSets.ok) {
+      assert.equal(parsedSets.value.operation, 'gym.session.create.propose');
+      assert.equal(parsedSets.value.payload.sets.length, 1);
+    }
+
+    const getPath = `/api/openclaw/v1/proposals/${json.proposalKey}`;
+    const healthGet = signedWithSecret({
+      secret: SPECIALIZED_KEYS.OPENCLAW_HEALTH_REFLECTION_API_SECRET,
+      keyId: SPECIALIZED_KEYS.OPENCLAW_HEALTH_REFLECTION_API_KEY_ID,
+      method: 'GET',
+      pathname: getPath,
+    });
+    const healthResponse = await getProposal(
+      new Request(`https://example.test${getPath}`, {
+        method: 'GET',
+        headers: {
+          'x-vida-key-id': healthGet.keyId,
+          'x-vida-timestamp': healthGet.timestamp,
+          'x-vida-signature': healthGet.signature,
+          'x-vida-request-id': healthGet.requestId,
+        },
+      }),
+      { params: Promise.resolve({ key: json.proposalKey }) },
+    );
+    assert.equal(healthResponse.status, 200);
+    const healthJson = (await healthResponse.json()) as { source: string; ok: boolean };
+    assert.equal(healthJson.ok, true);
+    assert.equal(healthJson.source, 'agent:health-reflection');
+
+    for (const agent of [
+      {
+        keyId: SPECIALIZED_KEYS.OPENCLAW_STEWARD_API_KEY_ID,
+        secret: SPECIALIZED_KEYS.OPENCLAW_STEWARD_API_SECRET,
+      },
+      {
+        keyId: SPECIALIZED_KEYS.OPENCLAW_DIGITAL_ORDER_API_KEY_ID,
+        secret: SPECIALIZED_KEYS.OPENCLAW_DIGITAL_ORDER_API_SECRET,
+      },
+      {
+        keyId: SPECIALIZED_KEYS.OPENCLAW_TECHNICAL_GUARDIAN_API_KEY_ID,
+        secret: SPECIALIZED_KEYS.OPENCLAW_TECHNICAL_GUARDIAN_API_SECRET,
+      },
+    ]) {
+      const denied = signedWithSecret({
+        secret: agent.secret,
+        keyId: agent.keyId,
+        method: 'GET',
+        pathname: getPath,
+      });
+      const deniedResponse = await getProposal(
+        new Request(`https://example.test${getPath}`, {
+          method: 'GET',
+          headers: {
+            'x-vida-key-id': denied.keyId,
+            'x-vida-timestamp': denied.timestamp,
+            'x-vida-signature': denied.signature,
+            'x-vida-request-id': denied.requestId,
+          },
+        }),
+        { params: Promise.resolve({ key: json.proposalKey }) },
+      );
+      assert.equal(deniedResponse.status, 404, agent.keyId);
+    }
+  });
+});
+
+test('openclaw proposals: negativos fail-closed de payloads tipados', async () => {
+  const baseGym = {
+    operation: 'gym.session.create.propose',
+    idempotencyKey: 'gym-neg',
+    reason: 'Registrar sesión',
+    expectedChange: 'Propuesta',
+    risk: 'medium' as const,
+    reversible: true,
+  };
+
+  assert.equal(
+    parseOpenClawProposalRequest({ ...baseGym, payload: { ...GYM_PAYLOAD, sets: undefined } }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({ ...baseGym, payload: { ...GYM_PAYLOAD, sets: [] } }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({
+      ...baseGym,
+      payload: { ...GYM_PAYLOAD, sets: [{ ...GYM_SET, unknownField: true }] },
+    }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({ ...baseGym, payload: { ...GYM_PAYLOAD, sets: 'nope' } }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({
+      ...baseGym,
+      payload: {
+        text: 'no soy gym',
+        link: null,
+        capturedAt: '2027-07-30T12:00:00.000Z',
+        origin: 'openclaw',
+      },
+    }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({
+      operation: 'inbox.capture.propose',
+      idempotencyKey: 'inbox-neg',
+      reason: 'r',
+      expectedChange: 'c',
+      risk: 'low',
+      reversible: true,
+      payload: { text: 'hola', nested: { x: 1 } },
+    }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({
+      operation: 'task.create.propose',
+      idempotencyKey: 'task-neg',
+      reason: 'r',
+      expectedChange: 'c',
+      risk: 'medium',
+      reversible: true,
+      payload: {
+        title: 'Tarea',
+        priority: 'Media',
+        areaKey: 'area.salud',
+        projectKey: null,
+        date: null,
+        duration: null,
+        energy: null,
+        note: null,
+        unknownField: true,
+      },
+    }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({
+      operation: 'calendar.hold.create.propose',
+      idempotencyKey: 'cal-neg',
+      reason: 'r',
+      expectedChange: 'c',
+      risk: 'medium',
+      reversible: true,
+      payload: {
+        title: 'Hold',
+        start: '2027-08-01T15:00:00.000Z',
+        end: '2027-08-01T16:00:00.000Z',
+        note: null,
+        relatedTaskKey: null,
+        extra: true,
+      },
+    }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({ ...baseGym, risk: 'low', payload: GYM_PAYLOAD }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({ ...baseGym, reversible: false, payload: GYM_PAYLOAD }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({
+      ...baseGym,
+      actorId: 'evil',
+      payload: GYM_PAYLOAD,
+    }).ok,
+    false,
+  );
+  assert.equal(
+    parseOpenClawProposalRequest({
+      operation: 'proposal.approve',
+      idempotencyKey: 'x',
+      reason: 'r',
+      expectedChange: 'c',
+      risk: 'high',
+      reversible: false,
+      payload: { proposalKey: 'prop-1' },
+    }).ok,
+    false,
+  );
+
+  await withEnv({ ...PROPOSALS_HTTP_ENV }, async () => {
+    const body = JSON.stringify({
+      operation: 'gym.session.create.propose',
+      idempotencyKey: 'gym-steward-forbidden',
+      reason: 'Registrar sesión',
+      expectedChange: 'Propuesta',
+      risk: 'medium',
+      reversible: true,
+      payload: GYM_PAYLOAD,
+    });
+    const signed = signedWithSecret({
+      secret: SPECIALIZED_KEYS.OPENCLAW_STEWARD_API_SECRET,
+      keyId: SPECIALIZED_KEYS.OPENCLAW_STEWARD_API_KEY_ID,
+      method: 'POST',
+      pathname: '/api/openclaw/v1/proposals',
+      rawBody: body,
+    });
+    const response = await postProposals(
+      new Request('https://example.test/api/openclaw/v1/proposals', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-vida-key-id': signed.keyId,
+          'x-vida-timestamp': signed.timestamp,
+          'x-vida-signature': signed.signature,
+          'x-vida-request-id': signed.requestId,
+        },
+        body,
+      }),
+    );
+    assert.equal(response.status, 403);
+    const json = (await response.json()) as { error: { code: string } };
+    assert.equal(json.error.code, 'forbidden');
+
+    for (const badPayload of [
+      { ...GYM_PAYLOAD, sets: undefined },
+      { ...GYM_PAYLOAD, sets: [] },
+      { ...GYM_PAYLOAD, sets: 'x' },
+    ]) {
+      const badBody = JSON.stringify({
+        operation: 'gym.session.create.propose',
+        idempotencyKey: `gym-bad-${Math.random().toString(16).slice(2)}`,
+        reason: 'Registrar sesión',
+        expectedChange: 'Propuesta',
+        risk: 'medium',
+        reversible: true,
+        payload: badPayload,
+      });
+      const badSigned = signedWithSecret({
+        secret: SPECIALIZED_KEYS.OPENCLAW_HEALTH_REFLECTION_API_SECRET,
+        keyId: SPECIALIZED_KEYS.OPENCLAW_HEALTH_REFLECTION_API_KEY_ID,
+        method: 'POST',
+        pathname: '/api/openclaw/v1/proposals',
+        rawBody: badBody,
+      });
+      const badResponse = await postProposals(
+        new Request('https://example.test/api/openclaw/v1/proposals', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-vida-key-id': badSigned.keyId,
+            'x-vida-timestamp': badSigned.timestamp,
+            'x-vida-signature': badSigned.signature,
+            'x-vida-request-id': badSigned.requestId,
+          },
+          body: badBody,
+        }),
+      );
+      assert.equal(badResponse.status, 400);
+      const badJson = (await badResponse.json()) as { error: { code: string } };
+      assert.equal(badJson.error.code, 'invalid-input');
+    }
+  });
 });

@@ -57,6 +57,9 @@ import type { AuditSink } from '@/lib/actions/audit';
 import type { IdempotencyStore } from '@/lib/actions/idempotency';
 import { createMemoryAuditSink, processAuditSink } from '@/lib/actions/audit';
 import { createMemoryIdempotencyStore, processIdempotencyStore } from '@/lib/actions/idempotency';
+
+/** Ledger de propuestas en memoria compartido entre requests de test (como idempotency). */
+const processMemoryProposalPort = createMemoryProposalPort();
 import type {
   CalendarHoldWritePort,
   GymSheetWritePort,
@@ -227,7 +230,7 @@ export function buildWriteRuntime(
         tasks: overrides?.tasks ?? createMemoryTaskPort(),
         inbox: overrides?.inbox ?? createMemoryInboxPort(),
         gym: overrides?.gym ?? createMemoryGymPort(),
-        proposals: overrides?.proposals ?? createMemoryProposalPort(),
+        proposals: overrides?.proposals ?? processMemoryProposalPort,
         calendar: overrides?.calendar ?? createMemoryCalendarHoldPort(),
         encryptionStore,
         encryptionKey,

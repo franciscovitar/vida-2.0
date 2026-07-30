@@ -1,6 +1,14 @@
 /**
  * Contratos planos de la API OpenClaw (8F.1).
  */
+import type {
+  CalendarHoldCreatePayload,
+  GymSessionCreatePayload,
+  InboxCapturePayload,
+  TaskChangeStatusPayload,
+  TaskCreatePayload,
+} from '@/types/actions';
+
 export const OPENCLAW_API_VERSION = 'v1' as const;
 export type OpenClawApiVersion = typeof OPENCLAW_API_VERSION;
 
@@ -194,16 +202,40 @@ export type OpenClawReadResponse<T = unknown> = {
   data: T;
 };
 
-export type OpenClawProposalRequest = {
-  operation: OpenClawProposeOperation;
+type OpenClawProposalRequestBase = {
   idempotencyKey: string;
   reason: string;
   expectedChange: string;
   risk: 'low' | 'medium' | 'high';
   reversible: boolean;
-  payload: Record<string, string | number | boolean | null>;
   targetKey?: string | null;
 };
+
+export type OpenClawProposalRequest =
+  | (OpenClawProposalRequestBase & {
+      operation: 'task.create.propose';
+      payload: TaskCreatePayload;
+    })
+  | (OpenClawProposalRequestBase & {
+      operation: 'task.change-status.propose';
+      payload: TaskChangeStatusPayload;
+    })
+  | (OpenClawProposalRequestBase & {
+      operation: 'inbox.capture.propose';
+      payload: InboxCapturePayload;
+    })
+  | (OpenClawProposalRequestBase & {
+      operation: 'gym.session.create.propose';
+      payload: GymSessionCreatePayload;
+    })
+  | (OpenClawProposalRequestBase & {
+      operation: 'calendar.hold.create.propose';
+      payload: CalendarHoldCreatePayload;
+    })
+  | (OpenClawProposalRequestBase & {
+      operation: 'calendar.block.propose';
+      payload: CalendarHoldCreatePayload;
+    });
 
 export type OpenClawProposalDiffField = {
   field: string;
