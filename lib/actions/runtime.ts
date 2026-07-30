@@ -274,7 +274,8 @@ export function buildWriteRuntime(
   }
 
   const client = overrides?.notionClient ?? (token ? createNotionActionsClient(token) : null);
-  const coordination = overrides?.coordination ?? createUpstashWriteCoordination(upstash.value);
+  const coordination =
+    overrides?.coordination ?? createUpstashWriteCoordination(upstash.value, encryptionKey);
   // Real/preview path MUST use Upstash encrypted payload store — never memory.
   const encryptionStore =
     overrides?.encryptionStore ?? createUpstashEncryptedPayloadStore(upstash.value);
