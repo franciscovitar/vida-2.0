@@ -5,10 +5,24 @@
  * Módulo puro y testeable. La frontera server-only permanece en reads.ts.
  */
 import { getWriteRuntimeStatus } from '@/lib/actions/config';
-import { getOpenClawAgentStatuses } from '@/lib/openclaw/agent-status';
+import {
+  getOpenClawAgentStatuses,
+  type OpenClawAgentStatusView,
+} from '@/lib/openclaw/agent-status';
 import { getOpenClawReadiness } from '@/lib/openclaw/readiness';
+import type { OpenClawAgentId } from '@/types/openclaw';
 
 type Env = Readonly<Record<string, string | undefined>>;
+
+/** DTO público de agente para technical.status (sin clave `id`). */
+export type OpenClawTechnicalAgentStatus = {
+  agentKey: OpenClawAgentId;
+  name: string;
+  status: OpenClawAgentStatusView['status'];
+  reads: number;
+  proposals: number;
+  externalAccess: OpenClawAgentStatusView['externalAccess'];
+};
 
 function environment(env: Env): 'local' | 'development' | 'preview' | 'production' {
   const value = env.VERCEL_ENV;
@@ -22,6 +36,17 @@ function safeCode(value: string): string {
     .replace(/[^a-z0-9-]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 80);
+}
+
+function toTechnicalAgentStatus(agent: OpenClawAgentStatusView): OpenClawTechnicalAgentStatus {
+  return {
+    agentKey: agent.id,
+    name: agent.name,
+    status: agent.status,
+    reads: agent.reads,
+    proposals: agent.proposals,
+    externalAccess: agent.externalAccess,
+  };
 }
 
 export function buildOpenClawTechnicalStatus(env: Env = process.env) {
@@ -40,7 +65,7 @@ export function buildOpenClawTechnicalStatus(env: Env = process.env) {
       rollback: writes.rollback,
       coordination: writes.coordination,
     },
-    agents: getOpenClawAgentStatuses(env),
+    agents: getOpenClawAgentStatuses(env).map(toTechnicalAgentStatus),
   };
 }
 
@@ -85,7 +110,7 @@ export function buildOpenClawTechnicalDiagnostics(env: Env = process.env) {
   for (const agent of status.agents) {
     if (agent.status !== 'ready') {
       entries.push({
-        code: `agent-${safeCode(agent.id)}-${safeCode(agent.status)}`,
+        code: `agent-${safeCode(agent.agentKey)}-${safeCode(agent.status)}`,
         severity: agent.status === 'misconfigured' ? 'error' : 'info',
         component: 'agents',
         state: agent.status,
