@@ -13,8 +13,17 @@ import {
 } from '@/types/openclaw';
 import type { WebCatalogEntry } from '@/types/web-catalog';
 
-const PROFILES: Readonly<Record<OpenClawAgentId, OpenClawAgentProfile>> = {
-  steward: {
+function freezeProfile(profile: OpenClawAgentProfile): OpenClawAgentProfile {
+  return Object.freeze({
+    ...profile,
+    allowedReads: Object.freeze([...profile.allowedReads]),
+    allowedProposals: Object.freeze([...profile.allowedProposals]),
+    areaScopes: Object.freeze([...profile.areaScopes]),
+  });
+}
+
+const PROFILES = Object.freeze({
+  steward: freezeProfile({
     id: 'steward',
     name: 'Mayordomo',
     allowedReads: [
@@ -38,8 +47,8 @@ const PROFILES: Readonly<Record<OpenClawAgentId, OpenClawAgentProfile>> = {
     approvalsScope: 'own',
     documentScope: 'general',
     maxPrivacy: 'general',
-  },
-  'health-reflection': {
+  }),
+  'health-reflection': freezeProfile({
     id: 'health-reflection',
     name: 'Salud y reflexión',
     allowedReads: [
@@ -54,8 +63,8 @@ const PROFILES: Readonly<Record<OpenClawAgentId, OpenClawAgentProfile>> = {
     approvalsScope: 'own',
     documentScope: 'health',
     maxPrivacy: 'health',
-  },
-  'digital-order': {
+  }),
+  'digital-order': freezeProfile({
     id: 'digital-order',
     name: 'Orden digital',
     allowedReads: [],
@@ -64,8 +73,8 @@ const PROFILES: Readonly<Record<OpenClawAgentId, OpenClawAgentProfile>> = {
     approvalsScope: 'none',
     documentScope: 'none',
     maxPrivacy: 'general',
-  },
-  'technical-guardian': {
+  }),
+  'technical-guardian': freezeProfile({
     id: 'technical-guardian',
     name: 'Guardián técnico',
     allowedReads: ['technical.status', 'technical.logs'],
@@ -74,8 +83,8 @@ const PROFILES: Readonly<Record<OpenClawAgentId, OpenClawAgentProfile>> = {
     approvalsScope: 'none',
     documentScope: 'none',
     maxPrivacy: 'technical',
-  },
-};
+  }),
+}) satisfies Readonly<Record<OpenClawAgentId, OpenClawAgentProfile>>;
 
 const CREDENTIAL_ENV = [
   {

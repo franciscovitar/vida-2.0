@@ -1,5 +1,5 @@
 /**
- * CreaciÃ³n de propuestas vÃ­a motor Block 3 (sin escrituras finales ni approve).
+ * Creación de propuestas vía motor Block 3 (sin escrituras finales ni approve).
  */
 import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import { executeAction } from '@/lib/actions/engine';
@@ -30,6 +30,17 @@ const PROPOSE_TO_ACTION: Record<OpenClawProposeOperation, ProposedBusinessAction
   'calendar.hold.create.propose': 'calendar.hold.create',
   'calendar.block.propose': 'calendar.hold.create',
 };
+
+const PROPOSAL_BODY_KEYS = new Set([
+  'operation',
+  'idempotencyKey',
+  'reason',
+  'expectedChange',
+  'risk',
+  'reversible',
+  'payload',
+  'targetKey',
+]);
 
 const ACTOR_BODY_KEYS = new Set(['actor', 'actorId', 'actorHash', 'actorHint', 'email', 'user']);
 
@@ -75,16 +86,18 @@ export function parseOpenClawProposalRequest(
   body: unknown,
 ): { ok: true; value: OpenClawProposalRequest } | { ok: false; message: string } {
   const record = asRecord(body);
-  if (!record) return { ok: false, message: 'Body invÃ¡lido.' };
+  if (!record) return { ok: false, message: 'Body inválido.' };
 
   for (const key of Object.keys(record)) {
-    if (ACTOR_BODY_KEYS.has(key)) {
-      return { ok: false, message: 'Actor no permitido en el body.' };
+    if (!PROPOSAL_BODY_KEYS.has(key)) {
+      if (ACTOR_BODY_KEYS.has(key)) {
+        return { ok: false, message: 'Actor no permitido en el body.' };
+      }
+      if (key === 'actionType') {
+        return { ok: false, message: 'actionType no permitido; use operation de propuesta.' };
+      }
+      return { ok: false, message: `Campo no permitido en el body: ${key}.` };
     }
-  }
-
-  if (typeof record.actionType === 'string') {
-    return { ok: false, message: 'actionType no permitido; use operation de propuesta.' };
   }
 
   const operation = typeof record.operation === 'string' ? record.operation : '';
@@ -94,10 +107,10 @@ export function parseOpenClawProposalRequest(
     operation === 'action.rollback' ||
     operation === 'proposal.create'
   ) {
-    return { ok: false, message: 'OperaciÃ³n de control no permitida vÃ­a OpenClaw.' };
+    return { ok: false, message: 'Operación de control no permitida vía OpenClaw.' };
   }
   if (!isOpenClawProposeOperation(operation)) {
-    return { ok: false, message: 'OperaciÃ³n de propuesta no permitida.' };
+    return { ok: false, message: 'Operación de propuesta no permitida.' };
   }
 
   const idempotencyKey =
@@ -113,7 +126,7 @@ export function parseOpenClawProposalRequest(
   }
   const risk = record.risk;
   if (risk !== 'low' && risk !== 'medium' && risk !== 'high') {
-    return { ok: false, message: 'risk invÃ¡lido.' };
+    return { ok: false, message: 'risk inválido.' };
   }
   if (typeof record.reversible !== 'boolean') {
     return { ok: false, message: 'reversible requerido.' };
@@ -220,7 +233,7 @@ export async function createOpenClawProposal(input: {
     return {
       ok: false,
       code: 'policy-denied',
-      message: 'OperaciÃ³n no permitida para este agente.',
+      message: 'Operación no permitida para este agente.',
     };
   }
 

@@ -192,6 +192,34 @@ test('openclaw proposals: parse rechaza approve/actor/direct-write', () => {
   );
 });
 
+test('openclaw proposals: body top-level cerrado rechaza overrides e identidad', () => {
+  const validBody = {
+    operation: 'inbox.capture.propose',
+    idempotencyKey: 'k',
+    reason: 'r',
+    expectedChange: 'c',
+    risk: 'low' as const,
+    reversible: true,
+    payload: { text: 'hola' },
+  };
+
+  const accepted = parseOpenClawProposalRequest(validBody);
+  assert.equal(accepted.ok, true);
+
+  for (const key of [
+    'agentId',
+    'profile',
+    'scopes',
+    'overrides',
+    'actor',
+    'actionType',
+    'unknownField',
+  ] as const) {
+    const parsed = parseOpenClawProposalRequest({ ...validBody, [key]: 'x' });
+    assert.equal(parsed.ok, false, `debe rechazar campo top-level: ${key}`);
+  }
+});
+
 test('openclaw proposals: create success con memory ports', async () => {
   const proposals = createMemoryProposalPort();
   const created = await createOpenClawProposal({

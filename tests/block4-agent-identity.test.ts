@@ -12,6 +12,7 @@ import {
 } from '@/lib/openclaw/agents';
 import { buildCanonicalString, signCanonical, verifyOpenClawRequest } from '@/lib/openclaw/auth';
 import { listOpenClawCapabilities } from '@/lib/openclaw/capabilities';
+import type { OpenClawReadOperation } from '@/types/openclaw';
 
 const BASE = {
   OPENCLAW_API_ENABLED: 'true',
@@ -78,6 +79,43 @@ test('B4-A1: perfiles canónicos cerrados y sin capacidades cruzadas', () => {
   assert.equal(isOpenClawReadAllowed('health-reflection', 'gym.summary'), true);
   assert.equal(isOpenClawProposalAllowed('steward', 'gym.session.create.propose'), false);
   assert.equal(isOpenClawProposalAllowed('health-reflection', 'gym.session.create.propose'), true);
+});
+
+test('B4-A1b: perfiles canónicos profundamente congelados en runtime', () => {
+  const ids = ['steward', 'health-reflection', 'digital-order', 'technical-guardian'] as const;
+
+  for (const id of ids) {
+    const profile = getOpenClawAgentProfile(id);
+    assert.equal(Object.isFrozen(profile), true);
+    assert.equal(Object.isFrozen(profile.allowedReads), true);
+    assert.equal(Object.isFrozen(profile.allowedProposals), true);
+    assert.equal(Object.isFrozen(profile.areaScopes), true);
+  }
+
+  const steward = getOpenClawAgentProfile('steward');
+  const originalName = steward.name;
+  const originalReads = [...steward.allowedReads];
+  const originalAreas = [...steward.areaScopes];
+
+  const mutable = steward as unknown as {
+    name: string;
+    allowedReads: OpenClawReadOperation[];
+    areaScopes: string[];
+  };
+
+  assert.throws(() => {
+    mutable.name = 'Hijacked';
+  }, TypeError);
+  assert.throws(() => {
+    mutable.allowedReads.push('technical.status');
+  }, TypeError);
+  assert.throws(() => {
+    mutable.areaScopes[0] = 'hijacked';
+  }, TypeError);
+
+  assert.equal(getOpenClawAgentProfile('steward').name, originalName);
+  assert.deepEqual([...getOpenClawAgentProfile('steward').allowedReads], originalReads);
+  assert.deepEqual([...getOpenClawAgentProfile('steward').areaScopes], originalAreas);
 });
 
 test('B4-A2: credenciales especializadas completas y key IDs únicas', () => {
