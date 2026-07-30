@@ -1,4 +1,5 @@
 import { isOpenClawProposalsEnabled, getWriteRuntimeStatus } from '@/lib/actions/config';
+import { getOpenClawAgentCredentials } from '@/lib/openclaw/agents';
 import { resolveOpenClawAccessMode } from '@/lib/openclaw/config';
 import { resolveOpenClawSecurityStoreConfig } from '@/lib/openclaw/security-store';
 import type {
@@ -34,8 +35,7 @@ function resolveApiStatus(env: Readonly<Record<string, string | undefined>>): Op
   if (env.OPENCLAW_API_ENABLED !== 'true') return 'disabled';
   const accessMode = resolveOpenClawAccessMode(env);
   if (accessMode !== 'read-only') return 'misconfigured';
-  if (!has(env.OPENCLAW_API_KEY_ID) || !has(env.OPENCLAW_API_SECRET)) return 'misconfigured';
-  return 'read-only';
+  return getOpenClawAgentCredentials(env).ok ? 'read-only' : 'misconfigured';
 }
 
 export function getOpenClawReadiness(
@@ -95,10 +95,14 @@ export function getOpenClawReadiness(
     'projects.list': combine([notion]),
     'calendar.upcoming': combine([calendar]),
     'gym.summary': combine([notion, sheets, catalog]),
-    // Sin lector read-only de propuestas: no anunciar ready ni devolver [].
-    'approvals.list': 'unavailable',
+    'approvals.list':
+      isOpenClawProposalsEnabled(env) && getWriteRuntimeStatus(env).openclawProposals === 'ready'
+        ? 'ready'
+        : 'unavailable',
     'documents.search': combine([catalog]),
     'document.get': combine([catalog]),
+    'technical.status': 'ready',
+    'technical.logs': 'ready',
   };
 
   let status: OpenClawReadinessStatus;

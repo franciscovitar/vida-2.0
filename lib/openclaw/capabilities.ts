@@ -28,6 +28,11 @@ const READ_CAPABILITIES: readonly {
   { id: 'approvals.list', description: 'Propuestas propias en solo lectura.' },
   { id: 'documents.search', description: 'Búsqueda documental autorizada.' },
   { id: 'document.get', description: 'Documento autorizado por slug.' },
+  { id: 'technical.status', description: 'Readiness y estado técnico sanitizados.' },
+  {
+    id: 'technical.logs',
+    description: 'Diagnósticos técnicos acotados; nunca logs crudos de proveedor.',
+  },
 ];
 
 const PROPOSAL_TOOL_IDS = [

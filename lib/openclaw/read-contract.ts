@@ -101,7 +101,8 @@ function pagination(input: Record<string, unknown>): OpenClawReadValidation | nu
 }
 
 function emptyInput(
-  operation: 'system.overview' | 'areas.list' | 'gym.summary',
+  operation:
+    'system.overview' | 'areas.list' | 'gym.summary' | 'technical.status' | 'technical.logs',
   input: Record<string, unknown>,
 ): OpenClawReadValidation {
   return Object.keys(input).length === 0
@@ -136,7 +137,9 @@ export function validateOpenClawReadEnvelope(value: unknown): OpenClawReadValida
   if (
     operation === 'system.overview' ||
     operation === 'areas.list' ||
-    operation === 'gym.summary'
+    operation === 'gym.summary' ||
+    operation === 'technical.status' ||
+    operation === 'technical.logs'
   ) {
     return emptyInput(operation, input);
   }

@@ -1,4 +1,5 @@
 import {
+  Bot,
   CircleAlert,
   CircleCheckBig,
   Palette,
@@ -15,6 +16,7 @@ import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ThemeControl } from '@/components/ui/ThemeControl';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
+import { getOpenClawAgentStatuses } from '@/lib/openclaw/agent-status';
 import { getRuntimeReadiness } from '@/lib/runtime/server-readiness';
 import type { Domain } from '@/types';
 import type { RuntimeIntegrationStatus } from '@/types/runtime';
@@ -45,9 +47,24 @@ const ENVIRONMENT_LABELS = {
   production: 'Production',
 } as const;
 
+const AGENT_STATUS_LABELS = {
+  ready: 'Lista',
+  'pending-credentials': 'Pendiente',
+  misconfigured: 'Revisar',
+  disabled: 'Desactivada',
+} as const;
+
+const AGENT_STATUS_DOMAINS = {
+  ready: 'habits',
+  'pending-credentials': 'neutral',
+  misconfigured: 'danger',
+  disabled: 'neutral',
+} as const;
+
 export default async function AjustesPage() {
   await requireAuthorizedSession();
   const readiness = getRuntimeReadiness();
+  const agents = getOpenClawAgentStatuses();
   const errors = readiness.preview.issues.filter((item) => item.severity === 'error');
   const warnings = readiness.preview.issues.filter((item) => item.severity === 'warning');
 
@@ -108,6 +125,34 @@ export default async function AjustesPage() {
                 </div>
                 <Badge domain={STATUS_DOMAINS[source.status]} variant="outline">
                   {STATUS_LABELS[source.status]}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        </Card>
+
+        <Card aria-labelledby="agents-title">
+          <SectionHeader
+            id="agents-title"
+            title="Agentes especializados"
+            description="Identidad server-side, permisos cerrados y estado sin revelar credenciales."
+            icon={Bot}
+            domain="productivity"
+          />
+          <ul className={styles.sources}>
+            {agents.map((agent) => (
+              <li key={agent.id} className={styles.source}>
+                <div className={styles['source-text']}>
+                  <span className={styles['source-name']}>{agent.name}</span>
+                  <span className={styles['source-detail']}>
+                    {agent.reads} lecturas · {agent.proposals} propuestas ·{' '}
+                    {agent.externalAccess === 'pending-authorization'
+                      ? 'acceso externo pendiente'
+                      : 'sin acceso externo'}
+                  </span>
+                </div>
+                <Badge domain={AGENT_STATUS_DOMAINS[agent.status]} variant="outline">
+                  {AGENT_STATUS_LABELS[agent.status]}
                 </Badge>
               </li>
             ))}

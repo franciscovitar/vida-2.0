@@ -288,3 +288,21 @@ components:
                   minLength: 1
                   maxLength: 80
                   pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: technical.status
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: technical.logs
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'

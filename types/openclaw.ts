@@ -18,7 +18,9 @@ export type OpenClawReadOperation =
   | 'gym.summary'
   | 'approvals.list'
   | 'documents.search'
-  | 'document.get';
+  | 'document.get'
+  | 'technical.status'
+  | 'technical.logs';
 
 export type OpenClawAreaSlug = 'facultad' | 'genova-trabajo' | 'salud' | 'vida-personal';
 export type OpenClawCanonicalAreaKey = `area.${OpenClawAreaSlug}`;
@@ -152,7 +154,9 @@ export type OpenClawReadRequest =
   | { operation: 'gym.summary'; input: OpenClawEmptyInput }
   | { operation: 'approvals.list'; input: OpenClawApprovalsListInput }
   | { operation: 'documents.search'; input: OpenClawDocumentsSearchInput }
-  | { operation: 'document.get'; input: OpenClawDocumentGetInput };
+  | { operation: 'document.get'; input: OpenClawDocumentGetInput }
+  | { operation: 'technical.status'; input: OpenClawEmptyInput }
+  | { operation: 'technical.logs'; input: OpenClawEmptyInput };
 
 export type OpenClawDataFreshness = 'live' | 'cached' | 'mock' | 'partial' | 'unavailable';
 export type OpenClawReadAvailability = 'ready' | 'degraded' | 'unavailable';

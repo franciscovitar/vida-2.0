@@ -68,7 +68,7 @@ const PROFILES: Readonly<Record<OpenClawAgentId, OpenClawAgentProfile>> = {
   'technical-guardian': {
     id: 'technical-guardian',
     name: 'Guardián técnico',
-    allowedReads: [],
+    allowedReads: ['technical.status', 'technical.logs'],
     allowedProposals: [],
     areaScopes: [],
     approvalsScope: 'none',

@@ -115,6 +115,8 @@ test('openclaw final: cada variante válida del contrato pasa', () => {
     { operation: 'approvals.list', input: { status: 'pending', limit: 5 } },
     { operation: 'documents.search', input: { query: '  salud  ' } },
     { operation: 'document.get', input: { slug: 'documento-seguro' } },
+    { operation: 'technical.status', input: {} },
+    { operation: 'technical.logs', input: {} },
   ] as const;
 
   for (const variant of variants) {
@@ -605,7 +607,7 @@ test('openclaw final: health y capabilities publican readiness sin I/O', () => {
   assert.match(capabilities, /readiness/);
 });
 
-test('openclaw final: OpenAPI oneOf alineado con las 10 operaciones', () => {
+test('openclaw final: OpenAPI oneOf alineado con las 12 operaciones', () => {
   const yaml = readFileSync(path.join(process.cwd(), 'docs/openclaw-openapi.yaml'), 'utf8');
   assert.match(yaml, /OpenClawReadEnvelope/);
   assert.match(yaml, /oneOf:/);
@@ -613,5 +615,5 @@ test('openclaw final: OpenAPI oneOf alineado con las 10 operaciones', () => {
   for (const operation of OPENCLAW_READ_OPERATIONS) {
     assert.match(yaml, new RegExp(`const:\\s*${operation.replace('.', '\\.')}`));
   }
-  assert.equal((yaml.match(/const:\s*[a-z]+\.[a-z]+/g) ?? []).length, 10);
+  assert.equal((yaml.match(/const:\s*[a-z]+\.[a-z]+/g) ?? []).length, 12);
 });

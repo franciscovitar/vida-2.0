@@ -13,6 +13,10 @@ import {
   filterOpenClawDocumentHits,
 } from '@/lib/openclaw/document-policy';
 import { listOpenClawOwnProposals } from '@/lib/openclaw/proposals';
+import {
+  buildOpenClawTechnicalDiagnostics,
+  buildOpenClawTechnicalStatus,
+} from '@/lib/openclaw/technical';
 import { getCalendarAgendaForTrustedService } from '@/lib/data/calendar-source';
 import { getDataSource } from '@/lib/data/config';
 import { loadGymDashboardData } from '@/lib/gym/load';
@@ -385,6 +389,31 @@ export async function executeOpenClawRead(
       warnings: [],
       nextCursor: null,
       itemCount: result.proposals.length,
+    };
+  }
+
+  if (operation === 'technical.status') {
+    return {
+      ok: true,
+      data: buildOpenClawTechnicalStatus(),
+      dataFreshness: 'live',
+      sources: ['runtime-config'],
+      warnings: [],
+      nextCursor: null,
+      itemCount: 1,
+    };
+  }
+
+  if (operation === 'technical.logs') {
+    const diagnostics = buildOpenClawTechnicalDiagnostics();
+    return {
+      ok: true,
+      data: diagnostics,
+      dataFreshness: 'live',
+      sources: ['sanitized-diagnostics'],
+      warnings: ['No incluye logs crudos de Vercel ni de proveedores.'],
+      nextCursor: null,
+      itemCount: diagnostics.entries.length,
     };
   }
 
