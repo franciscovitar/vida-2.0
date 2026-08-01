@@ -50,6 +50,7 @@ export function openClawClientTrace(agentId: string): string {
 export function buildOpenClawLogEvent(input: {
   requestId: string;
   operation: string;
+  principalId?: string;
   agentId?: OpenClawAgentId;
   /** Compatibilidad de tests históricos; las rutas nuevas siempre envían agentId. */
   keyId?: string;
@@ -60,7 +61,7 @@ export function buildOpenClawLogEvent(input: {
   sourceCount?: number | null;
   dataFreshness?: OpenClawDataFreshness | null;
 }): OpenClawLogEvent {
-  const principal = input.agentId ?? input.keyId ?? 'unknown-agent';
+  const principal = input.principalId?.trim() || input.agentId || input.keyId || 'unknown-agent';
   return {
     operation: input.operation,
     durationMs: Math.max(0, Math.round(input.durationMs)),

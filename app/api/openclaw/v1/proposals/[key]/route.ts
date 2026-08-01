@@ -34,6 +34,16 @@ export async function GET(request: Request, context: { params: Promise<{ key: st
     );
   }
 
+  if (parsed.value.workflowPrincipalKey) {
+    return finishOpenClawError(
+      parsed.value,
+      'proposals.get',
+      403,
+      'forbidden',
+      'Operación no incluida en el contrato del workflow.',
+    );
+  }
+
   const { key: rawKey } = await context.params;
   const key = typeof rawKey === 'string' ? rawKey.trim() : '';
   if (!KEY_PATTERN.test(key)) {

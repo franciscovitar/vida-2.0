@@ -11,6 +11,7 @@ import {
   type OpenClawProposeOperation,
   type OpenClawReadOperation,
 } from '@/types/openclaw';
+import { getAutomationWorkflowCredentials } from '@/lib/automations/credentials';
 import type { WebCatalogEntry } from '@/types/web-catalog';
 
 function freezeProfile(profile: OpenClawAgentProfile): OpenClawAgentProfile {
@@ -210,6 +211,12 @@ export function getOpenClawAgentCredentials(
       credentials.push({ agentId: 'steward', keyId, secret });
     }
   }
+
+  const automation = getAutomationWorkflowCredentials(env);
+  if (!automation.ok) {
+    return { ok: false, reason: automation.reason };
+  }
+  credentials.push(...automation.credentials);
 
   if (credentials.length === 0) {
     return { ok: false, reason: 'no-credentials' };

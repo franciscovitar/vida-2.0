@@ -111,6 +111,11 @@ export type OpenClawAgentCredential = {
   agentId: OpenClawAgentId;
   keyId: string;
   secret: string;
+  /** Principal server-side para aislar rate limit, replay, auditoría e idempotencia. */
+  principalId?: string;
+  /** Presente únicamente para credenciales HMAC de workflows. */
+  workflowPrincipalKey?: string | null;
+  workflowKey?: string | null;
 };
 
 export type OpenClawAgentCredentialsResolution =
@@ -288,6 +293,9 @@ export type OpenClawRequestContext = {
   requestId: string;
   keyId: string;
   agentId: OpenClawAgentId;
+  principalId: string;
+  workflowPrincipalKey: string | null;
+  workflowKey: string | null;
   actorId: string;
   method: string;
   pathname: string;
@@ -304,6 +312,9 @@ export type OpenClawAuthDecision =
       ok: true;
       keyId: string;
       agentId: OpenClawAgentId;
+      principalId: string;
+      workflowPrincipalKey: string | null;
+      workflowKey: string | null;
       actorId: string;
       requestId: string;
       replayKeys: OpenClawReplayKeys;

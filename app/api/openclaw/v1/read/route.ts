@@ -1,3 +1,5 @@
+import { isAutomationReadAccessEnabled } from '@/lib/automations/config';
+import { isAutomationReadAllowed } from '@/lib/automations/contracts';
 import { isOpenClawReadAllowed } from '@/lib/openclaw/agents';
 import {
   finishOpenClawError,
@@ -48,7 +50,31 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await executeOpenClawRead(validation.value, parsed.value.agentId);
+  if (
+    parsed.value.workflowPrincipalKey &&
+    (!isAutomationReadAccessEnabled(parsed.value.workflowPrincipalKey) ||
+      !isAutomationReadAllowed(
+        parsed.value.workflowPrincipalKey,
+        parsed.value.agentId,
+        validation.value.operation,
+      ))
+  ) {
+    return finishOpenClawError(
+      parsed.value,
+      validation.value.operation,
+      403,
+      'forbidden',
+      'Operación no permitida para este workflow.',
+    );
+  }
+
+  const result = parsed.value.workflowPrincipalKey
+    ? await executeOpenClawRead(
+        validation.value,
+        parsed.value.agentId,
+        parsed.value.workflowPrincipalKey,
+      )
+    : await executeOpenClawRead(validation.value, parsed.value.agentId);
   if (!result.ok) {
     const mapped = mapReadFailure(result.code);
     return finishOpenClawError(

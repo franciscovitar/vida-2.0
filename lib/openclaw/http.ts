@@ -3,6 +3,11 @@
  */
 import { NextResponse } from 'next/server';
 
+import {
+  getAutomationPrincipalContract,
+  getAutomationWorkflowContract,
+  isAutomationPrincipalKey,
+} from '@/lib/automations/contracts';
 import { verifyOpenClawRequest } from '@/lib/openclaw/auth';
 import {
   decodeOpenClawUtf8,
@@ -22,6 +27,7 @@ import {
   validateOpenClawRouteContract,
   type OpenClawRouteContract,
 } from '@/lib/openclaw/route-contract';
+import type { AutomationPrincipalKey } from '@/types/automations';
 import type {
   OpenClawAgentId,
   OpenClawDataFreshness,
@@ -57,6 +63,9 @@ export type OpenClawParsedRequest = {
   requestId: string;
   keyId: string;
   agentId: OpenClawAgentId;
+  principalId: string;
+  workflowPrincipalKey: AutomationPrincipalKey | null;
+  workflowKey: string | null;
   actorId: string;
   rawBody: string;
   json: unknown | null;
@@ -164,10 +173,27 @@ export async function parseAndAuthenticateOpenClawRequest(
     };
   }
 
+  const workflowPrincipalKeyRaw = auth.workflowPrincipalKey;
+  const workflowPrincipalKey =
+    workflowPrincipalKeyRaw && isAutomationPrincipalKey(workflowPrincipalKeyRaw)
+      ? workflowPrincipalKeyRaw
+      : null;
+  if (workflowPrincipalKeyRaw && !workflowPrincipalKey) {
+    return {
+      ok: false,
+      response: openClawError(401, 'unknown', 'unauthorized', 'Autenticación inválida.'),
+    };
+  }
+
   const requestId = auth.requestId;
   const config = getOpenClawApiConfig();
   if (config.ok) {
-    const rate = await resolveOpenClawRateLimitPort().allow(auth.agentId, config.ratePerMinute);
+    const ratePerMinute = workflowPrincipalKey
+      ? getAutomationWorkflowContract(
+          getAutomationPrincipalContract(workflowPrincipalKey).workflowKey,
+        ).ratePerMinute
+      : config.ratePerMinute;
+    const rate = await resolveOpenClawRateLimitPort().allow(auth.principalId, ratePerMinute);
     if (!rate.ok) {
       if (rate.reason === 'rate-limited') {
         return {
@@ -248,6 +274,9 @@ export async function parseAndAuthenticateOpenClawRequest(
       requestId,
       keyId: auth.keyId,
       agentId: auth.agentId,
+      principalId: auth.principalId,
+      workflowPrincipalKey,
+      workflowKey: auth.workflowKey,
       actorId: auth.actorId,
       rawBody,
       json,
@@ -271,6 +300,7 @@ export function finishOpenClawOk(
       requestId: parsed.requestId,
       operation,
       agentId: parsed.agentId,
+      principalId: parsed.principalId,
       durationMs: Date.now() - parsed.startedAt,
       result: 'ok',
       itemCount: meta?.itemCount ?? null,
@@ -282,7 +312,7 @@ export function finishOpenClawOk(
 }
 
 export function finishOpenClawError(
-  parsed: Pick<OpenClawParsedRequest, 'requestId' | 'agentId' | 'startedAt'>,
+  parsed: Pick<OpenClawParsedRequest, 'requestId' | 'agentId' | 'principalId' | 'startedAt'>,
   operation: string,
   status: number,
   code: OpenClawErrorCode,
@@ -294,6 +324,7 @@ export function finishOpenClawError(
       requestId: parsed.requestId,
       operation,
       agentId: parsed.agentId,
+      principalId: parsed.principalId,
       durationMs: Date.now() - parsed.startedAt,
       result: 'error',
       errorCode: code,

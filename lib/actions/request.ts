@@ -20,18 +20,29 @@ export function requestFromEmail(
   };
 }
 
+/** Construye un ActionRequest desde principal server-side (nunca desde el body). */
+export function requestFromOpenClawPrincipal(
+  agentId: OpenClawAgentId,
+  principalId: string,
+  partial: Omit<ActionRequest, 'actorHash' | 'actorHint'> &
+    Partial<Pick<ActionRequest, 'actorHash' | 'actorHint'>>,
+): ActionRequest {
+  const principal = principalId.trim() || `agent:${agentId}`;
+  const actorHash = partial.actorHash ?? actorHashFromOpenClawKeyId(principal);
+  return {
+    ...partial,
+    actorHash,
+    actorHint: partial.actorHint ?? `openclaw:${actorHash.slice(0, 8)}`,
+  };
+}
+
 /** Construye un ActionRequest desde AgentId canónico (nunca desde el body). */
 export function requestFromOpenClawAgentId(
   agentId: OpenClawAgentId,
   partial: Omit<ActionRequest, 'actorHash' | 'actorHint'> &
     Partial<Pick<ActionRequest, 'actorHash' | 'actorHint'>>,
 ): ActionRequest {
-  const principal = `agent:${agentId}`;
-  return {
-    ...partial,
-    actorHash: partial.actorHash ?? actorHashFromOpenClawKeyId(principal),
-    actorHint: partial.actorHint ?? sanitizeActorHint(principal),
-  };
+  return requestFromOpenClawPrincipal(agentId, `agent:${agentId}`, partial);
 }
 
 /** Construye un ActionRequest desde keyId OpenClaw. @deprecated Block 4 usa AgentId. */

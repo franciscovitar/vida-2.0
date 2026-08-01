@@ -11,9 +11,12 @@ import {
   validateTaskCreate,
 } from '@/lib/actions/payloads';
 import { getAllowedActionMeta } from '@/lib/actions/policy';
-import { requestFromOpenClawAgentId } from '@/lib/actions/request';
+import { requestFromOpenClawPrincipal } from '@/lib/actions/request';
+import { isAutomationProposalAccessEnabled } from '@/lib/automations/config';
+import { automationProposalSource, isAutomationProposalAllowed } from '@/lib/automations/contracts';
 import { buildWriteRuntime } from '@/lib/actions/runtime';
 import { isOpenClawProposalAllowed, openClawAgentSource } from '@/lib/openclaw/agents';
+import type { AutomationPrincipalKey } from '@/types/automations';
 import type {
   OpenClawAgentId,
   OpenClawApprovalsListInput,
@@ -289,6 +292,8 @@ type RuntimeOverrides = NonNullable<Parameters<typeof buildWriteRuntime>[1]>;
 
 export async function createOpenClawProposal(input: {
   agentId?: OpenClawAgentId;
+  principalId?: string;
+  workflowPrincipalKey?: AutomationPrincipalKey | null;
   /** Compatibilidad de tests previos; se ignora como identidad. */
   keyId?: string;
   request: OpenClawProposalRequest;
@@ -311,6 +316,8 @@ export async function createOpenClawProposal(input: {
   const env = input.env ?? process.env;
   const legacyCaller = input.agentId === undefined;
   const agentId = input.agentId ?? 'steward';
+  const principalId = input.principalId?.trim() || `agent:${agentId}`;
+  const workflowPrincipalKey = input.workflowPrincipalKey ?? null;
   if (!isOpenClawProposalsEnabled(env)) {
     return {
       ok: false,
@@ -319,11 +326,30 @@ export async function createOpenClawProposal(input: {
     };
   }
 
+  if (workflowPrincipalKey && !isAutomationProposalAccessEnabled(workflowPrincipalKey, env)) {
+    return {
+      ok: false,
+      code: 'flag-disabled',
+      message: 'Propuestas de automatizaciones desactivadas.',
+    };
+  }
+
   if (!legacyCaller && !isOpenClawProposalAllowed(agentId, input.request.operation)) {
     return {
       ok: false,
       code: 'policy-denied',
       message: 'Operación no permitida para este agente.',
+    };
+  }
+
+  if (
+    workflowPrincipalKey &&
+    !isAutomationProposalAllowed(workflowPrincipalKey, agentId, input.request.operation)
+  ) {
+    return {
+      ok: false,
+      code: 'policy-denied',
+      message: 'Operación no permitida para este workflow.',
     };
   }
 
@@ -341,10 +367,14 @@ export async function createOpenClawProposal(input: {
 
   const businessPayload = input.request.payload;
 
-  const source: 'openclaw' | `agent:${string}` = legacyCaller ? 'openclaw' : `agent:${agentId}`;
+  const source: 'openclaw' | `agent:${string}` = legacyCaller
+    ? 'openclaw'
+    : workflowPrincipalKey
+      ? automationProposalSource(workflowPrincipalKey, agentId)
+      : `agent:${agentId}`;
   const runtime = buildWriteRuntime(env, input.runtimeOverrides);
   const result = await executeAction(
-    requestFromOpenClawAgentId(agentId, {
+    requestFromOpenClawPrincipal(agentId, principalId, {
       actionType: 'proposal.create',
       payload: {
         name: `OpenClaw: ${input.request.operation}`,
@@ -397,9 +427,13 @@ export async function createOpenClawProposal(input: {
 export function isOpenClawProposalOwnedByAgent(
   proposal: Pick<ActionProposalSummary, 'source'>,
   agentId: OpenClawAgentId,
+  workflowPrincipalKey: AutomationPrincipalKey | null = null,
 ): boolean {
+  if (workflowPrincipalKey) {
+    return proposal.source === automationProposalSource(workflowPrincipalKey, agentId);
+  }
   const source = openClawAgentSource(agentId);
-  // Migración segura: la fuente global histórica pertenece únicamente al Mayordomo.
+  // La credencial directa no hereda propuestas de workflows; evita visibilidad cruzada.
   return proposal.source === source || (agentId === 'steward' && proposal.source === 'openclaw');
 }
 
@@ -407,10 +441,11 @@ export function filterOpenClawOwnProposals(
   proposals: readonly ActionProposalSummary[],
   agentId: OpenClawAgentId,
   input: OpenClawApprovalsListInput = {},
+  workflowPrincipalKey: AutomationPrincipalKey | null = null,
 ): ActionProposalSummary[] {
   const limit = Math.min(Math.max(input.limit ?? 20, 1), 50);
   return proposals
-    .filter((proposal) => isOpenClawProposalOwnedByAgent(proposal, agentId))
+    .filter((proposal) => isOpenClawProposalOwnedByAgent(proposal, agentId, workflowPrincipalKey))
     .filter(
       (proposal) =>
         !input.status ||
@@ -426,6 +461,7 @@ export async function listOpenClawOwnProposals(
   input: OpenClawApprovalsListInput,
   env: Readonly<Record<string, string | undefined>> = process.env,
   runtimeOverrides?: RuntimeOverrides,
+  workflowPrincipalKey: AutomationPrincipalKey | null = null,
 ): Promise<
   | { ok: true; proposals: ReturnType<typeof toOpenClawProposalMetadata>[] }
   | { ok: false; code: 'source-unavailable'; message: string }
@@ -440,7 +476,7 @@ export async function listOpenClawOwnProposals(
 
   const runtime = buildWriteRuntime(env, runtimeOverrides);
   const rows = await runtime.handlers.proposals.list();
-  const own = filterOpenClawOwnProposals(rows, agentId, input);
+  const own = filterOpenClawOwnProposals(rows, agentId, input, workflowPrincipalKey);
   return { ok: true, proposals: own.map(toOpenClawProposalMetadata) };
 }
 

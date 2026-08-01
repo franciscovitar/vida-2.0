@@ -4,6 +4,11 @@
  */
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
+import { isAutomationPrincipalEnabled } from '@/lib/automations/config';
+import {
+  getAutomationPrincipalContract,
+  isAutomationPrincipalKey,
+} from '@/lib/automations/contracts';
 import { resolveOpenClawAgentCredential } from '@/lib/openclaw/agents';
 import {
   getOpenClawApiConfig,
@@ -84,11 +89,15 @@ export function signaturesMatch(expectedHex: string, providedHex: string): boole
 
 export function buildOpenClawReplayKeys(input: {
   environment: string;
-  agentId: OpenClawAgentId;
+  principalId?: string;
+  /** Compatibilidad con callers previos. */
+  agentId?: OpenClawAgentId;
   requestId: string;
   signature: string;
 }): OpenClawReplayKeys {
-  const namespace = `${OPENCLAW_HMAC_PROTOCOL}\n${input.environment}\nagent:${input.agentId}`;
+  const principalId =
+    input.principalId?.trim() || (input.agentId ? openClawActorId(input.agentId) : 'agent:unknown');
+  const namespace = `${OPENCLAW_HMAC_PROTOCOL}\n${input.environment}\n${principalId}`;
   return {
     requestKey: sha256Hex(`${namespace}\nrequest\n${input.requestId}`),
     canonicalKey: sha256Hex(`${namespace}\ncanonical\n${input.signature}`),
@@ -144,6 +153,31 @@ export function verifyOpenClawRequest(input: {
   const credential = resolveOpenClawAgentCredential(keyId, env);
   if (!credential) return unauthorized();
 
+  const principalId = credential.principalId?.trim() || openClawActorId(credential.agentId);
+  const workflowPrincipalKeyRaw = credential.workflowPrincipalKey?.trim() || null;
+  const workflowPrincipalKey =
+    workflowPrincipalKeyRaw && isAutomationPrincipalKey(workflowPrincipalKeyRaw)
+      ? workflowPrincipalKeyRaw
+      : null;
+  if (workflowPrincipalKeyRaw && !workflowPrincipalKey) {
+    return unauthorized();
+  }
+
+  const workflowKey = credential.workflowKey?.trim() || null;
+  if (workflowPrincipalKey) {
+    const contract = getAutomationPrincipalContract(workflowPrincipalKey);
+    if (
+      contract.agentId !== credential.agentId ||
+      contract.principalId !== principalId ||
+      contract.workflowKey !== workflowKey ||
+      !isAutomationPrincipalEnabled(workflowPrincipalKey, env)
+    ) {
+      return unauthorized();
+    }
+  } else if (workflowKey) {
+    return unauthorized();
+  }
+
   const timestampRaw = input.timestampHeader ?? '';
   if (!isValidOpenClawTimestamp(timestampRaw)) return unauthorized();
 
@@ -172,11 +206,14 @@ export function verifyOpenClawRequest(input: {
     ok: true,
     keyId,
     agentId: credential.agentId,
-    actorId: openClawActorId(credential.agentId),
+    principalId,
+    workflowPrincipalKey,
+    workflowKey,
+    actorId: principalId,
     requestId,
     replayKeys: buildOpenClawReplayKeys({
       environment: resolveReplayEnvironment(env),
-      agentId: credential.agentId,
+      principalId,
       requestId,
       signature,
     }),

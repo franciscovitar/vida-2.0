@@ -34,6 +34,7 @@ import {
 } from '@/lib/web-catalog/service';
 import { getNotionDataSource } from '@/lib/notion/config';
 import { getCalendarDataSource } from '@/lib/calendar/config';
+import type { AutomationPrincipalKey } from '@/types/automations';
 import type { OpenClawAgentId, OpenClawDataFreshness, OpenClawReadRequest } from '@/types/openclaw';
 import type { AreaSlug } from '@/types/areas';
 
@@ -106,6 +107,7 @@ export type OpenClawReadResult =
 export async function executeOpenClawRead(
   request: OpenClawReadRequest,
   agentId: OpenClawAgentId = 'steward',
+  workflowPrincipalKey: AutomationPrincipalKey | null = null,
 ): Promise<OpenClawReadResult> {
   const { operation, input } = request;
 
@@ -372,7 +374,13 @@ export async function executeOpenClawRead(
   }
 
   if (operation === 'approvals.list') {
-    const result = await listOpenClawOwnProposals(agentId, input);
+    const result = await listOpenClawOwnProposals(
+      agentId,
+      input,
+      process.env,
+      undefined,
+      workflowPrincipalKey,
+    );
     if (!result.ok) {
       return {
         ok: false,

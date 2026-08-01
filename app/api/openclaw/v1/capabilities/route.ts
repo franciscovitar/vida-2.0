@@ -19,7 +19,11 @@ export async function GET(request: Request) {
   const config = getOpenClawApiConfig();
   const readiness = getOpenClawReadiness();
   const profile = getOpenClawAgentProfile(parsed.value.agentId);
-  const capabilities = listOpenClawCapabilities(parsed.value.agentId);
+  const capabilities = listOpenClawCapabilities(
+    parsed.value.agentId,
+    process.env,
+    parsed.value.workflowPrincipalKey,
+  );
   const reads = capabilities
     .filter((item) => item.kind === 'read')
     .map((item) => ({

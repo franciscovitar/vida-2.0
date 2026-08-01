@@ -3,6 +3,11 @@
  */
 import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import {
+  isAutomationProposalAccessEnabled,
+  isAutomationReadAccessEnabled,
+} from '@/lib/automations/config';
+import { isAutomationProposalAllowed, isAutomationReadAllowed } from '@/lib/automations/contracts';
+import {
   getOpenClawAgentProfile,
   isOpenClawProposalAllowed,
   isOpenClawReadAllowed,
@@ -13,6 +18,7 @@ import type {
   OpenClawProposeOperation,
   OpenClawReadOperation,
 } from '@/types/openclaw';
+import type { AutomationPrincipalKey } from '@/types/automations';
 
 const READ_CAPABILITIES: readonly {
   id: OpenClawReadOperation;
@@ -48,6 +54,7 @@ type Env = Readonly<Record<string, string | undefined>>;
 export function listOpenClawCapabilities(
   agentIdOrEnv: OpenClawAgentId | Env = 'steward',
   maybeEnv: Env = process.env,
+  workflowPrincipalKey: AutomationPrincipalKey | null = null,
 ): readonly OpenClawCapability[] {
   const legacyGlobal = typeof agentIdOrEnv !== 'string';
   const agentId = typeof agentIdOrEnv === 'string' ? agentIdOrEnv : 'steward';
@@ -56,7 +63,10 @@ export function listOpenClawCapabilities(
   const proposalsEnabled = isOpenClawProposalsEnabled(env);
 
   const reads: OpenClawCapability[] = READ_CAPABILITIES.map((capability) => {
-    const allowed = legacyGlobal || isOpenClawReadAllowed(agentId, capability.id);
+    const allowed = workflowPrincipalKey
+      ? isAutomationReadAccessEnabled(workflowPrincipalKey, env) &&
+        isAutomationReadAllowed(workflowPrincipalKey, agentId, capability.id)
+      : legacyGlobal || isOpenClawReadAllowed(agentId, capability.id);
     return {
       id: capability.id,
       kind: allowed ? 'read' : 'forbidden',
@@ -65,7 +75,12 @@ export function listOpenClawCapabilities(
   });
 
   const proposals: OpenClawCapability[] = PROPOSAL_TOOL_IDS.map((id) => {
-    const allowed = proposalsEnabled && (legacyGlobal || isOpenClawProposalAllowed(agentId, id));
+    const allowed =
+      proposalsEnabled &&
+      (workflowPrincipalKey
+        ? isAutomationProposalAccessEnabled(workflowPrincipalKey, env) &&
+          isAutomationProposalAllowed(workflowPrincipalKey, agentId, id)
+        : legacyGlobal || isOpenClawProposalAllowed(agentId, id));
     return {
       id,
       kind: allowed ? 'proposal' : 'forbidden',
