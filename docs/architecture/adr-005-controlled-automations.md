@@ -80,7 +80,9 @@ comparten credencial, rate limit, replay ni ownership.
   server-side del único principal. No acepta identidad ni permisos del navegador.
 - Circuit breaker, idempotencia, TTL, concurrencia y reintentos se aplican por
   workflow sin ampliar los contratos de la Etapa 1.
-- Los cinco exports n8n permanecen inactivos y sin credenciales.
+- Los cinco exports n8n son manifiestos inactivos de aprovisionamiento: sus placeholders HTTP están
+  desconectados y no se consideran listos hasta que Work inyecte y pruebe firma y callback.
+- Production requiere una autorización explícita adicional; habilitar Preview no la hereda.
 
 ## Fuera de alcance
 

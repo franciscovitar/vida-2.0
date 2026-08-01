@@ -3,7 +3,10 @@ import { test } from 'node:test';
 
 import { handleAutomationResultRequest } from '@/lib/automations/callback';
 import { createAutomationRuntime } from '@/lib/automations/runtime';
-import { createMemoryAutomationStateStore } from '@/lib/automations/store';
+import {
+  createMemoryAutomationStateStore,
+  type AutomationStateStore,
+} from '@/lib/automations/store';
 
 const SECRET = 'callback-secret-with-enough-length';
 const ENV = {
@@ -194,4 +197,172 @@ test('block5 callback: cancelled es terminal y no admite instrucciones', async (
   );
   assert.equal(result.status, 200);
   assert.equal((await store.getRun(runKey))?.status, 'cancelled');
+});
+
+test('block5 callback: content type, UTF-8, JSON y secreto ausente fallan con envelopes acotados', async () => {
+  const { store, runtime, runKey } = await fixture();
+  const deps = { env: ENV, store, runtime };
+  const withoutContentType = new Request('http://localhost/api/automations/v1/runs', {
+    method: 'POST',
+    headers: {
+      'x-vida-request-id': 'callback-request-content-type',
+      'x-vida-automations-secret': SECRET,
+    },
+    body: JSON.stringify(validBody(runKey)),
+  });
+  assert.equal((await handleAutomationResultRequest(withoutContentType, deps)).status, 415);
+
+  const invalidUtf8 = new Request('http://localhost/api/automations/v1/runs', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-vida-request-id': 'callback-request-invalid-utf8',
+      'x-vida-automations-secret': SECRET,
+    },
+    body: new Uint8Array([0xc3, 0x28]),
+  });
+  assert.equal((await handleAutomationResultRequest(invalidUtf8, deps)).status, 400);
+
+  const malformed = new Request('http://localhost/api/automations/v1/runs', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-vida-request-id': 'callback-request-malformed',
+      'x-vida-automations-secret': SECRET,
+    },
+    body: '{"open":',
+  });
+  assert.equal((await handleAutomationResultRequest(malformed, deps)).status, 400);
+  assert.equal(
+    (
+      await handleAutomationResultRequest(
+        new Request('http://localhost/api/automations/v1/runs', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-vida-request-id': 'callback-request-no-secret',
+          },
+          body: JSON.stringify(validBody(runKey)),
+        }),
+        deps,
+      )
+    ).status,
+    401,
+  );
+});
+
+test('block5 callback: identidad, run inexistente, artefacto y replay divergente se rechazan', async () => {
+  const { store, runtime, runKey } = await fixture();
+  const deps = { env: ENV, store, runtime };
+  assert.equal(
+    (
+      await handleAutomationResultRequest(
+        request(
+          { ...validBody(runKey), workflowKey: 'weekly-review' },
+          { requestId: 'callback-request-workflow-mismatch' },
+        ),
+        deps,
+      )
+    ).status,
+    400,
+  );
+  assert.equal(
+    (
+      await handleAutomationResultRequest(
+        request(validBody('run_abcdefghijklmnopqrstuvwx'), {
+          requestId: 'callback-request-missing-run',
+        }),
+        deps,
+      )
+    ).status,
+    409,
+  );
+  assert.equal(
+    (
+      await handleAutomationResultRequest(
+        request(
+          {
+            ...validBody(runKey),
+            artifact: {
+              title: 'Briefing diario',
+              summary: 'Referencia https://private.example',
+              items: [],
+            },
+          },
+          { requestId: 'callback-request-sensitive-artifact' },
+        ),
+        deps,
+      )
+    ).status,
+    400,
+  );
+  const first = await handleAutomationResultRequest(
+    request(validBody(runKey), { requestId: 'callback-request-divergent' }),
+    deps,
+  );
+  assert.equal(first.status, 200);
+  const divergent = await handleAutomationResultRequest(
+    request(
+      { ...validBody(runKey), summary: 'Otro resumen seguro.' },
+      { requestId: 'callback-request-divergent' },
+    ),
+    deps,
+  );
+  assert.equal(divergent.status, 409);
+});
+
+test('block5 callback: store no disponible responde 503 sin filtrar excepción', async () => {
+  const unavailable = {
+    reserveIdempotency: async () => {
+      throw new Error('redis https://private.example token=forbidden');
+    },
+  } as unknown as AutomationStateStore;
+  const result = await handleAutomationResultRequest(
+    request(validBody('run_abcdefghijklmnopqrstuvwx'), {
+      requestId: 'callback-request-unavailable',
+    }),
+    {
+      env: ENV,
+      store: unavailable,
+      runtime: {} as never,
+    },
+  );
+  assert.equal(result.status, 503);
+  const body = JSON.stringify(await result.json());
+  assert.equal(/redis|https|token|forbidden/i.test(body), false);
+});
+
+test('block5 callback: intento, instructions, tools, IDs y formas de artefacto no entran al DTO', async () => {
+  const { store, runtime, runKey } = await fixture();
+  const deps = { env: ENV, store, runtime };
+  const invalidBodies = [
+    { ...validBody(runKey), attempt: 0 },
+    { ...validBody(runKey), instructions: 'Ejecutar una tarea' },
+    { ...validBody(runKey), tools: ['task.create'] },
+    { ...validBody(runKey), summary: 'x'.repeat(501) },
+    { ...validBody(runKey), summary: 'Provider ID notion-page-12345678' },
+    {
+      ...validBody(runKey),
+      artifact: { title: 'Resultado', summary: 'Seguro', items: [], extra: true },
+    },
+    {
+      ...validBody(runKey),
+      artifact: {
+        title: 'Resultado',
+        summary: 'Seguro',
+        items: Array.from({ length: 21 }, (_, index) => ({
+          label: `Elemento ${index}`,
+          value: 'Seguro',
+        })),
+      },
+    },
+  ];
+  for (const [index, body] of invalidBodies.entries()) {
+    const result = await handleAutomationResultRequest(
+      request(body, { requestId: `callback-invalid-shape-${index}` }),
+      deps,
+    );
+    assert.equal(result.status, 400, `case ${index}`);
+    assert.equal(JSON.stringify(await result.json()).length < 240, true);
+  }
 });

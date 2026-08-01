@@ -35,11 +35,34 @@
         "rawContentType": "application/json",
         "body": "={{ $json.body }}"
       }
+    },
+    {
+      "id": "approval-callback",
+      "name": "Controlled Vida2 callback (provisioning placeholder)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-vida-request-id", "value": "={{ $json.callbackRequestId }}" },
+            {
+              "name": "x-vida-automations-secret",
+              "value": "={{ $env.VIDA2_AUTOMATIONS_CALLBACK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}"
+      }
     }
   ],
-  "connections": {
-    "Schedule": { "main": [[{ "node": "Controlled Vida2 request", "type": "main", "index": 0 }]] }
-  },
+  "connections": {},
   "settings": { "timezone": "America/Argentina/Cordoba", "executionOrder": "v1" },
   "versionId": "vida2-approval-digest-v1",
   "meta": {
@@ -48,7 +71,12 @@
     "operations": ["approvals.list"],
     "principals": ["approval-digest-steward", "approval-digest-health"],
     "signatureProtocol": "vida2-openclaw-hmac-v2",
+    "idempotencyPolicy": "preserve-business-key",
+    "requestAuthenticationPolicy": "regenerate-per-attempt",
     "retryableStatusCodes": [429, 500, 502, 503, 504],
-    "maxAttempts": 3
+    "maxAttempts": 3,
+    "provisioningState": "requires-signing-helper",
+    "executable": false,
+    "callbackPath": "/api/automations/v1/runs"
   }
 }

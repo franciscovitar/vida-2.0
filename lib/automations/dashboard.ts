@@ -1,12 +1,9 @@
-import {
-  isAutomationsApiEnabled,
-  isAutomationsManualRunEnabled,
-  isAutomationWorkflowEnabled,
-  isAutomationWorkflowPausedByConfig,
-} from '@/lib/automations/config';
 import { listAutomationWorkflowContracts } from '@/lib/automations/contracts';
-import { getAutomationWorkflowCredentials } from '@/lib/automations/credentials';
-import { resolveN8nClientConfig } from '@/lib/automations/n8n-client';
+import {
+  evaluateAutomationReadiness,
+  type AutomationReadinessCheck,
+  type AutomationReadinessState,
+} from '@/lib/automations/readiness';
 import {
   buildAutomationStateStore,
   resolveAutomationStoreConfig,
@@ -17,10 +14,11 @@ import {
   type AutomationResultCode,
   type AutomationRunStatus,
   type AutomationTrigger,
+  type AutomationWorkflowControl,
   type AutomationWorkflowKey,
 } from '@/types/automations';
 
-export type AutomationUiStatus = 'disabled' | 'ready' | 'degraded' | 'misconfigured' | 'paused';
+export type AutomationUiStatus = AutomationReadinessState;
 export type AutomationDashboardRun = {
   workflowKey: AutomationWorkflowKey;
   trigger: AutomationTrigger;
@@ -53,6 +51,11 @@ export type AutomationDashboardData = {
   storeConfigured: boolean;
   systemEnabled: boolean;
   manualRunEnabled: boolean;
+  callbackEnabled: boolean;
+  templatesProvisioned: boolean;
+  credentialsConfigured: number;
+  readinessState: AutomationReadinessState;
+  readinessChecks: readonly AutomationReadinessCheck[];
   items: readonly AutomationDashboardItem[];
   recentRuns: readonly AutomationDashboardRun[];
 };
@@ -142,23 +145,33 @@ export async function getAutomationsDashboardData(
 ): Promise<AutomationDashboardData> {
   const env = input.env ?? process.env;
   const storeConfig = resolveAutomationStoreConfig(env);
-  const orchestratorConfig = resolveN8nClientConfig(env);
   const store =
     input.store === undefined
       ? storeConfig.ok
         ? buildAutomationStateStore(env)
         : null
       : input.store;
-  const systemEnabled = isAutomationsApiEnabled(env);
-  const credentials = getAutomationWorkflowCredentials(env);
   let storedRuns: Awaited<ReturnType<AutomationStateStore['listRuns']>> = [];
+  const controls: Partial<Record<AutomationWorkflowKey, AutomationWorkflowControl | null>> = {};
+  let storeReachable: boolean | null = storeConfig.ok ? null : false;
   if (store) {
     try {
-      storedRuns = await store.listRuns({ limit: 20 });
+      const [runs] = await Promise.all([
+        store.listRuns({ limit: 20 }),
+        ...listAutomationWorkflowContracts().map(async (contract) => {
+          controls[contract.workflowKey] = await store.getWorkflowControl(contract.workflowKey);
+        }),
+      ]);
+      storedRuns = runs;
+      storeReachable = true;
     } catch {
       storedRuns = [];
+      storeReachable = false;
     }
   }
+  const readiness = evaluateAutomationReadiness({ env, controls, storeReachable });
+  const readinessCheck = (id: AutomationReadinessCheck['id']): boolean =>
+    readiness.checks.find((item) => item.id === id)?.ready ?? false;
   const recentRuns: readonly AutomationDashboardRun[] = storedRuns.map((run) => ({
     workflowKey: run.workflowKey,
     trigger: run.trigger,
@@ -174,26 +187,12 @@ export async function getAutomationsDashboardData(
   }));
   const items = await Promise.all(
     listAutomationWorkflowContracts().map(async (contract): Promise<AutomationDashboardItem> => {
-      const control = store
-        ? await store.getWorkflowControl(contract.workflowKey).catch(() => null)
-        : null;
+      const control = controls[contract.workflowKey] ?? null;
       const lastRun = recentRuns.find((run) => run.workflowKey === contract.workflowKey) ?? null;
-      const workflowEnabled = isAutomationWorkflowEnabled(contract.workflowKey, env);
-      const hasCredentials =
-        credentials.ok &&
-        contract.principalKeys.every((principalKey) =>
-          credentials.credentials.some((item) => item.workflowPrincipalKey === principalKey),
-        );
-      const paused =
-        isAutomationWorkflowPausedByConfig(contract.workflowKey, env) ||
-        control?.paused === true ||
-        control?.circuit.mode === 'open';
-      let status: AutomationUiStatus = 'ready';
-      if (!systemEnabled || !workflowEnabled) status = 'disabled';
-      else if (!storeConfig.ok || !orchestratorConfig.ok || !hasCredentials)
-        status = 'misconfigured';
-      else if (paused) status = 'paused';
-      else if ((control?.circuit.consecutiveFailures ?? 0) > 0) status = 'degraded';
+      const workflowReadiness = readiness.workflows.find(
+        (workflow) => workflow.workflowKey === contract.workflowKey,
+      )!;
+      const status = workflowReadiness.state;
       return {
         workflowKey: contract.workflowKey,
         name: contract.name,
@@ -201,23 +200,28 @@ export async function getAutomationsDashboardData(
         principals: contract.principalKeys.map((key) => PRINCIPAL_LABELS[key]).join(' / '),
         status,
         schedule: SCHEDULE_LABELS[contract.workflowKey],
-        nextRun: workflowEnabled ? nextAutomationRun(contract.workflowKey, input.nowMs) : null,
+        nextRun: workflowReadiness.enabled
+          ? nextAutomationRun(contract.workflowKey, input.nowMs)
+          : null,
         lastRun,
-        paused,
+        paused: workflowReadiness.paused,
         circuit: control?.circuit.mode ?? 'closed',
         canRunNow:
-          status === 'ready' &&
-          isAutomationsManualRunEnabled(env) &&
-          contract.principalKeys.length === 1,
+          status === 'ready' && readinessCheck('manual') && contract.principalKeys.length === 1,
       };
     }),
   );
   return {
     contractVersion: AUTOMATION_CONTRACT_VERSION,
-    orchestratorConfigured: orchestratorConfig.ok,
-    storeConfigured: storeConfig.ok,
-    systemEnabled,
-    manualRunEnabled: isAutomationsManualRunEnabled(env),
+    orchestratorConfigured: readinessCheck('orchestrator'),
+    storeConfigured: readinessCheck('store'),
+    systemEnabled: readinessCheck('api'),
+    manualRunEnabled: readinessCheck('manual'),
+    callbackEnabled: readinessCheck('callback'),
+    templatesProvisioned: readiness.templatesProvisioned,
+    credentialsConfigured: readiness.credentialsConfigured,
+    readinessState: readiness.state,
+    readinessChecks: readiness.checks,
     items,
     recentRuns,
   };

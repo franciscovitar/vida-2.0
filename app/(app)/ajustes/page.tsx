@@ -19,6 +19,7 @@ import { ThemeControl } from '@/components/ui/ThemeControl';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { getOpenClawAgentStatuses } from '@/lib/openclaw/agent-status';
 import { getAutomationsDashboardData } from '@/lib/automations/dashboard';
+import type { AutomationReadinessState } from '@/lib/automations/readiness';
 import { getRuntimeReadiness } from '@/lib/runtime/server-readiness';
 import type { Domain } from '@/types';
 import type { RuntimeIntegrationStatus } from '@/types/runtime';
@@ -62,6 +63,22 @@ const AGENT_STATUS_DOMAINS = {
   misconfigured: 'danger',
   disabled: 'neutral',
 } as const;
+
+const AUTOMATION_STATUS_LABELS: Record<AutomationReadinessState, string> = {
+  disabled: 'Desactivadas',
+  misconfigured: 'Revisar',
+  degraded: 'Degradadas',
+  ready: 'Listas',
+  paused: 'Pausadas',
+};
+
+const AUTOMATION_STATUS_DOMAINS: Record<AutomationReadinessState, Domain> = {
+  disabled: 'neutral',
+  misconfigured: 'danger',
+  degraded: 'projects',
+  ready: 'habits',
+  paused: 'projects',
+};
 
 export default async function AjustesPage() {
   await requireAuthorizedSession();
@@ -175,12 +192,30 @@ export default async function AjustesPage() {
             icon={Workflow}
             domain="productivity"
             action={
-              <Badge domain={automations.systemEnabled ? 'habits' : 'neutral'} variant="outline">
-                {automations.systemEnabled ? 'Habilitadas' : 'Desactivadas'}
+              <Badge
+                domain={AUTOMATION_STATUS_DOMAINS[automations.readinessState]}
+                variant="outline"
+              >
+                {AUTOMATION_STATUS_LABELS[automations.readinessState]}
               </Badge>
             }
           />
           <ul className={styles.sources}>
+            <li className={styles.source}>
+              <div className={styles['source-text']}>
+                <span className={styles['source-name']}>Preparación canónica</span>
+                <span className={styles['source-detail']}>
+                  {automations.readinessChecks.filter((check) => check.ready).length}/
+                  {automations.readinessChecks.length} controles satisfechos
+                </span>
+              </div>
+              <Badge
+                domain={AUTOMATION_STATUS_DOMAINS[automations.readinessState]}
+                variant="outline"
+              >
+                {AUTOMATION_STATUS_LABELS[automations.readinessState]}
+              </Badge>
+            </li>
             <li className={styles.source}>
               <div className={styles['source-text']}>
                 <span className={styles['source-name']}>Orquestador</span>
@@ -194,6 +229,16 @@ export default async function AjustesPage() {
               >
                 {automations.orchestratorConfigured ? 'Configurado' : 'No configurado'}
               </Badge>
+            </li>
+            <li className={styles.source}>
+              <div className={styles['source-text']}>
+                <span className={styles['source-name']}>Fronteras externas</span>
+                <span className={styles['source-detail']}>
+                  Callback {automations.callbackEnabled ? 'habilitado' : 'desactivado'} · templates{' '}
+                  {automations.templatesProvisioned ? 'provisionados' : 'pendientes'} ·{' '}
+                  {automations.credentialsConfigured}/6 principales
+                </span>
+              </div>
             </li>
             <li className={styles.source}>
               <div className={styles['source-text']}>

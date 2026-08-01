@@ -11,14 +11,20 @@ import type { AutomationWorkflowKey } from '@/types/automations';
 type N8nTemplate = {
   active: boolean;
   nodes: Array<{ type: string; parameters: Record<string, unknown> }>;
+  connections: Record<string, unknown>;
   settings: { timezone: string };
   meta: {
     contractVersion: string;
     workflowKey: AutomationWorkflowKey;
     operations: string[];
     signatureProtocol: string;
+    idempotencyPolicy: string;
+    requestAuthenticationPolicy: string;
     retryableStatusCodes: number[];
     maxAttempts: number;
+    provisioningState: string;
+    executable: boolean;
+    callbackPath: string;
   };
 };
 
@@ -47,8 +53,14 @@ test('block5 n8n: hay cinco exports inactivos, importables y alineados al contra
       file,
     );
     assert.equal(template.meta.signatureProtocol, 'vida2-openclaw-hmac-v2', file);
+    assert.equal(template.meta.idempotencyPolicy, 'preserve-business-key', file);
+    assert.equal(template.meta.requestAuthenticationPolicy, 'regenerate-per-attempt', file);
     assert.deepEqual(template.meta.retryableStatusCodes, contract.retry.retryableStatusCodes, file);
     assert.equal(template.meta.maxAttempts, contract.retry.maxAttempts, file);
+    assert.equal(template.meta.provisioningState, 'requires-signing-helper', file);
+    assert.equal(template.meta.executable, false, file);
+    assert.equal(template.meta.callbackPath, '/api/automations/v1/runs', file);
+    assert.deepEqual(template.connections, {}, file);
     assert.equal(
       JSON.stringify(template).includes(schedules[template.meta.workflowKey]),
       true,
@@ -56,6 +68,13 @@ test('block5 n8n: hay cinco exports inactivos, importables y alineados al contra
     );
     assert.equal(
       template.nodes.some((node) => node.type === 'n8n-nodes-base.httpRequest'),
+      true,
+      file,
+    );
+    assert.equal(
+      template.nodes.some((node) =>
+        JSON.stringify(node.parameters).includes('/api/automations/v1/runs'),
+      ),
       true,
       file,
     );
@@ -110,10 +129,24 @@ test('block5 dashboard: cinco estados, schedules y manual run server-resolved', 
     AUTOMATIONS_WORKFLOW_CONTRACT_VERSION: 'vida2-automations-v1',
     AUTOMATIONS_DAILY_BRIEFING_ENABLED: 'true',
     AUTOMATIONS_MANUAL_RUN_ENABLED: 'true',
+    AUTOMATIONS_RESULT_CALLBACK_ENABLED: 'true',
+    AUTOMATIONS_N8N_TEMPLATES_PROVISIONED: 'true',
     AUTOMATIONS_N8N_BASE_URL: 'http://localhost:5678',
     AUTOMATIONS_N8N_WEBHOOK_SECRET: 'orchestrator-secret-safe-value',
     OPENCLAW_AUTOMATION_DAILY_BRIEFING_API_KEY_ID: 'daily-key',
     OPENCLAW_AUTOMATION_DAILY_BRIEFING_API_SECRET: 'daily-secret-with-safe-length',
+    OPENCLAW_AUTOMATION_TECHNICAL_WATCHDOG_API_KEY_ID: 'technical-key',
+    OPENCLAW_AUTOMATION_TECHNICAL_WATCHDOG_API_SECRET: 'technical-secret-with-safe-length',
+    OPENCLAW_AUTOMATION_WEEKLY_REVIEW_API_KEY_ID: 'weekly-key',
+    OPENCLAW_AUTOMATION_WEEKLY_REVIEW_API_SECRET: 'weekly-secret-with-safe-length',
+    OPENCLAW_AUTOMATION_APPROVAL_DIGEST_STEWARD_API_KEY_ID: 'approval-steward-key',
+    OPENCLAW_AUTOMATION_APPROVAL_DIGEST_STEWARD_API_SECRET:
+      'approval-steward-secret-with-safe-length',
+    OPENCLAW_AUTOMATION_APPROVAL_DIGEST_HEALTH_API_KEY_ID: 'approval-health-key',
+    OPENCLAW_AUTOMATION_APPROVAL_DIGEST_HEALTH_API_SECRET:
+      'approval-health-secret-with-safe-length',
+    OPENCLAW_AUTOMATION_PLANNING_SUGGESTION_API_KEY_ID: 'planning-key',
+    OPENCLAW_AUTOMATION_PLANNING_SUGGESTION_API_SECRET: 'planning-secret-with-safe-length',
     AUTOMATIONS_UPSTASH_REDIS_REST_URL: 'https://safe-name.upstash.io',
     AUTOMATIONS_UPSTASH_REDIS_REST_TOKEN: 'token-with-safe-length',
     AUTOMATIONS_STATE_NAMESPACE: 'vida2:automations:test:vida2-automations-v1',
@@ -178,6 +211,7 @@ test('block5 UI: ruta, navegación, ajustes, aprobaciones y responsive no expone
     'utf8',
   );
   const navigation = readFileSync(path.join(process.cwd(), 'lib/constants/navigation.ts'), 'utf8');
+  const actions = readFileSync(path.join(process.cwd(), 'app/actions/automations.ts'), 'utf8');
   const settings = readFileSync(path.join(process.cwd(), 'app/(app)/ajustes/page.tsx'), 'utf8');
   const approvals = readFileSync(
     path.join(process.cwd(), 'components/actions/ApprovalsPanel.tsx'),
@@ -187,12 +221,21 @@ test('block5 UI: ruta, navegación, ajustes, aprobaciones y responsive no expone
   assert.match(component, /Ejecutar ahora/);
   assert.match(component, /Confirmo esta ejecución manual/);
   assert.match(component, /Pausar/);
+  assert.match(component, /aria-busy/);
+  assert.match(component, /aria-live="polite"/);
+  assert.match(component, /Ejecutando…/);
+  assert.match(component, /readinessState/);
   assert.match(component, /Últimas 20 ejecuciones/);
   assert.match(styles, /width <= 420px/);
   assert.match(styles, /overflow-wrap: anywhere/);
   assert.match(navigation, /\/automatizaciones/);
+  assert.match(actions, /verifySession/);
+  assert.match(actions, /resolveManualAutomationRequest/);
+  assert.doesNotMatch(actions, /input\.principal|input\.scopes|input\.permissions/);
   assert.match(settings, /Automatizaciones controladas/);
   assert.match(settings, /vida2-automations-v1|contractVersion/);
+  assert.match(settings, /readinessState/);
+  assert.match(settings, /templatesProvisioned/);
   assert.match(approvals, /Automatización · Sugerencia diaria de planificación/);
   const clientSurface = `${page}\n${component}\n${settings}`;
   assert.equal(

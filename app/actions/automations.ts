@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 
 import { verifySession } from '@/lib/auth/dal';
 import { getAutomationsDashboardData } from '@/lib/automations/dashboard';
-import { getAutomationWorkflowContract } from '@/lib/automations/contracts';
+import { resolveManualAutomationRequest } from '@/lib/automations/manual';
 import { buildAutomationRuntime } from '@/lib/automations/runtime';
 import { buildAutomationStateStore } from '@/lib/automations/store';
 import { AUTOMATION_WORKFLOW_KEYS, type AutomationWorkflowKey } from '@/types/automations';
@@ -24,11 +24,7 @@ export async function loadAutomationsDashboard() {
   return getAutomationsDashboardData();
 }
 
-export async function runAutomationNow(input: {
-  workflowKey: string;
-  confirmed: boolean;
-  idempotencyKey?: string;
-}) {
+export async function runAutomationNow(input: { workflowKey: string; confirmed: boolean }) {
   const session = await verifySession();
   if (!session.ok)
     return {
@@ -37,20 +33,12 @@ export async function runAutomationNow(input: {
       message: 'Tenés que iniciar sesión.',
       run: null,
     };
-  const key = workflowKey(input.workflowKey);
-  if (!key || input.confirmed !== true)
+  const request = resolveManualAutomationRequest(input);
+  if (!request)
     return {
       ok: false,
       code: 'invalid-input' as const,
       message: 'Confirmación inválida.',
-      run: null,
-    };
-  const contract = getAutomationWorkflowContract(key);
-  if (contract.principalKeys.length !== 1)
-    return {
-      ok: false,
-      code: 'invalid-input' as const,
-      message: 'Este workflow requiere múltiples principales y no admite ejecución manual.',
       run: null,
     };
   const runtime = buildAutomationRuntime();
@@ -61,16 +49,25 @@ export async function runAutomationNow(input: {
       message: 'La automatización todavía no está configurada.',
       run: null,
     };
-  const result = await runtime.start({
-    workflowKey: key,
-    principalKey: contract.principalKeys[0]!,
-    trigger: 'manual',
-    idempotencyKey: input.idempotencyKey?.trim() || `manual:${randomUUID()}`,
-    confirmed: true,
-  });
-  revalidatePath('/automatizaciones');
-  revalidatePath('/ajustes');
-  return result;
+  try {
+    const result = await runtime.start({
+      workflowKey: request.workflowKey,
+      principalKey: request.principalKey,
+      trigger: 'manual',
+      idempotencyKey: `manual:${randomUUID()}`,
+      confirmed: true,
+    });
+    revalidatePath('/automatizaciones');
+    revalidatePath('/ajustes');
+    return result;
+  } catch {
+    return {
+      ok: false,
+      code: 'failed' as const,
+      message: 'La automatización no está disponible temporalmente.',
+      run: null,
+    };
+  }
 }
 
 export async function setAutomationPaused(input: {
@@ -85,15 +82,26 @@ export async function setAutomationPaused(input: {
     return { ok: false, message: 'Solicitud inválida.' };
   const store = buildAutomationStateStore();
   if (!store) return { ok: false, message: 'El store de automatizaciones no está configurado.' };
-  const now = new Date().toISOString();
-  const current = (await store.getWorkflowControl(key)) ?? {
-    workflowKey: key,
-    paused: false,
-    circuit: { mode: 'closed' as const, consecutiveFailures: 0, openedAt: null },
-    updatedAt: now,
-  };
-  await store.putWorkflowControl({ ...current, paused: input.paused, updatedAt: now });
-  revalidatePath('/automatizaciones');
-  revalidatePath('/ajustes');
-  return { ok: true, message: input.paused ? 'Workflow pausado.' : 'Workflow reanudado.' };
+  try {
+    const now = new Date().toISOString();
+    const current = (await store.getWorkflowControl(key)) ?? {
+      workflowKey: key,
+      paused: false,
+      circuit: { mode: 'closed' as const, consecutiveFailures: 0, openedAt: null },
+      updatedAt: now,
+    };
+    await store.putWorkflowControl({
+      ...current,
+      paused: input.paused,
+      circuit: input.paused
+        ? current.circuit
+        : { mode: 'closed', consecutiveFailures: 0, openedAt: null },
+      updatedAt: now,
+    });
+    revalidatePath('/automatizaciones');
+    revalidatePath('/ajustes');
+    return { ok: true, message: input.paused ? 'Workflow pausado.' : 'Workflow reanudado.' };
+  } catch {
+    return { ok: false, message: 'El control no está disponible temporalmente.' };
+  }
 }

@@ -40,6 +40,7 @@ export function AutomationsDashboard({ data }: { data: AutomationDashboardData }
   const router = useRouter();
   const [confirmed, setConfirmed] = useState<Record<string, boolean>>({});
   const [message, setMessage] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
 
   return (
@@ -48,6 +49,27 @@ export function AutomationsDashboard({ data }: { data: AutomationDashboardData }
         Las automatizaciones solo leen o crean propuestas pendientes. Aprobar, rechazar y revertir
         siguen siendo acciones exclusivas de la Web.
       </div>
+
+      <Card aria-labelledby="automation-readiness-title">
+        <SectionHeader
+          id="automation-readiness-title"
+          title="Preparación del sistema"
+          description="Evaluación única y sanitizada compartida con Ajustes."
+          action={
+            <Badge domain={STATUS_DOMAINS[data.readinessState]} variant="outline">
+              {STATUS_LABELS[data.readinessState]}
+            </Badge>
+          }
+        />
+        <ul className={styles.checks}>
+          {data.readinessChecks.map((check) => (
+            <li key={check.id} data-ready={check.ready}>
+              <span aria-hidden="true">{check.ready ? '✓' : '–'}</span>
+              {check.label}
+            </li>
+          ))}
+        </ul>
+      </Card>
 
       <div className={styles.grid}>
         {data.items.map((item) => (
@@ -120,19 +142,25 @@ export function AutomationsDashboard({ data }: { data: AutomationDashboardData }
                     size="sm"
                     variant="primary"
                     disabled={busy || !confirmed[item.workflowKey]}
+                    aria-busy={pendingAction === `run:${item.workflowKey}`}
                     onClick={() =>
                       startTransition(async () => {
-                        const result = await runAutomationNow({
-                          workflowKey: item.workflowKey,
-                          confirmed: true,
-                        });
-                        setMessage(result.message);
-                        setConfirmed((current) => ({ ...current, [item.workflowKey]: false }));
-                        router.refresh();
+                        setPendingAction(`run:${item.workflowKey}`);
+                        try {
+                          const result = await runAutomationNow({
+                            workflowKey: item.workflowKey,
+                            confirmed: true,
+                          });
+                          setMessage(result.message);
+                          setConfirmed((current) => ({ ...current, [item.workflowKey]: false }));
+                          router.refresh();
+                        } finally {
+                          setPendingAction(null);
+                        }
                       })
                     }
                   >
-                    Ejecutar ahora
+                    {pendingAction === `run:${item.workflowKey}` ? 'Ejecutando…' : 'Ejecutar ahora'}
                   </Button>
                 </>
               ) : (
@@ -146,19 +174,31 @@ export function AutomationsDashboard({ data }: { data: AutomationDashboardData }
                 type="button"
                 size="sm"
                 disabled={busy || !data.storeConfigured || !data.systemEnabled}
+                aria-busy={pendingAction === `pause:${item.workflowKey}`}
                 onClick={() =>
                   startTransition(async () => {
-                    const result = await setAutomationPaused({
-                      workflowKey: item.workflowKey,
-                      paused: !item.paused,
-                      confirmed: true,
-                    });
-                    setMessage(result.message);
-                    router.refresh();
+                    setPendingAction(`pause:${item.workflowKey}`);
+                    try {
+                      const result = await setAutomationPaused({
+                        workflowKey: item.workflowKey,
+                        paused: !item.paused,
+                        confirmed: true,
+                      });
+                      setMessage(result.message);
+                      router.refresh();
+                    } finally {
+                      setPendingAction(null);
+                    }
                   })
                 }
               >
-                {item.paused ? 'Reanudar' : 'Pausar'}
+                {pendingAction === `pause:${item.workflowKey}`
+                  ? item.paused
+                    ? 'Reanudando…'
+                    : 'Pausando…'
+                  : item.paused
+                    ? 'Reanudar'
+                    : 'Pausar'}
               </Button>
             </div>
           </Card>
@@ -204,7 +244,7 @@ export function AutomationsDashboard({ data }: { data: AutomationDashboardData }
         )}
       </Card>
       {message ? (
-        <p className={styles.status} role="status">
+        <p className={styles.status} role="status" aria-live="polite">
           {message}
         </p>
       ) : null}

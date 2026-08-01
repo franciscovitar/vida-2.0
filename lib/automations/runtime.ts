@@ -1,5 +1,6 @@
 import { getAutomationWorkflowCredentials } from '@/lib/automations/credentials';
 import {
+  areAutomationTemplatesProvisioned,
   isAutomationsApiEnabled,
   isAutomationsManualRunEnabled,
   isAutomationWorkflowEnabled,
@@ -16,6 +17,7 @@ import {
   buildN8nClient,
   type AutomationOrchestratorClient,
 } from '@/lib/automations/n8n-client';
+import { buildAutomationLogEvent, emitAutomationLog } from '@/lib/automations/observability';
 import {
   buildAutomationStateStore,
   createOpaqueAutomationKey,
@@ -119,6 +121,7 @@ export function createAutomationRuntime(deps: {
   env?: Readonly<Record<string, string | undefined>>;
   now?: () => number;
   sleep?: (ms: number) => Promise<void>;
+  log?: (event: string) => void;
 }) {
   const env = deps.env ?? process.env;
   const now = deps.now ?? Date.now;
@@ -176,6 +179,13 @@ export function createAutomationRuntime(deps: {
         };
       if (!isAutomationsApiEnabled(env) || !isAutomationWorkflowEnabled(input.workflowKey, env))
         return { ok: false, code: 'disabled', message: safeMessage('disabled'), run: null };
+      if (env.NODE_ENV !== 'test' && !areAutomationTemplatesProvisioned(env))
+        return {
+          ok: false,
+          code: 'misconfigured',
+          message: safeMessage('misconfigured'),
+          run: null,
+        };
       if (
         input.trigger === 'manual' &&
         (!isAutomationsManualRunEnabled(env) || input.confirmed !== true)
@@ -197,18 +207,16 @@ export function createAutomationRuntime(deps: {
         };
 
       let control = await controlFor(input.workflowKey);
+      let halfOpenProbe = false;
       if (isAutomationWorkflowPausedByConfig(input.workflowKey, env) || control.paused)
         return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
       if (control.circuit.mode === 'open') {
         const openedAt = control.circuit.openedAt ? Date.parse(control.circuit.openedAt) : now();
         if (now() - openedAt < CIRCUIT_OPEN_MS)
           return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
-        control = {
-          ...control,
-          circuit: { ...control.circuit, mode: 'half-open' },
-          updatedAt: new Date(now()).toISOString(),
-        };
-        await deps.store.putWorkflowControl(control);
+        halfOpenProbe = true;
+      } else if (control.circuit.mode === 'half-open') {
+        return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
       }
 
       const createdMs = now();
@@ -260,11 +268,21 @@ export function createAutomationRuntime(deps: {
       const lease = await deps.store.acquireWorkflowLease(
         input.workflowKey,
         Math.ceil(contract.timeoutMs / 1000),
+        runKey,
       );
       if (lease.status === 'busy') {
         run = finishRun(run, now(), 'skipped', 'no-change', 'Omitida por límite de concurrencia.');
         await deps.store.putRun(run, contract.retentionSeconds);
         return { ok: false, code: 'busy', message: safeMessage('busy'), run };
+      }
+
+      if (halfOpenProbe) {
+        control = {
+          ...control,
+          circuit: { ...control.circuit, mode: 'half-open' },
+          updatedAt: new Date(now()).toISOString(),
+        };
+        await deps.store.putWorkflowControl(control);
       }
 
       run = {
@@ -292,6 +310,19 @@ export function createAutomationRuntime(deps: {
             attempt,
             trigger: run.trigger,
           });
+          emitAutomationLog(
+            buildAutomationLogEvent({
+              workflowKey: input.workflowKey,
+              principalKey: input.principalKey,
+              runKey,
+              operation: 'runtime.dispatch',
+              status: 'running',
+              attempt,
+              durationMs: now() - createdMs,
+              resultCode: null,
+            }),
+            deps.log,
+          );
           return { ok: true, code: 'accepted', message: safeMessage('accepted'), run };
         } catch (error) {
           lastError =
@@ -312,6 +343,19 @@ export function createAutomationRuntime(deps: {
       );
       await deps.store.putRun(run, contract.retentionSeconds);
       await updateCircuit(input.workflowKey, true);
+      emitAutomationLog(
+        buildAutomationLogEvent({
+          workflowKey: input.workflowKey,
+          principalKey: input.principalKey,
+          runKey,
+          operation: 'runtime.dispatch',
+          status: 'failed',
+          attempt: run.attempt,
+          durationMs: now() - createdMs,
+          resultCode: run.resultCode,
+        }),
+        deps.log,
+      );
       return { ok: false, code: 'failed', message: safeMessage('failed'), run };
     },
 
@@ -323,8 +367,13 @@ export function createAutomationRuntime(deps: {
         return { ok: false, replay: false, run: null };
       if (run.proposalKey !== null && run.proposalKey !== input.proposalKey)
         return { ok: false, replay: false, run };
-      if (run.status === input.status && run.resultCode === input.resultCode)
-        return { ok: true, replay: true, run };
+      if (run.status === input.status && run.resultCode === input.resultCode) {
+        const sameResult =
+          run.summary === input.summary &&
+          run.proposalKey === input.proposalKey &&
+          Boolean(run.artifactKey) === Boolean(input.artifact);
+        return sameResult ? { ok: true, replay: true, run } : { ok: false, replay: false, run };
+      }
       if (run.status !== 'running' && run.status !== 'queued')
         return { ok: false, replay: false, run };
       if (!(AUTOMATION_RESULT_CODES as readonly string[]).includes(input.resultCode))
@@ -375,7 +424,14 @@ export function createAutomationRuntime(deps: {
       paused: boolean,
     ): Promise<AutomationWorkflowControl> {
       const current = await controlFor(workflowKey);
-      const next = { ...current, paused, updatedAt: new Date(now()).toISOString() };
+      const next = {
+        ...current,
+        paused,
+        circuit: paused
+          ? current.circuit
+          : { mode: 'closed' as const, consecutiveFailures: 0, openedAt: null },
+        updatedAt: new Date(now()).toISOString(),
+      };
       await deps.store.putWorkflowControl(next);
       return next;
     },

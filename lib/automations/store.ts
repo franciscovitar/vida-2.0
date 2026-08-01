@@ -7,6 +7,7 @@ import {
   type EncryptedProposalEnvelope,
 } from '@/lib/actions/encryption';
 import {
+  evalRedisScript,
   executeRedisCommand,
   normalizeUpstashUrl,
   type UpstashRedisFetch,
@@ -52,8 +53,12 @@ export interface AutomationStateStore {
   acquireWorkflowLease(
     workflowKey: AutomationWorkflowKey,
     ttlSeconds: number,
+    ownerKey?: string,
   ): Promise<LeaseResult>;
   releaseWorkflowLease(workflowKey: AutomationWorkflowKey, token: string): Promise<void>;
+  releaseWorkflowLeaseForRun(workflowKey: AutomationWorkflowKey, runKey: string): Promise<void>;
+  acquireRunLease(runKey: string, ttlSeconds: number): Promise<LeaseResult>;
+  releaseRunLease(runKey: string, token: string): Promise<void>;
   putRun(run: AutomationRunRecord, ttlSeconds: number): Promise<void>;
   getRun(runKey: string): Promise<AutomationRunRecord | null>;
   listRuns(input?: {
@@ -282,12 +287,16 @@ export function resolveAutomationStoreConfig(
   const url = normalizeUpstashUrl(rawUrl);
   const token = rawToken.trim();
   const namespace = rawNamespace.trim();
+  const sharedUrl = normalizeUpstashUrl(env.UPSTASH_REDIS_REST_URL ?? '');
+  const sharedToken = (env.UPSTASH_REDIS_REST_TOKEN ?? '').trim();
   if (
     !url ||
     token !== rawToken ||
     token.length < 16 ||
     /\s/.test(token) ||
-    !NAMESPACE_PATTERN.test(namespace)
+    !NAMESPACE_PATTERN.test(namespace) ||
+    (sharedUrl !== null && sharedUrl === url) ||
+    (sharedToken.length > 0 && sharedToken === token)
   )
     return { ok: false, reason: 'invalid-store' };
   return { ok: true, value: { url, token, namespace, timeoutMs: 3_000, encryptionKey: key } };
@@ -307,12 +316,14 @@ export function createMemoryAutomationStateStore(
     { runKey: string; payloadDigest: string | null; expiresAt: number }
   >();
   const leases = new Map<AutomationWorkflowKey, { token: string; expiresAt: number }>();
+  const runLeases = new Map<string, { token: string; expiresAt: number }>();
   const controls = new Map<AutomationWorkflowKey, AutomationWorkflowControl>();
   const purge = () => {
     for (const [key, row] of runs) if (row.expiresAt <= now()) runs.delete(key);
     for (const [key, row] of artifacts) if (row.expiresAt <= now()) artifacts.delete(key);
     for (const [key, row] of idempotency) if (row.expiresAt <= now()) idempotency.delete(key);
     for (const [key, row] of leases) if (row.expiresAt <= now()) leases.delete(key);
+    for (const [key, row] of runLeases) if (row.expiresAt <= now()) runLeases.delete(key);
   };
   return {
     rawSnapshot: () => JSON.stringify({ runs: [...runs.keys()], artifacts: [...artifacts.keys()] }),
@@ -331,15 +342,33 @@ export function createMemoryAutomationStateStore(
       });
       return { status: 'reserved' };
     },
-    async acquireWorkflowLease(workflowKey, ttlSeconds) {
+    async acquireWorkflowLease(workflowKey, ttlSeconds, ownerKey) {
       purge();
       if (leases.has(workflowKey)) return { status: 'busy' };
-      const token = randomBytes(24).toString('base64url');
+      const token = ownerKey
+        ? hashKey(['workflow-lease-owner', ownerKey])
+        : randomBytes(24).toString('base64url');
       leases.set(workflowKey, { token, expiresAt: now() + Math.max(1, ttlSeconds) * 1000 });
       return { status: 'acquired', token };
     },
     async releaseWorkflowLease(workflowKey, token) {
       if (leases.get(workflowKey)?.token === token) leases.delete(workflowKey);
+    },
+    async releaseWorkflowLeaseForRun(workflowKey, runKey) {
+      const token = hashKey(['workflow-lease-owner', runKey]);
+      if (leases.get(workflowKey)?.token === token) leases.delete(workflowKey);
+    },
+    async acquireRunLease(runKey, ttlSeconds) {
+      purge();
+      const key = hashKey(['run-lease', runKey]);
+      if (runLeases.has(key)) return { status: 'busy' };
+      const token = randomBytes(24).toString('base64url');
+      runLeases.set(key, { token, expiresAt: now() + Math.max(1, ttlSeconds) * 1000 });
+      return { status: 'acquired', token };
+    },
+    async releaseRunLease(runKey, token) {
+      const key = hashKey(['run-lease', runKey]);
+      if (runLeases.get(key)?.token === token) runLeases.delete(key);
     },
     async putRun(run, ttlSeconds) {
       if (!parseRun(run)) throw new Error('automation-run-invalid');
@@ -389,6 +418,15 @@ function redisKey(config: AutomationStoreConfig, kind: string, opaque: string): 
   return `${config.namespace}:${kind}:${hashKey([kind, opaque])}`;
 }
 
+const RELEASE_LEASE_SCRIPT = `
+local key = KEYS[1]
+local token = ARGV[1]
+if redis.call('GET', key) == token then
+  return redis.call('DEL', key)
+end
+return 0
+`;
+
 export function createUpstashAutomationStateStore(
   config: AutomationStoreConfig,
   fetchImpl: UpstashRedisFetch = fetch,
@@ -437,15 +475,35 @@ export function createUpstashAutomationStateStore(
       if (existing.payloadDigest !== (input.payloadDigest ?? null)) return { status: 'conflict' };
       return { status: 'replay', runKey: existing.runKey };
     },
-    async acquireWorkflowLease(workflowKey, ttlSeconds) {
+    async acquireWorkflowLease(workflowKey, ttlSeconds, ownerKey) {
       const key = redisKey(config, 'lease', workflowKey);
-      const token = randomBytes(24).toString('base64url');
+      const token = ownerKey
+        ? hashKey(['workflow-lease-owner', ownerKey])
+        : randomBytes(24).toString('base64url');
       const result = await command(['SET', key, token, 'NX', 'EX', Math.max(1, ttlSeconds)]);
       return result === 'OK' ? { status: 'acquired', token } : { status: 'busy' };
     },
     async releaseWorkflowLease(workflowKey, token) {
       const key = redisKey(config, 'lease', workflowKey);
-      if ((await command(['GET', key])) === token) await command(['DEL', key]);
+      await evalRedisScript(config, RELEASE_LEASE_SCRIPT, [key], [token], fetchImpl);
+    },
+    async releaseWorkflowLeaseForRun(workflowKey, runKey) {
+      if (!OPAQUE_KEY_PATTERN.test(runKey)) return;
+      const key = redisKey(config, 'lease', workflowKey);
+      const token = hashKey(['workflow-lease-owner', runKey]);
+      await evalRedisScript(config, RELEASE_LEASE_SCRIPT, [key], [token], fetchImpl);
+    },
+    async acquireRunLease(runKey, ttlSeconds) {
+      if (!OPAQUE_KEY_PATTERN.test(runKey)) return { status: 'busy' };
+      const key = redisKey(config, 'run-lease', runKey);
+      const token = randomBytes(24).toString('base64url');
+      const result = await command(['SET', key, token, 'NX', 'EX', Math.max(1, ttlSeconds)]);
+      return result === 'OK' ? { status: 'acquired', token } : { status: 'busy' };
+    },
+    async releaseRunLease(runKey, token) {
+      if (!OPAQUE_KEY_PATTERN.test(runKey)) return;
+      const key = redisKey(config, 'run-lease', runKey);
+      await evalRedisScript(config, RELEASE_LEASE_SCRIPT, [key], [token], fetchImpl);
     },
     async putRun(run, ttlSeconds) {
       if (!parseRun(run)) throw new Error('automation-run-invalid');
@@ -459,9 +517,17 @@ export function createUpstashAutomationStateStore(
       ]);
       const index = `${config.namespace}:index:${run.workflowKey}`;
       const global = `${config.namespace}:index:all`;
-      await command(['ZADD', index, Date.parse(run.createdAt), run.runKey]);
+      const indexMember = hashKey(['index-member', run.runKey]);
+      await command([
+        'SET',
+        redisKey(config, 'index-entry', indexMember),
+        encryptJson(config.encryptionKey, { runKey: run.runKey }, 256),
+        'EX',
+        ttl,
+      ]);
+      await command(['ZADD', index, Date.parse(run.createdAt), indexMember]);
       await command(['EXPIRE', index, ttl]);
-      await command(['ZADD', global, Date.parse(run.createdAt), run.runKey]);
+      await command(['ZADD', global, Date.parse(run.createdAt), indexMember]);
       await command(['EXPIRE', global, ttl]);
     },
     async getRun(runKey) {
@@ -479,10 +545,31 @@ export function createUpstashAutomationStateStore(
       const index = `${config.namespace}:index:${input.workflowKey ?? 'all'}`;
       const raw = await command(['ZREVRANGE', index, offset, offset + limit - 1]);
       if (!Array.isArray(raw)) return [];
-      const keys = raw
-        .filter((item): item is string => typeof item === 'string' && OPAQUE_KEY_PATTERN.test(item))
+      const members = raw
+        .filter((item): item is string => typeof item === 'string' && /^[0-9a-f]{64}$/.test(item))
         .slice(0, limit);
-      const records = await Promise.all(keys.map((key) => this.getRun(key)));
+      const keys = await Promise.all(
+        members.map(async (member) =>
+          decryptJson(
+            config.encryptionKey,
+            await command(['GET', redisKey(config, 'index-entry', member)]),
+            256,
+            (candidate) => {
+              if (
+                !isRecord(candidate) ||
+                !hasExactKeys(candidate, ['runKey']) ||
+                typeof candidate.runKey !== 'string' ||
+                !OPAQUE_KEY_PATTERN.test(candidate.runKey)
+              )
+                return null;
+              return candidate.runKey;
+            },
+          ),
+        ),
+      );
+      const records = await Promise.all(
+        keys.filter((key): key is string => key !== null).map((key) => this.getRun(key)),
+      );
       return records.filter((item): item is AutomationRunRecord => item !== null);
     },
     async putArtifact(artifact, ttlSeconds) {

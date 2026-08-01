@@ -453,7 +453,8 @@ test('block5 ownership: approval digest Steward y Salud nunca comparten propuest
 test('block5 proposals: planning crea source y actor aislados por principal', async () => {
   const proposals = createMemoryProposalPort();
   const audit = createMemoryAuditSink();
-  const created = await createOpenClawProposal({
+  const idempotency = createMemoryIdempotencyStore();
+  const input: Parameters<typeof createOpenClawProposal>[0] = {
     agentId: 'steward',
     principalId: 'workflow:planning-suggestion',
     workflowPrincipalKey: 'planning-suggestion',
@@ -467,7 +468,7 @@ test('block5 proposals: planning crea source y actor aislados por principal', as
     },
     runtimeOverrides: {
       proposals,
-      idempotency: createMemoryIdempotencyStore(),
+      idempotency,
       audit,
     },
     request: {
@@ -488,9 +489,16 @@ test('block5 proposals: planning crea source y actor aislados por principal', as
         note: null,
       },
     },
+  };
+  const created = await createOpenClawProposal(input);
+  const replay = await createOpenClawProposal({
+    ...input,
+    requestId: 'block5-planning-create-replay',
   });
 
   assert.equal(created.ok, true, JSON.stringify(created));
+  assert.equal(replay.ok, true, JSON.stringify(replay));
+  assert.equal((await proposals.list()).length, 1);
   assert.equal((await proposals.list())[0]?.source, 'agent:steward:workflow:planning-suggestion');
   const auditRows = await audit.list();
   assert.equal(auditRows.length > 0, true);

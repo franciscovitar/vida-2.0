@@ -9,9 +9,10 @@ las claves Redis son hashes opacos. Corrupción, clave incorrecta, envelopes leg
 campos desconocidos fallan cerrados. La implementación en memoria solo se construye explícitamente
 en tests; nunca es fallback de runtime.
 
-El TTL de cada ejecución y artefacto proviene del contrato inmutable del workflow. Los índices solo
-contienen `runKey` opacas. Ningún body, firma, key ID, token, correo, URL privada, ID de proveedor o
-contenido de Journaling forma parte del registro.
+El TTL de cada ejecución y artefacto proviene del contrato inmutable del workflow. Los índices
+contienen solamente hashes; la correspondencia con cada `runKey` está cifrada en una entrada
+separada. Ningún argumento Redis contiene la `runKey` en claro. Ningún body, firma, key ID, token,
+correo, URL privada, ID de proveedor o contenido de Journaling forma parte del registro.
 
 ## Runtime y kill switches
 
@@ -58,6 +59,8 @@ arquitecturas. Fuera del MVP quedan Production, deploy, alta/edición de n8n o U
 directo a proveedores, Gmail, Drive, Journaling, mensajes, compras, eliminaciones y cualquier
 aprobación automática.
 
-Work deberá preparar posteriormente el Upstash dedicado, la clave de cifrado, la instancia n8n,
-las seis credenciales HMAC por principal y los secretos del callback. Esa preparación no forma parte
-de este commit.
+Los JSON de `automations/n8n` son manifiestos de aprovisionamiento, no workflows ejecutables: los
+placeholders HTTP están desconectados y el readiness permanece pendiente hasta que Work inyecte y
+pruebe el helper HMAC y el armado del callback. Work deberá preparar posteriormente el Upstash
+dedicado, la clave de cifrado, la instancia n8n, las seis credenciales HMAC por principal y los
+secretos del callback. Esa preparación no forma parte de este commit.

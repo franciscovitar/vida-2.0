@@ -41,9 +41,25 @@ export function isAutomationsApiEnabled(
 ): boolean {
   return (
     env.AUTOMATIONS_API_ENABLED === 'true' &&
+    isAutomationsEnvironmentAllowed(env) &&
     resolveAutomationsAccessMode(env) !== 'disabled' &&
     env.AUTOMATIONS_WORKFLOW_CONTRACT_VERSION?.trim() === AUTOMATION_CONTRACT_VERSION
   );
+}
+
+export function isAutomationsEnvironmentAllowed(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  const production =
+    env.VERCEL_ENV === 'production' ||
+    (env.NODE_ENV === 'production' && env.VERCEL_ENV !== 'preview');
+  return !production || env.AUTOMATIONS_PRODUCTION_ENABLED === 'true';
+}
+
+export function areAutomationTemplatesProvisioned(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.AUTOMATIONS_N8N_TEMPLATES_PROVISIONED === 'true';
 }
 
 export function isAutomationWorkflowEnabled(

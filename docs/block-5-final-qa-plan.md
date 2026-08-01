@@ -1,0 +1,58 @@
+# Bloque 5 — plan final de QA real para Work
+
+Objetivo: una sola ventana de QA, secuencial y fail-fast. Cada paso requiere evidencia sanitizada;
+ante un fallo se apagan las compuertas y se ejecuta rollback antes de continuar. Está prohibido hacer
+búsquedas globales, leer Journaling, usar datos productivos o ampliar permisos.
+
+## Secuencia
+
+1. **Preflight local.** Verificar rama/SHA aprobados, suite completa, audit, diff limpio, sin
+   `.env.local`, secretos ni cambios de lockfile.
+2. **Autorización única.** Registrar responsable, ventana, Preview branch-scoped, recursos permitidos
+   y criterio de cierre. No autorizar Production.
+3. **Upstash dedicado.** Crear/seleccionar el recurso separado, validar plan/costo/cuotas y cargar
+   namespace y AES-256-GCM sin reutilizar el Bloque 4.
+4. **n8n.** Importar los cinco manifests inactivos, inyectar helper HMAC/callback, validar conexiones,
+   pruning y backup. Mantener schedules apagados.
+5. **Variables Preview.** Cargar las compuertas apagadas, store, orquestador, callback y seis pares
+   HMAC desde el manifest; revisar pares parciales/duplicados.
+6. **Deploy exacto.** Desplegar únicamente el SHA de cierre certificado y registrar ese SHA.
+7. **Readiness.** Con workflows apagados esperar `disabled`; completar infraestructura, marcar
+   templates solo después de sus pruebas y exigir checks completos antes de `ready`.
+8. **Smoke manual.** Habilitar global/manual y un workflow de un principal; iniciar con sesión Web y
+   confirmación. Verificar disabled/loading, no doble submit y resultado sanitizado.
+9. **Schedules controlados.** Activar un schedule por vez, observar una única ejecución y volver a
+   apagarlo antes del siguiente si hay anomalías.
+10. **Cinco workflows.** Certificar cron/zona, contrato, principal, artefacto y retención de cada uno;
+    el digest se prueba por separado con Steward y Salud.
+11. **Proposal-only.** Para planificación exigir una sola `task.create.propose`, pendiente y sin
+    ejecución automática; el resto no puede proponer.
+12. **Ownership.** Verificar source exacto del principal y que agentes/workflows distintos no puedan
+    listar ni obtener la propuesta.
+13. **Idempotencia/replay.** Repetir el mismo evento y callback: mismo run/resultado, sin segundo
+    artefacto ni propuesta. Un payload divergente debe rechazarse.
+14. **Retry/circuit breaker.** Inducir respuestas retryables acotadas; comprobar tres intentos,
+    request ID/firma nuevos, idempotency key estable, apertura, bloqueo y recuperación half-open.
+15. **Store cifrado.** Inspeccionar métricas/comandos permitidos: namespace dedicado, TTL positivo,
+    claves opacas/ciphertext y cero plaintext, runKey cruda, emails, URLs o IDs de proveedor.
+16. **Callback.** Ejecutar matriz válida y negativa de método, query, content type, UTF-8, tamaño,
+    auth, replay, identidad, transición y store unavailable; nunca debe aparecer un stack trace.
+17. **UI.** Revisar `/automatizaciones`, `/ajustes` y `/aprobaciones` en desktop y 390×844: sin scroll
+    horizontal, estados canónicos iguales, foco/labels/aria, loading, origen legible y cero datos
+    técnicos/sensibles.
+18. **Kill switches.** Probar pausa/reanudación, kill switch individual y global. Cada apagado debe
+    impedir nuevos triggers sin borrar ejecuciones terminales.
+19. **Limpieza.** Apagar schedules, retirar fixtures DEV y cerrar sesiones de prueba. No hacer
+    búsquedas globales ni consultar Journaling.
+20. **Rollback.** Ejecutar el orden del manifest si cualquier evidencia falla; revocar credenciales y
+    apagar Preview dentro de la autorización.
+21. **Certificación.** Registrar SHA, checks, cinco workflows, seis principales, evidencia sanitizada,
+    costos observados, incidentes y confirmación de cero Production/direct writes/Journaling.
+
+## Criterio fail-fast
+
+Detener la ventana ante cualquier readiness distinto del esperado, credencial parcial/duplicada,
+reutilización del store, URL insegura, secreto en salida, ejecución doble, proposal ownership
+incorrecto, write directo, callback no acotado o diferencia entre SHA desplegado y certificado.
+No “arreglar en vivo”: volver a compuertas apagadas, corregir localmente y solicitar una nueva
+autorización.

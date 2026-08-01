@@ -16,6 +16,7 @@ import {
   type AutomationResultInput,
   type AutomationRuntime,
 } from '@/lib/automations/runtime';
+import { buildAutomationLogEvent, emitAutomationLog } from '@/lib/automations/observability';
 import { buildAutomationStateStore, type AutomationStateStore } from '@/lib/automations/store';
 import {
   decodeOpenClawUtf8,
@@ -31,7 +32,7 @@ const OPAQUE_RUN_PATTERN = /^run_[A-Za-z0-9_-]{20,80}$/;
 const OPAQUE_REFERENCE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,159}$/;
 const JSON_CONTENT_TYPE_PATTERN = /^application\/json(?:\s*;\s*charset=utf-8)?$/i;
 const SENSITIVE_PATTERN =
-  /(?:https?:\/\/|bearer\s|secret|token|signature|key.?id|journal|[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i;
+  /(?:https?:\/\/|bearer\s|secret|token|signature|key.?id|provider.?id|notion|google.?sheet|calendar.?id|journal|[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i;
 
 const HEADERS = {
   'Cache-Control': 'no-store',
@@ -156,6 +157,7 @@ export async function handleAutomationResultRequest(
     log?: (event: string) => void;
   } = {},
 ): Promise<NextResponse> {
+  const startedAt = Date.now();
   const env = deps.env ?? process.env;
   if (!isAutomationsResultCallbackEnabled(env))
     return response(404, {
@@ -213,59 +215,85 @@ export async function handleAutomationResultRequest(
       ok: false,
       error: { code: 'misconfigured', message: 'Runtime no configurado.' },
     });
-  const replay = await store.reserveIdempotency({
-    workflowKey: dto.workflowKey,
-    idempotencyKey: `callback:${requestId}`,
-    runKey: dto.runKey,
-    payloadDigest: createHash('sha256').update(decoded.text, 'utf8').digest('hex'),
-    ttlSeconds: 24 * 60 * 60,
-  });
-  if (replay.status === 'conflict') {
-    return response(409, {
-      ok: false,
-      error: { code: 'replay', message: 'Solicitud duplicada.' },
+  try {
+    const replay = await store.reserveIdempotency({
+      workflowKey: dto.workflowKey,
+      idempotencyKey: `callback:${requestId}`,
+      runKey: dto.runKey,
+      payloadDigest: createHash('sha256').update(decoded.text, 'utf8').digest('hex'),
+      ttlSeconds: 24 * 60 * 60,
     });
-  }
-  if (replay.status === 'replay') {
-    if (replay.runKey !== dto.runKey)
+    if (replay.status === 'conflict') {
       return response(409, {
         ok: false,
         error: { code: 'replay', message: 'Solicitud duplicada.' },
       });
-    const stored = await store.getRun(dto.runKey);
-    if (
-      !stored ||
-      stored.status !== dto.status ||
-      stored.resultCode !== dto.resultCode ||
-      stored.proposalKey !== dto.proposalKey
-    ) {
+    }
+    if (replay.status === 'replay') {
+      if (replay.runKey !== dto.runKey)
+        return response(409, {
+          ok: false,
+          error: { code: 'replay', message: 'Solicitud duplicada.' },
+        });
+      const stored = await store.getRun(dto.runKey);
+      if (
+        !stored ||
+        stored.status !== dto.status ||
+        stored.resultCode !== dto.resultCode ||
+        stored.proposalKey !== dto.proposalKey ||
+        stored.summary !== dto.summary ||
+        Boolean(stored.artifactKey) !== Boolean(dto.artifact)
+      ) {
+        return response(409, {
+          ok: false,
+          error: { code: 'replay', message: 'Solicitud duplicada o en curso.' },
+        });
+      }
+      return response(200, { ok: true, runKey: dto.runKey, status: dto.status, replay: true });
+    }
+    const runLease = await store.acquireRunLease(dto.runKey, 30);
+    if (runLease.status === 'busy') {
       return response(409, {
         ok: false,
-        error: { code: 'replay', message: 'Solicitud duplicada o en curso.' },
+        error: { code: 'in-progress', message: 'Resultado en curso.' },
       });
     }
-    return response(200, { ok: true, runKey: dto.runKey, status: dto.status, replay: true });
-  }
-  const result = await runtime.recordResult(dto);
-  if (!result.ok || !result.run)
-    return response(409, {
-      ok: false,
-      error: { code: 'invalid-transition', message: 'Transición inválida.' },
+    let result: Awaited<ReturnType<AutomationRuntime['recordResult']>>;
+    try {
+      result = await runtime.recordResult(dto);
+    } finally {
+      await store.releaseRunLease(dto.runKey, runLease.token);
+    }
+    if (!result.ok || !result.run)
+      return response(409, {
+        ok: false,
+        error: { code: 'invalid-transition', message: 'Transición inválida.' },
+      });
+    await store.releaseWorkflowLeaseForRun(dto.workflowKey, dto.runKey);
+    emitAutomationLog(
+      buildAutomationLogEvent({
+        workflowKey: dto.workflowKey,
+        principalKey: dto.principalKey,
+        runKey: dto.runKey,
+        operation: 'callback.result',
+        status: result.run.status,
+        attempt: result.run.attempt,
+        durationMs: Date.now() - startedAt,
+        resultCode: result.run.resultCode,
+        itemCount: dto.artifact?.items.length ?? 0,
+      }),
+      deps.log,
+    );
+    return response(200, {
+      ok: true,
+      runKey: dto.runKey,
+      status: result.run.status,
+      replay: result.replay,
     });
-  const trace = createHash('sha256').update(dto.runKey).digest('hex').slice(0, 24);
-  (deps.log ?? console.info)(
-    JSON.stringify({
-      scope: 'automations',
-      operation: 'result',
-      runTrace: trace,
-      workflowKey: dto.workflowKey,
-      status: dto.status,
-    }),
-  );
-  return response(200, {
-    ok: true,
-    runKey: dto.runKey,
-    status: result.run.status,
-    replay: result.replay,
-  });
+  } catch {
+    return response(503, {
+      ok: false,
+      error: { code: 'temporarily-unavailable', message: 'Servicio temporalmente no disponible.' },
+    });
+  }
 }
