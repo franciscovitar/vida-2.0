@@ -20,6 +20,7 @@ import {
   ShoppingCart,
   Target,
   UtensilsCrossed,
+  Workflow,
 } from 'lucide-react';
 
 import type { Domain } from '@/types';
@@ -45,6 +46,7 @@ export type NavIconKey =
   | 'bandeja'
   | 'journaling'
   | 'ajustes'
+  | 'automatizaciones'
   | 'buscar'
   | 'document';
 
@@ -83,6 +85,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   bandeja: Inbox,
   journaling: NotebookPen,
   ajustes: Settings,
+  automatizaciones: Workflow,
   buscar: Search,
   document: FileText,
 };
@@ -111,6 +114,12 @@ export const primaryNav: NavItemData[] = [
 export const secondaryNav: NavItemData[] = [
   { label: 'Bandeja de entrada', href: '/bandeja', icon: 'bandeja', domain: 'neutral' },
   { label: 'Journaling', href: '/journaling', icon: 'journaling', domain: 'neutral' },
+  {
+    label: 'Automatizaciones',
+    href: '/automatizaciones',
+    icon: 'automatizaciones',
+    domain: 'productivity',
+  },
   { label: 'Ajustes', href: '/ajustes', icon: 'ajustes', domain: 'neutral' },
 ];
 

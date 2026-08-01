@@ -68,16 +68,25 @@ comparten credencial, rate limit, replay ni ownership.
 - Los nombres y placeholders están documentados en `.env.example`; no se guardan
   secretos en el repositorio.
 
+## Runtime local de Etapa 2
+
+- El estado y los artefactos sanitizados se cifran con AES-256-GCM en un Redis
+  dedicado del Bloque 5, separado del Upstash congelado del Bloque 4.
+- La implementación memory se reserva exclusivamente para tests; el runtime real
+  falla cerrado si falta cualquier parte del store o del cliente n8n.
+- El callback de resultados nace apagado, autentica al orquestador con un secreto
+  independiente y solo acepta transiciones y DTOs cerrados.
+- La ejecución manual requiere sesión Web, flag propio, confirmación y resolución
+  server-side del único principal. No acepta identidad ni permisos del navegador.
+- Circuit breaker, idempotencia, TTL, concurrencia y reintentos se aplican por
+  workflow sin ampliar los contratos de la Etapa 1.
+- Los cinco exports n8n permanecen inactivos y sin credenciales.
+
 ## Fuera de alcance
 
-No se agregan workflows n8n reales, endpoints nuevos de proveedores, OAuth,
-despliegues ni cambios en Vercel o Upstash. Gmail, Drive, Journaling, mensajes,
-compras, eliminaciones y Production continúan fuera del alcance.
-
-## Persistencia futura
-
-El estado de ejecuciones y artefactos sanitizados utilizará un Redis dedicado del
-Bloque 5, separado del Upstash congelado del Bloque 4.
+No se agregan endpoints nuevos de proveedores, OAuth, despliegues ni cambios en
+Vercel, n8n o Upstash reales. Gmail, Drive, Journaling, mensajes, compras,
+eliminaciones y Production continúan fuera del alcance.
 
 ## Consecuencias
 

@@ -1,0 +1,59 @@
+{
+  "name": "Vida 2.0 · Briefing diario",
+  "active": false,
+  "nodes": [
+    {
+      "id": "daily-schedule",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "15 7 * * *" }] }
+      }
+    },
+    {
+      "id": "daily-request",
+      "name": "Controlled Vida2 request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/openclaw/v1/read' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-vida-key-id", "value": "={{ $json.keyId }}" },
+            { "name": "x-vida-timestamp", "value": "={{ $json.timestamp }}" },
+            { "name": "x-vida-request-id", "value": "={{ $json.requestId }}" },
+            { "name": "x-vida-signature", "value": "={{ $json.signature }}" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.body }}"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": { "main": [[{ "node": "Controlled Vida2 request", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "timezone": "America/Argentina/Cordoba", "executionOrder": "v1" },
+  "versionId": "vida2-daily-briefing-v1",
+  "meta": {
+    "contractVersion": "vida2-automations-v1",
+    "workflowKey": "daily-briefing",
+    "operations": [
+      "system.overview",
+      "tasks.list",
+      "projects.list",
+      "calendar.upcoming",
+      "approvals.list"
+    ],
+    "signatureProtocol": "vida2-openclaw-hmac-v2",
+    "retryableStatusCodes": [429, 500, 502, 503, 504],
+    "maxAttempts": 3
+  }
+}

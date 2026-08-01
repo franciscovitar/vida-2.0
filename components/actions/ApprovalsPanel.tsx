@@ -42,6 +42,12 @@ function sourceLabel(source: string): string {
   if (source === 'agent:health-reflection') return 'Agente · Salud y reflexión';
   if (source === 'agent:digital-order') return 'Agente · Orden digital';
   if (source === 'agent:technical-guardian') return 'Agente · Guardián técnico';
+  if (source === 'agent:steward:workflow:planning-suggestion') {
+    return 'Automatización · Sugerencia diaria de planificación';
+  }
+  if (source.startsWith('agent:') && source.includes(':workflow:')) {
+    return 'Automatización · Origen controlado';
+  }
   return 'Origen controlado';
 }
 

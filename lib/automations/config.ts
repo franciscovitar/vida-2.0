@@ -11,6 +11,15 @@ import { getAutomationPrincipalContract } from '@/lib/automations/contracts';
 
 export type AutomationsAccessMode = 'disabled' | 'read-only' | 'proposal-only';
 
+export type AutomationsRuntimeStatus = {
+  systemEnabled: boolean;
+  manualRunEnabled: boolean;
+  callbackEnabled: boolean;
+  orchestratorConfigured: boolean;
+  storeConfigured: boolean;
+  contractVersion: typeof AUTOMATION_CONTRACT_VERSION;
+};
+
 const WORKFLOW_FLAG: Readonly<Record<AutomationWorkflowKey, string>> = Object.freeze({
   'daily-briefing': 'AUTOMATIONS_DAILY_BRIEFING_ENABLED',
   'technical-watchdog': 'AUTOMATIONS_TECHNICAL_WATCHDOG_ENABLED',
@@ -70,4 +79,24 @@ export function isAutomationProposalAccessEnabled(
     isAutomationPrincipalEnabled(principalKey, env) &&
     resolveAutomationsAccessMode(env) === 'proposal-only'
   );
+}
+
+export function isAutomationsManualRunEnabled(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.AUTOMATIONS_MANUAL_RUN_ENABLED === 'true';
+}
+
+export function isAutomationsResultCallbackEnabled(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.AUTOMATIONS_RESULT_CALLBACK_ENABLED === 'true' && isAutomationsApiEnabled(env);
+}
+
+export function isAutomationWorkflowPausedByConfig(
+  workflowKey: AutomationWorkflowKey,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  const suffix = workflowKey.replaceAll('-', '_').toUpperCase();
+  return env[`AUTOMATIONS_${suffix}_PAUSED`] === 'true';
 }

@@ -7,6 +7,7 @@ import {
   ServerCog,
   Settings,
   ShieldCheck,
+  Workflow,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 
@@ -17,6 +18,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ThemeControl } from '@/components/ui/ThemeControl';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { getOpenClawAgentStatuses } from '@/lib/openclaw/agent-status';
+import { getAutomationsDashboardData } from '@/lib/automations/dashboard';
 import { getRuntimeReadiness } from '@/lib/runtime/server-readiness';
 import type { Domain } from '@/types';
 import type { RuntimeIntegrationStatus } from '@/types/runtime';
@@ -65,6 +67,12 @@ export default async function AjustesPage() {
   await requireAuthorizedSession();
   const readiness = getRuntimeReadiness();
   const agents = getOpenClawAgentStatuses();
+  const automations = await getAutomationsDashboardData();
+  const automationCounts = automations.items.reduce(
+    (counts, item) => ({ ...counts, [item.status]: counts[item.status] + 1 }),
+    { ready: 0, disabled: 0, degraded: 0, misconfigured: 0, paused: 0 },
+  );
+  const lastAutomationRun = automations.recentRuns[0] ?? null;
   const errors = readiness.preview.issues.filter((item) => item.severity === 'error');
   const warnings = readiness.preview.issues.filter((item) => item.severity === 'warning');
 
@@ -156,6 +164,70 @@ export default async function AjustesPage() {
                 </Badge>
               </li>
             ))}
+          </ul>
+        </Card>
+
+        <Card aria-labelledby="automations-title">
+          <SectionHeader
+            id="automations-title"
+            title="Automatizaciones controladas"
+            description="Estado sanitizado del orquestador y su store dedicado, sin probar proveedores."
+            icon={Workflow}
+            domain="productivity"
+            action={
+              <Badge domain={automations.systemEnabled ? 'habits' : 'neutral'} variant="outline">
+                {automations.systemEnabled ? 'Habilitadas' : 'Desactivadas'}
+              </Badge>
+            }
+          />
+          <ul className={styles.sources}>
+            <li className={styles.source}>
+              <div className={styles['source-text']}>
+                <span className={styles['source-name']}>Orquestador</span>
+                <span className={styles['source-detail']}>
+                  Cliente fail-closed para workflows permitidos.
+                </span>
+              </div>
+              <Badge
+                domain={automations.orchestratorConfigured ? 'habits' : 'neutral'}
+                variant="outline"
+              >
+                {automations.orchestratorConfigured ? 'Configurado' : 'No configurado'}
+              </Badge>
+            </li>
+            <li className={styles.source}>
+              <div className={styles['source-text']}>
+                <span className={styles['source-name']}>Store cifrado</span>
+                <span className={styles['source-detail']}>
+                  Namespace separado · contrato {automations.contractVersion}
+                </span>
+              </div>
+              <Badge domain={automations.storeConfigured ? 'habits' : 'neutral'} variant="outline">
+                {automations.storeConfigured ? 'Configurado' : 'No configurado'}
+              </Badge>
+            </li>
+            <li className={styles.source}>
+              <div className={styles['source-text']}>
+                <span className={styles['source-name']}>Workflows</span>
+                <span className={styles['source-detail']}>
+                  {automationCounts.ready} listos · {automationCounts.disabled} desactivados ·{' '}
+                  {automationCounts.degraded +
+                    automationCounts.misconfigured +
+                    automationCounts.paused}{' '}
+                  requieren atención
+                </span>
+              </div>
+            </li>
+            <li className={styles.source}>
+              <div className={styles['source-text']}>
+                <span className={styles['source-name']}>Última ejecución</span>
+                <span className={styles['source-detail']}>
+                  {lastAutomationRun
+                    ? `${lastAutomationRun.status} · ${new Date(lastAutomationRun.createdAt).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}`
+                    : 'Sin ejecuciones registradas'}
+                </span>
+              </div>
+            </li>
           </ul>
         </Card>
 
