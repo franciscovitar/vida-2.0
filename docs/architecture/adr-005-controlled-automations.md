@@ -26,6 +26,8 @@ omnipotente.
 - Gmail, Drive, Journaling, mensajes, compras, eliminaciones y Production quedan
   fuera del MVP.
 - Los workflows nacen apagados y requieren kill switch global e individual.
+- El schedule nace en n8n, pero primero cruza una frontera HMAC que crea el run canónico en Vida;
+  esa frontera nunca vuelve a despachar n8n.
 
 ## MVP
 
@@ -78,10 +80,15 @@ comparten credencial, rate limit, replay ni ownership.
   independiente y solo acepta transiciones y DTOs cerrados.
 - La ejecución manual requiere sesión Web, flag propio, confirmación y resolución
   server-side del único principal. No acepta identidad ni permisos del navegador.
-- Circuit breaker, idempotencia, TTL, concurrencia y reintentos se aplican por
-  workflow sin ampliar los contratos de la Etapa 1.
-- Los cinco exports n8n son manifiestos inactivos de aprovisionamiento: sus placeholders HTTP están
-  desconectados y no se consideran listos hasta que Work inyecte y pruebe firma y callback.
+- Circuit breaker, idempotencia, TTL, concurrencia y reintentos no amplían los contratos de la
+  Etapa 1. El lease se separa por principal para que los dos digest mantengan ejecución y ownership
+  independientes.
+- El runtime es bifásico: la operación canónica reserva y arranca sin orquestador; el camino manual
+  agrega exactamente un dispatch, mientras el schedule continúa dentro de la ejecución n8n actual.
+- `POST /api/automations/v1/triggers/scheduled` reutiliza HMAC v2, deriva principal e idempotencia
+  server-side y devuelve una `runKey` opaca. El callback sigue rechazando runs inexistentes.
+- Los seis exports n8n inactivos representan cinco contratos y seis principales. Cada runner se
+  vincula a una sola credencial; ambos digest tienen manifests separados.
 - Production requiere una autorización explícita adicional; habilitar Preview no la hereda.
 
 ## Fuera de alcance

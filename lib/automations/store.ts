@@ -24,6 +24,7 @@ import {
   AUTOMATION_TRIGGERS,
   AUTOMATION_WORKFLOW_KEYS,
   type AutomationArtifact,
+  type AutomationPrincipalKey,
   type AutomationRunRecord,
   type AutomationWorkflowControl,
   type AutomationWorkflowKey,
@@ -54,9 +55,18 @@ export interface AutomationStateStore {
     workflowKey: AutomationWorkflowKey,
     ttlSeconds: number,
     ownerKey?: string,
+    principalKey?: AutomationPrincipalKey,
   ): Promise<LeaseResult>;
-  releaseWorkflowLease(workflowKey: AutomationWorkflowKey, token: string): Promise<void>;
-  releaseWorkflowLeaseForRun(workflowKey: AutomationWorkflowKey, runKey: string): Promise<void>;
+  releaseWorkflowLease(
+    workflowKey: AutomationWorkflowKey,
+    token: string,
+    principalKey?: AutomationPrincipalKey,
+  ): Promise<void>;
+  releaseWorkflowLeaseForRun(
+    workflowKey: AutomationWorkflowKey,
+    runKey: string,
+    principalKey?: AutomationPrincipalKey,
+  ): Promise<void>;
   acquireRunLease(runKey: string, ttlSeconds: number): Promise<LeaseResult>;
   releaseRunLease(runKey: string, token: string): Promise<void>;
   putRun(run: AutomationRunRecord, ttlSeconds: number): Promise<void>;
@@ -315,7 +325,7 @@ export function createMemoryAutomationStateStore(
     string,
     { runKey: string; payloadDigest: string | null; expiresAt: number }
   >();
-  const leases = new Map<AutomationWorkflowKey, { token: string; expiresAt: number }>();
+  const leases = new Map<string, { token: string; expiresAt: number }>();
   const runLeases = new Map<string, { token: string; expiresAt: number }>();
   const controls = new Map<AutomationWorkflowKey, AutomationWorkflowControl>();
   const purge = () => {
@@ -342,21 +352,24 @@ export function createMemoryAutomationStateStore(
       });
       return { status: 'reserved' };
     },
-    async acquireWorkflowLease(workflowKey, ttlSeconds, ownerKey) {
+    async acquireWorkflowLease(workflowKey, ttlSeconds, ownerKey, principalKey) {
       purge();
-      if (leases.has(workflowKey)) return { status: 'busy' };
+      const leaseKey = principalKey ? `${workflowKey}:${principalKey}` : workflowKey;
+      if (leases.has(leaseKey)) return { status: 'busy' };
       const token = ownerKey
         ? hashKey(['workflow-lease-owner', ownerKey])
         : randomBytes(24).toString('base64url');
-      leases.set(workflowKey, { token, expiresAt: now() + Math.max(1, ttlSeconds) * 1000 });
+      leases.set(leaseKey, { token, expiresAt: now() + Math.max(1, ttlSeconds) * 1000 });
       return { status: 'acquired', token };
     },
-    async releaseWorkflowLease(workflowKey, token) {
-      if (leases.get(workflowKey)?.token === token) leases.delete(workflowKey);
+    async releaseWorkflowLease(workflowKey, token, principalKey) {
+      const leaseKey = principalKey ? `${workflowKey}:${principalKey}` : workflowKey;
+      if (leases.get(leaseKey)?.token === token) leases.delete(leaseKey);
     },
-    async releaseWorkflowLeaseForRun(workflowKey, runKey) {
+    async releaseWorkflowLeaseForRun(workflowKey, runKey, principalKey) {
+      const leaseKey = principalKey ? `${workflowKey}:${principalKey}` : workflowKey;
       const token = hashKey(['workflow-lease-owner', runKey]);
-      if (leases.get(workflowKey)?.token === token) leases.delete(workflowKey);
+      if (leases.get(leaseKey)?.token === token) leases.delete(leaseKey);
     },
     async acquireRunLease(runKey, ttlSeconds) {
       purge();
@@ -475,21 +488,33 @@ export function createUpstashAutomationStateStore(
       if (existing.payloadDigest !== (input.payloadDigest ?? null)) return { status: 'conflict' };
       return { status: 'replay', runKey: existing.runKey };
     },
-    async acquireWorkflowLease(workflowKey, ttlSeconds, ownerKey) {
-      const key = redisKey(config, 'lease', workflowKey);
+    async acquireWorkflowLease(workflowKey, ttlSeconds, ownerKey, principalKey) {
+      const key = redisKey(
+        config,
+        'lease',
+        principalKey ? `${workflowKey}:${principalKey}` : workflowKey,
+      );
       const token = ownerKey
         ? hashKey(['workflow-lease-owner', ownerKey])
         : randomBytes(24).toString('base64url');
       const result = await command(['SET', key, token, 'NX', 'EX', Math.max(1, ttlSeconds)]);
       return result === 'OK' ? { status: 'acquired', token } : { status: 'busy' };
     },
-    async releaseWorkflowLease(workflowKey, token) {
-      const key = redisKey(config, 'lease', workflowKey);
+    async releaseWorkflowLease(workflowKey, token, principalKey) {
+      const key = redisKey(
+        config,
+        'lease',
+        principalKey ? `${workflowKey}:${principalKey}` : workflowKey,
+      );
       await evalRedisScript(config, RELEASE_LEASE_SCRIPT, [key], [token], fetchImpl);
     },
-    async releaseWorkflowLeaseForRun(workflowKey, runKey) {
+    async releaseWorkflowLeaseForRun(workflowKey, runKey, principalKey) {
       if (!OPAQUE_KEY_PATTERN.test(runKey)) return;
-      const key = redisKey(config, 'lease', workflowKey);
+      const key = redisKey(
+        config,
+        'lease',
+        principalKey ? `${workflowKey}:${principalKey}` : workflowKey,
+      );
       const token = hashKey(['workflow-lease-owner', runKey]);
       await evalRedisScript(config, RELEASE_LEASE_SCRIPT, [key], [token], fetchImpl);
     },

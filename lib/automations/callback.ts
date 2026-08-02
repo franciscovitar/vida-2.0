@@ -269,7 +269,7 @@ export async function handleAutomationResultRequest(
         ok: false,
         error: { code: 'invalid-transition', message: 'Transición inválida.' },
       });
-    await store.releaseWorkflowLeaseForRun(dto.workflowKey, dto.runKey);
+    await store.releaseWorkflowLeaseForRun(dto.workflowKey, dto.runKey, dto.principalKey);
     emitAutomationLog(
       buildAutomationLogEvent({
         workflowKey: dto.workflowKey,

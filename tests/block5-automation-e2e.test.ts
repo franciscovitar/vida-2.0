@@ -19,6 +19,7 @@ const SECRET = 'callback-secret-with-safe-length';
 const ENV = {
   NODE_ENV: 'test',
   AUTOMATIONS_API_ENABLED: 'true',
+  AUTOMATIONS_SCHEDULE_INGRESS_ENABLED: 'true',
   AUTOMATIONS_ACCESS_MODE: 'proposal-only',
   AUTOMATIONS_WORKFLOW_CONTRACT_VERSION: 'vida2-automations-v1',
   AUTOMATIONS_DAILY_BRIEFING_ENABLED: 'true',
@@ -35,6 +36,8 @@ const ENV = {
   AUTOMATIONS_UPSTASH_REDIS_REST_TOKEN: 'automations-token-with-safe-length',
   AUTOMATIONS_STATE_NAMESPACE: 'vida2:automations:test:vida2-automations-v1',
   AUTOMATIONS_STATE_ENCRYPTION_KEY: Buffer.alloc(32, 17).toString('base64'),
+  OPENCLAW_API_ENABLED: 'true',
+  OPENCLAW_ACCESS_MODE: 'read-only',
   OPENCLAW_AUTOMATION_DAILY_BRIEFING_API_KEY_ID: 'daily-key',
   OPENCLAW_AUTOMATION_DAILY_BRIEFING_API_SECRET: 'daily-secret-with-safe-length',
   OPENCLAW_AUTOMATION_TECHNICAL_WATCHDOG_API_KEY_ID: 'technical-key',

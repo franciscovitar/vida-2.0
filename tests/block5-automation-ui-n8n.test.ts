@@ -10,12 +10,13 @@ import type { AutomationWorkflowKey } from '@/types/automations';
 
 type N8nTemplate = {
   active: boolean;
-  nodes: Array<{ type: string; parameters: Record<string, unknown> }>;
+  nodes: Array<{ name: string; type: string; parameters: Record<string, unknown> }>;
   connections: Record<string, unknown>;
   settings: { timezone: string };
   meta: {
     contractVersion: string;
     workflowKey: AutomationWorkflowKey;
+    principalKey: string;
     operations: string[];
     signatureProtocol: string;
     idempotencyPolicy: string;
@@ -25,15 +26,21 @@ type N8nTemplate = {
     provisioningState: string;
     executable: boolean;
     callbackPath: string;
+    scheduleIngressPath: string;
+    runnerContract: string;
   };
 };
 
-test('block5 n8n: hay cinco exports inactivos, importables y alineados al contrato', () => {
+test('block5 n8n: hay seis unidades inactivas para cinco contratos y dos digest aislados', () => {
   const directory = path.join(process.cwd(), 'automations/n8n');
   const files = readdirSync(directory)
     .filter((file) => file.endsWith('.json'))
     .sort();
-  assert.equal(files.length, 5);
+  assert.equal(files.length, 6);
+  assert.deepEqual(
+    files.filter((file) => file.startsWith('approval-digest-')),
+    ['approval-digest-health.json', 'approval-digest-steward.json'],
+  );
   const schedules: Record<AutomationWorkflowKey, string> = {
     'daily-briefing': '15 7 * * *',
     'technical-watchdog': '17 * * * *',
@@ -41,10 +48,14 @@ test('block5 n8n: hay cinco exports inactivos, importables y alineados al contra
     'approval-digest': '15 12,19 * * *',
     'planning-suggestion': '30 7 * * 1-5',
   };
+  const logicalContracts = new Set<AutomationWorkflowKey>();
+  const principals = new Set<string>();
   for (const file of files) {
     const raw = readFileSync(path.join(directory, file), 'utf8');
     const template = JSON.parse(raw) as N8nTemplate;
     const contract = getAutomationWorkflowContract(template.meta.workflowKey);
+    logicalContracts.add(template.meta.workflowKey);
+    principals.add(template.meta.principalKey);
     assert.equal(template.active, false, file);
     assert.equal(template.settings.timezone, contract.schedule.timezone, file);
     assert.deepEqual(
@@ -53,14 +64,16 @@ test('block5 n8n: hay cinco exports inactivos, importables y alineados al contra
       file,
     );
     assert.equal(template.meta.signatureProtocol, 'vida2-openclaw-hmac-v2', file);
-    assert.equal(template.meta.idempotencyPolicy, 'preserve-business-key', file);
+    assert.equal(template.meta.idempotencyPolicy, 'same-normalized-occurrence', file);
     assert.equal(template.meta.requestAuthenticationPolicy, 'regenerate-per-attempt', file);
     assert.deepEqual(template.meta.retryableStatusCodes, contract.retry.retryableStatusCodes, file);
     assert.equal(template.meta.maxAttempts, contract.retry.maxAttempts, file);
-    assert.equal(template.meta.provisioningState, 'requires-signing-helper', file);
-    assert.equal(template.meta.executable, false, file);
+    assert.equal(template.meta.provisioningState, 'credential-binding-required', file);
+    assert.equal(template.meta.executable, true, file);
     assert.equal(template.meta.callbackPath, '/api/automations/v1/runs', file);
-    assert.deepEqual(template.connections, {}, file);
+    assert.equal(template.meta.scheduleIngressPath, '/api/automations/v1/triggers/scheduled', file);
+    assert.equal(template.meta.runnerContract, 'vida2-n8n-principal-runner-v1', file);
+    assert.ok(Object.keys(template.connections).length >= 6, file);
     assert.equal(
       JSON.stringify(template).includes(schedules[template.meta.workflowKey]),
       true,
@@ -69,6 +82,22 @@ test('block5 n8n: hay cinco exports inactivos, importables y alineados al contra
     assert.equal(
       template.nodes.some((node) => node.type === 'n8n-nodes-base.httpRequest'),
       true,
+      file,
+    );
+    const names = template.nodes.map((node) => node.name);
+    assert.ok(names.indexOf('HMAC begin scheduled run') > names.indexOf('Schedule'), file);
+    assert.ok(
+      names.indexOf('Extract canonical runKey') > names.indexOf('HMAC begin scheduled run'),
+      file,
+    );
+    assert.ok(
+      names.findIndex((name) => name.startsWith('HMAC contracted')) >
+        names.indexOf('Extract canonical runKey'),
+      file,
+    );
+    assert.ok(
+      names.indexOf('Callback terminal') >
+        names.findIndex((name) => name.startsWith('HMAC contracted')),
       file,
     );
     assert.equal(
@@ -86,6 +115,7 @@ test('block5 n8n: hay cinco exports inactivos, importables y alineados al contra
       file,
     );
     assert.equal('credentials' in template, false, file);
+    assert.equal(raw.includes('$env'), false, file);
     assert.equal(/https?:\/\//i.test(raw), false, file);
     assert.equal(
       /BEGIN PRIVATE|Bearer\s+[A-Za-z0-9]|@[a-z0-9.-]+\.[a-z]{2,}/i.test(raw),
@@ -100,6 +130,8 @@ test('block5 n8n: hay cinco exports inactivos, importables y alineados al contra
       file,
     );
   }
+  assert.equal(logicalContracts.size, 5);
+  assert.equal(principals.size, 6);
 });
 
 test('block5 dashboard: cinco estados, schedules y manual run server-resolved', async () => {
@@ -125,6 +157,7 @@ test('block5 dashboard: cinco estados, schedules y manual run server-resolved', 
   const dashboardEnv = {
     NODE_ENV: 'test',
     AUTOMATIONS_API_ENABLED: 'true',
+    AUTOMATIONS_SCHEDULE_INGRESS_ENABLED: 'true',
     AUTOMATIONS_ACCESS_MODE: 'read-only',
     AUTOMATIONS_WORKFLOW_CONTRACT_VERSION: 'vida2-automations-v1',
     AUTOMATIONS_DAILY_BRIEFING_ENABLED: 'true',
@@ -133,6 +166,8 @@ test('block5 dashboard: cinco estados, schedules y manual run server-resolved', 
     AUTOMATIONS_N8N_TEMPLATES_PROVISIONED: 'true',
     AUTOMATIONS_N8N_BASE_URL: 'http://localhost:5678',
     AUTOMATIONS_N8N_WEBHOOK_SECRET: 'orchestrator-secret-safe-value',
+    OPENCLAW_API_ENABLED: 'true',
+    OPENCLAW_ACCESS_MODE: 'read-only',
     OPENCLAW_AUTOMATION_DAILY_BRIEFING_API_KEY_ID: 'daily-key',
     OPENCLAW_AUTOMATION_DAILY_BRIEFING_API_SECRET: 'daily-secret-with-safe-length',
     OPENCLAW_AUTOMATION_TECHNICAL_WATCHDOG_API_KEY_ID: 'technical-key',

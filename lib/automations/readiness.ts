@@ -7,6 +7,7 @@ import { listAutomationWorkflowContracts } from '@/lib/automations/contracts';
 import { getAutomationWorkflowCredentials } from '@/lib/automations/credentials';
 import { resolveN8nClientConfig } from '@/lib/automations/n8n-client';
 import { resolveAutomationStoreConfig, type AutomationStateStore } from '@/lib/automations/store';
+import { getOpenClawReadiness } from '@/lib/openclaw/readiness';
 import {
   AUTOMATION_CONTRACT_VERSION,
   type AutomationWorkflowControl,
@@ -25,6 +26,7 @@ export type AutomationReadinessCheck = {
     | 'encryption'
     | 'namespace'
     | 'orchestrator'
+    | 'schedule-ingress'
     | 'callback'
     | 'manual'
     | 'credentials'
@@ -102,6 +104,11 @@ export function evaluateAutomationReadiness(
   const store = resolveAutomationStoreConfig(env);
   const orchestrator = resolveN8nClientConfig(env);
   const callbackReady = env.AUTOMATIONS_RESULT_CALLBACK_ENABLED === 'true';
+  const openClaw = getOpenClawReadiness(env);
+  const scheduleIngressReady =
+    env.AUTOMATIONS_SCHEDULE_INGRESS_ENABLED === 'true' &&
+    openClaw.apiStatus === 'read-only' &&
+    openClaw.securityControls === 'ready';
   const manualReady = env.AUTOMATIONS_MANUAL_RUN_ENABLED === 'true';
   const templatesProvisioned = env.AUTOMATIONS_N8N_TEMPLATES_PROVISIONED === 'true';
   const credentials = getAutomationWorkflowCredentials(env);
@@ -140,6 +147,11 @@ export function evaluateAutomationReadiness(
       callbackReady ? 'Callback habilitado' : 'Callback desactivado',
     ),
     check(
+      'schedule-ingress',
+      scheduleIngressReady,
+      scheduleIngressReady ? 'Ingreso programado habilitado' : 'Ingreso programado desactivado',
+    ),
+    check(
       'manual',
       manualReady,
       manualReady ? 'Ejecución manual habilitada' : 'Ejecución manual desactivada',
@@ -152,7 +164,7 @@ export function evaluateAutomationReadiness(
     check(
       'templates',
       templatesProvisioned,
-      templatesProvisioned ? 'Templates provisionados' : 'Templates pendientes',
+      templatesProvisioned ? 'Seis unidades n8n provisionadas' : 'Seis unidades n8n pendientes',
     ),
     check(
       'environment',

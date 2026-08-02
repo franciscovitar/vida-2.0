@@ -1,35 +1,35 @@
 {
-  "name": "Vida 2.0 · Guardián técnico",
+  "name": "Vida 2.0 · Digest de aprobaciones · Mayordomo",
   "active": false,
   "nodes": [
     {
-      "id": "technical-schedule",
+      "id": "approval-steward-schedule",
       "name": "Schedule",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [0, 0],
       "parameters": {
-        "rule": { "interval": [{ "field": "cronExpression", "expression": "17 * * * *" }] }
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "15 12,19 * * *" }] }
       }
     },
     {
-      "id": "technical-occurrence",
+      "id": "approval-steward-occurrence",
       "name": "Build canonical scheduledFor",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [240, 0],
       "parameters": {
-        "jsCode": "const occurrence = new Date(); occurrence.setSeconds(0, 0); const scheduledFor = occurrence.toISOString(); const scheduleBody = JSON.stringify({ workflowKey: 'technical-watchdog', scheduledFor, contractVersion: 'vida2-automations-v1' }); return [{ json: { scheduledFor, scheduleBody } }];"
+        "jsCode": "const occurrence = new Date(); occurrence.setSeconds(0, 0); const scheduledFor = occurrence.toISOString(); const scheduleBody = JSON.stringify({ workflowKey: 'approval-digest', scheduledFor, contractVersion: 'vida2-automations-v1' }); return [{ json: { scheduledFor, scheduleBody } }];"
       }
     },
     {
-      "id": "technical-begin",
+      "id": "approval-steward-begin",
       "name": "HMAC begin scheduled run",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [500, 0],
       "parameters": {
-        "workflowId": "={{ $vars.VIDA2_TECHNICAL_WATCHDOG_RUNNER_WORKFLOW_ID }}",
+        "workflowId": "={{ $vars.VIDA2_APPROVAL_DIGEST_STEWARD_RUNNER_WORKFLOW_ID }}",
         "mode": "each",
         "waitForSubWorkflow": true,
         "workflowInputs": {
@@ -47,7 +47,7 @@
       }
     },
     {
-      "id": "technical-run-key",
+      "id": "approval-steward-run-key",
       "name": "Extract canonical runKey",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -57,38 +57,38 @@
       }
     },
     {
-      "id": "technical-operations",
+      "id": "approval-steward-operations",
       "name": "HMAC contracted reads",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [1020, 0],
       "onError": "continueRegularOutput",
       "parameters": {
-        "workflowId": "={{ $vars.VIDA2_TECHNICAL_WATCHDOG_RUNNER_WORKFLOW_ID }}",
+        "workflowId": "={{ $vars.VIDA2_APPROVAL_DIGEST_STEWARD_RUNNER_WORKFLOW_ID }}",
         "mode": "each",
         "waitForSubWorkflow": true,
         "workflowInputs": {
           "value": {
             "action": "execute",
             "runKey": "={{ $json.runKey }}",
-            "workflowKey": "technical-watchdog",
-            "operations": "technical.status,technical.logs"
+            "workflowKey": "approval-digest",
+            "operations": "approvals.list"
           }
         }
       }
     },
     {
-      "id": "technical-result",
+      "id": "approval-steward-result",
       "name": "Build sanitized terminal or error DTO",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1280, 0],
       "parameters": {
-        "jsCode": "const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'technical-watchdog', principalKey: 'technical-watchdog', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Chequeo completado.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"
+        "jsCode": "const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'approval-digest', principalKey: 'approval-digest-steward', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Digest completado.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"
       }
     },
     {
-      "id": "technical-callback",
+      "id": "approval-steward-callback",
       "name": "Callback terminal",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -133,12 +133,12 @@
     }
   },
   "settings": { "timezone": "America/Argentina/Cordoba", "executionOrder": "v1" },
-  "versionId": "vida2-technical-watchdog-scheduled-v2",
+  "versionId": "vida2-approval-digest-steward-scheduled-v2",
   "meta": {
     "contractVersion": "vida2-automations-v1",
-    "workflowKey": "technical-watchdog",
-    "principalKey": "technical-watchdog",
-    "operations": ["technical.status", "technical.logs"],
+    "workflowKey": "approval-digest",
+    "principalKey": "approval-digest-steward",
+    "operations": ["approvals.list"],
     "signatureProtocol": "vida2-openclaw-hmac-v2",
     "scheduleIngressPath": "/api/automations/v1/triggers/scheduled",
     "callbackPath": "/api/automations/v1/runs",

@@ -30,7 +30,7 @@ export type AutomationLogEvent = {
   workflowKey: AutomationWorkflowKey;
   principalTrace: string;
   runTrace: string;
-  operation: 'callback.result' | 'runtime.dispatch';
+  operation: 'callback.result' | 'runtime.dispatch' | 'schedule.begin';
   status: AutomationRunStatus | 'rejected';
   attempt: number;
   durationMs: number;
@@ -87,7 +87,7 @@ export function automationLogLooksSafe(event: AutomationLogEvent): boolean {
   if (
     event.scope !== 'automations' ||
     !(AUTOMATION_WORKFLOW_KEYS as readonly string[]).includes(event.workflowKey) ||
-    !['callback.result', 'runtime.dispatch'].includes(event.operation) ||
+    !['callback.result', 'runtime.dispatch', 'schedule.begin'].includes(event.operation) ||
     ![...(AUTOMATION_RUN_STATUSES as readonly string[]), 'rejected'].includes(event.status) ||
     (event.resultCode !== null &&
       !(AUTOMATION_RESULT_CODES as readonly string[]).includes(event.resultCode)) ||

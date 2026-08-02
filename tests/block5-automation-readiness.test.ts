@@ -7,6 +7,7 @@ import type { AutomationWorkflowControl } from '@/types/automations';
 const COMPLETE_ENV = {
   NODE_ENV: 'test',
   AUTOMATIONS_API_ENABLED: 'true',
+  AUTOMATIONS_SCHEDULE_INGRESS_ENABLED: 'true',
   AUTOMATIONS_ACCESS_MODE: 'proposal-only',
   AUTOMATIONS_WORKFLOW_CONTRACT_VERSION: 'vida2-automations-v1',
   AUTOMATIONS_DAILY_BRIEFING_ENABLED: 'true',
@@ -15,6 +16,8 @@ const COMPLETE_ENV = {
   AUTOMATIONS_N8N_TEMPLATES_PROVISIONED: 'true',
   AUTOMATIONS_N8N_BASE_URL: 'http://localhost:5678',
   AUTOMATIONS_N8N_WEBHOOK_SECRET: 'orchestrator-secret-with-safe-length',
+  OPENCLAW_API_ENABLED: 'true',
+  OPENCLAW_ACCESS_MODE: 'read-only',
   AUTOMATIONS_UPSTASH_REDIS_REST_URL: 'https://automations-only.upstash.io',
   AUTOMATIONS_UPSTASH_REDIS_REST_TOKEN: 'automations-token-with-safe-length',
   AUTOMATIONS_STATE_NAMESPACE: 'vida2:automations:test:vida2-automations-v1',
@@ -69,7 +72,7 @@ test('block5 readiness: estados canónicos son fail-closed y comparten checks sa
   const ready = evaluateAutomationReadiness({ env: COMPLETE_ENV, storeReachable: true });
   assert.equal(ready.state, 'ready');
   assert.equal(ready.credentialsConfigured, 6);
-  assert.equal(ready.checks.length, 12);
+  assert.equal(ready.checks.length, 13);
   assert.equal(
     ready.checks.every((item) => item.ready),
     true,
@@ -99,6 +102,13 @@ test('block5 readiness: estados canónicos son fail-closed y comparten checks sa
 });
 
 test('block5 readiness: templates, seis HMAC y Production son checks independientes', () => {
+  const ingressOff = evaluateAutomationReadiness({
+    env: { ...COMPLETE_ENV, AUTOMATIONS_SCHEDULE_INGRESS_ENABLED: 'false' },
+    storeReachable: true,
+  });
+  assert.equal(ingressOff.state, 'misconfigured');
+  assert.equal(ingressOff.checks.find((item) => item.id === 'schedule-ingress')?.ready, false);
+
   const pendingTemplates = evaluateAutomationReadiness({
     env: { ...COMPLETE_ENV, AUTOMATIONS_N8N_TEMPLATES_PROVISIONED: 'false' },
     storeReachable: true,
@@ -132,6 +142,10 @@ test('block5 readiness: templates, seis HMAC y Production son checks independien
       NODE_ENV: 'production',
       AUTOMATIONS_PRODUCTION_ENABLED: 'true',
       AUTOMATIONS_N8N_BASE_URL: 'https://orchestrator.example.test',
+      OPENCLAW_RATE_LIMIT_MODE: 'upstash',
+      OPENCLAW_REPLAY_MODE: 'upstash',
+      UPSTASH_REDIS_REST_URL: 'https://security-controls.upstash.io',
+      UPSTASH_REDIS_REST_TOKEN: 'security-control-token-with-safe-length',
     },
     storeReachable: true,
   });

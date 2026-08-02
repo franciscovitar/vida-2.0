@@ -15,6 +15,7 @@ export type AutomationsRuntimeStatus = {
   systemEnabled: boolean;
   manualRunEnabled: boolean;
   callbackEnabled: boolean;
+  scheduleIngressEnabled: boolean;
   orchestratorConfigured: boolean;
   storeConfigured: boolean;
   contractVersion: typeof AUTOMATION_CONTRACT_VERSION;
@@ -101,6 +102,12 @@ export function isAutomationsManualRunEnabled(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): boolean {
   return env.AUTOMATIONS_MANUAL_RUN_ENABLED === 'true';
+}
+
+export function isAutomationsScheduleIngressEnabled(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.AUTOMATIONS_SCHEDULE_INGRESS_ENABLED === 'true' && isAutomationsApiEnabled(env);
 }
 
 export function isAutomationsResultCallbackEnabled(

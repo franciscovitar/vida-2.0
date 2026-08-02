@@ -1,8 +1,11 @@
+import { createHash } from 'node:crypto';
+
 import { getAutomationWorkflowCredentials } from '@/lib/automations/credentials';
 import {
   areAutomationTemplatesProvisioned,
   isAutomationsApiEnabled,
   isAutomationsManualRunEnabled,
+  isAutomationsScheduleIngressEnabled,
   isAutomationWorkflowEnabled,
   isAutomationWorkflowPausedByConfig,
   resolveAutomationsAccessMode,
@@ -24,6 +27,7 @@ import {
   type AutomationStateStore,
 } from '@/lib/automations/store';
 import {
+  AUTOMATION_CONTRACT_VERSION,
   AUTOMATION_RESULT_CODES,
   type AutomationArtifact,
   type AutomationPrincipalKey,
@@ -103,7 +107,7 @@ function finishRun(
 
 function safeMessage(code: AutomationStartResult['code']): string {
   const messages: Record<AutomationStartResult['code'], string> = {
-    accepted: 'La ejecución fue aceptada por el orquestador.',
+    accepted: 'La ejecución fue iniciada.',
     replay: 'La solicitud ya estaba registrada.',
     disabled: 'La automatización está desactivada.',
     misconfigured: 'La automatización todavía no está configurada.',
@@ -117,7 +121,7 @@ function safeMessage(code: AutomationStartResult['code']): string {
 
 export function createAutomationRuntime(deps: {
   store: AutomationStateStore;
-  orchestrator: AutomationOrchestratorClient;
+  orchestrator?: AutomationOrchestratorClient;
   env?: Readonly<Record<string, string | undefined>>;
   now?: () => number;
   sleep?: (ms: number) => Promise<void>;
@@ -149,133 +153,136 @@ export function createAutomationRuntime(deps: {
     });
   }
 
-  return {
-    async start(input: {
-      workflowKey: AutomationWorkflowKey;
-      principalKey: AutomationPrincipalKey;
-      trigger: 'scheduled' | 'manual';
-      idempotencyKey: string;
-      confirmed?: boolean;
-    }): Promise<AutomationStartResult> {
-      if (
-        !isAutomationPrincipalKey(input.principalKey) ||
-        input.idempotencyKey.length < 8 ||
-        input.idempotencyKey.length > 160
-      )
-        return {
-          ok: false,
-          code: 'invalid-input',
-          message: safeMessage('invalid-input'),
-          run: null,
-        };
-      const contract = getAutomationWorkflowContract(input.workflowKey);
-      const principal = getAutomationPrincipalContract(input.principalKey);
-      if (principal.workflowKey !== input.workflowKey)
-        return {
-          ok: false,
-          code: 'invalid-input',
-          message: safeMessage('invalid-input'),
-          run: null,
-        };
-      if (!isAutomationsApiEnabled(env) || !isAutomationWorkflowEnabled(input.workflowKey, env))
-        return { ok: false, code: 'disabled', message: safeMessage('disabled'), run: null };
-      if (env.NODE_ENV !== 'test' && !areAutomationTemplatesProvisioned(env))
-        return {
-          ok: false,
-          code: 'misconfigured',
-          message: safeMessage('misconfigured'),
-          run: null,
-        };
-      if (
-        input.trigger === 'manual' &&
-        (!isAutomationsManualRunEnabled(env) || input.confirmed !== true)
-      )
-        return { ok: false, code: 'disabled', message: safeMessage('disabled'), run: null };
-      const mode = resolveAutomationsAccessMode(env);
-      if (contract.outputKind === 'proposal' && mode !== 'proposal-only')
-        return { ok: false, code: 'disabled', message: safeMessage('disabled'), run: null };
-      const credentials = getAutomationWorkflowCredentials(env);
-      if (
-        !credentials.ok ||
-        !credentials.credentials.some((item) => item.workflowPrincipalKey === input.principalKey)
-      )
-        return {
-          ok: false,
-          code: 'misconfigured',
-          message: safeMessage('misconfigured'),
-          run: null,
-        };
-
-      let control = await controlFor(input.workflowKey);
-      let halfOpenProbe = false;
-      if (isAutomationWorkflowPausedByConfig(input.workflowKey, env) || control.paused)
-        return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
-      if (control.circuit.mode === 'open') {
-        const openedAt = control.circuit.openedAt ? Date.parse(control.circuit.openedAt) : now();
-        if (now() - openedAt < CIRCUIT_OPEN_MS)
-          return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
-        halfOpenProbe = true;
-      } else if (control.circuit.mode === 'half-open') {
-        return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
-      }
-
-      const createdMs = now();
-      const createdAt = new Date(createdMs).toISOString();
-      const runKey = createOpaqueAutomationKey('run');
-      const reserved = await deps.store.reserveIdempotency({
-        workflowKey: input.workflowKey,
-        idempotencyKey: input.idempotencyKey,
-        runKey,
-        ttlSeconds: contract.retentionSeconds,
-      });
-      if (reserved.status === 'conflict') {
-        return {
-          ok: false,
-          code: 'invalid-input',
-          message: safeMessage('invalid-input'),
-          run: null,
-        };
-      }
-      if (reserved.status === 'replay') {
-        return {
-          ok: true,
-          code: 'replay',
-          message: safeMessage('replay'),
-          run: await deps.store.getRun(reserved.runKey),
-        };
-      }
-      let run: AutomationRunRecord = {
-        runKey,
-        workflowKey: input.workflowKey,
-        principalKey: input.principalKey,
-        principalId: principal.principalId,
-        trigger: input.trigger,
-        status: 'queued',
-        attempt: 1,
-        idempotencyKey: input.idempotencyKey,
-        startedAt: null,
-        finishedAt: null,
-        durationMs: null,
-        resultCode: null,
-        summary: null,
-        proposalKey: null,
-        artifactKey: null,
-        createdAt,
-        updatedAt: createdAt,
-        expiresAt: new Date(createdMs + contract.retentionSeconds * 1000).toISOString(),
+  async function beginRun(input: {
+    workflowKey: AutomationWorkflowKey;
+    principalKey: AutomationPrincipalKey;
+    trigger: 'scheduled' | 'manual';
+    idempotencyKey: string;
+    payloadDigest?: string;
+    confirmed?: boolean;
+  }): Promise<AutomationStartResult> {
+    if (
+      !isAutomationPrincipalKey(input.principalKey) ||
+      input.idempotencyKey.length < 8 ||
+      input.idempotencyKey.length > 160 ||
+      (input.payloadDigest !== undefined && !/^[0-9a-f]{64}$/.test(input.payloadDigest))
+    )
+      return {
+        ok: false,
+        code: 'invalid-input',
+        message: safeMessage('invalid-input'),
+        run: null,
       };
-      await deps.store.putRun(run, contract.retentionSeconds);
-      const lease = await deps.store.acquireWorkflowLease(
-        input.workflowKey,
-        Math.ceil(contract.timeoutMs / 1000),
-        runKey,
-      );
-      if (lease.status === 'busy') {
-        run = finishRun(run, now(), 'skipped', 'no-change', 'Omitida por límite de concurrencia.');
-        await deps.store.putRun(run, contract.retentionSeconds);
-        return { ok: false, code: 'busy', message: safeMessage('busy'), run };
-      }
 
+    const contract = getAutomationWorkflowContract(input.workflowKey);
+    const principal = getAutomationPrincipalContract(input.principalKey);
+    if (principal.workflowKey !== input.workflowKey)
+      return {
+        ok: false,
+        code: 'invalid-input',
+        message: safeMessage('invalid-input'),
+        run: null,
+      };
+    if (!isAutomationsApiEnabled(env) || !isAutomationWorkflowEnabled(input.workflowKey, env))
+      return { ok: false, code: 'disabled', message: safeMessage('disabled'), run: null };
+    if (env.NODE_ENV !== 'test' && !areAutomationTemplatesProvisioned(env))
+      return {
+        ok: false,
+        code: 'misconfigured',
+        message: safeMessage('misconfigured'),
+        run: null,
+      };
+    if (
+      input.trigger === 'manual' &&
+      (!isAutomationsManualRunEnabled(env) || input.confirmed !== true)
+    )
+      return { ok: false, code: 'disabled', message: safeMessage('disabled'), run: null };
+    const mode = resolveAutomationsAccessMode(env);
+    if (contract.outputKind === 'proposal' && mode !== 'proposal-only')
+      return { ok: false, code: 'disabled', message: safeMessage('disabled'), run: null };
+    const credentials = getAutomationWorkflowCredentials(env);
+    if (
+      !credentials.ok ||
+      !credentials.credentials.some((item) => item.workflowPrincipalKey === input.principalKey)
+    )
+      return {
+        ok: false,
+        code: 'misconfigured',
+        message: safeMessage('misconfigured'),
+        run: null,
+      };
+
+    let control = await controlFor(input.workflowKey);
+    let halfOpenProbe = false;
+    if (isAutomationWorkflowPausedByConfig(input.workflowKey, env) || control.paused)
+      return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
+    if (control.circuit.mode === 'open') {
+      const openedAt = control.circuit.openedAt ? Date.parse(control.circuit.openedAt) : now();
+      if (now() - openedAt < CIRCUIT_OPEN_MS)
+        return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
+      halfOpenProbe = true;
+    } else if (control.circuit.mode === 'half-open') {
+      return { ok: false, code: 'paused', message: safeMessage('paused'), run: null };
+    }
+
+    const createdMs = now();
+    const createdAt = new Date(createdMs).toISOString();
+    const runKey = createOpaqueAutomationKey('run');
+    const reserved = await deps.store.reserveIdempotency({
+      workflowKey: input.workflowKey,
+      idempotencyKey: input.idempotencyKey,
+      runKey,
+      payloadDigest: input.payloadDigest,
+      ttlSeconds: contract.retentionSeconds,
+    });
+    if (reserved.status === 'conflict')
+      return {
+        ok: false,
+        code: 'invalid-input',
+        message: safeMessage('invalid-input'),
+        run: null,
+      };
+    if (reserved.status === 'replay') {
+      const replayed = await deps.store.getRun(reserved.runKey);
+      return replayed
+        ? { ok: true, code: 'replay', message: safeMessage('replay'), run: replayed }
+        : { ok: false, code: 'failed', message: safeMessage('failed'), run: null };
+    }
+
+    let run: AutomationRunRecord = {
+      runKey,
+      workflowKey: input.workflowKey,
+      principalKey: input.principalKey,
+      principalId: principal.principalId,
+      trigger: input.trigger,
+      status: 'queued',
+      attempt: 1,
+      idempotencyKey: input.idempotencyKey,
+      startedAt: null,
+      finishedAt: null,
+      durationMs: null,
+      resultCode: null,
+      summary: null,
+      proposalKey: null,
+      artifactKey: null,
+      createdAt,
+      updatedAt: createdAt,
+      expiresAt: new Date(createdMs + contract.retentionSeconds * 1000).toISOString(),
+    };
+    await deps.store.putRun(run, contract.retentionSeconds);
+    const lease = await deps.store.acquireWorkflowLease(
+      input.workflowKey,
+      Math.ceil(contract.timeoutMs / 1000),
+      runKey,
+      input.principalKey,
+    );
+    if (lease.status === 'busy') {
+      run = finishRun(run, now(), 'skipped', 'no-change', 'Omitida por límite de concurrencia.');
+      await deps.store.putRun(run, contract.retentionSeconds);
+      return { ok: false, code: 'busy', message: safeMessage('busy'), run };
+    }
+
+    try {
       if (halfOpenProbe) {
         control = {
           ...control,
@@ -284,7 +291,6 @@ export function createAutomationRuntime(deps: {
         };
         await deps.store.putWorkflowControl(control);
       }
-
       run = {
         ...run,
         status: 'running',
@@ -292,6 +298,71 @@ export function createAutomationRuntime(deps: {
         updatedAt: new Date(now()).toISOString(),
       };
       await deps.store.putRun(run, contract.retentionSeconds);
+      return { ok: true, code: 'accepted', message: safeMessage('accepted'), run };
+    } catch (error) {
+      await deps.store.releaseWorkflowLease(input.workflowKey, lease.token, input.principalKey);
+      throw error;
+    }
+  }
+
+  return {
+    async beginScheduledRun(input: {
+      workflowKey: AutomationWorkflowKey;
+      principalKey: AutomationPrincipalKey;
+      scheduledFor: string;
+      contractVersion: string;
+      payloadDigest: string;
+    }): Promise<AutomationStartResult> {
+      const scheduledMs = Date.parse(input.scheduledFor);
+      if (!isAutomationsScheduleIngressEnabled(env))
+        return { ok: false, code: 'disabled', message: safeMessage('disabled'), run: null };
+      if (
+        input.contractVersion !== AUTOMATION_CONTRACT_VERSION ||
+        !Number.isFinite(scheduledMs) ||
+        new Date(scheduledMs).toISOString() !== input.scheduledFor
+      )
+        return {
+          ok: false,
+          code: 'invalid-input',
+          message: safeMessage('invalid-input'),
+          run: null,
+        };
+      const idempotencyKey = `scheduled:${createHash('sha256')
+        .update(
+          [input.contractVersion, input.workflowKey, input.principalKey, input.scheduledFor].join(
+            '\n',
+          ),
+          'utf8',
+        )
+        .digest('hex')}`;
+      return beginRun({
+        workflowKey: input.workflowKey,
+        principalKey: input.principalKey,
+        trigger: 'scheduled',
+        idempotencyKey,
+        payloadDigest: input.payloadDigest,
+      });
+    },
+
+    async start(input: {
+      workflowKey: AutomationWorkflowKey;
+      principalKey: AutomationPrincipalKey;
+      trigger: 'scheduled' | 'manual';
+      idempotencyKey: string;
+      confirmed?: boolean;
+    }): Promise<AutomationStartResult> {
+      if (!deps.orchestrator)
+        return {
+          ok: false,
+          code: 'misconfigured',
+          message: safeMessage('misconfigured'),
+          run: null,
+        };
+      const begun = await beginRun(input);
+      if (!begun.ok || begun.code !== 'accepted' || !begun.run) return begun;
+      const contract = getAutomationWorkflowContract(input.workflowKey);
+      const createdMs = Date.parse(begun.run.createdAt);
+      let run = begun.run;
       let lastError: AutomationOrchestratorError | null = null;
       for (let attempt = 1; attempt <= contract.retry.maxAttempts; attempt += 1) {
         run = {
@@ -303,7 +374,7 @@ export function createAutomationRuntime(deps: {
         await deps.store.putRun(run, contract.retentionSeconds);
         try {
           await deps.orchestrator.trigger({
-            runKey,
+            runKey: run.runKey,
             workflowKey: input.workflowKey,
             principalKey: input.principalKey,
             idempotencyKey: input.idempotencyKey,
@@ -314,7 +385,7 @@ export function createAutomationRuntime(deps: {
             buildAutomationLogEvent({
               workflowKey: input.workflowKey,
               principalKey: input.principalKey,
-              runKey,
+              runKey: run.runKey,
               operation: 'runtime.dispatch',
               status: 'running',
               attempt,
@@ -333,7 +404,11 @@ export function createAutomationRuntime(deps: {
           await sleep(contract.retry.backoffSeconds[attempt - 1]! * 1000);
         }
       }
-      await deps.store.releaseWorkflowLease(input.workflowKey, lease.token);
+      await deps.store.releaseWorkflowLeaseForRun(
+        input.workflowKey,
+        run.runKey,
+        input.principalKey,
+      );
       run = finishRun(
         run,
         now(),
@@ -347,7 +422,7 @@ export function createAutomationRuntime(deps: {
         buildAutomationLogEvent({
           workflowKey: input.workflowKey,
           principalKey: input.principalKey,
-          runKey,
+          runKey: run.runKey,
           operation: 'runtime.dispatch',
           status: 'failed',
           attempt: run.attempt,
@@ -388,6 +463,11 @@ export function createAutomationRuntime(deps: {
           'La ejecución superó el tiempo máximo.',
         );
         await deps.store.putRun(timedOut, contract.retentionSeconds);
+        await deps.store.releaseWorkflowLeaseForRun(
+          input.workflowKey,
+          input.runKey,
+          input.principalKey,
+        );
         await updateCircuit(input.workflowKey, true);
         return { ok: false, replay: false, run: timedOut };
       }
@@ -415,6 +495,11 @@ export function createAutomationRuntime(deps: {
         artifactKey,
       };
       await deps.store.putRun(completed, contract.retentionSeconds);
+      await deps.store.releaseWorkflowLeaseForRun(
+        input.workflowKey,
+        input.runKey,
+        input.principalKey,
+      );
       await updateCircuit(input.workflowKey, input.status === 'failed');
       return { ok: true, replay: false, run: completed };
     },
@@ -444,4 +529,11 @@ export function buildAutomationRuntime(
   const store = buildAutomationStateStore(env);
   const orchestrator = buildN8nClient(env);
   return store && orchestrator ? createAutomationRuntime({ store, orchestrator, env }) : null;
+}
+
+export function buildScheduledAutomationRuntime(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): AutomationRuntime | null {
+  const store = buildAutomationStateStore(env);
+  return store ? createAutomationRuntime({ store, env }) : null;
 }
