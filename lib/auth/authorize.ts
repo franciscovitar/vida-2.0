@@ -129,6 +129,11 @@ export function evaluateSessionClaims(
   return { ok: true, email, userId: claims.sub };
 }
 
+const MACHINE_AUTHENTICATED_PATHS = new Set([
+  '/api/automations/v1/triggers/scheduled',
+  '/api/automations/v1/runs',
+]);
+
 /** Rutas públicas del Proxy (UX). */
 export function isPublicAuthPath(pathname: string): boolean {
   if (pathname === '/login' || pathname.startsWith('/login/')) return true;
@@ -136,6 +141,8 @@ export function isPublicAuthPath(pathname: string): boolean {
   if (pathname.startsWith('/api/auth')) return true;
   // API OpenClaw: auth HMAC propia (sin cookie de usuario).
   if (pathname === '/api/openclaw' || pathname.startsWith('/api/openclaw/')) return true;
+  // Fronteras machine-to-machine con autenticación propia; comparación deliberadamente exacta.
+  if (MACHINE_AUTHENTICATED_PATHS.has(pathname)) return true;
   return false;
 }
 
