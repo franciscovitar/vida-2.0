@@ -270,6 +270,20 @@ test('block5 n8n: allowlist, body mínimo, respuesta estricta y secreto fuera de
   assert.equal(capturedSecret, 'orchestrator-secret-safe-value');
   assert.equal(capturedBody.includes('orchestrator-secret-safe-value'), false);
   assert.equal(/email|token|provider|journal/i.test(capturedBody), false);
+  await assert.rejects(
+    client.trigger({
+      runKey: 'run_abcdefghijklmnopqrstuvwx',
+      workflowKey: 'approval-digest',
+      principalKey: 'approval-digest-steward',
+      idempotencyKey: 'manual:approval-not-supported',
+      attempt: 1,
+      trigger: 'manual',
+    }),
+    (error: unknown) =>
+      error instanceof AutomationOrchestratorError &&
+      error.message === 'orchestrator-rejected' &&
+      error.retryable === false,
+  );
 });
 
 test('block5 runtime: no contiene caminos de approve, reject, execute o rollback', () => {

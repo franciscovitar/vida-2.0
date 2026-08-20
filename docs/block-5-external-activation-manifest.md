@@ -56,15 +56,23 @@ habilita Production de forma implícita.
 ## n8n
 
 Usar una instancia de preparación aislada y un plan vigente que Work confirme suficiente para seis
-principales, baja concurrencia, retención breve y backups. Hay seis JSON ejecutables inactivos para
-cinco contratos: Steward y Salud tienen unidades digest separadas. Antes de provisionar, Work debe
-vincular cada unidad a su runner exclusivo y probar schedule ingress, operaciones y callback.
+principales, baja concurrencia, retención breve y backups. Hay seis JSON programados inactivos para
+cinco contratos y un JSON de ingress manual inactivo: Steward y Salud tienen unidades digest
+separadas. Antes de provisionar, Work debe vincular cada unidad a su runner exclusivo y probar
+schedule ingress, manual ingress, operaciones y callback.
 
 En n8n, crear sin valores una variable `VIDA2_CONTROLLED_API_BASE_URL`, una credencial server-only
-`HTTP Header Auth` para callback y seis runners con credenciales HMAC separadas (una por principal).
-Cada unidad recibe solo el ID variable de su runner. Los nombres/IDs internos quedan en el
-inventario privado de Work, no en los exports. No reutilizar runners ni credenciales entre
-principales.
+`HTTP Header Auth` con header `x-vida-automations-secret` para los cuatro Webhooks manuales y los
+callbacks, y seis runners con credenciales HMAC separadas (una por principal). El valor de Header
+Auth debe corresponder a `AUTOMATIONS_N8N_WEBHOOK_SECRET` y nunca quedar en el export. Cada unidad
+recibe solo el ID variable de su runner. Los nombres/IDs internos quedan en el inventario privado de
+Work, no en los exports. No reutilizar runners ni credenciales HMAC entre principales.
+
+`Vida 2.0 · Manual ingress` expone solo los paths `vida2/automations/daily-briefing`,
+`vida2/automations/technical-watchdog`, `vida2/automations/weekly-review` y
+`vida2/automations/planning-suggestion`. No tiene Schedule ni Approval Digest. Un retry manual
+válido se reconoce pero no vuelve a cruzar el runner; la pérdida del primer dispatch se resuelve por
+timeout fail-closed, nunca con una ejecución potencialmente duplicada.
 
 | Workflow                    | Cron             | Zona                        |
 | --------------------------- | ---------------- | --------------------------- |
@@ -106,7 +114,8 @@ no debe consultarse ni siquiera para preparar el QA.
 
 ## Rollback exacto
 
-1. Apagar los seis schedules en n8n y confirmar que no quedan ejecuciones activas.
+1. Despublicar el ingress manual, apagar los seis schedules en n8n y confirmar que no quedan
+   ejecuciones activas.
 2. Poner los cinco kill switches y la compuerta global en `false`.
 3. Apagar schedule ingress, callback y ejecución manual; mantener Production no autorizada.
 4. Revocar las seis credenciales HMAC y el secreto del callback/orquestador.

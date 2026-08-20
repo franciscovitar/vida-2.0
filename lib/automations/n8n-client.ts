@@ -1,9 +1,16 @@
 import { randomBytes } from 'node:crypto';
 
-import { AUTOMATION_WORKFLOW_KEYS, type AutomationWorkflowKey } from '@/types/automations';
+import type { AutomationWorkflowKey } from '@/types/automations';
 
 const MAX_RESPONSE_CHARS = 4 * 1024;
 const SECRET_HEADER = 'x-vida-automations-secret';
+
+export const N8N_MANUAL_WORKFLOW_KEYS = Object.freeze([
+  'daily-briefing',
+  'technical-watchdog',
+  'weekly-review',
+  'planning-suggestion',
+] as const satisfies readonly AutomationWorkflowKey[]);
 
 export type N8nTriggerInput = {
   runKey: string;
@@ -95,7 +102,7 @@ export function createN8nClient(
 ): AutomationOrchestratorClient {
   return {
     async trigger(input) {
-      if (!(AUTOMATION_WORKFLOW_KEYS as readonly string[]).includes(input.workflowKey))
+      if (!(N8N_MANUAL_WORKFLOW_KEYS as readonly string[]).includes(input.workflowKey))
         throw new AutomationOrchestratorError(null, false, 'orchestrator-rejected');
       const requestKey = `request_${randomBytes(18).toString('base64url')}`;
       const controller = new AbortController();

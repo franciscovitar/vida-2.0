@@ -32,9 +32,18 @@ Tres fallos consecutivos abren el circuito durante 15 minutos. Después se admit
 half-open; un resultado exitoso vuelve a `closed`. La pausa visual solo modifica el control cifrado
 del Bloque 5 y no toca proveedores ni configuración externa.
 
-El inicio manual Web usa esa operación y después despacha una única vez a n8n; solo los fallos de
-ese despacho aplican sus retries acotados sobre el mismo run. El inicio schedule usa la misma
-operación y nunca llama a `n8n-client`, evitando recursión. No existe código para aprobar, rechazar,
+El inicio manual Web usa esa operación y despacha al workflow n8n `Vida 2.0 · Manual ingress`. Sus
+cuatro Webhooks POST fijos autentican `x-vida-automations-secret`, validan el DTO exacto y fijan
+workflow, principal, runner y operaciones sin aceptar routing desde el body. Approval Digest queda
+fuera porque tiene dos principales. El ACK estricto se envía antes de invocar al runner y conserva
+el `requestKey` recibido.
+
+Los fallos de dispatch aplican retries acotados sobre el mismo run. Como una pérdida de ACK no
+permite saber si la primera entrega ya cruzó el Webhook, el ingress aplica la solución mínima
+fail-closed: solo `attempt=1` con `trigger=manual` llega al runner; `attempt=2|3` con `trigger=retry`
+se confirma sin redispatch. Esto prioriza no duplicar efectos —en especial
+`task.create.propose`—; si la primera entrega nunca llegó, el run expira sin efecto. El inicio
+schedule nunca llama a `n8n-client`, evitando recursión. No existe código para aprobar, rechazar,
 ejecutar o hacer rollback. El workflow de planificación puede terminar con una única referencia
 opaca a una propuesta pendiente; cualquier decisión sigue siendo Web.
 
@@ -76,8 +85,12 @@ arquitecturas. Fuera del MVP quedan Production, deploy, alta/edición de n8n o U
 directo a proveedores, Gmail, Drive, Journaling, mensajes, compras, eliminaciones y cualquier
 aprobación automática.
 
-Los JSON de `automations/n8n` son seis unidades ejecutables inactivas para cinco contratos lógicos.
-Los dos digest son unidades separadas. Cada una define schedule → runner HMAC del principal →
-schedule ingress → runKey → operaciones contratadas → DTO terminal/error → callback. Readiness
-permanece pendiente hasta que Work vincule y pruebe seis runners con credencial única, el callback y
-las variables de instancia. Esa preparación externa no forma parte de este commit.
+Los JSON de `automations/n8n` son seis unidades programadas ejecutables inactivas para cinco
+contratos lógicos y un ingress manual inactivo. Los dos digest son unidades programadas separadas.
+Las unidades schedule definen schedule → runner HMAC del principal → schedule ingress → runKey →
+operaciones contratadas → DTO terminal/error → callback. El ingress manual define cuatro Webhooks
+fijos → ACK temprano → gate de primera entrega → runner fijo → DTO terminal/error → callback. Los
+seis runners privados siguen siendo externos y aislados por principal. Readiness permanece
+pendiente hasta que Work vincule y pruebe los siete exports, los seis runners, la credencial Header
+Auth compartida por contrato y las variables de instancia. Esa preparación externa no forma parte
+de este cambio.

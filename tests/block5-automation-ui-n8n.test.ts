@@ -2,15 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
+import { runInNewContext } from 'node:vm';
 
 import { getAutomationWorkflowContract } from '@/lib/automations/contracts';
 import { getAutomationsDashboardData, nextAutomationRun } from '@/lib/automations/dashboard';
+import { N8N_MANUAL_WORKFLOW_KEYS } from '@/lib/automations/n8n-client';
 import { createMemoryAutomationStateStore } from '@/lib/automations/store';
 import type { AutomationWorkflowKey } from '@/types/automations';
 
 type N8nTemplate = {
   active: boolean;
-  nodes: Array<{ name: string; type: string; parameters: Record<string, unknown> }>;
+  nodes: N8nNode[];
   connections: Record<string, unknown>;
   settings: { timezone: string };
   meta: {
@@ -31,11 +33,50 @@ type N8nTemplate = {
   };
 };
 
+type N8nNode = {
+  name: string;
+  type: string;
+  parameters: Record<string, unknown>;
+};
+
+type ManualIngressTemplate = {
+  name: string;
+  active: boolean;
+  nodes: N8nNode[];
+  connections: Record<string, unknown>;
+  meta: {
+    contractVersion: string;
+    role: string;
+    webhookPaths: string[];
+    authentication: { type: string; headerName: string; valueContract: string };
+    mappings: Record<
+      string,
+      { principalKey: string; runnerVariable: string; operations: string[] }
+    >;
+    runnerContract: string;
+    callbackPath: string;
+    retryPolicy: string;
+    provisioningState: string;
+  };
+};
+
+type N8nCodeItem = { json: Record<string, unknown> };
+
+function runN8nCode(source: string, json: unknown): N8nCodeItem[] {
+  const execute = runInNewContext(`(($json) => { ${source} })`) as (
+    value: unknown,
+  ) => N8nCodeItem[];
+  return execute(json);
+}
+
 test('block5 n8n: hay seis unidades inactivas para cinco contratos y dos digest aislados', () => {
   const directory = path.join(process.cwd(), 'automations/n8n');
-  const files = readdirSync(directory)
+  const allFiles = readdirSync(directory)
     .filter((file) => file.endsWith('.json'))
     .sort();
+  assert.equal(allFiles.length, 7);
+  assert.equal(allFiles.includes('manual-ingress.json'), true);
+  const files = allFiles.filter((file) => file !== 'manual-ingress.json');
   assert.equal(files.length, 6);
   assert.deepEqual(
     files.filter((file) => file.startsWith('approval-digest-')),
@@ -50,12 +91,16 @@ test('block5 n8n: hay seis unidades inactivas para cinco contratos y dos digest 
   };
   const logicalContracts = new Set<AutomationWorkflowKey>();
   const principals = new Set<string>();
+  const runnerVariables = new Set<string>();
   for (const file of files) {
     const raw = readFileSync(path.join(directory, file), 'utf8');
     const template = JSON.parse(raw) as N8nTemplate;
     const contract = getAutomationWorkflowContract(template.meta.workflowKey);
     logicalContracts.add(template.meta.workflowKey);
     principals.add(template.meta.principalKey);
+    const runnerVariable = raw.match(/VIDA2_[A-Z_]+_RUNNER_WORKFLOW_ID/g) ?? [];
+    assert.equal(new Set(runnerVariable).size, 1, file);
+    runnerVariables.add(runnerVariable[0]!);
     assert.equal(template.active, false, file);
     assert.equal(template.settings.timezone, contract.schedule.timezone, file);
     assert.deepEqual(
@@ -132,6 +177,161 @@ test('block5 n8n: hay seis unidades inactivas para cinco contratos y dos digest 
   }
   assert.equal(logicalContracts.size, 5);
   assert.equal(principals.size, 6);
+  assert.equal(runnerVariables.size, 6);
+});
+
+test('block5 n8n: ingress manual fijo autentica, valida, responde temprano y no redispatcha retries', () => {
+  const file = path.join(process.cwd(), 'automations/n8n/manual-ingress.json');
+  const raw = readFileSync(file, 'utf8');
+  const template = JSON.parse(raw) as ManualIngressTemplate;
+  const supported = [
+    'daily-briefing',
+    'technical-watchdog',
+    'weekly-review',
+    'planning-suggestion',
+  ] as const;
+  const paths = supported.map((workflowKey) => `vida2/automations/${workflowKey}`);
+
+  assert.deepEqual(N8N_MANUAL_WORKFLOW_KEYS, supported);
+  assert.equal(template.name, 'Vida 2.0 · Manual ingress');
+  assert.equal(template.active, false);
+  assert.equal(template.meta.role, 'manual-ingress');
+  assert.equal(template.meta.contractVersion, 'vida2-automations-v1');
+  assert.deepEqual(template.meta.webhookPaths, paths);
+  assert.deepEqual(Object.keys(template.meta.mappings).sort(), [...supported].sort());
+  assert.deepEqual(template.meta.authentication, {
+    type: 'httpHeaderAuth',
+    headerName: 'x-vida-automations-secret',
+    valueContract: 'AUTOMATIONS_N8N_WEBHOOK_SECRET',
+  });
+  assert.equal(template.meta.runnerContract, 'vida2-n8n-principal-runner-v1');
+  assert.equal(template.meta.callbackPath, '/api/automations/v1/runs');
+  assert.equal(template.meta.retryPolicy, 'acknowledge-valid-retry-without-runner-redispatch');
+  assert.equal(template.meta.provisioningState, 'credential-binding-required');
+
+  const webhooks = template.nodes.filter((node) => node.type === 'n8n-nodes-base.webhook');
+  assert.equal(webhooks.length, 4);
+  assert.deepEqual(webhooks.map((node) => node.parameters.path).sort(), [...paths].sort());
+  for (const webhook of webhooks) {
+    assert.equal(webhook.parameters.httpMethod, 'POST');
+    assert.equal(webhook.parameters.authentication, 'headerAuth');
+    assert.equal(webhook.parameters.responseMode, 'responseNode');
+  }
+  assert.equal(
+    template.nodes.some((node) => /schedule|poll|interval|cron/i.test(node.type)),
+    false,
+  );
+  assert.equal(raw.includes('approval-digest'), false);
+
+  const runnerVariables = new Set<string>();
+  const nextNode = (name: string): string | undefined => {
+    const connection = template.connections[name] as
+      { main?: Array<Array<{ node: string }>> } | undefined;
+    return connection?.main?.[0]?.[0]?.node;
+  };
+  for (const workflowKey of supported) {
+    const mapping = template.meta.mappings[workflowKey]!;
+    const contract = getAutomationWorkflowContract(workflowKey);
+    assert.equal(mapping.principalKey, workflowKey);
+    assert.deepEqual(mapping.operations, [...contract.allowedReads, ...contract.allowedProposals]);
+    runnerVariables.add(mapping.runnerVariable);
+
+    const validator = template.nodes.find((node) => node.name === `Validate ${workflowKey}`)!;
+    const respond = template.nodes.find((node) => node.name === `Respond ${workflowKey}`)!;
+    const gate = template.nodes.find((node) => node.name === `Gate ${workflowKey} first delivery`)!;
+    const execute = template.nodes.find((node) => node.name === `Execute ${workflowKey} runner`)!;
+    const callback = template.nodes.find((node) => node.name === `Callback ${workflowKey}`)!;
+    assert.equal(nextNode(`Webhook ${workflowKey}`), `Validate ${workflowKey}`);
+    assert.equal(nextNode(`Validate ${workflowKey}`), `Respond ${workflowKey}`);
+    assert.equal(nextNode(`Respond ${workflowKey}`), `Gate ${workflowKey} first delivery`);
+    assert.equal(nextNode(`Gate ${workflowKey} first delivery`), `Execute ${workflowKey} runner`);
+    assert.equal(nextNode(`Execute ${workflowKey} runner`), `Build ${workflowKey} callback`);
+    assert.equal(nextNode(`Build ${workflowKey} callback`), `Callback ${workflowKey}`);
+    const validatorCode = String(validator.parameters.jsCode);
+    const gateCode = String(gate.parameters.jsCode);
+    const validBody = {
+      runKey: 'run_abcdefghijklmnopqrstuvwx',
+      workflowKey,
+      principalKey: mapping.principalKey,
+      idempotencyKey: 'manual:123e4567-e89b-42d3-a456-426614174000',
+      requestKey: 'request_abcdefghijklmnopqrstuvwx',
+      attempt: 1,
+      trigger: 'manual',
+      contractVersion: 'vida2-automations-v1',
+    };
+    const initial = runN8nCode(validatorCode, { body: validBody });
+    assert.equal(initial[0]?.json.shouldExecute, true);
+    assert.equal(initial[0]?.json.workflowKey, workflowKey);
+    assert.equal(initial[0]?.json.principalKey, mapping.principalKey);
+    assert.equal(initial[0]?.json.requestKey, validBody.requestKey);
+    assert.equal(runN8nCode(gateCode, initial[0]!.json).length, 1);
+
+    const retry = runN8nCode(validatorCode, {
+      body: {
+        ...validBody,
+        requestKey: 'request_zyxwvutsrqponmlkjihgfedc',
+        attempt: 2,
+        trigger: 'retry',
+      },
+    });
+    assert.equal(retry[0]?.json.shouldExecute, false);
+    assert.equal(runN8nCode(gateCode, retry[0]!.json).length, 0);
+    assert.throws(() =>
+      runN8nCode(validatorCode, {
+        body: { ...validBody, workflowKey: 'approval-digest' },
+      }),
+    );
+    assert.throws(() =>
+      runN8nCode(validatorCode, {
+        body: { ...validBody, principalKey: 'approval-digest-steward' },
+      }),
+    );
+    assert.throws(() =>
+      runN8nCode(validatorCode, {
+        body: { ...validBody, unexpected: true },
+      }),
+    );
+    assert.throws(() =>
+      runN8nCode(validatorCode, {
+        body: { ...validBody, attempt: 2, trigger: 'manual' },
+      }),
+    );
+
+    assert.equal(respond.type, 'n8n-nodes-base.respondToWebhook');
+    assert.equal(respond.parameters.respondWith, 'json');
+    assert.equal(
+      respond.parameters.responseBody,
+      '={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}',
+    );
+    const inputs = execute.parameters.workflowInputs as {
+      value: { action: string; runKey: string; workflowKey: string; operations: string };
+    };
+    assert.equal(execute.type, 'n8n-nodes-base.executeWorkflow');
+    assert.equal(inputs.value.action, 'execute');
+    assert.equal(inputs.value.runKey, '={{ $json.runKey }}');
+    assert.equal(inputs.value.workflowKey, workflowKey);
+    assert.equal(inputs.value.operations, mapping.operations.join(','));
+    assert.equal(String(execute.parameters.workflowId).includes(mapping.runnerVariable), true);
+    assert.equal(callback.type, 'n8n-nodes-base.httpRequest');
+    assert.equal(callback.parameters.method, 'POST');
+    assert.equal(String(callback.parameters.url).includes('/api/automations/v1/runs'), true);
+  }
+  assert.equal(runnerVariables.size, 4);
+  assert.equal(
+    template.nodes.some((node) =>
+      /notion|googleSheets|googleCalendar|gmail|drive/i.test(node.type),
+    ),
+    false,
+  );
+  assert.equal('credentials' in template, false);
+  assert.equal(raw.includes('$env'), false);
+  assert.equal(/https?:\/\//i.test(raw), false);
+  assert.equal(/BEGIN PRIVATE|Bearer\s+[A-Za-z0-9]|@[a-z0-9.-]+\.[a-z]{2,}/i.test(raw), false);
+  assert.equal(
+    /proposal\.approve|proposal\.reject|action\.rollback|content\.delete|message\.send/i.test(raw),
+    false,
+  );
+  assert.equal((raw.match(/task\.create\.propose/g) ?? []).length, 2);
 });
 
 test('block5 dashboard: cinco estados, schedules y manual run server-resolved', async () => {

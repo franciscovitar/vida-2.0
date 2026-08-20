@@ -1,9 +1,10 @@
 # Unidades n8n del Bloque 5
 
-Hay cinco contratos lógicos y seis unidades programadas inactivas (`active: false`).
+Hay cinco contratos lógicos, seis unidades programadas inactivas (`active: false`) y un ingress
+manual también inactivo. Además existen seis runners privados externos, uno por principal.
 `approval-digest` se divide en Mayordomo y Salud para que cada ejecución conserve su credencial,
 rate limit, replay, idempotencia, lease y ownership. El JSON lógico anterior no se conserva para
-evitar una séptima unidad ambigua.
+evitar una unidad programada ambigua.
 
 ## Frontera programada
 
@@ -14,7 +15,22 @@ las lecturas o la única propuesta permitida. El cierre se envía a
 `POST /api/automations/v1/runs`. Un error posterior a la creación del run produce callback
 `failed`; si Vida nunca devolvió una `runKey`, no se fabrica callback.
 
-El trigger manual Web no usa esta frontera: crea el run en Vida y despacha una sola vez a n8n.
+## Frontera manual
+
+`manual-ingress.json` expone exclusivamente cuatro Webhooks POST fijos: briefing diario, guardián
+técnico, revisión semanal y sugerencia de planificación. Approval Digest no tiene ingreso manual
+porque sus dos principales no pueden resolverse desde la Web sin ambigüedad. Cada Webhook usa
+`Header Auth`; Work debe vincular una credencial cuyo nombre de header sea
+`x-vida-automations-secret` y cuyo valor sea el mismo contrato server-only de
+`AUTOMATIONS_N8N_WEBHOOK_SECRET`. El export no contiene la credencial ni su valor.
+
+Cada rama valida las ocho claves exactas del DTO de dispatch, liga workflow, principal, variable de
+runner y operaciones en el propio export, responde inmediatamente
+`{ ok: true, accepted: true, requestKey }` y recién después invoca al runner privado. Solo la primera
+entrega (`attempt=1`, `trigger=manual`) cruza el gate de ejecución. Un retry válido recibe el ACK
+estricto pero termina antes del runner: si se perdió el primer ACK no se duplican lecturas ni
+`task.create.propose`; si la primera entrega nunca llegó, la ejecución expira sin efectos en lugar
+de intentar una operación ambigua.
 
 ## Contrato del runner por principal
 
@@ -41,15 +57,18 @@ header secreto no está en el export.
 
 ## Checklist de Work antes de provisionar
 
-1. Importar las seis unidades y mantenerlas inactivas.
+1. Importar las seis unidades programadas y el ingress manual; mantener los siete exports
+   inactivos hasta completar todos los bindings y pruebas.
 2. Crear o verificar seis runners, cada uno unido a una única credencial HMAC y a la allowlist del
    principal correspondiente.
-3. Asignar la variable del runner y la variable de base URL a cada unidad, y vincular al callback su
-   credencial `HTTP Header Auth` server-side.
+3. Asignar la variable del runner y la variable de base URL a cada unidad. Vincular la credencial
+   `HTTP Header Auth` server-side tanto a los cuatro Webhooks manuales como a los callbacks, siempre
+   con el contrato `x-vida-automations-secret` y sin exportar su valor.
 4. Verificar cron y zona `America/Argentina/Cordoba`, body exacto, schedule ingress primero,
    extracción de `runKey`, reads/proposal, DTO terminal y callback de error.
 5. Probar retries: solo 429/500/502/503/504, máximo tres, autenticación nueva por intento y misma
-   ocurrencia. El callback puede reintentar el mismo request ID porque su idempotencia es propia.
+   ocurrencia. En manual, probar que un retry válido responde pero no vuelve a invocar al runner. El
+   callback puede reintentar el mismo request ID porque su idempotencia es propia.
 6. Confirmar que no existen nodos directos de Notion, Sheets, Calendar, Gmail, Drive, Journaling ni
    proveedores; planning solo admite `task.create.propose` y no hay approve/reject/execute/rollback.
 7. Recién después habilitar la señal de seis unidades provisionadas. Importar JSON o asignar una
