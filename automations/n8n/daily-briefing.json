@@ -29,7 +29,7 @@
       "typeVersion": 1.2,
       "position": [500, 0],
       "parameters": {
-        "workflowId": "={{ $vars.VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID }}",
+        "workflowId": "={{ $env.VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID }}",
         "mode": "each",
         "waitForSubWorkflow": true,
         "workflowInputs": {
@@ -64,7 +64,7 @@
       "position": [1020, 0],
       "onError": "continueRegularOutput",
       "parameters": {
-        "workflowId": "={{ $vars.VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID }}",
+        "workflowId": "={{ $env.VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID }}",
         "mode": "each",
         "waitForSubWorkflow": true,
         "workflowInputs": {
@@ -98,7 +98,7 @@
       "waitBetweenTries": 5000,
       "parameters": {
         "method": "POST",
-        "url": "={{ $vars.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,

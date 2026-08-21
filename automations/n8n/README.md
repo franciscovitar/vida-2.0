@@ -24,8 +24,8 @@ porque sus dos principales no pueden resolverse desde la Web sin ambigüedad. Ca
 `x-vida-automations-secret` y cuyo valor sea el mismo contrato server-only de
 `AUTOMATIONS_N8N_WEBHOOK_SECRET`. El export no contiene la credencial ni su valor.
 
-Cada rama valida las ocho claves exactas del DTO de dispatch, liga workflow, principal, variable de
-runner y operaciones en el propio export, responde inmediatamente
+Cada rama valida las ocho claves exactas del DTO de dispatch, liga workflow, principal, referencia
+de entorno del runner y operaciones en el propio export, responde inmediatamente
 `{ ok: true, accepted: true, requestKey }` y recién después invoca al runner privado. Solo la primera
 entrega (`attempt=1`, `trigger=manual`) cruza el gate de ejecución. Un retry válido recibe el ACK
 estricto pero termina antes del runner: si se perdió el primer ACK no se duplican lecturas ni
@@ -34,7 +34,8 @@ de intentar una operación ambigua.
 
 ## Contrato del runner por principal
 
-Cada manifest referencia una variable `VIDA2_*_RUNNER_WORKFLOW_ID`. Work debe vincularla a un
+Cada manifest referencia una variable de proceso `$env.VIDA2_*_RUNNER_WORKFLOW_ID`. Work debe
+inyectarla en el runtime self-hosted y vincularla a un
 subworkflow runner exclusivo de ese principal, con una sola credencial HMAC. No se permite un
 runner con las seis credenciales ni elegir principal desde datos de ejecución.
 
@@ -49,11 +50,17 @@ El runner implementa `vida2-n8n-principal-runner-v1` y dos acciones cerradas:
   devuelve `{ runKey, outcome }`. `outcome` admite solo `ok`, `proposalKey` opaca cuando corresponda
   y artefacto sanitizado; nunca respuestas crudas, IDs de proveedor ni instrucciones.
 
-Los runners deben usar credenciales n8n para HMAC. Los Code nodes de estos exports no leen `$env`,
-secretos ni key IDs; por eso son compatibles con planes Cloud que no exponen variables de entorno
-al sandbox. `VIDA2_CONTROLLED_API_BASE_URL` es una variable de instancia para el destino, no un
-secreto. El callback usa una credencial `HTTP Header Auth` asignada al nodo después de importar; el
-header secreto no está en el export.
+Los runners deben usar credenciales n8n para HMAC. Las expresiones de estos exports solo leen de
+`$env` los IDs de runners y `VIDA2_CONTROLLED_API_BASE_URL`, que son configuración no secreta. Los
+secretos y key IDs permanecen en Credentials cifradas de n8n y nunca se exponen mediante `$env` ni
+se incluyen en el export. El callback usa una credencial `HTTP Header Auth` asignada al nodo
+después de importar; el header secreto no está en el export.
+
+La instancia dedicada self-hosted Community 2.32.7 debe arrancar con
+`N8N_BLOCK_ENV_ACCESS_IN_NODE=false` para permitir estas expresiones. Este override se limita al
+runtime B5; no habilita acceso a secretos porque el contrato solo admite las variables
+`VIDA2_*_RUNNER_WORKFLOW_ID` y `VIDA2_CONTROLLED_API_BASE_URL`, y no se debilita ningún otro control
+de seguridad.
 
 ## Checklist de Work antes de provisionar
 
@@ -61,7 +68,7 @@ header secreto no está en el export.
    inactivos hasta completar todos los bindings y pruebas.
 2. Crear o verificar seis runners, cada uno unido a una única credencial HMAC y a la allowlist del
    principal correspondiente.
-3. Asignar la variable del runner y la variable de base URL a cada unidad. Vincular la credencial
+3. Inyectar en el proceso los IDs de runner y la base URL aprobados. Vincular la credencial
    `HTTP Header Auth` server-side tanto a los cuatro Webhooks manuales como a los callbacks, siempre
    con el contrato `x-vida-automations-secret` y sin exportar su valor.
 4. Verificar cron y zona `America/Argentina/Cordoba`, body exacto, schedule ingress primero,

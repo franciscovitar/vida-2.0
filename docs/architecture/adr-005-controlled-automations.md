@@ -89,6 +89,9 @@ comparten credencial, rate limit, replay ni ownership.
   server-side y devuelve una `runKey` opaca. El callback sigue rechazando runs inexistentes.
 - Los seis exports n8n inactivos representan cinco contratos y seis principales. Cada runner se
   vincula a una sola credencial; ambos digest tienen manifests separados.
+- Los exports self-hosted Community usan `$env` solo para IDs de runner y la URL base no secreta.
+  El runtime B5 fija `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`; los secretos siguen exclusivamente en
+  Credentials cifradas y no se debilitan los demás controles.
 - Production requiere una autorización explícita adicional; habilitar Preview no la hereda.
 
 ## Fuera de alcance

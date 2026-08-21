@@ -61,12 +61,29 @@ cinco contratos y un JSON de ingress manual inactivo: Steward y Salud tienen uni
 separadas. Antes de provisionar, Work debe vincular cada unidad a su runner exclusivo y probar
 schedule ingress, manual ingress, operaciones y callback.
 
-En n8n, crear sin valores una variable `VIDA2_CONTROLLED_API_BASE_URL`, una credencial server-only
-`HTTP Header Auth` con header `x-vida-automations-secret` para los cuatro Webhooks manuales y los
-callbacks, y seis runners con credenciales HMAC separadas (una por principal). El valor de Header
-Auth debe corresponder a `AUTOMATIONS_N8N_WEBHOOK_SECRET` y nunca quedar en el export. Cada unidad
-recibe solo el ID variable de su runner. Los nombres/IDs internos quedan en el inventario privado de
-Work, no en los exports. No reutilizar runners ni credenciales HMAC entre principales.
+La instancia self-hosted Community recibe como variables de proceso no secretas
+`VIDA2_CONTROLLED_API_BASE_URL` y los seis IDs `VIDA2_*_RUNNER_WORKFLOW_ID`. Los exports las leen
+exclusivamente mediante `$env`; no se crean Custom Variables pagas. El runtime dedicado B5 debe
+arrancar con `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`. No modificar otros controles de seguridad ni
+inyectar secretos en el entorno.
+
+Crear una credencial server-only `HTTP Header Auth` con header
+`x-vida-automations-secret` para los cuatro Webhooks manuales y los callbacks, y seis runners con
+credenciales HMAC separadas (una por principal). El valor de Header Auth debe corresponder a
+`AUTOMATIONS_N8N_WEBHOOK_SECRET` y nunca quedar en el export o en `$env`. Cada unidad recibe solo el
+ID de su runner por configuración de proceso. Los nombres/IDs internos quedan en el inventario
+privado de Work, no en los exports. No reutilizar runners ni credenciales HMAC entre principales.
+
+Contrato exacto de entorno local B5, siempre sin valores:
+
+- `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`;
+- `VIDA2_CONTROLLED_API_BASE_URL`;
+- `VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID`;
+- `VIDA2_TECHNICAL_WATCHDOG_RUNNER_WORKFLOW_ID`;
+- `VIDA2_WEEKLY_REVIEW_RUNNER_WORKFLOW_ID`;
+- `VIDA2_APPROVAL_DIGEST_STEWARD_RUNNER_WORKFLOW_ID`;
+- `VIDA2_APPROVAL_DIGEST_HEALTH_RUNNER_WORKFLOW_ID`;
+- `VIDA2_PLANNING_SUGGESTION_RUNNER_WORKFLOW_ID`.
 
 `Vida 2.0 · Manual ingress` expone solo los paths `vida2/automations/daily-briefing`,
 `vida2/automations/technical-watchdog`, `vida2/automations/weekly-review` y

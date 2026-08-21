@@ -62,6 +62,37 @@ type ManualIngressTemplate = {
 
 type N8nCodeItem = { json: Record<string, unknown> };
 
+const N8N_ENV_REFERENCE = /\$env\.([A-Z][A-Z0-9_]*)/g;
+
+function assertCommunityEnvContract(
+  raw: string,
+  expectedNames: readonly string[],
+  label: string,
+): void {
+  assert.equal(raw.includes('$vars.'), false, `${label}: paid n8n variables are forbidden`);
+  const actualNames = [...raw.matchAll(N8N_ENV_REFERENCE)].map((match) => match[1]!);
+  assert.equal(
+    (raw.match(/\$env\b/g) ?? []).length,
+    actualNames.length,
+    `${label}: dynamic or non-canonical environment access is forbidden`,
+  );
+  assert.deepEqual(
+    [...new Set(actualNames)].sort(),
+    [...expectedNames].sort(),
+    `${label}: only approved VIDA2 environment bindings are allowed`,
+  );
+  assert.equal(
+    actualNames.every((name) => name.startsWith('VIDA2_')),
+    true,
+    `${label}: environment bindings must stay inside the VIDA2 namespace`,
+  );
+  assert.equal(
+    actualNames.some((name) => /SECRET|TOKEN|PASSWORD|PRIVATE|HMAC|KEY_ID/.test(name)),
+    false,
+    `${label}: authentication material must remain in encrypted n8n Credentials`,
+  );
+}
+
 function runN8nCode(source: string, json: unknown): N8nCodeItem[] {
   const execute = runInNewContext(`(($json) => { ${source} })`) as (
     value: unknown,
@@ -160,7 +191,7 @@ test('block5 n8n: hay seis unidades inactivas para cinco contratos y dos digest 
       file,
     );
     assert.equal('credentials' in template, false, file);
-    assert.equal(raw.includes('$env'), false, file);
+    assertCommunityEnvContract(raw, [runnerVariable[0]!, 'VIDA2_CONTROLLED_API_BASE_URL'], file);
     assert.equal(/https?:\/\//i.test(raw), false, file);
     assert.equal(
       /BEGIN PRIVATE|Bearer\s+[A-Za-z0-9]|@[a-z0-9.-]+\.[a-z]{2,}/i.test(raw),
@@ -324,7 +355,11 @@ test('block5 n8n: ingress manual fijo autentica, valida, responde temprano y no 
     false,
   );
   assert.equal('credentials' in template, false);
-  assert.equal(raw.includes('$env'), false);
+  assertCommunityEnvContract(
+    raw,
+    [...runnerVariables, 'VIDA2_CONTROLLED_API_BASE_URL'],
+    'manual-ingress.json',
+  );
   assert.equal(/https?:\/\//i.test(raw), false);
   assert.equal(/BEGIN PRIVATE|Bearer\s+[A-Za-z0-9]|@[a-z0-9.-]+\.[a-z]{2,}/i.test(raw), false);
   assert.equal(

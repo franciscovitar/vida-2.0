@@ -13,8 +13,10 @@ búsquedas globales, leer Journaling, usar datos productivos o ampliar permisos.
 3. **Upstash dedicado.** Crear/seleccionar el recurso separado, validar plan/costo/cuotas y cargar
    namespace y AES-256-GCM sin reutilizar el Bloque 4.
 4. **n8n.** Importar las seis unidades programadas y el ingress manual, todos inactivos. Vincular
-   cada runner HMAC exclusivo y la credencial Header Auth de Webhooks/callback, validar conexiones,
-   pruning y backup. Mantener schedules e ingress sin publicar.
+   los IDs de runners y base URL mediante el entorno no secreto del proceso, cada runner HMAC
+   exclusivo y la credencial Header Auth de Webhooks/callback. Validar
+   `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`, conexiones, pruning y backup. Mantener schedules e ingress
+   sin publicar.
 5. **Variables Preview.** Cargar las compuertas apagadas, store, orquestador, callback y seis pares
    HMAC desde el manifest; revisar pares parciales/duplicados.
 6. **Deploy exacto.** Desplegar únicamente el SHA de cierre certificado y registrar ese SHA.

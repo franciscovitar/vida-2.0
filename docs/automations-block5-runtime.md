@@ -92,5 +92,8 @@ operaciones contratadas → DTO terminal/error → callback. El ingress manual d
 fijos → ACK temprano → gate de primera entrega → runner fijo → DTO terminal/error → callback. Los
 seis runners privados siguen siendo externos y aislados por principal. Readiness permanece
 pendiente hasta que Work vincule y pruebe los siete exports, los seis runners, la credencial Header
-Auth compartida por contrato y las variables de instancia. Esa preparación externa no forma parte
-de este cambio.
+Auth compartida por contrato y el entorno no secreto del proceso. Los exports Community leen
+únicamente `$env.VIDA2_*_RUNNER_WORKFLOW_ID` y `$env.VIDA2_CONTROLLED_API_BASE_URL`; HMAC, Header
+Auth y callback permanecen en Credentials cifradas. El runtime dedicado B5 requiere
+`N8N_BLOCK_ENV_ACCESS_IN_NODE=false` sin relajar ningún otro control. Esa preparación externa no
+forma parte de este cambio.
