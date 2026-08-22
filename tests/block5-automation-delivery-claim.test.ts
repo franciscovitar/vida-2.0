@@ -149,7 +149,10 @@ test('block5 delivery claim: auth, run identity and exact DTO fail closed', asyn
     headers: wrongRun.headers,
     body: JSON.stringify(body),
   });
-  assert.equal((await handleManualDeliveryClaimRequest(mismatch, { env: BASE_ENV, store })).status, 409);
+  assert.equal(
+    (await handleManualDeliveryClaimRequest(mismatch, { env: BASE_ENV, store })).status,
+    409,
+  );
 
   const invalid = claimRequest({ requestKey, attempt: 1, trigger: 'manual' });
   const invalidBody = (await invalid.json()) as Record<string, unknown>;
@@ -159,5 +162,8 @@ test('block5 delivery claim: auth, run identity and exact DTO fail closed', asyn
     headers: invalid.headers,
     body: JSON.stringify(invalidBody),
   });
-  assert.equal((await handleManualDeliveryClaimRequest(extraKey, { env: BASE_ENV, store })).status, 400);
+  assert.equal(
+    (await handleManualDeliveryClaimRequest(extraKey, { env: BASE_ENV, store })).status,
+    400,
+  );
 });
