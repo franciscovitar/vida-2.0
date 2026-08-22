@@ -54,6 +54,7 @@ type ManualIngressTemplate = {
       { principalKey: string; runnerVariable: string; operations: string[] }
     >;
     runnerContract: string;
+    deliveryClaimPath: string;
     callbackPath: string;
     retryPolicy: string;
     provisioningState: string;
@@ -211,7 +212,7 @@ test('block5 n8n: hay seis unidades inactivas para cinco contratos y dos digest 
   assert.equal(runnerVariables.size, 6);
 });
 
-test('block5 n8n: ingress manual fijo autentica, valida, responde temprano y no redispatcha retries', () => {
+test('block5 n8n: ingress manual reclama la primera entrega efectiva antes del ACK y no redispatcha retries posteriores', () => {
   const file = path.join(process.cwd(), 'automations/n8n/manual-ingress.json');
   const raw = readFileSync(file, 'utf8');
   const template = JSON.parse(raw) as ManualIngressTemplate;
@@ -236,8 +237,9 @@ test('block5 n8n: ingress manual fijo autentica, valida, responde temprano y no 
     valueContract: 'AUTOMATIONS_N8N_WEBHOOK_SECRET',
   });
   assert.equal(template.meta.runnerContract, 'vida2-n8n-principal-runner-v1');
+  assert.equal(template.meta.deliveryClaimPath, '/api/automations/v1/deliveries/claim');
   assert.equal(template.meta.callbackPath, '/api/automations/v1/runs');
-  assert.equal(template.meta.retryPolicy, 'acknowledge-valid-retry-without-runner-redispatch');
+  assert.equal(template.meta.retryPolicy, 'claim-first-effective-delivery-before-runner');
   assert.equal(template.meta.provisioningState, 'credential-binding-required');
 
   const webhooks = template.nodes.filter((node) => node.type === 'n8n-nodes-base.webhook');
@@ -268,12 +270,14 @@ test('block5 n8n: ingress manual fijo autentica, valida, responde temprano y no 
     runnerVariables.add(mapping.runnerVariable);
 
     const validator = template.nodes.find((node) => node.name === `Validate ${workflowKey}`)!;
+    const claim = template.nodes.find((node) => node.name === `Claim ${workflowKey} delivery`)!;
     const respond = template.nodes.find((node) => node.name === `Respond ${workflowKey}`)!;
     const gate = template.nodes.find((node) => node.name === `Gate ${workflowKey} first delivery`)!;
     const execute = template.nodes.find((node) => node.name === `Execute ${workflowKey} runner`)!;
     const callback = template.nodes.find((node) => node.name === `Callback ${workflowKey}`)!;
     assert.equal(nextNode(`Webhook ${workflowKey}`), `Validate ${workflowKey}`);
-    assert.equal(nextNode(`Validate ${workflowKey}`), `Respond ${workflowKey}`);
+    assert.equal(nextNode(`Validate ${workflowKey}`), `Claim ${workflowKey} delivery`);
+    assert.equal(nextNode(`Claim ${workflowKey} delivery`), `Respond ${workflowKey}`);
     assert.equal(nextNode(`Respond ${workflowKey}`), `Gate ${workflowKey} first delivery`);
     assert.equal(nextNode(`Gate ${workflowKey} first delivery`), `Execute ${workflowKey} runner`);
     assert.equal(nextNode(`Execute ${workflowKey} runner`), `Build ${workflowKey} callback`);
@@ -328,6 +332,13 @@ test('block5 n8n: ingress manual fijo autentica, valida, responde temprano y no 
       }),
     );
 
+    assert.equal(claim.type, 'n8n-nodes-base.httpRequest');
+    assert.equal(claim.parameters.method, 'POST');
+    assert.equal(
+      String(claim.parameters.url).includes('/api/automations/v1/deliveries/claim'),
+      true,
+    );
+    assert.equal(String(claim.parameters.body).includes('shouldExecute'), false);
     assert.equal(respond.type, 'n8n-nodes-base.respondToWebhook');
     assert.equal(respond.parameters.respondWith, 'json');
     assert.equal(
