@@ -77,25 +77,37 @@ test('block5 delivery claim: first effective delivery executes, same transport r
     { env: BASE_ENV, store },
   );
   assert.equal(first.status, 200);
-  assert.deepEqual(await first.json(), { ok: true, execute: true, runKey: RUN_KEY });
+  assert.deepEqual(await first.json(), {
+    ok: true,
+    shouldExecute: true,
+    runKey: RUN_KEY,
+    requestKey: firstRequestKey,
+  });
 
   const sameTransportRetry = await handleManualDeliveryClaimRequest(
     claimRequest({ requestKey: firstRequestKey, attempt: 1, trigger: 'manual' }),
     { env: BASE_ENV, store },
   );
   assert.equal(sameTransportRetry.status, 200);
-  assert.deepEqual(await sameTransportRetry.json(), { ok: true, execute: true, runKey: RUN_KEY });
+  assert.deepEqual(await sameTransportRetry.json(), {
+    ok: true,
+    shouldExecute: true,
+    runKey: RUN_KEY,
+    requestKey: firstRequestKey,
+  });
 
+  const retryRequestKey = 'request_zyxwvutsrqponmlkjihgfedc';
   const laterVidaRetry = await handleManualDeliveryClaimRequest(
-    claimRequest({
-      requestKey: 'request_zyxwvutsrqponmlkjihgfedc',
-      attempt: 2,
-      trigger: 'retry',
-    }),
+    claimRequest({ requestKey: retryRequestKey, attempt: 2, trigger: 'retry' }),
     { env: BASE_ENV, store },
   );
   assert.equal(laterVidaRetry.status, 200);
-  assert.deepEqual(await laterVidaRetry.json(), { ok: true, execute: false, runKey: RUN_KEY });
+  assert.deepEqual(await laterVidaRetry.json(), {
+    ok: true,
+    shouldExecute: false,
+    runKey: RUN_KEY,
+    requestKey: retryRequestKey,
+  });
 });
 
 test('block5 delivery claim: attempt 2 can become the first effective delivery when attempt 1 never claimed', async () => {
@@ -103,16 +115,18 @@ test('block5 delivery claim: attempt 2 can become the first effective delivery w
   const run = { ...runningRun(), attempt: 2, trigger: 'retry' as const };
   await store.putRun(run, 48 * 60 * 60);
 
+  const retryRequestKey = 'request_zyxwvutsrqponmlkjihgfedc';
   const second = await handleManualDeliveryClaimRequest(
-    claimRequest({
-      requestKey: 'request_zyxwvutsrqponmlkjihgfedc',
-      attempt: 2,
-      trigger: 'retry',
-    }),
+    claimRequest({ requestKey: retryRequestKey, attempt: 2, trigger: 'retry' }),
     { env: BASE_ENV, store },
   );
   assert.equal(second.status, 200);
-  assert.deepEqual(await second.json(), { ok: true, execute: true, runKey: RUN_KEY });
+  assert.deepEqual(await second.json(), {
+    ok: true,
+    shouldExecute: true,
+    runKey: RUN_KEY,
+    requestKey: retryRequestKey,
+  });
 });
 
 test('block5 delivery claim: auth, run identity and exact DTO fail closed', async () => {
