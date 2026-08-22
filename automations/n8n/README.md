@@ -24,13 +24,19 @@ porque sus dos principales no pueden resolverse desde la Web sin ambigüedad. Ca
 `x-vida-automations-secret` y cuyo valor sea el mismo contrato server-only de
 `AUTOMATIONS_N8N_WEBHOOK_SECRET`. El export no contiene la credencial ni su valor.
 
-Cada rama valida las ocho claves exactas del DTO de dispatch, liga workflow, principal, referencia
-de entorno del runner y operaciones en el propio export, responde inmediatamente
-`{ ok: true, accepted: true, requestKey }` y recién después invoca al runner privado. Solo la primera
-entrega (`attempt=1`, `trigger=manual`) cruza el gate de ejecución. Un retry válido recibe el ACK
-estricto pero termina antes del runner: si se perdió el primer ACK no se duplican lecturas ni
-`task.create.propose`; si la primera entrega nunca llegó, la ejecución expira sin efectos en lugar
-de intentar una operación ambigua.
+Cada rama valida las ocho claves exactas del DTO de dispatch y liga workflow, principal, referencia
+de entorno del runner y operaciones en el propio export. Antes de devolver el ACK llama a
+`POST /api/automations/v1/deliveries/claim` con la misma identidad canónica. Vida registra de forma
+atómica la primera entrega efectiva de la `runKey` en el store dedicado: el primer request que logra
+reclamarla recibe `shouldExecute=true`; un retry del mismo request de claim conserva ese permiso para
+poder superar una respuesta de red perdida; un intento posterior de Vida con otro `requestKey`
+recibe `shouldExecute=false`. Recién después n8n responde
+`{ ok: true, accepted: true, requestKey }` y el gate decide si invoca al runner privado.
+
+Así, si `attempt=1` nunca llega a n8n, `attempt=2` puede convertirse en la primera entrega efectiva y
+ejecutar una vez. Si el primer intento sí reclamó la ejecución pero se perdió su ACK, los intentos
+posteriores reciben ACK sin volver a cruzar el runner. El claim usa el mismo store cifrado e
+idempotente de automatizaciones y no agrega otra base de datos ni otra credencial.
 
 ## Contrato del runner por principal
 
@@ -53,8 +59,8 @@ El runner implementa `vida2-n8n-principal-runner-v1` y dos acciones cerradas:
 Los runners deben usar credenciales n8n para HMAC. Las expresiones de estos exports solo leen de
 `$env` los IDs de runners y `VIDA2_CONTROLLED_API_BASE_URL`, que son configuración no secreta. Los
 secretos y key IDs permanecen en Credentials cifradas de n8n y nunca se exponen mediante `$env` ni
-se incluyen en el export. El callback usa una credencial `HTTP Header Auth` asignada al nodo
-después de importar; el header secreto no está en el export.
+se incluyen en el export. El ingress manual usa la misma credencial `HTTP Header Auth` en Webhooks,
+nodos de delivery claim y callbacks; el header secreto no está en el export.
 
 La instancia dedicada self-hosted Community 2.32.7 debe arrancar con
 `N8N_BLOCK_ENV_ACCESS_IN_NODE=false` para permitir estas expresiones. Este override se limita al
@@ -69,13 +75,15 @@ de seguridad.
 2. Crear o verificar seis runners, cada uno unido a una única credencial HMAC y a la allowlist del
    principal correspondiente.
 3. Inyectar en el proceso los IDs de runner y la base URL aprobados. Vincular la credencial
-   `HTTP Header Auth` server-side tanto a los cuatro Webhooks manuales como a los callbacks, siempre
-   con el contrato `x-vida-automations-secret` y sin exportar su valor.
+   `HTTP Header Auth` server-side a los cuatro Webhooks manuales, los cuatro delivery claims y los
+   cuatro callbacks, siempre con el contrato `x-vida-automations-secret` y sin exportar su valor.
 4. Verificar cron y zona `America/Argentina/Cordoba`, body exacto, schedule ingress primero,
    extracción de `runKey`, reads/proposal, DTO terminal y callback de error.
 5. Probar retries: solo 429/500/502/503/504, máximo tres, autenticación nueva por intento y misma
-   ocurrencia. En manual, probar que un retry válido responde pero no vuelve a invocar al runner. El
-   callback puede reintentar el mismo request ID porque su idempotencia es propia.
+   ocurrencia. En manual, comprobar que el primer intento que llega efectivamente puede reclamar la
+   ejecución aunque sea `attempt=2/3`, que un retry del mismo claim conserva el permiso y que un
+   request posterior de Vida responde sin volver a invocar al runner. El callback puede reintentar
+   el mismo request ID porque su idempotencia es propia.
 6. Confirmar que no existen nodos directos de Notion, Sheets, Calendar, Gmail, Drive, Journaling ni
    proveedores; planning solo admite `task.create.propose` y no hay approve/reject/execute/rollback.
 7. Recién después habilitar la señal de seis unidades provisionadas. Importar JSON o asignar una
