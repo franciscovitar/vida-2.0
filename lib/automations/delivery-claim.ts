@@ -125,14 +125,20 @@ export async function handleManualDeliveryClaimRequest(
     !isAutomationsManualRunEnabled(env) ||
     !areAutomationTemplatesProvisioned(env)
   )
-    return response(404, { ok: false, error: { code: 'disabled', message: 'Endpoint desactivado.' } });
+    return response(404, {
+      ok: false,
+      error: { code: 'disabled', message: 'Endpoint desactivado.' },
+    });
 
   const target = validateOpenClawRouteContract(
     { method: request.method, url: request.url },
     { method: 'POST', pathname: PATHNAME, body: 'json' },
   );
   if (!target.ok)
-    return response(target.status, { ok: false, error: { code: target.code, message: target.message } });
+    return response(target.status, {
+      ok: false,
+      error: { code: target.code, message: target.message },
+    });
   if (!JSON_CONTENT_TYPE_PATTERN.test(request.headers.get('content-type') ?? ''))
     return response(415, {
       ok: false,
@@ -147,10 +153,16 @@ export async function handleManualDeliveryClaimRequest(
     });
   const decoded = decodeOpenClawUtf8(bytes.bytes);
   if (!decoded.ok)
-    return response(400, { ok: false, error: { code: 'invalid-json', message: 'JSON inválido.' } });
+    return response(400, {
+      ok: false,
+      error: { code: 'invalid-json', message: 'JSON inválido.' },
+    });
   const parsed = parseOpenClawJsonStrict(decoded.text);
   if (!parsed.ok)
-    return response(400, { ok: false, error: { code: 'invalid-json', message: 'JSON inválido.' } });
+    return response(400, {
+      ok: false,
+      error: { code: 'invalid-json', message: 'JSON inválido.' },
+    });
   const dto = parseManualDeliveryClaimDto(parsed.value);
   if (!dto)
     return response(400, {
@@ -171,7 +183,10 @@ export async function handleManualDeliveryClaimRequest(
       error: { code: 'unauthorized', message: 'Autenticación inválida.' },
     });
   if (!isAutomationWorkflowEnabled(dto.workflowKey, env))
-    return response(404, { ok: false, error: { code: 'disabled', message: 'Workflow desactivado.' } });
+    return response(404, {
+      ok: false,
+      error: { code: 'disabled', message: 'Workflow desactivado.' },
+    });
 
   const store = deps.store ?? buildAutomationStateStore(env);
   if (!store)
@@ -202,8 +217,13 @@ export async function handleManualDeliveryClaimRequest(
       payloadDigest: claimDigest(dto),
       ttlSeconds: contract.retentionSeconds,
     });
-    const execute = claim.status !== 'conflict';
-    return response(200, { ok: true, execute, runKey: dto.runKey });
+    const shouldExecute = claim.status !== 'conflict';
+    return response(200, {
+      ok: true,
+      shouldExecute,
+      runKey: dto.runKey,
+      requestKey: dto.requestKey,
+    });
   } catch {
     return response(503, {
       ok: false,
