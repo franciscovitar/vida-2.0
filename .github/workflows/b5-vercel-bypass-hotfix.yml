@@ -6,6 +6,11 @@ on:
       - feature/controlled-automations-v1
     paths:
       - .github/workflows/b5-vercel-bypass-hotfix.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/b5-vercel-bypass-hotfix.yml
 
 permissions:
   contents: write
