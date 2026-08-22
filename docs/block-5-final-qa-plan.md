@@ -14,7 +14,7 @@ búsquedas globales, leer Journaling, usar datos productivos o ampliar permisos.
    namespace y AES-256-GCM sin reutilizar el Bloque 4.
 4. **n8n.** Importar las seis unidades programadas y el ingress manual, todos inactivos. Vincular
    los IDs de runners y base URL mediante el entorno no secreto del proceso, cada runner HMAC
-   exclusivo y la credencial Header Auth de Webhooks/callback. Validar
+   exclusivo y la credencial Header Auth de Webhooks, delivery claims y callbacks. Validar
    `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`, conexiones, pruning y backup. Mantener schedules e ingress
    sin publicar.
 5. **Variables Preview.** Cargar las compuertas apagadas, store, orquestador, callback y seis pares
@@ -24,9 +24,11 @@ búsquedas globales, leer Journaling, usar datos productivos o ampliar permisos.
    ingress y manual ingress. Marcar templates provisionados solo después de probar los siete exports,
    ambos digest y los seis runners; exigir todos los checks antes de `ready`.
 8. **Smoke manual.** Publicar únicamente el ingress manual, habilitar global/manual y un workflow de
-   un principal; iniciar con sesión Web y confirmación. Verificar path fijo, Header Auth, ACK estricto
-   antes de 10 s, disabled/loading, no doble submit y resultado sanitizado. Repetir el mismo run como
-   retry y comprobar que responde sin segunda invocación del runner.
+   un principal; iniciar con sesión Web y confirmación. Verificar path fijo, Header Auth y claim
+   atómico en `/api/automations/v1/deliveries/claim` antes del ACK estricto. El primer intento que
+   llegue efectivamente debe obtener `shouldExecute=true`, aunque sea un retry de Vida; un request
+   posterior del mismo run debe obtener `shouldExecute=false`. Verificar disabled/loading, no doble
+   submit y resultado sanitizado.
 9. **Schedules controlados.** Activar una unidad por vez: schedule ingress debe crear el run y
    devolver runKey sin redispatch. Observar una única ejecución y apagar ante anomalías.
 10. **Inventario 6 + 1 + 6.** Certificar seis unidades schedule, un ingress manual y seis runners
@@ -37,10 +39,13 @@ búsquedas globales, leer Journaling, usar datos productivos o ampliar permisos.
 12. **Ownership.** Verificar source exacto del principal y que agentes/workflows distintos no puedan
     listar ni obtener la propuesta.
 13. **Idempotencia/replay.** Repetir el mismo evento y callback: mismo run/resultado, sin segundo
-    artefacto ni propuesta. En manual, un retry válido no debe cruzar el runner y un payload
-    divergente debe rechazarse.
+    artefacto ni propuesta. En manual, repetir el mismo request de claim y comprobar que conserva el
+    permiso de la entrega ya reclamada; luego usar un requestKey distinto para el mismo run y exigir
+    ACK sin segunda invocación del runner. Un payload divergente debe rechazarse.
 14. **Retry/circuit breaker.** Inducir respuestas retryables acotadas; comprobar tres intentos,
-    request ID/firma nuevos, idempotency key estable, apertura, bloqueo y recuperación half-open.
+    request ID nuevo por intento de Vida, idempotency key estable, apertura, bloqueo y recuperación
+    half-open. Incluir el caso `attempt=1` perdido antes de n8n: `attempt=2` debe poder convertirse en
+    la primera entrega efectiva y ejecutar una sola vez.
 15. **Store cifrado.** Inspeccionar métricas/comandos permitidos: namespace dedicado, TTL positivo,
     claves opacas/ciphertext y cero plaintext, runKey cruda, emails, URLs o IDs de proveedor.
 16. **Callback.** Ejecutar matriz válida y negativa de método, query, content type, UTF-8, tamaño,
