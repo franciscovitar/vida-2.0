@@ -1,9 +1,9 @@
 name: B5 Delivery Repair Validation
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/controlled-automations-v1
+      - main
     paths:
       - .github/workflows/b5-format-hotfix.yml
 
