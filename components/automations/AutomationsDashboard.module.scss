@@ -1,0 +1,163 @@
+.stack {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  min-width: 0;
+}
+
+.warning,
+.status {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--c-projects-border);
+  border-radius: var(--radius);
+  background: var(--c-projects-soft);
+  color: var(--text);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checks li {
+  display: flex;
+  gap: 0.4rem;
+  align-items: baseline;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.checks li[data-ready='true'] span {
+  color: var(--c-habits);
+}
+
+.facts {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.facts > div {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 0.45fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border);
+}
+
+.facts dt,
+.facts dd,
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.facts dt {
+  color: var(--text-muted);
+}
+
+.facts dd {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.hint {
+  color: var(--text-muted);
+}
+
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.table th,
+.table td {
+  padding: 0.65rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+@media (width <= 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 420px) {
+  .checks {
+    grid-template-columns: 1fr;
+  }
+
+  .facts > div {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tr {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table td {
+    padding: 0.2rem 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+}

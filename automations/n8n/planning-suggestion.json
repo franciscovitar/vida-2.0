@@ -1,0 +1,153 @@
+{
+  "name": "Vida 2.0 · Sugerencia de planificación",
+  "active": false,
+  "nodes": [
+    {
+      "id": "planning-schedule",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "30 7 * * 1-5" }] }
+      }
+    },
+    {
+      "id": "planning-occurrence",
+      "name": "Build canonical scheduledFor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0],
+      "parameters": {
+        "jsCode": "const occurrence = new Date(); occurrence.setSeconds(0, 0); const scheduledFor = occurrence.toISOString(); const scheduleBody = JSON.stringify({ workflowKey: 'planning-suggestion', scheduledFor, contractVersion: 'vida2-automations-v1' }); return [{ json: { scheduledFor, scheduleBody } }];"
+      }
+    },
+    {
+      "id": "planning-begin",
+      "name": "HMAC begin scheduled run",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [500, 0],
+      "parameters": {
+        "workflowId": "={{ $env.VIDA2_PLANNING_SUGGESTION_RUNNER_WORKFLOW_ID }}",
+        "mode": "each",
+        "waitForSubWorkflow": true,
+        "workflowInputs": {
+          "value": {
+            "action": "begin",
+            "method": "POST",
+            "pathname": "/api/automations/v1/triggers/scheduled",
+            "body": "={{ $json.scheduleBody }}",
+            "signatureProtocol": "vida2-openclaw-hmac-v2",
+            "maxAttempts": 3,
+            "retryableStatusCodes": "429,500,502,503,504",
+            "newAuthenticationPerAttempt": true
+          }
+        }
+      }
+    },
+    {
+      "id": "planning-run-key",
+      "name": "Extract canonical runKey",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [760, 0],
+      "parameters": {
+        "jsCode": "const reply = $json.scheduleResponse; if (!reply?.ok || typeof reply.runKey !== 'string') throw new Error('schedule-ingress-rejected'); return [{ json: { runKey: reply.runKey, workflowKey: reply.workflowKey } }];"
+      }
+    },
+    {
+      "id": "planning-operations",
+      "name": "HMAC contracted reads and proposal",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1020, 0],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "workflowId": "={{ $env.VIDA2_PLANNING_SUGGESTION_RUNNER_WORKFLOW_ID }}",
+        "mode": "each",
+        "waitForSubWorkflow": true,
+        "workflowInputs": {
+          "value": {
+            "action": "execute",
+            "runKey": "={{ $json.runKey }}",
+            "workflowKey": "planning-suggestion",
+            "operations": "tasks.list,calendar.upcoming,task.create.propose"
+          }
+        }
+      }
+    },
+    {
+      "id": "planning-result",
+      "name": "Build sanitized terminal or error DTO",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1280, 0],
+      "parameters": {
+        "jsCode": "const outcome = $json.outcome; const ok = outcome?.ok === true && typeof outcome.proposalKey === 'string'; const runKey = $json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'planning-suggestion', principalKey: 'planning-suggestion', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'proposal-created' : 'invalid-result', summary: ok ? 'Propuesta pendiente creada.' : 'Ejecución controlada fallida.', proposalKey: ok ? outcome.proposalKey : null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"
+      }
+    },
+    {
+      "id": "planning-callback",
+      "name": "Callback terminal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "x-vida-request-id", "value": "={{ $json.callbackRequestId }}" }]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [[{ "node": "Build canonical scheduledFor", "type": "main", "index": 0 }]]
+    },
+    "Build canonical scheduledFor": {
+      "main": [[{ "node": "HMAC begin scheduled run", "type": "main", "index": 0 }]]
+    },
+    "HMAC begin scheduled run": {
+      "main": [[{ "node": "Extract canonical runKey", "type": "main", "index": 0 }]]
+    },
+    "Extract canonical runKey": {
+      "main": [[{ "node": "HMAC contracted reads and proposal", "type": "main", "index": 0 }]]
+    },
+    "HMAC contracted reads and proposal": {
+      "main": [[{ "node": "Build sanitized terminal or error DTO", "type": "main", "index": 0 }]]
+    },
+    "Build sanitized terminal or error DTO": {
+      "main": [[{ "node": "Callback terminal", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "timezone": "America/Argentina/Cordoba", "executionOrder": "v1" },
+  "versionId": "vida2-planning-suggestion-scheduled-v2",
+  "meta": {
+    "contractVersion": "vida2-automations-v1",
+    "workflowKey": "planning-suggestion",
+    "principalKey": "planning-suggestion",
+    "operations": ["tasks.list", "calendar.upcoming", "task.create.propose"],
+    "signatureProtocol": "vida2-openclaw-hmac-v2",
+    "scheduleIngressPath": "/api/automations/v1/triggers/scheduled",
+    "callbackPath": "/api/automations/v1/runs",
+    "runnerContract": "vida2-n8n-principal-runner-v1",
+    "idempotencyPolicy": "same-normalized-occurrence",
+    "requestAuthenticationPolicy": "regenerate-per-attempt",
+    "retryableStatusCodes": [429, 500, 502, 503, 504],
+    "maxAttempts": 3,
+    "provisioningState": "credential-binding-required",
+    "executable": true
+  }
+}

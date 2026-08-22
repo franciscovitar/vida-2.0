@@ -61,11 +61,17 @@ test('B1-QA-4. todos los respaldos declaran validación y criterio de contenido'
   }
 });
 
-test('B1-QA-5. ningún workspace ejecuta escrituras o fetch directo', () => {
+test('B1-QA-5. workspaces locales no escriben directo; gym solo proposal.create', () => {
   for (const workspace of workspaces) {
+    assert.equal(workspace.includes('fetch('), false);
+    if (workspace.includes('GymSessionPanel')) {
+      assert.ok(workspace.includes('runWriteAction'));
+      assert.ok(workspace.includes("actionType: 'proposal.create'"));
+      assert.equal(workspace.includes("actionType: 'gym.session.create'"), false);
+      continue;
+    }
     assert.equal(workspace.includes('runWriteAction'), false);
     assert.equal(workspace.includes('@/app/actions/writes'), false);
-    assert.equal(workspace.includes('fetch('), false);
   }
 });
 

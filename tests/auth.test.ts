@@ -266,6 +266,43 @@ test('8–10. /agenda, /tareas y /proyectos están protegidas', () => {
   }
 });
 
+test('proxy permite solo los dos endpoints machine-authenticated exactos del Bloque 5', () => {
+  for (const pathname of ['/api/automations/v1/triggers/scheduled', '/api/automations/v1/runs']) {
+    assert.equal(isPublicAuthPath(pathname), true);
+    assert.deepEqual(
+      resolveAuthProxyDecision({
+        pathname,
+        hasUser: false,
+        email: null,
+        allowedEmails: ALLOWED_LIST,
+      }),
+      { action: 'next' },
+    );
+  }
+});
+
+test('proxy mantiene protegidas las rutas de automatizaciones no allowlisted', () => {
+  for (const pathname of [
+    '/api/automations',
+    '/api/automations/v1',
+    '/api/automations/v1/triggers',
+    '/api/automations/v1/triggers/otro',
+    '/api/automations/v1/runs/otro',
+    '/api/automations/v1/triggers/scheduled/otro',
+  ]) {
+    assert.equal(isPublicAuthPath(pathname), false);
+    assert.deepEqual(
+      resolveAuthProxyDecision({
+        pathname,
+        hasUser: false,
+        email: null,
+        allowedEmails: ALLOWED_LIST,
+      }),
+      { action: 'redirect', pathname: '/login' },
+    );
+  }
+});
+
 test('11. APIs privadas rechazan sesión ausente', async () => {
   const result = await verifySessionCore({
     getSession: async () => null,
@@ -352,6 +389,21 @@ test('16. /api/auth/* sigue siendo pública', () => {
   assert.equal(isPublicAuthPath('/api/auth/signin'), true);
   assert.equal(isPublicAuthPath('/api/auth/callback/google'), true);
   assert.equal(isPublicAuthPath('/api/auth/session'), true);
+});
+
+test('/api/openclaw/* conserva acceso al autenticador HMAC propio', () => {
+  for (const pathname of ['/api/openclaw', '/api/openclaw/v1/health']) {
+    assert.equal(isPublicAuthPath(pathname), true);
+    assert.deepEqual(
+      resolveAuthProxyDecision({
+        pathname,
+        hasUser: false,
+        email: null,
+        allowedEmails: ALLOWED_LIST,
+      }),
+      { action: 'next' },
+    );
+  }
 });
 
 test('17. OAuth local de Calendar sigue separado', () => {

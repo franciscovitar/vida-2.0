@@ -44,7 +44,9 @@ export async function recordActionAudit(
   sink: AuditSink,
   input: {
     actionType: string;
-    actorEmail: string;
+    /** Preferir actorHint; actorEmail solo para derivar hint (compat). */
+    actorHint?: string;
+    actorEmail?: string;
     result: ActionResult;
     confirmationMode: ConfirmationMode | 'none';
     at?: string;
@@ -54,14 +56,17 @@ export async function recordActionAudit(
     beforeSummary?: string | null;
     afterSummary?: string | null;
     idempotencyDigest?: string | null;
+    sagaPhase?: string | null;
   },
 ): Promise<
   | { ok: true; record: ActionAuditRecord }
   | { ok: false; record: ActionAuditRecord; message: string }
 > {
+  const actorHint =
+    input.actorHint?.trim() || (input.actorEmail ? sanitizeActorHint(input.actorEmail) : 'user');
   const record: ActionAuditRecord = {
     actionType: input.actionType,
-    actorHint: sanitizeActorHint(input.actorEmail),
+    actorHint,
     at: input.at ?? new Date().toISOString(),
     resultCode: input.result.code,
     confirmationMode: input.confirmationMode,
@@ -75,6 +80,7 @@ export async function recordActionAudit(
     beforeSummary: input.beforeSummary ?? null,
     afterSummary: input.afterSummary ?? input.result.summary,
     idempotencyDigest: input.idempotencyDigest ?? null,
+    sagaPhase: input.sagaPhase ?? null,
   };
   const appended = await sink.append(record);
   if (!appended.ok) {

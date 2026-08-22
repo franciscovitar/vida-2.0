@@ -222,6 +222,44 @@ export function createGymSheetWritePort(input: {
       }
       return { ok: true };
     },
+
+    async markReverted(sessionId) {
+      const loaded = await loadSessions();
+      if (!loaded.ok) return { ok: false, message: loaded.message };
+      const idx = findSessionRow(loaded.values, sessionId);
+      if (idx < 0) return { ok: false, message: 'Sesión ausente.' };
+      const rowNumber = idx + 1;
+      const statusCol = GYM_SESSIONS_HEADERS.indexOf('status');
+      const colLetter = String.fromCharCode('A'.charCodeAt(0) + statusCol);
+      const range = `${sessionsSheet}!${colLetter}${rowNumber}`;
+      const put = await input.sheets.putValues(range, [['reverted']]);
+      if (!put.ok) return { ok: false, message: put.message };
+      return { ok: true };
+    },
+
+    async checkReady() {
+      const sessions = await loadSessions();
+      if (!sessions.ok) {
+        return {
+          ok: false,
+          code: sessions.message.includes('Esquema')
+            ? ('misconfigured' as const)
+            : ('unavailable' as const),
+          message: sessions.message,
+        };
+      }
+      const sets = await loadSets();
+      if (!sets.ok) {
+        return {
+          ok: false,
+          code: sets.message.includes('Esquema')
+            ? ('misconfigured' as const)
+            : ('unavailable' as const),
+          message: sets.message,
+        };
+      }
+      return { ok: true };
+    },
   };
 }
 

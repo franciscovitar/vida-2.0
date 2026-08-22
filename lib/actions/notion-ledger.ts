@@ -5,6 +5,7 @@
 import { ACTIONS_PROPS, LEDGER_KIND, PROPOSAL_STATUSES } from '@/lib/actions/actions-props';
 import type { AuditAppendResult, AuditSink } from '@/lib/actions/audit';
 import type { IdempotencyStore } from '@/lib/actions/idempotency';
+import { decodePayloadBag, encodePayloadBagAsRichTextProp } from '@/lib/actions/ledger-bag-codec';
 import {
   checkboxProp,
   createNotionActionsClient,
@@ -21,6 +22,7 @@ import {
 } from '@/lib/actions/notion-client';
 import { idempotencyDigest, opaqueKey } from '@/lib/actions/opaque';
 import type { ProposalRepositoryPort } from '@/lib/actions/ports';
+import { assertAllowedProposalStatusTransition } from '@/lib/actions/proposal-transitions';
 import type {
   ActionAuditRecord,
   ActionProposalSummary,
@@ -48,14 +50,7 @@ type PayloadBag = {
 };
 
 function parsePayloadBag(raw: string): PayloadBag {
-  if (!raw) return {};
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== 'object') return {};
-    return parsed as PayloadBag;
-  } catch {
-    return {};
-  }
+  return decodePayloadBag(raw) as PayloadBag;
 }
 
 function isProposalStatus(value: string | null): value is ProposalStatus {
@@ -82,6 +77,8 @@ function pageToProposal(page: NotionRawPage): ActionProposalSummary | null {
   const riskRaw = readSelectName(props[ACTIONS_PROPS.risk]);
   const risk = riskRaw === 'high' || riskRaw === 'medium' || riskRaw === 'low' ? riskRaw : 'medium';
   const targetTypeRaw = readSelectName(props[ACTIONS_PROPS.targetType]) ?? 'system';
+  const diff =
+    bag.diff && typeof bag.diff === 'object' ? (bag.diff as ActionProposalSummary['diff']) : null;
   return {
     key,
     name: title || 'Propuesta',
@@ -100,6 +97,19 @@ function pageToProposal(page: NotionRawPage): ActionProposalSummary | null {
     decidedAt: readDateStart(props[ACTIONS_PROPS.decidedAt]),
     appliedAt: readDateStart(props[ACTIONS_PROPS.appliedAt]),
     resultCode: readRichText(props[ACTIONS_PROPS.resultCode]) || null,
+    expiresAt: typeof bag.expiresAt === 'string' ? bag.expiresAt : null,
+    executionStartedAt: typeof bag.executionStartedAt === 'string' ? bag.executionStartedAt : null,
+    rollbackDeadline: typeof bag.rollbackDeadline === 'string' ? bag.rollbackDeadline : null,
+    rolledBackAt: typeof bag.rolledBackAt === 'string' ? bag.rolledBackAt : null,
+    payloadDigest: typeof bag.payloadDigest === 'string' ? bag.payloadDigest : null,
+    contractVersion:
+      typeof bag.contractVersion === 'string' ? bag.contractVersion : 'vida2-writes-v1',
+    source: typeof bag.source === 'string' ? bag.source : 'web',
+    beforeDigest: typeof bag.beforeDigest === 'string' ? bag.beforeDigest : null,
+    diff,
+    encryptedPayloadKey:
+      typeof bag.encryptedPayloadKey === 'string' ? bag.encryptedPayloadKey : null,
+    ownershipDigest: typeof bag.ownershipDigest === 'string' ? bag.ownershipDigest : null,
   };
 }
 
@@ -121,10 +131,18 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
   return {
     async create(payload: ProposalCreatePayload, meta) {
       const bag: PayloadBag = {
-        ...payload.sanitizedPayload,
         _k: meta.key,
         reason: payload.reason,
         expectedChange: payload.expectedChange,
+        expiresAt: meta.expiresAt,
+        payloadDigest: meta.payloadDigest,
+        contractVersion: meta.contractVersion,
+        source: meta.source,
+        beforeDigest: meta.beforeDigest,
+        diff: meta.diff,
+        encryptedPayloadKey: meta.encryptedPayloadKey,
+        // Nunca persistir plaintext del payload de negocio.
+        payloadKind: payload.proposedActionType,
       };
       const created = await deps.client.createPage({
         dataSourceId: deps.actionsDataSourceId,
@@ -134,10 +152,10 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
           [ACTIONS_PROPS.targetType]: selectProp(payload.targetType),
           [ACTIONS_PROPS.targetKey]: richTextProp(payload.targetKey ?? ''),
           [ACTIONS_PROPS.status]: selectProp('pending'),
-          [ACTIONS_PROPS.confirmationMode]: selectProp('explicit'),
+          [ACTIONS_PROPS.confirmationMode]: selectProp(meta.confirmationMode ?? 'explicit'),
           [ACTIONS_PROPS.risk]: selectProp(payload.risk),
           [ACTIONS_PROPS.reversible]: checkboxProp(payload.reversible),
-          [ACTIONS_PROPS.payloadSanitized]: richTextProp(JSON.stringify(bag).slice(0, 1900)),
+          [ACTIONS_PROPS.payloadSanitized]: encodePayloadBagAsRichTextProp(bag),
           [ACTIONS_PROPS.beforeSummary]: richTextProp(''),
           [ACTIONS_PROPS.afterSummary]: richTextProp(''),
           [ACTIONS_PROPS.idempotencyKey]: richTextProp(meta.idempotencyKey),
@@ -158,7 +176,7 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
           targetType: payload.targetType,
           targetKey: payload.targetKey,
           status: 'pending',
-          confirmationMode: 'explicit',
+          confirmationMode: meta.confirmationMode ?? 'explicit',
           risk: payload.risk,
           reversible: payload.reversible,
           reason: payload.reason,
@@ -169,6 +187,17 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
           decidedAt: null,
           appliedAt: null,
           resultCode: null,
+          expiresAt: meta.expiresAt,
+          executionStartedAt: null,
+          rollbackDeadline: null,
+          rolledBackAt: null,
+          payloadDigest: meta.payloadDigest,
+          contractVersion: meta.contractVersion,
+          source: meta.source,
+          beforeDigest: meta.beforeDigest,
+          diff: meta.diff,
+          encryptedPayloadKey: meta.encryptedPayloadKey,
+          ownershipDigest: null,
         }
       );
     },
@@ -185,11 +214,38 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
       return status ? all.filter((row) => row.status === status) : all;
     },
 
-    async updateStatus(key, status, patch) {
+    async updateStatus(key, status, patch, options) {
       const page = findProposalPage(await allPages(), key);
       if (!page) return null;
+      const current = pageToProposal(page);
+      if (!current) return null;
+      if (options?.expectedStatus && current.status !== options.expectedStatus) {
+        return null;
+      }
+      const transition = assertAllowedProposalStatusTransition(current.status, status);
+      if (!transition.ok) return null;
+      const existingBag = parsePayloadBag(
+        readRichText(page.properties[ACTIONS_PROPS.payloadSanitized]),
+      );
+      const nextBag: PayloadBag = {
+        ...existingBag,
+        ...(patch.beforeDigest !== undefined ? { beforeDigest: patch.beforeDigest } : {}),
+        ...(patch.diff !== undefined ? { diff: patch.diff } : {}),
+        ...(patch.encryptedPayloadKey !== undefined
+          ? { encryptedPayloadKey: patch.encryptedPayloadKey }
+          : {}),
+        ...(patch.ownershipDigest !== undefined ? { ownershipDigest: patch.ownershipDigest } : {}),
+        ...(patch.executionStartedAt !== undefined
+          ? { executionStartedAt: patch.executionStartedAt }
+          : {}),
+        ...(patch.rollbackDeadline !== undefined
+          ? { rollbackDeadline: patch.rollbackDeadline }
+          : {}),
+        ...(patch.rolledBackAt !== undefined ? { rolledBackAt: patch.rolledBackAt } : {}),
+      };
       const properties: Record<string, unknown> = {
         [ACTIONS_PROPS.status]: selectProp(status),
+        [ACTIONS_PROPS.payloadSanitized]: encodePayloadBagAsRichTextProp(nextBag),
       };
       if (patch.decidedAt !== undefined) {
         properties[ACTIONS_PROPS.decidedAt] = dateProp(patch.decidedAt);
@@ -202,6 +258,12 @@ export function createNotionProposalRepository(deps: ActionsLedgerDeps): Proposa
       }
       if (patch.afterSummary !== undefined) {
         properties[ACTIONS_PROPS.afterSummary] = richTextProp(patch.afterSummary ?? '');
+      }
+      if (patch.beforeSummary !== undefined) {
+        properties[ACTIONS_PROPS.beforeSummary] = richTextProp(patch.beforeSummary ?? '');
+      }
+      if (patch.targetKey !== undefined) {
+        properties[ACTIONS_PROPS.targetKey] = richTextProp(patch.targetKey ?? '');
       }
       const updated = await deps.client.updatePage(page.id, properties);
       if (!updated.ok) return null;
@@ -290,7 +352,7 @@ export function createNotionIdempotencyStore(deps: ActionsLedgerDeps): Idempoten
           [ACTIONS_PROPS.confirmationMode]: selectProp('explicit'),
           [ACTIONS_PROPS.risk]: selectProp('low'),
           [ACTIONS_PROPS.reversible]: checkboxProp(false),
-          [ACTIONS_PROPS.payloadSanitized]: richTextProp(JSON.stringify(bag).slice(0, 1900)),
+          [ACTIONS_PROPS.payloadSanitized]: encodePayloadBagAsRichTextProp(bag),
           [ACTIONS_PROPS.beforeSummary]: richTextProp(''),
           [ACTIONS_PROPS.afterSummary]: richTextProp(safe.summary ?? ''),
           [ACTIONS_PROPS.idempotencyKey]: richTextProp(digest),
@@ -333,14 +395,12 @@ export function createNotionAuditSink(deps: ActionsLedgerDeps): AuditSink {
           ),
           [ACTIONS_PROPS.risk]: selectProp(record.risk ?? 'low'),
           [ACTIONS_PROPS.reversible]: checkboxProp(record.reversible ?? false),
-          [ACTIONS_PROPS.payloadSanitized]: richTextProp(
-            JSON.stringify({
-              _ledger: LEDGER_KIND.audit,
-              actorHint: record.actorHint,
-              verified: record.verified,
-              errorCode: record.errorCode,
-            }).slice(0, 1900),
-          ),
+          [ACTIONS_PROPS.payloadSanitized]: encodePayloadBagAsRichTextProp({
+            _ledger: LEDGER_KIND.audit,
+            actorHint: record.actorHint,
+            verified: record.verified,
+            errorCode: record.errorCode,
+          }),
           [ACTIONS_PROPS.beforeSummary]: richTextProp(record.beforeSummary ?? ''),
           [ACTIONS_PROPS.afterSummary]: richTextProp(record.afterSummary ?? ''),
           [ACTIONS_PROPS.idempotencyKey]: richTextProp(

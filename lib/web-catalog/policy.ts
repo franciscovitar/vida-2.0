@@ -58,3 +58,28 @@ export function canSearchWebCatalogEntry(entry: WebCatalogEntry): boolean {
   if (!entry.policy.searchable) return false;
   return true;
 }
+
+/**
+ * OpenClaw solo puede usar recursos autorizados explícitamente para IA general.
+ * `limited`, `explicit-authorization` y `denied` fallan cerrados.
+ */
+export function canUseWebCatalogEntryInGeneralAI(entry: WebCatalogEntry): boolean {
+  if (!canLoadWebCatalogContent(entry)) return false;
+  return entry.policy.generalAI === 'allowed';
+}
+
+/**
+ * Autorización final generalAI contra catálogo fresco.
+ * Un snapshot cacheado nunca debe revelar redirect ni contenido si el fresco deniega.
+ */
+export function authorizeFreshGeneralAIEntry(
+  stableKey: string,
+  freshEntries: readonly WebCatalogEntry[],
+): { ok: true; entry: WebCatalogEntry } | { ok: false; code: 'not-found' | 'forbidden-policy' } {
+  const entry = freshEntries.find((item) => item.stableKey === stableKey);
+  if (!entry) return { ok: false, code: 'not-found' };
+  if (!canUseWebCatalogEntryInGeneralAI(entry)) {
+    return { ok: false, code: 'forbidden-policy' };
+  }
+  return { ok: true, entry };
+}

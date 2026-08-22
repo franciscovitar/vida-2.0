@@ -15,6 +15,8 @@ export const OPENCLAW_READ_OPERATIONS: readonly OpenClawReadOperation[] = [
   'approvals.list',
   'documents.search',
   'document.get',
+  'technical.status',
+  'technical.logs',
 ] as const;
 
 export function isOpenClawReadOperation(value: string): value is OpenClawReadOperation {

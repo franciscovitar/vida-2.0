@@ -1,16 +1,21 @@
 /**
- * Contratos del sistema de acciones seguras (8E.1).
+ * Contratos del sistema de acciones seguras (Block 3 — reversible writes).
  * Planos, serializables, sin IDs internos ni secretos en respuestas al cliente.
  */
+
+export const WRITE_CONTRACT_VERSION = 'vida2-writes-v1' as const;
+export type WriteContractVersion = typeof WRITE_CONTRACT_VERSION;
 
 export type AllowedActionType =
   | 'task.create'
   | 'task.change-status'
   | 'inbox.capture'
   | 'gym.session.create'
+  | 'calendar.hold.create'
   | 'proposal.create'
   | 'proposal.approve'
-  | 'proposal.reject';
+  | 'proposal.reject'
+  | 'action.rollback';
 
 /** Acciones que nunca deben existir como endpoints públicos. */
 export type ForbiddenActionType =
@@ -29,8 +34,16 @@ export type ForbiddenActionType =
 
 export type ActionType = AllowedActionType;
 
+/** Acciones de negocio que pueden vivir dentro de una propuesta. */
+export type ProposedBusinessActionType =
+  | 'inbox.capture'
+  | 'task.create'
+  | 'task.change-status'
+  | 'gym.session.create'
+  | 'calendar.hold.create';
+
 export type ActionTargetType =
-  'task' | 'inbox' | 'gym-session' | 'proposal' | 'calendar-block' | 'system';
+  'task' | 'inbox' | 'gym-session' | 'proposal' | 'calendar-hold' | 'calendar-block' | 'system';
 
 export interface ActionTarget {
   type: ActionTargetType;
@@ -52,15 +65,17 @@ export type IdempotencyKey = string;
 
 export interface ActionRequest<TPayload = unknown> {
   actionType: ActionType;
-  /** Email sanitizado del actor (nunca token). */
-  actorEmail: string;
+  /** Hash opaco del actor (nunca email crudo). */
+  actorHash: string;
+  /** Hint sanitizado para auditoría / UI. */
+  actorHint: string;
   payload: TPayload;
   idempotencyKey: IdempotencyKey;
   confirmation: ActionConfirmation;
   /** Estado previo esperado cuando aplica (p. ej. status de tarea). */
   expectedPrevious: string | null;
   context: {
-    source: 'web' | 'openclaw';
+    source: 'web' | 'openclaw' | `agent:${string}`;
     targetDate: string | null;
   };
 }
@@ -98,7 +113,14 @@ export type ActionResultCode =
   | 'flag-disabled'
   | 'unauthorized'
   | 'invalid-payload'
-  | 'policy-denied';
+  | 'policy-denied'
+  | 'in-progress'
+  | 'applied-audit-pending'
+  | 'expired'
+  | 'rolled-back'
+  | 'rollback-failed'
+  | 'lease-conflict'
+  | 'misconfigured';
 
 export interface ActionError {
   code: ActionResultCode;
@@ -135,6 +157,8 @@ export interface ActionAuditRecord {
   afterSummary?: string | null;
   /** Digest determinista; no es el correo ni el UUID de Notion. */
   idempotencyDigest?: string | null;
+  /** Fase de saga (reservation / intention / finalize). */
+  sagaPhase?: string | null;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -157,11 +181,14 @@ export interface TaskChangeStatusPayload {
   nextStatus: 'Pendiente' | 'En progreso' | 'Bloqueada' | 'Hecha' | 'Algún día';
 }
 
+export const INBOX_CAPTURE_ORIGINS = ['web', 'openclaw', 'manual', 'import'] as const;
+export type InboxCaptureOrigin = (typeof INBOX_CAPTURE_ORIGINS)[number];
+
 export interface InboxCapturePayload {
   text: string;
   link: string | null;
   capturedAt: string;
-  origin: string;
+  origin: InboxCaptureOrigin;
 }
 
 export interface GymSetInput {
@@ -188,33 +215,64 @@ export interface GymSessionCreatePayload {
   sets: readonly GymSetInput[];
 }
 
-export type ProposalStatus = 'pending' | 'approved' | 'rejected' | 'applied' | 'failed' | 'expired';
+export interface CalendarHoldCreatePayload {
+  title: string;
+  /** ISO-8601 start. */
+  start: string;
+  /** ISO-8601 end. */
+  end: string;
+  note?: string | null;
+  relatedTaskKey?: string | null;
+}
+
+export type ProposalStatus =
+  | 'pending'
+  | 'executing'
+  | 'applied'
+  | 'rejected'
+  | 'failed'
+  | 'expired'
+  | 'rolling-back'
+  | 'rolled-back'
+  | 'rollback-failed';
+
+export type ProposalBusinessPayload =
+  | { proposedActionType: 'task.create'; payload: TaskCreatePayload }
+  | { proposedActionType: 'task.change-status'; payload: TaskChangeStatusPayload }
+  | { proposedActionType: 'inbox.capture'; payload: InboxCapturePayload }
+  | { proposedActionType: 'gym.session.create'; payload: GymSessionCreatePayload }
+  | { proposedActionType: 'calendar.hold.create'; payload: CalendarHoldCreatePayload };
 
 export interface ProposalCreatePayload {
   name: string;
-  /** Acción que se ejecutaría al aprobar (nunca calendar.event.create). */
-  proposedActionType: AllowedActionType | 'calendar.block.propose';
+  proposedActionType: ProposedBusinessActionType;
   targetType: ActionTargetType;
   targetKey: string | null;
   reason: string;
   expectedChange: string;
   risk: 'low' | 'medium' | 'high';
   reversible: boolean;
-  /** Payload sanitizado (sin secretos). */
-  sanitizedPayload: Record<string, string | number | boolean | null>;
+  /** Payload de negocio a ejecutar al aprobar (cifrado en reposo). */
+  payload: ProposalBusinessPayload['payload'];
 }
 
 export interface ProposalDecidePayload {
   proposalKey: string;
 }
 
-export interface CalendarBlockProposePayload {
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  reason: string;
-  relatedTaskKey: string | null;
+export interface RollbackPayload {
+  proposalKey: string;
+}
+
+export interface ActionDiffField {
+  field: string;
+  before: string | number | boolean | null;
+  after: string | number | boolean | null;
+}
+
+export interface ActionDiff {
+  fields: ActionDiffField[];
+  warnings?: string[];
 }
 
 export interface ActionProposalSummary {
@@ -235,4 +293,17 @@ export interface ActionProposalSummary {
   decidedAt: string | null;
   appliedAt: string | null;
   resultCode: string | null;
+  expiresAt: string | null;
+  executionStartedAt: string | null;
+  rollbackDeadline: string | null;
+  rolledBackAt: string | null;
+  payloadDigest: string | null;
+  contractVersion: WriteContractVersion | string;
+  source: 'web' | 'openclaw' | string;
+  beforeDigest: string | null;
+  diff: ActionDiff | null;
+  /** Referencia opaca al ciphertext (nunca el plaintext). */
+  encryptedPayloadKey?: string | null;
+  /** Token de ownership sanitizado / digest (no secretos de proveedor). */
+  ownershipDigest?: string | null;
 }

@@ -1,0 +1,110 @@
+# ADR-005 — Automatizaciones controladas
+
+## Estado
+
+Aceptado para implementación en Preview. Production permanece fuera de alcance.
+
+## Contexto
+
+Vida 2.0 ya cuenta con agentes especializados, API HMAC v2, lectura sanitizada,
+propuestas reversibles, aprobación humana, rate limit, replay, idempotencia,
+cifrado y auditoría.
+
+El Bloque 5 agrega orquestación programada sin convertir a n8n en un actor
+omnipotente.
+
+## Decisión
+
+- n8n actúa únicamente como orquestador.
+- Cada principal de workflow tiene una credencial HMAC independiente.
+- Cada principal conserva un agente canónico como techo de permisos.
+- El permiso efectivo es la intersección entre el perfil del agente y el contrato
+  inmutable del workflow.
+- Rate limit y replay se particionan por principal, no solo por agente.
+- Las propuestas de workflows conservan ownership exacto por principal.
+- Aprobar, rechazar, ejecutar y revertir continúa siendo exclusivo de la Web.
+- Gmail, Drive, Journaling, mensajes, compras, eliminaciones y Production quedan
+  fuera del MVP.
+- Los workflows nacen apagados y requieren kill switch global e individual.
+- El schedule nace en n8n, pero primero cruza una frontera HMAC que crea el run canónico en Vida;
+  esa frontera nunca vuelve a despachar n8n.
+
+## MVP
+
+| Workflow                    | Agente canónico               | Lecturas                                                | Propuestas               |
+| --------------------------- | ----------------------------- | ------------------------------------------------------- | ------------------------ |
+| Briefing diario             | Mayordomo                     | sistema, tareas, proyectos, agenda y propuestas propias | ninguna                  |
+| Guardián técnico            | Guardián técnico              | estado y diagnósticos técnicos sanitizados              | ninguna                  |
+| Revisión semanal            | Mayordomo                     | áreas, tareas, proyectos y agenda                       | ninguna                  |
+| Resumen de aprobaciones     | Mayordomo / Salud y reflexión | propuestas propias de cada principal                    | ninguna                  |
+| Sugerencia de planificación | Mayordomo                     | tareas y agenda                                         | crear propuesta de tarea |
+
+Los cinco workflows se materializan como seis principales HMAC. El resumen de
+aprobaciones usa un principal para Mayordomo y otro para Salud y reflexión; no
+comparten credencial, rate limit, replay ni ownership.
+
+## Barreras de ejecución
+
+- La identidad se resuelve únicamente desde la credencial server-side. El body no
+  puede elegir agente, workflow, principal ni permisos.
+- Las credenciales directas de agentes continúan funcionando y no heredan
+  propuestas creadas por sus workflows.
+- La fuente de una propuesta de workflow sigue el contrato
+  `agent:<agent-id>:workflow:<principal-key>`.
+- Capabilities, lecturas y propuestas aplican la intersección del perfil canónico
+  con el contrato del workflow.
+- `proposal-only` habilita las lecturas contratadas y, únicamente donde el contrato
+  lo permite, creación de propuestas. Nunca habilita escritura directa.
+- Obtener una propuesta individual, aprobar, rechazar, ejecutar o revertir no forma
+  parte de ningún contrato de workflow.
+
+## Configuración fail-closed
+
+- La compuerta global, el modo de acceso y los cinco kill switches nacen apagados.
+- La versión del contrato debe coincidir exactamente con
+  `vida2-automations-v1` para habilitar una credencial de workflow.
+- La ausencia completa de credenciales de automatización es válida mientras el
+  sistema está apagado.
+- Un par key/secret incompleto o una key ID duplicada invalida la resolución de
+  credenciales completa.
+- Los nombres y placeholders están documentados en `.env.example`; no se guardan
+  secretos en el repositorio.
+
+## Runtime local de Etapa 2
+
+- El estado y los artefactos sanitizados se cifran con AES-256-GCM en un Redis
+  dedicado del Bloque 5, separado del Upstash congelado del Bloque 4.
+- La implementación memory se reserva exclusivamente para tests; el runtime real
+  falla cerrado si falta cualquier parte del store o del cliente n8n.
+- El callback de resultados nace apagado, autentica al orquestador con un secreto
+  independiente y solo acepta transiciones y DTOs cerrados.
+- La ejecución manual requiere sesión Web, flag propio, confirmación y resolución
+  server-side del único principal. No acepta identidad ni permisos del navegador.
+- Circuit breaker, idempotencia, TTL, concurrencia y reintentos no amplían los contratos de la
+  Etapa 1. El lease se separa por principal para que los dos digest mantengan ejecución y ownership
+  independientes.
+- El runtime es bifásico: la operación canónica reserva y arranca sin orquestador; el camino manual
+  agrega exactamente un dispatch, mientras el schedule continúa dentro de la ejecución n8n actual.
+- `POST /api/automations/v1/triggers/scheduled` reutiliza HMAC v2, deriva principal e idempotencia
+  server-side y devuelve una `runKey` opaca. El callback sigue rechazando runs inexistentes.
+- Los seis exports n8n inactivos representan cinco contratos y seis principales. Cada runner se
+  vincula a una sola credencial; ambos digest tienen manifests separados.
+- Los exports self-hosted Community usan `$env` solo para IDs de runner y la URL base no secreta.
+  El runtime B5 fija `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`; los secretos siguen exclusivamente en
+  Credentials cifradas y no se debilitan los demás controles.
+- Production requiere una autorización explícita adicional; habilitar Preview no la hereda.
+
+## Fuera de alcance
+
+No se agregan endpoints nuevos de proveedores, OAuth, despliegues ni cambios en
+Vercel, n8n o Upstash reales. Gmail, Drive, Journaling, mensajes, compras,
+eliminaciones y Production continúan fuera del alcance.
+
+## Consecuencias
+
+- Se agregan seis principales HMAC para cinco workflows.
+- El principal `approval-digest` se divide por agente para impedir mezcla de
+  ownership.
+- Los reintentos regeneran timestamp, request ID y firma, pero conservan la
+  idempotencyKey de negocio.
+- No se reutilizan credenciales directas de proveedores dentro de n8n.

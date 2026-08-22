@@ -9,9 +9,12 @@ const stylesPath = path.join(process.cwd(), 'components', 'actions', 'GymSession
 const panel = readFileSync(panelPath, 'utf8');
 const styles = readFileSync(stylesPath, 'utf8');
 
-test('B1-GYM-UI-1. el panel móvil no ejecuta acciones de escritura', () => {
-  assert.equal(panel.includes('runWriteAction'), false);
-  assert.equal(panel.includes('@/app/actions/writes'), false);
+test('B1-GYM-UI-1. el panel propone vía proposal.create y no escribe directo', () => {
+  assert.ok(panel.includes('runWriteAction'));
+  assert.ok(panel.includes('@/app/actions/writes'));
+  assert.ok(panel.includes("actionType: 'proposal.create'"));
+  assert.ok(panel.includes("proposedActionType: 'gym.session.create'"));
+  assert.equal(panel.includes("actionType: 'gym.session.create'"), false);
   assert.ok(panel.includes('buildGymSessionCreatePayload'));
   assert.ok(panel.includes('No se escribió ningún dato'));
 });

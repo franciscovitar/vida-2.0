@@ -1,17 +1,36 @@
+import { getOpenClawAgentProfile } from '@/lib/openclaw/agents';
 import { listOpenClawCapabilities } from '@/lib/openclaw/capabilities';
+import { getOpenClawApiConfig } from '@/lib/openclaw/config';
 import { finishOpenClawOk, parseAndAuthenticateOpenClawRequest } from '@/lib/openclaw/http';
-import { OPENCLAW_CAPABILITIES_VERSION } from '@/types/openclaw';
+import { getOpenClawReadiness } from '@/lib/openclaw/readiness';
+import { OPENCLAW_CAPABILITIES_VERSION, type OpenClawReadOperation } from '@/types/openclaw';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   const parsed = await parseAndAuthenticateOpenClawRequest(request, {
-    requireJsonBody: false,
+    method: 'GET',
+    pathname: '/api/openclaw/v1/capabilities',
+    body: 'none',
   });
   if (!parsed.ok) return parsed.response;
 
-  const capabilities = listOpenClawCapabilities();
+  const config = getOpenClawApiConfig();
+  const readiness = getOpenClawReadiness();
+  const profile = getOpenClawAgentProfile(parsed.value.agentId);
+  const capabilities = listOpenClawCapabilities(
+    parsed.value.agentId,
+    process.env,
+    parsed.value.workflowPrincipalKey,
+  );
+  const reads = capabilities
+    .filter((item) => item.kind === 'read')
+    .map((item) => ({
+      ...item,
+      availability: readiness.readers[item.id as OpenClawReadOperation],
+    }));
+
   return finishOpenClawOk(
     parsed.value,
     'capabilities',
@@ -19,7 +38,10 @@ export async function GET(request: Request) {
       ok: true,
       requestId: parsed.value.requestId,
       capabilitiesVersion: OPENCLAW_CAPABILITIES_VERSION,
-      read: capabilities.filter((item) => item.kind === 'read'),
+      agent: { id: profile.id, name: profile.name },
+      accessMode: config.ok ? config.accessMode : 'disabled',
+      readiness,
+      read: reads,
       proposal: capabilities.filter((item) => item.kind === 'proposal'),
       forbidden: capabilities.filter((item) => item.kind === 'forbidden'),
     },

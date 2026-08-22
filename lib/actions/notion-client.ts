@@ -30,7 +30,15 @@ export type NotionActionsClient = {
   appendBlockChildren(
     blockId: string,
     children: readonly Record<string, unknown>[],
-  ): Promise<{ ok: true } | { ok: false; message: string }>;
+  ): Promise<{ ok: true; blockIds: string[] } | { ok: false; message: string }>;
+  retrieveBlock(blockId: string): Promise<
+    | {
+        ok: true;
+        block: { id: string; archived: boolean; type: string; plainText: string };
+      }
+    | { ok: false; message: string }
+  >;
+  archiveBlock(blockId: string): Promise<{ ok: true } | { ok: false; message: string }>;
 };
 
 function asPage(item: { id: string; properties?: unknown }): NotionRawPage | null {
@@ -135,9 +143,69 @@ export function createNotionActionsClient(token: string): NotionActionsClient {
 
     async appendBlockChildren(blockId, children) {
       try {
-        await client.blocks.children.append({
+        const response = await client.blocks.children.append({
           block_id: blockId,
           children: children as never,
+        });
+        const blockIds: string[] = [];
+        for (const item of response.results ?? []) {
+          if (item && typeof item === 'object' && 'id' in item) {
+            const id = (item as { id?: unknown }).id;
+            if (typeof id === 'string' && id) blockIds.push(id);
+          }
+        }
+        return { ok: true, blockIds };
+      } catch {
+        return { ok: false, message: sanitizeError() };
+      }
+    },
+
+    async retrieveBlock(blockId) {
+      try {
+        const response = await client.blocks.retrieve({ block_id: blockId });
+        if (!response || typeof response !== 'object' || !('id' in response)) {
+          return { ok: false, message: sanitizeError() };
+        }
+        const block = response as {
+          id: string;
+          archived?: boolean;
+          type?: string;
+          [key: string]: unknown;
+        };
+        const type = typeof block.type === 'string' ? block.type : 'unknown';
+        let plainText = '';
+        const typed = block[type];
+        if (typed && typeof typed === 'object' && !Array.isArray(typed)) {
+          const rich = (typed as { rich_text?: unknown }).rich_text;
+          if (Array.isArray(rich)) {
+            plainText = rich
+              .map((part) => {
+                const p =
+                  part && typeof part === 'object' ? (part as Record<string, unknown>) : null;
+                return typeof p?.plain_text === 'string' ? p.plain_text : '';
+              })
+              .join('');
+          }
+        }
+        return {
+          ok: true,
+          block: {
+            id: block.id,
+            archived: block.archived === true,
+            type,
+            plainText,
+          },
+        };
+      } catch {
+        return { ok: false, message: sanitizeError() };
+      }
+    },
+
+    async archiveBlock(blockId) {
+      try {
+        await client.blocks.update({
+          block_id: blockId,
+          archived: true,
         });
         return { ok: true };
       } catch {

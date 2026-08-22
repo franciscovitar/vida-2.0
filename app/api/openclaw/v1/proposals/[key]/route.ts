@@ -1,35 +1,63 @@
-import { getOpenClawProposal } from '@/lib/openclaw/proposals';
+import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import {
   finishOpenClawError,
   finishOpenClawOk,
   parseAndAuthenticateOpenClawRequest,
 } from '@/lib/openclaw/http';
+import {
+  getOpenClawProposal,
+  isOpenClawProposalOwnedByAgent,
+  toOpenClawProposalMetadata,
+} from '@/lib/openclaw/proposals';
+import type { OpenClawProposalGetResponse } from '@/types/openclaw';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type RouteContext = { params: Promise<{ key: string }> };
+const KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(request: Request, context: { params: Promise<{ key: string }> }) {
   const parsed = await parseAndAuthenticateOpenClawRequest(request, {
-    requireJsonBody: false,
+    method: 'GET',
+    pathname: /^\/api\/openclaw\/v1\/proposals\/[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/,
+    body: 'none',
   });
   if (!parsed.ok) return parsed.response;
 
-  const { key } = await context.params;
-  const proposalKey = decodeURIComponent(key ?? '').trim();
-  if (!proposalKey) {
+  if (!isOpenClawProposalsEnabled()) {
+    return finishOpenClawError(
+      parsed.value,
+      'proposals.forbidden',
+      403,
+      'forbidden',
+      'Operación bloqueada en modo read-only.',
+    );
+  }
+
+  if (parsed.value.workflowPrincipalKey) {
+    return finishOpenClawError(
+      parsed.value,
+      'proposals.get',
+      403,
+      'forbidden',
+      'Operación no incluida en el contrato del workflow.',
+    );
+  }
+
+  const { key: rawKey } = await context.params;
+  const key = typeof rawKey === 'string' ? rawKey.trim() : '';
+  if (!KEY_PATTERN.test(key)) {
     return finishOpenClawError(
       parsed.value,
       'proposals.get',
       400,
       'invalid-input',
-      'Clave de propuesta requerida.',
+      'Clave de propuesta inválida.',
     );
   }
 
-  const proposal = await getOpenClawProposal(proposalKey);
-  if (!proposal) {
+  const proposal = await getOpenClawProposal(key);
+  if (!proposal || !isOpenClawProposalOwnedByAgent(proposal, parsed.value.agentId)) {
     return finishOpenClawError(
       parsed.value,
       'proposals.get',
@@ -39,27 +67,13 @@ export async function GET(request: Request, context: RouteContext) {
     );
   }
 
-  return finishOpenClawOk(
-    parsed.value,
-    'proposals.get',
-    {
-      ok: true,
-      requestId: parsed.value.requestId,
-      generatedAt: new Date().toISOString(),
-      proposal: {
-        key: proposal.key,
-        name: proposal.name,
-        actionType: proposal.actionType,
-        status: proposal.status,
-        risk: proposal.risk,
-        reversible: proposal.reversible,
-        reason: proposal.reason,
-        expectedChange: proposal.expectedChange,
-        createdAt: proposal.createdAt,
-        decidedAt: proposal.decidedAt,
-        resultCode: proposal.resultCode,
-      },
-    },
-    { itemCount: 1 },
-  );
+  const meta = toOpenClawProposalMetadata(proposal);
+  const response: OpenClawProposalGetResponse = {
+    ok: true,
+    requestId: parsed.value.requestId,
+    generatedAt: new Date().toISOString(),
+    ...meta,
+  };
+
+  return finishOpenClawOk(parsed.value, 'proposals.get', response, { itemCount: 1 });
 }
