@@ -1,1 +1,540 @@
-{"name":"Vida 2.0 · Manual ingress","active":false,"nodes":[{"id":"manual-daily-webhook","name":"Webhook daily-briefing","type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[0,0],"parameters":{"httpMethod":"POST","path":"vida2/automations/daily-briefing","authentication":"headerAuth","responseMode":"responseNode","options":{}}},{"id":"manual-daily-validate","name":"Validate daily-briefing","type":"n8n-nodes-base.code","typeVersion":2,"position":[260,0],"parameters":{"jsCode":"const body = $json.body; const expectedKeys = ['attempt', 'contractVersion', 'idempotencyKey', 'principalKey', 'requestKey', 'runKey', 'trigger', 'workflowKey']; const keys = body && typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).sort() : []; if (keys.length !== expectedKeys.length || !keys.every((key, index) => key === expectedKeys[index])) throw new Error('manual-ingress-invalid'); const valid = /^run_[A-Za-z0-9_-]{20,80}$/.test(body.runKey) && body.workflowKey === 'daily-briefing' && body.principalKey === 'daily-briefing' && /^manual:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.idempotencyKey) && /^request_[A-Za-z0-9_-]{24}$/.test(body.requestKey) && Number.isInteger(body.attempt) && body.attempt >= 1 && body.attempt <= 3 && body.trigger === (body.attempt === 1 ? 'manual' : 'retry') && body.contractVersion === 'vida2-automations-v1'; if (!valid) throw new Error('manual-ingress-invalid'); return [{ json: { runKey: body.runKey, workflowKey: 'daily-briefing', principalKey: 'daily-briefing', idempotencyKey: body.idempotencyKey, requestKey: body.requestKey, attempt: body.attempt, trigger: body.trigger, contractVersion: 'vida2-automations-v1', shouldExecute: body.attempt === 1 } }];"}},{"id":"manual-daily-respond","name":"Respond daily-briefing","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.5,"position":[520,0],"parameters":{"respondWith":"json","responseBody":"={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}","options":{"responseCode":200}}},{"id":"manual-daily-gate","name":"Gate daily-briefing first delivery","type":"n8n-nodes-base.code","typeVersion":2,"position":[780,0],"parameters":{"jsCode":"if ($json.shouldExecute !== true) return []; return [{ json: $json }];"}},{"id":"manual-daily-execute","name":"Execute daily-briefing runner","type":"n8n-nodes-base.executeWorkflow","typeVersion":1.2,"position":[1040,0],"onError":"continueRegularOutput","parameters":{"workflowId":"={{ $env.VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID }}","mode":"each","waitForSubWorkflow":true,"workflowInputs":{"value":{"action":"execute","runKey":"={{ $json.runKey }}","workflowKey":"daily-briefing","operations":"system.overview,tasks.list,projects.list,calendar.upcoming,approvals.list"}}}},{"id":"manual-daily-result","name":"Build daily-briefing callback","type":"n8n-nodes-base.code","typeVersion":2,"position":[1300,0],"parameters":{"jsCode":"const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $('Gate daily-briefing first delivery').first().json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-manual-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'daily-briefing', principalKey: 'daily-briefing', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Briefing completado.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"}},{"id":"manual-daily-callback","name":"Callback daily-briefing","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[1560,0],"retryOnFail":true,"maxTries":3,"waitBetweenTries":5000,"parameters":{"method":"POST","url":"={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}","authentication":"genericCredentialType","genericAuthType":"httpHeaderAuth","sendHeaders":true,"headerParameters":{"parameters":[{"name":"x-vida-request-id","value":"={{ $json.callbackRequestId }}"}]},"sendBody":true,"contentType":"raw","rawContentType":"application/json","body":"={{ $json.callbackBody }}"}},{"id":"manual-technical-webhook","name":"Webhook technical-watchdog","type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[0,320],"parameters":{"httpMethod":"POST","path":"vida2/automations/technical-watchdog","authentication":"headerAuth","responseMode":"responseNode","options":{}}},{"id":"manual-technical-validate","name":"Validate technical-watchdog","type":"n8n-nodes-base.code","typeVersion":2,"position":[260,320],"parameters":{"jsCode":"const body = $json.body; const expectedKeys = ['attempt', 'contractVersion', 'idempotencyKey', 'principalKey', 'requestKey', 'runKey', 'trigger', 'workflowKey']; const keys = body && typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).sort() : []; if (keys.length !== expectedKeys.length || !keys.every((key, index) => key === expectedKeys[index])) throw new Error('manual-ingress-invalid'); const valid = /^run_[A-Za-z0-9_-]{20,80}$/.test(body.runKey) && body.workflowKey === 'technical-watchdog' && body.principalKey === 'technical-watchdog' && /^manual:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.idempotencyKey) && /^request_[A-Za-z0-9_-]{24}$/.test(body.requestKey) && Number.isInteger(body.attempt) && body.attempt >= 1 && body.attempt <= 3 && body.trigger === (body.attempt === 1 ? 'manual' : 'retry') && body.contractVersion === 'vida2-automations-v1'; if (!valid) throw new Error('manual-ingress-invalid'); return [{ json: { runKey: body.runKey, workflowKey: 'technical-watchdog', principalKey: 'technical-watchdog', idempotencyKey: body.idempotencyKey, requestKey: body.requestKey, attempt: body.attempt, trigger: body.trigger, contractVersion: 'vida2-automations-v1', shouldExecute: body.attempt === 1 } }];"}},{"id":"manual-technical-respond","name":"Respond technical-watchdog","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.5,"position":[520,320],"parameters":{"respondWith":"json","responseBody":"={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}","options":{"responseCode":200}}},{"id":"manual-technical-gate","name":"Gate technical-watchdog first delivery","type":"n8n-nodes-base.code","typeVersion":2,"position":[780,320],"parameters":{"jsCode":"if ($json.shouldExecute !== true) return []; return [{ json: $json }];"}},{"id":"manual-technical-execute","name":"Execute technical-watchdog runner","type":"n8n-nodes-base.executeWorkflow","typeVersion":1.2,"position":[1040,320],"onError":"continueRegularOutput","parameters":{"workflowId":"={{ $env.VIDA2_TECHNICAL_WATCHDOG_RUNNER_WORKFLOW_ID }}","mode":"each","waitForSubWorkflow":true,"workflowInputs":{"value":{"action":"execute","runKey":"={{ $json.runKey }}","workflowKey":"technical-watchdog","operations":"technical.status,technical.logs"}}}},{"id":"manual-technical-result","name":"Build technical-watchdog callback","type":"n8n-nodes-base.code","typeVersion":2,"position":[1300,320],"parameters":{"jsCode":"const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $('Gate technical-watchdog first delivery').first().json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-manual-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'technical-watchdog', principalKey: 'technical-watchdog', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Chequeo completado.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"}},{"id":"manual-technical-callback","name":"Callback technical-watchdog","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[1560,320],"retryOnFail":true,"maxTries":3,"waitBetweenTries":5000,"parameters":{"method":"POST","url":"={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}","authentication":"genericCredentialType","genericAuthType":"httpHeaderAuth","sendHeaders":true,"headerParameters":{"parameters":[{"name":"x-vida-request-id","value":"={{ $json.callbackRequestId }}"}]},"sendBody":true,"contentType":"raw","rawContentType":"application/json","body":"={{ $json.callbackBody }}"}},{"id":"manual-weekly-webhook","name":"Webhook weekly-review","type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[0,640],"parameters":{"httpMethod":"POST","path":"vida2/automations/weekly-review","authentication":"headerAuth","responseMode":"responseNode","options":{}}},{"id":"manual-weekly-validate","name":"Validate weekly-review","type":"n8n-nodes-base.code","typeVersion":2,"position":[260,640],"parameters":{"jsCode":"const body = $json.body; const expectedKeys = ['attempt', 'contractVersion', 'idempotencyKey', 'principalKey', 'requestKey', 'runKey', 'trigger', 'workflowKey']; const keys = body && typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).sort() : []; if (keys.length !== expectedKeys.length || !keys.every((key, index) => key === expectedKeys[index])) throw new Error('manual-ingress-invalid'); const valid = /^run_[A-Za-z0-9_-]{20,80}$/.test(body.runKey) && body.workflowKey === 'weekly-review' && body.principalKey === 'weekly-review' && /^manual:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.idempotencyKey) && /^request_[A-Za-z0-9_-]{24}$/.test(body.requestKey) && Number.isInteger(body.attempt) && body.attempt >= 1 && body.attempt <= 3 && body.trigger === (body.attempt === 1 ? 'manual' : 'retry') && body.contractVersion === 'vida2-automations-v1'; if (!valid) throw new Error('manual-ingress-invalid'); return [{ json: { runKey: body.runKey, workflowKey: 'weekly-review', principalKey: 'weekly-review', idempotencyKey: body.idempotencyKey, requestKey: body.requestKey, attempt: body.attempt, trigger: body.trigger, contractVersion: 'vida2-automations-v1', shouldExecute: body.attempt === 1 } }];"}},{"id":"manual-weekly-respond","name":"Respond weekly-review","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.5,"position":[520,640],"parameters":{"respondWith":"json","responseBody":"={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}","options":{"responseCode":200}}},{"id":"manual-weekly-gate","name":"Gate weekly-review first delivery","type":"n8n-nodes-base.code","typeVersion":2,"position":[780,640],"parameters":{"jsCode":"if ($json.shouldExecute !== true) return []; return [{ json: $json }];"}},{"id":"manual-weekly-execute","name":"Execute weekly-review runner","type":"n8n-nodes-base.executeWorkflow","typeVersion":1.2,"position":[1040,640],"onError":"continueRegularOutput","parameters":{"workflowId":"={{ $env.VIDA2_WEEKLY_REVIEW_RUNNER_WORKFLOW_ID }}","mode":"each","waitForSubWorkflow":true,"workflowInputs":{"value":{"action":"execute","runKey":"={{ $json.runKey }}","workflowKey":"weekly-review","operations":"areas.list,areas.get,tasks.list,projects.list,calendar.upcoming"}}}},{"id":"manual-weekly-result","name":"Build weekly-review callback","type":"n8n-nodes-base.code","typeVersion":2,"position":[1300,640],"parameters":{"jsCode":"const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $('Gate weekly-review first delivery').first().json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-manual-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'weekly-review', principalKey: 'weekly-review', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Revisión completada.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"}},{"id":"manual-weekly-callback","name":"Callback weekly-review","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[1560,640],"retryOnFail":true,"maxTries":3,"waitBetweenTries":5000,"parameters":{"method":"POST","url":"={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}","authentication":"genericCredentialType","genericAuthType":"httpHeaderAuth","sendHeaders":true,"headerParameters":{"parameters":[{"name":"x-vida-request-id","value":"={{ $json.callbackRequestId }}"}]},"sendBody":true,"contentType":"raw","rawContentType":"application/json","body":"={{ $json.callbackBody }}"}},{"id":"manual-planning-webhook","name":"Webhook planning-suggestion","type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[0,960],"parameters":{"httpMethod":"POST","path":"vida2/automations/planning-suggestion","authentication":"headerAuth","responseMode":"responseNode","options":{}}},{"id":"manual-planning-validate","name":"Validate planning-suggestion","type":"n8n-nodes-base.code","typeVersion":2,"position":[260,960],"parameters":{"jsCode":"const body = $json.body; const expectedKeys = ['attempt', 'contractVersion', 'idempotencyKey', 'principalKey', 'requestKey', 'runKey', 'trigger', 'workflowKey']; const keys = body && typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).sort() : []; if (keys.length !== expectedKeys.length || !keys.every((key, index) => key === expectedKeys[index])) throw new Error('manual-ingress-invalid'); const valid = /^run_[A-Za-z0-9_-]{20,80}$/.test(body.runKey) && body.workflowKey === 'planning-suggestion' && body.principalKey === 'planning-suggestion' && /^manual:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.idempotencyKey) && /^request_[A-Za-z0-9_-]{24}$/.test(body.requestKey) && Number.isInteger(body.attempt) && body.attempt >= 1 && body.attempt <= 3 && body.trigger === (body.attempt === 1 ? 'manual' : 'retry') && body.contractVersion === 'vida2-automations-v1'; if (!valid) throw new Error('manual-ingress-invalid'); return [{ json: { runKey: body.runKey, workflowKey: 'planning-suggestion', principalKey: 'planning-suggestion', idempotencyKey: body.idempotencyKey, requestKey: body.requestKey, attempt: body.attempt, trigger: body.trigger, contractVersion: 'vida2-automations-v1', shouldExecute: body.attempt === 1 } }];"}},{"id":"manual-planning-respond","name":"Respond planning-suggestion","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.5,"position":[520,960],"parameters":{"respondWith":"json","responseBody":"={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}","options":{"responseCode":200}}},{"id":"manual-planning-gate","name":"Gate planning-suggestion first delivery","type":"n8n-nodes-base.code","typeVersion":2,"position":[780,960],"parameters":{"jsCode":"if ($json.shouldExecute !== true) return []; return [{ json: $json }];"}},{"id":"manual-planning-execute","name":"Execute planning-suggestion runner","type":"n8n-nodes-base.executeWorkflow","typeVersion":1.2,"position":[1040,960],"onError":"continueRegularOutput","parameters":{"workflowId":"={{ $env.VIDA2_PLANNING_SUGGESTION_RUNNER_WORKFLOW_ID }}","mode":"each","waitForSubWorkflow":true,"workflowInputs":{"value":{"action":"execute","runKey":"={{ $json.runKey }}","workflowKey":"planning-suggestion","operations":"tasks.list,calendar.upcoming,task.create.propose"}}}},{"id":"manual-planning-result","name":"Build planning-suggestion callback","type":"n8n-nodes-base.code","typeVersion":2,"position":[1300,960],"parameters":{"jsCode":"const outcome = $json.outcome; const ok = outcome?.ok === true && typeof outcome.proposalKey === 'string'; const runKey = $('Gate planning-suggestion first delivery').first().json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-manual-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'planning-suggestion', principalKey: 'planning-suggestion', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'proposal-created' : 'invalid-result', summary: ok ? 'Propuesta pendiente creada.' : 'Ejecución controlada fallida.', proposalKey: ok ? outcome.proposalKey : null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"}},{"id":"manual-planning-callback","name":"Callback planning-suggestion","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[1560,960],"retryOnFail":true,"maxTries":3,"waitBetweenTries":5000,"parameters":{"method":"POST","url":"={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}","authentication":"genericCredentialType","genericAuthType":"httpHeaderAuth","sendHeaders":true,"headerParameters":{"parameters":[{"name":"x-vida-request-id","value":"={{ $json.callbackRequestId }}"}]},"sendBody":true,"contentType":"raw","rawContentType":"application/json","body":"={{ $json.callbackBody }}"}}],"connections":{"Webhook daily-briefing":{"main":[[{"node":"Validate daily-briefing","type":"main","index":0}]]},"Validate daily-briefing":{"main":[[{"node":"Respond daily-briefing","type":"main","index":0}]]},"Respond daily-briefing":{"main":[[{"node":"Gate daily-briefing first delivery","type":"main","index":0}]]},"Gate daily-briefing first delivery":{"main":[[{"node":"Execute daily-briefing runner","type":"main","index":0}]]},"Execute daily-briefing runner":{"main":[[{"node":"Build daily-briefing callback","type":"main","index":0}]]},"Build daily-briefing callback":{"main":[[{"node":"Callback daily-briefing","type":"main","index":0}]]},"Webhook technical-watchdog":{"main":[[{"node":"Validate technical-watchdog","type":"main","index":0}]]},"Validate technical-watchdog":{"main":[[{"node":"Respond technical-watchdog","type":"main","index":0}]]},"Respond technical-watchdog":{"main":[[{"node":"Gate technical-watchdog first delivery","type":"main","index":0}]]},"Gate technical-watchdog first delivery":{"main":[[{"node":"Execute technical-watchdog runner","type":"main","index":0}]]},"Execute technical-watchdog runner":{"main":[[{"node":"Build technical-watchdog callback","type":"main","index":0}]]},"Build technical-watchdog callback":{"main":[[{"node":"Callback technical-watchdog","type":"main","index":0}]]},"Webhook weekly-review":{"main":[[{"node":"Validate weekly-review","type":"main","index":0}]]},"Validate weekly-review":{"main":[[{"node":"Respond weekly-review","type":"main","index":0}]]},"Respond weekly-review":{"main":[[{"node":"Gate weekly-review first delivery","type":"main","index":0}]]},"Gate weekly-review first delivery":{"main":[[{"node":"Execute weekly-review runner","type":"main","index":0}]]},"Execute weekly-review runner":{"main":[[{"node":"Build weekly-review callback","type":"main","index":0}]]},"Build weekly-review callback":{"main":[[{"node":"Callback weekly-review","type":"main","index":0}]]},"Webhook planning-suggestion":{"main":[[{"node":"Validate planning-suggestion","type":"main","index":0}]]},"Validate planning-suggestion":{"main":[[{"node":"Respond planning-suggestion","type":"main","index":0}]]},"Respond planning-suggestion":{"main":[[{"node":"Gate planning-suggestion first delivery","type":"main","index":0}]]},"Gate planning-suggestion first delivery":{"main":[[{"node":"Execute planning-suggestion runner","type":"main","index":0}]]},"Execute planning-suggestion runner":{"main":[[{"node":"Build planning-suggestion callback","type":"main","index":0}]]},"Build planning-suggestion callback":{"main":[[{"node":"Callback planning-suggestion","type":"main","index":0}]]}},"settings":{"timezone":"America/Argentina/Cordoba","executionOrder":"v1"},"versionId":"vida2-manual-ingress-v1","meta":{"contractVersion":"vida2-automations-v1","role":"manual-ingress","webhookPaths":["vida2/automations/daily-briefing","vida2/automations/technical-watchdog","vida2/automations/weekly-review","vida2/automations/planning-suggestion"],"authentication":{"type":"httpHeaderAuth","headerName":"x-vida-automations-secret","valueContract":"AUTOMATIONS_N8N_WEBHOOK_SECRET"},"mappings":{"daily-briefing":{"principalKey":"daily-briefing","runnerVariable":"VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID","operations":["system.overview","tasks.list","projects.list","calendar.upcoming","approvals.list"]},"technical-watchdog":{"principalKey":"technical-watchdog","runnerVariable":"VIDA2_TECHNICAL_WATCHDOG_RUNNER_WORKFLOW_ID","operations":["technical.status","technical.logs"]},"weekly-review":{"principalKey":"weekly-review","runnerVariable":"VIDA2_WEEKLY_REVIEW_RUNNER_WORKFLOW_ID","operations":["areas.list","areas.get","tasks.list","projects.list","calendar.upcoming"]},"planning-suggestion":{"principalKey":"planning-suggestion","runnerVariable":"VIDA2_PLANNING_SUGGESTION_RUNNER_WORKFLOW_ID","operations":["tasks.list","calendar.upcoming","task.create.propose"]}},"runnerContract":"vida2-n8n-principal-runner-v1","callbackPath":"/api/automations/v1/runs","retryPolicy":"acknowledge-valid-retry-without-runner-redispatch","provisioningState":"credential-binding-required","executable":true}}
+{
+  "name": "Vida 2.0 · Manual ingress",
+  "active": false,
+  "nodes": [
+    {
+      "id": "manual-daily-webhook",
+      "name": "Webhook daily-briefing",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vida2/automations/daily-briefing",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "manual-daily-validate",
+      "name": "Validate daily-briefing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 0],
+      "parameters": {
+        "jsCode": "const body = $json.body; const expectedKeys = ['attempt', 'contractVersion', 'idempotencyKey', 'principalKey', 'requestKey', 'runKey', 'trigger', 'workflowKey']; const keys = body && typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).sort() : []; if (keys.length !== expectedKeys.length || !keys.every((key, index) => key === expectedKeys[index])) throw new Error('manual-ingress-invalid'); const valid = /^run_[A-Za-z0-9_-]{20,80}$/.test(body.runKey) && body.workflowKey === 'daily-briefing' && body.principalKey === 'daily-briefing' && /^manual:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.idempotencyKey) && /^request_[A-Za-z0-9_-]{24}$/.test(body.requestKey) && Number.isInteger(body.attempt) && body.attempt >= 1 && body.attempt <= 3 && body.trigger === (body.attempt === 1 ? 'manual' : 'retry') && body.contractVersion === 'vida2-automations-v1'; if (!valid) throw new Error('manual-ingress-invalid'); return [{ json: { runKey: body.runKey, workflowKey: 'daily-briefing', principalKey: 'daily-briefing', idempotencyKey: body.idempotencyKey, requestKey: body.requestKey, attempt: body.attempt, trigger: body.trigger, contractVersion: 'vida2-automations-v1', shouldExecute: body.attempt === 1 } }];"
+      }
+    },
+    {
+      "id": "manual-daily-respond",
+      "name": "Respond daily-briefing",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [520, 0],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}",
+        "options": { "responseCode": 200 }
+      }
+    },
+    {
+      "id": "manual-daily-gate",
+      "name": "Gate daily-briefing first delivery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 0],
+      "parameters": {
+        "jsCode": "if ($json.shouldExecute !== true) return []; return [{ json: $json }];"
+      }
+    },
+    {
+      "id": "manual-daily-execute",
+      "name": "Execute daily-briefing runner",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1040, 0],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "workflowId": "={{ $env.VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID }}",
+        "mode": "each",
+        "waitForSubWorkflow": true,
+        "workflowInputs": {
+          "value": {
+            "action": "execute",
+            "runKey": "={{ $json.runKey }}",
+            "workflowKey": "daily-briefing",
+            "operations": "system.overview,tasks.list,projects.list,calendar.upcoming,approvals.list"
+          }
+        }
+      }
+    },
+    {
+      "id": "manual-daily-result",
+      "name": "Build daily-briefing callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 0],
+      "parameters": {
+        "jsCode": "const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $('Gate daily-briefing first delivery').first().json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-manual-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'daily-briefing', principalKey: 'daily-briefing', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Briefing completado.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"
+      }
+    },
+    {
+      "id": "manual-daily-callback",
+      "name": "Callback daily-briefing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "x-vida-request-id", "value": "={{ $json.callbackRequestId }}" }]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}"
+      }
+    },
+    {
+      "id": "manual-technical-webhook",
+      "name": "Webhook technical-watchdog",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 320],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vida2/automations/technical-watchdog",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "manual-technical-validate",
+      "name": "Validate technical-watchdog",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 320],
+      "parameters": {
+        "jsCode": "const body = $json.body; const expectedKeys = ['attempt', 'contractVersion', 'idempotencyKey', 'principalKey', 'requestKey', 'runKey', 'trigger', 'workflowKey']; const keys = body && typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).sort() : []; if (keys.length !== expectedKeys.length || !keys.every((key, index) => key === expectedKeys[index])) throw new Error('manual-ingress-invalid'); const valid = /^run_[A-Za-z0-9_-]{20,80}$/.test(body.runKey) && body.workflowKey === 'technical-watchdog' && body.principalKey === 'technical-watchdog' && /^manual:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.idempotencyKey) && /^request_[A-Za-z0-9_-]{24}$/.test(body.requestKey) && Number.isInteger(body.attempt) && body.attempt >= 1 && body.attempt <= 3 && body.trigger === (body.attempt === 1 ? 'manual' : 'retry') && body.contractVersion === 'vida2-automations-v1'; if (!valid) throw new Error('manual-ingress-invalid'); return [{ json: { runKey: body.runKey, workflowKey: 'technical-watchdog', principalKey: 'technical-watchdog', idempotencyKey: body.idempotencyKey, requestKey: body.requestKey, attempt: body.attempt, trigger: body.trigger, contractVersion: 'vida2-automations-v1', shouldExecute: body.attempt === 1 } }];"
+      }
+    },
+    {
+      "id": "manual-technical-respond",
+      "name": "Respond technical-watchdog",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [520, 320],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}",
+        "options": { "responseCode": 200 }
+      }
+    },
+    {
+      "id": "manual-technical-gate",
+      "name": "Gate technical-watchdog first delivery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 320],
+      "parameters": {
+        "jsCode": "if ($json.shouldExecute !== true) return []; return [{ json: $json }];"
+      }
+    },
+    {
+      "id": "manual-technical-execute",
+      "name": "Execute technical-watchdog runner",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1040, 320],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "workflowId": "={{ $env.VIDA2_TECHNICAL_WATCHDOG_RUNNER_WORKFLOW_ID }}",
+        "mode": "each",
+        "waitForSubWorkflow": true,
+        "workflowInputs": {
+          "value": {
+            "action": "execute",
+            "runKey": "={{ $json.runKey }}",
+            "workflowKey": "technical-watchdog",
+            "operations": "technical.status,technical.logs"
+          }
+        }
+      }
+    },
+    {
+      "id": "manual-technical-result",
+      "name": "Build technical-watchdog callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 320],
+      "parameters": {
+        "jsCode": "const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $('Gate technical-watchdog first delivery').first().json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-manual-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'technical-watchdog', principalKey: 'technical-watchdog', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Chequeo completado.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"
+      }
+    },
+    {
+      "id": "manual-technical-callback",
+      "name": "Callback technical-watchdog",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 320],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "x-vida-request-id", "value": "={{ $json.callbackRequestId }}" }]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}"
+      }
+    },
+    {
+      "id": "manual-weekly-webhook",
+      "name": "Webhook weekly-review",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 640],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vida2/automations/weekly-review",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "manual-weekly-validate",
+      "name": "Validate weekly-review",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 640],
+      "parameters": {
+        "jsCode": "const body = $json.body; const expectedKeys = ['attempt', 'contractVersion', 'idempotencyKey', 'principalKey', 'requestKey', 'runKey', 'trigger', 'workflowKey']; const keys = body && typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).sort() : []; if (keys.length !== expectedKeys.length || !keys.every((key, index) => key === expectedKeys[index])) throw new Error('manual-ingress-invalid'); const valid = /^run_[A-Za-z0-9_-]{20,80}$/.test(body.runKey) && body.workflowKey === 'weekly-review' && body.principalKey === 'weekly-review' && /^manual:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.idempotencyKey) && /^request_[A-Za-z0-9_-]{24}$/.test(body.requestKey) && Number.isInteger(body.attempt) && body.attempt >= 1 && body.attempt <= 3 && body.trigger === (body.attempt === 1 ? 'manual' : 'retry') && body.contractVersion === 'vida2-automations-v1'; if (!valid) throw new Error('manual-ingress-invalid'); return [{ json: { runKey: body.runKey, workflowKey: 'weekly-review', principalKey: 'weekly-review', idempotencyKey: body.idempotencyKey, requestKey: body.requestKey, attempt: body.attempt, trigger: body.trigger, contractVersion: 'vida2-automations-v1', shouldExecute: body.attempt === 1 } }];"
+      }
+    },
+    {
+      "id": "manual-weekly-respond",
+      "name": "Respond weekly-review",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [520, 640],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}",
+        "options": { "responseCode": 200 }
+      }
+    },
+    {
+      "id": "manual-weekly-gate",
+      "name": "Gate weekly-review first delivery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 640],
+      "parameters": {
+        "jsCode": "if ($json.shouldExecute !== true) return []; return [{ json: $json }];"
+      }
+    },
+    {
+      "id": "manual-weekly-execute",
+      "name": "Execute weekly-review runner",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1040, 640],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "workflowId": "={{ $env.VIDA2_WEEKLY_REVIEW_RUNNER_WORKFLOW_ID }}",
+        "mode": "each",
+        "waitForSubWorkflow": true,
+        "workflowInputs": {
+          "value": {
+            "action": "execute",
+            "runKey": "={{ $json.runKey }}",
+            "workflowKey": "weekly-review",
+            "operations": "areas.list,areas.get,tasks.list,projects.list,calendar.upcoming"
+          }
+        }
+      }
+    },
+    {
+      "id": "manual-weekly-result",
+      "name": "Build weekly-review callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 640],
+      "parameters": {
+        "jsCode": "const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $('Gate weekly-review first delivery').first().json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-manual-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'weekly-review', principalKey: 'weekly-review', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Revisión completada.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"
+      }
+    },
+    {
+      "id": "manual-weekly-callback",
+      "name": "Callback weekly-review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 640],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "x-vida-request-id", "value": "={{ $json.callbackRequestId }}" }]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}"
+      }
+    },
+    {
+      "id": "manual-planning-webhook",
+      "name": "Webhook planning-suggestion",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 960],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vida2/automations/planning-suggestion",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "manual-planning-validate",
+      "name": "Validate planning-suggestion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 960],
+      "parameters": {
+        "jsCode": "const body = $json.body; const expectedKeys = ['attempt', 'contractVersion', 'idempotencyKey', 'principalKey', 'requestKey', 'runKey', 'trigger', 'workflowKey']; const keys = body && typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).sort() : []; if (keys.length !== expectedKeys.length || !keys.every((key, index) => key === expectedKeys[index])) throw new Error('manual-ingress-invalid'); const valid = /^run_[A-Za-z0-9_-]{20,80}$/.test(body.runKey) && body.workflowKey === 'planning-suggestion' && body.principalKey === 'planning-suggestion' && /^manual:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.idempotencyKey) && /^request_[A-Za-z0-9_-]{24}$/.test(body.requestKey) && Number.isInteger(body.attempt) && body.attempt >= 1 && body.attempt <= 3 && body.trigger === (body.attempt === 1 ? 'manual' : 'retry') && body.contractVersion === 'vida2-automations-v1'; if (!valid) throw new Error('manual-ingress-invalid'); return [{ json: { runKey: body.runKey, workflowKey: 'planning-suggestion', principalKey: 'planning-suggestion', idempotencyKey: body.idempotencyKey, requestKey: body.requestKey, attempt: body.attempt, trigger: body.trigger, contractVersion: 'vida2-automations-v1', shouldExecute: body.attempt === 1 } }];"
+      }
+    },
+    {
+      "id": "manual-planning-respond",
+      "name": "Respond planning-suggestion",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [520, 960],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, accepted: true, requestKey: $json.requestKey } }}",
+        "options": { "responseCode": 200 }
+      }
+    },
+    {
+      "id": "manual-planning-gate",
+      "name": "Gate planning-suggestion first delivery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 960],
+      "parameters": {
+        "jsCode": "if ($json.shouldExecute !== true) return []; return [{ json: $json }];"
+      }
+    },
+    {
+      "id": "manual-planning-execute",
+      "name": "Execute planning-suggestion runner",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1040, 960],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "workflowId": "={{ $env.VIDA2_PLANNING_SUGGESTION_RUNNER_WORKFLOW_ID }}",
+        "mode": "each",
+        "waitForSubWorkflow": true,
+        "workflowInputs": {
+          "value": {
+            "action": "execute",
+            "runKey": "={{ $json.runKey }}",
+            "workflowKey": "planning-suggestion",
+            "operations": "tasks.list,calendar.upcoming,task.create.propose"
+          }
+        }
+      }
+    },
+    {
+      "id": "manual-planning-result",
+      "name": "Build planning-suggestion callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 960],
+      "parameters": {
+        "jsCode": "const outcome = $json.outcome; const ok = outcome?.ok === true && typeof outcome.proposalKey === 'string'; const runKey = $('Gate planning-suggestion first delivery').first().json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-manual-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'planning-suggestion', principalKey: 'planning-suggestion', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'proposal-created' : 'invalid-result', summary: ok ? 'Propuesta pendiente creada.' : 'Ejecución controlada fallida.', proposalKey: ok ? outcome.proposalKey : null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"
+      }
+    },
+    {
+      "id": "manual-planning-callback",
+      "name": "Callback planning-suggestion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 960],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "x-vida-request-id", "value": "={{ $json.callbackRequestId }}" }]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook daily-briefing": {
+      "main": [[{ "node": "Validate daily-briefing", "type": "main", "index": 0 }]]
+    },
+    "Validate daily-briefing": {
+      "main": [[{ "node": "Respond daily-briefing", "type": "main", "index": 0 }]]
+    },
+    "Respond daily-briefing": {
+      "main": [[{ "node": "Gate daily-briefing first delivery", "type": "main", "index": 0 }]]
+    },
+    "Gate daily-briefing first delivery": {
+      "main": [[{ "node": "Execute daily-briefing runner", "type": "main", "index": 0 }]]
+    },
+    "Execute daily-briefing runner": {
+      "main": [[{ "node": "Build daily-briefing callback", "type": "main", "index": 0 }]]
+    },
+    "Build daily-briefing callback": {
+      "main": [[{ "node": "Callback daily-briefing", "type": "main", "index": 0 }]]
+    },
+    "Webhook technical-watchdog": {
+      "main": [[{ "node": "Validate technical-watchdog", "type": "main", "index": 0 }]]
+    },
+    "Validate technical-watchdog": {
+      "main": [[{ "node": "Respond technical-watchdog", "type": "main", "index": 0 }]]
+    },
+    "Respond technical-watchdog": {
+      "main": [[{ "node": "Gate technical-watchdog first delivery", "type": "main", "index": 0 }]]
+    },
+    "Gate technical-watchdog first delivery": {
+      "main": [[{ "node": "Execute technical-watchdog runner", "type": "main", "index": 0 }]]
+    },
+    "Execute technical-watchdog runner": {
+      "main": [[{ "node": "Build technical-watchdog callback", "type": "main", "index": 0 }]]
+    },
+    "Build technical-watchdog callback": {
+      "main": [[{ "node": "Callback technical-watchdog", "type": "main", "index": 0 }]]
+    },
+    "Webhook weekly-review": {
+      "main": [[{ "node": "Validate weekly-review", "type": "main", "index": 0 }]]
+    },
+    "Validate weekly-review": {
+      "main": [[{ "node": "Respond weekly-review", "type": "main", "index": 0 }]]
+    },
+    "Respond weekly-review": {
+      "main": [[{ "node": "Gate weekly-review first delivery", "type": "main", "index": 0 }]]
+    },
+    "Gate weekly-review first delivery": {
+      "main": [[{ "node": "Execute weekly-review runner", "type": "main", "index": 0 }]]
+    },
+    "Execute weekly-review runner": {
+      "main": [[{ "node": "Build weekly-review callback", "type": "main", "index": 0 }]]
+    },
+    "Build weekly-review callback": {
+      "main": [[{ "node": "Callback weekly-review", "type": "main", "index": 0 }]]
+    },
+    "Webhook planning-suggestion": {
+      "main": [[{ "node": "Validate planning-suggestion", "type": "main", "index": 0 }]]
+    },
+    "Validate planning-suggestion": {
+      "main": [[{ "node": "Respond planning-suggestion", "type": "main", "index": 0 }]]
+    },
+    "Respond planning-suggestion": {
+      "main": [[{ "node": "Gate planning-suggestion first delivery", "type": "main", "index": 0 }]]
+    },
+    "Gate planning-suggestion first delivery": {
+      "main": [[{ "node": "Execute planning-suggestion runner", "type": "main", "index": 0 }]]
+    },
+    "Execute planning-suggestion runner": {
+      "main": [[{ "node": "Build planning-suggestion callback", "type": "main", "index": 0 }]]
+    },
+    "Build planning-suggestion callback": {
+      "main": [[{ "node": "Callback planning-suggestion", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "timezone": "America/Argentina/Cordoba", "executionOrder": "v1" },
+  "versionId": "vida2-manual-ingress-v1",
+  "meta": {
+    "contractVersion": "vida2-automations-v1",
+    "role": "manual-ingress",
+    "webhookPaths": [
+      "vida2/automations/daily-briefing",
+      "vida2/automations/technical-watchdog",
+      "vida2/automations/weekly-review",
+      "vida2/automations/planning-suggestion"
+    ],
+    "authentication": {
+      "type": "httpHeaderAuth",
+      "headerName": "x-vida-automations-secret",
+      "valueContract": "AUTOMATIONS_N8N_WEBHOOK_SECRET"
+    },
+    "mappings": {
+      "daily-briefing": {
+        "principalKey": "daily-briefing",
+        "runnerVariable": "VIDA2_DAILY_BRIEFING_RUNNER_WORKFLOW_ID",
+        "operations": [
+          "system.overview",
+          "tasks.list",
+          "projects.list",
+          "calendar.upcoming",
+          "approvals.list"
+        ]
+      },
+      "technical-watchdog": {
+        "principalKey": "technical-watchdog",
+        "runnerVariable": "VIDA2_TECHNICAL_WATCHDOG_RUNNER_WORKFLOW_ID",
+        "operations": ["technical.status", "technical.logs"]
+      },
+      "weekly-review": {
+        "principalKey": "weekly-review",
+        "runnerVariable": "VIDA2_WEEKLY_REVIEW_RUNNER_WORKFLOW_ID",
+        "operations": [
+          "areas.list",
+          "areas.get",
+          "tasks.list",
+          "projects.list",
+          "calendar.upcoming"
+        ]
+      },
+      "planning-suggestion": {
+        "principalKey": "planning-suggestion",
+        "runnerVariable": "VIDA2_PLANNING_SUGGESTION_RUNNER_WORKFLOW_ID",
+        "operations": ["tasks.list", "calendar.upcoming", "task.create.propose"]
+      }
+    },
+    "runnerContract": "vida2-n8n-principal-runner-v1",
+    "callbackPath": "/api/automations/v1/runs",
+    "retryPolicy": "acknowledge-valid-retry-without-runner-redispatch",
+    "provisioningState": "credential-binding-required",
+    "executable": true
+  }
+}
