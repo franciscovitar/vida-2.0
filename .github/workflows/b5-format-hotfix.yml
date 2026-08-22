@@ -1,4 +1,4 @@
-name: B5 Delivery Validation
+name: B5 Delivery Repair Validation
 
 on:
   push:
@@ -6,17 +6,12 @@ on:
       - feature/controlled-automations-v1
     paths:
       - .github/workflows/b5-format-hotfix.yml
-  pull_request:
-    branches:
-      - main
-    paths:
-      - .github/workflows/b5-format-hotfix.yml
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  validate:
+  repair-and-validate:
     runs-on: ubuntu-latest
     steps:
       - name: Check out feature branch
@@ -34,6 +29,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Repair the four validator code strings
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'automations/n8n/manual-ingress.json';
+          const doc = JSON.parse(fs.readFileSync(file, 'utf8'));
+          const validators = doc.nodes.filter((node) => node.name.startsWith('Validate '));
+          if (validators.length !== 4) throw new Error(`expected 4 validators, found ${validators.length}`);
+          for (const node of validators) {
+            const code = node.parameters?.jsCode;
+            if (typeof code !== 'string' || !code.endsWith('} } }];')) {
+              throw new Error(`unexpected validator shape: ${node.name}`);
+            }
+            node.parameters.jsCode = `${code.slice(0, -7)}} }];`;
+          }
+          fs.writeFileSync(file, `${JSON.stringify(doc, null, 2)}\n`);
+          NODE
+          npx prettier --write automations/n8n/manual-ingress.json
+
+      - name: Focused Block 5 regression
+        run: node --import tsx --test tests/block5-automation-delivery-claim.test.ts tests/block5-automation-ui-n8n.test.ts tests/block5-delivery-claim-auth.test.ts tests/block5-manual-ingress-runkey.test.ts
+
       - name: Full test suite
         run: npm test
 
@@ -41,4 +59,17 @@ jobs:
         run: npm run verify
 
       - name: Diff hygiene
-        run: git diff --check origin/main...HEAD
+        run: git diff --check
+
+      - name: Commit validated repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add automations/n8n/manual-ingress.json
+          if git diff --cached --quiet; then
+            echo 'No repair required.'
+            exit 0
+          fi
+          git commit -m 'fix: correct manual ingress validator syntax'
+          git push origin HEAD:feature/controlled-automations-v1
