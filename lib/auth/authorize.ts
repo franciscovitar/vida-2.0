@@ -64,7 +64,6 @@ export function isEmailAuthorized(
   const list = entries
     .map((entry) => normalizeEmail(entry))
     .filter((entry): entry is string => Boolean(entry));
-
   if (list.length === 0) return false;
   return list.includes(email);
 }
@@ -131,6 +130,7 @@ export function evaluateSessionClaims(
 
 const MACHINE_AUTHENTICATED_PATHS = new Set([
   '/api/automations/v1/triggers/scheduled',
+  '/api/automations/v1/deliveries/claim',
   '/api/automations/v1/runs',
 ]);
 
@@ -198,36 +198,23 @@ export function buildMinimalSessionJwt(input: { userId: string; email: string; e
   email: string;
   exp: number;
 } {
-  return {
-    sub: input.userId,
-    email: normalizeEmail(input.email) ?? '',
-    exp: input.exp,
-  };
-}
-
-export function sessionJwtContainsSecrets(payload: Record<string, unknown>): boolean {
-  const forbidden = [
-    'accessToken',
-    'refreshToken',
-    'access_token',
-    'refresh_token',
-    'client_secret',
-    'clientSecret',
-    'AUTH_SECRET',
-    'AUTH_GOOGLE_SECRET',
-  ];
-  return forbidden.some((key) => key in payload && payload[key] != null);
-}
-
-/** Detecta scopes prohibidos en la URL de autorización de login. */
-export function loginAuthorizationHasCalendarScopes(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    const scope = parsed.searchParams.get('scope') ?? '';
-    return /calendar|drive|sheets|offline_access/i.test(scope);
-  } catch {
-    return /calendar|drive|sheets|offline_access/i.test(url);
-  }
+  return { sub: input.userId, email: input.email, exp: input.exp };
 }
 
 export const LOGIN_GOOGLE_SCOPES = 'openid email profile';
+
+export function loginAuthorizationHasCalendarScopes(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const scopes = parsed.searchParams.get('scope')?.split(/\s+/).filter(Boolean) ?? [];
+    return scopes.some((scope) => /calendar/i.test(scope));
+  } catch {
+    return false;
+  }
+}
+
+export function sessionJwtContainsSecrets(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const record = value as Record<string, unknown>;
+  return Object.keys(record).some((key) => /access.?token|refresh.?token|secret|credential/i.test(key));
+}
