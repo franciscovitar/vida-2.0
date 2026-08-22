@@ -6,6 +6,11 @@ on:
       - feature/controlled-automations-v1
     paths:
       - .github/workflows/b5-format-hotfix.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/b5-format-hotfix.yml
 
 permissions:
   contents: write
