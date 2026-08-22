@@ -69,17 +69,50 @@ jobs:
           let readme = fs.readFileSync(readmePath, 'utf8');
           const oldTransport = `Los runners deben usar credenciales n8n para HMAC. Las expresiones de estos exports solo leen de\n\`$env\` los IDs de runners y \`VIDA2_CONTROLLED_API_BASE_URL\`, que son configuración no secreta. Los\nsecretos y key IDs permanecen en Credentials cifradas de n8n y nunca se exponen mediante \`$env\` ni\nse incluyen en el export. El ingress manual usa la misma credencial \`HTTP Header Auth\` en Webhooks,\nnodos de delivery claim y callbacks; el header secreto no está en el export.\n\nLa instancia dedicada self-hosted Community 2.32.7 debe arrancar con\n\`N8N_BLOCK_ENV_ACCESS_IN_NODE=false\` para permitir estas expresiones. Este override se limita al\nruntime B5; no habilita acceso a secretos porque el contrato solo admite las variables\n\`VIDA2_*_RUNNER_WORKFLOW_ID\` y \`VIDA2_CONTROLLED_API_BASE_URL\`, y no se debilita ningún otro control\nde seguridad.`;
           const newTransport = `Los runners deben usar credenciales n8n para HMAC. Las expresiones regulares de estos exports leen\nde \`$env\` los IDs de runners y \`VIDA2_CONTROLLED_API_BASE_URL\`. Los secretos de Vida y los key IDs\npermanecen en Credentials cifradas de n8n y no se incluyen en el export. El ingress manual usa la\nmisma credencial \`HTTP Header Auth\` en Webhooks, nodos de delivery claim y callbacks; el header\n\`x-vida-automations-secret\` no está en el export.\n\nPreview protegido agrega una única excepción de transporte: \`VERCEL_AUTOMATION_BYPASS_SECRET\`.\nDebe generarse en Deployment Protection de Vercel, inyectarse solo en el proceso B5 local y enviarse\nexclusivamente como header \`x-vercel-protection-bypass\` en los cuatro delivery claims y los cuatro\ncallbacks. Nunca debe escribirse en GitHub, en el JSON del workflow, en URLs, bodies, logs o el\ncheckpoint. Si se creó solo para el E2E, debe revocarse al terminar.\n\nLa instancia dedicada self-hosted Community 2.32.7 debe arrancar con\n\`N8N_BLOCK_ENV_ACCESS_IN_NODE=false\` para permitir estas expresiones. El runtime B5 queda limitado a\nlos IDs de runner, la base URL y, solo cuando Preview está protegido, el bypass revocable de Vercel.\nNo se habilitan otros secretos por \`$env\` ni se debilita ningún otro control de seguridad.`;
-          if (!readme.includes(oldTransport)) {
+          if (readme.includes(oldTransport)) {
+            readme = readme.replace(oldTransport, newTransport);
+          } else if (!readme.includes('VERCEL_AUTOMATION_BYPASS_SECRET')) {
             throw new Error('expected transport documentation block not found');
           }
-          readme = readme.replace(oldTransport, newTransport);
           fs.writeFileSync(readmePath, readme);
+
+          const testPath = 'tests/block5-automation-ui-n8n.test.ts';
+          let testSource = fs.readFileSync(testPath, 'utf8');
+          const replacements = [
+            [
+              "`${label}: only approved VIDA2 environment bindings are allowed`,",
+              "`${label}: only approved environment bindings are allowed`,",
+            ],
+            [
+              "actualNames.every((name) => name.startsWith('VIDA2_'))",
+              "actualNames.every(\n      (name) => name.startsWith('VIDA2_') || name === 'VERCEL_AUTOMATION_BYPASS_SECRET',\n    )",
+            ],
+            [
+              "actualNames.some((name) => /SECRET|TOKEN|PASSWORD|PRIVATE|HMAC|KEY_ID/.test(name)),\n    false,",
+              "actualNames.some(\n      (name) =>\n        name !== 'VERCEL_AUTOMATION_BYPASS_SECRET' &&\n        /SECRET|TOKEN|PASSWORD|PRIVATE|HMAC|KEY_ID/.test(name),\n    ),\n    false,",
+            ],
+            [
+              "[...runnerVariables, 'VIDA2_CONTROLLED_API_BASE_URL'],",
+              "[\n      ...runnerVariables,\n      'VIDA2_CONTROLLED_API_BASE_URL',\n      'VERCEL_AUTOMATION_BYPASS_SECRET',\n    ],",
+            ],
+          ];
+          for (const [oldText, newText] of replacements) {
+            if (testSource.includes(oldText)) {
+              testSource = testSource.replace(oldText, newText);
+            } else if (!testSource.includes(newText)) {
+              throw new Error(`expected env guardrail fragment not found: ${oldText}`);
+            }
+          }
+          fs.writeFileSync(testPath, testSource);
           NODE
 
-          npx prettier --write automations/n8n/manual-ingress.json automations/n8n/README.md tests/block5-vercel-protection-bypass.test.ts
+          npx prettier --write automations/n8n/manual-ingress.json automations/n8n/README.md tests/block5-vercel-protection-bypass.test.ts tests/block5-automation-ui-n8n.test.ts
 
       - name: Focused regression
         run: node --import tsx --test tests/block5-vercel-protection-bypass.test.ts tests/block5-automation-ui-n8n.test.ts tests/block5-automation-delivery-claim.test.ts tests/block5-delivery-claim-auth.test.ts tests/block5-manual-ingress-runkey.test.ts
+
+      - name: Full test suite
+        run: npm test
 
       - name: Verify project
         run: npm run verify
@@ -92,7 +125,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add automations/n8n/manual-ingress.json automations/n8n/README.md tests/block5-vercel-protection-bypass.test.ts
+          git add automations/n8n/manual-ingress.json automations/n8n/README.md tests/block5-vercel-protection-bypass.test.ts tests/block5-automation-ui-n8n.test.ts
           if git diff --cached --quiet; then
             echo 'No hotfix changes required.'
             exit 0
