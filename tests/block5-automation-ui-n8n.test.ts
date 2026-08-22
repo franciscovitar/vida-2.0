@@ -80,15 +80,21 @@ function assertCommunityEnvContract(
   assert.deepEqual(
     [...new Set(actualNames)].sort(),
     [...expectedNames].sort(),
-    `${label}: only approved VIDA2 environment bindings are allowed`,
+    `${label}: only approved environment bindings are allowed`,
   );
   assert.equal(
-    actualNames.every((name) => name.startsWith('VIDA2_')),
+    actualNames.every(
+      (name) => name.startsWith('VIDA2_') || name === 'VERCEL_AUTOMATION_BYPASS_SECRET',
+    ),
     true,
     `${label}: environment bindings must stay inside the VIDA2 namespace`,
   );
   assert.equal(
-    actualNames.some((name) => /SECRET|TOKEN|PASSWORD|PRIVATE|HMAC|KEY_ID/.test(name)),
+    actualNames.some(
+      (name) =>
+        name !== 'VERCEL_AUTOMATION_BYPASS_SECRET' &&
+        /SECRET|TOKEN|PASSWORD|PRIVATE|HMAC|KEY_ID/.test(name),
+    ),
     false,
     `${label}: authentication material must remain in encrypted n8n Credentials`,
   );
@@ -368,7 +374,7 @@ test('block5 n8n: ingress manual reclama la primera entrega efectiva antes del A
   assert.equal('credentials' in template, false);
   assertCommunityEnvContract(
     raw,
-    [...runnerVariables, 'VIDA2_CONTROLLED_API_BASE_URL'],
+    [...runnerVariables, 'VIDA2_CONTROLLED_API_BASE_URL', 'VERCEL_AUTOMATION_BYPASS_SECRET'],
     'manual-ingress.json',
   );
   assert.equal(/https?:\/\//i.test(raw), false);

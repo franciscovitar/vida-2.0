@@ -27,16 +27,10 @@ test('block5 protected Preview: claim and callback use the Vercel automation byp
 
   for (const node of protectedRequests) {
     const headers = node.parameters.headerParameters?.parameters ?? [];
-    const bypassHeaders = headers.filter(
-      (header) => header.name === 'x-vercel-protection-bypass',
-    );
+    const bypassHeaders = headers.filter((header) => header.name === 'x-vercel-protection-bypass');
 
     assert.equal(bypassHeaders.length, 1, node.name);
-    assert.equal(
-      bypassHeaders[0]?.value,
-      '={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}',
-      node.name,
-    );
+    assert.equal(bypassHeaders[0]?.value, '={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}', node.name);
     assert.equal(String(node.parameters.url ?? '').includes('x-vercel-protection-bypass'), false);
     assert.equal(
       String(node.parameters.body ?? '').includes('VERCEL_AUTOMATION_BYPASS_SECRET'),

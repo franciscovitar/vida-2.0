@@ -46,6 +46,10 @@
             {
               "name": "x-vida-request-id",
               "value": "={{ 'claim:' + $json.requestKey }}"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}"
             }
           ]
         },
@@ -130,6 +134,10 @@
             {
               "name": "x-vida-request-id",
               "value": "={{ $json.callbackRequestId }}"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}"
             }
           ]
         },
@@ -183,6 +191,10 @@
             {
               "name": "x-vida-request-id",
               "value": "={{ 'claim:' + $json.requestKey }}"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}"
             }
           ]
         },
@@ -267,6 +279,10 @@
             {
               "name": "x-vida-request-id",
               "value": "={{ $json.callbackRequestId }}"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}"
             }
           ]
         },
@@ -320,6 +336,10 @@
             {
               "name": "x-vida-request-id",
               "value": "={{ 'claim:' + $json.requestKey }}"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}"
             }
           ]
         },
@@ -404,6 +424,10 @@
             {
               "name": "x-vida-request-id",
               "value": "={{ $json.callbackRequestId }}"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}"
             }
           ]
         },
@@ -457,6 +481,10 @@
             {
               "name": "x-vida-request-id",
               "value": "={{ 'claim:' + $json.requestKey }}"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}"
             }
           ]
         },
@@ -541,6 +569,10 @@
             {
               "name": "x-vida-request-id",
               "value": "={{ $json.callbackRequestId }}"
+            },
+            {
+              "name": "x-vercel-protection-bypass",
+              "value": "={{ $env.VERCEL_AUTOMATION_BYPASS_SECRET }}"
             }
           ]
         },

@@ -56,17 +56,22 @@ El runner implementa `vida2-n8n-principal-runner-v1` y dos acciones cerradas:
   devuelve `{ runKey, outcome }`. `outcome` admite solo `ok`, `proposalKey` opaca cuando corresponda
   y artefacto sanitizado; nunca respuestas crudas, IDs de proveedor ni instrucciones.
 
-Los runners deben usar credenciales n8n para HMAC. Las expresiones de estos exports solo leen de
-`$env` los IDs de runners y `VIDA2_CONTROLLED_API_BASE_URL`, que son configuración no secreta. Los
-secretos y key IDs permanecen en Credentials cifradas de n8n y nunca se exponen mediante `$env` ni
-se incluyen en el export. El ingress manual usa la misma credencial `HTTP Header Auth` en Webhooks,
-nodos de delivery claim y callbacks; el header secreto no está en el export.
+Los runners deben usar credenciales n8n para HMAC. Las expresiones regulares de estos exports leen
+de `$env` los IDs de runners y `VIDA2_CONTROLLED_API_BASE_URL`. Los secretos de Vida y los key IDs
+permanecen en Credentials cifradas de n8n y no se incluyen en el export. El ingress manual usa la
+misma credencial `HTTP Header Auth` en Webhooks, nodos de delivery claim y callbacks; el header
+`x-vida-automations-secret` no está en el export.
+
+Preview protegido agrega una única excepción de transporte: `VERCEL_AUTOMATION_BYPASS_SECRET`.
+Debe generarse en Deployment Protection de Vercel, inyectarse solo en el proceso B5 local y enviarse
+exclusivamente como header `x-vercel-protection-bypass` en los cuatro delivery claims y los cuatro
+callbacks. Nunca debe escribirse en GitHub, en el JSON del workflow, en URLs, bodies, logs o el
+checkpoint. Si se creó solo para el E2E, debe revocarse al terminar.
 
 La instancia dedicada self-hosted Community 2.32.7 debe arrancar con
-`N8N_BLOCK_ENV_ACCESS_IN_NODE=false` para permitir estas expresiones. Este override se limita al
-runtime B5; no habilita acceso a secretos porque el contrato solo admite las variables
-`VIDA2_*_RUNNER_WORKFLOW_ID` y `VIDA2_CONTROLLED_API_BASE_URL`, y no se debilita ningún otro control
-de seguridad.
+`N8N_BLOCK_ENV_ACCESS_IN_NODE=false` para permitir estas expresiones. El runtime B5 queda limitado a
+los IDs de runner, la base URL y, solo cuando Preview está protegido, el bypass revocable de Vercel.
+No se habilitan otros secretos por `$env` ni se debilita ningún otro control de seguridad.
 
 ## Checklist de Work antes de provisionar
 
