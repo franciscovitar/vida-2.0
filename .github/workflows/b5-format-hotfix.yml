@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Restore checkpoint from current main baseline
+        run: git checkout origin/main -- docs/WORK-CHECKPOINT.md
+
       - name: Format scoped Block 5 files
         run: npx prettier --write automations/n8n/manual-ingress.json docs/WORK-CHECKPOINT.md tests/block5-automation-delivery-claim.test.ts
 
@@ -44,12 +47,12 @@ jobs:
       - name: Commit formatting only
         shell: bash
         run: |
-          if git diff --quiet -- automations/n8n/manual-ingress.json docs/WORK-CHECKPOINT.md tests/block5-automation-delivery-claim.test.ts; then
-            echo 'No formatting changes required.'
-            exit 0
-          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add automations/n8n/manual-ingress.json docs/WORK-CHECKPOINT.md tests/block5-automation-delivery-claim.test.ts
+          if git diff --cached --quiet; then
+            echo 'No formatting changes required.'
+            exit 0
+          fi
           git commit -m 'style: format Block 5 delivery claim changes'
           git push origin HEAD:feature/controlled-automations-v1
