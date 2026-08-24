@@ -102,3 +102,11 @@ No se habilitan otros secretos por `$env` ni se debilita ningún otro control de
    runners que llama de vuelta a Vida, no solo en el ingress manual. Los seis runners no tienen
    fuente canónica en este repositorio (viven en el inventario privado de Work); confirmar el header
    directamente en cada runner desplegado.
+9. El nodo HTTP `execute` de cada runner que llama de vuelta a Vida debe emitir el body JSON ya
+   parseado, nunca un stream/binario. Si ese nodo envía su body con Content Type "raw" (necesario
+   para firmar exactamente los mismos bytes que se envían), "Response Format" debe ser
+   `Autodetect`, no `JSON`: con body raw, el nodo fuerza una respuesta en streaming y sólo el modo
+   Autodetect decodifica ese stream a texto y lo parsea como JSON cuando el `Content-Type` de la
+   respuesta es `application/json`; el modo `JSON` explícito no decodifica el stream y deja pasar
+   el objeto de transporte crudo. "Include Response Headers and Status" debe permanecer
+   deshabilitado salvo que el nodo siguiente desenvuelva `.body` explícitamente.
