@@ -64,9 +64,13 @@ misma credencial `HTTP Header Auth` en Webhooks, nodos de delivery claim y callb
 
 Preview protegido agrega una única excepción de transporte: `VERCEL_AUTOMATION_BYPASS_SECRET`.
 Debe generarse en Deployment Protection de Vercel, inyectarse solo en el proceso B5 local y enviarse
-exclusivamente como header `x-vercel-protection-bypass` en los cuatro delivery claims y los cuatro
-callbacks. Nunca debe escribirse en GitHub, en el JSON del workflow, en URLs, bodies, logs o el
-checkpoint. Si se creó solo para el E2E, debe revocarse al terminar.
+exclusivamente como header `x-vercel-protection-bypass` en toda llamada saliente que cruce esa
+protección hacia `VIDA2_CONTROLLED_API_BASE_URL`: los cuatro delivery claims y los cuatro callbacks
+del ingress manual, y también la llamada `execute` de cada uno de los seis runners privados (el nodo
+que llama de vuelta a Vida, p. ej. lecturas `POST /api/openclaw/v1/read`). Omitir el header en los
+runners produce `401` de Vercel indistinguible de un fallo de aplicación. Nunca debe escribirse en
+GitHub, en el JSON del workflow, en URLs, bodies, logs o el checkpoint. Si se creó solo para el E2E,
+debe revocarse al terminar.
 
 La instancia dedicada self-hosted Community 2.32.7 debe arrancar con
 `N8N_BLOCK_ENV_ACCESS_IN_NODE=false` para permitir estas expresiones. El runtime B5 queda limitado a
@@ -93,3 +97,8 @@ No se habilitan otros secretos por `$env` ni se debilita ningún otro control de
    proveedores; planning solo admite `task.create.propose` y no hay approve/reject/execute/rollback.
 7. Recién después habilitar la señal de seis unidades provisionadas. Importar JSON o asignar una
    credencial sin pruebas no satisface readiness.
+8. Si Preview está protegido, vincular `x-vercel-protection-bypass` (valor
+   `$env.VERCEL_AUTOMATION_BYPASS_SECRET`) también en el nodo `execute` de cada uno de los seis
+   runners que llama de vuelta a Vida, no solo en el ingress manual. Los seis runners no tienen
+   fuente canónica en este repositorio (viven en el inventario privado de Work); confirmar el header
+   directamente en cada runner desplegado.
