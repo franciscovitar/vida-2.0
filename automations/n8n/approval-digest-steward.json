@@ -29,7 +29,11 @@
       "typeVersion": 1.2,
       "position": [500, 0],
       "parameters": {
-        "workflowId": "={{ $env.VIDA2_APPROVAL_DIGEST_STEWARD_RUNNER_WORKFLOW_ID }}",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $env.VIDA2_APPROVAL_DIGEST_STEWARD_RUNNER_WORKFLOW_ID }}",
+          "mode": "id"
+        },
         "mode": "each",
         "waitForSubWorkflow": true,
         "workflowInputs": {
@@ -64,7 +68,11 @@
       "position": [1020, 0],
       "onError": "continueRegularOutput",
       "parameters": {
-        "workflowId": "={{ $env.VIDA2_APPROVAL_DIGEST_STEWARD_RUNNER_WORKFLOW_ID }}",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $env.VIDA2_APPROVAL_DIGEST_STEWARD_RUNNER_WORKFLOW_ID }}",
+          "mode": "id"
+        },
         "mode": "each",
         "waitForSubWorkflow": true,
         "workflowInputs": {

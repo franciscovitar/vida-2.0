@@ -36,6 +36,7 @@ type N8nTemplate = {
 type N8nNode = {
   name: string;
   type: string;
+  typeVersion?: number;
   parameters: Record<string, unknown>;
 };
 
@@ -218,6 +219,34 @@ test('block5 n8n: hay seis unidades inactivas para cinco contratos y dos digest 
   assert.equal(runnerVariables.size, 6);
 });
 
+test('block5 n8n: todo nodo Execute Workflow >=1.1 usa workflowId como selector __rl/mode=id', () => {
+  const directory = path.join(process.cwd(), 'automations/n8n');
+  const files = readdirSync(directory)
+    .filter((file) => file.endsWith('.json'))
+    .sort();
+  assert.equal(files.length, 7);
+  const runnerVariablePattern = /^={{ \$env\.VIDA2_[A-Z_]+_RUNNER_WORKFLOW_ID }}$/;
+  let checked = 0;
+  for (const file of files) {
+    const raw = readFileSync(path.join(directory, file), 'utf8');
+    const template = JSON.parse(raw) as N8nTemplate;
+    for (const node of template.nodes) {
+      if (node.type !== 'n8n-nodes-base.executeWorkflow') continue;
+      if ((node.typeVersion ?? 0) < 1.1) continue;
+      checked += 1;
+      const workflowId = node.parameters.workflowId;
+      assert.equal(typeof workflowId, 'object', `${file}/${node.name}`);
+      assert.notEqual(workflowId, null, `${file}/${node.name}`);
+      const selector = workflowId as { __rl?: unknown; mode?: unknown; value?: unknown };
+      assert.equal(selector.__rl, true, `${file}/${node.name}`);
+      assert.equal(selector.mode, 'id', `${file}/${node.name}`);
+      assert.equal(typeof selector.value, 'string', `${file}/${node.name}`);
+      assert.match(selector.value as string, runnerVariablePattern, `${file}/${node.name}`);
+    }
+  }
+  assert.equal(checked, 16);
+});
+
 test('block5 n8n: ingress manual reclama la primera entrega efectiva antes del ACK y no redispatcha retries posteriores', () => {
   const file = path.join(process.cwd(), 'automations/n8n/manual-ingress.json');
   const raw = readFileSync(file, 'utf8');
@@ -359,7 +388,14 @@ test('block5 n8n: ingress manual reclama la primera entrega efectiva antes del A
     assert.equal(inputs.value.runKey, '={{ $json.runKey }}');
     assert.equal(inputs.value.workflowKey, workflowKey);
     assert.equal(inputs.value.operations, mapping.operations.join(','));
-    assert.equal(String(execute.parameters.workflowId).includes(mapping.runnerVariable), true);
+    const workflowIdSelector = execute.parameters.workflowId as {
+      __rl: boolean;
+      mode: string;
+      value: string;
+    };
+    assert.equal(workflowIdSelector.__rl, true);
+    assert.equal(workflowIdSelector.mode, 'id');
+    assert.equal(workflowIdSelector.value.includes(mapping.runnerVariable), true);
     assert.equal(callback.type, 'n8n-nodes-base.httpRequest');
     assert.equal(callback.parameters.method, 'POST');
     assert.equal(String(callback.parameters.url).includes('/api/automations/v1/runs'), true);
