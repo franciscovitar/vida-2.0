@@ -23,52 +23,50 @@ Estados recomendados:
 - `DONE`: gate completado y no requiere repetición salvo que cambie una dependencia;
 - `UNKNOWN`: falta evidencia actual.
 
-## Último handoff operativo
+## Bloque 5 — estado de cierre
 
-> Registrado como continuidad de la sesión de setup previa. Revalidar los ítems marcados
-> `LAST_KNOWN` antes de usarlos como hechos actuales.
+**B5 = DONE.**
 
-| Componente / gate        | Estado       | Último dato conocido                                                                 | Regla al retomar                                                                                            |
-| ------------------------ | ------------ | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| Repositorio `main`       | `VERIFIED`   | `28b536667810268365b8d08cb47b9db90b1fe39f` al crear este checkpoint                  | No confundir este SHA con un SHA de Preview; volver a leer `main` si el trabajo depende del código actual.  |
-| Preview                  | `LAST_KNOWN` | Se había reportado `READY` en la sesión de setup                                     | Verificar deployment y readiness reales antes de cualquier E2E.                                             |
-| SHA/candidato de Preview | `LAST_KNOWN` | Se había trabajado con un candidato `8a401949…`                                      | Confirmar el SHA completo y que corresponda al Preview activo antes de usarlo.                              |
-| Túnel                    | `LAST_KNOWN` | Tailscale configurado y elegido como transporte estable                              | Probar reachability. Si funciona, conservarlo; no volver a Cloudflare/ngrok por defecto.                    |
-| Login/OAuth Google       | `LAST_KNOWN` | Autenticación humana completada en navegador del usuario                             | Verificar el efecto/autorización resultante; no reiniciar OAuth sólo por falta de sesión en otro navegador. |
-| n8n                      | `LAST_KNOWN` | Proceso detenido al último cierre; se habían observado 15 ejecuciones                | Verificar proceso/workflow actual antes de iniciar o repetir ejecuciones.                                   |
-| Store temporal / Upstash | `BLOCKED`    | El recurso temporal se había reportado expirado                                      | Restaurar o reemplazar sólo este recurso; después volver a ejecutar readiness.                              |
-| Readiness global         | `BLOCKED`    | No debe considerarse `PASS` mientras el store temporal siga inválido o sin verificar | Resolver primer blocker y revalidar.                                                                        |
-| E2E final                | `LAST_KNOWN` | No ejecutado todavía                                                                 | Ejecutar una sola cadena final cuando todos los gates requeridos estén en `PASS`.                           |
-| Production               | `LAST_KNOWN` | No debía tocarse durante este setup                                                  | Mantener sin cambios salvo autorización explícita específica.                                               |
-| Datos externos           | `LAST_KNOWN` | Sin cambios intencionales fuera del flujo de prueba                                  | Preservar; verificar efectos antes de repetir acciones con side effects.                                    |
+### Evidencia final
+
+- E2E funcional de Briefing diario: `PASS`.
+- Resultado terminal en Vida: `status=succeeded`, `resultCode=completed`,
+  `summary="Briefing completado."`.
+- Las cinco lecturas autorizadas de OpenClaw respondieron `ok=true`.
+- Artefacto de briefing sanitizado y acotado persistido (no `null`).
+- Dispatches manuales duplicados: 0.
+- Propuestas creadas: 0.
+- Escrituras externas no intencionadas: 0.
+- Los seis workflows programados permanecieron inactivos durante todo el ciclo (`schedules=0`).
+- Conteo final de ejecuciones n8n: 33.
+- Production sin cambios.
+
+### Cleanup aplicado
+
+- Manual ingress: unpublished.
+- Los seis workflows programados: inactivos.
+- Runtime dedicado de n8n B5: detenido.
+- Puerto 5678: cerrado.
+- Tailscale Funnel: apagado.
+- Historial/evidencia de ejecuciones: preservado (no se borró ninguna ejecución, workflow ni
+  credencial).
+
+### Dependencias temporales de Preview
+
+- El store temporal de automatizaciones de B5 usado durante la validación puede seguir existiendo o
+  haber expirado; no se revalidó al cierre.
+- El store temporal de seguridad de OpenClaw usado durante la validación puede seguir existiendo o
+  haber expirado; no se revalidó al cierre.
+- Puede quedar algún recurso temporal huérfano de sesiones anteriores.
+- La disposición de estos recursos queda diferida intencionalmente.
+- Ninguno de estos ítems debe tratarse como verdad vigente: revalidar antes de cualquier uso futuro.
+- Este archivo nunca contiene credenciales, URLs, tokens ni valores de secretos.
 
 ## Próxima acción canónica
 
-Mientras el estado anterior siga siendo válido, el orden es:
+**No repetir el E2E de B5 sin evidencia de regresión.** El siguiente paso canónico del producto es:
 
-1. verificar que el blocker real siga siendo el store temporal;
-2. restaurar o reemplazar el recurso temporal mínimo necesario;
-3. ejecutar el readiness check completo;
-4. si y sólo si devuelve `PASS`, ejecutar una única cadena E2E final;
-5. registrar evidencia observable del resultado y actualizar este checkpoint.
-
-Si al revalidar aparece un blocker anterior o diferente, **ese nuevo blocker pasa a ser la próxima
-acción**. No continuar por inercia con los pasos de arriba.
-
-## Evidencia mínima para marcar cierre
-
-El setup/E2E puede considerarse cerrado sólo cuando quede evidencia actual de:
-
-- Preview correcto y accesible;
-- SHA/deployment esperado confirmado;
-- túnel alcanzable si el flujo lo requiere;
-- autenticaciones necesarias efectivas;
-- servicios requeridos activos;
-- store/dependencias temporales válidas;
-- readiness en `PASS`;
-- una ejecución E2E final completada con resultado observable;
-- ausencia de cambios no autorizados en Production;
-- checkpoint actualizado con el resultado final.
+**B6 — experiencia conversacional local completa de OpenClaw.**
 
 ## Higiene del archivo
 

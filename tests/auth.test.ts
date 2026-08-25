@@ -266,8 +266,12 @@ test('8–10. /agenda, /tareas y /proyectos están protegidas', () => {
   }
 });
 
-test('proxy permite solo los dos endpoints machine-authenticated exactos del Bloque 5', () => {
-  for (const pathname of ['/api/automations/v1/triggers/scheduled', '/api/automations/v1/runs']) {
+test('proxy permite solo los tres endpoints machine-authenticated exactos del Bloque 5', () => {
+  for (const pathname of [
+    '/api/automations/v1/triggers/scheduled',
+    '/api/automations/v1/deliveries/claim',
+    '/api/automations/v1/runs',
+  ]) {
     assert.equal(isPublicAuthPath(pathname), true);
     assert.deepEqual(
       resolveAuthProxyDecision({
