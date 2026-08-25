@@ -1,31 +1,47 @@
 {
   "id": "vida-2-0-api",
   "name": "Vida 2.0 API",
-  "description": "Closed, typed bridge from one isolated local Vida agent to the private Vida 2.0 OpenClaw API.",
+  "description": "Closed, typed bridge from one isolated local Vida agent to the private Vida 2.0 OpenClaw API (HMAC v2, read-only or pending-proposal only, no Journaling).",
   "version": "0.1.0",
   "activation": {
     "onStartup": false,
     "onCapabilities": ["tool"]
   },
-  "contracts": {
-    "tools": ["vida_operation"]
-  },
-  "toolMetadata": {
-    "vida_operation": {
-      "optional": true
-    }
-  },
   "configContracts": {
     "secretInputs": {
       "paths": [
-        { "path": "agents.steward.keyId", "expected": "string" },
-        { "path": "agents.steward.secret", "expected": "string" },
-        { "path": "agents.health-reflection.keyId", "expected": "string" },
-        { "path": "agents.health-reflection.secret", "expected": "string" },
-        { "path": "agents.digital-order.keyId", "expected": "string" },
-        { "path": "agents.digital-order.secret", "expected": "string" },
-        { "path": "agents.technical-guardian.keyId", "expected": "string" },
-        { "path": "agents.technical-guardian.secret", "expected": "string" }
+        {
+          "path": "agents.steward.keyId",
+          "expected": "string"
+        },
+        {
+          "path": "agents.steward.secret",
+          "expected": "string"
+        },
+        {
+          "path": "agents.health-reflection.keyId",
+          "expected": "string"
+        },
+        {
+          "path": "agents.health-reflection.secret",
+          "expected": "string"
+        },
+        {
+          "path": "agents.digital-order.keyId",
+          "expected": "string"
+        },
+        {
+          "path": "agents.digital-order.secret",
+          "expected": "string"
+        },
+        {
+          "path": "agents.technical-guardian.keyId",
+          "expected": "string"
+        },
+        {
+          "path": "agents.technical-guardian.secret",
+          "expected": "string"
+        }
       ]
     }
   },
@@ -43,34 +59,87 @@
   },
   "configSchema": {
     "type": "object",
-    "additionalProperties": false,
-    "required": ["baseUrl"],
+    "required": ["baseUrl", "agents"],
     "properties": {
       "baseUrl": {
         "type": "string",
-        "minLength": 1
+        "minLength": 1,
+        "description": "Vida origin only, e.g. https://vida.example.com. No path, no query string."
       },
       "agents": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
-          "steward": { "$ref": "#/$defs/agentCredential" },
-          "health-reflection": { "$ref": "#/$defs/agentCredential" },
-          "digital-order": { "$ref": "#/$defs/agentCredential" },
-          "technical-guardian": { "$ref": "#/$defs/agentCredential" }
+          "steward": {
+            "type": "object",
+            "required": ["keyId", "secret"],
+            "properties": {
+              "keyId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "secret": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "health-reflection": {
+            "type": "object",
+            "required": ["keyId", "secret"],
+            "properties": {
+              "keyId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "secret": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "digital-order": {
+            "type": "object",
+            "required": ["keyId", "secret"],
+            "properties": {
+              "keyId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "secret": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "technical-guardian": {
+            "type": "object",
+            "required": ["keyId", "secret"],
+            "properties": {
+              "keyId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "secret": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
         }
       }
     },
-    "$defs": {
-      "agentCredential": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["keyId", "secret"],
-        "properties": {
-          "keyId": { "type": "string", "minLength": 1 },
-          "secret": { "type": "string", "minLength": 1 }
-        }
-      }
+    "additionalProperties": false
+  },
+  "contracts": {
+    "tools": ["vida_operation"]
+  },
+  "toolMetadata": {
+    "vida_operation": {
+      "optional": true
     }
   }
 }

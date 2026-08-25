@@ -19,7 +19,10 @@ function readAdapterSource(): string {
   return readFileSync(ADAPTER_PATH, 'utf8');
 }
 
-function readManifest(): { activation: { onStartup: boolean; onCapabilities: string[] } } {
+function readManifest(): {
+  description: string;
+  activation: { onStartup: boolean; onCapabilities: string[] };
+} {
   return JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
 }
 
@@ -83,4 +86,21 @@ test('adapter passes an explicit activation block to defineToolPlugin that match
 test('openclaw.plugin.json declares the plugin as not started eagerly on Gateway startup', () => {
   const manifest = readManifest();
   assert.equal(manifest.activation.onStartup, false);
+});
+
+test('manifest description matches the source description passed to defineToolPlugin verbatim (stale-manifest regression guard)', () => {
+  const source = readAdapterSource();
+  const manifest = readManifest();
+
+  const descriptionMatch = source.match(
+    /export default defineToolPlugin\(\{[\s\S]*?description:\s*\n?\s*'((?:[^'\\]|\\.)*)'/,
+  );
+  assert.ok(descriptionMatch, 'expected a description field on the defineToolPlugin(...) call');
+  const sourceDescription = (descriptionMatch![1] ?? '').replace(/\\'/g, "'");
+
+  assert.equal(
+    manifest.description,
+    sourceDescription,
+    'openclaw.plugin.json "description" must be regenerated with `openclaw plugins build` after changing the source description, not hand-edited independently',
+  );
 });

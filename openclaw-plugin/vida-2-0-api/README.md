@@ -17,9 +17,16 @@ an explicit later Work step.
   at `tests/openclaw-plugin-*.test.ts` via `node --import tsx --test`.
 - `src/adapter/plugin.ts` -- the OpenClaw SDK wiring (`defineToolPlugin`,
   `typebox`). This is the only file that imports `openclaw` or `typebox`.
-- `openclaw.plugin.json` -- the native plugin manifest, hand-authored
-  against the installed `openclaw@2026.7.1-2` plugin-manifest schema
-  (`docs/plugins/manifest.md` in the OpenClaw package).
+- `openclaw.plugin.json` -- the native plugin manifest. Its `description`,
+  `activation`, `configSchema`, `contracts`, and `toolMetadata` fields are
+  generated from `src/adapter/plugin.ts` by `openclaw plugins build
+--entry ./dist/adapter/plugin.js` (confirmed against installed
+  `openclaw@2026.7.1-2`; see `docs/plugins/manifest.md` in the OpenClaw
+  package for the full schema). `configContracts` and `uiHints` are
+  hand-authored manifest-only metadata that the generator does not touch.
+  Re-run `openclaw plugins build` after changing the adapter's tool
+  parameters, config schema, description, or activation, and commit the
+  regenerated file verbatim rather than hand-editing it.
 
 ## Building and installing (later Work step, not run by this change)
 
@@ -56,3 +63,8 @@ openclaw plugins install .
 `digital-order` currently has no allowed reads or proposals; configuring a
 credential for it does not grant it any capability -- the tool factory
 returns `null` for any agent with no Vida-data capability.
+
+The `agents` object itself is a required config key (it may be `{}`), even
+though every named agent entry inside it is optional -- an unconfigured
+agent simply gets `missing-credential` at dispatch time, not a config
+validation error.
