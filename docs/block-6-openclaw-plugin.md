@@ -123,6 +123,30 @@ operaciones GET no llevan cuerpo y hashean la cadena vacía. Nunca hay
 query string: la URL se construye siempre como `baseUrl + pathname` fijo,
 sin interpolar nada proveniente del modelo.
 
+## Preview protegido de Vercel (transporte, no autenticación)
+
+Un Preview exacto de Vercel puede tener Deployment Protection activo. En ese
+caso, una request que no la cruce nunca llega a Vida, sin importar si el HMAC
+es válido. El plugin admite un valor de bypass fijo y opcional,
+`vercelProtectionBypass`, mapeado internamente a un único header fijo:
+`x-vercel-protection-bypass` — el mismo contrato ya establecido en el
+Bloque 5 (`automations/n8n/README.md`,
+`tests/block5-vercel-protection-bypass.test.ts`).
+
+Es exclusivamente transporte hacia Vercel, nunca autenticación hacia Vida:
+
+- Es un SecretRef (`configContracts.secretInputs` en `openclaw.plugin.json`),
+  nunca un valor literal en el repo.
+- Se agrega después de firmar; nunca forma parte del canonical string HMAC,
+  del cuerpo ni de un query string.
+- Solo existe ese header fijo — no hay mapa de headers arbitrario ni forma
+  de que el modelo lo provea o lo sobrescriba.
+- El HMAC `vida2-openclaw-hmac-v2` sigue siendo obligatorio y sin cambios:
+  este valor no lo reemplaza ni lo debilita.
+- Production no requiere ni obtiene este valor automáticamente por tener
+  esta capacidad disponible en el plugin — solo aplica cuando el operador
+  configura `baseUrl` contra un Preview con Deployment Protection activo.
+
 ## Sin reintentos
 
 El dispatcher hace exactamente un intento de red por llamada. Un fallo de

@@ -49,6 +49,14 @@
  * manifest, keeps the plugin's real default posture -- not eagerly loaded
  * at Gateway startup, available only through explicit tool-capability
  * activation and per-agent allowlisting.
+ *
+ * `vercelProtectionBypass` is an optional, SecretRef-eligible config value
+ * (see `configContracts.secretInputs` in `openclaw.plugin.json`) for a
+ * protected Vercel Preview host. It is Vercel transport only: the dispatcher
+ * maps it to exactly one fixed header, `x-vercel-protection-bypass`, added
+ * after HMAC signing so it can never affect the canonical string. It is not
+ * a tool parameter, so the model can never supply or override it, and it
+ * only ever maps to that one fixed header name -- never an arbitrary one.
  */
 import { Type, type Static } from 'typebox';
 import { defineToolPlugin } from 'openclaw/plugin-sdk/tool-plugin';
@@ -124,6 +132,13 @@ const ConfigSchema = Type.Object(
       minLength: 1,
       description: 'Vida origin only, e.g. https://vida.example.com. No path, no query string.',
     }),
+    vercelProtectionBypass: Type.Optional(
+      Type.String({
+        minLength: 1,
+        description:
+          'Optional fixed Vercel Deployment Protection bypass value for a protected Preview host. Sent only as the exact header x-vercel-protection-bypass; never signed, never part of the body or a query string, never a substitute for Vida HMAC.',
+      }),
+    ),
     agents: Type.Partial(
       Type.Object(
         {
@@ -167,7 +182,10 @@ function buildVidaOperationTool(
       const result = await executeVidaOperation({
         agentId,
         call,
-        config: { baseUrl: config.baseUrl },
+        config: {
+          baseUrl: config.baseUrl,
+          vercelProtectionBypass: config.vercelProtectionBypass,
+        },
         deps: {
           fetch,
           now: () => Date.now(),

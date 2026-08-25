@@ -46,6 +46,14 @@ openclaw plugins install .
       'vida-2-0-api': {
         config: {
           baseUrl: 'https://<vida-preview-or-prod-host>',
+          // Optional. Only needed when baseUrl is a Vercel Preview with
+          // Deployment Protection enabled -- see docs/block-6-openclaw-plugin.md.
+          // Vercel transport only; never replaces Vida HMAC.
+          vercelProtectionBypass: {
+            source: 'env',
+            provider: 'default',
+            id: 'VERCEL_AUTOMATION_BYPASS_SECRET',
+          },
           agents: {
             steward: {
               keyId: { source: 'env', provider: 'default', id: 'OPENCLAW_STEWARD_API_KEY_ID' },

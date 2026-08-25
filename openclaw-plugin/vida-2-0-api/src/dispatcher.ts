@@ -16,6 +16,12 @@
  *   error, never silently retried.
  * - returned results never carry the signing secret, the canonical
  *   string, the HMAC signature, Vida's raw error body, or a stack trace.
+ *
+ * An optional `vercelProtectionBypass` config value adds exactly one fixed,
+ * unsigned transport header (`x-vercel-protection-bypass`) for a protected
+ * Vercel Preview host. It never changes the Vida HMAC canonical string, the
+ * body, the pathname, or the query string, and it is never echoed back in a
+ * result.
  */
 import { isVidaAgentId, isOperationAllowedForAgent } from './agents.js';
 import { buildCanonicalString, formatTimestamp, signCanonical } from './canonical.js';
@@ -65,6 +71,18 @@ export type ClockLike = () => number;
 export type VidaClientConfig = {
   /** Vida origin only, e.g. https://vida.example.com -- no path, no trailing slash required. */
   readonly baseUrl: string;
+  /**
+   * Optional fixed Vercel Deployment Protection bypass value for a protected
+   * Preview host. Purely a transport-layer exception at Vercel: it is never
+   * part of the Vida HMAC canonical string, never signed, never placed in
+   * the body or a query string, and never maps to anything other than the
+   * single fixed header `x-vercel-protection-bypass` (see the established
+   * B5 contract in `automations/n8n/README.md` /
+   * `tests/block5-vercel-protection-bypass.test.ts`). Vida's own HMAC
+   * authentication remains mandatory and is completely unaffected by this
+   * value's presence or absence.
+   */
+  readonly vercelProtectionBypass?: string;
 };
 
 export type VidaDispatchDeps = {
@@ -257,6 +275,12 @@ export async function executeVidaOperation(params: {
   };
   if (route.method === 'POST') {
     headers['Content-Type'] = 'application/json';
+  }
+  // Added after signing on purpose: a Vercel Preview transport exception,
+  // never part of the HMAC canonical string above. Fixed header name only --
+  // config never supplies a header name, only this one value.
+  if (config.vercelProtectionBypass) {
+    headers['x-vercel-protection-bypass'] = config.vercelProtectionBypass;
   }
 
   const url = buildTargetUrl(config.baseUrl, route.pathname);
