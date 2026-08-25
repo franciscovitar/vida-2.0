@@ -25,10 +25,38 @@
  * `config` object is populated, so this file only ever sees plain already-
  * resolved strings (or nothing, for an unconfigured agent) -- never a ref
  * object and never a value this repository wrote.
+ *
+ * `payloadTextResult`/`failedTextResult` are imported from
+ * `openclaw/plugin-sdk/agent-runtime`, not `openclaw/plugin-sdk/core`:
+ * confirmed against the installed openclaw@2026.7.1-2 package that
+ * `core.d.ts` does not export either helper, while `agent-runtime.d.ts`
+ * does (both re-export the same underlying `common-CZ-od2BP` helpers).
+ * `agent-runtime` is documented as a deprecated broad barrel for other,
+ * unrelated helpers, but it is still the only public plugin-sdk subpath
+ * that exports these two -- there is no narrower alternative to prefer.
+ * They are needed only because a `factory`-built tool's `execute` bypasses
+ * `defineToolPlugin`'s own result wrapping (verified in the installed
+ * `tool-plugin` runtime source): a plain `tool({ execute })` result gets
+ * wrapped automatically, but a `factory`-returned `AnyAgentTool.execute`
+ * must already return a complete `AgentToolResult`.
+ *
+ * `activation` is passed explicitly and kept identical to
+ * `openclaw.plugin.json`'s `activation` block. The installed
+ * `defineToolPlugin` runtime source defaults to `{ onStartup: true }` when
+ * `activation` is omitted from this call, which is what produced the
+ * "generated metadata is stale" mismatch against the committed manifest
+ * (which declares `onStartup: false`). Passing it here, matching the
+ * manifest, keeps the plugin's real default posture -- not eagerly loaded
+ * at Gateway startup, available only through explicit tool-capability
+ * activation and per-agent allowlisting.
  */
 import { Type, type Static } from 'typebox';
 import { defineToolPlugin } from 'openclaw/plugin-sdk/tool-plugin';
-import { failedTextResult, payloadTextResult, type AnyAgentTool } from 'openclaw/plugin-sdk/core';
+import {
+  failedTextResult,
+  payloadTextResult,
+  type AnyAgentTool,
+} from 'openclaw/plugin-sdk/agent-runtime';
 
 import { hasAnyDataCapability, isVidaAgentId, listAllowedOperationsForAgent } from '../agents.js';
 import { executeVidaOperation, type VidaOperationResult } from '../dispatcher.js';
@@ -157,6 +185,12 @@ export default defineToolPlugin({
   name: 'Vida 2.0 API',
   description:
     'Closed, typed bridge from one isolated local Vida agent to the private Vida 2.0 OpenClaw API (HMAC v2, read-only or pending-proposal only, no Journaling).',
+  // Kept identical to openclaw.plugin.json's "activation" block -- see the
+  // file-level comment above for why this must be explicit.
+  activation: {
+    onStartup: false,
+    onCapabilities: ['tool'],
+  },
   configSchema: ConfigSchema,
   tools: (tool) => [
     tool({
