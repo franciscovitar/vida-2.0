@@ -110,3 +110,5 @@ No se habilitan otros secretos por `$env` ni se debilita ningún otro control de
    respuesta es `application/json`; el modo `JSON` explícito no decodifica el stream y deja pasar
    el objeto de transporte crudo. "Include Response Headers and Status" debe permanecer
    deshabilitado salvo que el nodo siguiente desenvuelva `.body` explícitamente.
+10. La salida `completed` del runner de Briefing diario debe incluir un artefacto de briefing
+    sanitizado y acotado (no `null`) cuando las cinco lecturas responden `ok=true`.
