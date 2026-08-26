@@ -72,8 +72,8 @@ El núcleo (`src/*.ts`, excepto `adapter/`) no depende de nada más que
 `tsc --noEmit` en la raíz lo incluye, y sus pruebas viven en
 `tests/openclaw-plugin-*.test.ts` y corren con `npm test`.
 `src/adapter/plugin.ts` es el único archivo que importa
-`openclaw/plugin-sdk/tool-plugin`, `openclaw/plugin-sdk/core` y `typebox`;
-está excluido del `tsconfig.json` raíz y de ESLint raíz porque esas
+`openclaw/plugin-sdk/tool-plugin`, `openclaw/plugin-sdk/agent-runtime` y
+`typebox`; está excluido del `tsconfig.json` raíz y de ESLint raíz porque esas
 dependencias no están instaladas en el repo web (son peer dependencies del
 propio paquete del plugin) y no se instalan como parte de este bloque.
 
@@ -97,14 +97,54 @@ Se inspeccionó `openclaw@2026.7.1-2` instalado globalmente
 ## Frontera HMAC / SecretRef
 
 El plugin nunca contiene un secreto, key ID real, ni referencia con valor.
-`configContracts.secretInputs.paths` en `openclaw.plugin.json` declara
-`agents.<agentId>.keyId` y `agents.<agentId>.secret` como campos con forma
-de secreto para el registro de SecretRef de OpenClaw. Operativamente (paso
-posterior de Work, no ejecutado en este bloque), cada credencial se
-configura como una referencia (`{"source":"env","provider":"default","id":"..."}`),
-y el runtime de OpenClaw la resuelve antes de que el código del plugin la
-vea — el adaptador solo lee `config.agents.<agentId>.keyId/secret` ya
-resueltos como strings.
+`agents.<agentId>.keyId`, `agents.<agentId>.secret` y
+`vercelProtectionBypass` son campos con forma de secreto (declarados en
+`configContracts.secretInputs.paths` de `openclaw.plugin.json`), configurados
+operativamente (paso posterior de Work, no ejecutado en este bloque) como
+una referencia (`{"source":"env"|"file"|"exec","provider":"...","id":"..."}`).
+
+**Ciclo de vida verificado contra el runtime real instalado** (corrige una
+descripción previa de este documento que asumía, sin evidencia, que OpenClaw
+resolvía el SecretRef antes de cualquier validación de esquema):
+
+1. OpenClaw valida `plugins.entries.vida-2-0-api.config` contra el
+   `configSchema` **generado desde el propio `defineToolPlugin` del
+   adaptador** usando el valor **crudo, sin resolver**, tal como está en
+   `openclaw.json`. Si ese campo está tipado como `Type.String()` puro, un
+   objeto SecretRef real lo rechaza en este punto exacto — reproducido
+   contra `openclaw@2026.7.1-2` real: `invalid config: must be string`,
+   antes de que exista oportunidad de resolución. Por eso cada campo con
+   forma de secreto usa un schema TypeBox cerrado `string | SecretRef`
+   (`secretInputSchema()` en `adapter/plugin.ts`), nunca `Type.Unknown()`
+   ni `Type.Any()`.
+2. Una vez que el valor crudo pasa esa validación, el propio runtime de
+   OpenClaw (guiado por los mismos `configContracts.secretInputs.paths` de
+   este manifest — confirmado leyendo el colector real de config de
+   plugins del paquete instalado, no asumido) resuelve cualquier SecretRef
+   encontrado en esas rutas exactas y sustituye el objeto por el valor
+   resuelto **antes** de construir el snapshot de configuración que
+   `register(api)` — y por lo tanto la `factory` del tool — recibe.
+3. El plugin nunca implementa esta resolución: solo declara el schema y las
+   rutas `configContracts.secretInputs` que hacen que el resolvedor propio
+   de OpenClaw aplique a estos campos. El código de ejecución del plugin
+   sigue tratando `config.agents.<agentId>.keyId/secret` y
+   `config.vercelProtectionBypass` como strings ya resueltos
+   (`ResolvedPluginConfig` en `adapter/plugin.ts`), con un único cast
+   explícito y comentado en el límite de la `factory`.
+
+Verificación real realizada (sin tocar la configuración activa, sin
+credenciales reales, sin red): perfil OpenClaw aislado
+(`openclaw --profile <nombre>`), plugin enlazado (`plugins install --link`),
+un proveedor `exec` sintético local (sin red) resolviendo valores claramente
+falsos, y comprobación oficial (`openclaw config patch --dry-run`,
+`openclaw plugins doctor`, `openclaw plugins inspect --runtime`) de que:
+la configuración con SecretRef reales para `vercelProtectionBypass` y para
+`steward`/`health-reflection`/`technical-guardian` se acepta y el plugin
+carga (`status: "loaded"`, tool `vida_operation` registrado); un SecretRef
+inválido (sin `id`) y un objeto arbitrario se rechazan con el mismo error
+`invalid config: must be string`; y `resolveSecretRefValues` (export
+público de `openclaw/plugin-sdk/secret-ref-runtime`) resuelve una referencia
+`exec` real a un string plano, nunca a un objeto.
 
 La firma sigue exactamente el contrato canónico v2 existente:
 

@@ -117,7 +117,11 @@ test('bypass presence never changes the HMAC signature: identical canonical inpu
 
   // Every other signed header is identical too -- only the new transport
   // header differs between the two requests.
-  const { ['x-vercel-protection-bypass']: _omit, ...withoutExtra } = withBypass.calls[0]!.headers;
+  const withoutExtra = Object.fromEntries(
+    Object.entries(withBypass.calls[0]!.headers).filter(
+      ([name]) => name !== 'x-vercel-protection-bypass',
+    ),
+  );
   assert.deepEqual(withoutExtra, withoutBypass.calls[0]!.headers);
   assert.equal(withBypass.calls[0]!.body, withoutBypass.calls[0]!.body);
   assert.equal(withBypass.calls[0]!.url, withoutBypass.calls[0]!.url);

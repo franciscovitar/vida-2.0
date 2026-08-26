@@ -21,10 +21,28 @@
  * `openclaw.plugin.json`. Operators configure `agents.<agentId>.keyId` /
  * `agents.<agentId>.secret` in their local OpenClaw config as SecretRefs
  * (env/file/exec); see `configContracts.secretInputs` in
- * `openclaw.plugin.json`. OpenClaw resolves those before this plugin's
- * `config` object is populated, so this file only ever sees plain already-
- * resolved strings (or nothing, for an unconfigured agent) -- never a ref
- * object and never a value this repository wrote.
+ * `openclaw.plugin.json`.
+ *
+ * SecretRef schema/resolution lifecycle (verified against installed
+ * openclaw@2026.7.1-2, not assumed -- see docs/block-6-openclaw-plugin.md):
+ * external-plugin config is schema-validated against the RAW value loaded
+ * from `openclaw.json` *before* any SecretRef is resolved. A field typed as
+ * a plain string in `ConfigSchema` therefore rejects a real SecretRef
+ * object at that gate ("must be string"), before OpenClaw ever gets a
+ * chance to resolve it. Every secret-bearing field below is typed with
+ * `secretInputSchema()` (`string | SecretRef`) for exactly this reason --
+ * NOT `Type.Unknown()`/`Type.Any()`, which would defeat schema validation
+ * entirely. Separately, and later in the pipeline, OpenClaw's own runtime
+ * config-secrets collector (driven by this manifest's own
+ * `configContracts.secretInputs.paths`) resolves any SecretRef found at
+ * those exact paths into a plain string before building the resolved
+ * config snapshot that plugin `register(api)` -- and therefore this
+ * factory -- actually receives. This plugin does not implement any part of
+ * that resolution itself; it only declares the schema and the
+ * `configContracts.secretInputs` paths that make OpenClaw's own resolver
+ * apply to this plugin's fields, then treats the runtime `config` value
+ * for those fields as already-resolved plain strings (see
+ * `ResolvedPluginConfig` below).
  *
  * `payloadTextResult`/`failedTextResult` are imported from
  * `openclaw/plugin-sdk/agent-runtime`, not `openclaw/plugin-sdk/core`:
@@ -58,7 +76,7 @@
  * a tool parameter, so the model can never supply or override it, and it
  * only ever maps to that one fixed header name -- never an arbitrary one.
  */
-import { Type, type Static } from 'typebox';
+import { Type } from 'typebox';
 import { defineToolPlugin } from 'openclaw/plugin-sdk/tool-plugin';
 import {
   failedTextResult,
@@ -72,6 +90,31 @@ import { createDefaultRequestIdGenerator } from '../request-id.js';
 import { VIDA_AGENT_IDS, type VidaOperationCall } from '../types.js';
 
 const UnknownInput = Type.Unknown();
+
+/**
+ * Mirrors OpenClaw's own public `SecretRef` object shape exactly
+ * (`{ source: 'env'|'file'|'exec'; provider: string; id: string }`,
+ * confirmed against `openclaw`'s installed `types.secrets` module -- there
+ * is no public TypeBox helper for it; the public `buildSecretInputSchema`
+ * family in `openclaw/plugin-sdk/secret-input` is Zod-based and belongs to
+ * the core `openclaw.json` config validator, not `defineToolPlugin`'s
+ * TypeBox `configSchema`). Kept closed (`additionalProperties: false`) and
+ * restricted to the three source kinds OpenClaw itself supports -- no
+ * provider kind is invented here.
+ */
+const SecretRefSchema = Type.Object(
+  {
+    source: Type.Union([Type.Literal('env'), Type.Literal('file'), Type.Literal('exec')]),
+    provider: Type.String({ minLength: 1 }),
+    id: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+/** A secret-bearing config field: a literal value or an OpenClaw SecretRef, never an arbitrary object. */
+function secretInputSchema(description?: string) {
+  return Type.Union([Type.String({ minLength: 1 }), SecretRefSchema], { description });
+}
 
 const ReadOperationLiteral = Type.Union([
   Type.Literal('system.overview'),
@@ -120,8 +163,8 @@ const VidaOperationParamsSchema = Type.Union([ReadCallSchema, ProposeCallSchema,
 
 const AgentCredentialSchema = Type.Object(
   {
-    keyId: Type.String({ minLength: 1 }),
-    secret: Type.String({ minLength: 1 }),
+    keyId: secretInputSchema(),
+    secret: secretInputSchema(),
   },
   { additionalProperties: false },
 );
@@ -133,11 +176,9 @@ const ConfigSchema = Type.Object(
       description: 'Vida origin only, e.g. https://vida.example.com. No path, no query string.',
     }),
     vercelProtectionBypass: Type.Optional(
-      Type.String({
-        minLength: 1,
-        description:
-          'Optional fixed Vercel Deployment Protection bypass value for a protected Preview host. Sent only as the exact header x-vercel-protection-bypass; never signed, never part of the body or a query string, never a substitute for Vida HMAC.',
-      }),
+      secretInputSchema(
+        'Optional fixed Vercel Deployment Protection bypass value for a protected Preview host. Sent only as the exact header x-vercel-protection-bypass; never signed, never part of the body or a query string, never a substitute for Vida HMAC.',
+      ),
     ),
     agents: Type.Partial(
       Type.Object(
@@ -154,7 +195,25 @@ const ConfigSchema = Type.Object(
   { additionalProperties: false },
 );
 
-type PluginConfig = Static<typeof ConfigSchema>;
+/**
+ * The schema-level type (`Static<typeof ConfigSchema>`) allows a SecretRef
+ * object on every secret-bearing field, because that is what OpenClaw's
+ * pre-resolution schema gate must accept. By the time `register(api)` (and
+ * therefore this plugin's `factory`/`execute`) runs, OpenClaw has already
+ * resolved every path declared in `configContracts.secretInputs` into a
+ * plain string -- proven against the real installed runtime (see
+ * docs/block-6-openclaw-plugin.md). Plugin execution code uses this
+ * narrower, hand-written runtime type instead of the schema type so a
+ * regression in that resolution guarantee would surface as a TypeScript
+ * error at the one cast site below, not as a silently-wrong header/HMAC
+ * value.
+ */
+type ResolvedAgentCredential = { keyId: string; secret: string };
+type ResolvedPluginConfig = {
+  baseUrl: string;
+  vercelProtectionBypass?: string;
+  agents?: Partial<Record<(typeof VIDA_AGENT_IDS)[number], ResolvedAgentCredential>>;
+};
 
 function toToolResult(result: VidaOperationResult): ReturnType<typeof payloadTextResult> {
   if (result.ok) {
@@ -169,7 +228,7 @@ function toToolResult(result: VidaOperationResult): ReturnType<typeof payloadTex
 
 function buildVidaOperationTool(
   agentId: (typeof VIDA_AGENT_IDS)[number],
-  config: PluginConfig,
+  config: ResolvedPluginConfig,
 ): AnyAgentTool {
   return {
     name: 'vida_operation',
@@ -228,7 +287,11 @@ export default defineToolPlugin({
           // permanently-limited stub.
           return null;
         }
-        return buildVidaOperationTool(agentId, config);
+        // See the ResolvedPluginConfig comment above: OpenClaw resolves
+        // every configContracts.secretInputs path before register(api)
+        // runs, so config's secret-bearing fields are plain strings here
+        // even though the schema also accepts a SecretRef object.
+        return buildVidaOperationTool(agentId, config as unknown as ResolvedPluginConfig);
       },
     }),
   ],

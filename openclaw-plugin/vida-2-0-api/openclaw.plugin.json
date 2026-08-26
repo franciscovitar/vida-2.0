@@ -76,8 +76,43 @@
         "description": "Vida origin only, e.g. https://vida.example.com. No path, no query string."
       },
       "vercelProtectionBypass": {
-        "type": "string",
-        "minLength": 1,
+        "anyOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "required": ["source", "provider", "id"],
+            "properties": {
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "env"
+                  },
+                  {
+                    "type": "string",
+                    "const": "file"
+                  },
+                  {
+                    "type": "string",
+                    "const": "exec"
+                  }
+                ]
+              },
+              "provider": {
+                "type": "string",
+                "minLength": 1
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "description": "Optional fixed Vercel Deployment Protection bypass value for a protected Preview host. Sent only as the exact header x-vercel-protection-bypass; never signed, never part of the body or a query string, never a substitute for Vida HMAC."
       },
       "agents": {
@@ -88,12 +123,82 @@
             "required": ["keyId", "secret"],
             "properties": {
               "keyId": {
-                "type": "string",
-                "minLength": 1
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "required": ["source", "provider", "id"],
+                    "properties": {
+                      "source": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "env"
+                          },
+                          {
+                            "type": "string",
+                            "const": "file"
+                          },
+                          {
+                            "type": "string",
+                            "const": "exec"
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               },
               "secret": {
-                "type": "string",
-                "minLength": 1
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "required": ["source", "provider", "id"],
+                    "properties": {
+                      "source": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "env"
+                          },
+                          {
+                            "type": "string",
+                            "const": "file"
+                          },
+                          {
+                            "type": "string",
+                            "const": "exec"
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -103,12 +208,82 @@
             "required": ["keyId", "secret"],
             "properties": {
               "keyId": {
-                "type": "string",
-                "minLength": 1
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "required": ["source", "provider", "id"],
+                    "properties": {
+                      "source": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "env"
+                          },
+                          {
+                            "type": "string",
+                            "const": "file"
+                          },
+                          {
+                            "type": "string",
+                            "const": "exec"
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               },
               "secret": {
-                "type": "string",
-                "minLength": 1
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "required": ["source", "provider", "id"],
+                    "properties": {
+                      "source": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "env"
+                          },
+                          {
+                            "type": "string",
+                            "const": "file"
+                          },
+                          {
+                            "type": "string",
+                            "const": "exec"
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -118,12 +293,82 @@
             "required": ["keyId", "secret"],
             "properties": {
               "keyId": {
-                "type": "string",
-                "minLength": 1
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "required": ["source", "provider", "id"],
+                    "properties": {
+                      "source": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "env"
+                          },
+                          {
+                            "type": "string",
+                            "const": "file"
+                          },
+                          {
+                            "type": "string",
+                            "const": "exec"
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               },
               "secret": {
-                "type": "string",
-                "minLength": 1
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "required": ["source", "provider", "id"],
+                    "properties": {
+                      "source": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "env"
+                          },
+                          {
+                            "type": "string",
+                            "const": "file"
+                          },
+                          {
+                            "type": "string",
+                            "const": "exec"
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -133,12 +378,82 @@
             "required": ["keyId", "secret"],
             "properties": {
               "keyId": {
-                "type": "string",
-                "minLength": 1
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "required": ["source", "provider", "id"],
+                    "properties": {
+                      "source": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "env"
+                          },
+                          {
+                            "type": "string",
+                            "const": "file"
+                          },
+                          {
+                            "type": "string",
+                            "const": "exec"
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               },
               "secret": {
-                "type": "string",
-                "minLength": 1
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "required": ["source", "provider", "id"],
+                    "properties": {
+                      "source": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "env"
+                          },
+                          {
+                            "type": "string",
+                            "const": "file"
+                          },
+                          {
+                            "type": "string",
+                            "const": "exec"
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               }
             },
             "additionalProperties": false
