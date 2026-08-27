@@ -257,14 +257,62 @@ test('the vida_operation tool parameter schemas never declare agentId, credentia
     'method',
   ];
 
-  for (const schemaName of ['ReadCallSchema', 'ProposeCallSchema', 'HealthCallSchema']) {
-    const match = source.match(
-      new RegExp(`const ${schemaName} = Type\\.Object\\(\\{([\\s\\S]*?)\\n\\}\\);`),
+  // Bounded by the section comment and the final params union, so this
+  // guard survives restructuring the individual per-operation schemas.
+  const sectionMatch = source.match(
+    /Tool call parameter schema: one discriminated variant per closed operation[\s\S]*?const VidaOperationParamsSchema = Type\.Union\(\[[\s\S]*?\]\);/,
+  );
+  assert.ok(
+    sectionMatch,
+    'expected to find the tool call parameter schema section in the adapter source',
+  );
+  const body = sectionMatch![0];
+  for (const term of forbidden) {
+    assert.equal(body.includes(term), false, `tool parameter schemas must not declare ${term}`);
+  }
+});
+
+test('each closed read operation has its own discriminated parameter schema (system.overview no longer needs an unknown/generic input)', () => {
+  const source = readAdapterSource();
+  const readCallMatch = source.match(/const ReadCallSchemas = \[([\s\S]*?)\n\] as const;/);
+  assert.ok(readCallMatch, 'expected a ReadCallSchemas array in the adapter source');
+  const body = readCallMatch![1] ?? '';
+
+  const expectedOperations = [
+    'system.overview',
+    'areas.list',
+    'areas.get',
+    'tasks.list',
+    'projects.list',
+    'calendar.upcoming',
+    'gym.summary',
+    'approvals.list',
+    'documents.search',
+    'document.get',
+    'technical.status',
+    'technical.logs',
+  ];
+  for (const operation of expectedOperations) {
+    assert.match(
+      body,
+      new RegExp(`readCall\\('${operation}'`),
+      `expected a discriminated schema for ${operation}`,
     );
-    assert.ok(match, `expected to find ${schemaName} in the adapter source`);
-    const body = match![1] ?? '';
-    for (const term of forbidden) {
-      assert.equal(body.includes(term), false, `${schemaName} must not declare ${term}`);
-    }
+  }
+
+  // The old generic contract must be gone, not just supplemented.
+  assert.equal(source.includes('operation: ReadOperationLiteral'), false);
+  assert.equal(/input:\s*UnknownInput/.test(source), false);
+  assert.equal(/input:\s*Type\.Unknown\(\)/.test(readCallMatch![0]), false);
+
+  // The empty-input operations use a strict empty object, not an optional/unknown escape hatch.
+  for (const operation of [
+    'system.overview',
+    'areas.list',
+    'gym.summary',
+    'technical.status',
+    'technical.logs',
+  ]) {
+    assert.match(body, new RegExp(`readCall\\('${operation}',\\s*EmptyInputSchema\\)`));
   }
 });

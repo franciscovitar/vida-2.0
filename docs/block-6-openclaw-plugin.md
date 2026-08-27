@@ -65,6 +65,7 @@ openclaw-plugin/vida-2-0-api/
     dispatcher.ts         # el único lugar que construye/firma/envía una request
     index.ts              # barrel del núcleo puro (sin dependencia de openclaw/typebox)
     adapter/plugin.ts      # ÚNICO archivo que importa openclaw/plugin-sdk y typebox
+    adapter/plugin.integration.test.ts  # arnés real contra el SDK instalado (no forma parte de npm test)
 ```
 
 El núcleo (`src/*.ts`, excepto `adapter/`) no depende de nada más que
@@ -94,6 +95,19 @@ Se inspeccionó `openclaw@2026.7.1-2` instalado globalmente
   allowlist explícito (`tools.allow`), y `toolMetadata.vida_operation.optional`
   en `openclaw.plugin.json` mantiene esa metadata alineada.
 
+El parámetro del tool `vida_operation` usa una unión discriminada con un
+schema por operación cerrada (`readCall(...)` en `adapter/plugin.ts`), no un
+literal de operación genérico más `input: Type.Unknown()`. Una sesión real
+de TUI local mostró dos intentos inválidos de `vida_operation` antes de
+llegar a una llamada válida porque el contrato genérico anterior no le daba
+al modelo una forma exacta para `system.overview` (ni para el resto de
+operaciones sin input). Ahora cada operación sin datos exige exactamente
+`input: {}`, `areas.get` exige `slug` o `areaKey`, `documents.search` exige
+`query`, `document.get` exige `slug`, y cualquier operación desconocida o
+con forma incorrecta se rechaza en el propio schema del tool antes de que
+el plugin la procese. La validación autoritativa sigue siendo la del
+servidor Vida; este cambio solo reduce llamadas exploratorias inválidas.
+
 ## Frontera HMAC / SecretRef
 
 El plugin nunca contiene un secreto, key ID real, ni referencia con valor.
@@ -103,48 +117,66 @@ El plugin nunca contiene un secreto, key ID real, ni referencia con valor.
 operativamente (paso posterior de Work, no ejecutado en este bloque) como
 una referencia (`{"source":"env"|"file"|"exec","provider":"...","id":"..."}`).
 
-**Ciclo de vida verificado contra el runtime real instalado** (corrige una
-descripción previa de este documento que asumía, sin evidencia, que OpenClaw
-resolvía el SecretRef antes de cualquier validación de esquema):
+**Ciclo de vida verificado contra el runtime real instalado — corregido tras
+evidencia real de TUI local** (una sesión real de `openclaw tui --local`
+con `steward` demostró que la suposición anterior de este documento —
+"OpenClaw siempre entrega a `factory`/`register(api)` un snapshot ya
+resuelto" — no se sostiene en esa ruta de ejecución concreta, aunque sí se
+sostenía en los diagnósticos aislados de CLI usados para verificarla
+entonces):
 
-1. OpenClaw valida `plugins.entries.vida-2-0-api.config` contra el
+1. `plugins.entries.vida-2-0-api.config` sigue validándose contra el
    `configSchema` **generado desde el propio `defineToolPlugin` del
    adaptador** usando el valor **crudo, sin resolver**, tal como está en
-   `openclaw.json`. Si ese campo está tipado como `Type.String()` puro, un
-   objeto SecretRef real lo rechaza en este punto exacto — reproducido
-   contra `openclaw@2026.7.1-2` real: `invalid config: must be string`,
-   antes de que exista oportunidad de resolución. Por eso cada campo con
-   forma de secreto usa un schema TypeBox cerrado `string | SecretRef`
-   (`secretInputSchema()` en `adapter/plugin.ts`), nunca `Type.Unknown()`
-   ni `Type.Any()`.
-2. Una vez que el valor crudo pasa esa validación, el propio runtime de
-   OpenClaw (guiado por los mismos `configContracts.secretInputs.paths` de
-   este manifest — confirmado leyendo el colector real de config de
-   plugins del paquete instalado, no asumido) resuelve cualquier SecretRef
-   encontrado en esas rutas exactas y sustituye el objeto por el valor
-   resuelto **antes** de construir el snapshot de configuración que
-   `register(api)` — y por lo tanto la `factory` del tool — recibe.
-3. El plugin nunca implementa esta resolución: solo declara el schema y las
-   rutas `configContracts.secretInputs` que hacen que el resolvedor propio
-   de OpenClaw aplique a estos campos. El código de ejecución del plugin
-   sigue tratando `config.agents.<agentId>.keyId/secret` y
-   `config.vercelProtectionBypass` como strings ya resueltos
-   (`ResolvedPluginConfig` en `adapter/plugin.ts`), con un único cast
-   explícito y comentado en el límite de la `factory`.
+   `openclaw.json`. Esto se mantiene: cada campo con forma de secreto sigue
+   usando el schema TypeBox cerrado `string | SecretRef`
+   (`secretInputSchema()` en `adapter/plugin.ts`), nunca `Type.String()`
+   puro ni `Type.Unknown()`/`Type.Any()`.
+2. Lo que la `factory`/`execute` del plugin reciben para un campo con forma
+   de secreto **ya no se asume resuelto**. En diagnósticos aislados de CLI
+   (`plugins doctor`, `plugins inspect --runtime`, `config patch --dry-run`)
+   llegaba resuelto; en una ejecución real de TUI local
+   (`openclaw tui --local`) llegó como objeto `SecretRef` crudo —
+   `config.agents.steward.keyId`/`secret` sin resolver — y las tres
+   llamadas válidas de `vida_operation` fallaron antes de cualquier
+   intento de red porque el secreto HMAC era un objeto, no un string.
+3. Por eso el propio adaptador resuelve explícitamente cualquier campo
+   crudo, en el momento de uso, llamando al resolvedor público real de
+   OpenClaw — `resolveSecretRefValues` de
+   `openclaw/plugin-sdk/secret-ref-runtime` — con el `OpenClawConfig`
+   completo que `api.config` entrega en cualquier ruta de ejecución
+   (`resolveSecretInputValue`/`resolveAgentCredential` en
+   `adapter/plugin.ts`). El plugin no reimplementa la resolución de
+   SecretRef: solo invoca el resolvedor propio de OpenClaw. Si el valor no
+   es ya un string ni un `SecretRef` bien formado, o si la resolución
+   falla, la función retorna `null` y la llamada falla cerrada
+   (`missing-credential` para credenciales de agente,
+   `invalid-configuration` para un bypass configurado pero no resuelto)
+   antes de firmar HMAC o intentar red — un objeto `SecretRef` nunca llega
+   a convertirse en material de firma.
+4. `RawPluginConfig` (`Static<typeof ConfigSchema>`, lo que la `factory`
+   realmente recibe: los campos de secreto pueden seguir siendo objetos) y
+   `ResolvedPluginConfig` (solo strings, lo que el dispatcher acepta) son
+   tipos nombrados y distintos en `adapter/plugin.ts` para que esta
+   frontera quede visible en el sistema de tipos. Ya no existe ningún cast
+   de "confío en que el host ya resolvió esto".
 
 Verificación real realizada (sin tocar la configuración activa, sin
-credenciales reales, sin red): perfil OpenClaw aislado
-(`openclaw --profile <nombre>`), plugin enlazado (`plugins install --link`),
-un proveedor `exec` sintético local (sin red) resolviendo valores claramente
-falsos, y comprobación oficial (`openclaw config patch --dry-run`,
-`openclaw plugins doctor`, `openclaw plugins inspect --runtime`) de que:
-la configuración con SecretRef reales para `vercelProtectionBypass` y para
-`steward`/`health-reflection`/`technical-guardian` se acepta y el plugin
-carga (`status: "loaded"`, tool `vida_operation` registrado); un SecretRef
-inválido (sin `id`) y un objeto arbitrario se rechazan con el mismo error
-`invalid config: must be string`; y `resolveSecretRefValues` (export
-público de `openclaw/plugin-sdk/secret-ref-runtime`) resuelve una referencia
-`exec` real a un string plano, nunca a un objeto.
+credenciales reales, sin red): un arnés que reproduce exactamente la forma
+real de fallo — `register(api)` invocado con `pluginConfig` conteniendo
+objetos `SecretRef` crudos para `agents.steward.keyId`/`secret` y para
+`vercelProtectionBypass`, y `api.config.secrets.providers` apuntando a un
+proveedor `exec` sintético local (sin red) — confirma que `execute` firma
+con un HMAC válido de 64 caracteres hex (`createHmac` lanzaría
+`TypeError` si el secreto fuera un objeto) y que el header de bypass se
+envía como string. Un perfil OpenClaw aislado adicional
+(`openclaw --profile <nombre>`, plugin enlazado con `plugins install
+--link`) confirmó por separado que la configuración con SecretRef reales
+sigue siendo aceptada por el schema y que un SecretRef inválido o un
+objeto arbitrario se siguen rechazando con `invalid config: must be
+string`. Ver `openclaw-plugin/vida-2-0-api/src/adapter/plugin.integration.test.ts`
+para el arnés committeado (requiere las peer dependencies del plugin;
+no forma parte de `npm test` de la raíz).
 
 La firma sigue exactamente el contrato canónico v2 existente:
 
