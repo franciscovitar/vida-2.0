@@ -1,9 +1,10 @@
 # Bloque 6 — Plugin nativo OpenClaw (superficie conversacional local)
 
 Versión de contratos de agente reutilizada: `vida2-agents-v1`. Protocolo HMAC
-reutilizado: `vida2-openclaw-hmac-v2`. Este documento cubre únicamente el
-código fuente del plugin en el repo; no configura ni instala nada en la
-instalación local de OpenClaw.
+reutilizado: `vida2-openclaw-hmac-v2`. Este documento cubre el código fuente
+canónico del plugin y registra el estado operativo certificado al cierre de B6.
+La instalación local de OpenClaw sigue siendo estado externo: debe revalidarse
+antes de actuar y nunca sustituye al repo como fuente de verdad del software.
 
 ## Arquitectura
 
@@ -113,9 +114,11 @@ servidor Vida; este cambio solo reduce llamadas exploratorias inválidas.
 El plugin nunca contiene un secreto, key ID real, ni referencia con valor.
 `agents.<agentId>.keyId`, `agents.<agentId>.secret` y
 `vercelProtectionBypass` son campos con forma de secreto (declarados en
-`configContracts.secretInputs.paths` de `openclaw.plugin.json`), configurados
-operativamente (paso posterior de Work, no ejecutado en este bloque) como
-una referencia (`{"source":"env"|"file"|"exec","provider":"...","id":"..."}`).
+`configContracts.secretInputs.paths` de `openclaw.plugin.json`). En la
+instalación certificada se configuraron como SecretRefs; al cierre Work
+verificó tres pares HMAC agent-local más el bypass de Preview, todos
+indirectos mediante el proveedor DPAPI CurrentUser y sin valores literales
+en `openclaw.json`, repo, logs ni handoffs.
 
 **Ciclo de vida verificado contra el runtime real instalado — corregido tras
 evidencia real de TUI local** (una sesión real de `openclaw tui --local`
@@ -250,22 +253,48 @@ El plugin llama directamente a `https://<host-vida>/api/openclaw/v1/*` vía
 HTTPS estándar (fetch inyectable). No hay ningún componente intermedio
 nuevo.
 
-## Configuración local es un paso posterior de Work
+## Estado operativo certificado al cierre de B6
 
-Este bloque no instala el plugin, no crea secretos, no arranca Gateway, no
-toca `~/.openclaw`, ni modifica la instalación local de OpenClaw. Ver
-`openclaw-plugin/vida-2-0-api/README.md` para los comandos de instalación y
-configuración que Work ejecutará más adelante (`openclaw plugins install`,
-`openclaw plugins validate`, credenciales SecretRef por agente).
+La instalación local se configuró y validó contra `openclaw@2026.7.1-2`.
+El estado certificado es:
+
+- `steward`: OAuth oficial OpenAI utilizable, `openai/gpt-5.5`, runtime
+  model-scoped `openclaw`, sandbox `off`, superficie efectiva exactamente
+  `vida_operation`; E2E real `system.overview` con HTTP 200 y `ok=true`.
+- `health-reflection`: mismo runtime/modelo y superficie mínima; E2E real
+  `gym.summary` con HTTP 200 y `ok=true`.
+- `technical-guardian`: mismo runtime/modelo y superficie mínima; E2E real
+  `technical.status` con HTTP 200 y `ok=true`.
+- `digital-order`: sin OAuth ni credencial Vida, sin `vida_operation`,
+  sandbox `all`, inerte.
+- Los tres agentes activos fijan explícitamente
+  `openai/gpt-5.5 -> agentRuntime.id=openclaw`; B6 no depende del app-server
+  administrado de Codex ni de Docker.
+- En los agentes activos, `tools.allow=["vida_operation"]` debe coexistir con
+  los denies de herramientas host, pero `vida_operation` no puede aparecer
+  también en `tools.deny`: el deny prevalece y elimina el tool.
+- No se dejó Gateway persistente, TUI, agente/modelo ni n8n ejecutándose al
+  cierre.
+- Propuestas: 0; escrituras: 0; Journaling: 0; Production sin cambios.
+- No se creó `MEMORY.md`, memoria diaria ni memoria cross-agent.
+- Quedaron seis sesiones B6 aisladas porque la instalación actual no ofrece
+  borrado exacto seguro por sesión. No son fuente de verdad y no deben
+  reutilizarse como contexto canónico.
+
+El estado operativo externo puede caducar o cambiar. Antes de reutilizarlo,
+leer `docs/WORK-CHECKPOINT.md` y revalidar sólo los gates necesarios; no
+repetir los E2E certificados sin evidencia de regresión.
 
 ## Rollback
 
-Revertir este bloque es desinstalar/deshabilitar el plugin y su binding de
-agente local (`openclaw plugins remove vida-2-0-api`, o simplemente no
-activar `tools.allow` para él) y, si se llegó a configurar, retirar las
-credenciales `OPENCLAW_<AGENT>_API_KEY_ID/SECRET` del entorno local de
-OpenClaw. Ningún dato de Vida cambia: el plugin nunca escribe directamente,
-solo puede crear propuestas `pending` a través de la API existente, que ya
-requiere aprobación humana Web y ya puede revertirse por los mecanismos del
-Bloque 3 (`docs/block-3-reversible-writes.md`). No hay estado del lado de
-Vida que este bloque introduzca para revertir.
+El rollback de B6 consiste en deshabilitar/desinstalar el plugin o retirar su
+binding/allowlist de los agentes locales y, si se decide desmontar por
+completo el runtime, retirar de forma controlada los OAuth agent-local y los
+SecretRefs operativos correspondientes. No borrar ni revelar valores de
+secretos durante el rollback. `digital-order` no requiere acción porque ya
+permanece inerte.
+
+Ningún dato de Vida cambia por desactivar el plugin: el bridge no escribe
+directamente y la autoridad sigue en `/api/openclaw/v1`. Si en el futuro se
+habilitan propuestas, seguirán siendo `pending` y sujetas a la política y
+aprobación existentes; B6 cerró con propuestas y escrituras desactivadas.
