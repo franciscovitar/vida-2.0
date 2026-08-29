@@ -535,7 +535,12 @@ async function compensateBusiness(input: {
   if (actionType === 'task.create') {
     if (!ownership) return { ok: false, message: 'Ownership ausente.' };
     const archived = await deps.tasks.archiveOwnedTask(targetKey, ownership);
-    return archived.ok ? { ok: true } : { ok: false, message: archived.message };
+    if (!archived.ok) return { ok: false, message: archived.message };
+    const stillActive = await deps.tasks.getTask(targetKey);
+    if (stillActive) {
+      return { ok: false, message: 'La tarea sigue activa tras el rollback.' };
+    }
+    return { ok: true };
   }
   if (actionType === 'inbox.capture') {
     if (!ownership) return { ok: false, message: 'Ownership ausente.' };

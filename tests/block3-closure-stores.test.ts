@@ -25,7 +25,7 @@ import {
 } from '@/lib/actions/ledger-bag-codec';
 import { createMemoryInboxCaptureMappingStore } from '@/lib/actions/inbox-mapping';
 import { createNotionInboxWritePort } from '@/lib/actions/notion-inbox';
-import type { NotionActionsClient } from '@/lib/actions/notion-client';
+import { readSelectName, type NotionActionsClient } from '@/lib/actions/notion-client';
 import { createNotionTaskWritePort } from '@/lib/actions/notion-tasks';
 import {
   createMemoryProposalPort,
@@ -144,7 +144,10 @@ test('closure-02. Calendar multi-instance shares fake client + deterministic IDs
 });
 
 test('closure-03. Notion ownership exact equality; false 24-char proof fails', async () => {
-  const pages = new Map<string, { id: string; properties: Record<string, unknown> }>();
+  const pages = new Map<
+    string,
+    { id: string; properties: Record<string, unknown>; archived?: boolean }
+  >();
   const client: NotionActionsClient = {
     async queryDataSource(dataSourceId) {
       if (dataSourceId === 'areas') {
@@ -165,10 +168,12 @@ test('closure-03. Notion ownership exact equality; false 24-char proof fails', a
       }
       return {
         ok: true,
-        pages: [...pages.values()].map((page) => ({
-          id: page.id,
-          properties: page.properties,
-        })),
+        pages: [...pages.values()]
+          .filter((page) => !page.archived)
+          .map((page) => ({
+            id: page.id,
+            properties: page.properties,
+          })),
       };
     },
     async createPage(input) {
@@ -223,6 +228,12 @@ test('closure-03. Notion ownership exact equality; false 24-char proof fails', a
       const page = pages.get(pageId);
       return page ? { ok: true, page } : { ok: false, message: 'missing' };
     },
+    async archivePage(pageId) {
+      const page = pages.get(pageId);
+      if (!page) return { ok: false, message: 'missing' };
+      page.archived = true;
+      return { ok: true, archived: true };
+    },
     async appendBlockChildren() {
       return { ok: true, blockIds: [] };
     },
@@ -270,6 +281,29 @@ test('closure-03. Notion ownership exact equality; false 24-char proof fails', a
 
   const ok = await port.archiveOwnedTask(taskKey, storedOwn);
   assert.equal(ok.ok, true);
+
+  // Postcondición real: la PAGE quedó archivada (papelera), no en "Algún día".
+  assert.equal(pages.get(pageId)?.archived, true);
+  assert.equal(readSelectName(pages.get(pageId)?.properties.Status), 'Pendiente');
+  assert.notEqual(readSelectName(pages.get(pageId)?.properties.Status), 'Algún día');
+  assert.equal(await port.getTask(taskKey), null);
+
+  // Ownership incorrecto nunca archiva.
+  const other = 'ffffffffffffffffffffffff';
+  pages.set('page-own-2', {
+    id: 'page-own-2',
+    properties: {
+      Name: { title: [{ plain_text: 'T2', text: { content: 'T2' } }] },
+      Status: { select: { name: 'Pendiente' } },
+      [ownershipProp]: { rich_text: [{ plain_text: other, text: { content: other } }] },
+    },
+  });
+  const denied2 = await port.archiveOwnedTask(
+    opaqueKey('task', 'page-own-2'),
+    'not-the-proof-xxxxxxxxxxx',
+  );
+  assert.equal(denied2.ok, false);
+  assert.equal(pages.get('page-own-2')?.archived, undefined);
 });
 
 test('closure-04. Inbox multi-instance mapping store', async () => {
@@ -289,6 +323,9 @@ test('closure-04. Inbox multi-instance mapping store', async () => {
       },
       async retrievePage() {
         return { ok: true, page: { id: 'inbox', properties: {} } };
+      },
+      async archivePage() {
+        return { ok: false, message: 'n/a' };
       },
       async appendBlockChildren(_blockId, children) {
         seq += 1;
