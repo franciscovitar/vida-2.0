@@ -140,6 +140,10 @@ export function createMemoryTaskPort(options?: {
       if (task.ownership !== ownershipProof) {
         return { ok: false, code: 'ownership-mismatch', message: 'Ownership inválido.' };
       }
+      if (options?.failVerify) {
+        // Archivo no verificable: la tarea permanece activa (no se marca archived).
+        return { ok: false, code: 'verification-failed', message: 'Archivo no verificable.' };
+      }
       task.archived = true;
       return { ok: true };
     },

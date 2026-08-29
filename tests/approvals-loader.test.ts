@@ -79,6 +79,9 @@ function createSharedFakeClient(): NotionActionsClient & {
       if (!page) return { ok: false, message: 'missing' };
       return { ok: true, page };
     },
+    async archivePage() {
+      return { ok: false, message: 'unused' };
+    },
     async appendBlockChildren() {
       return { ok: false, message: 'unused' };
     },

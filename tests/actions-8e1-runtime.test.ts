@@ -174,7 +174,7 @@ function createFakeNotionClient(): NotionActionsClient & {
           return page.id === PROJECT_ID;
         }
         if (dataSourceId === NOTION_DATABASES.tasks.dataSourceId) {
-          return page.id.startsWith('task-');
+          return page.id.startsWith('task-') && !page.archived;
         }
         if (dataSourceId === ACTIONS_DS) {
           return page.id.startsWith('act-');
@@ -209,6 +209,12 @@ function createFakeNotionClient(): NotionActionsClient & {
       const page = pages.get(pageId);
       if (!page) return { ok: false, message: 'missing' };
       return { ok: true, page };
+    },
+    async archivePage(pageId) {
+      const page = pages.get(pageId);
+      if (!page) return { ok: false, message: 'missing' };
+      pages.set(pageId, { ...page, archived: true });
+      return { ok: true, archived: true };
     },
     async appendBlockChildren(blockId, children) {
       const list = blocks.get(blockId);

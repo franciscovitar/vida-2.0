@@ -325,11 +325,27 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
       if (stored !== ownershipProof) {
         return { ok: false, code: 'ownership-mismatch', message: 'Ownership inválido.' };
       }
-      const archived = await deps.client.updatePage(page.id, {
-        [TASK_PROPS.status]: selectProp('Algún día'),
-      });
+      // Rollback real de task.create: archivar la PAGE (papelera), no cambiar de
+      // estado. Cambiar Status a "Algún día" dejaría la tarea visible en /tareas.
+      const archived = await deps.client.archivePage(page.id);
       if (!archived.ok) {
         return { ok: false, code: 'failed', message: archived.message };
+      }
+      if (!archived.archived) {
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'La tarea no quedó archivada.',
+        };
+      }
+      // Postcondición: la página debe recuperarse como archivada/no operativa.
+      const verified = await deps.client.retrievePage(page.id);
+      if (!verified.ok || verified.page.archived !== true) {
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'No se pudo verificar el archivo de la tarea.',
+        };
       }
       return { ok: true };
     },

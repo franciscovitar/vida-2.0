@@ -9,6 +9,8 @@ import type { NotionRawPage } from '@/lib/notion/adapters';
 export type NotionPageResult = {
   id: string;
   properties: Record<string, unknown>;
+  /** true si la página está en la papelera (in_trash / archived del proveedor). */
+  archived?: boolean;
 };
 
 export type NotionActionsClient = {
@@ -27,6 +29,14 @@ export type NotionActionsClient = {
   retrievePage(
     pageId: string,
   ): Promise<{ ok: true; page: NotionPageResult } | { ok: false; message: string }>;
+  /**
+   * Archiva la página (papelera de Notion) vía `pages.update` con `in_trash`.
+   * Compensación ownership-scoped únicamente: nunca borrado permanente ni genérico.
+   * `archived` refleja el estado devuelto por el proveedor para la postcondición.
+   */
+  archivePage(
+    pageId: string,
+  ): Promise<{ ok: true; archived: boolean } | { ok: false; message: string }>;
   appendBlockChildren(
     blockId: string,
     children: readonly Record<string, unknown>[],
@@ -51,6 +61,13 @@ function asPage(item: { id: string; properties?: unknown }): NotionRawPage | nul
 
 function sanitizeError(): string {
   return 'Operación Notion no disponible.';
+}
+
+/** Lee el flag de papelera de una respuesta de página (in_trash / archived / is_archived). */
+function readArchivedFlag(response: unknown): boolean {
+  if (!response || typeof response !== 'object') return false;
+  const record = response as Record<string, unknown>;
+  return record.in_trash === true || record.archived === true || record.is_archived === true;
 }
 
 export function createNotionActionsClient(token: string): NotionActionsClient {
@@ -95,6 +112,7 @@ export function createNotionActionsClient(token: string): NotionActionsClient {
           page: {
             id: response.id,
             properties: response.properties as Record<string, unknown>,
+            archived: readArchivedFlag(response),
           },
         };
       } catch {
@@ -116,6 +134,7 @@ export function createNotionActionsClient(token: string): NotionActionsClient {
           page: {
             id: response.id,
             properties: response.properties as Record<string, unknown>,
+            archived: readArchivedFlag(response),
           },
         };
       } catch {
@@ -134,8 +153,18 @@ export function createNotionActionsClient(token: string): NotionActionsClient {
           page: {
             id: response.id,
             properties: response.properties as Record<string, unknown>,
+            archived: readArchivedFlag(response),
           },
         };
+      } catch {
+        return { ok: false, message: sanitizeError() };
+      }
+    },
+
+    async archivePage(pageId) {
+      try {
+        const response = await client.pages.update({ page_id: pageId, in_trash: true });
+        return { ok: true, archived: readArchivedFlag(response) };
       } catch {
         return { ok: false, message: sanitizeError() };
       }
