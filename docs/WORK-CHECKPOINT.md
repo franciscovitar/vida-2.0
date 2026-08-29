@@ -60,12 +60,12 @@ No se requiere Gateway persistente, n8n, MCP, túnel nuevo, Docker ni Codex app-
 
 ### Agentes
 
-| Agente | Estado | Runtime/model | Superficie efectiva | E2E certificado |
-| --- | --- | --- | --- | --- |
-| `steward` | `DONE` | `openai/gpt-5.5` sobre runtime `openclaw` | sólo `vida_operation` | `system.overview`, HTTP 200, `ok=true` |
-| `health-reflection` | `DONE` | `openai/gpt-5.5` sobre runtime `openclaw` | sólo `vida_operation` | `gym.summary`, HTTP 200, `ok=true` |
-| `technical-guardian` | `DONE` | `openai/gpt-5.5` sobre runtime `openclaw` | sólo `vida_operation` | `technical.status`, HTTP 200, `ok=true` |
-| `digital-order` | `DONE` / inerte | sin OAuth/credencial Vida | sin `vida_operation`; sandbox `all` | no corresponde |
+| Agente               | Estado          | Runtime/model                             | Superficie efectiva                 | E2E certificado                         |
+| -------------------- | --------------- | ----------------------------------------- | ----------------------------------- | --------------------------------------- |
+| `steward`            | `DONE`          | `openai/gpt-5.5` sobre runtime `openclaw` | sólo `vida_operation`               | `system.overview`, HTTP 200, `ok=true`  |
+| `health-reflection`  | `DONE`          | `openai/gpt-5.5` sobre runtime `openclaw` | sólo `vida_operation`               | `gym.summary`, HTTP 200, `ok=true`      |
+| `technical-guardian` | `DONE`          | `openai/gpt-5.5` sobre runtime `openclaw` | sólo `vida_operation`               | `technical.status`, HTTP 200, `ok=true` |
+| `digital-order`      | `DONE` / inerte | sin OAuth/credencial Vida                 | sin `vida_operation`; sandbox `all` | no corresponde                          |
 
 Los tres agentes activos usan OAuth oficial OpenAI, perfiles agent-local y una política
 model-scoped explícita `openai/gpt-5.5 → agentRuntime.id=openclaw`. Esto evita depender de la
