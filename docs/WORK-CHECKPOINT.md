@@ -238,6 +238,61 @@ frontera.
 **Siguiente frontera:** Safe Writes/Aprobaciones es el próximo trabajo de activación. Automatizaciones
 siguen separadas y deben tratarse después de validar escrituras, no como una simple flag adicional.
 
+## Safe Writes Core Production — activación final 29/08/2026
+
+**SAFE WRITES CORE PRODUCTION = DONE.**
+
+El Core de escrituras reversibles quedó activo en Production después de completar los E2E focales de
+Tareas, Bandeja y Gimnasio, corregir un defecto real de rollback de `task.create` y reparar la única
+tarea QA legacy afectada. No repetir esos E2E por simple recertificación.
+
+Estado canónico de código para el cierre operativo:
+
+- PR #6 corrigió `task.create` para archivar realmente la página de Notion y verificar la
+  postcondición antes de declarar rollback exitoso.
+- PR #7 mantuvo `Notion-Version 2025-09-03` y alineó la operación de papelera con el contrato de esa
+  versión mediante `archived=true`.
+- PR #8 agregó una vía de mantenimiento autenticada, sin argumentos de recurso y fail-closed para
+  cerrar la inconsistencia legacy mientras Safe Writes estaba apagado.
+- El merge commit canónico que incluye esas correcciones y la vía de mantenimiento es
+  `05e6d88455336e727e5260eeb54ed5f91cc2223c`.
+- GitHub Actions `Quality` y Vercel Preview pasaron sobre el candidato de PR #8 antes del merge.
+
+Evidencia funcional acumulada:
+
+- `task.create`: creación controlada verificada; el primer rollback expuso el bug histórico que
+  dejaba la tarea activa como `Algún día`.
+- La misma tarea QA fue posteriormente reparada mediante la vía de mantenimiento: quedó archivada en
+  la papelera de Notion, desapareció de `/tareas`, las tareas reales permanecieron intactas y el
+  ledger histórico siguió terminal `rolled-back` sin crear nuevas propuestas.
+- `inbox.capture`: E2E reversible certificado y rollback verificado.
+- `gym.session.create`: E2E reversible certificado con una sesión y un set; rollback verificado con
+  sesión `reverted`, filas conservadas y ledger terminal.
+- No hubo que repetir Tareas, Bandeja ni Gym después de quedar certificados.
+
+Activación final Production: `PASS`.
+
+- Production quedó `READY` sobre el SHA exacto
+  `05e6d88455336e727e5260eeb54ed5f91cc2223c`.
+- `WRITE_ACTIONS_ENABLED=true` quedó activo en Production.
+- Safe Writes Core reportó readiness operativa.
+- La única degradación observada fue `calendar-write-id-missing`; es intencional y no crítica para
+  Core.
+- La activación final no ejecutó nuevas propuestas, E2E ni escrituras de datos.
+- Calendar conserva lectura real y su superficie de escritura permanece OFF.
+- OpenClaw permanece `read-only`; creación de propuestas vía OpenClaw sigue OFF.
+- Automatizaciones permanecen desactivadas.
+- Journaling no fue accedido durante este cierre.
+
+**Regla de cierre:** Safe Writes Core puede permanecer activo. No repetir E2E de Tareas, Bandeja o
+Gym ni la reparación legacy sin evidencia de regresión. Si Core deja de estar ready, hacer
+fail-closed y reparar únicamente la frontera observada.
+
+**Siguiente frontera:** Calendar Hold / escritura de Calendar es una capacidad separada. Requiere
+una autorización explícita nueva antes de ampliar el OAuth de Calendar o habilitar
+`GOOGLE_CALENDAR_WRITE_ID`. OpenClaw proposals y Automatizaciones permanecen fuera de alcance hasta
+que esa frontera se trate por separado.
+
 ## Higiene del archivo
 
 - No pegar secretos, tokens, cookies, credenciales, emails, URLs privadas, payloads personales ni
