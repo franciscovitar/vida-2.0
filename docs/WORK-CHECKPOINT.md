@@ -132,6 +132,33 @@ Las ramas históricas de B5/B6 e integración pueden conservarse mientras result
 referencia. No borrarlas ni alterar recursos externos sólo por higiene; cualquier limpieza futura es
 una tarea separada y debe revisar primero su utilidad y riesgo.
 
+## Activación de fuentes base en Production — 29/08/2026
+
+**FUENTES BASE PRODUCTION = DONE.**
+
+Resultado operativo reportado y cerrado como `PASS`:
+
+- Google Sheets Production quedó apuntando al target canónico `prod`.
+- Antes del cambio se creó un backup recuperable y se reconciliaron únicamente los dos hábitos
+  completados del día que existían en DEV y faltaban en PROD; Salud y productividad se preservaron.
+- El gate canónico de escrituras de hábitos sobre PROD quedó habilitado.
+- Google Calendar renovó OAuth con alcance de solo lectura y `/agenda` volvió a mostrar eventos
+  reales.
+- El productor local de ActivityWatch recuperó credencial y volvió a escribir las siete métricas de
+  productividad del día en `Registro diario` PROD sin alterar otras columnas.
+- Las vistas `/habitos`, `/salud`, `/agenda` y `/productividad` fueron verificadas con datos reales.
+- El deployment Production permaneció `READY` sobre
+  `eed1fbad76588dcd6ad4ddcce284d2869104c8f0` durante este pass operativo.
+- No hubo escrituras en Notion, Calendar, OpenClaw, automatizaciones ni Journaling.
+- No se modificó código de aplicación durante este pass; el único cambio posterior en Git es este
+  cierre documental sanitizado.
+
+**Regla:** no repetir esta activación ni resincronizar por certificación. Revalidar sólo ante
+regresión observable o cuando un cambio posterior dependa de una de estas fuentes.
+
+**Siguiente frontera:** OpenClaw/agentes, escrituras avanzadas y automatizaciones siguen siendo
+trabajos separados. No se consideran activados por el PASS de fuentes base.
+
 ## Higiene del archivo
 
 - No pegar secretos, tokens, cookies, credenciales, emails, URLs privadas, payloads personales ni
