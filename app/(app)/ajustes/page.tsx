@@ -11,8 +11,13 @@ import {
 } from 'lucide-react';
 import type { Metadata } from 'next';
 
+import {
+  loadLegacyTaskRollbackRepairState,
+  repairLegacyTaskRollbackAction,
+} from '@/app/actions/maintenance';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ThemeControl } from '@/components/ui/ThemeControl';
@@ -82,6 +87,7 @@ const AUTOMATION_STATUS_DOMAINS: Record<AutomationReadinessState, Domain> = {
 
 export default async function AjustesPage() {
   await requireAuthorizedSession();
+  const maintenanceState = await loadLegacyTaskRollbackRepairState();
   const readiness = getRuntimeReadiness();
   const agents = getOpenClawAgentStatuses();
   const automations = await getAutomationsDashboardData();
@@ -103,6 +109,45 @@ export default async function AjustesPage() {
       />
 
       <div className={styles.grid}>
+        {maintenanceState !== 'none' && maintenanceState !== 'disabled' ? (
+          <Card aria-labelledby="maintenance-title">
+            <SectionHeader
+              id="maintenance-title"
+              title="Mantenimiento"
+              description="Reparación puntual de una inconsistencia de rollback histórica."
+              icon={ServerCog}
+              domain={maintenanceState === 'repairable' ? 'projects' : 'danger'}
+            />
+            {maintenanceState === 'repairable' ? (
+              <>
+                <p className={styles.explainer}>Se detectó un rollback pendiente de reparación.</p>
+                <form
+                  action={async () => {
+                    'use server';
+                    await repairLegacyTaskRollbackAction();
+                  }}
+                >
+                  <Button type="submit" variant="primary" size="sm">
+                    Reparar rollback
+                  </Button>
+                </form>
+              </>
+            ) : null}
+            {maintenanceState === 'requires-review' ? (
+              <div className={styles.summary}>
+                <CircleAlert size={18} aria-hidden="true" />
+                <p>La reparación automática no es segura. Requiere revisión.</p>
+              </div>
+            ) : null}
+            {maintenanceState === 'misconfigured' ? (
+              <div className={styles.summary}>
+                <CircleAlert size={18} aria-hidden="true" />
+                <p>El mantenimiento no está disponible en esta configuración.</p>
+              </div>
+            ) : null}
+          </Card>
+        ) : null}
+
         <Card aria-labelledby="appearance-title">
           <SectionHeader
             id="appearance-title"
