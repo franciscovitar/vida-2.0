@@ -156,8 +156,9 @@ Resultado operativo reportado y cerrado como `PASS`:
 **Regla:** no repetir esta activación ni resincronizar por certificación. Revalidar sólo ante
 regresión observable o cuando un cambio posterior dependa de una de estas fuentes.
 
-**Siguiente frontera:** OpenClaw/agentes, escrituras avanzadas y automatizaciones siguen siendo
-trabajos separados. No se consideran activados por el PASS de fuentes base.
+**Siguiente frontera al cierre de este pass:** OpenClaw/agentes, escrituras avanzadas y
+automatizaciones seguían siendo trabajos separados. El estado posterior de OpenClaw Production se
+registra más abajo.
 
 ## Recuperación del store de seguridad OpenClaw Preview — 29/08/2026
 
@@ -187,6 +188,55 @@ Verificación posterior a la rotación: `PASS`.
 siguiente gate de OpenClaw Production debe revalidar el aislamiento `preview`/`production` y puede
 evaluar reutilizar esta misma base física sólo si el contrato vigente mantiene namespaces separados
 y no se mezclan credenciales o recursos de B5.
+
+## OpenClaw Production — activación final 29/08/2026
+
+**OPENCLAW PRODUCTION = DONE.**
+
+La primera activación Production alcanzó correctamente el store de seguridad y el aislamiento por
+namespace, pero `steward → system.overview` devolvió HTTP 500. Se hizo rollback completo y se
+diagnosticó una causa puntual de privacidad: eventos Calendar titulados `Journaling` llegaban al DTO
+de OpenClaw y la frontera final `/journaling/i` los bloqueaba correctamente en fail-closed.
+
+El fix mínimo se implementó en `fix/openclaw-calendar-privacy-filter`, head
+`826b262d760f3696d7b766a5f8ef057d3cc1c2bd`, y se integró mediante PR #5. El merge commit canónico
+fue `c248e0e2798510a59647c30e192c473837630f06`. El cambio filtra los eventos de Journaling antes del
+DTO sólo para el lector server-to-server de OpenClaw; `/agenda` web conserva el Calendar real y la
+frontera final de privacidad permanece intacta.
+
+Gates observados antes del merge:
+
+- GitHub Actions `Quality`: PASS sobre checkout limpio.
+- Vercel Preview del head del fix: READY/PASS.
+- Production del merge commit `c248e0e2798510a59647c30e192c473837630f06`: READY.
+
+Reintento focal de activación Production: `PASS`.
+
+- `steward → system.overview`: HTTP 200, `ok=true`.
+- Tres eventos Calendar normales presentes en el DTO; Journaling ausente.
+- `health-reflection → gym.summary`: HTTP 200, `ok=true`.
+- `technical-guardian → technical.status`: HTTP 200, `ok=true`.
+- `digital-order`: inerte, sin credencial ni herramienta Vida.
+- Los tres agentes activos exponen únicamente `vida_operation`; herramientas host denegadas.
+- Replay y rate limiting disponibles mediante Upstash.
+- La misma base física de seguridad puede servir Preview y Production porque el contrato vigente
+  mantiene namespaces separados; Production usa `vida2:openclaw:production:*` y Preview permanece
+  aislado bajo `vida2:openclaw:preview:*`.
+- Production usa tres pares HMAC nuevos y exclusivos, almacenados como Sensitive server-side y
+  SecretRef/DPAPI local; no registrar sus valores en este archivo.
+- Propuestas/escrituras: 0/0.
+- Journaling: 0 accesos y ausente de las respuestas.
+- OpenClaw queda activo en Production con `OPENCLAW_ACCESS_MODE=read-only`.
+- `/ajustes` confirmó API configurada y los tres agentes operativos.
+- No se modificaron B5, Preview, OAuth Calendar, Sheets, Notion ni automatizaciones durante el pass
+  final.
+
+**Regla:** no repetir la activación, las primitivas Upstash ni los E2E completos de B6 por simple
+recertificación. Revalidar sólo ante regresión observable o si una evolución posterior cambia esta
+frontera.
+
+**Siguiente frontera:** Safe Writes/Aprobaciones es el próximo trabajo de activación. Automatizaciones
+siguen separadas y deben tratarse después de validar escrituras, no como una simple flag adicional.
 
 ## Higiene del archivo
 
