@@ -159,6 +159,35 @@ regresión observable o cuando un cambio posterior dependa de una de estas fuent
 **Siguiente frontera:** OpenClaw/agentes, escrituras avanzadas y automatizaciones siguen siendo
 trabajos separados. No se consideran activados por el PASS de fuentes base.
 
+## Recuperación del store de seguridad OpenClaw Preview — 29/08/2026
+
+**OPENCLAW PREVIEW SECURITY STORE = VERIFIED.**
+
+Durante la preparación de la activación de OpenClaw en Production se detectó que la cuenta Upstash
+ya tenía una única base Free Tier, consistente con el store account-owned usado por OpenClaw Preview.
+No se creó una segunda base persistente ni se agregó método de pago.
+
+La inspección inicial produjo una copia accidental de una variable Sensitive al portapapeles local.
+Como no pudo descartarse persistencia local, la credencial REST afectada de Preview se rotó mediante
+el control oficial de Upstash. La credencial anterior quedó invalidada y el valor nuevo se transfirió
+a Vercel Preview sin persistirlo en repo, chat, logs ni archivos.
+
+Verificación posterior a la rotación: `PASS`.
+
+- Store Upstash Preview operativo con el nuevo token.
+- `SET NX` con TTL: PASS.
+- `INCR` con expiración: PASS.
+- `EVAL`: PASS.
+- Claves de prueba eliminadas.
+- Namespace verificado: `vida2:openclaw:preview:*`.
+- Vercel Preview conserva exactamente una URL y un token Sensitive branch-scoped para el store.
+- URL/base, B5, HMAC y Production permanecieron sin cambios durante esta recuperación.
+
+**Regla:** no repetir la rotación ni las pruebas de recuperación salvo evidencia de regresión. El
+siguiente gate de OpenClaw Production debe revalidar el aislamiento `preview`/`production` y puede
+evaluar reutilizar esta misma base física sólo si el contrato vigente mantiene namespaces separados
+y no se mezclan credenciales o recursos de B5.
+
 ## Higiene del archivo
 
 - No pegar secretos, tokens, cookies, credenciales, emails, URLs privadas, payloads personales ni
