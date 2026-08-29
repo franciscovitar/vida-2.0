@@ -21,6 +21,7 @@ import {
   type CalendarReadCode,
 } from '@/lib/calendar/errors';
 import { buildMockCalendarEvents } from '@/lib/mock-data/google-calendar';
+import { filterCalendarEventsForOpenClaw } from '@/lib/openclaw/calendar-privacy';
 import {
   buildAgendaData,
   buildCalendarTodayPreview,
@@ -33,18 +34,26 @@ import { todayInCalendarTz } from '@/lib/calendar/time';
 import type {
   CalendarAgendaData,
   CalendarAgendaView,
+  CalendarEvent,
   CalendarTodayPreview,
 } from '@/types/calendar';
+
+/** Transforma la lista de eventos antes de construir el DTO (p. ej. filtro de privacidad). */
+type CalendarEventFilter = (events: readonly CalendarEvent[]) => CalendarEvent[];
 
 function toPlain<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function mockAgenda(view: CalendarAgendaView): CalendarAgendaData {
+function mockAgenda(
+  view: CalendarAgendaView,
+  eventFilter?: CalendarEventFilter,
+): CalendarAgendaData {
   const today = todayInCalendarTz();
   const timezone = getCalendarTimezone();
   const calendarIds = getMockCalendarIds();
-  const events = buildMockCalendarEvents(today, calendarIds[0] ?? 'primary');
+  const rawEvents = buildMockCalendarEvents(today, calendarIds[0] ?? 'primary');
+  const events = eventFilter ? eventFilter(rawEvents) : rawEvents;
   return toPlain(
     buildAgendaData({
       events,
@@ -71,10 +80,13 @@ function fallbackAgenda(view: CalendarAgendaView, code: CalendarReadCode): Calen
   );
 }
 
-async function loadAgendaUncached(view: CalendarAgendaView): Promise<CalendarAgendaData> {
+async function loadAgendaUncached(
+  view: CalendarAgendaView,
+  eventFilter?: CalendarEventFilter,
+): Promise<CalendarAgendaData> {
   const mode = getCalendarDataSource();
   if (mode !== 'google') {
-    return mockAgenda(view);
+    return mockAgenda(view, eventFilter);
   }
 
   const configResult = getCalendarConfig();
@@ -89,13 +101,14 @@ async function loadAgendaUncached(view: CalendarAgendaView): Promise<CalendarAge
     const result = await loadCalendarEventsInRange(configResult.config, range.start, range.end);
     if (!result.ok) return fallbackAgenda(view, result.code);
 
+    const events = eventFilter ? eventFilter(result.events) : result.events;
     const data = buildAgendaData({
-      events: result.events,
+      events,
       view,
       today,
       source: 'google',
-      status: result.events.length === 0 ? 'empty' : 'ready',
-      notice: result.events.length === 0 ? calendarNoticeFor('empty') : null,
+      status: events.length === 0 ? 'empty' : 'ready',
+      notice: events.length === 0 ? calendarNoticeFor('empty') : null,
       calendarCount: configResult.config.calendarIds.length,
       timezone: configResult.config.timezone,
     });
@@ -123,10 +136,16 @@ export const getCalendarAgenda = cache(async (viewParam?: string | null) => {
  *
  * No usar desde páginas web: /agenda debe seguir con getCalendarAgenda().
  * No reemplaza la autorización de la API consumidora.
+ *
+ * Política de privacidad centralizada Calendar → OpenClaw: los eventos de
+ * Journaling se excluyen por completo aquí, antes de cualquier DTO, para las tres
+ * operaciones que consumen esta agenda (system.overview, areas.get,
+ * calendar.upcoming). El read-boundary conserva su regla /journaling/i como
+ * defensa final fail-closed. /agenda no pasa por este filtro.
  */
 export const getCalendarAgendaForTrustedService = cache(async (viewParam?: string | null) => {
   const view = parseAgendaView(viewParam);
-  return loadAgendaUncached(view);
+  return loadAgendaUncached(view, filterCalendarEventsForOpenClaw);
 });
 
 function hoyFallbackPreview(code: CalendarReadCode): CalendarTodayPreview {
