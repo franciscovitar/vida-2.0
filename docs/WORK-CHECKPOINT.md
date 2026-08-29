@@ -103,17 +103,34 @@ Durante `system.overview`, Calendar reportó un estado de autenticación no disp
 de B6. Cualquier UI/agente que use ese snapshot debe describir la agenda como no verificable y no
 inferir que no existen eventos.
 
-## Próxima acción canónica
+## V1 — cierre post-merge
 
-**B5 y B6 no deben recertificarse sin evidencia de regresión.**
+**V1 = DONE.**
 
-El siguiente paso del producto es únicamente:
+Estado de integración verificado el 29/08/2026:
 
-**integración final de V1 + QA final de V1.**
+- B5 fue integrado a `main` mediante PR #3 (`MERGED`) con merge commit
+  `b7d685f0695aac5a3d85acf2ac31a878f53f6afb`.
+- B6 fue integrado a `main` mediante PR #4 (`MERGED`) usando exactamente el head final certificado
+  `a55b40dd1edbfa1d366c5ca56db340bd09b5f741`.
+- El merge commit que completa la integración funcional de V1 es
+  `9bc8500e87b5871514cbfe7210bd12bae757632e`.
+- QA final de V1 sobre el candidato exacto: `PASS` / `READY_TO_MERGE`.
+- Vercel reportó `SUCCESS` para el merge commit de V1 en `main`.
+- No hubo mutación manual de Production como parte de la integración.
+- PR #1 y PR #2 permanecen cerrados sin merge como historial de los PRs draft originales; PR #3 y
+  PR #4 son los PRs canónicos de integración.
 
-Ese paso debe revisar el estado real de las ramas/PRs y la estrategia de integración antes de
-mergear. B6 fue construido sobre el trabajo de B5; no asumir orden de merge desde este checkpoint.
-No tocar Production salvo autorización explícita.
+**Regla de cierre:** no repetir `npm test`, `npm run verify`, B5 E2E ni B6 TUI E2E únicamente para
+volver a certificar V1. Repetir validaciones sólo ante evidencia de regresión o cuando un cambio
+posterior requiera una verificación focal propia.
+
+Los próximos trabajos pertenecen a evolución posterior a V1. No hay una fase de integración o QA
+final de V1 pendiente.
+
+Las ramas históricas de B5/B6 e integración pueden conservarse mientras resulten útiles como
+referencia. No borrarlas ni alterar recursos externos sólo por higiene; cualquier limpieza futura es
+una tarea separada y debe revisar primero su utilidad y riesgo.
 
 ## Higiene del archivo
 
