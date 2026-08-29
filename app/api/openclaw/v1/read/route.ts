@@ -1,80 +1,108 @@
+import { isAutomationReadAccessEnabled } from '@/lib/automations/config';
+import { isAutomationReadAllowed } from '@/lib/automations/contracts';
+import { isOpenClawReadAllowed } from '@/lib/openclaw/agents';
 import {
   finishOpenClawError,
   finishOpenClawOk,
   parseAndAuthenticateOpenClawRequest,
 } from '@/lib/openclaw/http';
+import {
+  validateOpenClawReadBoundary,
+  validateOpenClawSerializedResponseSize,
+} from '@/lib/openclaw/read-boundary';
+import { validateOpenClawReadEnvelope } from '@/lib/openclaw/read-contract';
 import { executeOpenClawRead } from '@/lib/openclaw/reads';
-import type { OpenClawReadOperation, OpenClawReadResponse } from '@/types/openclaw';
+import type { OpenClawErrorCode, OpenClawReadResponse } from '@/types/openclaw';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const READ_OPS = new Set<OpenClawReadOperation>([
-  'system.overview',
-  'areas.list',
-  'areas.get',
-  'tasks.list',
-  'projects.list',
-  'calendar.upcoming',
-  'gym.summary',
-  'approvals.list',
-  'documents.search',
-  'document.get',
-]);
+function mapReadFailure(code: string): { status: number; code: OpenClawErrorCode } {
+  if (code === 'invalid-operation') return { status: 400, code: 'invalid-operation' };
+  if (code === 'invalid-input') return { status: 400, code: 'invalid-input' };
+  if (code === 'forbidden') return { status: 403, code: 'forbidden' };
+  if (code === 'flag-disabled') return { status: 403, code: 'flag-disabled' };
+  if (code === 'not-found') return { status: 404, code: 'not-found' };
+  if (code === 'source-unavailable') return { status: 503, code: 'source-unavailable' };
+  return { status: 500, code: 'internal-error' };
+}
 
 export async function POST(request: Request) {
   const parsed = await parseAndAuthenticateOpenClawRequest(request, {
-    requireJsonBody: true,
+    method: 'POST',
+    pathname: '/api/openclaw/v1/read',
+    body: 'json',
   });
   if (!parsed.ok) return parsed.response;
 
-  const body = parsed.value.json;
-  if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    return finishOpenClawError(
-      parsed.value,
-      'read',
-      400,
-      'invalid-input',
-      'Body de lectura inválido.',
-    );
+  const validation = validateOpenClawReadEnvelope(parsed.value.json);
+  if (!validation.ok) {
+    return finishOpenClawError(parsed.value, 'read', 400, validation.code, validation.message);
   }
-  const record = body as Record<string, unknown>;
-  const operation = typeof record.operation === 'string' ? record.operation : '';
-  if (!READ_OPS.has(operation as OpenClawReadOperation)) {
+
+  if (!isOpenClawReadAllowed(parsed.value.agentId, validation.value.operation)) {
     return finishOpenClawError(
       parsed.value,
-      'read',
-      400,
-      'invalid-operation',
-      'Operación de lectura no registrada.',
+      validation.value.operation,
+      403,
+      'forbidden',
+      'Operación no permitida para este agente.',
     );
   }
 
-  const result = await executeOpenClawRead(operation as OpenClawReadOperation, record.input ?? {});
-  if (!result.ok) {
-    const status =
-      result.code === 'not-found'
-        ? 404
-        : result.code === 'forbidden' || result.code === 'flag-disabled'
-          ? 403
-          : result.code === 'invalid-input'
-            ? 400
-            : 503;
+  if (
+    parsed.value.workflowPrincipalKey &&
+    (!isAutomationReadAccessEnabled(parsed.value.workflowPrincipalKey) ||
+      !isAutomationReadAllowed(
+        parsed.value.workflowPrincipalKey,
+        parsed.value.agentId,
+        validation.value.operation,
+      ))
+  ) {
     return finishOpenClawError(
       parsed.value,
-      operation,
-      status,
-      result.code === 'flag-disabled'
-        ? 'flag-disabled'
-        : result.code === 'forbidden'
-          ? 'forbidden'
-          : result.code === 'not-found'
-            ? 'not-found'
-            : result.code === 'invalid-input'
-              ? 'invalid-input'
-              : 'source-unavailable',
+      validation.value.operation,
+      403,
+      'forbidden',
+      'Operación no permitida para este workflow.',
+    );
+  }
+
+  const result = parsed.value.workflowPrincipalKey
+    ? await executeOpenClawRead(
+        validation.value,
+        parsed.value.agentId,
+        parsed.value.workflowPrincipalKey,
+      )
+    : await executeOpenClawRead(validation.value, parsed.value.agentId);
+  if (!result.ok) {
+    const mapped = mapReadFailure(result.code);
+    return finishOpenClawError(
+      parsed.value,
+      validation.value.operation,
+      mapped.status,
+      mapped.code,
       result.message,
       Boolean(result.retryable),
+    );
+  }
+
+  const boundary = validateOpenClawReadBoundary({
+    dataFreshness: result.dataFreshness,
+    sources: result.sources,
+    warnings: result.warnings,
+    nextCursor: result.nextCursor,
+    itemCount: result.itemCount,
+    data: result.data,
+  });
+
+  if (!boundary.ok) {
+    return finishOpenClawError(
+      parsed.value,
+      validation.value.operation,
+      500,
+      'internal-error',
+      'La respuesta no superó la frontera de seguridad.',
     );
   }
 
@@ -82,15 +110,29 @@ export async function POST(request: Request) {
     ok: true,
     requestId: parsed.value.requestId,
     generatedAt: new Date().toISOString(),
-    operation: operation as OpenClawReadOperation,
+    operation: validation.value.operation,
     dataFreshness: result.dataFreshness,
     sources: result.sources,
     warnings: result.warnings,
     nextCursor: result.nextCursor,
+    itemCount: result.itemCount,
     data: result.data,
   };
 
-  return finishOpenClawOk(parsed.value, operation, response, {
+  const sizeCheck = validateOpenClawSerializedResponseSize(response);
+  if (!sizeCheck.ok) {
+    return finishOpenClawError(
+      parsed.value,
+      validation.value.operation,
+      500,
+      'internal-error',
+      'La respuesta no superó la frontera de seguridad.',
+    );
+  }
+
+  return finishOpenClawOk(parsed.value, validation.value.operation, response, {
     itemCount: result.itemCount,
+    sourceCount: result.sources.length,
+    dataFreshness: result.dataFreshness,
   });
 }

@@ -28,3 +28,9 @@ idempotencia y auditoría. En Vercel serverless eso bloquea la validación real 
 - Work puede validar Preview con variables ya preparadas sin cambiar Production.
 - Tests usan clientes SDK falsos; no tocan Notion/Sheets reales.
 - `getWriteRuntimeStatus()` expone solo estados ready/disabled/misconfigured (sin secretos).
+
+## Extensión Block 3
+
+La saga reversible, leases Upstash, cifrado AES-GCM de payloads y compensaciones
+ownership-scoped se documentan en [ADR 0005](./0005-reversible-writes.md) y
+`docs/block-3-reversible-writes.md`. Este ADR sigue gobernando el fail-closed del runtime.

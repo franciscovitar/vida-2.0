@@ -13,6 +13,7 @@ import {
   createNotionActionsClient,
   dateProp,
   readRelationIds,
+  readRichText,
   readSelectName,
   relationProp,
   richTextProp,
@@ -20,16 +21,26 @@ import {
   titleProp,
   type NotionActionsClient,
 } from '@/lib/actions/notion-client';
+import { createHash } from 'node:crypto';
 import { opaqueKey } from '@/lib/actions/opaque';
-import type { NotionTaskWritePort, TaskSnapshot } from '@/lib/actions/ports';
+import type { NotionTaskWritePort, OwnershipProof, TaskSnapshot } from '@/lib/actions/ports';
 import { PROJECT_PROPS, TASK_PROPS, TASK_STATUSES } from '@/lib/notion/constants';
 import type { TaskChangeStatusPayload, TaskCreatePayload } from '@/types/actions';
+
+function ownershipForTask(pageId: string, idempotencyKey: string): OwnershipProof {
+  return createHash('sha256')
+    .update(`notion-task-own:${pageId}:${idempotencyKey}`)
+    .digest('hex')
+    .slice(0, 24);
+}
 
 export type NotionTaskWriteDeps = {
   client: NotionActionsClient;
   tasksDataSourceId: string;
   projectsDataSourceId: string;
   areasDataSourceId: string;
+  /** Rich text property name for ownership proof. Default: Vida2 Ownership. */
+  ownershipProperty?: string;
   today?: () => string;
 };
 
@@ -86,6 +97,8 @@ function toSnapshot(
 
 export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTaskWritePort {
   const today = deps.today ?? todayIso;
+  const ownershipProperty =
+    (deps.ownershipProperty ?? 'Vida2 Ownership').trim() || 'Vida2 Ownership';
 
   async function loadMaps(): Promise<{
     areas: NotionRawPage[];
@@ -112,14 +125,19 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
 
   return {
     async resolveAreaProjectCompatibility(areaKey, projectKey) {
-      if (!projectKey) return { ok: true };
       const maps = await loadMaps();
       if (!maps) {
         return { ok: false, message: 'No se pudo verificar Área–Proyecto.' };
       }
       const areaPage = resolveAreaPage(maps.areas, areaKey);
+      if (!areaPage) {
+        return { ok: false, message: 'Área no autorizada.' };
+      }
+      if (!projectKey) {
+        return { ok: true };
+      }
       const projectPage = resolveProjectPage(maps.projects, projectKey);
-      if (!areaPage || !projectPage) {
+      if (!projectPage) {
         return { ok: false, message: 'Área o Proyecto no autorizado.' };
       }
       const projectAreaIds = readRelationIds(projectPage.properties[PROJECT_PROPS.area]);
@@ -130,6 +148,26 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
         return { ok: false, message: 'Área incompatible con el Proyecto.' };
       }
       return { ok: true };
+    },
+
+    async checkReady() {
+      const maps = await loadMaps();
+      if (!maps) {
+        return {
+          ok: false,
+          code: 'unavailable' as const,
+          message: 'Áreas/Proyectos no accesibles.',
+        };
+      }
+      const activeAreas = maps.areas
+        .map((page) => adaptArea(page))
+        .filter((area) => area.status === 'Activa');
+      const tasksRes = await deps.client.queryDataSource(deps.tasksDataSourceId);
+      return {
+        ok: true as const,
+        hasAuthorizedArea: activeAreas.length > 0,
+        hasTasks: tasksRes.ok ? tasksRes.pages.length > 0 : false,
+      };
     },
 
     async createTask(payload: TaskCreatePayload, meta) {
@@ -157,11 +195,16 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
         }
       }
 
+      // Ownership is assigned after page id is known; placeholder then patch, or two-step.
+      // We create with a provisional ownership seed, then patch exact proof after create.
+      const provisionalOwn = ownershipForTask('pending', meta.idempotencyKey);
+
       const properties: Record<string, unknown> = {
         [TASK_PROPS.title]: titleProp(payload.title),
         [TASK_PROPS.status]: selectProp('Pendiente'),
         [TASK_PROPS.priority]: selectProp(payload.priority),
         [TASK_PROPS.area]: relationProp([areaPage.id]),
+        [ownershipProperty]: richTextProp(provisionalOwn),
       };
       if (payload.date) properties[TASK_PROPS.date] = dateProp(payload.date);
       if (payload.duration) properties[TASK_PROPS.duration] = selectProp(payload.duration);
@@ -180,12 +223,30 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
         return { ok: false, code: 'failed', message: created.message };
       }
 
+      const ownership = ownershipForTask(created.page.id, meta.idempotencyKey);
+      if (ownership !== provisionalOwn) {
+        const patched = await deps.client.updatePage(created.page.id, {
+          [ownershipProperty]: richTextProp(ownership),
+        });
+        if (!patched.ok) {
+          return { ok: false, code: 'failed', message: patched.message };
+        }
+      }
+
       const verified = await deps.client.retrievePage(created.page.id);
       if (!verified.ok) {
         return {
           ok: false,
           code: 'verification-failed',
           message: 'No se pudo verificar la tarea.',
+        };
+      }
+      const storedOwn = readRichText(verified.page.properties[ownershipProperty]);
+      if (storedOwn !== ownership) {
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'Ownership de tarea no verificado.',
         };
       }
       const snapshot = toSnapshot(verified.page, maps.projectNames, maps.areaNames, today());
@@ -196,9 +257,7 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
           message: 'Verificación de tarea fallida.',
         };
       }
-      // meta.idempotencyKey disponible para ledger externo; no se expone el page id.
-      void meta;
-      return { ok: true, key: snapshot.key };
+      return { ok: true, key: snapshot.key, ownership };
     },
 
     async getTask(key) {
@@ -247,6 +306,33 @@ export function createNotionTaskWritePort(deps: NotionTaskWriteDeps): NotionTask
       }
       return { ok: true };
     },
+
+    async archiveOwnedTask(key, ownershipProof) {
+      const maps = await loadMaps();
+      if (!maps) {
+        return { ok: false, code: 'failed', message: 'No se pudo leer tareas.' };
+      }
+      const tasksRes = await deps.client.queryDataSource(deps.tasksDataSourceId);
+      if (!tasksRes.ok) {
+        return { ok: false, code: 'failed', message: tasksRes.message };
+      }
+      const page = tasksRes.pages.find((candidate) => pageMatchesOpaque('task', candidate.id, key));
+      if (!page) {
+        return { ok: false, code: 'not-found', message: 'Tarea no encontrada.' };
+      }
+      const stored = readRichText(page.properties[ownershipProperty]);
+      // Exact equality only — no startsWith / length heuristics.
+      if (stored !== ownershipProof) {
+        return { ok: false, code: 'ownership-mismatch', message: 'Ownership inválido.' };
+      }
+      const archived = await deps.client.updatePage(page.id, {
+        [TASK_PROPS.status]: selectProp('Algún día'),
+      });
+      if (!archived.ok) {
+        return { ok: false, code: 'failed', message: archived.message };
+      }
+      return { ok: true };
+    },
   };
 }
 
@@ -255,11 +341,13 @@ export function createNotionTaskWritePortFromToken(input: {
   tasksDataSourceId: string;
   projectsDataSourceId: string;
   areasDataSourceId: string;
+  ownershipProperty?: string;
 }): NotionTaskWritePort {
   return createNotionTaskWritePort({
     client: createNotionActionsClient(input.token),
     tasksDataSourceId: input.tasksDataSourceId,
     projectsDataSourceId: input.projectsDataSourceId,
     areasDataSourceId: input.areasDataSourceId,
+    ownershipProperty: input.ownershipProperty ?? 'Vida2 Ownership',
   });
 }

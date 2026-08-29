@@ -7,6 +7,7 @@ import type {
   ActionType,
   AllowedActionType,
   ForbiddenActionType,
+  ProposedBusinessActionType,
 } from '@/types/actions';
 
 const ALLOWED: readonly AllowedActionType[] = [
@@ -14,10 +15,27 @@ const ALLOWED: readonly AllowedActionType[] = [
   'task.change-status',
   'inbox.capture',
   'gym.session.create',
+  'calendar.hold.create',
   'proposal.create',
   'proposal.approve',
   'proposal.reject',
+  'action.rollback',
 ] as const;
+
+export const BUSINESS_ACTION_TYPES: readonly ProposedBusinessActionType[] = [
+  'inbox.capture',
+  'task.create',
+  'task.change-status',
+  'gym.session.create',
+  'calendar.hold.create',
+] as const;
+
+export const PUBLIC_CONTROL_ACTIONS = [
+  'proposal.create',
+  'proposal.approve',
+  'proposal.reject',
+  'action.rollback',
+] as const satisfies readonly AllowedActionType[];
 
 const FORBIDDEN: readonly ForbiddenActionType[] = [
   'content.delete',
@@ -36,15 +54,32 @@ const FORBIDDEN: readonly ForbiddenActionType[] = [
 
 const META: Record<
   AllowedActionType,
-  { confirmation: 'explicit' | 'reinforced'; risk: 'low' | 'medium' | 'high'; reversible: boolean }
+  {
+    confirmation: 'explicit' | 'reinforced';
+    risk: 'low' | 'medium' | 'high';
+    reversible: boolean;
+    reinforcedPhrase?: string;
+  }
 > = {
-  'task.create': { confirmation: 'explicit', risk: 'medium', reversible: false },
+  'task.create': { confirmation: 'explicit', risk: 'medium', reversible: true },
   'task.change-status': { confirmation: 'explicit', risk: 'low', reversible: true },
-  'inbox.capture': { confirmation: 'explicit', risk: 'low', reversible: false },
-  'gym.session.create': { confirmation: 'explicit', risk: 'medium', reversible: false },
+  'inbox.capture': { confirmation: 'explicit', risk: 'low', reversible: true },
+  'gym.session.create': { confirmation: 'explicit', risk: 'medium', reversible: true },
+  'calendar.hold.create': { confirmation: 'explicit', risk: 'medium', reversible: true },
   'proposal.create': { confirmation: 'explicit', risk: 'low', reversible: true },
-  'proposal.approve': { confirmation: 'reinforced', risk: 'high', reversible: false },
+  'proposal.approve': {
+    confirmation: 'reinforced',
+    risk: 'high',
+    reversible: false,
+    reinforcedPhrase: 'aprobar',
+  },
   'proposal.reject': { confirmation: 'explicit', risk: 'low', reversible: true },
+  'action.rollback': {
+    confirmation: 'reinforced',
+    risk: 'high',
+    reversible: false,
+    reinforcedPhrase: 'revertir',
+  },
 };
 
 export function isAllowedActionType(value: string): value is AllowedActionType {
@@ -55,12 +90,32 @@ export function isForbiddenActionType(value: string): value is ForbiddenActionTy
   return (FORBIDDEN as readonly string[]).includes(value);
 }
 
+export function isBusinessActionType(value: string): value is ProposedBusinessActionType {
+  return (BUSINESS_ACTION_TYPES as readonly string[]).includes(value);
+}
+
+export function isPublicControlAction(
+  value: string,
+): value is (typeof PUBLIC_CONTROL_ACTIONS)[number] {
+  return (PUBLIC_CONTROL_ACTIONS as readonly string[]).includes(value);
+}
+
 export function listAllowedActionTypes(): readonly AllowedActionType[] {
   return ALLOWED;
 }
 
 export function listForbiddenActionTypes(): readonly ForbiddenActionType[] {
   return FORBIDDEN;
+}
+
+/** Meta contractual (riesgo / reversibilidad / confirmación) de una acción permitida. */
+export function getAllowedActionMeta(actionType: AllowedActionType): {
+  confirmation: 'explicit' | 'reinforced';
+  risk: 'low' | 'medium' | 'high';
+  reversible: boolean;
+  reinforcedPhrase?: string;
+} {
+  return META[actionType];
 }
 
 export function evaluateActionPolicy(input: {
@@ -114,11 +169,12 @@ export function evaluateActionPolicy(input: {
         message: 'Esta acción exige confirmación reforzada.',
       };
     }
-    if ((input.confirmation.phrase ?? '').trim().toLowerCase() !== 'aprobar') {
+    const expected = meta.reinforcedPhrase ?? 'aprobar';
+    if ((input.confirmation.phrase ?? '').trim().toLowerCase() !== expected) {
       return {
         ok: false,
         code: 'confirmation-insufficient',
-        message: 'Confirmación reforzada inválida (escribí “aprobar”).',
+        message: `Confirmación reforzada inválida (escribí “${expected}”).`,
       };
     }
   }

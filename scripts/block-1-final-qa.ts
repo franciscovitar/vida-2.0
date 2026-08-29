@@ -100,15 +100,20 @@ export function runBlock1FinalQa(root = process.cwd()): Block1QaCheck[] {
     },
     {
       id: 'no-write-actions',
-      label: 'Sin acciones externas desde los workspaces',
-      ok: everySource(
-        componentSources,
-        (source) =>
-          !source.includes('runWriteAction') &&
-          !source.includes('@/app/actions/writes') &&
-          !source.includes('fetch('),
-      ),
-      detail: 'No se detectaron llamadas de escritura, Server Actions ni fetch directo.',
+      label: 'Sin escrituras directas desde los workspaces',
+      ok: everySource(componentSources, (source, id) => {
+        if (source.includes('fetch(')) return false;
+        if (id === 'gym') {
+          return (
+            source.includes('runWriteAction') &&
+            source.includes("actionType: 'proposal.create'") &&
+            !source.includes("actionType: 'gym.session.create'")
+          );
+        }
+        return !source.includes('runWriteAction') && !source.includes('@/app/actions/writes');
+      }),
+      detail:
+        'Los workspaces locales no escriben directo; gym solo crea propuestas (proposal.create).',
     },
     {
       id: 'local-backup-hook',

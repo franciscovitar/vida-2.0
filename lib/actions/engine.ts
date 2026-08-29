@@ -1,12 +1,18 @@
 /**
- * Flujo común de escritura segura.
+ * Flujo común de escritura segura (reserva → intention → write → finalize).
  */
 import { recordActionAudit, type AuditSink } from '@/lib/actions/audit';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
+import type { WriteCoordinationPort } from '@/lib/actions/coordination';
 import { handleAllowedAction, type HandlerDeps } from '@/lib/actions/handlers';
 import type { IdempotencyStore } from '@/lib/actions/idempotency';
-import { idempotencyDigest } from '@/lib/actions/opaque';
+import { idempotencyDigestFromActorHash, payloadDigestFromPlaintext } from '@/lib/actions/opaque';
 import { evaluateActionPolicy, isForbiddenActionType } from '@/lib/actions/policy';
+import {
+  applyAuditPendingIfNeeded,
+  recordSagaFinalize,
+  recordSagaIntention,
+} from '@/lib/actions/saga';
 import type { ActionConfirmation, ActionRequest, ActionResult } from '@/types/actions';
 
 export type ExecuteActionDeps = {
@@ -15,32 +21,34 @@ export type ExecuteActionDeps = {
   idempotency: IdempotencyStore;
   audit: AuditSink;
   handlers: HandlerDeps;
+  coordination?: WriteCoordinationPort;
 };
 
 async function auditSafe(
   deps: ExecuteActionDeps,
   input: {
     actionType: string;
-    actorEmail: string;
+    actorHash: string;
+    actorHint: string;
     result: ActionResult;
     confirmationMode: ActionConfirmation['mode'] | 'none';
   },
 ): Promise<ActionResult> {
-  const digest = idempotencyDigest(input.actorEmail, input.actionType, input.result.idempotencyKey);
+  const digest = idempotencyDigestFromActorHash(
+    input.actorHash,
+    input.actionType,
+    input.result.idempotencyKey,
+  );
   const audited = await recordActionAudit(deps.audit, {
     actionType: input.actionType,
-    actorEmail: input.actorEmail,
+    actorHint: input.actorHint,
     result: input.result,
     confirmationMode: input.confirmationMode,
     idempotencyDigest: digest,
     afterSummary: input.result.summary,
   });
   if (input.result.ok && !audited.ok) {
-    return {
-      ...input.result,
-      code: 'applied',
-      message: 'Escritura aplicada; la auditoría requiere revisión (no se reintentó la acción).',
-    };
+    return applyAuditPendingIfNeeded(input.result, false);
   }
   return input.result;
 }
@@ -51,6 +59,8 @@ export async function executeAction(
 ): Promise<ActionResult> {
   const writesEnabled = deps.writesEnabled ?? isWriteActionsEnabled(deps.env ?? process.env);
   const confirmation: ActionConfirmation | null = request.confirmation ?? null;
+  const actorHash = request.actorHash?.trim() ?? '';
+  const actorHint = request.actorHint?.trim() || 'user';
 
   if (isForbiddenActionType(request.actionType)) {
     const denied: ActionResult = {
@@ -65,7 +75,8 @@ export async function executeAction(
     };
     await auditSafe(deps, {
       actionType: request.actionType,
-      actorEmail: request.actorEmail,
+      actorHash: actorHash || 'anonymous',
+      actorHint,
       result: denied,
       confirmationMode: confirmation?.mode ?? 'none',
     });
@@ -75,7 +86,7 @@ export async function executeAction(
   const policy = evaluateActionPolicy({
     actionType: request.actionType,
     writesEnabled,
-    authenticated: Boolean(request.actorEmail?.trim()),
+    authenticated: Boolean(actorHash),
     confirmation,
   });
 
@@ -99,7 +110,8 @@ export async function executeAction(
     };
     await auditSafe(deps, {
       actionType: request.actionType,
-      actorEmail: request.actorEmail,
+      actorHash: actorHash || 'anonymous',
+      actorHint,
       result: mapped,
       confirmationMode: confirmation?.mode ?? 'none',
     });
@@ -119,25 +131,106 @@ export async function executeAction(
     };
   }
 
-  const cached = await deps.idempotency.get(
-    request.actorEmail,
+  const payloadDigest = payloadDigestFromPlaintext(
+    typeof request.payload === 'string' ? request.payload : JSON.stringify(request.payload ?? null),
+  );
+  const digest = idempotencyDigestFromActorHash(
+    actorHash,
     request.actionType,
     request.idempotencyKey,
   );
-  if (cached) {
-    const replay: ActionResult = {
-      ...cached,
-      code: 'idempotent-replay',
-      message: cached.ok ? 'Resultado idempotente reutilizado.' : cached.message,
-    };
-    await auditSafe(deps, {
+
+  const coordination = deps.coordination ?? deps.handlers.coordination;
+  if (coordination) {
+    const reserved = await coordination.reserveIdempotency({
+      actorHash,
       actionType: request.actionType,
-      actorEmail: request.actorEmail,
-      result: replay,
-      confirmationMode: confirmation?.mode ?? 'none',
+      idempotencyKey: request.idempotencyKey,
+      payloadDigest,
+      ttlSeconds: 86_400,
     });
-    return replay;
+    if (reserved.status === 'replay') {
+      const replay: ActionResult = {
+        ...reserved.result,
+        code: 'idempotent-replay',
+        message: reserved.result.ok
+          ? 'Resultado idempotente reutilizado.'
+          : reserved.result.message,
+      };
+      await auditSafe(deps, {
+        actionType: request.actionType,
+        actorHash,
+        actorHint,
+        result: replay,
+        confirmationMode: confirmation?.mode ?? 'none',
+      });
+      return replay;
+    }
+    if (reserved.status === 'conflict') {
+      const conflict: ActionResult = {
+        ok: false,
+        code: reserved.reason === 'in-progress' ? 'in-progress' : 'conflict',
+        message:
+          reserved.reason === 'digest-mismatch'
+            ? 'Conflicto de idempotencia: digest distinto.'
+            : reserved.reason === 'in-progress'
+              ? 'Operación en progreso.'
+              : 'Conflicto de idempotencia.',
+        idempotencyKey: request.idempotencyKey,
+        actionType: request.actionType,
+        target: null,
+        summary: null,
+        verified: null,
+      };
+      await auditSafe(deps, {
+        actionType: request.actionType,
+        actorHash,
+        actorHint,
+        result: conflict,
+        confirmationMode: confirmation?.mode ?? 'none',
+      });
+      return conflict;
+    }
+  } else {
+    const cached = await deps.idempotency.get(
+      actorHash,
+      request.actionType,
+      request.idempotencyKey,
+    );
+    if (cached) {
+      const replay: ActionResult = {
+        ...cached,
+        code: 'idempotent-replay',
+        message: cached.ok ? 'Resultado idempotente reutilizado.' : cached.message,
+      };
+      await auditSafe(deps, {
+        actionType: request.actionType,
+        actorHash,
+        actorHint,
+        result: replay,
+        confirmationMode: confirmation?.mode ?? 'none',
+      });
+      return replay;
+    }
   }
+
+  const intentionPlaceholder: ActionResult = {
+    ok: true,
+    code: 'in-progress',
+    message: 'Intención',
+    idempotencyKey: request.idempotencyKey,
+    actionType: request.actionType,
+    target: null,
+    summary: null,
+    verified: null,
+  };
+  await recordSagaIntention(deps.audit, {
+    actionType: request.actionType,
+    actorHint,
+    result: intentionPlaceholder,
+    confirmationMode: confirmation?.mode ?? 'none',
+    idempotencyDigest: digest,
+  });
 
   const handled = await handleAllowedAction({
     actionType: policy.actionType,
@@ -147,17 +240,27 @@ export async function executeAction(
     deps: deps.handlers,
   });
 
-  await deps.idempotency.set(
-    request.actorEmail,
-    request.actionType,
-    request.idempotencyKey,
-    handled,
-  );
+  if (coordination) {
+    await coordination.markFinal({
+      actorHash,
+      actionType: request.actionType,
+      idempotencyKey: request.idempotencyKey,
+      payloadDigest,
+      result: handled,
+      ttlSeconds: 86_400,
+    });
+  } else {
+    await deps.idempotency.set(actorHash, request.actionType, request.idempotencyKey, handled);
+  }
 
-  return auditSafe(deps, {
+  const finalized = await recordSagaFinalize(deps.audit, {
     actionType: request.actionType,
-    actorEmail: request.actorEmail,
+    actorHint,
     result: handled,
     confirmationMode: confirmation?.mode ?? 'none',
+    idempotencyDigest: digest,
+    afterSummary: handled.summary,
   });
+
+  return applyAuditPendingIfNeeded(handled, finalized.ok);
 }

@@ -1,8 +1,10 @@
 'use client';
 
 import { Check, Clock3, Plus, RotateCcw, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 
+import { runWriteAction } from '@/app/actions/writes';
+import { WritesDisabledNotice } from '@/components/actions/WritePanels';
 import { LocalDraftStatus } from '@/components/local-drafts/LocalDraftStatus';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -31,6 +33,7 @@ import type {
   GymSessionDraftExercise,
   GymSessionDraftSet,
 } from '@/types/gym';
+import type { GymSessionCreatePayload } from '@/types/actions';
 
 import styles from './GymSessionPanel.module.scss';
 
@@ -204,6 +207,8 @@ export function GymSessionPanel({
   );
   const [showValidation, setShowValidation] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [confirmPropose, setConfirmPropose] = useState(false);
+  const [pending, start] = useTransition();
 
   const validation = useMemo(() => (draft ? validateGymSessionDraft(draft) : null), [draft]);
   const localDraft = useLocalDraftBackup<GymSessionDraft | null>({
@@ -306,15 +311,29 @@ export function GymSessionPanel({
     <Card>
       <SectionHeader
         title="Registrar sesión"
-        description="Completá el entrenamiento desde el celular. El borrador no modifica ninguna fuente."
+        description={
+          writesEnabled
+            ? 'Completá el entrenamiento y proponé el registro. No escribe directo en Sheets.'
+            : 'Completá el entrenamiento desde el celular. El borrador no modifica ninguna fuente.'
+        }
         domain="health"
       />
 
-      <p className={styles['safety-notice']} data-environment-writes={writesEnabled}>
-        {writesEnabled
-          ? 'Bloqueo de etapa activo: esta interfaz no envía datos aunque el entorno reporte escrituras.'
-          : 'Modo borrador local: Sheets, Notion y Calendar permanecen sin cambios.'}
-      </p>
+      {writesEnabled ? (
+        <p className={styles['safety-notice']} data-environment-writes={writesEnabled}>
+          Las escrituras pasan por proposal.create → aprobación. El borrador local se conserva si
+          falla.
+        </p>
+      ) : (
+        <>
+          <WritesDisabledNotice />
+          <p className={styles['safety-notice']} data-environment-writes={writesEnabled}>
+            {
+              'Modo borrador local: Sheets, Notion y Calendar permanecen sin cambios. No se escribió ningún dato externo.'
+            }
+          </p>
+        </>
+      )}
       <LocalDraftStatus
         controller={localDraft}
         hasContent={hasPersistedGymContent}
@@ -325,13 +344,44 @@ export function GymSessionPanel({
         className={styles.form}
         onSubmit={(event) => {
           event.preventDefault();
-          const result = buildGymSessionCreatePayload(draft);
+          const built = buildGymSessionCreatePayload(draft);
           setShowValidation(true);
-          setMessage(
-            result.ok
-              ? 'Borrador completo y listo para convertirse en propuesta. No se escribió ningún dato.'
-              : 'Revisá los campos marcados antes de continuar.',
-          );
+          if (!built.ok) {
+            setMessage('Revisá los campos marcados antes de continuar.');
+            return;
+          }
+          if (!writesEnabled) {
+            setMessage(
+              'Borrador completo. Escrituras desactivadas: no se escribió ningún dato externo.',
+            );
+            return;
+          }
+          if (!confirmPropose) {
+            setMessage('Confirmá proponer el registro de la sesión.');
+            return;
+          }
+          const businessPayload: GymSessionCreatePayload = built.payload;
+          start(async () => {
+            const result = await runWriteAction({
+              actionType: 'proposal.create',
+              payload: {
+                name: `Sesión gym: ${draft.workoutDayLabel}`,
+                proposedActionType: 'gym.session.create',
+                targetType: 'gym-session',
+                targetKey: null,
+                reason: 'Registro de sesión desde gimnasio web',
+                expectedChange: `${businessPayload.sets.length} sets · ${draft.date}`,
+                risk: 'medium',
+                reversible: true,
+                payload: businessPayload,
+              },
+              confirmation: { mode: 'explicit', acknowledged: true, phrase: null },
+            });
+            setMessage(result.message);
+            if (result.ok) {
+              setConfirmPropose(false);
+            }
+          });
         }}
       >
         <div className={styles['session-grid']}>
@@ -695,9 +745,30 @@ export function GymSessionPanel({
           >
             Reiniciar borrador
           </Button>
-          <Button type="submit" variant="primary" className={styles['touch-button']}>
-            Validar borrador
-          </Button>
+          {writesEnabled ? (
+            <>
+              <label className={styles['complete-toggle']}>
+                <input
+                  type="checkbox"
+                  checked={confirmPropose}
+                  onChange={(event) => setConfirmPropose(event.target.checked)}
+                />
+                <span>Confirmo proponer esta sesión</span>
+              </label>
+              <Button
+                type="submit"
+                variant="primary"
+                className={styles['touch-button']}
+                disabled={pending}
+              >
+                {pending ? 'Enviando…' : 'Crear propuesta'}
+              </Button>
+            </>
+          ) : (
+            <Button type="submit" variant="primary" className={styles['touch-button']}>
+              Validar borrador
+            </Button>
+          )}
         </div>
 
         {message ? (

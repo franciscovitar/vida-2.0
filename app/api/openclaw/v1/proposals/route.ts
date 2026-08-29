@@ -1,68 +1,102 @@
-import { createOpenClawProposal, parseOpenClawProposalRequest } from '@/lib/openclaw/proposals';
+import { isOpenClawProposalsEnabled } from '@/lib/actions/config';
 import {
   finishOpenClawError,
   finishOpenClawOk,
   parseAndAuthenticateOpenClawRequest,
 } from '@/lib/openclaw/http';
-import type { OpenClawErrorCode, OpenClawProposalResponse } from '@/types/openclaw';
+import { createOpenClawProposal, parseOpenClawProposalRequest } from '@/lib/openclaw/proposals';
+import type { OpenClawProposalResponse } from '@/types/openclaw';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   const parsed = await parseAndAuthenticateOpenClawRequest(request, {
-    requireJsonBody: true,
+    method: 'POST',
+    pathname: '/api/openclaw/v1/proposals',
+    body: 'json',
   });
   if (!parsed.ok) return parsed.response;
 
-  const validated = parseOpenClawProposalRequest(parsed.value.json);
-  if (!validated.ok) {
+  // Fail closed: no runtime de escrituras si las flags no están activas.
+  if (!isOpenClawProposalsEnabled()) {
+    return finishOpenClawError(
+      parsed.value,
+      'proposals.forbidden',
+      403,
+      'forbidden',
+      'Operación bloqueada en modo read-only.',
+    );
+  }
+
+  const body = parseOpenClawProposalRequest(parsed.value.json);
+  if (!body.ok) {
     return finishOpenClawError(
       parsed.value,
       'proposals.create',
       400,
       'invalid-input',
-      validated.message,
+      body.message,
     );
   }
 
   const created = await createOpenClawProposal({
-    actorId: parsed.value.actorId,
-    request: validated.value,
+    agentId: parsed.value.agentId,
+    principalId: parsed.value.principalId,
+    workflowPrincipalKey: parsed.value.workflowPrincipalKey,
+    request: body.value,
     requestId: parsed.value.requestId,
   });
 
   if (!created.ok) {
-    const code: OpenClawErrorCode =
+    const status =
+      created.code === 'flag-disabled'
+        ? 403
+        : created.code === 'policy-denied' || created.code === 'forbidden-action'
+          ? 403
+          : created.code === 'conflict' || created.code === 'lease-conflict'
+            ? 409
+            : 400;
+    const errorCode =
       created.code === 'flag-disabled'
         ? 'flag-disabled'
-        : created.code === 'conflict'
-          ? 'conflict'
-          : created.code === 'invalid-payload'
-            ? 'invalid-input'
-            : 'source-unavailable';
+        : created.code === 'policy-denied' || created.code === 'forbidden-action'
+          ? 'forbidden'
+          : created.code === 'conflict' || created.code === 'lease-conflict'
+            ? 'conflict'
+            : 'invalid-input';
     return finishOpenClawError(
       parsed.value,
-      validated.value.operation,
-      created.code === 'flag-disabled' ? 403 : 400,
-      code,
+      'proposals.create',
+      status,
+      errorCode,
       created.message,
     );
   }
 
-  const body: OpenClawProposalResponse = {
+  if (!created.proposalKey) {
+    return finishOpenClawError(
+      parsed.value,
+      'proposals.create',
+      500,
+      'internal-error',
+      'Propuesta sin clave opaca.',
+    );
+  }
+
+  const response: OpenClawProposalResponse = {
     ok: true,
     requestId: parsed.value.requestId,
     generatedAt: new Date().toISOString(),
     proposalKey: created.proposalKey,
     status: 'pending',
-    operation: validated.value.operation,
+    operation: body.value.operation,
     replay: created.replay,
     summary: created.summary,
+    risk: created.risk,
+    expiresAt: created.expiresAt,
+    diff: created.diff,
   };
 
-  return finishOpenClawOk(parsed.value, validated.value.operation, body, {
-    proposalCreated: !created.replay,
-    itemCount: 1,
-  });
+  return finishOpenClawOk(parsed.value, 'proposals.create', response, { itemCount: 1 });
 }

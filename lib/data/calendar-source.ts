@@ -109,10 +109,22 @@ async function loadAgendaUncached(view: CalendarAgendaView): Promise<CalendarAge
   }
 }
 
-/** Agenda por vista (cache por request + vista). */
+/** Agenda por vista (cache por request + vista). Requiere sesión web. */
 export const getCalendarAgenda = cache(async (viewParam?: string | null) => {
   const { requireAuthorizedSession } = await import('@/lib/auth/dal');
   await requireAuthorizedSession();
+  const view = parseAgendaView(viewParam);
+  return loadAgendaUncached(view);
+});
+
+/**
+ * Agenda para consumidores server-to-server que ya autenticaron por su propio
+ * mecanismo (p. ej. OpenClaw HMAC). No usa cookies ni sesión web.
+ *
+ * No usar desde páginas web: /agenda debe seguir con getCalendarAgenda().
+ * No reemplaza la autorización de la API consumidora.
+ */
+export const getCalendarAgendaForTrustedService = cache(async (viewParam?: string | null) => {
   const view = parseAgendaView(viewParam);
   return loadAgendaUncached(view);
 });

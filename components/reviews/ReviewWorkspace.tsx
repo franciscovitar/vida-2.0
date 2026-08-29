@@ -15,6 +15,20 @@ import type { ActionProposalSummary } from '@/types/actions';
 
 import styles from './ReviewWorkspace.module.scss';
 
+/** Campos mínimos seguros para revisión local (sin ciphertext ni digests internos). */
+type ReviewProposalView = Pick<
+  ActionProposalSummary,
+  | 'key'
+  | 'name'
+  | 'actionType'
+  | 'status'
+  | 'risk'
+  | 'reversible'
+  | 'reason'
+  | 'expectedChange'
+  | 'confirmationMode'
+>;
+
 type ReviewDecision = 'pending' | 'recommend-approve' | 'recommend-reject' | 'needs-info';
 type ReviewRisk = 'low' | 'medium' | 'high';
 
@@ -82,7 +96,7 @@ function isReviewBackup(value: unknown): value is ReviewWorkspaceBackup {
 export function ReviewWorkspace({
   initialProposals,
 }: {
-  initialProposals: readonly ActionProposalSummary[];
+  initialProposals: readonly ReviewProposalView[];
 }) {
   const [proposalDecisions, setProposalDecisions] = useState<Record<string, ReviewDecision>>({});
   const [name, setName] = useState('');

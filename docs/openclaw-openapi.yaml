@@ -3,8 +3,12 @@ info:
   title: Vida 2.0 OpenClaw API
   version: v1
   description: >
-    API server-to-server para OpenClaw. HMAC-SHA256. Desactivada por defecto.
-    Sin secretos ni valores reales en este documento.
+    API server-to-server para OpenClaw. HMAC-SHA256 v2 con request ID firmado.
+    Métodos, paths y query usan un contrato cerrado. El body se lee con límite real
+    de 64 KiB, hash de bytes originales, UTF-8 estricto y JSON sin claves duplicadas.
+    Replay y rate limit usan Upstash Redis REST con operaciones atómicas, claves
+    opacas y TTL. Cada lectura tiene schema cerrado, política generalAI y frontera
+    de salida de 256 KiB sobre la respuesta completa. Desactivada por defecto.
 servers:
   - url: /api/openclaw/v1
 security:
@@ -13,7 +17,7 @@ paths:
   /health:
     get:
       operationId: health
-      summary: Health sin consultar fuentes externas
+      summary: Health y readiness de configuración sin consultar fuentes
       responses:
         '200':
           description: OK
@@ -24,7 +28,7 @@ paths:
   /capabilities:
     get:
       operationId: capabilities
-      summary: Catálogo de operaciones
+      summary: Catálogo de operaciones con disponibilidad sanitizada
       responses:
         '200':
           description: OK
@@ -35,99 +39,50 @@ paths:
   /read:
     post:
       operationId: read
-      summary: Lectura tipada
+      summary: Lectura tipada con input y output cerrados
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [operation, input]
-              properties:
-                operation:
-                  type: string
-                  enum:
-                    - system.overview
-                    - areas.list
-                    - areas.get
-                    - tasks.list
-                    - projects.list
-                    - calendar.upcoming
-                    - gym.summary
-                    - approvals.list
-                    - documents.search
-                    - document.get
-                input:
-                  type: object
+              $ref: '#/components/schemas/OpenClawReadEnvelope'
       responses:
         '200':
-          description: OK
+          description: DTO sanitizado con freshness, sources, warnings, cursor e itemCount
         '400':
           description: Input u operación inválida
         '401':
           description: Auth fallida
         '403':
-          description: Forbidden / flag
+          description: Forbidden, flag o política generalAI
         '404':
           description: API desactivada o recurso
+        '500':
+          description: La salida no superó la frontera de seguridad
+        '503':
+          description: Fuente o control de seguridad no disponible
   /proposals:
     post:
-      operationId: createProposal
-      summary: Crear propuesta pending
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - operation
-                - idempotencyKey
-                - reason
-                - expectedChange
-                - risk
-                - reversible
-                - payload
-              properties:
-                operation:
-                  type: string
-                  enum:
-                    - task.create.propose
-                    - task.change-status.propose
-                    - inbox.capture.propose
-                    - gym.session.create.propose
-                    - calendar.block.propose
-                idempotencyKey:
-                  type: string
-                reason:
-                  type: string
-                expectedChange:
-                  type: string
-                risk:
-                  type: string
-                  enum: [low, medium, high]
-                reversible:
-                  type: boolean
-                payload:
-                  type: object
-                targetKey:
-                  type: string
-                  nullable: true
+      operationId: proposalsForbidden
+      deprecated: true
+      summary: Bloqueada durante el modo read-only
+      description: >
+        La ruta existe únicamente para rechazar de forma explícita clientes antiguos.
+        No analiza propuestas ni construye el runtime de escrituras.
       responses:
-        '200':
-          description: Propuesta creada o replay
-        '400':
-          description: Input inválido
         '401':
-          description: Auth fallida
+          description: Auth HMAC fallida
         '403':
-          description: Escrituras/propuestas no habilitadas
+          description: Operación bloqueada en modo read-only
         '404':
-          description: API desactivada
+          description: API desactivada o configuración cerrada
   /proposals/{key}:
     get:
-      operationId: getProposal
-      summary: Obtener propuesta por clave opaca
+      operationId: proposalLookupForbidden
+      deprecated: true
+      summary: Bloqueada durante el modo read-only
+      description: >
+        La ruta no consulta el repositorio de propuestas ni revela si una clave existe.
       parameters:
         - name: key
           in: path
@@ -135,12 +90,12 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: OK
         '401':
-          description: Auth fallida
+          description: Auth HMAC fallida
+        '403':
+          description: Operación bloqueada en modo read-only
         '404':
-          description: API desactivada o propuesta ausente
+          description: API desactivada o configuración cerrada
 components:
   securitySchemes:
     VidaHmac:
@@ -149,4 +104,205 @@ components:
       name: X-Vida-Signature
       description: >
         Requiere además X-Vida-Key-Id, X-Vida-Timestamp y X-Vida-Request-Id.
-        Firma = HMAC-SHA256(secret, timestamp + LF + METHOD + LF + pathname + LF + sha256(body)).
+        Canonical v2 = vida2-openclaw-hmac-v2 + LF + timestamp + LF + requestId
+        + LF + METHOD + LF + pathname + LF + sha256(body). No se admite query.
+  schemas:
+    OpenClawEmptyInput:
+      type: object
+      additionalProperties: false
+      properties: {}
+    OpenClawReadEnvelope:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: system.overview
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: areas.list
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: areas.get
+            input:
+              oneOf:
+                - type: object
+                  additionalProperties: false
+                  required: [slug]
+                  properties:
+                    slug:
+                      type: string
+                      enum: [facultad, genova-trabajo, salud, vida-personal]
+                - type: object
+                  additionalProperties: false
+                  required: [areaKey]
+                  properties:
+                    areaKey:
+                      type: string
+                      enum:
+                        - area.facultad
+                        - area.genova-trabajo
+                        - area.salud
+                        - area.vida-personal
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: tasks.list
+            input:
+              type: object
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  enum: [Pendiente, En progreso, Bloqueada, Hecha, Algún día]
+                areaKey:
+                  type: string
+                  pattern: '^area-[a-z0-9]{1,16}$'
+                projectKey:
+                  type: string
+                  pattern: '^proj-[a-z0-9]{1,16}$'
+                dueBefore:
+                  type: string
+                  format: date
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                cursor:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]{1,32}$'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: projects.list
+            input:
+              type: object
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  enum: [Activo, En espera, Bloqueado, Completado, Cancelado]
+                areaKey:
+                  type: string
+                  pattern: '^area-[a-z0-9]{1,16}$'
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                cursor:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]{1,32}$'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: calendar.upcoming
+            input:
+              type: object
+              additionalProperties: false
+              properties:
+                days:
+                  type: integer
+                  minimum: 1
+                  maximum: 31
+                  default: 7
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: gym.summary
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: approvals.list
+            input:
+              type: object
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  enum: [pending, approved, rejected, applied, failed, expired]
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: documents.search
+            input:
+              type: object
+              additionalProperties: false
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  minLength: 1
+                  maxLength: 120
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: document.get
+            input:
+              type: object
+              additionalProperties: false
+              required: [slug]
+              properties:
+                slug:
+                  type: string
+                  minLength: 1
+                  maxLength: 80
+                  pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: technical.status
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'
+        - type: object
+          additionalProperties: false
+          required: [operation, input]
+          properties:
+            operation:
+              type: string
+              const: technical.logs
+            input:
+              $ref: '#/components/schemas/OpenClawEmptyInput'

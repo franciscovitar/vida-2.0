@@ -1,0 +1,161 @@
+{
+  "name": "Vida 2.0 · Digest de aprobaciones · Salud",
+  "active": false,
+  "nodes": [
+    {
+      "id": "approval-health-schedule",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "15 12,19 * * *" }] }
+      }
+    },
+    {
+      "id": "approval-health-occurrence",
+      "name": "Build canonical scheduledFor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0],
+      "parameters": {
+        "jsCode": "const occurrence = new Date(); occurrence.setSeconds(0, 0); const scheduledFor = occurrence.toISOString(); const scheduleBody = JSON.stringify({ workflowKey: 'approval-digest', scheduledFor, contractVersion: 'vida2-automations-v1' }); return [{ json: { scheduledFor, scheduleBody } }];"
+      }
+    },
+    {
+      "id": "approval-health-begin",
+      "name": "HMAC begin scheduled run",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [500, 0],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $env.VIDA2_APPROVAL_DIGEST_HEALTH_RUNNER_WORKFLOW_ID }}",
+          "mode": "id"
+        },
+        "mode": "each",
+        "waitForSubWorkflow": true,
+        "workflowInputs": {
+          "value": {
+            "action": "begin",
+            "method": "POST",
+            "pathname": "/api/automations/v1/triggers/scheduled",
+            "body": "={{ $json.scheduleBody }}",
+            "signatureProtocol": "vida2-openclaw-hmac-v2",
+            "maxAttempts": 3,
+            "retryableStatusCodes": "429,500,502,503,504",
+            "newAuthenticationPerAttempt": true
+          }
+        }
+      }
+    },
+    {
+      "id": "approval-health-run-key",
+      "name": "Extract canonical runKey",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [760, 0],
+      "parameters": {
+        "jsCode": "const reply = $json.scheduleResponse; if (!reply?.ok || typeof reply.runKey !== 'string') throw new Error('schedule-ingress-rejected'); return [{ json: { runKey: reply.runKey, workflowKey: reply.workflowKey } }];"
+      }
+    },
+    {
+      "id": "approval-health-operations",
+      "name": "HMAC contracted reads",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1020, 0],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $env.VIDA2_APPROVAL_DIGEST_HEALTH_RUNNER_WORKFLOW_ID }}",
+          "mode": "id"
+        },
+        "mode": "each",
+        "waitForSubWorkflow": true,
+        "workflowInputs": {
+          "value": {
+            "action": "execute",
+            "runKey": "={{ $json.runKey }}",
+            "workflowKey": "approval-digest",
+            "operations": "approvals.list"
+          }
+        }
+      }
+    },
+    {
+      "id": "approval-health-result",
+      "name": "Build sanitized terminal or error DTO",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1280, 0],
+      "parameters": {
+        "jsCode": "const outcome = $json.outcome; const ok = outcome?.ok === true; const runKey = $json.runKey; if (typeof runKey !== 'string') throw new Error('missing-canonical-run'); const callbackRequestId = `callback-${$execution.id}-${Date.now()}`; const callbackBody = JSON.stringify({ runKey, workflowKey: 'approval-digest', principalKey: 'approval-digest-health', status: ok ? 'succeeded' : 'failed', resultCode: ok ? 'completed' : 'invalid-result', summary: ok ? 'Digest completado.' : 'Ejecución controlada fallida.', proposalKey: null, artifact: outcome?.artifact ?? null }); return [{ json: { callbackRequestId, callbackBody } }];"
+      }
+    },
+    {
+      "id": "approval-health-callback",
+      "name": "Callback terminal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VIDA2_CONTROLLED_API_BASE_URL + '/api/automations/v1/runs' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "x-vida-request-id", "value": "={{ $json.callbackRequestId }}" }]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [[{ "node": "Build canonical scheduledFor", "type": "main", "index": 0 }]]
+    },
+    "Build canonical scheduledFor": {
+      "main": [[{ "node": "HMAC begin scheduled run", "type": "main", "index": 0 }]]
+    },
+    "HMAC begin scheduled run": {
+      "main": [[{ "node": "Extract canonical runKey", "type": "main", "index": 0 }]]
+    },
+    "Extract canonical runKey": {
+      "main": [[{ "node": "HMAC contracted reads", "type": "main", "index": 0 }]]
+    },
+    "HMAC contracted reads": {
+      "main": [[{ "node": "Build sanitized terminal or error DTO", "type": "main", "index": 0 }]]
+    },
+    "Build sanitized terminal or error DTO": {
+      "main": [[{ "node": "Callback terminal", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "timezone": "America/Argentina/Cordoba", "executionOrder": "v1" },
+  "versionId": "vida2-approval-digest-health-scheduled-v2",
+  "meta": {
+    "contractVersion": "vida2-automations-v1",
+    "workflowKey": "approval-digest",
+    "principalKey": "approval-digest-health",
+    "operations": ["approvals.list"],
+    "signatureProtocol": "vida2-openclaw-hmac-v2",
+    "scheduleIngressPath": "/api/automations/v1/triggers/scheduled",
+    "callbackPath": "/api/automations/v1/runs",
+    "runnerContract": "vida2-n8n-principal-runner-v1",
+    "idempotencyPolicy": "same-normalized-occurrence",
+    "requestAuthenticationPolicy": "regenerate-per-attempt",
+    "retryableStatusCodes": [429, 500, 502, 503, 504],
+    "maxAttempts": 3,
+    "provisioningState": "credential-binding-required",
+    "executable": true
+  }
+}

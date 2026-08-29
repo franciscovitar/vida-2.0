@@ -1,9 +1,11 @@
 /**
- * Puertos inyectables de escritura (Notion / Sheets / propuestas).
- * Sin métodos destructivos públicos.
+ * Puertos inyectables de escritura (Notion / Sheets / Calendar / propuestas).
+ * Compensaciones de rollback son ownership-scoped (no destructivos públicos).
  */
 import type {
+  ActionDiff,
   ActionProposalSummary,
+  CalendarHoldCreatePayload,
   GymSessionCreatePayload,
   InboxCapturePayload,
   ProposalCreatePayload,
@@ -27,21 +29,46 @@ export type AreaProjectLink = {
   projectAreaKey: string | null;
 };
 
+export type OwnershipProof = string;
+
+/** Resultado sanitizado de preflight read-only de proveedores. */
+export type ProviderReadyResult =
+  | { ok: true; hasAuthorizedArea?: boolean; hasTasks?: boolean }
+  | {
+      ok: false;
+      code: 'not-configured' | 'unavailable' | 'misconfigured';
+      message: string;
+    };
+
 export interface NotionTaskWritePort {
   createTask(
     payload: TaskCreatePayload,
     meta: { idempotencyKey: string },
-  ): Promise<{ ok: true; key: string } | { ok: false; code: string; message: string }>;
+  ): Promise<
+    | { ok: true; key: string; ownership: OwnershipProof }
+    | { ok: false; code: string; message: string }
+  >;
   getTask(key: string): Promise<TaskSnapshot | null>;
   updateTaskStatus(
     key: string,
     nextStatus: TaskChangeStatusPayload['nextStatus'],
     expectedPrevious: string,
   ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
+  /**
+   * Valida referencias Área/Proyecto antes de crear propuesta.
+   * Con projectKey null todavía exige que el área exista y esté autorizada.
+   */
   resolveAreaProjectCompatibility(
     areaKey: string,
     projectKey: string | null,
   ): Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Lectura mínima: DS de áreas accesible + presencia de área autorizada. */
+  checkReady(): Promise<ProviderReadyResult>;
+  /** Rollback ownership-scoped: archiva solo si ownershipProof coincide. */
+  archiveOwnedTask(
+    key: string,
+    ownershipProof: OwnershipProof,
+  ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
 }
 
 export interface NotionInboxWritePort {
@@ -49,11 +76,21 @@ export interface NotionInboxWritePort {
     payload: InboxCapturePayload,
     meta: { idempotencyKey: string },
   ): Promise<
-    { ok: true; key: string } | { ok: false; code: string; message: string; preserveText: true }
+    | { ok: true; key: string; ownership: OwnershipProof }
+    | { ok: false; code: string; message: string; preserveText: true }
   >;
+  archiveCapture(
+    key: string,
+    ownership: OwnershipProof,
+  ): Promise<{ ok: true } | { ok: false; code: string; message: string }>;
+  verifyCapture(
+    key: string,
+  ): Promise<{ ok: true; present: boolean } | { ok: false; message: string }>;
+  /** Lectura mínima del destino Bandeja (sin append). */
+  checkReady(): Promise<ProviderReadyResult>;
 }
 
-export type GymSessionRowStatus = 'pending' | 'complete' | 'partial' | 'failed';
+export type GymSessionRowStatus = 'pending' | 'complete' | 'partial' | 'failed' | 'reverted';
 
 export interface GymSheetWritePort {
   createPendingSession(
@@ -72,26 +109,112 @@ export interface GymSheetWritePort {
     sessionId: string,
     status: GymSessionRowStatus,
   ): Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Compensación: marca reverted (nunca borra filas). */
+  markReverted(sessionId: string): Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Lectura de headers Gym Sessions/Sets sin escribir. */
+  checkReady(): Promise<ProviderReadyResult>;
 }
 
+export type CalendarHoldSnapshot = {
+  key: string;
+  title: string;
+  start: string;
+  end: string;
+  ownership: OwnershipProof;
+  relatedTaskKey: string | null;
+};
+
+export type CalendarHoldCreateMeta = {
+  idempotencyKey: string;
+  ownership: OwnershipProof;
+  /** Digest used for opaque client key + provider id derivation. */
+  payloadDigest?: string;
+  contractVersion?: string;
+};
+
+export interface CalendarHoldWritePort {
+  createHold(
+    payload: CalendarHoldCreatePayload,
+    meta: CalendarHoldCreateMeta,
+  ): Promise<{ ok: true; key: string; ownership: OwnershipProof } | { ok: false; message: string }>;
+  getHold(key: string): Promise<CalendarHoldSnapshot | null>;
+  deleteHoldWithOwnership(
+    key: string,
+    ownership: OwnershipProof,
+  ): Promise<
+    | { ok: true; outcome: 'deleted' | 'already-absent' }
+    | { ok: false; code: string; message: string }
+  >;
+  /**
+   * Postcondition explícita de ausencia (cancelled / 404 / 410).
+   * No colapsa errores de proveedor a absent.
+   */
+  verifyHoldAbsent(
+    key: string,
+  ): Promise<
+    | { ok: true; absent: true }
+    | { ok: true; absent: false }
+    | { ok: false; code: string; message: string }
+  >;
+  /** Lectura mínima del calendario dedicado (sin crear eventos). */
+  checkReady(): Promise<ProviderReadyResult>;
+}
+
+export type ProposalCreateMeta = {
+  key: string;
+  idempotencyKey: string;
+  createdAt: string;
+  expiresAt: string;
+  payloadDigest: string;
+  contractVersion: string;
+  source: string;
+  beforeDigest: string | null;
+  diff: ActionDiff | null;
+  encryptedPayloadKey: string | null;
+  confirmationMode?: ActionProposalSummary['confirmationMode'];
+};
+
 export interface ProposalRepositoryPort {
-  create(
-    payload: ProposalCreatePayload,
-    meta: { key: string; idempotencyKey: string; createdAt: string },
-  ): Promise<ActionProposalSummary>;
+  create(payload: ProposalCreatePayload, meta: ProposalCreateMeta): Promise<ActionProposalSummary>;
   get(key: string): Promise<ActionProposalSummary | null>;
   list(status?: ProposalStatus): Promise<readonly ActionProposalSummary[]>;
   updateStatus(
     key: string,
     status: ProposalStatus,
     patch: Partial<
-      Pick<ActionProposalSummary, 'decidedAt' | 'appliedAt' | 'resultCode' | 'afterSummary'>
+      Pick<
+        ActionProposalSummary,
+        | 'decidedAt'
+        | 'appliedAt'
+        | 'resultCode'
+        | 'afterSummary'
+        | 'beforeSummary'
+        | 'executionStartedAt'
+        | 'rollbackDeadline'
+        | 'rolledBackAt'
+        | 'beforeDigest'
+        | 'diff'
+        | 'encryptedPayloadKey'
+        | 'ownershipDigest'
+        | 'targetKey'
+      >
     >,
+    options?: { expectedStatus?: ProposalStatus },
   ): Promise<ActionProposalSummary | null>;
 }
 
-/** Garantiza que un puerto no exponga métodos destructivos. */
+const ROLLBACK_METHOD_ALLOWLIST = new Set([
+  'archiveCapture',
+  'archiveOwnedTask',
+  'deleteHoldWithOwnership',
+  'markReverted',
+]);
+
+/** Garantiza que un puerto no exponga métodos destructivos públicos. */
 export function portHasDestructiveMethods(port: object): boolean {
   const keys = Object.keys(port as Record<string, unknown>);
-  return keys.some((key) => /delete|archive|merge|destroy|drop|removePage|trash/i.test(key));
+  return keys.some((key) => {
+    if (ROLLBACK_METHOD_ALLOWLIST.has(key)) return false;
+    return /delete|archive|merge|destroy|drop|removePage|trash/i.test(key);
+  });
 }

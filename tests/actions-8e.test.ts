@@ -8,9 +8,12 @@ import { test } from 'node:test';
 
 import { auditLooksSafe, createMemoryAuditSink, sanitizeActorHint } from '@/lib/actions/audit';
 import { isWriteActionsEnabled } from '@/lib/actions/config';
+import { createMemoryWriteCoordination } from '@/lib/actions/coordination';
+import { createMemoryEncryptedPayloadStore } from '@/lib/actions/encryption';
 import { executeAction } from '@/lib/actions/engine';
 import { createMemoryIdempotencyStore } from '@/lib/actions/idempotency';
 import {
+  createMemoryCalendarHoldPort,
   createMemoryGymPort,
   createMemoryInboxPort,
   createMemoryProposalPort,
@@ -22,8 +25,10 @@ import {
   listForbiddenActionTypes,
 } from '@/lib/actions/policy';
 import { portHasDestructiveMethods } from '@/lib/actions/ports';
+import { requestFromEmail } from '@/lib/actions/request';
 import { primaryNav } from '@/lib/constants/navigation';
 import type { ActionConfirmation, ActionRequest } from '@/types/actions';
+import { randomBytes } from 'node:crypto';
 
 const explicit: ActionConfirmation = {
   mode: 'explicit',
@@ -36,11 +41,16 @@ function deps(overrides?: {
   inbox?: ReturnType<typeof createMemoryInboxPort>;
   gym?: ReturnType<typeof createMemoryGymPort>;
   proposals?: ReturnType<typeof createMemoryProposalPort>;
+  calendar?: ReturnType<typeof createMemoryCalendarHoldPort>;
 }) {
+  const encryptionKey = randomBytes(32);
+  const encryptionStore = createMemoryEncryptedPayloadStore();
+  const coordination = createMemoryWriteCoordination();
   return {
     writesEnabled: true,
     idempotency: createMemoryIdempotencyStore(),
     audit: createMemoryAuditSink(),
+    coordination,
     handlers: {
       tasks:
         overrides?.tasks ??
@@ -50,6 +60,12 @@ function deps(overrides?: {
       inbox: overrides?.inbox ?? createMemoryInboxPort(),
       gym: overrides?.gym ?? createMemoryGymPort(),
       proposals: overrides?.proposals ?? createMemoryProposalPort(),
+      calendar: overrides?.calendar ?? createMemoryCalendarHoldPort(),
+      encryptionStore,
+      encryptionKey,
+      coordination,
+      approvalTtlSeconds: 86_400,
+      rollbackWindowSeconds: 604_800,
       now: () => '2026-07-22T12:00:00.000Z',
     },
   };
@@ -57,15 +73,17 @@ function deps(overrides?: {
 
 function request(
   partial: Partial<ActionRequest> &
-    Pick<ActionRequest, 'actionType' | 'payload' | 'idempotencyKey'>,
+    Pick<ActionRequest, 'actionType' | 'payload' | 'idempotencyKey'> & {
+      actorEmail?: string;
+    },
 ): ActionRequest {
-  return {
-    actorEmail: 'user@example.com',
+  const { actorEmail, ...rest } = partial;
+  return requestFromEmail(actorEmail ?? 'user@example.com', {
     confirmation: explicit,
     expectedPrevious: null,
     context: { source: 'web', targetDate: '2026-07-22' },
-    ...partial,
-  };
+    ...rest,
+  });
 }
 
 test('8E1-1. flag apagada bloquea toda escritura', async () => {
@@ -358,7 +376,7 @@ test('8E1-14. captura de Bandeja', async () => {
     deps({ inbox }),
   );
   assert.equal(result.ok, true);
-  assert.equal(inbox.captures.length, 1);
+  assert.equal(inbox.captures.size, 1);
 });
 
 test('8E1-15. captura preservada ante error', async () => {
@@ -537,6 +555,22 @@ test('8E1-19. validación de peso, reps, RIR y RPE', async () => {
 
 test('8E1-20. propuesta creada', async () => {
   const proposals = createMemoryProposalPort();
+  const d = deps({ proposals });
+  const seeded = await d.handlers.tasks.createTask(
+    {
+      title: 'Seed',
+      priority: 'Media',
+      areaKey: 'area.salud',
+      projectKey: null,
+      date: null,
+      duration: null,
+      energy: null,
+      note: null,
+    },
+    { idempotencyKey: 'seed-prop-1' },
+  );
+  assert.equal(seeded.ok, true);
+  if (!seeded.ok) return;
   const result = await executeAction(
     request({
       actionType: 'proposal.create',
@@ -545,15 +579,15 @@ test('8E1-20. propuesta creada', async () => {
         name: 'Mover tarea',
         proposedActionType: 'task.change-status',
         targetType: 'task',
-        targetKey: 'task-1',
+        targetKey: seeded.key,
         reason: 'Reorganizar',
         expectedChange: 'Pendiente → En progreso',
         risk: 'low',
         reversible: true,
-        sanitizedPayload: { nextStatus: 'En progreso' },
+        payload: { taskKey: seeded.key, nextStatus: 'En progreso' },
       },
     }),
-    deps({ proposals }),
+    d,
   );
   assert.equal(result.ok, true);
   assert.equal((await proposals.list()).length, 1);
@@ -561,6 +595,8 @@ test('8E1-20. propuesta creada', async () => {
 
 test('8E1-21. propuesta aprobada', async () => {
   const proposals = createMemoryProposalPort();
+  const inbox = createMemoryInboxPort();
+  const d = deps({ proposals, inbox });
   const created = await executeAction(
     request({
       actionType: 'proposal.create',
@@ -574,10 +610,15 @@ test('8E1-21. propuesta aprobada', async () => {
         expectedChange: 'c',
         risk: 'low',
         reversible: true,
-        sanitizedPayload: {},
+        payload: {
+          text: 'captura propuesta',
+          link: null,
+          capturedAt: '2026-07-22T12:00:00.000Z',
+          origin: 'web',
+        },
       },
     }),
-    deps({ proposals }),
+    d,
   );
   assert.equal(created.ok, true);
   const key = created.target?.key;
@@ -589,14 +630,15 @@ test('8E1-21. propuesta aprobada', async () => {
       confirmation: { mode: 'reinforced', acknowledged: true, phrase: 'aprobar' },
       payload: { proposalKey: key },
     }),
-    deps({ proposals }),
+    d,
   );
   assert.equal(approved.ok, true);
-  assert.equal((await proposals.get(key!))?.status, 'approved');
+  assert.equal((await proposals.get(key!))?.status, 'applied');
 });
 
 test('8E1-22. propuesta rechazada', async () => {
   const proposals = createMemoryProposalPort();
+  const d = deps({ proposals });
   const created = await executeAction(
     request({
       actionType: 'proposal.create',
@@ -610,10 +652,15 @@ test('8E1-22. propuesta rechazada', async () => {
         expectedChange: 'c',
         risk: 'low',
         reversible: true,
-        sanitizedPayload: {},
+        payload: {
+          text: 'captura y',
+          link: null,
+          capturedAt: '2026-07-22T12:00:00.000Z',
+          origin: 'web',
+        },
       },
     }),
-    deps({ proposals }),
+    d,
   );
   assert.equal(created.ok, true);
   const key = created.target?.key;
@@ -624,7 +671,7 @@ test('8E1-22. propuesta rechazada', async () => {
       idempotencyKey: 'prop-3-r',
       payload: { proposalKey: key },
     }),
-    deps({ proposals }),
+    d,
   );
   assert.equal(rejected.ok, true);
   assert.equal((await proposals.get(key!))?.status, 'rejected');
@@ -640,22 +687,33 @@ test('8E1-23. aprobación vuelve a pasar por política', async () => {
   assert.equal(decision.ok, false);
 });
 
-test('8E1-24. propuesta Calendar no crea evento', async () => {
+test('8E1-24. propuesta Calendar hold se aplica sin event.create', async () => {
   const proposals = createMemoryProposalPort();
+  const calendar = createMemoryCalendarHoldPort();
+  const d = deps({ proposals, calendar });
   const created = await executeAction(
     request({
       actionType: 'proposal.create',
       idempotencyKey: 'cal-1',
       payload: {
-        title: 'Bloque foco',
-        date: '2026-07-23',
-        startTime: '10:00',
-        endTime: '11:00',
+        name: 'Calendar: Bloque foco',
+        proposedActionType: 'calendar.hold.create',
+        targetType: 'calendar-hold',
+        targetKey: null,
         reason: 'Proteger tiempo',
-        relatedTaskKey: null,
+        expectedChange: 'hold 60m',
+        risk: 'medium',
+        reversible: true,
+        payload: {
+          title: 'Bloque foco',
+          start: '2027-07-23T10:00:00.000Z',
+          end: '2027-07-23T11:00:00.000Z',
+          note: 'Proteger tiempo',
+          relatedTaskKey: null,
+        },
       },
     }),
-    deps({ proposals }),
+    d,
   );
   assert.equal(created.ok, true);
   const key = created.target?.key;
@@ -667,11 +725,11 @@ test('8E1-24. propuesta Calendar no crea evento', async () => {
       confirmation: { mode: 'reinforced', acknowledged: true, phrase: 'aprobar' },
       payload: { proposalKey: key },
     }),
-    deps({ proposals }),
+    d,
   );
   assert.equal(approved.ok, true);
-  assert.match(approved.message, /sin crear evento/i);
-  assert.equal((await proposals.get(key))?.resultCode, 'approved-no-calendar-write');
+  assert.equal((await proposals.get(key))?.status, 'applied');
+  assert.equal(isForbiddenActionType('calendar.event.create'), true);
 });
 
 test('8E1-25. Journaling prohibido', () => {

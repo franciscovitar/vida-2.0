@@ -173,11 +173,14 @@ export function buildPreviewPreflight(env: Env): DeploymentPreflightResult {
   }
 
   if (exactTrue(env.OPENCLAW_API_ENABLED)) {
+    const openClawStatus = getOpenClawRuntimeStatus(env);
     issues.push(
       issue(
         'openclaw-enabled',
         'error',
-        'OPENCLAW_API_ENABLED debe permanecer false hasta la fase de OpenClaw.',
+        openClawStatus === 'read-only'
+          ? 'OpenClaw read-only está configurado, pero todavía no está certificado para este Preview.'
+          : 'OpenClaw requiere OPENCLAW_ACCESS_MODE=read-only y credenciales HMAC completas.',
       ),
     );
   }
@@ -338,7 +341,7 @@ function catalogIntegration(env: Env): RuntimeIntegrationView {
 
 function writesIntegration(env: Env): RuntimeIntegrationView {
   const status = getWriteRuntimeStatus(env);
-  if (!status.writesEnabled) {
+  if (!status.writesEnabled || status.global === 'disabled') {
     return {
       id: 'writes',
       label: 'Escrituras avanzadas',
@@ -348,14 +351,31 @@ function writesIntegration(env: Env): RuntimeIntegrationView {
     };
   }
 
-  const configured = status.issues.length === 0;
+  if (status.global === 'ready') {
+    return {
+      id: 'writes',
+      label: 'Escrituras avanzadas',
+      status: 'configured',
+      summary: `Listas (${Object.keys(status.components).length} componentes).`,
+      blocking: true,
+    };
+  }
+
+  if (status.global === 'degraded') {
+    return {
+      id: 'writes',
+      label: 'Escrituras avanzadas',
+      status: 'configured',
+      summary: `Degradadas: ${status.issues.slice(0, 3).join(', ') || 'componentes opcionales incompletos'}.`,
+      blocking: true,
+    };
+  }
+
   return {
     id: 'writes',
     label: 'Escrituras avanzadas',
-    status: configured ? 'configured' : 'misconfigured',
-    summary: configured
-      ? 'Habilitadas; requieren una fase de validación separada.'
-      : 'Habilitadas con configuración incompleta.',
+    status: 'misconfigured',
+    summary: `Mal configuradas: ${status.issues.slice(0, 3).join(', ') || 'faltan componentes críticos'}.`,
     blocking: true,
   };
 }
@@ -372,14 +392,14 @@ function openClawIntegration(env: Env): RuntimeIntegrationView {
     };
   }
 
+  const readOnly = status === 'read-only';
   return {
     id: 'openclaw',
     label: 'OpenClaw API',
-    status: status === 'ready' ? 'configured' : 'misconfigured',
-    summary:
-      status === 'ready'
-        ? 'API HMAC configurada; permanece fuera del alcance de Web V1.'
-        : 'Feature activa con configuración incompleta.',
+    status: readOnly ? 'configured' : 'misconfigured',
+    summary: readOnly
+      ? 'Contrato HMAC read-only configurado; la activación sigue bloqueada hasta completar el hardening.'
+      : 'Feature activa con modo de acceso o credenciales incompletas.',
     blocking: true,
   };
 }
