@@ -29,5 +29,10 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "openclaw-plugin/vida-2-0-api/src/adapter/**",
+    "openclaw-plugin/vida-2-0-api/dist/**",
+    "openclaw-plugin/vida-2-0-api/node_modules/**"
+  ]
 }

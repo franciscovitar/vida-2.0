@@ -58,6 +58,43 @@
 - A catalog entry may select only a renderer registered in code; external text is never executable.
 - New catalog resources are drafts by default and never become visible through discovery alone.
 
+## External setup / Work resume protocol
+
+These rules apply whenever an agent resumes or performs external setup involving Preview/Vercel,
+n8n, tunnels, temporary stores, browser-based OAuth, OpenClaw, or external E2E validation.
+
+- Before acting, read `docs/WORK-CHECKPOINT.md` when it exists.
+- Treat the checkpoint as a handoff, not as live truth. Revalidate every volatile fact that matters
+  before acting: deployment/SHA, environment flags, tunnel reachability, service process state,
+  temporary infrastructure, authentication state, and readiness gates. Never reconstruct the
+  workflow from chat memory alone.
+- Human-browser authentication is a valid part of the workflow. If the user completed OAuth/login
+  in their own browser, do not restart the setup merely because an agent-controlled browser does
+  not share that session. Verify the resulting external state or effect; request re-authentication
+  only when that verification fails or the authorization is actually expired.
+- Tailscale is the current preferred stable tunnel for this workflow. Do not replace it with
+  Cloudflare Tunnel, ngrok, or a newly-created tunnel unless Tailscale is verified broken or
+  incompatible, or the user explicitly asks for a different transport.
+- Validate sensitive integrations and E2E flows in Preview/dev first. Do not touch Production for
+  setup, recovery, or final validation unless the user explicitly authorizes the Production action
+  and the required backup/recovery gate is satisfied.
+- Repair the narrowest verified blocker. If a temporary dependency such as Upstash expires or
+  fails, restore or replace that dependency and then revalidate readiness; do not redeploy or
+  reconfigure unrelated infrastructure without evidence that it is also broken.
+- Readiness is a hard gate. Do not run the final external E2E while required readiness checks are
+  failing or unknown. Stop at the first verified blocker, repair it, and re-check.
+- After readiness returns to PASS, run one deliberate final E2E chain rather than repeatedly
+  replaying side-effecting steps. Preserve idempotency and audit evidence where the implementation
+  supports them.
+- Never claim that a service is connected, a deployment is READY, a gate is PASS, or an E2E was
+  executed based only on a previous prompt or checkpoint. State what was actually verified and by
+  what observable result.
+- Update `docs/WORK-CHECKPOINT.md` at meaningful pause/resume boundaries. Keep only sanitized
+  operational state, blockers, completed gates, and the exact next action. Never store secrets,
+  tokens, emails, provider credentials, or sensitive payloads there.
+- Do not recreate working architecture during recovery. Preserve verified-good components and fix
+  only the delta unless evidence shows that the approach itself is wrong.
+
 ## Completion criteria
 
 - The requested behavior is implemented without unrelated changes.

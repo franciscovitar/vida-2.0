@@ -5,5 +5,12 @@ import nextTypeScript from 'eslint-config-next/typescript';
 export default defineConfig([
   ...nextVitals,
   ...nextTypeScript,
-  globalIgnores(['.next/**', 'coverage/**', 'dist/**', 'build/**', 'next-env.d.ts']),
+  globalIgnores([
+    '.next/**',
+    'coverage/**',
+    'dist/**',
+    'build/**',
+    'next-env.d.ts',
+    'openclaw-plugin/vida-2-0-api/src/adapter/**',
+  ]),
 ]);
