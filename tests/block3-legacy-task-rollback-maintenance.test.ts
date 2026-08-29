@@ -96,12 +96,13 @@ type FakeTaskOptions = {
 
 function fakeTaskPort(options: FakeTaskOptions = {}) {
   let snapshot = options.snapshot === undefined ? defaultSnapshot() : options.snapshot;
-  const state = { archiveCalls: 0 };
+  const state = { archiveCalls: 0, getTaskCalls: 0 };
   const port: NotionTaskWritePort = {
     async createTask() {
       return { ok: false, code: 'not-configured', message: 'no usado' };
     },
     async getTask() {
+      state.getTaskCalls += 1;
       return snapshot;
     },
     async updateTaskStatus() {
@@ -243,6 +244,23 @@ test('10. Más de una candidata → requires-review, cero archives', async () =>
   const repair = await repairSingleLegacyTaskCreateRollback(d, OFF);
   assert.deepEqual(repair, { ok: false, state: 'requires-review', outcome: 'blocked' });
   assert.equal(tasks.state.archiveCalls, 0);
+});
+
+test('10b. >1 ledger candidate: getTask NO se usa para elegir (aunque una sería null)', async () => {
+  // getTask siempre null: una lectura fallida no debe hacer parecer que hay una sola.
+  const tasks = fakeTaskPort({ snapshot: null });
+  const d = deps(
+    fakeProposals([
+      makeProposal({ key: 'prop-a', targetKey: 'task-a' }),
+      makeProposal({ key: 'prop-b', targetKey: 'task-b' }),
+    ]),
+    tasks.port,
+  );
+  assert.deepEqual(await inspectLegacyTaskRollbackRepair(d, OFF), { state: 'requires-review' });
+  const repair = await repairSingleLegacyTaskCreateRollback(d, OFF);
+  assert.deepEqual(repair, { ok: false, state: 'requires-review', outcome: 'blocked' });
+  assert.equal(tasks.state.archiveCalls, 0);
+  assert.equal(tasks.state.getTaskCalls, 0, 'no se consulta getTask con más de una proposal');
 });
 
 test('11. archiveOwnedTask falla → repair falla', async () => {

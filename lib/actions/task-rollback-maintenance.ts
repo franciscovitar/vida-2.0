@@ -70,39 +70,41 @@ function passesLedgerFilters(proposal: ActionProposalSummary): boolean {
   );
 }
 
-type Buckets = {
-  /** Ledger coherente + tarea activa exactamente en «Algún día». */
-  repairable: ActionProposalSummary[];
-  /** Ledger coherente pero tarea activa en OTRO Estado: no auto-reparable. */
-  review: ActionProposalSummary[];
-};
+type Classification =
+  | { state: 'none' }
+  | { state: 'requires-review' }
+  | { state: 'repairable'; proposal: ActionProposalSummary };
 
-async function classify(deps: TaskRollbackMaintenanceDeps): Promise<Buckets> {
+/**
+ * Clasificación fail-closed.
+ *
+ * Primero aplica TODOS los filtros de ledger. `getTask` solo se consulta cuando
+ * hay EXACTAMENTE una proposal elegible: con más de una, `getTask` podría
+ * devolver `null` por un fallo de lectura de Notion (no solo por tarea ausente) y
+ * hacer parecer que existe una única candidata. Ante varias proposals que
+ * cumplen el contrato de ledger se exige revisión, aunque alguna ya estuviera
+ * archivada: es una vía one-off y se prefiere un falso bloqueo a una selección
+ * ambigua. Nunca se elige una entre varias.
+ */
+async function classify(deps: TaskRollbackMaintenanceDeps): Promise<Classification> {
   const rolledBack = await deps.proposals.list('rolled-back');
   const ledgerCandidates = rolledBack.filter(passesLedgerFilters);
 
-  const buckets: Buckets = { repairable: [], review: [] };
-  for (const proposal of ledgerCandidates) {
-    // targetKey ya fue validado por passesLedgerFilters.
-    const task = await deps.tasks.getTask(proposal.targetKey as string);
-    if (task === null) {
-      // Propuesta ya coherente (tarea archivada / ausente): no es candidata.
-      continue;
-    }
-    if (task.status === LEGACY_ROLLBACK_TASK_STATUS) {
-      buckets.repairable.push(proposal);
-    } else {
-      buckets.review.push(proposal);
-    }
-  }
-  return buckets;
-}
+  if (ledgerCandidates.length === 0) return { state: 'none' };
+  if (ledgerCandidates.length > 1) return { state: 'requires-review' };
 
-function stateFromBuckets(buckets: Buckets): LegacyTaskRollbackRepairState {
-  if (buckets.repairable.length === 1 && buckets.review.length === 0) return 'repairable';
-  if (buckets.repairable.length === 0 && buckets.review.length === 0) return 'none';
-  // >1 reparable, o mezcla con casos que requieren mirada humana: nunca elegir.
-  return 'requires-review';
+  const proposal = ledgerCandidates[0]!;
+  // targetKey ya fue validado por passesLedgerFilters.
+  const task = await deps.tasks.getTask(proposal.targetKey as string);
+  if (task === null) {
+    // Propuesta ya coherente (tarea archivada / ausente).
+    return { state: 'none' };
+  }
+  if (task.status === LEGACY_ROLLBACK_TASK_STATUS) {
+    return { state: 'repairable', proposal };
+  }
+  // Tarea activa en otro Estado: no es la huella del bug, no auto-reparable.
+  return { state: 'requires-review' };
 }
 
 /**
@@ -115,8 +117,8 @@ export async function inspectLegacyTaskRollbackRepair(
 ): Promise<{ state: LegacyTaskRollbackRepairState }> {
   if (isWriteActionsEnabled(env)) return { state: 'disabled' };
   try {
-    const buckets = await classify(deps);
-    return { state: stateFromBuckets(buckets) };
+    const classification = await classify(deps);
+    return { state: classification.state };
   } catch {
     return { state: 'misconfigured' };
   }
@@ -134,28 +136,25 @@ export async function repairSingleLegacyTaskCreateRollback(
     return { ok: false, state: 'disabled', outcome: 'blocked' };
   }
 
-  let buckets: Buckets;
+  let classification: Classification;
   try {
-    buckets = await classify(deps);
+    classification = await classify(deps);
   } catch {
     return { ok: false, state: 'misconfigured', outcome: 'blocked' };
   }
 
-  const state = stateFromBuckets(buckets);
-
-  if (state === 'none') {
+  if (classification.state === 'none') {
     // Idempotente: al reabrir ya no hay tarea activa que reparar.
     return { ok: true, state: 'none', outcome: 'already-consistent' };
   }
-  if (state !== 'repairable') {
-    // requires-review / disabled: jamás mutar.
-    return { ok: false, state, outcome: 'blocked' };
+  if (classification.state !== 'repairable') {
+    // requires-review: jamás mutar; nunca elegir entre varias.
+    return { ok: false, state: classification.state, outcome: 'blocked' };
   }
 
-  const proposal = buckets.repairable[0]!;
-  // Derivado EXCLUSIVAMENTE del ledger.
-  const targetKey = proposal.targetKey as string;
-  const ownershipDigest = proposal.ownershipDigest as string;
+  // Derivado EXCLUSIVAMENTE del ledger (la única proposal elegible).
+  const targetKey = classification.proposal.targetKey as string;
+  const ownershipDigest = classification.proposal.ownershipDigest as string;
 
   const archived = await deps.tasks.archiveOwnedTask(targetKey, ownershipDigest);
   if (!archived.ok) {
