@@ -30,9 +30,9 @@ export type NotionActionsClient = {
     pageId: string,
   ): Promise<{ ok: true; page: NotionPageResult } | { ok: false; message: string }>;
   /**
-   * Archiva la página (papelera de Notion) vía `pages.update` con `in_trash`.
+   * Archiva la página en la papelera de Notion usando el parámetro compatible
+   * con la versión API fijada por este cliente (2025-09-03: `archived`).
    * Compensación ownership-scoped únicamente: nunca borrado permanente ni genérico.
-   * `archived` refleja el estado devuelto por el proveedor para la postcondición.
    */
   archivePage(
     pageId: string,
@@ -163,7 +163,8 @@ export function createNotionActionsClient(token: string): NotionActionsClient {
 
     async archivePage(pageId) {
       try {
-        const response = await client.pages.update({ page_id: pageId, in_trash: true });
+        // Notion-Version 2025-09-03 usa `archived`; `in_trash` corresponde a 2026-03-11.
+        const response = await client.pages.update({ page_id: pageId, archived: true });
         return { ok: true, archived: readArchivedFlag(response) };
       } catch {
         return { ok: false, message: sanitizeError() };
