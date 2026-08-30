@@ -8,7 +8,11 @@ import {
 } from '@/lib/actions/config';
 import { digestFromDiff } from '@/lib/actions/diff';
 import { compensateBusiness, executeBusinessAction } from '@/lib/actions/handlers';
-import { idempotencyDigestFromActorHash, opaqueKey, payloadDigestFromPlaintext } from '@/lib/actions/opaque';
+import {
+  idempotencyDigestFromActorHash,
+  opaqueKey,
+  payloadDigestFromPlaintext,
+} from '@/lib/actions/opaque';
 import { validateInboxCapture } from '@/lib/actions/payloads';
 import { getAllowedActionMeta } from '@/lib/actions/policy';
 import { preflightBusinessProposal } from '@/lib/actions/preflight';
@@ -178,7 +182,11 @@ export async function executeConversationalInboxDirectApply(
   const env = options.env ?? process.env;
 
   if (input.channel !== 'chatgpt') {
-    return fail('policy-denied', 'Este canal todavía no está habilitado para captura directa.', null);
+    return fail(
+      'policy-denied',
+      'Este canal todavía no está habilitado para captura directa.',
+      null,
+    );
   }
   if (input.userIntent !== 'explicit-write') {
     return fail('policy-denied', 'Hace falta una intención explícita de guardar.', null);
