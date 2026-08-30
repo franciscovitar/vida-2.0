@@ -26,9 +26,7 @@ export function isWriteActionsUseMemory(
 export function isConversationalInboxDirectApplyEnabled(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): boolean {
-  return (
-    env.CONVERSATIONAL_INBOX_DIRECT_APPLY_ENABLED === 'true' && isWriteActionsEnabled(env)
-  );
+  return env.CONVERSATIONAL_INBOX_DIRECT_APPLY_ENABLED === 'true' && isWriteActionsEnabled(env);
 }
 
 /**
@@ -369,35 +367,58 @@ export function getWriteRuntimeStatus(
   }
 
   let calendarHold: IntegrationRuntimeState = 'misconfigured';
-  const calendarOauth = resolveCalendarConfig(env);
-  const calendarWriteId = getGoogleCalendarWriteId(env);
-  if (!calendarWriteId) {
-    issues.push('calendar-write-id-missing');
-  } else if (!calendarOauth.ok) {
-    issues.push('calendar-oauth-misconfigured');
-  } else {
+  const calendarOauth =
+    Boolean(env.GOOGLE_CALENDAR_CLIENT_ID?.trim()) &&
+    Boolean(env.GOOGLE_CALENDAR_CLIENT_SECRET?.trim()) &&
+    Boolean(env.GOOGLE_CALENDAR_REFRESH_TOKEN?.trim());
+  if (writeConfig.ok && writeConfig.calendarWriteId && calendarOauth) {
     calendarHold = 'ready';
+  } else if (!writeConfig.ok || !writeConfig.calendarWriteId) {
+    issues.push('calendar-write-id-missing');
+  } else {
+    issues.push('calendar-oauth-missing');
   }
 
-  const proposalsLedger: IntegrationRuntimeState =
-    tokenOk && writeConfig.ok && Boolean(writeConfig.actionsDataSourceId) ? 'ready' : 'misconfigured';
-  if (proposalsLedger !== 'ready') issues.push('actions-ledger-misconfigured');
+  let notionInbox: IntegrationRuntimeState = 'misconfigured';
+  if (writeConfig.ok && writeConfig.inboxPageId && tokenOk && coordination === 'ready') {
+    notionInbox = 'ready';
+  } else if (!writeConfig.ok || !writeConfig.inboxPageId) {
+    issues.push('inbox-page-missing');
+  } else if (coordination !== 'ready') {
+    issues.push('inbox-mapping-requires-upstash');
+  }
 
-  const notionInbox: IntegrationRuntimeState =
-    tokenOk && writeConfig.ok && Boolean(writeConfig.inboxPageId) ? 'ready' : 'misconfigured';
-  if (notionInbox !== 'ready') issues.push('notion-inbox-misconfigured');
+  let sheetsGym: IntegrationRuntimeState = 'misconfigured';
+  if (writeConfig.ok && writeConfig.gymSessionsRange && writeConfig.gymSetsRange) {
+    sheetsGym = 'ready';
+  } else {
+    issues.push('gym-ranges-missing');
+  }
 
-  const sheetsGym: IntegrationRuntimeState =
-    writeConfig.ok && Boolean(writeConfig.gymSessionsRange) && Boolean(writeConfig.gymSetsRange)
-      ? 'ready'
-      : 'misconfigured';
-  if (sheetsGym !== 'ready') issues.push('sheets-gym-misconfigured');
+  let proposalsLedger: IntegrationRuntimeState = 'misconfigured';
+  let audit: IntegrationRuntimeState = 'misconfigured';
+  let idempotency: IntegrationRuntimeState = 'misconfigured';
+  let idempotencyDetail: IdempotencyRuntimeState = 'unavailable';
+  let rollback: IntegrationRuntimeState = 'misconfigured';
+  if (
+    writeConfig.ok &&
+    writeConfig.actionsDataSourceId &&
+    tokenOk &&
+    encryptedPayloadStore === 'ready'
+  ) {
+    proposalsLedger = 'ready';
+    audit = 'ready';
+    idempotency = 'ready';
+    idempotencyDetail = 'persistent';
+    rollback = coordination === 'ready' ? 'ready' : 'misconfigured';
+  } else {
+    issues.push('actions-data-source-missing');
+  }
 
-  const idempotency: IntegrationRuntimeState = proposalsLedger;
-  const audit: IntegrationRuntimeState = proposalsLedger;
-  const rollback: IntegrationRuntimeState = proposalsLedger;
   const openclawProposals: IntegrationRuntimeState = isOpenClawProposalsEnabled(env)
-    ? 'ready'
+    ? proposalsLedger === 'ready' && encryptedPayloadStore === 'ready'
+      ? 'ready'
+      : 'misconfigured'
     : 'disabled';
 
   const components: WriteRuntimeComponents = {
@@ -415,22 +436,21 @@ export function getWriteRuntimeStatus(
     openclawProposals,
   };
 
-  return withAliases(
-    components,
-    idempotency === 'ready' && coordination === 'ready' ? 'persistent' : 'unavailable',
-    issues,
-  );
+  return withAliases(components, idempotencyDetail, issues);
 }
 
+/** Preflight cerrado: lectura mock + escritura real no se mezclan. */
 export function assertNotionLiveForWrites(
   env: Readonly<Record<string, string | undefined>> = process.env,
-): { ok: true } | { ok: false; message: string } {
+): { ok: true } | { ok: false; code: string; message: string } {
+  if (!isWriteActionsEnabled(env)) return { ok: true };
+  if (allowMemoryWritePorts(env)) return { ok: true };
   if (getNotionDataSource(env) !== 'notion') {
-    return { ok: false, message: 'Notion no está en modo live para escrituras.' };
-  }
-  const cfg = getNotionConfig(env);
-  if (!cfg.ok) {
-    return { ok: false, message: 'Configuración Notion incompleta o no autorizada.' };
+    return {
+      ok: false,
+      code: 'notion-data-source-not-live',
+      message: 'NOTION_DATA_SOURCE debe ser notion cuando las escrituras reales están activas.',
+    };
   }
   return { ok: true };
 }
