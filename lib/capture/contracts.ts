@@ -12,10 +12,7 @@ export const CONVERSATIONAL_CAPTURE_CHANNELS = [
 export type ConversationalCaptureChannel = (typeof CONVERSATIONAL_CAPTURE_CHANNELS)[number];
 
 export type VidaCaptureAuthority =
-  | 'notion-tasks'
-  | 'notion-inbox'
-  | 'sheets-gym'
-  | 'google-calendar-holds';
+  'notion-tasks' | 'notion-inbox' | 'sheets-gym' | 'google-calendar-holds';
 
 export type VidaCaptureExecutionMode = 'proposal-only' | 'proposal-or-direct-apply';
 
