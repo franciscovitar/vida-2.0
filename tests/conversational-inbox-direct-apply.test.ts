@@ -5,10 +5,7 @@ import { createMemoryAuditSink } from '@/lib/actions/audit';
 import { createMemoryWriteCoordination } from '@/lib/actions/coordination';
 import { executeAction } from '@/lib/actions/engine';
 import { createMemoryIdempotencyStore } from '@/lib/actions/idempotency';
-import {
-  createMemoryInboxPort,
-  createMemoryProposalPort,
-} from '@/lib/actions/memory-ports';
+import { createMemoryInboxPort, createMemoryProposalPort } from '@/lib/actions/memory-ports';
 import { requestFromEmail } from '@/lib/actions/request';
 import { buildWriteRuntime } from '@/lib/actions/runtime';
 import {
@@ -26,7 +23,9 @@ const enabledEnv = {
 
 const fixedNow = () => '2030-08-30T15:00:00.000Z';
 
-function baseInput(overrides: Partial<ConversationalInboxDirectInput> = {}): ConversationalInboxDirectInput {
+function baseInput(
+  overrides: Partial<ConversationalInboxDirectInput> = {},
+): ConversationalInboxDirectInput {
   return {
     channel: 'chatgpt',
     principalId: 'chatgpt-user-1',
