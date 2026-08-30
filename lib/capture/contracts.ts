@@ -12,7 +12,10 @@ export const CONVERSATIONAL_CAPTURE_CHANNELS = [
 export type ConversationalCaptureChannel = (typeof CONVERSATIONAL_CAPTURE_CHANNELS)[number];
 
 export type VidaCaptureAuthority =
-  'notion-tasks' | 'notion-inbox' | 'sheets-gym' | 'google-calendar-holds';
+  | 'notion-tasks'
+  | 'notion-inbox'
+  | 'sheets-gym'
+  | 'google-calendar-holds';
 
 export type VidaCaptureExecutionMode = 'proposal-only' | 'proposal-or-direct-apply';
 
@@ -86,6 +89,12 @@ export function isVidaConversationalDirectApplyEnabled(
 ): boolean {
   const capability = CAPABILITIES[operation];
   if (!capability.directApplyEligible) return false;
+
+  const policy = getAllowedActionMeta(operation);
+  if (policy.confirmation !== 'explicit' || policy.risk !== 'low' || !policy.reversible) {
+    return false;
+  }
+
   if (operation === 'inbox.capture') return isConversationalInboxDirectApplyEnabled(env);
   return false;
 }
