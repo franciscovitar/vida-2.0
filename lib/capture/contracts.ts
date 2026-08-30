@@ -1,3 +1,4 @@
+import { isConversationalInboxDirectApplyEnabled } from '@/lib/actions/config';
 import { BUSINESS_ACTION_TYPES, getAllowedActionMeta } from '@/lib/actions/policy';
 import type { ProposedBusinessActionType } from '@/types/actions';
 
@@ -13,21 +14,20 @@ export type ConversationalCaptureChannel = (typeof CONVERSATIONAL_CAPTURE_CHANNE
 export type VidaCaptureAuthority =
   'notion-tasks' | 'notion-inbox' | 'sheets-gym' | 'google-calendar-holds';
 
-export type VidaCaptureExecutionMode = 'proposal-only';
+export type VidaCaptureExecutionMode = 'proposal-only' | 'proposal-or-direct-apply';
 
 export interface VidaConversationalCaptureCapability {
   operation: ProposedBusinessActionType;
   authority: VidaCaptureAuthority;
   /**
-   * Current production contract. Conversational routing must not silently bypass
-   * the existing proposal/approval path until a separate policy change is designed,
-   * tested and activated.
+   * Direct apply is an additional, action-scoped path. Proposal flow remains available
+   * and web data-entry surfaces stay disabled.
    */
   executionMode: VidaCaptureExecutionMode;
   /** Daily data entry is not originated from Vida Web. */
   webOriginatingSurface: false;
-  /** No current business action is direct-applied by this V1 registry. */
-  directApplyEnabled: false;
+  /** Eligibility is static; runtime activation still requires a separate exact feature flag. */
+  directApplyEligible: boolean;
 }
 
 export type VidaConversationalCaptureCapabilities = readonly VidaConversationalCaptureCapability[];
@@ -38,35 +38,35 @@ const CAPABILITIES: Record<ProposedBusinessActionType, VidaConversationalCapture
     authority: 'notion-tasks',
     executionMode: 'proposal-only',
     webOriginatingSurface: false,
-    directApplyEnabled: false,
+    directApplyEligible: false,
   },
   'task.change-status': {
     operation: 'task.change-status',
     authority: 'notion-tasks',
     executionMode: 'proposal-only',
     webOriginatingSurface: false,
-    directApplyEnabled: false,
+    directApplyEligible: false,
   },
   'inbox.capture': {
     operation: 'inbox.capture',
     authority: 'notion-inbox',
-    executionMode: 'proposal-only',
+    executionMode: 'proposal-or-direct-apply',
     webOriginatingSurface: false,
-    directApplyEnabled: false,
+    directApplyEligible: true,
   },
   'gym.session.create': {
     operation: 'gym.session.create',
     authority: 'sheets-gym',
     executionMode: 'proposal-only',
     webOriginatingSurface: false,
-    directApplyEnabled: false,
+    directApplyEligible: false,
   },
   'calendar.hold.create': {
     operation: 'calendar.hold.create',
     authority: 'google-calendar-holds',
     executionMode: 'proposal-only',
     webOriginatingSurface: false,
-    directApplyEnabled: false,
+    directApplyEligible: false,
   },
 };
 
@@ -78,6 +78,22 @@ export function getVidaConversationalCaptureCapability(
   operation: ProposedBusinessActionType,
 ): VidaConversationalCaptureCapability {
   return CAPABILITIES[operation];
+}
+
+export function isVidaConversationalDirectApplyEnabled(
+  operation: ProposedBusinessActionType,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  const capability = CAPABILITIES[operation];
+  if (!capability.directApplyEligible) return false;
+
+  const policy = getAllowedActionMeta(operation);
+  if (policy.confirmation !== 'explicit' || policy.risk !== 'low' || !policy.reversible) {
+    return false;
+  }
+
+  if (operation === 'inbox.capture') return isConversationalInboxDirectApplyEnabled(env);
+  return false;
 }
 
 /**

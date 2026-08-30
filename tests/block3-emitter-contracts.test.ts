@@ -22,7 +22,7 @@ function source(...parts: string[]): string {
 }
 
 test('B3-EMIT-01. inbox origins allowlist from canonical constant', () => {
-  assert.deepEqual([...INBOX_CAPTURE_ORIGINS], ['web', 'openclaw', 'manual', 'import']);
+  assert.deepEqual([...INBOX_CAPTURE_ORIGINS], ['web', 'openclaw', 'chatgpt', 'manual', 'import']);
   for (const origin of INBOX_CAPTURE_ORIGINS) {
     const parsed = validateInboxCapture({
       text: 'captura válida',

@@ -49,12 +49,32 @@ const WORKSPACES: readonly WorkspaceDefinition[] = [
   },
 ] as const;
 
-const ROUTES = [
-  ['app/(app)/gimnasio/page.tsx', 'GymSessionPanel'],
-  ['app/(app)/tareas/page.tsx', 'TaskPlanningWorkspace'],
-  ['app/(app)/proyectos/page.tsx', 'ProjectReviewWorkspace'],
-  ['app/(app)/bandeja/page.tsx', 'InboxPlanningWorkspace'],
-  ['app/(app)/aprobaciones/page.tsx', 'ReviewWorkspace'],
+const ROUTE_CONTRACTS = [
+  {
+    route: 'app/(app)/gimnasio/page.tsx',
+    includes: ['GymDashboardView'],
+    excludes: ['GymSessionPanel'],
+  },
+  {
+    route: 'app/(app)/tareas/page.tsx',
+    includes: ['TasksBoard'],
+    excludes: ['TaskPlanningWorkspace', 'TaskCreatePanel', 'TaskStatusPanel'],
+  },
+  {
+    route: 'app/(app)/proyectos/page.tsx',
+    includes: ['ProjectReviewWorkspace'],
+    excludes: [],
+  },
+  {
+    route: 'app/(app)/bandeja/page.tsx',
+    includes: ['Captura conversacional'],
+    excludes: ['InboxPlanningWorkspace', 'InboxCapturePanel', 'QuickInbox'],
+  },
+  {
+    route: 'app/(app)/aprobaciones/page.tsx',
+    includes: ['ReviewWorkspace', 'ApprovalsPanel'],
+    excludes: ['CalendarHoldPanel'],
+  },
 ] as const;
 
 function read(root: string, relativePath: string): string | null {
@@ -202,9 +222,17 @@ export function runBlock1FinalQa(root = process.cwd()): Block1QaCheck[] {
     },
     {
       id: 'routes-wired',
-      label: 'Rutas conectadas a los workspaces',
-      ok: ROUTES.every(([route, symbol]) => read(root, route)?.includes(symbol)),
-      detail: 'Gimnasio, Tareas, Proyectos, Bandeja y Aprobaciones usan las interfaces nuevas.',
+      label: 'Rutas alineadas con captura conversacional',
+      ok: ROUTE_CONTRACTS.every(({ route, includes, excludes }) => {
+        const routeSource = read(root, route);
+        if (!routeSource) return false;
+        return (
+          includes.every((symbol) => routeSource.includes(symbol)) &&
+          excludes.every((symbol) => !routeSource.includes(symbol))
+        );
+      }),
+      detail:
+        'Vida Web conserva observación/revisión y no vuelve a montar emisores cotidianos retirados por el contrato conversacional.',
     },
     {
       id: 'client-secret-boundary',

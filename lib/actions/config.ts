@@ -20,6 +20,16 @@ export function isWriteActionsUseMemory(
 }
 
 /**
+ * Captura conversacional directa de Bandeja.
+ * Compuerta adicional y fail-closed: nunca implica habilitar otras acciones o canales.
+ */
+export function isConversationalInboxDirectApplyEnabled(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.CONVERSATIONAL_INBOX_DIRECT_APPLY_ENABLED === 'true' && isWriteActionsEnabled(env);
+}
+
+/**
  * Memoria solo para tests o desarrollo local explícito.
  * Nunca como fallback silencioso en Preview/Production.
  */
