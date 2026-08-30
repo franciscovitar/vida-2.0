@@ -174,8 +174,37 @@ export type ProposalCreateMeta = {
   confirmationMode?: ActionProposalSummary['confirmationMode'];
 };
 
+/**
+ * Metadata sanitizada para una ejecución directa ya autorizada por la política del caller.
+ * No contiene el payload de negocio y nace en estado `executing`, nunca `pending`.
+ */
+export type DirectExecutionCreateInput = {
+  key: string;
+  name: string;
+  actionType: ActionProposalSummary['actionType'];
+  targetType: ActionProposalSummary['targetType'];
+  targetKey: string | null;
+  idempotencyKey: string;
+  createdAt: string;
+  payloadDigest: string;
+  contractVersion: string;
+  source: string;
+  beforeDigest: string | null;
+  diff: ActionDiff | null;
+  confirmationMode: ActionProposalSummary['confirmationMode'];
+  risk: ActionProposalSummary['risk'];
+  reversible: boolean;
+  reason: string;
+  expectedChange: string;
+};
+
 export interface ProposalRepositoryPort {
   create(payload: ProposalCreatePayload, meta: ProposalCreateMeta): Promise<ActionProposalSummary>;
+  /**
+   * Registro de una ejecución directa ya autorizada. Opcional para ports legacy/tests;
+   * callers de direct-apply deben fallar cerrado si no está disponible.
+   */
+  createDirectExecution?(input: DirectExecutionCreateInput): Promise<ActionProposalSummary>;
   get(key: string): Promise<ActionProposalSummary | null>;
   list(status?: ProposalStatus): Promise<readonly ActionProposalSummary[]>;
   updateStatus(
