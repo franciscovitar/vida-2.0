@@ -1,20 +1,14 @@
 import { CheckSquare } from 'lucide-react';
 import type { Metadata } from 'next';
 
-import { loadWriteOperabilityMatrix } from '@/app/actions/writes';
-import { TaskCreatePanel, TaskStatusPanel } from '@/components/actions/WritePanels';
 import styles from '@/components/domain/DomainPage.module.scss';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { NotionIntegrationNotice } from '@/components/notion/NotionIntegrationNotice';
 import boardStyles from '@/components/notion/NotionBoards.module.scss';
 import { TasksBoard } from '@/components/notion/TasksBoard';
-import { TaskPlanningWorkspace } from '@/components/tasks/TaskPlanningWorkspace';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { formatArgentineFullDate } from '@/lib/adapters/dates';
-import { isWriteActionsEnabled } from '@/lib/actions/config';
-import { isActionOperable } from '@/lib/actions/operability';
-import { buildTaskWriteCatalogs } from '@/lib/actions/task-write-catalog';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { getNotionDashboard } from '@/lib/data/notion-source';
 
@@ -34,14 +28,7 @@ function sourceLabel(source: 'mock' | 'notion', status: string): string {
 
 export default async function TareasPage() {
   await requireAuthorizedSession();
-  const writesEnabled = isWriteActionsEnabled();
   const data = await getNotionDashboard();
-  const catalogs = buildTaskWriteCatalogs({
-    areas: data.areas,
-    projects: data.projects,
-    tasks: data.tasks,
-  });
-  const operability = writesEnabled ? await loadWriteOperabilityMatrix() : null;
   const s = data.taskSummary;
 
   return (
@@ -54,25 +41,6 @@ export default async function TareasPage() {
       />
 
       {data.notice ? <NotionIntegrationNotice status={data.status} message={data.notice} /> : null}
-      <TaskCreatePanel
-        writesEnabled={writesEnabled}
-        areaOptions={catalogs.areas}
-        projectOptions={catalogs.projects}
-        actionReady={
-          !operability ||
-          (operability.global !== 'disabled' &&
-            isActionOperable(operability, 'task.create') &&
-            catalogs.areas.length > 0)
-        }
-      />
-      <TaskStatusPanel
-        writesEnabled={writesEnabled}
-        taskOptions={catalogs.tasks}
-        actionReady={
-          !operability ||
-          (operability.global !== 'disabled' && isActionOperable(operability, 'task.change-status'))
-        }
-      />
 
       <p className={styles['meta-line']}>
         <span>Fuente: {sourceLabel(data.source, data.status)}</span>
@@ -88,7 +56,7 @@ export default async function TareasPage() {
         <SectionHeader
           id="tasks-summary-title"
           title="Resumen"
-          description="Datos reales de Notion con planificación local sin escrituras."
+          description="Datos reales de Notion para observar carga, estado y vencimientos."
           domain="tasks"
         />
         <ul className={boardStyles.summary}>
@@ -123,18 +91,11 @@ export default async function TareasPage() {
         </ul>
       </Card>
 
-      <TaskPlanningWorkspace
-        tasks={data.tasks}
-        projects={data.projects}
-        areas={data.areas}
-        targetDate={data.targetDate}
-      />
-
       <Card aria-labelledby="tasks-list-title">
         <SectionHeader
           id="tasks-list-title"
           title="Listado"
-          description="Filtros locales sobre los datos ya cargados."
+          description="Filtros locales sobre las tareas ya cargadas en la fuente canónica."
           domain="tasks"
         />
         <TasksBoard tasks={data.tasks} projects={data.projects} areas={data.areas} />
