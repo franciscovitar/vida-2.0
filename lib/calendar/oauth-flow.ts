@@ -5,6 +5,8 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import {
+  CALENDAR_HOLD_WRITE_SCOPES,
+  CALENDAR_OAUTH_HOLD_WRITE_MODE,
   CALENDAR_OAUTH_STATE_COOKIE,
   CALENDAR_OAUTH_STATE_MAX_AGE_SEC,
   CALENDAR_READONLY_SCOPE,
@@ -45,23 +47,47 @@ export function timingSafeEqualString(a: string, b: string): boolean {
   return timingSafeEqual(left, right);
 }
 
+/**
+ * Modo del consentimiento OAuth local de Calendar.
+ * - `readonly`: default seguro, solo lectura de eventos.
+ * - `hold-write`: opt-in local explícito con el set mínimo para Calendar Hold.
+ */
+export type CalendarOAuthMode = 'readonly' | 'hold-write';
+
+/**
+ * Helper puro y cerrado: solo el literal exacto `hold-write` selecciona el modo de escritura.
+ * Ausente, vacío, con typo o cualquier otro valor resuelve a `readonly`.
+ * El modo nunca se infiere de otras flags de escritura ni del entorno (Production/Preview).
+ */
+export function resolveCalendarOAuthMode(rawValue: string | null | undefined): CalendarOAuthMode {
+  return rawValue === CALENDAR_OAUTH_HOLD_WRITE_MODE ? 'hold-write' : 'readonly';
+}
+
+/** Scopes exactos autorizados para un modo dado (lista cerrada, nunca desde el cliente). */
+export function calendarScopesForMode(mode: CalendarOAuthMode): readonly string[] {
+  return mode === 'hold-write' ? CALENDAR_HOLD_WRITE_SCOPES : [CALENDAR_READONLY_SCOPE];
+}
+
 export interface CalendarConsentUrlInput {
   clientId: string;
   redirectUri: string;
   state: string;
+  /** Resuelto server-side por la ruta start. Sin este campo, el default es `readonly`. */
+  mode?: CalendarOAuthMode;
 }
 
 /**
- * URL de consentimiento con exactamente el scope readonly,
+ * URL de consentimiento con exactamente los scopes del modo resuelto,
  * access_type=offline, prompt=consent, response_type=code.
- * Sin include_granted_scopes.
+ * Sin include_granted_scopes. No acepta un array arbitrario de scopes.
  */
 export function buildCalendarConsentUrl(input: CalendarConsentUrlInput): string {
+  const scopes = calendarScopesForMode(input.mode ?? 'readonly');
   const url = new URL(GOOGLE_OAUTH_AUTH_URL);
   url.searchParams.set('client_id', input.clientId);
   url.searchParams.set('redirect_uri', input.redirectUri);
   url.searchParams.set('response_type', 'code');
-  url.searchParams.set('scope', CALENDAR_READONLY_SCOPE);
+  url.searchParams.set('scope', scopes.join(' '));
   url.searchParams.set('access_type', 'offline');
   url.searchParams.set('prompt', 'consent');
   url.searchParams.set('state', input.state);
