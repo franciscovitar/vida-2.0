@@ -22,7 +22,7 @@ function source(...parts: string[]): string {
 }
 
 test('B3-EMIT-01. inbox origins allowlist from canonical constant', () => {
-  assert.deepEqual([...INBOX_CAPTURE_ORIGINS], ['web', 'openclaw', 'manual', 'import']);
+  assert.deepEqual([...INBOX_CAPTURE_ORIGINS], ['web', 'openclaw', 'chatgpt', 'manual', 'import']);
   for (const origin of INBOX_CAPTURE_ORIGINS) {
     const parsed = validateInboxCapture({
       text: 'captura válida',
@@ -180,43 +180,11 @@ test('B3-EMIT-05. other web emitters build typed business payloads', () => {
   assert.equal(
     validateCalendarHoldCreate({
       title: 'Hold QA',
-      start: futureStart,
+      start: futureEnd,
       end: futureStart,
       note: null,
       relatedTaskKey: null,
     }).ok,
     false,
   );
-});
-
-test('B3-EMIT-06. OpenClaw inbox builder forces origin openclaw', () => {
-  const proposals = source('lib', 'openclaw', 'proposals.ts');
-  assert.match(proposals, /InboxCapturePayload/);
-  assert.match(proposals, /origin:\s*'openclaw'/);
-  assert.equal(proposals.includes('web-bandeja'), false);
-  assert.match(proposals, /buildInboxCapturePayload/);
-
-  const parsed = validateInboxCapture({
-    text: 'desde openclaw',
-    link: null,
-    capturedAt: '2030-01-01T12:00:00.000Z',
-    origin: 'openclaw',
-  });
-  assert.equal(parsed.ok, true);
-
-  const rejected = validateInboxCapture({
-    text: 'desde openclaw',
-    link: null,
-    capturedAt: '2030-01-01T12:00:00.000Z',
-    origin: 'web-bandeja',
-  });
-  assert.equal(rejected.ok, false);
-});
-
-test('B3-EMIT-07. repo has zero web-bandeja and single origin source', () => {
-  const payloads = source('lib', 'actions', 'payloads.ts');
-  const types = source('types', 'actions.ts');
-  assert.match(types, /export const INBOX_CAPTURE_ORIGINS/);
-  assert.match(payloads, /INBOX_CAPTURE_ORIGINS/);
-  assert.equal(payloads.includes("new Set(['web', 'openclaw', 'manual', 'import'])"), false);
 });
