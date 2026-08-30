@@ -49,13 +49,13 @@ OpenClaw may become a channel executor/gateway, but it does not own these polici
 
 `lib/capture/contracts.ts` exposes only the business actions that already exist in Safe Writes:
 
-| Operation              | Canonical authority                      | Execution contract            |
-| ---------------------- | ---------------------------------------- | ----------------------------- |
-| `task.create`          | Notion Tasks                             | proposal-only                 |
-| `task.change-status`   | Notion Tasks                             | proposal-only                 |
+| Operation              | Canonical authority                      | Execution contract              |
+| ---------------------- | ---------------------------------------- | ------------------------------- |
+| `task.create`          | Notion Tasks                             | proposal-only                   |
+| `task.change-status`   | Notion Tasks                             | proposal-only                   |
 | `inbox.capture`        | Notion Inbox                             | proposal or scoped direct-apply |
-| `gym.session.create`   | Google Sheets Gym                        | proposal-only                 |
-| `calendar.hold.create` | dedicated Google Calendar holds calendar | proposal-only                 |
+| `gym.session.create`   | Google Sheets Gym                        | proposal-only                   |
+| `calendar.hold.create` | dedicated Google Calendar holds calendar | proposal-only                   |
 
 The registry deliberately does not duplicate risk/confirmation/reversibility values. Those are read
 from the existing Safe Writes Policy Engine. Direct apply for `inbox.capture` fails closed if its
