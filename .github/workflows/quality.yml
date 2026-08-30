@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
@@ -30,9 +30,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Diagnose capture formatting and tests
-        run: |
-          npx prettier --write docs/conversational-capture-v1.md lib/capture/contracts.ts lib/capture/direct-inbox.ts tests/conversational-inbox-direct-apply.test.ts
-          git diff -- docs/conversational-capture-v1.md lib/capture/contracts.ts lib/capture/direct-inbox.ts tests/conversational-inbox-direct-apply.test.ts
-          npm test
-          exit 1
+      - name: Verify project
+        run: npm run verify
