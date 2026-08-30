@@ -33,6 +33,9 @@ export interface VidaConversationalCaptureCapability {
   directApplyEnabled: false;
 }
 
+export type VidaConversationalCaptureCapabilities =
+  readonly VidaConversationalCaptureCapability[];
+
 const CAPABILITIES: Record<ProposedBusinessActionType, VidaConversationalCaptureCapability> = {
   'task.create': {
     operation: 'task.create',
@@ -71,7 +74,7 @@ const CAPABILITIES: Record<ProposedBusinessActionType, VidaConversationalCapture
   },
 };
 
-export function listVidaConversationalCaptureCapabilities(): readonly VidaConversationalCaptureCapability[] {
+export function listVidaConversationalCaptureCapabilities(): VidaConversationalCaptureCapabilities {
   return BUSINESS_ACTION_TYPES.map((operation) => CAPABILITIES[operation]);
 }
 
