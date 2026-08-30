@@ -30,8 +30,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Show exact Prettier diff for capture files
-        run: |
-          npx prettier --write docs/conversational-capture-v1.md lib/capture/contracts.ts tests/conversational-capture-contract.test.ts
-          git diff -- docs/conversational-capture-v1.md lib/capture/contracts.ts tests/conversational-capture-contract.test.ts
-          git diff --quiet -- docs/conversational-capture-v1.md lib/capture/contracts.ts tests/conversational-capture-contract.test.ts
+      - name: Verify project
+        run: npm run verify
