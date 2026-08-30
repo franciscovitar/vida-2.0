@@ -25,6 +25,23 @@ Configurar únicamente en el entorno correspondiente:
 `GOOGLE_CALENDAR_REDIRECT_URI` se usa solamente para el flujo local de obtención inicial del
 refresh token. Las rutas OAuth están bloqueadas en Vercel y fuera de localhost.
 
+## Modo del consentimiento local (`GOOGLE_CALENDAR_OAUTH_MODE`)
+
+El flujo local `/api/calendar/oauth/start` resuelve el conjunto de scopes con una única variable
+de servidor, nunca desde la query string ni el navegador:
+
+- vacía, ausente, con typo o cualquier otro valor => `readonly`: solo
+  `calendar.events.readonly`, idéntico al comportamiento actual.
+- exactamente `hold-write` => opt-in local y manual para Calendar Hold. Solicita SOLO:
+  1. `https://www.googleapis.com/auth/calendar.events.readonly`
+  2. `https://www.googleapis.com/auth/calendar.events.owned`
+  3. `https://www.googleapis.com/auth/calendar.calendars.readonly`
+
+`readonly` es el default. El modo `hold-write` no se infiere de `WRITE_ACTIONS_ENABLED`, de
+`GOOGLE_CALENDAR_WRITE_ID` ni del entorno Production/Preview, y no se configura en Vercel. El
+runtime de lectura y el runtime de Calendar Hold no cambian: siguen usando solo el
+refresh token. El scope general `calendar` y `calendar.events` quedan explícitamente fuera.
+
 ## Verificación segura
 
 1. Mantener Production sin cambios.

@@ -13,6 +13,7 @@ import {
   isCalendarOAuthAllowed,
   NO_STORE_HEADERS,
   oauthErrorPageMessage,
+  resolveCalendarOAuthMode,
 } from '@/lib/calendar/oauth-flow';
 
 export const runtime = 'nodejs';
@@ -58,11 +59,16 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // El modo se resuelve solo desde el entorno del servidor local.
+  // Nunca se lee de la query string: el cliente no puede elevar scopes con ?mode=.
+  const mode = resolveCalendarOAuthMode(process.env.GOOGLE_CALENDAR_OAUTH_MODE);
+
   const state = generateOAuthState();
   const authUrl = buildCalendarConsentUrl({
     clientId: setup.config.clientId,
     redirectUri: setup.config.redirectUri,
     state,
+    mode,
   });
 
   const response = NextResponse.redirect(authUrl, 302);
