@@ -181,7 +181,7 @@ export interface TaskChangeStatusPayload {
   nextStatus: 'Pendiente' | 'En progreso' | 'Bloqueada' | 'Hecha' | 'Algún día';
 }
 
-export const INBOX_CAPTURE_ORIGINS = ['web', 'openclaw', 'manual', 'import'] as const;
+export const INBOX_CAPTURE_ORIGINS = ['web', 'openclaw', 'chatgpt', 'manual', 'import'] as const;
 export type InboxCaptureOrigin = (typeof INBOX_CAPTURE_ORIGINS)[number];
 
 export interface InboxCapturePayload {
