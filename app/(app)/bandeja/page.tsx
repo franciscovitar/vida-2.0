@@ -1,10 +1,9 @@
 import { Inbox } from 'lucide-react';
 import type { Metadata } from 'next';
 
-import { InboxCapturePanel } from '@/components/actions/InboxCapturePanel';
-import { InboxPlanningWorkspace } from '@/components/inbox/InboxPlanningWorkspace';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { isWriteActionsEnabled } from '@/lib/actions/config';
+import { Card } from '@/components/ui/Card';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 
 import styles from './page.module.scss';
@@ -15,19 +14,29 @@ export const runtime = 'nodejs';
 
 export default async function BandejaPage() {
   await requireAuthorizedSession();
-  const writesEnabled = isWriteActionsEnabled();
 
   return (
     <div>
       <PageHeader
         title="Bandeja de entrada"
-        description="Captura y revisión temporal en el navegador, sin sincronización externa."
+        description="Superficie de revisión. La captura cotidiana se mueve a canales conversacionales."
         icon={Inbox}
         domain="neutral"
       />
       <div className={styles.wrapper}>
-        <InboxCapturePanel writesEnabled={writesEnabled} />
-        <InboxPlanningWorkspace />
+        <Card>
+          <SectionHeader
+            title="Captura conversacional"
+            description="ChatGPT es el primer canal; Telegram y WhatsApp podrán sumarse sin convertir la web en un formulario."
+            icon={Inbox}
+            domain="neutral"
+          />
+          <p>
+            Esta pantalla no crea capturas ni borradores. Vida Web queda orientada a revisar y
+            entender lo ya registrado; la entrada se estructura y enruta fuera de la web hacia la
+            fuente canónica correspondiente.
+          </p>
+        </Card>
       </div>
     </div>
   );

@@ -70,22 +70,31 @@ test('B1-WEB-7. revisiones documentan riesgo y reversibilidad', () => {
   assert.match(reviews, /Cambio esperado/);
 });
 
-test('B1-WEB-8. las cuatro rutas usan los nuevos workspaces locales', () => {
+test('B1-WEB-8. las rutas cotidianas no montan emisores manuales de escritura', () => {
   const taskPage = source('app', '(app)', 'tareas', 'page.tsx');
   const projectPage = source('app', '(app)', 'proyectos', 'page.tsx');
   const inboxPage = source('app', '(app)', 'bandeja', 'page.tsx');
   const reviewPage = source('app', '(app)', 'aprobaciones', 'page.tsx');
+  const gymPage = source('app', '(app)', 'gimnasio', 'page.tsx');
 
-  assert.match(taskPage, /TaskPlanningWorkspace/);
-  assert.match(taskPage, /TaskCreatePanel/);
-  assert.match(taskPage, /TaskStatusPanel/);
+  assert.match(taskPage, /TasksBoard/);
+  assert.equal(taskPage.includes('TaskPlanningWorkspace'), false);
+  assert.equal(taskPage.includes('TaskCreatePanel'), false);
+  assert.equal(taskPage.includes('TaskStatusPanel'), false);
+
   assert.match(projectPage, /ProjectReviewWorkspace/);
-  assert.match(inboxPage, /InboxPlanningWorkspace/);
-  assert.match(inboxPage, /InboxCapturePanel/);
+
+  assert.match(inboxPage, /Captura conversacional/);
+  assert.equal(inboxPage.includes('InboxPlanningWorkspace'), false);
+  assert.equal(inboxPage.includes('InboxCapturePanel'), false);
   assert.equal(inboxPage.includes('QuickInbox'), false);
+
   assert.match(reviewPage, /ReviewWorkspace/);
   assert.match(reviewPage, /ApprovalsPanel/);
-  assert.match(reviewPage, /CalendarHoldPanel/);
+  assert.equal(reviewPage.includes('CalendarHoldPanel'), false);
+
+  assert.match(gymPage, /GymDashboardView/);
+  assert.equal(gymPage.includes('GymSessionPanel'), false);
 });
 
 test('B1-WEB-9. controles móviles respetan targets táctiles de 44 px', () => {
