@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { BUSINESS_ACTION_TYPES, isPublicControlAction } from '@/lib/actions/policy';
 import {
   CONVERSATIONAL_CAPTURE_CHANNELS,
   getVidaConversationalCaptureCapability,
   getVidaConversationalCapturePolicy,
   listVidaConversationalCaptureCapabilities,
 } from '@/lib/capture/contracts';
-import { BUSINESS_ACTION_TYPES, isPublicControlAction } from '@/lib/actions/policy';
 
 test('CAP1. V1 covers exactly the registered Safe Writes business actions', () => {
   const operations = listVidaConversationalCaptureCapabilities().map((item) => item.operation);
@@ -64,7 +64,10 @@ test('CAP6. channel list is transport-only and starts ChatGPT-first', () => {
 test('CAP7. canonical authority is singular per operation', () => {
   assert.equal(getVidaConversationalCaptureCapability('task.create').authority, 'notion-tasks');
   assert.equal(getVidaConversationalCaptureCapability('inbox.capture').authority, 'notion-inbox');
-  assert.equal(getVidaConversationalCaptureCapability('gym.session.create').authority, 'sheets-gym');
+  assert.equal(
+    getVidaConversationalCaptureCapability('gym.session.create').authority,
+    'sheets-gym',
+  );
   assert.equal(
     getVidaConversationalCaptureCapability('calendar.hold.create').authority,
     'google-calendar-holds',
