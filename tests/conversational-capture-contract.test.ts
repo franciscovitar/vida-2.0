@@ -53,12 +53,7 @@ test('CAP5. risk and confirmation remain owned by the canonical Policy Engine', 
 });
 
 test('CAP6. channel list is transport-only and starts ChatGPT-first', () => {
-  assert.deepEqual(CONVERSATIONAL_CAPTURE_CHANNELS, [
-    'chatgpt',
-    'telegram',
-    'whatsapp',
-    'other',
-  ]);
+  assert.deepEqual(CONVERSATIONAL_CAPTURE_CHANNELS, ['chatgpt', 'telegram', 'whatsapp', 'other']);
 });
 
 test('CAP7. canonical authority is singular per operation', () => {
