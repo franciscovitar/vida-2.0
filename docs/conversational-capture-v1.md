@@ -13,7 +13,7 @@ ChatGPT first / Telegram later / WhatsApp later
   -> grounded intent + missing-info check
   -> Vida capability registry
   -> canonical Safe Writes policy
-  -> proposal / future explicitly-authorized direct apply
+  -> proposal / narrowly authorized direct apply
   -> Notion | Sheets | Calendar
   -> Vida Web as derived command center
 ```
@@ -49,16 +49,17 @@ OpenClaw may become a channel executor/gateway, but it does not own these polici
 
 `lib/capture/contracts.ts` exposes only the business actions that already exist in Safe Writes:
 
-| Operation              | Canonical authority                      | Current execution |
-| ---------------------- | ---------------------------------------- | ----------------- |
-| `task.create`          | Notion Tasks                             | proposal-only     |
-| `task.change-status`   | Notion Tasks                             | proposal-only     |
-| `inbox.capture`        | Notion Inbox                             | proposal-only     |
-| `gym.session.create`   | Google Sheets Gym                        | proposal-only     |
-| `calendar.hold.create` | dedicated Google Calendar holds calendar | proposal-only     |
+| Operation              | Canonical authority                      | Execution contract            |
+| ---------------------- | ---------------------------------------- | ----------------------------- |
+| `task.create`          | Notion Tasks                             | proposal-only                 |
+| `task.change-status`   | Notion Tasks                             | proposal-only                 |
+| `inbox.capture`        | Notion Inbox                             | proposal or scoped direct-apply |
+| `gym.session.create`   | Google Sheets Gym                        | proposal-only                 |
+| `calendar.hold.create` | dedicated Google Calendar holds calendar | proposal-only                 |
 
 The registry deliberately does not duplicate risk/confirmation/reversibility values. Those are read
-from the existing Safe Writes Policy Engine.
+from the existing Safe Writes Policy Engine. Direct apply for `inbox.capture` fails closed if its
+canonical policy stops being explicit, low risk or reversible.
 
 No control operation (`proposal.approve`, `proposal.reject`, `action.rollback`) is a semantic capture
 intent.
@@ -74,50 +75,51 @@ sanitized capability if/when the command-center integration needs it.
 
 The same principle applies to any future domain: register a capability, do not copy its database.
 
-## Current vs target execution policy
+## First direct-apply policy: Inbox only
 
-The current Safe Writes engine places business actions behind proposals/approval. Conversational
-Capture V1 preserves that boundary exactly; `directApplyEnabled=false` for every Vida capability.
+`inbox.capture` is the first and only Vida business action eligible for direct apply in this slice.
+The implementation is intentionally narrower than a generic direct-write API:
 
-This is intentionally a staging point, not the final low-friction UX.
+- only trusted `chatgpt` transport identity is accepted by the internal executor;
+- the user intent must already be classified as an explicit request to write;
+- both `WRITE_ACTIONS_ENABLED=true` and the separate
+  `CONVERSATIONAL_INBOX_DIRECT_APPLY_ENABLED=true` gate are required;
+- Safe Writes readiness for Inbox, ledger, audit, coordination and rollback must be ready;
+- transport principal and source-event identifiers are server-side inputs, not model-generated body
+  identity;
+- the same source event is idempotent and cannot be reused for different content;
+- the canonical Inbox validator still governs text/link/origin;
+- Notion Inbox remains the only content source of truth;
+- the actions ledger stores only sanitized evidence (`contentPresent`, origin and link presence), not
+  the captured text;
+- the ledger retains target ownership and rollback deadline so the existing `action.rollback` path can
+  compensate the capture;
+- if the business write succeeds but the ledger cannot certify `applied`, the executor attempts the
+  ownership-scoped compensation immediately and never retries the write automatically.
 
-The next policy change should be designed separately and narrowly. Candidate actions for a first
-controlled direct-apply experiment are those that are:
-
-- clearly user-originated;
-- low risk;
-- reversible/correctable;
-- idempotent;
-- ownership-scoped;
-- validated against the canonical target;
-- useful enough that approval would add more friction than safety.
-
-`inbox.capture` is the likely first candidate because its existing Safe Writes policy is low-risk and
-reversible. This document does not activate that behavior.
-
-Calendar should not be used as the first direct-apply experiment. The existing Calendar Hold runtime
-and dedicated-calendar/OAuth work remain useful execution infrastructure, but the abandoned web-form
-E2E is not the product path to resume.
+This is **technical capability, not Production activation**. The flag remains fail-closed by default,
+and this slice does not expose a new public endpoint or a ChatGPT adapter by itself.
 
 ## ChatGPT-first slice
 
-The first useful end-to-end behavior should be:
+The first useful end-to-end behavior remains:
 
 1. user sends a messy but actionable message in ChatGPT;
 2. PAS resolves one or more grounded intents;
 3. only materially missing information is requested;
 4. each intent is matched to a registered capability/domain contract;
 5. current target policy is evaluated;
-6. successful independent intents are not repeated because another intent is blocked;
-7. user receives a brief effect summary, not provider IDs or database mechanics.
+6. for an explicitly requested Inbox capture, the trusted adapter may call the scoped direct executor
+   only when its separate gate and readiness are active;
+7. successful independent intents are not repeated because another intent is blocked;
+8. user receives a brief effect summary, not provider IDs or database mechanics.
 
-Until a direct-apply policy is explicitly implemented, Vida business actions remain proposal-only.
-This prevents a conversational UI from becoming an accidental bypass around the security work already
-certified.
+Tasks, Gym and Calendar remain proposal-only. Calendar must not inherit Inbox direct-apply merely
+because the shared Safe Writes substrate exists.
 
 ## Channel progression
 
-- **ChatGPT:** first surface; validate intent/routing/policy semantics.
+- **ChatGPT:** first surface; validate intent/routing/policy semantics and Inbox direct capture.
 - **Telegram:** thin authenticated transport adapter over the same contract once ChatGPT flow is
   stable.
 - **WhatsApp:** later, only if it can preserve the same identity, idempotency, privacy and operational
@@ -125,21 +127,21 @@ certified.
 
 No channel-specific business routing.
 
-## Non-goals for V1 foundation
+## Non-goals for this slice
 
 - no new database;
+- no generic business-write endpoint;
 - no generic `calendar.event.create`;
 - no automatic Journaling access;
 - no automatic OpenClaw proposal activation;
 - no Automations activation;
 - no broad agent autonomy;
 - no copying Nutrition/Gym raw history into Vida;
-- no direct apply until a separate policy/test/activation pass.
+- no direct apply for Tasks, Gym or Calendar;
+- no Production activation of the new Inbox gate yet.
 
 ## Next implementation step
 
-Design a narrow trusted conversational execution path for **one** low-risk reversible action
-(preferably `inbox.capture`) that preserves the existing Safe Writes guarantees while eliminating the
-second approval step when the target policy explicitly permits it.
-
-After that passes, extend the same mechanism action-by-action instead of creating a generic bypass.
+After the internal direct transaction passes tests and code review, build the smallest authenticated
+ChatGPT → Vida adapter that can supply trusted principal/source-event identity and invoke only
+`inbox.capture` direct apply. Preview/dev validation comes before any Production flag change.
