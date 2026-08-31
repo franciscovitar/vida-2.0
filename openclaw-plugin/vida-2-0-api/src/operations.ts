@@ -8,11 +8,16 @@
  * arbitrary-method escape hatch, and Journaling has no operation id at all
  * so it cannot be reached through this contract.
  */
-import type { VidaOperation, VidaProposeOperation, VidaReadOperation } from './types.js';
+import type {
+  VidaDirectOperation,
+  VidaOperation,
+  VidaProposeOperation,
+  VidaReadOperation,
+} from './types.js';
 
 export type VidaHttpMethod = 'GET' | 'POST';
 
-export type VidaOperationKind = 'read' | 'propose' | 'protocol';
+export type VidaOperationKind = 'read' | 'propose' | 'direct' | 'protocol';
 
 export type VidaOperationRoute = {
   readonly method: VidaHttpMethod;
@@ -43,6 +48,8 @@ const PROPOSE_OPERATIONS: readonly VidaProposeOperation[] = [
   'calendar.hold.create.propose',
 ];
 
+const DIRECT_OPERATIONS: readonly VidaDirectOperation[] = ['inbox.capture.direct'];
+
 const READ_ROUTE: VidaOperationRoute = Object.freeze({
   method: 'POST',
   pathname: '/api/openclaw/v1/read',
@@ -55,6 +62,12 @@ const PROPOSE_ROUTE: VidaOperationRoute = Object.freeze({
   kind: 'propose',
 });
 
+const DIRECT_INBOX_ROUTE: VidaOperationRoute = Object.freeze({
+  method: 'POST',
+  pathname: '/api/openclaw/v1/direct/inbox',
+  kind: 'direct',
+});
+
 const HEALTH_ROUTE: VidaOperationRoute = Object.freeze({
   method: 'GET',
   pathname: '/api/openclaw/v1/health',
@@ -64,6 +77,7 @@ const HEALTH_ROUTE: VidaOperationRoute = Object.freeze({
 const ROUTES: ReadonlyMap<VidaOperation, VidaOperationRoute> = new Map([
   ...READ_OPERATIONS.map((op) => [op, READ_ROUTE] as const),
   ...PROPOSE_OPERATIONS.map((op) => [op, PROPOSE_ROUTE] as const),
+  ...DIRECT_OPERATIONS.map((op) => [op, DIRECT_INBOX_ROUTE] as const),
   ['system.health', HEALTH_ROUTE] as const,
 ]);
 
@@ -73,6 +87,10 @@ export function isVidaReadOperation(value: string): value is VidaReadOperation {
 
 export function isVidaProposeOperation(value: string): value is VidaProposeOperation {
   return (PROPOSE_OPERATIONS as readonly string[]).includes(value);
+}
+
+export function isVidaDirectOperation(value: string): value is VidaDirectOperation {
+  return (DIRECT_OPERATIONS as readonly string[]).includes(value);
 }
 
 export function isVidaOperation(value: string): value is VidaOperation {
