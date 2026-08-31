@@ -30,5 +30,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify project
-        run: npm run verify
+      - name: Diagnose capture doc formatting
+        run: |
+          npx prettier --write docs/conversational-capture-v1.md
+          git diff -- docs/conversational-capture-v1.md
+          exit 1
