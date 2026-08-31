@@ -1,5 +1,3 @@
-import { randomBytes } from 'node:crypto';
-
 export type TrustedTelegramDirectContext = {
   readonly runId: string;
   readonly senderId: string;
@@ -7,47 +5,50 @@ export type TrustedTelegramDirectContext = {
 };
 
 type StoredRun = TrustedTelegramDirectContext & { readonly expiresAt: number };
-type StoredToken = TrustedTelegramDirectContext & { readonly expiresAt: number };
+type StoredToolCall = TrustedTelegramDirectContext & { readonly expiresAt: number };
 
 type TelegramDirectContextStoreOptions = {
   now?: () => number;
-  token?: () => string;
   ttlMs?: number;
 };
 
 export type TelegramDirectContextStore = {
   record(input: TrustedTelegramDirectContext): boolean;
-  issue(runId: string): string | null;
-  consume(token: string): TrustedTelegramDirectContext | null;
+  bindToolCall(runId: string, toolCallId: string): boolean;
+  consumeToolCall(toolCallId: string): TrustedTelegramDirectContext | null;
   clearRun(runId: string): void;
   clear(): void;
 };
 
 const SAFE_RUNTIME_ID = /^[A-Za-z0-9._:-]{1,128}$/;
+const SAFE_TOOL_CALL_ID = /^[A-Za-z0-9._:-]{1,256}$/;
 const DEFAULT_TTL_MS = 5 * 60_000;
 
 function isSafeRuntimeId(value: string): boolean {
   return SAFE_RUNTIME_ID.test(value);
 }
 
+function isSafeToolCallId(value: string): boolean {
+  return SAFE_TOOL_CALL_ID.test(value);
+}
+
 export function createTelegramDirectContextStore(
   options: TelegramDirectContextStoreOptions = {},
 ): TelegramDirectContextStore {
   const now = options.now ?? Date.now;
-  const token = options.token ?? (() => randomBytes(24).toString('hex'));
   const ttlMs =
     Number.isFinite(options.ttlMs) && (options.ttlMs ?? 0) > 0
       ? Math.floor(options.ttlMs!)
       : DEFAULT_TTL_MS;
   const runs = new Map<string, StoredRun>();
-  const tokens = new Map<string, StoredToken>();
+  const toolCalls = new Map<string, StoredToolCall>();
 
   function sweep(at: number): void {
     for (const [key, value] of runs) {
       if (value.expiresAt <= at) runs.delete(key);
     }
-    for (const [key, value] of tokens) {
-      if (value.expiresAt <= at) tokens.delete(key);
+    for (const [key, value] of toolCalls) {
+      if (value.expiresAt <= at) toolCalls.delete(key);
     }
   }
 
@@ -66,31 +67,29 @@ export function createTelegramDirectContextStore(
       return true;
     },
 
-    issue(runId) {
+    bindToolCall(runId, toolCallId) {
       const at = now();
       sweep(at);
-      if (!isSafeRuntimeId(runId)) return null;
+      if (!isSafeRuntimeId(runId) || !isSafeToolCallId(toolCallId)) return false;
+      if (toolCalls.has(toolCallId)) return false;
       const trusted = runs.get(runId);
-      if (!trusted) return null;
-
-      const nextToken = token();
-      if (!/^[A-Za-z0-9_-]{32,128}$/.test(nextToken) || tokens.has(nextToken)) return null;
-      tokens.set(nextToken, {
+      if (!trusted) return false;
+      toolCalls.set(toolCallId, {
         runId: trusted.runId,
         senderId: trusted.senderId,
         messageId: trusted.messageId,
         expiresAt: Math.min(trusted.expiresAt, at + ttlMs),
       });
-      return nextToken;
+      return true;
     },
 
-    consume(rawToken) {
+    consumeToolCall(toolCallId) {
       const at = now();
       sweep(at);
-      if (!/^[A-Za-z0-9_-]{32,128}$/.test(rawToken)) return null;
-      const trusted = tokens.get(rawToken);
+      if (!isSafeToolCallId(toolCallId)) return null;
+      const trusted = toolCalls.get(toolCallId);
       if (!trusted) return null;
-      tokens.delete(rawToken);
+      toolCalls.delete(toolCallId);
       if (trusted.expiresAt <= at) return null;
       return {
         runId: trusted.runId,
@@ -101,14 +100,14 @@ export function createTelegramDirectContextStore(
 
     clearRun(runId) {
       runs.delete(runId);
-      for (const [key, value] of tokens) {
-        if (value.runId === runId) tokens.delete(key);
+      for (const [key, value] of toolCalls) {
+        if (value.runId === runId) toolCalls.delete(key);
       }
     },
 
     clear() {
       runs.clear();
-      tokens.clear();
+      toolCalls.clear();
     },
   };
 }
