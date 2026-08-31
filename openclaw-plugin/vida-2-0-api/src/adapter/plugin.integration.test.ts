@@ -1,17 +1,10 @@
 /**
- * Integration test for the real OpenClaw plugin lifecycle: reproduces the
- * exact local-TUI defect (a raw, unresolved SecretRef object reaching
- * `factory`/`execute` for an agent credential) and proves the fix resolves
- * it via OpenClaw's own public `resolveSecretRefValues`, with zero network
- * activity (a local synthetic `exec` SecretRef provider) and zero real
- * secrets.
+ * Integration tests for the real OpenClaw plugin lifecycle. They reproduce
+ * SecretRef resolution at the adapter boundary and exercise the Telegram
+ * inbox-direct hook chain without real network access or real credentials.
  *
  * This file requires the `openclaw`/`typebox` peer dependencies and is
- * therefore NOT part of the root repo's `npm test` (that glob only covers
- * `tests/*.test.ts` at the repo root, and this plugin's peer dependencies
- * are never installed there by design -- see
- * docs/block-6-openclaw-plugin.md). Run it manually after installing this
- * package's dependencies:
+ * therefore NOT part of the root repo's `npm test`. Run it from this package:
  *
  *   cd openclaw-plugin/vida-2-0-api
  *   npm install
@@ -53,8 +46,14 @@ function writeSyntheticExecProvider(dir: string): string {
 }
 
 type CapturedToolFactory = { name: string; factory: (ctx: OpenClawPluginToolContext) => unknown };
+type CapturedHook = (...args: unknown[]) => unknown;
 
-function makeFakeApi(config: unknown, pluginConfig: unknown, captured: CapturedToolFactory[]) {
+function makeFakeApi(
+  config: unknown,
+  pluginConfig: unknown,
+  captured: CapturedToolFactory[],
+  hooks: Map<string, CapturedHook> = new Map(),
+) {
   return {
     config,
     pluginConfig,
@@ -66,6 +65,9 @@ function makeFakeApi(config: unknown, pluginConfig: unknown, captured: CapturedT
         });
       }
     },
+    on(name: string, handler: CapturedHook) {
+      hooks.set(name, handler);
+    },
   };
 }
 
@@ -74,7 +76,6 @@ test('local embedded runtime: a raw SecretRef for an agent credential is resolve
   try {
     const scriptPath = writeSyntheticExecProvider(tmp);
 
-    // Sanity-check the synthetic provider speaks the exec protocol correctly.
     const probe = spawnSync(NODE_EXECUTABLE, [scriptPath], {
       input: JSON.stringify({
         protocolVersion: 1,
@@ -99,8 +100,6 @@ test('local embedded runtime: a raw SecretRef for an agent credential is resolve
       },
     };
 
-    // Exactly the reported real-world shape: raw, unresolved SecretRef
-    // objects for the agent credential and the Vercel bypass.
     const rawPluginConfig = {
       baseUrl: 'https://vida-preview.example.invalid',
       vercelProtectionBypass: { source: 'exec', provider: 'b6fixture', id: 'bypass-fixture' },
@@ -127,7 +126,7 @@ test('local embedded runtime: a raw SecretRef for an agent credential is resolve
 
     let capturedRequest: { headers: Record<string, string>; body?: string } | null = null;
     const originalFetch = globalThis.fetch;
-    // @ts-expect-error -- test-only override of the global fetch the adapter uses; no real network call is made.
+    // @ts-expect-error -- test-only override of global fetch; no real network call is made.
     globalThis.fetch = async (
       _url: string,
       init: { headers: Record<string, string>; body?: string },
@@ -143,9 +142,6 @@ test('local embedded runtime: a raw SecretRef for an agent credential is resolve
     try {
       const result = await tool.execute('tool-call-1', { operation: 'system.overview', input: {} });
       const signature = capturedRequest?.headers['X-Vida-Signature'];
-      // Node's createHmac throws a TypeError if given a non-string/Buffer
-      // key, so simply reaching here with a well-formed signature proves
-      // the secret was a resolved string, never the raw SecretRef object.
       assert.match(signature ?? '', /^[0-9a-f]{64}$/);
       assert.equal(typeof capturedRequest?.headers['x-vercel-protection-bypass'], 'string');
       assert.equal(JSON.stringify(result).includes('fixture-value-for'), false);
@@ -203,6 +199,117 @@ test('digital-order still receives no operational tool through the real register
 
   const tool = captured[0]!.factory({ agentId: 'digital-order' } as OpenClawPluginToolContext);
   assert.equal(tool === null || tool === undefined, true);
+});
+
+test('Telegram direct capture uses trusted hook context, derives transport ids, and consumes the tool-call binding once', async () => {
+  const mod = await import('./plugin.js');
+  const entry = mod.default;
+
+  const captured: CapturedToolFactory[] = [];
+  const hooks = new Map<string, CapturedHook>();
+  const fakeApi = makeFakeApi(
+    { secrets: { providers: {} } },
+    {
+      baseUrl: 'https://vida-preview.example.invalid',
+      agents: {
+        steward: {
+          keyId: 'synthetic-key-id',
+          secret: 'synthetic-secret-value-not-real',
+        },
+      },
+    },
+    captured,
+    hooks,
+  );
+  (entry as { register: (api: unknown) => void }).register(fakeApi);
+
+  const tool = captured[0]!.factory({
+    agentId: 'steward',
+    messageChannel: 'telegram',
+    requesterSenderId: '12345',
+    senderIsOwner: true,
+  } as OpenClawPluginToolContext) as {
+    execute: (toolCallId: string, params: unknown) => Promise<{ details: unknown }>;
+  };
+  assert.ok(tool);
+
+  const messageReceived = hooks.get('message_received');
+  const beforeToolCall = hooks.get('before_tool_call');
+  assert.ok(messageReceived);
+  assert.ok(beforeToolCall);
+
+  messageReceived!(
+    { runId: 'run-direct-1', senderId: '12345', messageId: 'msg-77' },
+    { channelId: 'telegram', runId: 'run-direct-1', senderId: '12345', messageId: 'msg-77' },
+  );
+  const hookResult = beforeToolCall!(
+    {
+      toolName: 'vida_operation',
+      params: { operation: 'inbox.capture.direct', input: { text: 'Guardar esto', link: null } },
+      runId: 'run-direct-1',
+      toolCallId: 'call-direct-1',
+    },
+    {
+      agentId: 'steward',
+      channelId: 'telegram',
+      runId: 'run-direct-1',
+      toolCallId: 'call-direct-1',
+    },
+  );
+  assert.equal(hookResult, undefined);
+
+  let fetchCount = 0;
+  let capturedUrl = '';
+  let capturedBody = '';
+  const originalFetch = globalThis.fetch;
+  // @ts-expect-error -- test-only override; no real network call is made.
+  globalThis.fetch = async (url: string, init: { body?: string }) => {
+    fetchCount += 1;
+    capturedUrl = url;
+    capturedBody = init.body ?? '';
+    return {
+      status: 200,
+      ok: true,
+      text: async () => JSON.stringify({ ok: true, requestId: 'fixture-direct-request' }),
+    };
+  };
+
+  try {
+    await tool.execute('call-direct-1', {
+      operation: 'inbox.capture.direct',
+      input: { text: 'Guardar esto', link: null },
+    });
+    assert.equal(fetchCount, 1);
+    assert.equal(
+      capturedUrl,
+      'https://vida-preview.example.invalid/api/openclaw/v1/direct/inbox',
+    );
+    const body = JSON.parse(capturedBody) as {
+      operation: string;
+      transport: { channel: string; principalId: string; sourceEventId: string };
+      input: { text: string; link: string | null };
+    };
+    assert.deepEqual(body, {
+      operation: 'inbox.capture.direct',
+      transport: {
+        channel: 'telegram',
+        principalId: 'telegram:12345',
+        sourceEventId: 'telegram:msg-77',
+      },
+      input: { text: 'Guardar esto', link: null },
+    });
+    assert.equal(capturedBody.includes('run-direct-1'), false);
+    assert.equal(capturedBody.includes('call-direct-1'), false);
+
+    const replayWithoutNewHook = await tool.execute('call-direct-1', {
+      operation: 'inbox.capture.direct',
+      input: { text: 'Guardar esto', link: null },
+    });
+    assert.equal(fetchCount, 1, 'consumed binding must block a second network attempt');
+    assert.equal((replayWithoutNewHook.details as { code?: string }).code, 'invalid-input');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('the tool parameter schema validates the canonical no-input read operations', async () => {
@@ -267,6 +374,32 @@ test('the tool parameter schema requires a correctly-shaped input for operations
   );
 });
 
+test('the direct inbox schema is closed to operation plus text/link only', async () => {
+  const { VidaOperationParamsSchema } = await import('./plugin.js');
+  assert.equal(
+    Check(VidaOperationParamsSchema, {
+      operation: 'inbox.capture.direct',
+      input: { text: 'Guardar esto', link: null },
+    }),
+    true,
+  );
+  assert.equal(
+    Check(VidaOperationParamsSchema, {
+      operation: 'inbox.capture.direct',
+      input: { text: 'Guardar esto', link: null },
+      principalId: 'telegram:invented',
+    }),
+    false,
+  );
+  assert.equal(
+    Check(VidaOperationParamsSchema, {
+      operation: 'inbox.capture.direct',
+      input: { text: '', link: null },
+    }),
+    false,
+  );
+});
+
 test('the tool parameter schema rejects an unknown/invalid operation', async () => {
   const { VidaOperationParamsSchema } = await import('./plugin.js');
   assert.equal(
@@ -303,7 +436,7 @@ test('the propose and health call schemas remain unchanged and closed', async ()
   );
 });
 
-test('the config schema still accepts real SecretRef objects for every secret-bearing field (SecretRef schema regression guard)', async () => {
+test('the config schema still accepts real SecretRef objects for every secret-bearing field', async () => {
   const { ConfigSchema } = await import('./plugin.js');
   const ref = { source: 'exec', provider: 'b6fixture', id: 'fixture-id' };
   assert.equal(
