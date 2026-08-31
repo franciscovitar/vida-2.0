@@ -23,6 +23,7 @@ import type {
   ActionDiff,
   ActionResult,
   ActionResultCode,
+  InboxCaptureOrigin,
   InboxCapturePayload,
   ProposalCreatePayload,
 } from '@/types/actions';
@@ -57,9 +58,39 @@ export type ConversationalInboxDirectOptions = {
   now?: () => string;
 };
 
+type EnabledDirectChannel = 'chatgpt' | 'telegram';
+
+type DirectChannelConfig = {
+  channel: EnabledDirectChannel;
+  origin: InboxCaptureOrigin;
+  source: `conversation-direct:${EnabledDirectChannel}`;
+  label: 'ChatGPT' | 'Telegram';
+};
+
+const CHANNEL_CONFIG: Readonly<Record<EnabledDirectChannel, DirectChannelConfig>> = {
+  chatgpt: {
+    channel: 'chatgpt',
+    origin: 'chatgpt',
+    source: 'conversation-direct:chatgpt',
+    label: 'ChatGPT',
+  },
+  telegram: {
+    channel: 'telegram',
+    origin: 'openclaw',
+    source: 'conversation-direct:telegram',
+    label: 'Telegram',
+  },
+};
+
 const SAFE_TRANSPORT_ID = /^[A-Za-z0-9._:-]{1,128}$/;
-const SOURCE = 'conversation-direct:chatgpt';
 const ACTION = 'inbox.capture' as const;
+
+function resolveDirectChannel(
+  channel: ConversationalInboxDirectInput['channel'],
+): DirectChannelConfig | null {
+  if (channel === 'chatgpt' || channel === 'telegram') return CHANNEL_CONFIG[channel];
+  return null;
+}
 
 function fail(
   code: ActionResultCode,
@@ -91,9 +122,12 @@ function sanitizedResult(result: ActionResult, replay = false): ConversationalIn
   };
 }
 
-function actorHashFromTrustedPrincipal(principalId: string): string {
+function actorHashFromTrustedPrincipal(
+  channel: EnabledDirectChannel,
+  principalId: string,
+): string {
   return createHash('sha256')
-    .update(`vida2-conversation-actor:chatgpt:${principalId}`)
+    .update(`vida2-conversation-actor:${channel}:${principalId}`)
     .digest('hex')
     .slice(0, 32);
 }
@@ -180,8 +214,9 @@ export async function executeConversationalInboxDirectApply(
   options: ConversationalInboxDirectOptions = {},
 ): Promise<ConversationalInboxDirectResult> {
   const env = options.env ?? process.env;
+  const channelConfig = resolveDirectChannel(input.channel);
 
-  if (input.channel !== 'chatgpt') {
+  if (!channelConfig) {
     return fail(
       'policy-denied',
       'Este canal todavía no está habilitado para captura directa.',
@@ -203,7 +238,7 @@ export async function executeConversationalInboxDirectApply(
     text: input.text,
     link: input.link ?? null,
     capturedAt: now,
-    origin: 'chatgpt',
+    origin: channelConfig.origin,
   });
   if (!parsed.ok) {
     return fail('invalid-payload', 'La captura no cumple el contrato permitido.', null);
@@ -232,11 +267,14 @@ export async function executeConversationalInboxDirectApply(
     );
   }
 
-  const actorHash = actorHashFromTrustedPrincipal(input.principalId);
+  const actorHash = actorHashFromTrustedPrincipal(channelConfig.channel, input.principalId);
   const actorHint = `conversation:${actorHash.slice(0, 8)}`;
-  const idempotencyKey = `conversation:chatgpt:${input.sourceEventId}`;
+  const idempotencyKey = `conversation:${channelConfig.channel}:${input.sourceEventId}`;
   const payloadDigest = payloadDigestFromPlaintext(JSON.stringify(parsed.value));
-  const ledgerKey = opaqueKey('prop', `${SOURCE}:${actorHash}:${input.sourceEventId}`);
+  const ledgerKey = opaqueKey(
+    'prop',
+    `${channelConfig.source}:${actorHash}:${input.sourceEventId}`,
+  );
   const ledgerDiff = directLedgerDiff(parsed.value);
   const beforeDigest = digestFromDiff({ fields: [] });
 
@@ -311,10 +349,10 @@ export async function executeConversationalInboxDirectApply(
     text: '[direct-capture-redacted]',
     link: null,
     capturedAt: now,
-    origin: 'chatgpt',
+    origin: channelConfig.origin,
   };
   const proposalPayload: ProposalCreatePayload = {
-    name: 'ChatGPT: inbox.capture',
+    name: `${channelConfig.label}: inbox.capture`,
     proposedActionType: ACTION,
     targetType: 'inbox',
     targetKey: null,
@@ -334,7 +372,7 @@ export async function executeConversationalInboxDirectApply(
       expiresAt: new Date(Date.parse(now) + getWriteApprovalTtlSeconds(env) * 1000).toISOString(),
       payloadDigest,
       contractVersion: getWriteContractVersion(env),
-      source: SOURCE,
+      source: channelConfig.source,
       beforeDigest,
       diff: ledgerDiff,
       encryptedPayloadKey: null,
@@ -386,7 +424,7 @@ export async function executeConversationalInboxDirectApply(
     payload: parsed.value,
     expectedPrevious: null,
     idempotencyKey: `${idempotencyKey}:exec`,
-    deps: { ...runtime.handlers, source: SOURCE, now: options.now },
+    deps: { ...runtime.handlers, source: channelConfig.source, now: options.now },
   });
 
   if (!executed.result.ok) {
