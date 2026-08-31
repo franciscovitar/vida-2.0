@@ -120,8 +120,6 @@ export function listAllowedOperationsForAgent(agentId: VidaAgentId): readonly Vi
 export function hasAnyDataCapability(agentId: VidaAgentId): boolean {
   const profile = PROFILES[agentId];
   return (
-    profile.allowedReads.length > 0 ||
-    profile.allowedProposals.length > 0 ||
-    agentId === 'steward'
+    profile.allowedReads.length > 0 || profile.allowedProposals.length > 0 || agentId === 'steward'
   );
 }

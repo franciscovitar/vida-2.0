@@ -56,10 +56,7 @@ export type VidaDirectOperation = 'inbox.capture.direct';
 export type VidaProtocolOperation = 'system.health';
 
 export type VidaOperation =
-  | VidaReadOperation
-  | VidaProposeOperation
-  | VidaDirectOperation
-  | VidaProtocolOperation;
+  VidaReadOperation | VidaProposeOperation | VidaDirectOperation | VidaProtocolOperation;
 
 /* -------------------------------------------------------------------------- */
 /* Read operation input shapes (mirrors types/openclaw.ts OpenClawReadRequest) */

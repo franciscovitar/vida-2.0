@@ -280,10 +280,7 @@ test('Telegram direct capture uses trusted hook context, derives transport ids, 
       input: { text: 'Guardar esto', link: null },
     });
     assert.equal(fetchCount, 1);
-    assert.equal(
-      capturedUrl,
-      'https://vida-preview.example.invalid/api/openclaw/v1/direct/inbox',
-    );
+    assert.equal(capturedUrl, 'https://vida-preview.example.invalid/api/openclaw/v1/direct/inbox');
     const body = JSON.parse(capturedBody) as {
       operation: string;
       transport: { channel: string; principalId: string; sourceEventId: string };

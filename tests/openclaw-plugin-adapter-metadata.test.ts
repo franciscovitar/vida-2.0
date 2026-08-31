@@ -137,7 +137,10 @@ test('adapter passes an explicit activation block to defineToolPlugin that match
   assert.equal(onStartupMatch![1] === 'true', manifest.activation.onStartup);
 
   const onChannelsMatch = activationBlock.match(/onChannels:\s*\[([^\]]*)\]/);
-  assert.ok(onChannelsMatch, 'expected an explicit onChannels array in the source activation block');
+  assert.ok(
+    onChannelsMatch,
+    'expected an explicit onChannels array in the source activation block',
+  );
   const sourceChannels = (onChannelsMatch![1] ?? '')
     .split(',')
     .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))

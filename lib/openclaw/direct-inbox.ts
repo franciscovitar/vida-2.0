@@ -35,9 +35,7 @@ function hasOnlyKeys(value: Record<string, unknown>, keys: readonly string[]): b
   return Object.keys(value).every((key) => allowed.has(key));
 }
 
-export function isOpenClawTelegramInboxDirectEnabled(
-  env: Env = process.env,
-): boolean {
+export function isOpenClawTelegramInboxDirectEnabled(env: Env = process.env): boolean {
   return (
     env.OPENCLAW_TELEGRAM_INBOX_DIRECT_ENABLED === 'true' &&
     env.CONVERSATIONAL_INBOX_DIRECT_APPLY_ENABLED === 'true' &&
@@ -54,11 +52,10 @@ export function parseOpenClawTelegramInboxDirectRequest(
   if (raw.operation !== 'inbox.capture.direct') {
     return { ok: false, message: 'Operación directa no permitida.' };
   }
-  if (!isPlainObject(raw.transport) || !hasOnlyKeys(raw.transport, [
-    'channel',
-    'principalId',
-    'sourceEventId',
-  ])) {
+  if (
+    !isPlainObject(raw.transport) ||
+    !hasOnlyKeys(raw.transport, ['channel', 'principalId', 'sourceEventId'])
+  ) {
     return { ok: false, message: 'Transporte inválido.' };
   }
   if (

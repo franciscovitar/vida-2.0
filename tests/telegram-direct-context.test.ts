@@ -10,10 +10,7 @@ test('TDC1. trusted run metadata binds to one tool call without storing message 
     ttlMs: 5_000,
   });
 
-  assert.equal(
-    store.record({ runId: 'run-1', senderId: '12345', messageId: '987' }),
-    true,
-  );
+  assert.equal(store.record({ runId: 'run-1', senderId: '12345', messageId: '987' }), true);
   assert.equal(store.bindToolCall('run-1', 'call-1'), true);
   assert.deepEqual(store.consumeToolCall('call-1'), {
     runId: 'run-1',

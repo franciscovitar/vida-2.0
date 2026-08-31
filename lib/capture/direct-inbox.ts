@@ -122,10 +122,7 @@ function sanitizedResult(result: ActionResult, replay = false): ConversationalIn
   };
 }
 
-function actorHashFromTrustedPrincipal(
-  channel: EnabledDirectChannel,
-  principalId: string,
-): string {
+function actorHashFromTrustedPrincipal(channel: EnabledDirectChannel, principalId: string): string {
   return createHash('sha256')
     .update(`vida2-conversation-actor:${channel}:${principalId}`)
     .digest('hex')

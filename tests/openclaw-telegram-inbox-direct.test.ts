@@ -94,9 +94,7 @@ test('OTD3. enabled server helper reuses Safe Writes direct apply in memory-test
 test('OTD4. dispatcher sends direct capture once to the fixed path with HMAC and exact trusted body', async () => {
   let fetchCount = 0;
   let capturedUrl = '';
-  let capturedInit:
-    | { method: string; headers: Record<string, string>; body?: string }
-    | undefined;
+  let capturedInit: { method: string; headers: Record<string, string>; body?: string } | undefined;
 
   const result = await executeVidaOperation({
     agentId: 'steward',
