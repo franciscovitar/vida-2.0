@@ -72,13 +72,13 @@ OpenClaw may become a channel executor/gateway, but it does not own these polici
 
 ## Canonical authorities
 
-| Information | Canonical authority |
-| --- | --- |
-| Areas, projects, tasks, operational content, Inbox | Notion |
-| Gym history, nutrition, habits, health, sleep, productivity, quantitative derivatives | Google Sheets |
-| Agenda and time blocks | Google Calendar |
-| Heavy/original files and evidence when appropriate | Google Drive |
-| Derived command-center views | Vida Web |
+| Information                                                                           | Canonical authority |
+| ------------------------------------------------------------------------------------- | ------------------- |
+| Areas, projects, tasks, operational content, Inbox                                    | Notion              |
+| Gym history, nutrition, habits, health, sleep, productivity, quantitative derivatives | Google Sheets       |
+| Agenda and time blocks                                                                | Google Calendar     |
+| Heavy/original files and evidence when appropriate                                    | Google Drive        |
+| Derived command-center views                                                          | Vida Web            |
 
 The conversational channel is never a source of truth.
 
@@ -86,13 +86,13 @@ The conversational channel is never a source of truth.
 
 `lib/capture/contracts.ts` describes only capabilities implemented by the Vida Safe Writes substrate:
 
-| Operation              | Canonical authority                      | Vida execution contract          |
-| ---------------------- | ---------------------------------------- | -------------------------------- |
-| `task.create`          | Notion Tasks                             | proposal-only                    |
-| `task.change-status`   | Notion Tasks                             | proposal-only                    |
-| `inbox.capture`        | Notion Inbox                             | proposal or scoped direct-apply  |
-| `gym.session.create`   | Google Sheets Gym                        | proposal-only                    |
-| `calendar.hold.create` | dedicated Google Calendar holds calendar | proposal-only                    |
+| Operation              | Canonical authority                      | Vida execution contract         |
+| ---------------------- | ---------------------------------------- | ------------------------------- |
+| `task.create`          | Notion Tasks                             | proposal-only                   |
+| `task.change-status`   | Notion Tasks                             | proposal-only                   |
+| `inbox.capture`        | Notion Inbox                             | proposal or scoped direct-apply |
+| `gym.session.create`   | Google Sheets Gym                        | proposal-only                   |
+| `calendar.hold.create` | dedicated Google Calendar holds calendar | proposal-only                   |
 
 This registry does **not** mean ChatGPT must use Vida for every write to those authorities. It only
 describes the Vida-owned execution surface when that route is selected.
