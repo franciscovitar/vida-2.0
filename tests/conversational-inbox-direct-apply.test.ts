@@ -65,9 +65,9 @@ test('CID1. direct apply is blocked unless the user intent is explicit', async (
   assert.equal(d.inbox.captures.size, 0);
 });
 
-test('CID2. only ChatGPT is enabled in the first direct-apply slice', async () => {
+test('CID2. unsupported channels remain denied', async () => {
   const d = makeRuntime();
-  const result = await executeConversationalInboxDirectApply(baseInput({ channel: 'telegram' }), {
+  const result = await executeConversationalInboxDirectApply(baseInput({ channel: 'whatsapp' }), {
     env: enabledEnv,
     runtime: d.runtime,
     now: fixedNow,
@@ -218,4 +218,64 @@ test('CID7. if ledger cannot certify applied, the write is compensated immediate
   const rows = await backing.list();
   assert.equal(rows.length, 1);
   assert.equal(rows[0].status, 'failed');
+});
+
+test('CID8. explicit Telegram capture uses OpenClaw origin and Telegram ledger provenance', async () => {
+  const d = makeRuntime();
+  const result = await executeConversationalInboxDirectApply(
+    baseInput({
+      channel: 'telegram',
+      principalId: 'telegram:12345',
+      sourceEventId: 'telegram:987',
+      text: 'Idea para revisar el tablero semanal',
+    }),
+    { env: enabledEnv, runtime: d.runtime, now: fixedNow },
+  );
+
+  assert.equal(result.ok, true, result.message);
+  assert.equal(result.code, 'applied');
+  assert.equal(d.inbox.captures.size, 1);
+  const capture = [...d.inbox.captures.values()][0];
+  assert.equal(capture.origin, 'openclaw');
+  assert.equal(capture.text, 'Idea para revisar el tablero semanal');
+
+  const rows = await d.proposals.list();
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].source, 'conversation-direct:telegram');
+  assert.equal(JSON.stringify(rows).includes('Idea para revisar el tablero semanal'), false);
+});
+
+test('CID9. Telegram replay is idempotent and channel namespace does not collide with ChatGPT', async () => {
+  const d = makeRuntime();
+  const telegram = baseInput({
+    channel: 'telegram',
+    principalId: 'same-user',
+    sourceEventId: 'same-event',
+    text: 'Captura Telegram',
+  });
+  const first = await executeConversationalInboxDirectApply(telegram, {
+    env: enabledEnv,
+    runtime: d.runtime,
+    now: fixedNow,
+  });
+  const replay = await executeConversationalInboxDirectApply(telegram, {
+    env: enabledEnv,
+    runtime: d.runtime,
+    now: fixedNow,
+  });
+  const chatgpt = await executeConversationalInboxDirectApply(
+    baseInput({
+      principalId: 'same-user',
+      sourceEventId: 'same-event',
+      text: 'Captura ChatGPT',
+    }),
+    { env: enabledEnv, runtime: d.runtime, now: fixedNow },
+  );
+
+  assert.equal(first.ok, true);
+  assert.equal(replay.ok, true);
+  assert.equal(replay.code, 'idempotent-replay');
+  assert.equal(chatgpt.ok, true);
+  assert.equal(d.inbox.captures.size, 2);
+  assert.equal((await d.proposals.list()).length, 2);
 });

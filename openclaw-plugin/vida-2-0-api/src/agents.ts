@@ -21,7 +21,11 @@ import {
   type VidaProposeOperation,
   type VidaReadOperation,
 } from './types.js';
-import { isVidaProposeOperation, isVidaReadOperation } from './operations.js';
+import {
+  isVidaDirectOperation,
+  isVidaProposeOperation,
+  isVidaReadOperation,
+} from './operations.js';
 
 export type VidaAgentProfile = {
   readonly id: VidaAgentId;
@@ -94,6 +98,7 @@ export function isOperationAllowedForAgent(
   operation: VidaOperation,
 ): boolean {
   if (operation === 'system.health') return true;
+  if (isVidaDirectOperation(operation)) return agentId === 'steward';
   if (isVidaReadOperation(operation)) return PROFILES[agentId].allowedReads.includes(operation);
   if (isVidaProposeOperation(operation))
     return PROFILES[agentId].allowedProposals.includes(operation);
@@ -103,11 +108,18 @@ export function isOperationAllowedForAgent(
 /** Every operation this agent may be offered, including the universal health check. */
 export function listAllowedOperationsForAgent(agentId: VidaAgentId): readonly VidaOperation[] {
   const profile = PROFILES[agentId];
-  return [...profile.allowedReads, ...profile.allowedProposals, 'system.health'];
+  return [
+    ...profile.allowedReads,
+    ...profile.allowedProposals,
+    ...(agentId === 'steward' ? (['inbox.capture.direct'] as const) : []),
+    'system.health',
+  ];
 }
 
 /** Whether this agent has any Vida-data capability at all (excludes the universal health check). */
 export function hasAnyDataCapability(agentId: VidaAgentId): boolean {
   const profile = PROFILES[agentId];
-  return profile.allowedReads.length > 0 || profile.allowedProposals.length > 0;
+  return (
+    profile.allowedReads.length > 0 || profile.allowedProposals.length > 0 || agentId === 'steward'
+  );
 }

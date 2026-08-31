@@ -1,13 +1,9 @@
 /**
  * Regression guards for OpenClaw 2026.7.1-2 runtime-validated failures fixed
  * in the adapter (import path, activation metadata drift, SecretRef schema
- * acceptance). These are lightweight, deterministic, and do not require the
- * OpenClaw SDK to be installed -- they inspect the adapter source text and
- * the manifest JSON directly rather than duplicating OpenClaw's own
- * `openclaw plugins validate` / `config patch --dry-run` logic (that
- * official pipeline was exercised directly, against the real installed
- * runtime, in an isolated `--profile` with synthetic `exec` SecretRefs; see
- * docs/block-6-openclaw-plugin.md).
+ * acceptance) plus the Telegram inbox-direct trust boundary. These are
+ * lightweight, deterministic, and do not require the OpenClaw SDK to be
+ * installed -- they inspect adapter source text and manifest JSON directly.
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -21,7 +17,7 @@ const MANIFEST_PATH = path.join(PLUGIN_ROOT, 'openclaw.plugin.json');
 type JsonSchema = Record<string, unknown>;
 type Manifest = {
   description: string;
-  activation: { onStartup: boolean; onCapabilities: string[] };
+  activation: { onStartup: boolean; onChannels?: string[]; onCapabilities: string[] };
   contracts: { tools: string[] };
   configContracts: { secretInputs: { paths: Array<{ path: string; expected?: string }> } };
   configSchema: {
@@ -123,7 +119,7 @@ test('adapter imports failedTextResult and payloadTextResult from openclaw/plugi
   assert.match(names, /\bpayloadTextResult\b/);
 });
 
-test('adapter passes an explicit activation block to defineToolPlugin that matches openclaw.plugin.json (stale-metadata regression guard)', () => {
+test('adapter passes an explicit activation block to defineToolPlugin that matches openclaw.plugin.json', () => {
   const source = readAdapterSource();
   const manifest = readManifest();
 
@@ -140,6 +136,17 @@ test('adapter passes an explicit activation block to defineToolPlugin that match
   assert.ok(onStartupMatch, 'expected an explicit onStartup value in the source activation block');
   assert.equal(onStartupMatch![1] === 'true', manifest.activation.onStartup);
 
+  const onChannelsMatch = activationBlock.match(/onChannels:\s*\[([^\]]*)\]/);
+  assert.ok(
+    onChannelsMatch,
+    'expected an explicit onChannels array in the source activation block',
+  );
+  const sourceChannels = (onChannelsMatch![1] ?? '')
+    .split(',')
+    .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))
+    .filter(Boolean);
+  assert.deepEqual(sourceChannels, manifest.activation.onChannels ?? []);
+
   const onCapabilitiesMatch = activationBlock.match(/onCapabilities:\s*\[([^\]]*)\]/);
   assert.ok(
     onCapabilitiesMatch,
@@ -152,17 +159,18 @@ test('adapter passes an explicit activation block to defineToolPlugin that match
   assert.deepEqual(sourceCapabilities, manifest.activation.onCapabilities);
 });
 
-test('openclaw.plugin.json declares the plugin as not started eagerly on Gateway startup', () => {
+test('plugin remains non-eager globally and activates specifically for Telegram', () => {
   const manifest = readManifest();
   assert.equal(manifest.activation.onStartup, false);
+  assert.deepEqual(manifest.activation.onChannels, ['telegram']);
 });
 
-test('manifest description matches the source description passed to defineToolPlugin verbatim (stale-manifest regression guard)', () => {
+test('manifest description matches the source description passed to defineToolPlugin verbatim', () => {
   const source = readAdapterSource();
   const manifest = readManifest();
 
   const descriptionMatch = source.match(
-    /export default defineToolPlugin\(\{[\s\S]*?description:\s*\n?\s*'((?:[^'\\]|\\.)*)'/,
+    /defineToolPlugin\(\{[\s\S]*?description:\s*\n?\s*'((?:[^'\\]|\\.)*)'/,
   );
   assert.ok(descriptionMatch, 'expected a description field on the defineToolPlugin(...) call');
   const sourceDescription = (descriptionMatch![1] ?? '').replace(/\\'/g, "'");
@@ -170,18 +178,18 @@ test('manifest description matches the source description passed to defineToolPl
   assert.equal(
     manifest.description,
     sourceDescription,
-    'openclaw.plugin.json "description" must be regenerated with `openclaw plugins build` after changing the source description, not hand-edited independently',
+    'openclaw.plugin.json "description" must be regenerated after changing the source description',
   );
 });
 
-test('vercelProtectionBypass accepts a plain string or a closed OpenClaw SecretRef object (SecretRef schema regression guard)', () => {
+test('vercelProtectionBypass accepts a plain string or a closed OpenClaw SecretRef object', () => {
   const manifest = readManifest();
   const schema = manifest.configSchema.properties.vercelProtectionBypass;
   assert.ok(schema, 'expected vercelProtectionBypass to remain in the generated config schema');
   assertSecretInputSchemaShape(schema!, 'vercelProtectionBypass');
 });
 
-test('vercelProtectionBypass remains optional, never required (fixed Vercel transport, not mandatory)', () => {
+test('vercelProtectionBypass remains optional, never required', () => {
   const manifest = readManifest();
   assert.equal(manifest.configSchema.required.includes('vercelProtectionBypass'), false);
 });
@@ -196,7 +204,7 @@ test('every agent keyId/secret accepts a plain string or a closed OpenClaw Secre
   }
 });
 
-test('an arbitrary object is structurally rejected by every secret-bearing schema (no Type.Unknown/Type.Any escape hatch)', () => {
+test('an arbitrary object is structurally rejected by every secret-bearing schema', () => {
   const manifest = readManifest();
   const arbitrary = { foo: 'bar', arbitrary: true };
   const missingId = { source: 'exec', provider: 'b6fixture' };
@@ -219,7 +227,7 @@ test('an arbitrary object is structurally rejected by every secret-bearing schem
   assert.equal(isRejectedByClosedSecretInputSchema(stewardKeyId, arbitrary), true);
 });
 
-test('baseUrl remains a plain string, never widened to accept a SecretRef (task boundary: baseUrl stays plain string)', () => {
+test('baseUrl remains a plain string, never widened to accept a SecretRef', () => {
   const manifest = readManifest();
   assert.equal(manifest.configSchema.properties.baseUrl.type, 'string');
   assert.equal('anyOf' in manifest.configSchema.properties.baseUrl, false);
@@ -235,7 +243,7 @@ test('configContracts.secretInputs still lists every secret-bearing path, includ
   assert.deepEqual(paths, expected);
 });
 
-test('the tool surface and capability set are unchanged by the SecretRef schema widening', () => {
+test('the plugin still exposes exactly one tool and the same canonical agent set', () => {
   const manifest = readManifest();
   assert.deepEqual(manifest.contracts.tools, ['vida_operation']);
   assert.deepEqual(
@@ -244,7 +252,7 @@ test('the tool surface and capability set are unchanged by the SecretRef schema 
   );
 });
 
-test('the vida_operation tool parameter schemas never declare agentId, credential, bypass, header, url, or method fields (tool-surface regression guard)', () => {
+test('the vida_operation model-facing schemas never declare trusted transport or credential fields', () => {
   const source = readAdapterSource();
   const forbidden = [
     'agentId',
@@ -255,10 +263,15 @@ test('the vida_operation tool parameter schemas never declare agentId, credentia
     "'url'",
     '"url"',
     'method',
+    'principalId',
+    'sourceEventId',
+    'senderId',
+    'messageId',
+    'runId',
+    'toolCallId',
+    'transportContextToken',
   ];
 
-  // Bounded by the section comment and the final params union, so this
-  // guard survives restructuring the individual per-operation schemas.
   const sectionMatch = source.match(
     /Tool call parameter schema: one discriminated variant per closed operation[\s\S]*?const VidaOperationParamsSchema = Type\.Union\(\[[\s\S]*?\]\);/,
   );
@@ -272,7 +285,41 @@ test('the vida_operation tool parameter schemas never declare agentId, credentia
   }
 });
 
-test('each closed read operation has its own discriminated parameter schema (system.overview no longer needs an unknown/generic input)', () => {
+test('direct inbox schema exposes only operation plus text/link; transport identity stays runtime-owned', () => {
+  const source = readAdapterSource();
+  const directMatch = source.match(
+    /const DirectInboxCallSchema = Type\.Object\(([\s\S]*?)\n\);\n\nconst HealthCallSchema/,
+  );
+  assert.ok(directMatch, 'expected the dedicated direct inbox schema');
+  const body = directMatch![1] ?? '';
+  assert.match(body, /inbox\.capture\.direct/);
+  assert.match(body, /text:/);
+  assert.match(body, /link:/);
+  for (const forbidden of [
+    'principalId',
+    'sourceEventId',
+    'senderId',
+    'messageId',
+    'runId',
+    'toolCallId',
+    'transportContextToken',
+  ]) {
+    assert.equal(body.includes(forbidden), false, `direct schema must not expose ${forbidden}`);
+  }
+});
+
+test('Telegram direct capture binds trusted message context to host-owned toolCallId and consumes it once', () => {
+  const source = readAdapterSource();
+  assert.match(source, /api\.on\('message_received'/);
+  assert.match(source, /api\.on\('before_tool_call'/);
+  assert.match(source, /telegramDirectContext\.bindToolCall\(runId, toolCallId\)/);
+  assert.match(source, /telegramDirectContext\.consumeToolCall\(toolCallId\)/);
+  assert.match(source, /trustedRequester\.senderIsOwner !== true/);
+  assert.match(source, /trustedRequester\.channel !== 'telegram'/);
+  assert.equal(source.includes('transportContextToken'), false);
+});
+
+test('each closed read operation has its own discriminated parameter schema', () => {
   const source = readAdapterSource();
   const readCallMatch = source.match(/const ReadCallSchemas = \[([\s\S]*?)\n\] as const;/);
   assert.ok(readCallMatch, 'expected a ReadCallSchemas array in the adapter source');
@@ -300,12 +347,10 @@ test('each closed read operation has its own discriminated parameter schema (sys
     );
   }
 
-  // The old generic contract must be gone, not just supplemented.
   assert.equal(source.includes('operation: ReadOperationLiteral'), false);
   assert.equal(/input:\s*UnknownInput/.test(source), false);
   assert.equal(/input:\s*Type\.Unknown\(\)/.test(readCallMatch![0]), false);
 
-  // The empty-input operations use a strict empty object, not an optional/unknown escape hatch.
   for (const operation of [
     'system.overview',
     'areas.list',

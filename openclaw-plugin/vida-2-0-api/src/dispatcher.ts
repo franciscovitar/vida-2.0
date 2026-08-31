@@ -12,22 +12,16 @@
  * - a non-2xx or structurally unexpected Vida response never becomes a
  *   success result.
  * - there is exactly one fetch attempt per call. No retries, ever -- an
- *   ambiguous network outcome on a propose call is surfaced as a network
- *   error, never silently retried.
+ *   ambiguous network outcome on a propose/direct call is surfaced as a
+ *   network error, never silently retried.
  * - returned results never carry the signing secret, the canonical
  *   string, the HMAC signature, Vida's raw error body, or a stack trace.
- *
- * An optional `vercelProtectionBypass` config value adds exactly one fixed,
- * unsigned transport header (`x-vercel-protection-bypass`) for a protected
- * Vercel Preview host. It never changes the Vida HMAC canonical string, the
- * body, the pathname, or the query string, and it is never echoed back in a
- * result.
  */
 import { isVidaAgentId, isOperationAllowedForAgent } from './agents.js';
 import { buildCanonicalString, formatTimestamp, signCanonical } from './canonical.js';
 import { resolveOperationRoute, type VidaOperationRoute } from './operations.js';
 import type { SecretResolver } from './secrets.js';
-import type { VidaOperationCall, VidaProposeCall } from './types.js';
+import type { VidaDirectCall, VidaOperationCall, VidaProposeCall } from './types.js';
 import type { RequestIdGenerator } from './request-id.js';
 
 export type VidaClientErrorCode =
@@ -71,17 +65,7 @@ export type ClockLike = () => number;
 export type VidaClientConfig = {
   /** Vida origin only, e.g. https://vida.example.com -- no path, no trailing slash required. */
   readonly baseUrl: string;
-  /**
-   * Optional fixed Vercel Deployment Protection bypass value for a protected
-   * Preview host. Purely a transport-layer exception at Vercel: it is never
-   * part of the Vida HMAC canonical string, never signed, never placed in
-   * the body or a query string, and never maps to anything other than the
-   * single fixed header `x-vercel-protection-bypass` (see the established
-   * B5 contract in `automations/n8n/README.md` /
-   * `tests/block5-vercel-protection-bypass.test.ts`). Vida's own HMAC
-   * authentication remains mandatory and is completely unaffected by this
-   * value's presence or absence.
-   */
+  /** Optional fixed Vercel Deployment Protection bypass value for a protected Preview host. */
   readonly vercelProtectionBypass?: string;
 };
 
@@ -129,6 +113,43 @@ function buildTargetUrl(baseUrl: string, pathname: string): string {
   return `${origin}${pathname}`;
 }
 
+function isSafeTransportId(value: unknown): value is string {
+  return typeof value === 'string' && /^[A-Za-z0-9._:-]{1,128}$/.test(value);
+}
+
+function buildDirectBody(call: VidaDirectCall): { ok: true; rawBody: string } | { ok: false } {
+  if (
+    call.operation !== 'inbox.capture.direct' ||
+    !isPlainObject(call.transport) ||
+    call.transport.channel !== 'telegram' ||
+    !isSafeTransportId(call.transport.principalId) ||
+    !isSafeTransportId(call.transport.sourceEventId) ||
+    !isPlainObject(call.input) ||
+    typeof call.input.text !== 'string' ||
+    call.input.text.trim().length < 1 ||
+    call.input.text.length > 2000 ||
+    (call.input.link !== null && typeof call.input.link !== 'string')
+  ) {
+    return { ok: false };
+  }
+
+  return {
+    ok: true,
+    rawBody: JSON.stringify({
+      operation: call.operation,
+      transport: {
+        channel: 'telegram',
+        principalId: call.transport.principalId,
+        sourceEventId: call.transport.sourceEventId,
+      },
+      input: {
+        text: call.input.text,
+        link: call.input.link,
+      },
+    }),
+  };
+}
+
 /** Builds the exact JSON bytes to hash and send. Returns null on a call shape that does not match the operation's kind. */
 function buildRequestBody(
   call: VidaOperationCall,
@@ -144,6 +165,11 @@ function buildRequestBody(
       ok: true,
       rawBody: JSON.stringify({ operation: call.operation, input: call.input ?? {} }),
     };
+  }
+
+  if (route.kind === 'direct') {
+    if (!('transport' in call) || !('input' in call)) return { ok: false };
+    return buildDirectBody(call as VidaDirectCall);
   }
 
   // route.kind === 'propose'
@@ -276,9 +302,6 @@ export async function executeVidaOperation(params: {
   if (route.method === 'POST') {
     headers['Content-Type'] = 'application/json';
   }
-  // Added after signing on purpose: a Vercel Preview transport exception,
-  // never part of the HMAC canonical string above. Fixed header name only --
-  // config never supplies a header name, only this one value.
   if (config.vercelProtectionBypass) {
     headers['x-vercel-protection-bypass'] = config.vercelProtectionBypass;
   }

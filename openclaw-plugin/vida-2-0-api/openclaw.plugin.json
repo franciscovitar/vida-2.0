@@ -1,10 +1,11 @@
 {
   "id": "vida-2-0-api",
   "name": "Vida 2.0 API",
-  "description": "Closed, typed bridge from one isolated local Vida agent to the private Vida 2.0 OpenClaw API (HMAC v2, read-only or pending-proposal only, no Journaling).",
+  "description": "Closed, typed bridge from one isolated local Vida agent to the private Vida 2.0 OpenClaw API (HMAC v2, sanitized reads, pending proposals, and a gated Telegram inbox-direct canary; no Journaling).",
   "version": "0.1.0",
   "activation": {
     "onStartup": false,
+    "onChannels": ["telegram"],
     "onCapabilities": ["tool"]
   },
   "configContracts": {
