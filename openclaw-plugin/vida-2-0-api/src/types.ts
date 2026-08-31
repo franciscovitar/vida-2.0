@@ -49,10 +49,17 @@ export type VidaProposeOperation =
   | 'gym.session.create.propose'
   | 'calendar.hold.create.propose';
 
+/** Canary direct operation. Trusted transport fields are injected locally, never by the model. */
+export type VidaDirectOperation = 'inbox.capture.direct';
+
 /** Protocol-level operation: routed to GET /api/openclaw/v1/health. No Vida data capability. */
 export type VidaProtocolOperation = 'system.health';
 
-export type VidaOperation = VidaReadOperation | VidaProposeOperation | VidaProtocolOperation;
+export type VidaOperation =
+  | VidaReadOperation
+  | VidaProposeOperation
+  | VidaDirectOperation
+  | VidaProtocolOperation;
 
 /* -------------------------------------------------------------------------- */
 /* Read operation input shapes (mirrors types/openclaw.ts OpenClawReadRequest) */
@@ -144,7 +151,7 @@ export type VidaCalendarHoldCreatePayload = {
 };
 
 /* -------------------------------------------------------------------------- */
-/* Operation calls: what the tool accepts, one shape per closed operation kind */
+/* Operation calls: what the dispatcher sends after local trust resolution    */
 /* -------------------------------------------------------------------------- */
 
 export type VidaReadCall = {
@@ -163,8 +170,21 @@ export type VidaProposeCall = {
   payload: unknown;
 };
 
+export type VidaDirectCall = {
+  operation: 'inbox.capture.direct';
+  transport: {
+    channel: 'telegram';
+    principalId: string;
+    sourceEventId: string;
+  };
+  input: {
+    text: string;
+    link: string | null;
+  };
+};
+
 export type VidaHealthCall = {
   operation: VidaProtocolOperation;
 };
 
-export type VidaOperationCall = VidaReadCall | VidaProposeCall | VidaHealthCall;
+export type VidaOperationCall = VidaReadCall | VidaProposeCall | VidaDirectCall | VidaHealthCall;
