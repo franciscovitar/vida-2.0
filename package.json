@@ -25,7 +25,7 @@
     "format:check": "prettier --check .",
     "test": "node --import tsx --test \"tests/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
-    "verify": "npm run check && npm run build",
+    "verify": "npm test && npm run check && npm run build && cd openclaw-plugin/vida-2-0-api && npm install --ignore-scripts --no-audit --no-fund --no-save --package-lock=false openclaw@2026.7.1-2 && npm run typecheck && npm run build && npm run test:integration",
     "preview:check": "tsx scripts/preview-preflight.ts",
     "qa:block1": "tsx scripts/block-1-final-qa.ts"
   },
