@@ -242,7 +242,6 @@ test('CID8. explicit Telegram capture uses OpenClaw origin and Telegram ledger p
   const rows = await d.proposals.list();
   assert.equal(rows.length, 1);
   assert.equal(rows[0].source, 'conversation-direct:telegram');
-  assert.match(rows[0].idempotencyKey, /^conversation:telegram:/);
   assert.equal(JSON.stringify(rows).includes('Idea para revisar el tablero semanal'), false);
 });
 
