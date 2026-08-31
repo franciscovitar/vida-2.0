@@ -2,96 +2,17 @@
  * OpenClaw SDK wiring for the Vida 2.0 plugin.
  *
  * This is the only file in the plugin that imports `openclaw/plugin-sdk/*`
- * and `typebox`. It is intentionally thin: all request-building, HMAC
- * signing, routing, and fail-closed logic lives in the pure core
- * (`../dispatcher.ts` and friends) and is unit-tested there without this
- * file or its peer dependencies.
+ * and `typebox`. Request-building, HMAC signing, routing, and fail-closed
+ * logic live in the pure core (`../dispatcher.ts` and friends).
  *
- * Trusted identity: the tool is declared with a `factory`, not a plain
- * `execute`, specifically because only `ToolPluginFactoryContext.toolContext`
- * (an `OpenClawPluginToolContext`) carries the runtime-supplied `agentId`.
- * The model can never supply or override `agentId` -- it is not a tool
- * parameter. When `toolContext.agentId` is missing, unrecognized, or
- * belongs to an agent with zero Vida-data capability (`digital-order` in
- * this version), the factory returns `null` and the tool is not registered
- * for that run at all -- there is no partially-registered, always-denied
- * tool sitting in front of the model.
- *
- * SecretRef schema/resolution lifecycle -- corrected after real local TUI
- * evidence (`openclaw tui --local`) disproved the previous assumption that
- * OpenClaw always hands `factory`/`register(api)` an already-resolved
- * config snapshot. That held in isolated CLI diagnostics
- * (`plugins doctor`, `plugins inspect --runtime`, `config patch --dry-run`)
- * but not in the local embedded agent runtime path: `config.agents.steward`
- * arrived at this plugin as a raw SecretRef object, and three otherwise-
- * valid `vida_operation` calls failed before any network attempt because
- * the HMAC secret was an object, not a string. This plugin no longer
- * assumes host-side resolution timing either way:
- *
- * 1. `plugins.entries.vida-2-0-api.config` is still schema-validated
- *    against the RAW value loaded from `openclaw.json`, so every secret-
- *    bearing field is still typed `secretInputSchema()` (`string |
- *    SecretRef`), never `Type.String()` alone and never
- *    `Type.Unknown()`/`Type.Any()` (see `docs/block-6-openclaw-plugin.md`
- *    for the schema-validation-order evidence, which still holds).
- * 2. Whatever this plugin's `factory`/`execute` actually receives for a
- *    secret-bearing field -- a plain string (if some execution path did
- *    resolve it upstream) or a raw `SecretRef` object (if it did not) --
- *    is resolved HERE, explicitly, using OpenClaw's own public
- *    `resolveSecretRefValues` (`openclaw/plugin-sdk/secret-ref-runtime`),
- *    fed with the full `OpenClawConfig` from `api.config` (which every
- *    plugin host construction supplies, including the local embedded
- *    runtime). This plugin does not reimplement SecretRef resolution --
- *    it only ever calls OpenClaw's own exported resolver.
- * 3. A field that is not yet a plain string and not a well-formed
- *    `SecretRef` object, or that fails resolution, never reaches the
- *    dispatcher: `resolveAgentCredential`/`resolveSecretInputValue` return
- *    `null`, which fails the call closed (`missing-credential` for agent
- *    credentials, `invalid-configuration` for a configured-but-unresolved
- *    bypass) before any HMAC signing or network attempt. A `SecretRef`
- *    object can never be stringified into HMAC material: the dispatcher's
- *    own types (`VidaAgentCredential`, `VidaClientConfig`) only ever
- *    accept plain strings, and every value that reaches them here has
- *    already passed through this resolution boundary.
- *
- * `RawPluginConfig` (`Static<typeof ConfigSchema>`, matching what OpenClaw
- * actually hands the factory) and `ResolvedPluginConfig` (plain strings
- * only, matching what the dispatcher accepts) are kept as distinct named
- * types precisely so this boundary stays visible in the type system --
- * there is no more "trust the host resolved this" cast anywhere in this
- * file.
- *
- * `payloadTextResult`/`failedTextResult` are imported from
- * `openclaw/plugin-sdk/agent-runtime`, not `openclaw/plugin-sdk/core`:
- * confirmed against the installed openclaw@2026.7.1-2 package that
- * `core.d.ts` does not export either helper, while `agent-runtime.d.ts`
- * does (both re-export the same underlying `common-CZ-od2BP` helpers).
- * `agent-runtime` is documented as a deprecated broad barrel for other,
- * unrelated helpers, but it is still the only public plugin-sdk subpath
- * that exports these two -- there is no narrower alternative to prefer.
- * They are needed only because a `factory`-built tool's `execute` bypasses
- * `defineToolPlugin`'s own result wrapping (verified in the installed
- * `tool-plugin` runtime source): a plain `tool({ execute })` result gets
- * wrapped automatically, but a `factory`-returned `AnyAgentTool.execute`
- * must already return a complete `AgentToolResult`.
- *
- * `activation` is passed explicitly and kept identical to
- * `openclaw.plugin.json`'s `activation` block. The installed
- * `defineToolPlugin` runtime source defaults to `{ onStartup: true }` when
- * `activation` is omitted from this call, which is what produced an
- * earlier "generated metadata is stale" mismatch against the committed
- * manifest (which declares `onStartup: false`). Passing it here, matching
- * the manifest, keeps the plugin's real default posture -- not eagerly
- * loaded at Gateway startup, available only through explicit
- * tool-capability activation and per-agent allowlisting.
- *
- * `vercelProtectionBypass` is an optional, SecretRef-eligible config value
- * (see `configContracts.secretInputs` in `openclaw.plugin.json`) for a
- * protected Vercel Preview host. It is Vercel transport only: the dispatcher
- * maps it to exactly one fixed header, `x-vercel-protection-bypass`, added
- * after HMAC signing so it can never affect the canonical string. It is not
- * a tool parameter, so the model can never supply or override it, and it
- * only ever maps to that one fixed header name -- never an arbitrary one.
+ * Trusted identity comes from OpenClaw runtime context, never model params.
+ * For the Telegram inbox-direct canary, message_received records only
+ * runId/senderId/messageId in ephemeral process memory. before_tool_call
+ * correlates the exact run and injects a one-time token. The tool consumes
+ * that token locally, requires senderIsOwner=true, verifies the trusted
+ * requester sender, and only then constructs the signed transport envelope.
+ * The token itself never leaves OpenClaw and the model can never choose a
+ * principalId or sourceEventId.
  */
 import { Type, type Static, type TSchema } from 'typebox';
 import { defineToolPlugin } from 'openclaw/plugin-sdk/tool-plugin';
@@ -106,19 +27,12 @@ import { resolveSecretRefValues, type SecretRef } from 'openclaw/plugin-sdk/secr
 import { hasAnyDataCapability, isVidaAgentId, listAllowedOperationsForAgent } from '../agents.js';
 import { executeVidaOperation, type VidaOperationResult } from '../dispatcher.js';
 import { createDefaultRequestIdGenerator } from '../request-id.js';
+import { createTelegramDirectContextStore } from '../telegram-direct-context.js';
 import { VIDA_AGENT_IDS, type VidaOperationCall } from '../types.js';
 
-/**
- * Mirrors OpenClaw's own public `SecretRef` object shape exactly
- * (`{ source: 'env'|'file'|'exec'; provider: string; id: string }`,
- * confirmed against `openclaw`'s installed `types.secrets` module -- there
- * is no public TypeBox helper for it; the public `buildSecretInputSchema`
- * family in `openclaw/plugin-sdk/secret-input` is Zod-based and belongs to
- * the core `openclaw.json` config validator, not `defineToolPlugin`'s
- * TypeBox `configSchema`). Kept closed (`additionalProperties: false`) and
- * restricted to the three source kinds OpenClaw itself supports -- no
- * provider kind is invented here.
- */
+const telegramDirectContext = createTelegramDirectContextStore();
+
+/** Closed OpenClaw SecretRef shape; arbitrary objects are rejected. */
 const SecretRefSchema = Type.Object(
   {
     source: Type.Union([Type.Literal('env'), Type.Literal('file'), Type.Literal('exec')]),
@@ -128,7 +42,6 @@ const SecretRefSchema = Type.Object(
   { additionalProperties: false },
 );
 
-/** A secret-bearing config field: a literal value or an OpenClaw SecretRef, never an arbitrary object. */
 function secretInputSchema(description?: string) {
   return Type.Union([Type.String({ minLength: 1 }), SecretRefSchema], { description });
 }
@@ -233,7 +146,6 @@ const DocumentGetInputSchema = Type.Object(
   { additionalProperties: false },
 );
 
-/** Builds one closed `{ operation: <literal>, input: <exact shape> }` variant. Generic so the literal type is preserved, not widened to `string`. */
 function readCall<TOp extends string, TInput extends TSchema>(operation: TOp, input: TInput) {
   return Type.Object(
     { operation: Type.Literal(operation), input },
@@ -278,6 +190,28 @@ const ProposeCallSchema = Type.Object(
   { additionalProperties: false },
 );
 
+const DirectInboxCallSchema = Type.Object(
+  {
+    operation: Type.Literal('inbox.capture.direct'),
+    input: Type.Object(
+      {
+        text: Type.String({ minLength: 1, maxLength: 2000 }),
+        link: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+      },
+      { additionalProperties: false },
+    ),
+    transportContextToken: Type.Optional(
+      Type.String({
+        minLength: 32,
+        maxLength: 128,
+        description:
+          'Internal one-time transport token. The Telegram hook overwrites this value; the model must not invent or reuse it.',
+      }),
+    ),
+  },
+  { additionalProperties: false },
+);
+
 const HealthCallSchema = Type.Object(
   { operation: Type.Literal('system.health') },
   { additionalProperties: false },
@@ -287,11 +221,12 @@ const HealthCallSchema = Type.Object(
 export const VidaOperationParamsSchema = Type.Union([
   ...ReadCallSchemas,
   ProposeCallSchema,
+  DirectInboxCallSchema,
   HealthCallSchema,
 ]);
 
 /* -------------------------------------------------------------------------- */
-/* Plugin config schema and the raw/resolved boundary                        */
+/* Plugin config schema and the raw/resolved boundary                         */
 /* -------------------------------------------------------------------------- */
 
 const AgentCredentialSchema = Type.Object(
@@ -329,28 +264,18 @@ export const ConfigSchema = Type.Object(
   { additionalProperties: false },
 );
 
-/** Exactly what OpenClaw hands the factory/execute: secret fields may still be raw SecretRef objects. */
 type RawPluginConfig = Static<typeof ConfigSchema>;
 type RawSecretInput = string | SecretRef;
 type RawAgentCredential = { keyId: RawSecretInput; secret: RawSecretInput };
 
-/** What the dispatcher/HMAC path accepts: secret fields are always plain, non-empty strings. */
 type ResolvedAgentCredential = { keyId: string; secret: string };
-type ResolvedPluginConfig = {
-  baseUrl: string;
-  vercelProtectionBypass?: string;
-  agents?: Partial<Record<(typeof VIDA_AGENT_IDS)[number], ResolvedAgentCredential>>;
+
+type DirectInboxToolCall = {
+  operation: 'inbox.capture.direct';
+  input: { text: string; link?: string | null };
+  transportContextToken?: string;
 };
 
-/**
- * Resolves one secret-bearing field to a plain string using OpenClaw's own
- * public `resolveSecretRefValues`, regardless of whether some upstream
- * execution path already resolved it. Never returns anything but a
- * non-empty string or `null` -- a `SecretRef` object can never pass
- * through this function unresolved, and resolution failures fail closed
- * (`null`) rather than throwing into caller code that might stringify the
- * value.
- */
 async function resolveSecretInputValue(
   value: RawSecretInput | undefined,
   api: OpenClawPluginApi,
@@ -396,19 +321,60 @@ function toToolResult(result: VidaOperationResult): ReturnType<typeof payloadTex
   return failedTextResult(result.message, { status: 'failed' as const, code: result.code });
 }
 
+function localDenied(message: string): ReturnType<typeof payloadTextResult> {
+  return toToolResult({
+    ok: false,
+    status: null,
+    code: 'invalid-input',
+    message,
+  });
+}
+
 function buildVidaOperationTool(
   agentId: (typeof VIDA_AGENT_IDS)[number],
   config: RawPluginConfig,
   api: OpenClawPluginApi,
+  trustedRequester: { senderId?: string; senderIsOwner?: boolean },
 ): AnyAgentTool {
   return {
     name: 'vida_operation',
     label: 'Vida Operation',
     description:
-      'Call one closed Vida 2.0 operation (a sanitized read, or a pending-only propose) as the current trusted Vida agent identity. The operation set, HTTP method, and path are fixed internally; no arbitrary URL, path, method, header, or credential can be supplied.',
+      'Call one closed Vida 2.0 operation as the current trusted Vida agent identity. Reads and pending proposals remain available; inbox.capture.direct is a Telegram-owner-only canary whose transport identity is injected by OpenClaw hooks. No arbitrary URL, path, method, header, credential, principal, or source event id can be supplied.',
     parameters: VidaOperationParamsSchema,
     async execute(_toolCallId, params) {
-      const call = params as VidaOperationCall;
+      const rawCall = params as VidaOperationCall | DirectInboxToolCall;
+      let call: VidaOperationCall;
+
+      if (rawCall.operation === 'inbox.capture.direct') {
+        const direct = rawCall as DirectInboxToolCall;
+        if (
+          agentId !== 'steward' ||
+          trustedRequester.senderIsOwner !== true ||
+          !trustedRequester.senderId ||
+          !direct.transportContextToken
+        ) {
+          return localDenied('Trusted Telegram owner context is unavailable.');
+        }
+        const trusted = telegramDirectContext.consume(direct.transportContextToken);
+        if (!trusted || trusted.senderId !== trustedRequester.senderId) {
+          return localDenied('Trusted Telegram transport token is invalid or expired.');
+        }
+        call = {
+          operation: 'inbox.capture.direct',
+          transport: {
+            channel: 'telegram',
+            principalId: `telegram:${trusted.senderId}`,
+            sourceEventId: `telegram:${trusted.messageId}`,
+          },
+          input: {
+            text: direct.input.text,
+            link: direct.input.link ?? null,
+          },
+        };
+      } else {
+        call = rawCall as VidaOperationCall;
+      }
 
       let vercelProtectionBypass: string | undefined;
       if (config.vercelProtectionBypass !== undefined) {
@@ -440,15 +406,14 @@ function buildVidaOperationTool(
   };
 }
 
-export default defineToolPlugin({
+const vidaPlugin = defineToolPlugin({
   id: 'vida-2-0-api',
   name: 'Vida 2.0 API',
   description:
-    'Closed, typed bridge from one isolated local Vida agent to the private Vida 2.0 OpenClaw API (HMAC v2, read-only or pending-proposal only, no Journaling).',
-  // Kept identical to openclaw.plugin.json's "activation" block -- see the
-  // file-level comment above for why this must be explicit.
+    'Closed, typed bridge from one isolated local Vida agent to the private Vida 2.0 OpenClaw API (HMAC v2, sanitized reads, pending proposals, and a gated Telegram inbox-direct canary; no Journaling).',
   activation: {
     onStartup: false,
+    onChannels: ['telegram'],
     onCapabilities: ['tool'],
   },
   configSchema: ConfigSchema,
@@ -457,21 +422,66 @@ export default defineToolPlugin({
       name: 'vida_operation',
       label: 'Vida Operation',
       description:
-        'Call one closed Vida 2.0 operation as the current trusted Vida agent identity. See the factory implementation for the fixed operation, routing, and credential contract.',
+        'Call one closed Vida 2.0 operation as the current trusted Vida agent identity. Use inbox.capture.direct only when the Telegram user explicitly asks to save/capture something; ordinary conversation must not create durable data.',
       parameters: VidaOperationParamsSchema,
       optional: true,
       factory({ api, config, toolContext }) {
         const agentId = toolContext.agentId;
         if (!agentId || !isVidaAgentId(agentId)) return null;
         if (!hasAnyDataCapability(agentId) && listAllowedOperationsForAgent(agentId).length <= 1) {
-          // Only the universal system.health check would be offered; keep the
-          // tool out of the model's hands entirely for an inert agent
-          // (digital-order in this version) rather than exposing a
-          // permanently-limited stub.
           return null;
         }
-        return buildVidaOperationTool(agentId, config, api);
+        return buildVidaOperationTool(agentId, config, api, {
+          senderId: toolContext.requesterSenderId,
+          senderIsOwner: toolContext.senderIsOwner,
+        });
       },
     }),
   ],
 });
+
+const registerVidaTool = vidaPlugin.register;
+vidaPlugin.register = (api) => {
+  registerVidaTool(api);
+
+  api.on('message_received', (event, context) => {
+    if (context.channelId !== 'telegram') return;
+    const runId = event.runId ?? context.runId;
+    const senderId = event.senderId ?? context.senderId;
+    const messageId = event.messageId ?? context.messageId;
+    if (!runId || !senderId || !messageId) return;
+    telegramDirectContext.record({ runId, senderId, messageId });
+  });
+
+  api.on('before_tool_call', (event, context) => {
+    if (event.toolName !== 'vida_operation') return;
+    if (event.params.operation !== 'inbox.capture.direct') return;
+    if (context.agentId !== 'steward' || context.channelId !== 'telegram') {
+      return { block: true, blockReason: 'Telegram direct capture is restricted to steward.' };
+    }
+    const runId = event.runId ?? context.runId;
+    if (!runId) {
+      return { block: true, blockReason: 'Trusted Telegram run identity is unavailable.' };
+    }
+    const transportContextToken = telegramDirectContext.issue(runId);
+    if (!transportContextToken) {
+      return { block: true, blockReason: 'Trusted Telegram message context is unavailable.' };
+    }
+    return {
+      params: {
+        ...event.params,
+        transportContextToken,
+      },
+    };
+  });
+
+  api.on('agent_end', (event) => {
+    if (event.runId) telegramDirectContext.clearRun(event.runId);
+  });
+
+  api.on('gateway_stop', () => {
+    telegramDirectContext.clear();
+  });
+};
+
+export default vidaPlugin;
