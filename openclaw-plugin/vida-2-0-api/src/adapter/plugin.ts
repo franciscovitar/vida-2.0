@@ -8,11 +8,11 @@
  * Trusted identity comes from OpenClaw runtime context, never model params.
  * For the Telegram inbox-direct canary, message_received records only
  * runId/senderId/messageId in ephemeral process memory. before_tool_call
- * correlates the exact run and injects a one-time token. The tool consumes
- * that token locally, requires senderIsOwner=true, verifies the trusted
- * requester sender, and only then constructs the signed transport envelope.
- * The token itself never leaves OpenClaw and the model can never choose a
- * principalId or sourceEventId.
+ * correlates the exact run with the host-owned toolCallId. The tool consumes
+ * that binding exactly once, requires senderIsOwner=true, verifies the
+ * trusted requester sender, and only then constructs the signed transport
+ * envelope. No internal token or transport identity appears in model-facing
+ * parameters, and the model can never choose a principalId or sourceEventId.
  */
 import { Type, type Static, type TSchema } from 'typebox';
 import { defineToolPlugin } from 'openclaw/plugin-sdk/tool-plugin';
@@ -200,14 +200,6 @@ const DirectInboxCallSchema = Type.Object(
       },
       { additionalProperties: false },
     ),
-    transportContextToken: Type.Optional(
-      Type.String({
-        minLength: 32,
-        maxLength: 128,
-        description:
-          'Internal one-time transport token. The Telegram hook overwrites this value; the model must not invent or reuse it.',
-      }),
-    ),
   },
   { additionalProperties: false },
 );
@@ -273,7 +265,6 @@ type ResolvedAgentCredential = { keyId: string; secret: string };
 type DirectInboxToolCall = {
   operation: 'inbox.capture.direct';
   input: { text: string; link?: string | null };
-  transportContextToken?: string;
 };
 
 async function resolveSecretInputValue(
@@ -334,15 +325,15 @@ function buildVidaOperationTool(
   agentId: (typeof VIDA_AGENT_IDS)[number],
   config: RawPluginConfig,
   api: OpenClawPluginApi,
-  trustedRequester: { senderId?: string; senderIsOwner?: boolean },
+  trustedRequester: { senderId?: string; senderIsOwner?: boolean; channel?: string },
 ): AnyAgentTool {
   return {
     name: 'vida_operation',
     label: 'Vida Operation',
     description:
-      'Call one closed Vida 2.0 operation as the current trusted Vida agent identity. Reads and pending proposals remain available; inbox.capture.direct is a Telegram-owner-only canary whose transport identity is injected by OpenClaw hooks. No arbitrary URL, path, method, header, credential, principal, or source event id can be supplied.',
+      'Call one closed Vida 2.0 operation as the current trusted Vida agent identity. Reads and pending proposals remain available; inbox.capture.direct is a Telegram-owner-only canary whose transport identity is bound by OpenClaw hooks. No arbitrary URL, path, method, header, credential, principal, or source event id can be supplied.',
     parameters: VidaOperationParamsSchema,
-    async execute(_toolCallId, params) {
+    async execute(toolCallId, params) {
       const rawCall = params as VidaOperationCall | DirectInboxToolCall;
       let call: VidaOperationCall;
 
@@ -350,15 +341,15 @@ function buildVidaOperationTool(
         const direct = rawCall as DirectInboxToolCall;
         if (
           agentId !== 'steward' ||
+          trustedRequester.channel !== 'telegram' ||
           trustedRequester.senderIsOwner !== true ||
-          !trustedRequester.senderId ||
-          !direct.transportContextToken
+          !trustedRequester.senderId
         ) {
           return localDenied('Trusted Telegram owner context is unavailable.');
         }
-        const trusted = telegramDirectContext.consume(direct.transportContextToken);
+        const trusted = telegramDirectContext.consumeToolCall(toolCallId);
         if (!trusted || trusted.senderId !== trustedRequester.senderId) {
-          return localDenied('Trusted Telegram transport token is invalid or expired.');
+          return localDenied('Trusted Telegram tool-call binding is invalid or expired.');
         }
         call = {
           operation: 'inbox.capture.direct',
@@ -434,6 +425,7 @@ const vidaPlugin = defineToolPlugin({
         return buildVidaOperationTool(agentId, config, api, {
           senderId: toolContext.requesterSenderId,
           senderIsOwner: toolContext.senderIsOwner,
+          channel: toolContext.messageChannel,
         });
       },
     }),
@@ -460,19 +452,13 @@ vidaPlugin.register = (api) => {
       return { block: true, blockReason: 'Telegram direct capture is restricted to steward.' };
     }
     const runId = event.runId ?? context.runId;
-    if (!runId) {
-      return { block: true, blockReason: 'Trusted Telegram run identity is unavailable.' };
+    const toolCallId = event.toolCallId ?? context.toolCallId;
+    if (!runId || !toolCallId) {
+      return { block: true, blockReason: 'Trusted Telegram run/tool identity is unavailable.' };
     }
-    const transportContextToken = telegramDirectContext.issue(runId);
-    if (!transportContextToken) {
+    if (!telegramDirectContext.bindToolCall(runId, toolCallId)) {
       return { block: true, blockReason: 'Trusted Telegram message context is unavailable.' };
     }
-    return {
-      params: {
-        ...event.params,
-        transportContextToken,
-      },
-    };
   });
 
   api.on('agent_end', (event) => {
