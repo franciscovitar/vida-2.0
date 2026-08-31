@@ -1,25 +1,40 @@
-# Conversational Capture V1 — Vida execution boundary
+# Conversational Capture V1 — source-direct execution boundary
 
 ## Goal
 
-Let the user operate Vida by speaking/writing naturally while keeping the existing canonical sources,
-Safe Writes guarantees and product boundaries intact.
+Let the user operate Vida by speaking/writing naturally while keeping the canonical sources and
+product boundaries intact.
 
-The user should not choose a database or open a data-entry form.
+The user should not choose a database, open a data-entry form or route the message through Vida Web.
 
 ```text
 ChatGPT first / Telegram later / WhatsApp later
   -> PAS conversational-capture Skill
   -> grounded intent + missing-info check
-  -> Vida capability registry
-  -> canonical Safe Writes policy
-  -> proposal / narrowly authorized direct apply
-  -> Notion | Sheets | Calendar
-  -> Vida Web as derived command center
+  -> canonical authority + target policy
+  -> trusted direct connector when sufficient
+       OR Vida capability/runtime when it adds a required safety boundary
+  -> Notion | Google Sheets | Google Calendar | Drive
+  -> Vida Web reads and composes the result
 ```
 
-ADR 0006 remains the durable product decision. This document defines the first concrete execution
+ADR 0006 remains the durable product decision. This document defines the concrete V1 execution
 boundary; it does not replace the ADR.
+
+## Core routing rule
+
+**The canonical source is the destination. Vida Web is not a write hop. Vida API/runtime is not a
+mandatory write hop either.**
+
+For each resolved intent, choose the smallest reliable path that preserves the target contract:
+
+1. prefer a trusted, authorized connector that writes directly to the canonical authority;
+2. use Vida Safe Writes when Vida contributes guarantees that are actually required and are not
+   equivalently provided by the direct connector/path;
+3. use OpenClaw or another gateway only as transport/execution infrastructure, never as another
+   authority or database.
+
+Do not add a webhook, queue, mirror table or Vida proxy merely to preserve architectural uniformity.
 
 ## Ownership split
 
@@ -30,26 +45,48 @@ boundary; it does not replace the ADR.
 - corrections vs new observations;
 - missing-information questions;
 - channel-neutral routing;
-- replay-safe source-event identity;
+- selecting the canonical authority;
+- selecting a permitted execution path based on the currently available trusted connector/runtime;
+- replay-safe source-event identity when the chosen path requires it;
 - delegation to domain Skills such as Gym Intelligence and Nutrition Intelligence.
+
+### Domain Skills own
+
+- domain semantics and structured payloads for their existing stores;
+- correction semantics specific to that domain;
+- domain-level validation that is not generic routing logic.
+
+Examples: Gym Intelligence and Nutrition Intelligence should continue writing to their canonical
+Google Sheets stores when ChatGPT has a trusted path to those stores. Their data should not be copied
+into Vida merely so the Web can display it.
 
 ### Vida owns
 
-- which product actions actually exist;
-- canonical destination for those actions;
-- payload validators;
-- risk / reversibility / confirmation policy;
-- readiness and authorization;
-- idempotency, audit, encryption, leases and rollback;
-- concrete provider adapters.
+- product-specific capabilities that actually exist in Vida;
+- read models and derived views used by Vida Web;
+- product-specific validation/policy where Vida owns the operation;
+- Safe Writes adapters/runtime when they add needed authorization, audit, ownership, idempotency,
+  compensation or rollback guarantees.
 
 OpenClaw may become a channel executor/gateway, but it does not own these policies.
 
-## V1 Vida capability registry
+## Canonical authorities
 
-`lib/capture/contracts.ts` exposes only the business actions that already exist in Safe Writes:
+| Information                                                                           | Canonical authority |
+| ------------------------------------------------------------------------------------- | ------------------- |
+| Areas, projects, tasks, operational content, Inbox                                    | Notion              |
+| Gym history, nutrition, habits, health, sleep, productivity, quantitative derivatives | Google Sheets       |
+| Agenda and time blocks                                                                | Google Calendar     |
+| Heavy/original files and evidence when appropriate                                    | Google Drive        |
+| Derived command-center views                                                          | Vida Web            |
 
-| Operation              | Canonical authority                      | Execution contract              |
+The conversational channel is never a source of truth.
+
+## Vida capability registry
+
+`lib/capture/contracts.ts` describes only capabilities implemented by the Vida Safe Writes substrate:
+
+| Operation              | Canonical authority                      | Vida execution contract         |
 | ---------------------- | ---------------------------------------- | ------------------------------- |
 | `task.create`          | Notion Tasks                             | proposal-only                   |
 | `task.change-status`   | Notion Tasks                             | proposal-only                   |
@@ -57,91 +94,125 @@ OpenClaw may become a channel executor/gateway, but it does not own these polici
 | `gym.session.create`   | Google Sheets Gym                        | proposal-only                   |
 | `calendar.hold.create` | dedicated Google Calendar holds calendar | proposal-only                   |
 
-The registry deliberately does not duplicate risk/confirmation/reversibility values. Those are read
-from the existing Safe Writes Policy Engine. Direct apply for `inbox.capture` fails closed if its
-canonical policy stops being explicit, low risk or reversible.
+This registry does **not** mean ChatGPT must use Vida for every write to those authorities. It only
+describes the Vida-owned execution surface when that route is selected.
+
+The registry deliberately does not duplicate risk/confirmation/reversibility values. Those remain in
+the Safe Writes Policy Engine.
 
 No control operation (`proposal.approve`, `proposal.reject`, `action.rollback`) is a semantic capture
 intent.
 
-## Nutrition boundary
+## Nutrition and Gym boundary
 
-Nutrition Intelligence already implements the desired conversational behavior against its own
-structured Google Sheets store. Its meal/correction/recipe/outcome contracts remain canonical there.
+Nutrition Intelligence and Gym Intelligence already implement the desired conversational behavior
+against their own structured Google Sheets stores.
 
-V1 does **not** duplicate those schemas inside Vida merely to make routing look uniform. PAS can route
-a nutrition intent to the Nutrition Intelligence contract. A future Vida bridge may expose a
-sanitized capability if/when the command-center integration needs it.
+V1 must preserve that model:
 
-The same principle applies to any future domain: register a capability, do not copy its database.
+```text
+user message
+-> ChatGPT
+-> domain Skill
+-> canonical Google Sheet
+-> Vida Web reads/derives
+```
 
-## First direct-apply policy: Inbox only
+Do not force those writes through `vida-2.0` merely to make all domains look uniform. A future Vida
+bridge may expose a sanitized capability only if it adds a real product/safety benefit.
 
-`inbox.capture` is the first and only Vida business action eligible for direct apply in this slice.
-The implementation is intentionally narrower than a generic direct-write API:
+The same principle applies to future domains: route to the authority; do not copy the database.
 
-- only trusted `chatgpt` transport identity is accepted by the internal executor;
-- the user intent must already be classified as an explicit request to write;
-- both `WRITE_ACTIONS_ENABLED=true` and the separate
-  `CONVERSATIONAL_INBOX_DIRECT_APPLY_ENABLED=true` gate are required;
-- Safe Writes readiness for Inbox, ledger, audit, coordination and rollback must be ready;
-- transport principal and source-event identifiers are server-side inputs, not model-generated body
-  identity;
-- the same source event is idempotent and cannot be reused for different content;
-- the canonical Inbox validator still governs text/link/origin;
-- Notion Inbox remains the only content source of truth;
-- the actions ledger stores only sanitized evidence (`contentPresent`, origin and link presence), not
-  the captured text;
-- the ledger retains target ownership and rollback deadline so the existing `action.rollback` path can
-  compensate the capture;
-- if the business write succeeds but the ledger cannot certify `applied`, the executor attempts the
-  ownership-scoped compensation immediately and never retries the write automatically.
+## Existing Inbox direct-apply capability
 
-This is **technical capability, not Production activation**. The flag remains fail-closed by default,
-and this slice does not expose a new public endpoint or a ChatGPT adapter by itself.
+`inbox.capture` has a narrow internal Vida direct-apply implementation created for a potential trusted
+ChatGPT adapter. It remains useful as a safe fallback/executor for channels that cannot write to
+Notion directly.
 
-## ChatGPT-first slice
+Its guarantees include:
 
-The first useful end-to-end behavior remains:
+- trusted transport identity;
+- explicit user write intent;
+- separate fail-closed feature flag;
+- Safe Writes readiness;
+- idempotent source-event handling;
+- canonical Inbox validation;
+- sanitized ledger evidence without storing the captured text;
+- ownership + rollback deadline;
+- immediate compensation when the provider write succeeds but the ledger cannot certify `applied`.
+
+This is **technical capability, not a mandatory architecture path** and not Production activation.
+`CONVERSATIONAL_INBOX_DIRECT_APPLY_ENABLED` remains off by default.
+
+If ChatGPT has a trusted, authorized Notion write connector that can satisfy the intended Inbox/Task
+contract directly, prefer that path instead of enabling a Vida API hop solely for transport.
+
+## ChatGPT-first behavior
+
+The useful behavior is:
 
 1. user sends a messy but actionable message in ChatGPT;
 2. PAS resolves one or more grounded intents;
 3. only materially missing information is requested;
-4. each intent is matched to a registered capability/domain contract;
-5. current target policy is evaluated;
-6. for an explicitly requested Inbox capture, the trusted adapter may call the scoped direct executor
-   only when its separate gate and readiness are active;
+4. each intent is matched to its canonical authority/domain contract;
+5. the applicable target policy is evaluated;
+6. ChatGPT uses the smallest trusted write path currently available:
+   - direct connector to Sheets/Notion/Calendar/Drive when sufficient; or
+   - the relevant Vida Safe Writes capability when its extra guarantees are necessary;
 7. successful independent intents are not repeated because another intent is blocked;
-8. user receives a brief effect summary, not provider IDs or database mechanics.
+8. user receives a brief effect summary, not provider IDs or database mechanics;
+9. Vida Web later reads and visualizes the canonical result.
 
-Tasks, Gym and Calendar remain proposal-only. Calendar must not inherit Inbox direct-apply merely
-because the shared Safe Writes substrate exists.
+## Example routes
+
+```text
+"hice jalón 60 kg: 8, 7 y 6"
+-> Gym Intelligence -> Google Sheets Gym -> Vida Web
+
+"comí 300 g de milanesa y una banana"
+-> Nutrition Intelligence -> Google Sheets Nutrition -> Vida Web
+
+"tengo que entregar Redes el jueves"
+-> Conversational Capture -> Notion Tasks -> Vida Web
+
+"martes 18 a 20 tengo fútbol"
+-> Conversational Capture -> Google Calendar -> Vida Web
+```
+
+For Tasks/Calendar, the exact confirmation/approval behavior depends on the currently authorized
+connector and the target operation policy. Do not infer auto-apply from this document.
 
 ## Channel progression
 
-- **ChatGPT:** first surface; validate intent/routing/policy semantics and Inbox direct capture.
-- **Telegram:** thin authenticated transport adapter over the same contract once ChatGPT flow is
-  stable.
+- **ChatGPT:** primary surface. Prefer its trusted direct connectors to canonical authorities when
+  available and sufficient.
+- **Telegram:** optional low-friction transport over the same semantic contract. It may use a Vida
+  adapter/OpenClaw or direct provider integration depending on which path safely preserves the target
+  contract.
 - **WhatsApp:** later, only if it can preserve the same identity, idempotency, privacy and operational
   boundaries without disproportionate maintenance.
 
 No channel-specific business routing.
 
-## Non-goals for this slice
+## Non-goals
 
 - no new database;
 - no generic business-write endpoint;
-- no generic `calendar.event.create`;
+- no forced ChatGPT -> Vida API hop;
+- no generic `calendar.event.create` in Vida merely for transport;
 - no automatic Journaling access;
 - no automatic OpenClaw proposal activation;
 - no Automations activation;
 - no broad agent autonomy;
 - no copying Nutrition/Gym raw history into Vida;
-- no direct apply for Tasks, Gym or Calendar;
-- no Production activation of the new Inbox gate yet.
+- no Production activation of the Inbox direct-apply gate solely because the code exists.
 
 ## Next implementation step
 
-After the internal direct transaction passes tests and code review, build the smallest authenticated
-ChatGPT → Vida adapter that can supply trusted principal/source-event identity and invoke only
-`inbox.capture` direct apply. Preview/dev validation comes before any Production flag change.
+Validate the **ChatGPT -> canonical source** paths that already exist for Gym and Nutrition, then
+extend the same model to Notion Tasks/Inbox and Google Calendar using the connected capabilities that
+are actually available and safe.
+
+Only build/activate a Vida adapter for a domain when direct source access is unavailable or when Vida
+must provide a concrete missing guarantee such as scoped authorization, audit, idempotency, ownership
+or rollback.
