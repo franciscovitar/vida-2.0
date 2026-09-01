@@ -90,18 +90,18 @@ export default async function SaludPage({
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
 
       <section className={local.hero} aria-labelledby="health-overview-title">
-        <div className={local.heroTop}>
+        <div className={local['hero-top']}>
           <div>
             <p className={local.eyebrow}>Salud V2</p>
-            <h2 id="health-overview-title" className={local.heroTitle}>
+            <h2 id="health-overview-title" className={local['hero-title']}>
               Tu estado en una mirada
             </h2>
-            <p className={local.heroText}>
+            <p className={local['hero-text']}>
               Primero tu evolución personal: período anterior + base de 30 días. Las referencias
               poblacionales se agregarán aparte y con fuente explícita.
             </p>
           </div>
-          <div className={local.todayState} data-kind={health.today.kind}>
+          <div className={local['today-state']} data-kind={health.today.kind}>
             <Activity size={17} aria-hidden="true" />
             <span>
               <strong>{health.today.label}</strong>
@@ -110,23 +110,26 @@ export default async function SaludPage({
           </div>
         </div>
 
-        <div className={local.summaryGrid}>
-          <div className={local.summaryItem}>
+        <div className={local['summary-grid']}>
+          <div className={local['summary-item']}>
             <span>Con datos</span>
             <strong className="tabular">{health.availableDays}</strong>
             <small>de {periodDays} días</small>
           </div>
-          <div className={local.summaryItem}>
+          <div className={local['summary-item']}>
             <span>Completos</span>
             <strong className="tabular">{health.completeDays}</strong>
             <small>importaciones</small>
           </div>
-          <div className={local.summaryItem} data-tone={health.partialDays > 0 ? 'watch' : 'neutral'}>
+          <div
+            className={local['summary-item']}
+            data-tone={health.partialDays > 0 ? 'watch' : 'neutral'}
+          >
             <span>Parciales</span>
             <strong className="tabular">{health.partialDays}</strong>
             <small>sin inventar faltantes</small>
           </div>
-          <div className={local.summaryItem}>
+          <div className={local['summary-item']}>
             <span>Base personal</span>
             <strong className="tabular">{health.baselineDays}</strong>
             <small>días previos disponibles</small>
@@ -141,10 +144,10 @@ export default async function SaludPage({
           description="Observaciones determinísticas. No se presentan asociaciones como causas ni se hacen diagnósticos."
           domain="health"
         />
-        <div className={local.insightGrid}>
+        <div className={local['insight-grid']}>
           {health.insights.map((insight) => (
             <article key={insight.id} className={local.insight} data-tone={insight.tone}>
-              <span className={local.insightDot} aria-hidden="true" />
+              <span className={local['insight-dot']} aria-hidden="true" />
               <div>
                 <h3>{insight.title}</h3>
                 <p>{insight.detail}</p>
@@ -161,8 +164,8 @@ export default async function SaludPage({
 
         return (
           <Card key={group.id} aria-labelledby={`health-${group.id}-title`}>
-            <div className={local.sectionHeading}>
-              <span className={local.sectionIcon} aria-hidden="true">
+            <div className={local['section-heading']}>
+              <span className={local['section-icon']} aria-hidden="true">
                 <Icon size={18} />
               </span>
               <SectionHeader
@@ -173,20 +176,20 @@ export default async function SaludPage({
               />
             </div>
 
-            <div className={local.metricGrid}>
+            <div className={local['metric-grid']}>
               {metrics.map((metric) => (
-                <article key={metric.id} className={local.metricCard}>
-                  <div className={local.metricTop}>
+                <article key={metric.id} className={local['metric-card']}>
+                  <div className={local['metric-top']}>
                     <span>{metric.label}</span>
                     <small>{metric.coverageDays} d</small>
                   </div>
-                  <p className={`${local.metricValue} tabular`}>
+                  <p className={`${local['metric-value']} tabular`}>
                     {metric.averageLabel}
                     {metric.average === null || !metric.unit ? null : (
                       <span>{metric.unit}</span>
                     )}
                   </p>
-                  <div className={local.sparkWrap}>
+                  <div className={local['spark-wrap']}>
                     <SparkBars
                       values={metric.series}
                       label={`Tendencia de ${metric.label}`}
