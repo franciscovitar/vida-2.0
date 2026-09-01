@@ -10,7 +10,7 @@
     var(--surface-1);
 }
 
-.heroTop {
+.hero-top {
   display: flex;
   gap: 1rem;
   align-items: flex-start;
@@ -26,14 +26,14 @@
   text-transform: uppercase;
 }
 
-.heroTitle {
+.hero-title {
   margin: 0;
   color: var(--text);
   font-size: clamp(1.2rem, 3vw, 1.65rem);
   line-height: 1.1;
 }
 
-.heroText {
+.hero-text {
   max-width: 48rem;
   margin: 0.45rem 0 0;
   color: var(--text-muted);
@@ -41,7 +41,7 @@
   line-height: 1.5;
 }
 
-.todayState {
+.today-state {
   display: inline-flex;
   flex: 0 0 auto;
   gap: 0.5rem;
@@ -54,35 +54,35 @@
   color: var(--text-muted);
 }
 
-.todayState[data-kind='partial'] {
+.today-state[data-kind='partial'] {
   border-color: var(--c-projects-border);
   background: var(--c-projects-soft);
 }
 
-.todayState span {
+.today-state span {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
 }
 
-.todayState strong {
+.today-state strong {
   color: var(--text);
   font-size: 0.75rem;
 }
 
-.todayState small {
+.today-state small {
   color: var(--text-subtle);
   font-size: 0.6875rem;
   line-height: 1.35;
 }
 
-.summaryGrid {
+.summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.625rem;
 }
 
-.summaryItem {
+.summary-item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.15rem 0.5rem;
@@ -93,29 +93,29 @@
   background: var(--surface-1);
 }
 
-.summaryItem[data-tone='watch'] {
+.summary-item[data-tone='watch'] {
   border-color: var(--c-projects-border);
 }
 
-.summaryItem > span {
+.summary-item > span {
   color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 600;
 }
 
-.summaryItem > strong {
+.summary-item > strong {
   grid-row: span 2;
   color: var(--text);
   font-size: 1.45rem;
   line-height: 1;
 }
 
-.summaryItem > small {
+.summary-item > small {
   color: var(--text-subtle);
   font-size: 0.65rem;
 }
 
-.insightGrid {
+.insight-grid {
   display: grid;
   gap: 0.625rem;
 }
@@ -135,7 +135,7 @@
   background: color-mix(in srgb, var(--c-projects-soft) 60%, var(--surface-1));
 }
 
-.insightDot {
+.insight-dot {
   width: 0.55rem;
   height: 0.55rem;
   margin-top: 0.3rem;
@@ -143,7 +143,7 @@
   background: var(--c-health);
 }
 
-.insight[data-tone='watch'] .insightDot {
+.insight[data-tone='watch'] .insight-dot {
   background: var(--c-projects);
 }
 
@@ -164,13 +164,13 @@
   line-height: 1.45;
 }
 
-.sectionHeading {
+.section-heading {
   display: flex;
   gap: 0.625rem;
   align-items: flex-start;
 }
 
-.sectionIcon {
+.section-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -182,14 +182,14 @@
   color: var(--c-health);
 }
 
-.metricGrid {
+.metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.625rem;
   margin-top: 0.75rem;
 }
 
-.metricCard {
+.metric-card {
   min-width: 0;
   padding: 0.75rem;
   border: 1px solid var(--border);
@@ -197,7 +197,7 @@
   background: var(--surface-2);
 }
 
-.metricTop {
+.metric-top {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
@@ -206,16 +206,16 @@
   font-size: 0.6875rem;
 }
 
-.metricTop > span {
+.metric-top > span {
   font-weight: 600;
 }
 
-.metricTop small {
+.metric-top small {
   color: var(--text-subtle);
   white-space: nowrap;
 }
 
-.metricValue {
+.metric-value {
   margin: 0.4rem 0 0;
   color: var(--text);
   font-size: clamp(1.2rem, 4vw, 1.65rem);
@@ -223,7 +223,7 @@
   letter-spacing: -0.025em;
 }
 
-.metricValue span {
+.metric-value span {
   margin-left: 0.25rem;
   color: var(--text-subtle);
   font-size: 0.6875rem;
@@ -231,7 +231,7 @@
   letter-spacing: 0;
 }
 
-.sparkWrap {
+.spark-wrap {
   height: 2.8rem;
   margin: 0.55rem 0 0.35rem;
 }
@@ -244,36 +244,36 @@
 }
 
 @media (width >= 760px) {
-  .summaryGrid {
+  .summary-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .insightGrid {
+  .insight-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .metricGrid {
+  .metric-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (width >= 1180px) {
-  .metricGrid {
+  .metric-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (width <= 640px) {
-  .heroTop {
+  .hero-top {
     flex-direction: column;
   }
 
-  .todayState {
+  .today-state {
     width: 100%;
     max-width: none;
   }
 
-  .metricGrid {
+  .metric-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
