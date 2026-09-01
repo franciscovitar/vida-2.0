@@ -1,4 +1,5 @@
-import { HeartPulse } from 'lucide-react';
+import { Activity, Flame, Footprints, HeartPulse, Moon, Wind } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -9,17 +10,58 @@ import { SparkBars } from '@/components/domain/SparkBars';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { getDomainPages } from '@/lib/data/domain-pages';
 import { periodLabel, parsePeriodParam } from '@/lib/periods';
+import type { HealthMetricGroupId } from '@/types/domain-pages';
 
 import pageStyles from '../page.module.scss';
+import local from './page.module.scss';
 
 export const metadata: Metadata = { title: 'Salud' };
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+type GroupDefinition = {
+  id: HealthMetricGroupId;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+const GROUPS: readonly GroupDefinition[] = [
+  {
+    id: 'sleep',
+    title: 'Sueño',
+    description: 'Duración y composición del sueño, sin completar huecos con cero.',
+    icon: Moon,
+  },
+  {
+    id: 'cardio',
+    title: 'Corazón y recuperación',
+    description: 'Frecuencia cardíaca y HRV como señales de tendencia, no como diagnóstico.',
+    icon: HeartPulse,
+  },
+  {
+    id: 'movement',
+    title: 'Movimiento',
+    description: 'Actividad diaria, distancia y métricas de marcha disponibles.',
+    icon: Footprints,
+  },
+  {
+    id: 'oxygen',
+    title: 'Oxígeno',
+    description: 'SpO₂ cuando la fuente entrega datos suficientes.',
+    icon: Wind,
+  },
+  {
+    id: 'energy',
+    title: 'Energía',
+    description: 'Gasto activo y energía de reposo derivada de la fuente canónica.',
+    icon: Flame,
+  },
+];
 
 export default async function SaludPage({
   searchParams,
@@ -35,7 +77,7 @@ export default async function SaludPage({
     <div className={pageStyles.page}>
       <PageHeader
         title="Salud"
-        description={`${periodLabel(periodDays)} · ${health.availableDays} días con datos`}
+        description={`${periodLabel(periodDays)} · ${health.availableDays} días con datos reales`}
         icon={HeartPulse}
         domain="health"
         action={
@@ -47,70 +89,126 @@ export default async function SaludPage({
 
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
 
-      <p className={styles['meta-line']}>
-        <span>{health.today.label}</span>
-        <span>{health.availableDays} días reales</span>
-        <span>Anterior: {health.previousAvailableDays} días</span>
-      </p>
+      <section className={local.hero} aria-labelledby="health-overview-title">
+        <div className={local.heroTop}>
+          <div>
+            <p className={local.eyebrow}>Salud V2</p>
+            <h2 id="health-overview-title" className={local.heroTitle}>
+              Tu estado en una mirada
+            </h2>
+            <p className={local.heroText}>
+              Primero tu evolución personal: período anterior + base de 30 días. Las referencias
+              poblacionales se agregarán aparte y con fuente explícita.
+            </p>
+          </div>
+          <div className={local.todayState} data-kind={health.today.kind}>
+            <Activity size={17} aria-hidden="true" />
+            <span>
+              <strong>{health.today.label}</strong>
+              {health.today.details ? <small>{health.today.details}</small> : null}
+            </span>
+          </div>
+        </div>
 
-      <div className={styles.metrics}>
-        {health.metrics.map((metric) => (
-          <MetricCard
-            key={metric.id}
-            label={metric.label}
-            value={metric.averageLabel}
-            unit={metric.average === null ? undefined : metric.unit || undefined}
-            context={metric.compare.label}
-            trend={
-              metric.compare.direction === 'up' ||
-              metric.compare.direction === 'down' ||
-              metric.compare.direction === 'steady'
-                ? metric.compare.direction
-                : undefined
-            }
-            status="neutral"
-            domain={metric.domain}
-          />
-        ))}
-      </div>
+        <div className={local.summaryGrid}>
+          <div className={local.summaryItem}>
+            <span>Con datos</span>
+            <strong className="tabular">{health.availableDays}</strong>
+            <small>de {periodDays} días</small>
+          </div>
+          <div className={local.summaryItem}>
+            <span>Completos</span>
+            <strong className="tabular">{health.completeDays}</strong>
+            <small>importaciones</small>
+          </div>
+          <div className={local.summaryItem} data-tone={health.partialDays > 0 ? 'watch' : 'neutral'}>
+            <span>Parciales</span>
+            <strong className="tabular">{health.partialDays}</strong>
+            <small>sin inventar faltantes</small>
+          </div>
+          <div className={local.summaryItem}>
+            <span>Base personal</span>
+            <strong className="tabular">{health.baselineDays}</strong>
+            <small>días previos disponibles</small>
+          </div>
+        </div>
+      </section>
 
-      <Card aria-labelledby="health-trends-title">
+      <Card aria-labelledby="health-insights-title">
         <SectionHeader
-          id="health-trends-title"
-          title="Tendencias"
-          description="Series del período. Los huecos son días sin dato, no ceros."
+          id="health-insights-title"
+          title="Qué cambió"
+          description="Observaciones determinísticas. No se presentan asociaciones como causas ni se hacen diagnósticos."
           domain="health"
         />
-        <ul className={styles.list}>
-          {health.metrics.map((metric) => (
-            <li key={metric.id} className={styles.item}>
-              <div className={styles.name}>
-                <span className={styles.title}>{metric.label}</span>
-                <span className={styles.sub}>
-                  Promedio:{' '}
-                  {metric.average === null
-                    ? 'Sin datos'
-                    : `${metric.averageLabel}${metric.unit ? ` ${metric.unit}` : ''}`}
-                </span>
+        <div className={local.insightGrid}>
+          {health.insights.map((insight) => (
+            <article key={insight.id} className={local.insight} data-tone={insight.tone}>
+              <span className={local.insightDot} aria-hidden="true" />
+              <div>
+                <h3>{insight.title}</h3>
+                <p>{insight.detail}</p>
               </div>
-              <SparkBars
-                values={metric.series}
-                label={`Tendencia de ${metric.label}`}
+            </article>
+          ))}
+        </div>
+      </Card>
+
+      {GROUPS.map((group) => {
+        const metrics = health.metrics.filter((metric) => metric.group === group.id);
+        if (metrics.length === 0) return null;
+        const Icon = group.icon;
+
+        return (
+          <Card key={group.id} aria-labelledby={`health-${group.id}-title`}>
+            <div className={local.sectionHeading}>
+              <span className={local.sectionIcon} aria-hidden="true">
+                <Icon size={18} />
+              </span>
+              <SectionHeader
+                id={`health-${group.id}-title`}
+                title={group.title}
+                description={group.description}
                 domain="health"
               />
-              <div className={styles.right}>
-                <CompareHint compare={metric.compare} />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Card>
+            </div>
+
+            <div className={local.metricGrid}>
+              {metrics.map((metric) => (
+                <article key={metric.id} className={local.metricCard}>
+                  <div className={local.metricTop}>
+                    <span>{metric.label}</span>
+                    <small>{metric.coverageDays} d</small>
+                  </div>
+                  <p className={`${local.metricValue} tabular`}>
+                    {metric.averageLabel}
+                    {metric.average === null || !metric.unit ? null : (
+                      <span>{metric.unit}</span>
+                    )}
+                  </p>
+                  <div className={local.sparkWrap}>
+                    <SparkBars
+                      values={metric.series}
+                      label={`Tendencia de ${metric.label}`}
+                      domain="health"
+                    />
+                  </div>
+                  <div className={local.comparisons}>
+                    <CompareHint compare={metric.compare} prefix="vs. período anterior" />
+                    <CompareHint compare={metric.baselineCompare} prefix="vs. base 30d" />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Card>
+        );
+      })}
 
       <Card aria-labelledby="health-history-title">
         <SectionHeader
           id="health-history-title"
           title="Historial diario"
-          description="No se convierten datos faltantes en cero."
+          description="Detalle crudo útil para auditar la lectura visual. Los faltantes siguen siendo faltantes."
           domain="health"
         />
         {health.history.length === 0 ? (
@@ -123,7 +221,7 @@ export default async function SaludPage({
                   <th scope="col">Fecha</th>
                   <th scope="col">Sueño</th>
                   <th scope="col">Pasos</th>
-                  <th scope="col">FC</th>
+                  <th scope="col">FC reposo</th>
                   <th scope="col">Importación</th>
                   <th scope="col">Entrenamiento</th>
                 </tr>
