@@ -282,7 +282,12 @@ function cellLabel(cell: Cell<number>, formatter: (n: number) => string): string
 
 function todayState(record: SaludRecord | undefined, today: string): HealthTodayState {
   if (!record || !saludHasData(record)) {
-    return { kind: 'missing', date: null, label: `Sin datos · ${formatShortDay(today)}`, details: null };
+    return {
+      kind: 'missing',
+      date: null,
+      label: `Sin datos · ${formatShortDay(today)}`,
+      details: null,
+    };
   }
   const kind = parseImportStatus(record.importStatus);
   const importKind: HealthImportKind = kind === 'none' ? 'complete' : kind;
@@ -441,7 +446,9 @@ export function buildHealthPageData(input: {
       };
     });
 
-  const partialDays = available.filter((record) => parseImportStatus(record.importStatus) === 'partial').length;
+  const partialDays = available.filter(
+    (record) => parseImportStatus(record.importStatus) === 'partial',
+  ).length;
   const completeDays = available.length - partialDays;
   const insights = buildInsights({
     metrics,

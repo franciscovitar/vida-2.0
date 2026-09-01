@@ -185,9 +185,7 @@ export default async function SaludPage({
                   </div>
                   <p className={`${local['metric-value']} tabular`}>
                     {metric.averageLabel}
-                    {metric.average === null || !metric.unit ? null : (
-                      <span>{metric.unit}</span>
-                    )}
+                    {metric.average === null || !metric.unit ? null : <span>{metric.unit}</span>}
                   </p>
                   <div className={local['spark-wrap']}>
                     <SparkBars
