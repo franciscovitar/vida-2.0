@@ -59,10 +59,10 @@ export function GymPreviousWeek({
       {snapshot.sessions.length === 0 ? (
         <p className={styles.empty}>No hay entrenos completos registrados en la semana anterior.</p>
       ) : (
-        <div className={styles.weekGrid}>
+        <div className={styles['week-grid']}>
           {snapshot.sessions.map(({ session, displayLabel, labelInferred }) => (
             <article key={session.key} className={styles.session}>
-              <header className={styles.sessionHeader}>
+              <header className={styles['session-header']}>
                 <div>
                   <span>Entreno previo</span>
                   <h3>
@@ -73,7 +73,7 @@ export function GymPreviousWeek({
                 <time dateTime={session.date}>{shortDate(session.date)}</time>
               </header>
 
-              <div className={styles.tableWrap}>
+              <div className={styles['table-wrap']}>
                 <table className={styles.table}>
                   <thead>
                     <tr>
