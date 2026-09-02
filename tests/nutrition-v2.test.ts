@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { isNutritionFoodItemStructurallyValid } from '@/lib/nutrition/food-item-integrity';
+import {
+  isNutritionFoodItemStructurallyValid,
+  partitionNutritionFoodItemRows,
+} from '@/lib/nutrition/food-item-integrity';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import { getNutritionSheetsConfig, getNutritionSpreadsheetId } from '@/lib/nutrition/sheets-config';
 
@@ -100,4 +103,30 @@ test('Food Items desalineados fallan cerrados antes de contaminar macros', () =>
     }),
     false,
   );
+});
+
+test('una fila histórica inválida no borra las filas válidas actuales', () => {
+  const current = {
+    mealId: 'meal-current',
+    confidence: 'high',
+    status: 'active',
+    energyKcal: 424,
+    proteinGrams: 12.8,
+    carbohydrateGrams: 68,
+    fatGrams: 11.2,
+    fiberGrams: 4.4,
+  };
+  const malformedHistorical = {
+    mealId: 'meal-old',
+    confidence: 'low',
+    status: 'active',
+    energyKcal: 345,
+    rawWeightGrams: 'nota histórica desplazada',
+  };
+
+  const partition = partitionNutritionFoodItemRows([current, malformedHistorical]);
+  assert.equal(partition.valid.length, 1);
+  assert.equal(partition.valid[0], current);
+  assert.equal(partition.invalid.length, 1);
+  assert.equal(partition.invalid[0], malformedHistorical);
 });
