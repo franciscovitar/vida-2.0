@@ -4,13 +4,14 @@ on:
   push:
     branches:
       - feat/gym-v2
+    paths:
+      - .github/workflows/temp-gym-mobile-boundary.yml
 
 permissions:
   contents: write
 
 jobs:
   patch:
-    if: github.event.head_commit.message == 'chore: temporary gym responsive repair'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
