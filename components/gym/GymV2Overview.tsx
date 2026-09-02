@@ -15,6 +15,7 @@ import { buildMaleStrengthLevelBenchmark } from '@/lib/gym/external-strength-ben
 import { computeGymV2Analytics, type GymV2Trend } from '@/lib/gym/v2-analytics';
 import type { GymSession, GymSessionSummary } from '@/types/gym';
 
+import benchmarkStyles from './GymExternalBenchmark.module.scss';
 import styles from './GymV2Overview.module.scss';
 
 type ShareStyle = CSSProperties & {
@@ -337,18 +338,18 @@ export function GymV2Overview({
             description="Referencia masculina de fuerza. Se muestra aparte de tu progreso personal."
             domain="health"
           />
-          <div className={styles['benchmark-layout']}>
-            <div className={styles['benchmark-summary']}>
+          <div className={benchmarkStyles.layout}>
+            <div className={benchmarkStyles.summary}>
               <span>{benchmark.scopeLabel}</span>
               <strong>{benchmark.label}</strong>
               <small>{benchmark.confidenceLabel}</small>
               <p>{benchmark.detail}</p>
             </div>
 
-            <div className={styles['benchmark-list']}>
+            <div className={benchmarkStyles.list}>
               {benchmark.exercises.map((exercise) => (
-                <article key={exercise.id} className={styles['benchmark-exercise']}>
-                  <div className={styles['benchmark-heading']}>
+                <article key={exercise.id} className={benchmarkStyles.exercise}>
+                  <div className={benchmarkStyles.heading}>
                     <div>
                       <a href={exercise.sourceUrl} target="_blank" rel="noreferrer">
                         {exercise.benchmarkName}
@@ -362,8 +363,8 @@ export function GymV2Overview({
                   </div>
 
                   {exercise.nextLevelProgressPercent !== null ? (
-                    <div className={styles['benchmark-progress']}>
-                      <div className={styles['benchmark-track']} aria-hidden="true">
+                    <div className={benchmarkStyles.progress}>
+                      <div className={benchmarkStyles.track} aria-hidden="true">
                         <span
                           style={
                             {
@@ -382,7 +383,7 @@ export function GymV2Overview({
                       </div>
                     </div>
                   ) : (
-                    <small className={styles['benchmark-max']}>
+                    <small className={benchmarkStyles.max}>
                       e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg
                     </small>
                   )}
@@ -390,7 +391,7 @@ export function GymV2Overview({
               ))}
             </div>
           </div>
-          <div className={styles['benchmark-footnote']}>
+          <div className={benchmarkStyles.footnote}>
             <Gauge size={16} aria-hidden="true" />
             <p>
               Fuente: {benchmark.sourceLabel}, datos hasta{' '}
