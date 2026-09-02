@@ -3,6 +3,7 @@ import 'server-only';
 import type { PlainCell } from '@/lib/data/plain';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 
+import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
 import { readNutritionTabValues } from './sheets-read';
 import type {
@@ -482,11 +483,12 @@ export async function loadNutritionDashboardData(
   const required = [dailyResult, mealsResult, itemsResult, targetsResult];
   const failure = failurePriority(required);
   const allUnavailable = required.every((result) => !result.ok);
-  const sourceStatus = allUnavailable ? 'unavailable' : failure ? 'partial' : 'ready';
+  const baseSourceStatus = allUnavailable ? 'unavailable' : failure ? 'partial' : 'ready';
 
   const dailyRows = rowsFrom(dailyResult);
   const mealRows = rowsFrom(mealsResult);
   const itemRows = rowsFrom(itemsResult);
+  const itemPartition = partitionNutritionFoodItemRows(itemRows);
   const targetRows = rowsFrom(targetsResult);
   const target = chooseTarget(targetRows, today);
   const history = parseDailyRows(dailyRows)
@@ -499,7 +501,13 @@ export async function loadNutritionDashboardData(
       .map((row) => stringValue(row.mealId))
       .filter((id): id is string => Boolean(id)),
   );
-  const todayItems = activeRows(itemRows).filter((row) => {
+  const invalidTodayItemCount = itemPartition.invalid.filter((row) => {
+    const mealId = stringValue(row.mealId);
+    return Boolean(mealId && todayMealIds.has(mealId));
+  }).length;
+  const sourceStatus =
+    invalidTodayItemCount > 0 && baseSourceStatus === 'ready' ? 'partial' : baseSourceStatus;
+  const todayItems = activeRows(itemPartition.valid).filter((row) => {
     const mealId = stringValue(row.mealId);
     return Boolean(mealId && todayMealIds.has(mealId));
   });
@@ -577,7 +585,7 @@ export async function loadNutritionDashboardData(
     },
     macros,
     history,
-    meals: buildMeals(mealRows, itemRows, today),
+    meals: buildMeals(mealRows, itemPartition.valid, today),
     nutrients,
     aiInsights: parseAiInsights(insightsResult, today),
     optionalSources: {
