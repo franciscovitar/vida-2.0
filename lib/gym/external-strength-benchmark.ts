@@ -101,6 +101,14 @@ const SUPPORTED_BENCHMARKS: readonly SupportedBenchmark[] = [
   },
 ];
 
+/**
+ * Indica si el nombre registrado tiene una referencia externa compatible.
+ * No implica que el set actual sea elegible para estimar 1RM (1–15 reps).
+ */
+export function isExternalStrengthBenchmarkSupported(exerciseName: string): boolean {
+  return SUPPORTED_BENCHMARKS.some((benchmark) => benchmark.matches(exerciseName));
+}
+
 function levelFor(
   estimatedOneRepMaxKg: number,
   thresholds: SupportedBenchmark['thresholds'],
