@@ -1,3 +1,4 @@
+import { estimateEpleyOneRepMax } from '@/lib/gym/strength-estimation';
 import type { GymSession, GymSessionSummary } from '@/types/gym';
 
 export type GymV2Trend = 'up' | 'down' | 'steady' | 'unknown';
@@ -126,12 +127,6 @@ function round(value: number, digits = 1): number {
   return Math.round(value * factor) / factor;
 }
 
-/** Epley e1RM. Se usa solo como índice personal para sets de 1–15 reps. */
-function estimatedStrength(load: number, reps: number): number | null {
-  if (load <= 0 || reps < 1 || reps > 15) return null;
-  return round(load * (1 + reps / 30), 2);
-}
-
 function percentDelta(current: number | null, previous: number | null): number | null {
   if (current === null || previous === null || previous <= 0) return null;
   return round(((current - previous) / previous) * 100);
@@ -156,7 +151,7 @@ function bestObservationForExercise(
     const load = numericLoad(set.load);
     const reps = set.reps;
     if (load === null || reps === null) continue;
-    const performance = estimatedStrength(load, reps);
+    const performance = estimateEpleyOneRepMax(load, reps);
     if (performance === null) continue;
     const candidate: ExerciseObservation = { date: session.date, load, reps, performance };
     if (
@@ -258,125 +253,130 @@ function muscleGroup(exerciseName: string): GymV2MuscleGroupId {
   }
   if (/dead bug|plancha|pallof|abdominal|copenhagen/.test(name)) return 'core';
   if (/jal[oó]n|dominada|remo|pulldown/.test(name)) return 'back';
-  if (/press militar|elevaci[oó]n lateral|elevaciones laterales|face pull|delto/.test(name)) {
+  if (/elevaci[oó]n lateral|elevaciones laterales|press militar|face ?pull|p[aá]jaro|deltoid/.test(name)) {
     return 'shoulders';
   }
-  if (/press de banca|press banca|pecho|apertura/.test(name)) return 'chest';
-  if (/tr[ií]ceps|press franc[eé]s|extensi[oó]n de tr[ií]ceps/.test(name)) return 'triceps';
+  if (/press banca|press de pecho|apertura|pec deck|pecho/.test(name)) return 'chest';
   if (/b[ií]ceps|curl/.test(name)) return 'biceps';
+  if (/tr[ií]ceps|franc[eé]s|extensi[oó]n.*polea|pushdown/.test(name)) return 'triceps';
   return 'other';
 }
 
-function buildMuscleGroups(
-  sessions: readonly GymSession[],
-  today: string,
-): { groups: GymV2MuscleGroupSummary[]; coverage: number | null } {
-  const start = addDays(today, -27);
+function buildMuscleGroups(sessions: readonly GymSession[], today: string): {
+  groups: GymV2MuscleGroupSummary[];
+  coveragePercent: number | null;
+} {
+  const cutoff = addDays(today, -27);
   const counts = new Map<GymV2MuscleGroupId, number>();
-  let totalSets = 0;
-  let mappedSets = 0;
+  let total = 0;
+  let mapped = 0;
 
   for (const session of sessions) {
-    if (session.date < start || session.date > today) continue;
+    if (session.date < cutoff || session.date > today) continue;
     for (const exercise of session.exercises) {
-      const sets = exercise.sets.length;
-      if (sets <= 0) continue;
       const group = muscleGroup(exercise.exerciseName);
-      totalSets += sets;
-      if (group !== 'other') mappedSets += sets;
-      counts.set(group, (counts.get(group) ?? 0) + sets);
+      const completedSets = exercise.sets.length;
+      if (completedSets === 0) continue;
+      total += completedSets;
+      if (group !== 'other') mapped += completedSets;
+      counts.set(group, (counts.get(group) ?? 0) + completedSets);
     }
   }
 
   const groups = [...counts.entries()]
-    .filter(([, sets]) => sets > 0)
     .map(([id, completedSets]) => ({
       id,
       label: GROUP_LABELS[id],
       completedSets,
-      sharePercent: totalSets === 0 ? 0 : Math.round((completedSets / totalSets) * 100),
+      sharePercent: total === 0 ? 0 : Math.round((completedSets / total) * 100),
     }))
     .sort((a, b) => b.completedSets - a.completedSets || a.label.localeCompare(b.label, 'es'));
 
   return {
     groups,
-    coverage: totalSets === 0 ? null : Math.round((mappedSets / totalSets) * 100),
+    coveragePercent: total === 0 ? null : Math.round((mapped / total) * 100),
   };
+}
+
+function summaryDate(summary: GymSessionSummary): string | null {
+  return summary.date || null;
+}
+
+function isCompleteSession(session: GymSession): boolean {
+  return session.status === 'complete';
+}
+
+function completedSessionsThrough(sessions: readonly GymSession[], end: string): GymSession[] {
+  return sessions.filter((session) => isCompleteSession(session) && session.date <= end);
 }
 
 function buildInsights(input: {
   currentWeekSessions: number;
   previousWeekSessions: number;
-  weeklyTarget: number | null;
-  trends: readonly GymV2ExerciseTrend[];
+  exerciseTrends: readonly GymV2ExerciseTrend[];
 }): GymV2Insight[] {
   const insights: GymV2Insight[] = [];
-  const weeklyDelta = input.currentWeekSessions - input.previousWeekSessions;
 
-  if (input.weeklyTarget !== null && input.weeklyTarget > 0) {
-    const remaining = Math.max(input.weeklyTarget - input.currentWeekSessions, 0);
+  if (input.currentWeekSessions > input.previousWeekSessions) {
     insights.push({
-      id: 'weekly-frequency',
-      title: remaining === 0 ? 'Frecuencia semanal cumplida' : 'Semana en curso',
-      detail:
-        remaining === 0
-          ? `Ya registraste ${input.currentWeekSessions} sesión(es) frente a un objetivo de ${input.weeklyTarget}.`
-          : `Llevás ${input.currentWeekSessions}/${input.weeklyTarget} sesión(es); faltan ${remaining} para completar la frecuencia objetivo.`,
-      tone: remaining === 0 ? 'positive' : 'neutral',
-    });
-  } else if (input.currentWeekSessions > 0 || input.previousWeekSessions > 0) {
-    insights.push({
-      id: 'weekly-frequency',
-      title: 'Frecuencia reciente',
-      detail: `${input.currentWeekSessions} sesión(es) esta semana y ${input.previousWeekSessions} a esta altura de la semana anterior.`,
-      tone: weeklyDelta < 0 ? 'watch' : weeklyDelta > 0 ? 'positive' : 'neutral',
-    });
-  }
-
-  const comparable = input.trends
-    .filter((item) => item.deltaPercent !== null)
-    .sort((a, b) => Math.abs(b.deltaPercent ?? 0) - Math.abs(a.deltaPercent ?? 0));
-  const strongestPositive = comparable.find((item) => item.trend === 'up');
-  const strongestNegative = comparable.find((item) => item.trend === 'down');
-
-  if (strongestPositive) {
-    insights.push({
-      id: 'exercise-progress',
-      title: `${strongestPositive.exerciseName} mejoró`,
-      detail: `La fuerza estimada del mejor set subió ${Math.abs(strongestPositive.deltaPercent ?? 0)}% frente a la sesión comparable anterior.`,
+      id: 'frequency',
+      title: 'Más frecuencia esta semana',
+      detail: `${input.currentWeekSessions} sesión(es) a esta altura, frente a ${input.previousWeekSessions} la semana anterior.`,
       tone: 'positive',
     });
-  } else if (comparable.length > 0) {
+  } else if (input.currentWeekSessions < input.previousWeekSessions) {
     insights.push({
-      id: 'exercise-progress',
-      title: 'Rendimiento estable',
-      detail:
-        'Los ejercicios comparables se mantienen dentro de un margen pequeño frente a su sesión anterior.',
-      tone: 'neutral',
-    });
-  }
-
-  if (strongestNegative) {
-    insights.push({
-      id: 'exercise-watch',
-      title: `${strongestNegative.exerciseName} bajó en la última comparación`,
-      detail: `La fuerza estimada del mejor set fue ${Math.abs(strongestNegative.deltaPercent ?? 0)}% menor que en la sesión comparable anterior. Es una observación, no una causa.`,
+      id: 'frequency',
+      title: 'Frecuencia reciente',
+      detail: `${input.currentWeekSessions} sesión(es) esta semana y ${input.previousWeekSessions} a esta altura de la semana anterior.`,
       tone: 'watch',
     });
-  }
-
-  if (insights.length < 3) {
-    const comparableCount = comparable.length;
+  } else {
     insights.push({
-      id: 'comparison-coverage',
-      title: 'Base de comparación',
-      detail:
-        comparableCount > 0
-          ? `${comparableCount} ejercicio(s) ya tienen al menos dos sesiones comparables.`
-          : 'Todavía faltan sesiones repetidas de los mismos ejercicios para construir tendencias personales.',
+      id: 'frequency',
+      title: 'Frecuencia estable',
+      detail: `${input.currentWeekSessions} sesión(es) a esta altura de ambas semanas.`,
       tone: 'neutral',
     });
   }
+
+  const strongestGain = input.exerciseTrends
+    .filter((exercise) => exercise.deltaPercent !== null && exercise.deltaPercent > 2)
+    .slice()
+    .sort((a, b) => (b.deltaPercent ?? 0) - (a.deltaPercent ?? 0))[0];
+
+  if (strongestGain?.deltaPercent !== null && strongestGain?.deltaPercent !== undefined) {
+    insights.push({
+      id: 'gain',
+      title: `${strongestGain.exerciseName} mejoró`,
+      detail: `La fuerza estimada del mejor set subió ${round(strongestGain.deltaPercent)}% frente a la sesión comparable anterior.`,
+      tone: 'positive',
+    });
+  } else {
+    const strongestDrop = input.exerciseTrends
+      .filter((exercise) => exercise.deltaPercent !== null && exercise.deltaPercent < -2)
+      .slice()
+      .sort((a, b) => (a.deltaPercent ?? 0) - (b.deltaPercent ?? 0))[0];
+    if (strongestDrop?.deltaPercent !== null && strongestDrop?.deltaPercent !== undefined) {
+      insights.push({
+        id: 'drop',
+        title: `${strongestDrop.exerciseName} bajó`,
+        detail: `La fuerza estimada del mejor set quedó ${round(Math.abs(strongestDrop.deltaPercent))}% debajo de la sesión comparable anterior.`,
+        tone: 'watch',
+      });
+    }
+  }
+
+  const comparableCount = input.exerciseTrends.filter((exercise) => exercise.sessionCount >= 2).length;
+  insights.push({
+    id: 'coverage',
+    title: 'Base de comparación',
+    detail:
+      comparableCount === 0
+        ? 'Todavía faltan sesiones repetidas de los mismos ejercicios para construir tendencias personales.'
+        : `${comparableCount} ejercicio(s) ya tienen al menos dos sesiones comparables.`,
+    tone: 'neutral',
+  });
 
   return insights.slice(0, 3);
 }
@@ -384,59 +384,57 @@ function buildInsights(input: {
 export function computeGymV2Analytics(input: {
   sessions: readonly GymSession[];
   summaries: readonly GymSessionSummary[];
-  today: string;
   weeklyTarget: number | null;
+  today: string;
 }): GymV2Analytics {
-  const summaryByKey = new Map(input.summaries.map((summary) => [summary.key, summary]));
-  const completed = input.sessions
-    .filter((session) => session.date <= input.today)
-    .filter((session) => summaryByKey.get(session.key)?.completed === true)
-    .slice()
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const completeSessions = completedSessionsThrough(input.sessions, input.today);
+  const weekStart = mondayOf(input.today);
+  const weekdayOffset = daysBetween(weekStart, input.today);
+  const previousWeekStart = addDays(weekStart, -7);
+  const previousWeekComparableEnd = addDays(previousWeekStart, weekdayOffset);
 
-  const currentWeekStart = mondayOf(input.today);
-  const previousWeekStart = addDays(currentWeekStart, -7);
-  const elapsedWeekDays = Math.max(0, daysBetween(currentWeekStart, input.today));
-  const previousComparisonEnd = addDays(previousWeekStart, elapsedWeekDays);
-  const currentWeekSessions = completed.filter(
-    (session) => session.date >= currentWeekStart && session.date <= input.today,
+  const currentWeekSessions = completeSessions.filter(
+    (session) => session.date >= weekStart && session.date <= input.today,
   ).length;
-  const previousWeekSessions = completed.filter(
-    (session) => session.date >= previousWeekStart && session.date <= previousComparisonEnd,
+  const previousWeekSessions = completeSessions.filter(
+    (session) =>
+      session.date >= previousWeekStart && session.date <= previousWeekComparableEnd,
   ).length;
   const weeklyDelta = currentWeekSessions - previousWeekSessions;
+  const exerciseTrends = buildExerciseTrends(completeSessions);
+  const comparable = exerciseTrends.filter((exercise) => exercise.sessionCount >= 2);
+  const improvingExercises = comparable.filter((exercise) => exercise.trend === 'up').length;
+  const stableExercises = comparable.filter((exercise) => exercise.trend === 'steady').length;
+  const decliningExercises = comparable.filter((exercise) => exercise.trend === 'down').length;
+  const baselineComparable = exerciseTrends.filter((exercise) => exercise.baselineDeltaPercent !== null);
+  const aboveBaselineExercises = baselineComparable.filter(
+    (exercise) => (exercise.baselineDeltaPercent ?? 0) > 2,
+  ).length;
+  const latestSession = completeSessions.slice().sort((a, b) => b.date.localeCompare(a.date))[0] ?? null;
+  const latestSummary = input.summaries
+    .filter((summary) => summaryDate(summary) !== null && summary.date <= input.today)
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))[0] ?? null;
+  const muscle = buildMuscleGroups(completeSessions, input.today);
   const adherencePercent =
-    input.weeklyTarget !== null && input.weeklyTarget > 0
+    input.weeklyTarget && input.weeklyTarget > 0
       ? Math.round((currentWeekSessions / input.weeklyTarget) * 100)
       : null;
-
-  const exerciseTrends = buildExerciseTrends(completed);
-  const comparable = exerciseTrends.filter((item) => item.trend !== 'unknown');
-  const improvingExercises = comparable.filter((item) => item.trend === 'up').length;
-  const stableExercises = comparable.filter((item) => item.trend === 'steady').length;
-  const decliningExercises = comparable.filter((item) => item.trend === 'down').length;
-  const baselineComparable = exerciseTrends.filter((item) => item.baselineDeltaPercent !== null);
-  const aboveBaselineExercises = baselineComparable.filter(
-    (item) => (item.baselineDeltaPercent ?? 0) > 2,
-  ).length;
 
   let statusLabel = 'Construyendo base';
   let statusDetail = 'Faltan sesiones comparables para leer una tendencia personal.';
   if (comparable.length > 0) {
-    if (improvingExercises > decliningExercises) {
+    if (improvingExercises > decliningExercises && improvingExercises > 0) {
       statusLabel = 'Progresando';
       statusDetail = `${improvingExercises} de ${comparable.length} ejercicio(s) comparables mejoraron en fuerza estimada.`;
-    } else if (decliningExercises > improvingExercises) {
+    } else if (decliningExercises > improvingExercises && decliningExercises > 0) {
       statusLabel = 'Tendencia mixta';
-      statusDetail = `${decliningExercises} de ${comparable.length} ejercicio(s) comparables bajaron en el último registro.`;
+      statusDetail = `${decliningExercises} ejercicio(s) bajaron frente a su sesión comparable anterior.`;
     } else {
       statusLabel = 'Estable';
-      statusDetail = `${comparable.length} ejercicio(s) ya permiten comparación entre sesiones.`;
+      statusDetail = `${stableExercises} ejercicio(s) están dentro de una variación pequeña frente a su sesión anterior.`;
     }
   }
-
-  const latestSession = completed.at(-1) ?? null;
-  const muscle = buildMuscleGroups(completed, input.today);
 
   return {
     statusLabel,
@@ -453,21 +451,16 @@ export function computeGymV2Analytics(input: {
     aboveBaselineExercises,
     baselineComparableExercises: baselineComparable.length,
     latestSessionDate: latestSession?.date ?? null,
-    latestSessionLabel: latestSession?.dayLabel ?? latestSession?.routineName ?? null,
+    latestSessionLabel: latestSummary?.date ?? latestSession?.date ?? null,
     exerciseTrends,
     muscleGroups: muscle.groups,
-    muscleCoveragePercent: muscle.coverage,
-    insights: buildInsights({
-      currentWeekSessions,
-      previousWeekSessions,
-      weeklyTarget: input.weeklyTarget,
-      trends: exerciseTrends,
-    }),
+    muscleCoveragePercent: muscle.coveragePercent,
+    insights: buildInsights({ currentWeekSessions, previousWeekSessions, exerciseTrends }),
     benchmark: {
       status: 'not-ready',
       label: 'Nivel externo pendiente',
       detail:
-        'No se asigna principiante/intermedio/avanzado a cargas de máquinas o poleas sin una referencia compatible. Se agregará con fuente, ejercicio elegible y contexto corporal explícitos.',
+        'Las referencias externas se muestran aparte y solo cuando la carga es comparable con una fuente explícita.',
     },
   };
 }
