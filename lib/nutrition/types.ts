@@ -100,6 +100,7 @@ export interface NutritionDashboardData {
   nutrients: readonly NutritionNutrientValue[];
   aiInsights: readonly NutritionAiInsight[];
   optionalSources: {
+    nutrientTargets: 'ready' | 'missing' | 'unavailable';
     nutrientSummary: 'ready' | 'missing' | 'unavailable';
     aiInsights: 'ready' | 'missing' | 'unavailable';
   };
