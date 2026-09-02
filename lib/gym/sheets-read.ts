@@ -11,8 +11,13 @@ import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 
 type PlainCell = string | number | boolean | null;
 type PlainRows = PlainCell[][];
+type GymSheetsEnv = {
+  GOOGLE_GYM_SPREADSHEET_ID?: string;
+  GOOGLE_SERVICE_ACCOUNT_EMAIL?: string;
+  GOOGLE_PRIVATE_KEY?: string;
+};
 
-function gymSpreadsheetId(env: NodeJS.ProcessEnv = process.env): string | null {
+function gymSpreadsheetId(env: GymSheetsEnv = process.env): string | null {
   const value = env.GOOGLE_GYM_SPREADSHEET_ID?.trim();
   if (!value || !/^[A-Za-z0-9_-]{20,}$/.test(value)) return null;
   return value;
@@ -47,13 +52,13 @@ export function normalizeGymSheetValues(tab: string, values: PlainRows): PlainRo
   });
 }
 
-export function isGymSpreadsheetConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+export function isGymSpreadsheetConfigured(env: GymSheetsEnv = process.env): boolean {
   return gymSpreadsheetId(env) !== null;
 }
 
 export async function readGymTabValues(
   tab: string,
-  env: NodeJS.ProcessEnv = process.env,
+  env: GymSheetsEnv = process.env,
 ): Promise<ReadTabResult> {
   const clientEmail = env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
   const rawPrivateKey = env.GOOGLE_PRIVATE_KEY;
