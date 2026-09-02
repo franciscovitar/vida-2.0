@@ -11,7 +11,10 @@ import type { CSSProperties } from 'react';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { buildMaleStrengthLevelBenchmark } from '@/lib/gym/external-strength-benchmark';
+import {
+  buildMaleStrengthLevelBenchmark,
+  isExternalStrengthBenchmarkSupported,
+} from '@/lib/gym/external-strength-benchmark';
 import { computeGymV2Analytics, type GymV2Trend } from '@/lib/gym/v2-analytics';
 import type { GymSession, GymSessionSummary } from '@/types/gym';
 
@@ -100,6 +103,11 @@ export function GymV2Overview({
     0,
   );
   const topMuscleGroup = analytics.muscleGroups.at(0) ?? null;
+  const featuredBenchmarkExercises = benchmark.exercises.slice(0, 2);
+  const unsupportedBenchmarkExercises = analytics.exerciseTrends.filter(
+    (exercise) => !isExternalStrengthBenchmarkSupported(exercise.exerciseName),
+  );
+  const externalExerciseCount = benchmark.exercises.length + unsupportedBenchmarkExercises.length;
 
   return (
     <div className={styles.stack}>
@@ -347,7 +355,7 @@ export function GymV2Overview({
             </div>
 
             <div className={benchmarkStyles.list}>
-              {benchmark.exercises.map((exercise) => (
+              {featuredBenchmarkExercises.map((exercise) => (
                 <article key={exercise.id} className={benchmarkStyles.exercise}>
                   <div className={benchmarkStyles.heading}>
                     <div>
@@ -391,6 +399,76 @@ export function GymV2Overview({
               ))}
             </div>
           </div>
+
+          {externalExerciseCount > featuredBenchmarkExercises.length ? (
+            <details className={benchmarkStyles.disclosure}>
+              <summary>
+                <span>Ver todos los ejercicios</span>
+                <small>
+                  {externalExerciseCount} en total · {benchmark.exercises.length} con referencia
+                  externa
+                </small>
+              </summary>
+
+              <div className={benchmarkStyles['all-exercises']}>
+                <section>
+                  <div className={benchmarkStyles['group-heading']}>
+                    <div>
+                      <strong>Con referencia externa</strong>
+                      <span>Nivel comparable con la fuente actual.</span>
+                    </div>
+                    <small>{benchmark.exercises.length}</small>
+                  </div>
+                  <div className={benchmarkStyles['compact-list']}>
+                    {benchmark.exercises.map((exercise) => (
+                      <article key={`all-${exercise.id}`} className={benchmarkStyles.compact}>
+                        <div>
+                          <strong>{exercise.benchmarkName}</strong>
+                          <small>
+                            {number(exercise.loadKg)} kg × {exercise.reps} · último{' '}
+                            {shortDate(exercise.latestDate)}
+                          </small>
+                        </div>
+                        <span data-tone="benchmark">{exercise.levelLabel}</span>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+
+                {unsupportedBenchmarkExercises.length > 0 ? (
+                  <section>
+                    <div className={benchmarkStyles['group-heading']}>
+                      <div>
+                        <strong>Sin referencia comparable</strong>
+                        <span>
+                          Tu progreso personal sí se analiza; solo evitamos asignar un nivel externo
+                          incompatible.
+                        </span>
+                      </div>
+                      <small>{unsupportedBenchmarkExercises.length}</small>
+                    </div>
+                    <div className={benchmarkStyles['compact-list']}>
+                      {unsupportedBenchmarkExercises.map((exercise) => (
+                        <article key={exercise.key} className={benchmarkStyles.compact}>
+                          <div>
+                            <strong>{exercise.exerciseName}</strong>
+                            <small>
+                              {exercise.latestLoad === null || exercise.latestReps === null
+                                ? 'Sin set comparable'
+                                : `${number(exercise.latestLoad)} kg × ${exercise.latestReps}`}{' '}
+                              · último {shortDate(exercise.latestDate)}
+                            </small>
+                          </div>
+                          <span data-tone="neutral">Sin benchmark</span>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                ) : null}
+              </div>
+            </details>
+          ) : null}
+
           <div className={benchmarkStyles.footnote}>
             <Gauge size={16} aria-hidden="true" />
             <p>
