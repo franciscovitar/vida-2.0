@@ -35,13 +35,13 @@ function signed(value: number): string {
 
 function trendLabel(trend: GymV2Trend, delta: number | null): string {
   if (delta === null || trend === 'unknown') return 'Sin comparación';
-  if (trend === 'steady') return 'Igual que la anterior';
+  if (trend === 'steady') return 'Estable vs anterior';
   return `${delta > 0 ? '+' : ''}${number(delta)}% vs anterior`;
 }
 
 function baselineLabel(delta: number | null): string {
   if (delta === null) return 'Sin base suficiente';
-  if (delta === 0) return 'Igual a tu base';
+  if (Math.abs(delta) <= 2) return 'En línea con tu base';
   return `${delta > 0 ? '+' : ''}${number(delta)}% vs tu base`;
 }
 
@@ -74,7 +74,8 @@ export function GymV2Overview({
       : analytics.statusLabel === 'Tendencia mixta'
         ? 'watch'
         : 'neutral';
-  const deltaTone = analytics.weeklyDelta > 0 ? 'positive' : analytics.weeklyDelta < 0 ? 'watch' : 'neutral';
+  const deltaTone =
+    analytics.weeklyDelta > 0 ? 'positive' : analytics.weeklyDelta < 0 ? 'watch' : 'neutral';
   const exerciseCards = analytics.exerciseTrends.slice(0, 6);
   const maxMuscleSets = Math.max(...analytics.muscleGroups.map((group) => group.completedSets), 1);
 
@@ -125,7 +126,7 @@ export function GymV2Overview({
               <span>Vs semana anterior</span>
               <strong className="tabular">{signed(analytics.weeklyDelta)}</strong>
               <small>
-                {analytics.previousWeekSessions} sesión(es) en la semana anterior
+                {analytics.previousWeekSessions} sesión(es) a esta altura de la semana anterior
               </small>
             </div>
           </article>
@@ -144,7 +145,7 @@ export function GymV2Overview({
               <small>
                 {analytics.baselineComparableExercises === 0
                   ? 'todavía sin base suficiente'
-                  : 'ejercicios por encima de su base personal'}
+                  : 'ejercicios claramente por encima de su base'}
               </small>
             </div>
           </article>
@@ -188,7 +189,7 @@ export function GymV2Overview({
         <SectionHeader
           id="gym-v2-exercises-title"
           title="Ejercicios principales"
-          description="Mejor set de cada sesión: carga × repeticiones. Sirve para compararte con el mismo ejercicio, no entre máquinas distintas."
+          description="El set real queda visible; la tendencia usa e1RM como índice personal para comparar carga y repeticiones del mismo ejercicio."
           domain="health"
         />
         {exerciseCards.length === 0 ? (
