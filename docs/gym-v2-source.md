@@ -43,7 +43,7 @@ Versión inicial:
 
 - `2026-09-02-v1`
 
-La tabla fue fijada explícitamente para Vida 2.0 y contiene 16 referencias masculinas de 1RM absoluto: jalón al pecho, remo máquina, press banca máquina, press militar máquina, curl de bíceps con mancuerna, elevación lateral con mancuerna, press francés polea, tríceps pushdown, face pull, prensa horizontal, hip thrust, curl femoral tumbado, abductores máquina, aductores máquina, gemelos máquina de pie y sóleo/gemelo sentado.
+La tabla fue fijada explícitamente para Vida 2.0 a partir de la referencia aprobada por el usuario y contiene 16 referencias masculinas de 1RM absoluto: jalón al pecho, remo máquina, press banca máquina, press militar máquina, curl de bíceps con mancuerna, elevación lateral con mancuerna, press francés polea, tríceps pushdown, face pull, prensa horizontal, hip thrust, curl femoral tumbado, abductores máquina, aductores máquina, gemelos máquina de pie y sóleo/gemelo sentado.
 
 Los valores de mancuernas son por mancuerna. La tabla no se duplica en este documento para evitar dos fuentes de verdad; los umbrales exactos están únicamente en el archivo canónico anterior y están cubiertos por tests.
 
@@ -53,7 +53,7 @@ El benchmark no usa directamente el peso de una serie. Calcula e1RM mediante Epl
 
 `e1RM = carga × (1 + repeticiones / 30)`
 
-La implementación canónica está en `lib/gym/strength-estimation.ts`.
+La implementación del benchmark está en `lib/gym/strength-estimation.ts`.
 
 Solo se clasifica un set de 1–15 repeticiones. Por encima de 15 reps se conserva el registro personal, pero no se inventa un e1RM para el benchmark.
 
