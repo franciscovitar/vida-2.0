@@ -1,0 +1,64 @@
+name: Temporary Nutrition V2 final validation
+
+on:
+  push:
+    branches:
+      - feat/nutrition-v2
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/nutrition-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Document dedicated Nutrition Sheet config
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('.env.example')
+          text = path.read_text()
+          marker = 'GOOGLE_NUTRITION_SPREADSHEET_ID='
+          if marker not in text:
+              anchor = 'GOOGLE_SHEETS_ALLOW_PROD_WRITES=false\n'
+              block = '''GOOGLE_SHEETS_ALLOW_PROD_WRITES=false\n\n# Store cuantitativo dedicado de Nutrition Intelligence (solo lectura en Nutrition V2).\n# No reutiliza implícitamente el Sheet general ni el de Gimnasio.\nGOOGLE_NUTRITION_SPREADSHEET_ID=ejemplo_nutrition_store\n'''
+              if anchor not in text:
+                  raise SystemExit('env anchor not found')
+              text = text.replace(anchor, block, 1)
+              path.write_text(text)
+      - name: Format Nutrition V2 files
+        run: >-
+          npx prettier --write
+          .env.example
+          app/'(app)'/dieta/page.tsx
+          components/nutrition/NutritionPlanSection.tsx
+          components/nutrition/NutritionV2Overview.tsx
+          components/nutrition/NutritionV2Overview.module.scss
+          lib/nutrition/dashboard.ts
+          lib/nutrition/nutrient-catalog.ts
+          lib/nutrition/sheets-config.ts
+          lib/nutrition/sheets-read.ts
+          lib/nutrition/types.ts
+          tests/nutrition-v2.test.ts
+          docs/nutrition-v2-source.md
+      - run: npm test
+      - run: npm run verify
+      - name: Commit finalization if needed
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .env.example app/'(app)'/dieta/page.tsx components/nutrition lib/nutrition tests/nutrition-v2.test.ts docs/nutrition-v2-source.md
+          git commit -m "chore(nutrition): finalize V2 read-only slice"
+          git push origin HEAD:feat/nutrition-v2
