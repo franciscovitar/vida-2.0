@@ -395,8 +395,8 @@ export function GymV2Overview({
             <Gauge size={16} aria-hidden="true" />
             <p>
               Fuente: {benchmark.sourceLabel}, datos hasta{' '}
-              {shortSourceDate(benchmark.sourceDataCutoff)}. {benchmark.populationNote} El e1RM es una
-              estimación a partir del set registrado; máquinas y poleas quedan fuera de esta
+              {shortSourceDate(benchmark.sourceDataCutoff)}. {benchmark.populationNote} El e1RM es
+              una estimación a partir del set registrado; máquinas y poleas quedan fuera de esta
               clasificación.
             </p>
           </div>

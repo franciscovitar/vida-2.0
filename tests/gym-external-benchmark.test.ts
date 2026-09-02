@@ -30,10 +30,7 @@ test('Gym benchmark clasifica curl y elevaciones laterales masculinas con refere
     result.exercises.find((item) => item.id === 'dumbbell-lateral-raise')?.level,
     'novice',
   );
-  assert.equal(
-    result.exercises.find((item) => item.id === 'dumbbell-curl')?.nextThresholdKg,
-    21,
-  );
+  assert.equal(result.exercises.find((item) => item.id === 'dumbbell-curl')?.nextThresholdKg, 21);
   assert.equal(
     result.exercises.find((item) => item.id === 'dumbbell-lateral-raise')?.nextThresholdKg,
     16,

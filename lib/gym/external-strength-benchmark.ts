@@ -1,10 +1,5 @@
 export type GymStrengthLevelId =
-  | 'below-beginner'
-  | 'beginner'
-  | 'novice'
-  | 'intermediate'
-  | 'advanced'
-  | 'elite';
+  'below-beginner' | 'beginner' | 'novice' | 'intermediate' | 'advanced' | 'elite';
 
 export type GymStrengthBenchmarkConfidence = 'low' | 'medium';
 

@@ -49,13 +49,13 @@ Primer alcance habilitado:
 
 Umbrales masculinos capturados para este slice:
 
-| Nivel | Curl mancuerna | Elevación lateral mancuerna |
-| --- | ---: | ---: |
-| Principiante | 7 kg | 4 kg |
-| Novato | 13 kg | 9 kg |
-| Intermedio | 21 kg | 16 kg |
-| Avanzado | 31 kg | 24 kg |
-| Élite | 42 kg | 34 kg |
+| Nivel        | Curl mancuerna | Elevación lateral mancuerna |
+| ------------ | -------------: | --------------------------: |
+| Principiante |           7 kg |                        4 kg |
+| Novato       |          13 kg |                        9 kg |
+| Intermedio   |          21 kg |                       16 kg |
+| Avanzado     |          31 kg |                       24 kg |
+| Élite        |          42 kg |                       34 kg |
 
 Fuentes trazables:
 
