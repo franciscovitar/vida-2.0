@@ -21,7 +21,7 @@ import type {
 type Row = Record<string, PlainCell>;
 
 const REQUIRED_TABS = ['Daily Summary', 'Meals', 'Food Items', 'Targets'] as const;
-const OPTIONAL_TABS = ['Nutrient Summary', 'AI Insights'] as const;
+const OPTIONAL_TABS = ['Nutrient Targets', 'Nutrient Summary', 'AI Insights'] as const;
 
 function cordobaToday(now = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -136,6 +136,25 @@ function chooseTarget(rows: readonly Row[], today: string): NutritionTarget | nu
     fatGrams: numberValue(row.fatTargetGrams),
     fiberGrams: numberValue(row.fiberTargetGrams),
   };
+}
+
+function chooseNutrientTargets(rows: readonly Row[], today: string): Map<string, Row> {
+  const eligible = activeRows(rows)
+    .filter((row) => {
+      const from = stringValue(row.effectiveFrom);
+      const to = stringValue(row.effectiveTo);
+      return Boolean(from && from <= today && (!to || to >= today));
+    })
+    .sort((a, b) =>
+      (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''),
+    );
+
+  const byKey = new Map<string, Row>();
+  for (const row of eligible) {
+    const key = stringValue(row.nutrientKey);
+    if (key && !byKey.has(key)) byKey.set(key, row);
+  }
+  return byKey;
 }
 
 function parseDailyRows(rows: readonly Row[]): NutritionDailyPoint[] {
@@ -272,11 +291,13 @@ function nutrientGroup(value: PlainCell, fallback: NutrientGroup): NutrientGroup
 
 function buildNutrients(
   result: ReadTabResult,
+  targetResult: ReadTabResult,
   todayItems: readonly Row[],
   today: string,
 ): NutritionNutrientValue[] {
   const rows = rowsFrom(result).filter((row) => stringValue(row.date) === today);
   const byKey = new Map(rows.map((row) => [stringValue(row.nutrientKey) ?? '', row]));
+  const targetByKey = chooseNutrientTargets(rowsFrom(targetResult), today);
 
   const activeItems = activeRows(todayItems);
   const derivedKnown = (column: string) => {
@@ -297,19 +318,26 @@ function buildNutrients(
 
   return NUTRIENT_CATALOG.map((catalog) => {
     const row = byKey.get(catalog.key);
+    const targetRow = targetByKey.get(catalog.key);
+    const targetAmount = numberValue(targetRow?.targetAmount ?? null);
+    const lowerTarget = numberValue(targetRow?.lowerTarget ?? null);
+    const upperTarget = numberValue(targetRow?.upperTarget ?? null);
+    const targetUnit = stringValue(targetRow?.unit ?? null);
+    const targetNotes = stringValue(targetRow?.notes ?? null);
+
     if (row) {
       return {
         key: catalog.key,
         name: stringValue(row.nutrientName) ?? catalog.name,
         group: nutrientGroup(row.group, catalog.group),
         amount: numberValue(row.amount),
-        unit: stringValue(row.unit) ?? catalog.unit,
-        target: numberValue(row.targetAmount ?? row.target),
-        lowerTarget: numberValue(row.lowerTarget),
-        upperTarget: numberValue(row.upperTarget),
+        unit: stringValue(row.unit) ?? targetUnit ?? catalog.unit,
+        target: targetAmount ?? numberValue(row.targetAmount ?? row.target),
+        lowerTarget: lowerTarget ?? numberValue(row.lowerTarget),
+        upperTarget: upperTarget ?? numberValue(row.upperTarget),
         confidence: confidenceValue(row.confidence),
         sourceCoverage: coverageValue(row.sourceCoverage ?? row.coverage),
-        notes: stringValue(row.notes),
+        notes: stringValue(row.notes) ?? targetNotes,
       } satisfies NutritionNutrientValue;
     }
 
@@ -320,13 +348,16 @@ function buildNutrients(
         name: catalog.name,
         group: catalog.group,
         amount: derived.amount,
-        unit: catalog.unit,
-        target: null,
-        lowerTarget: null,
-        upperTarget: null,
+        unit: targetUnit ?? catalog.unit,
+        target: targetAmount,
+        lowerTarget,
+        upperTarget,
         confidence: derived.amount === null ? 'unknown' : 'mixed',
         sourceCoverage: derived.coverage,
-        notes: derived.amount === null ? null : 'Subtotal conocido derivado de Food Items.',
+        notes:
+          derived.amount === null
+            ? targetNotes
+            : 'Subtotal conocido derivado de Food Items; la referencia proviene de Nutrient Targets.',
       };
     }
 
@@ -337,13 +368,16 @@ function buildNutrients(
         name: catalog.name,
         group: catalog.group,
         amount: derived.amount,
-        unit: catalog.unit,
-        target: null,
-        lowerTarget: null,
-        upperTarget: null,
+        unit: targetUnit ?? catalog.unit,
+        target: targetAmount,
+        lowerTarget,
+        upperTarget,
         confidence: derived.amount === null ? 'unknown' : 'mixed',
         sourceCoverage: derived.coverage,
-        notes: derived.amount === null ? null : 'Subtotal conocido derivado de Food Items.',
+        notes:
+          derived.amount === null
+            ? targetNotes
+            : 'Subtotal conocido derivado de Food Items; la referencia proviene de Nutrient Targets.',
       };
     }
 
@@ -352,13 +386,13 @@ function buildNutrients(
       name: catalog.name,
       group: catalog.group,
       amount: null,
-      unit: catalog.unit,
-      target: null,
-      lowerTarget: null,
-      upperTarget: null,
+      unit: targetUnit ?? catalog.unit,
+      target: targetAmount,
+      lowerTarget,
+      upperTarget,
       confidence: 'unknown',
       sourceCoverage: 'none',
-      notes: null,
+      notes: targetNotes,
     };
   });
 }
@@ -427,15 +461,23 @@ export async function loadNutritionDashboardData(
   now = new Date(),
 ): Promise<NutritionDashboardData> {
   const today = cordobaToday(now);
-  const [dailyResult, mealsResult, itemsResult, targetsResult, nutrientResult, insightsResult] =
-    await Promise.all([
-      readNutritionTabValues(REQUIRED_TABS[0]),
-      readNutritionTabValues(REQUIRED_TABS[1]),
-      readNutritionTabValues(REQUIRED_TABS[2]),
-      readNutritionTabValues(REQUIRED_TABS[3]),
-      readNutritionTabValues(OPTIONAL_TABS[0]),
-      readNutritionTabValues(OPTIONAL_TABS[1]),
-    ]);
+  const [
+    dailyResult,
+    mealsResult,
+    itemsResult,
+    targetsResult,
+    nutrientTargetsResult,
+    nutrientResult,
+    insightsResult,
+  ] = await Promise.all([
+    readNutritionTabValues(REQUIRED_TABS[0]),
+    readNutritionTabValues(REQUIRED_TABS[1]),
+    readNutritionTabValues(REQUIRED_TABS[2]),
+    readNutritionTabValues(REQUIRED_TABS[3]),
+    readNutritionTabValues(OPTIONAL_TABS[0]),
+    readNutritionTabValues(OPTIONAL_TABS[1]),
+    readNutritionTabValues(OPTIONAL_TABS[2]),
+  ]);
 
   const required = [dailyResult, mealsResult, itemsResult, targetsResult];
   const failure = failurePriority(required);
@@ -493,9 +535,15 @@ export async function loadNutritionDashboardData(
     }),
   ];
 
-  const nutrients = buildNutrients(nutrientResult, todayItems, today).map((nutrient) => {
-    if (nutrient.key === 'fiber' && nutrient.target === null && target?.fiberGrams !== null) {
-      return { ...nutrient, target: target?.fiberGrams ?? null };
+  const personalFiberTarget = target?.fiberGrams ?? null;
+  const nutrients = buildNutrients(
+    nutrientResult,
+    nutrientTargetsResult,
+    todayItems,
+    today,
+  ).map((nutrient) => {
+    if (nutrient.key === 'fiber' && personalFiberTarget !== null) {
+      return { ...nutrient, target: personalFiberTarget };
     }
     return nutrient;
   });
@@ -536,6 +584,7 @@ export async function loadNutritionDashboardData(
     nutrients,
     aiInsights: parseAiInsights(insightsResult, today),
     optionalSources: {
+      nutrientTargets: optionalStatus(nutrientTargetsResult),
       nutrientSummary: optionalStatus(nutrientResult),
       aiInsights: optionalStatus(insightsResult),
     },
