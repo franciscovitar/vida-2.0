@@ -35,9 +35,7 @@ test('Gym Sheets usa el spreadsheet dedicado y no sustituye el target general', 
     reason: 'not-configured',
   });
 
-  const dedicated = getGymSheetsWriteConfig(
-    gymEnv({ GOOGLE_GYM_SHEETS_ALLOW_WRITES: 'true' }),
-  );
+  const dedicated = getGymSheetsWriteConfig(gymEnv({ GOOGLE_GYM_SHEETS_ALLOW_WRITES: 'true' }));
   assert.equal(dedicated.ok, true);
   if (dedicated.ok) assert.equal(dedicated.config.spreadsheetId, GYM_ID);
 });

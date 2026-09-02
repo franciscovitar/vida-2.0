@@ -58,11 +58,7 @@ export async function readGymTabValues(
     return { ok: false, code: 'not-configured' };
   }
 
-  const token = await fetchAccessToken(
-    config.clientEmail,
-    config.privateKey,
-    READONLY_SCOPE,
-  );
+  const token = await fetchAccessToken(config.clientEmail, config.privateKey, READONLY_SCOPE);
   if (!token.ok) return token;
 
   const range = encodeURIComponent(tab);

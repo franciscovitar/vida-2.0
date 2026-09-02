@@ -6,10 +6,7 @@ import { fetchAccessToken, SHEETS_BASE, SPREADSHEETS_SCOPE } from '@/lib/google/
 import type { GymSessionCreatePayload } from '@/types/actions';
 import type { GymSessionRowStatus, GymSheetWritePort } from '@/lib/actions/ports';
 
-import {
-  getGymSheetsWriteConfig,
-  type GymSheetsEnv,
-} from '@/lib/gym/sheets-config';
+import { getGymSheetsWriteConfig, type GymSheetsEnv } from '@/lib/gym/sheets-config';
 import { GYM_SESSIONS_HEADERS, GYM_SETS_HEADERS } from '@/lib/gym/sheet-schema';
 
 export { GYM_SESSIONS_HEADERS, GYM_SETS_HEADERS } from '@/lib/gym/sheet-schema';
