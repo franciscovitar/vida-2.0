@@ -1,4 +1,4 @@
-name: Temporary Gym benchmark formatter
+name: Temporary Gym benchmark validation
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  format:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +20,9 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Format benchmark slice
+      - name: Run full test suite
+        run: npm test
+      - name: Keep benchmark slice formatted
         run: >-
           npx prettier --write
           components/gym/GymV2Overview.tsx
