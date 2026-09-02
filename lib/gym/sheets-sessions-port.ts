@@ -2,7 +2,7 @@
  * Lectura real y estrictamente read-only de Gym Sessions / Gym Sets.
  * Usa el scope readonly existente y nunca escribe, limpia ni agrega filas.
  */
-import { readTabValues } from '@/lib/google/sheets-read';
+import { readGymTabValues } from '@/lib/gym/sheets-read';
 import { GYM_SESSIONS_HEADERS, GYM_SETS_HEADERS } from '@/lib/gym/sheet-schema';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 import type {
@@ -261,7 +261,7 @@ export function summarizeExerciseProgress(sessions: readonly GymSession[]): GymE
 }
 
 export async function loadGymSessionsSnapshot(
-  read: (tab: string) => Promise<ReadTabResult> = readTabValues,
+  read: (tab: string) => Promise<ReadTabResult> = readGymTabValues,
 ): Promise<GymSessionsSnapshot> {
   const [sessionResult, setsResult] = await Promise.all([read('Gym Sessions'), read('Gym Sets')]);
   if (!sessionResult.ok) return failureSnapshot(sessionResult.code);
