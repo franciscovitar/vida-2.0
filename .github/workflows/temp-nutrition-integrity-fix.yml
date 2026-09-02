@@ -1,0 +1,120 @@
+name: Temporary Nutrition integrity fix
+
+on:
+  push:
+    branches:
+      - feat/nutrition-v2
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/nutrition-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Patch Nutrition dashboard integrity guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('lib/nutrition/dashboard.ts')
+          s = p.read_text()
+
+          replacements = [
+            (
+              "import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';\n\nimport { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';",
+              "import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';\n\nimport { isNutritionFoodItemStructurallyValid } from './food-item-integrity';\nimport { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';",
+            ),
+            (
+              "  const sourceStatus = allUnavailable ? 'unavailable' : failure ? 'partial' : 'ready';",
+              "  const baseSourceStatus = allUnavailable ? 'unavailable' : failure ? 'partial' : 'ready';",
+            ),
+            (
+              "  const itemRows = rowsFrom(itemsResult);\n  const targetRows = rowsFrom(targetsResult);",
+              "  const itemRows = rowsFrom(itemsResult);\n  const validItemRows = itemRows.filter(isNutritionFoodItemStructurallyValid);\n  const targetRows = rowsFrom(targetsResult);",
+            ),
+            (
+              "  const todayItems = activeRows(itemRows).filter((row) => {\n    const mealId = stringValue(row.mealId);\n    return Boolean(mealId && todayMealIds.has(mealId));\n  });",
+              "  const invalidTodayItemCount = itemRows.filter((row) => {\n    const mealId = stringValue(row.mealId);\n    return Boolean(\n      mealId &&\n        todayMealIds.has(mealId) &&\n        !isNutritionFoodItemStructurallyValid(row),\n    );\n  }).length;\n  const sourceStatus =\n    invalidTodayItemCount > 0 && baseSourceStatus === 'ready' ? 'partial' : baseSourceStatus;\n  const todayItems = activeRows(validItemRows).filter((row) => {\n    const mealId = stringValue(row.mealId);\n    return Boolean(mealId && todayMealIds.has(mealId));\n  });",
+            ),
+            (
+              "    meals: buildMeals(mealRows, itemRows, today),",
+              "    meals: buildMeals(mealRows, validItemRows, today),",
+            ),
+          ]
+
+          for old, new in replacements:
+            if s.count(old) != 1:
+              raise SystemExit(f'expected exactly one dashboard match, got {s.count(old)} for {old[:60]!r}')
+            s = s.replace(old, new)
+
+          p.write_text(s)
+          PY
+      - name: Add integrity regression tests
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('tests/nutrition-v2.test.ts')
+          s = p.read_text()
+          old = "import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';"
+          new = "import { isNutritionFoodItemStructurallyValid } from '@/lib/nutrition/food-item-integrity';\nimport { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';"
+          if s.count(old) != 1:
+            raise SystemExit('nutrition test import anchor mismatch')
+          s = s.replace(old, new)
+
+          addition = r'''
+
+test('Food Items válidos conservan números y estados canónicos', () => {
+  assert.equal(
+    isNutritionFoodItemStructurallyValid({
+      confidence: 'high',
+      status: 'active',
+      energyKcal: 112,
+      proteinGrams: 2.8,
+      carbohydrateGrams: 9.5,
+      fatGrams: 8.3,
+      fiberGrams: 3.5,
+    }),
+    true,
+  );
+});
+
+test('Food Items desalineados fallan cerrados antes de contaminar macros', () => {
+  assert.equal(
+    isNutritionFoodItemStructurallyValid({
+      confidence: 'product-label',
+      energyKcal: 'high',
+      energyKcalLow: 424,
+      energyKcalHigh: 424,
+      proteinGrams: 424,
+      status: null,
+    }),
+    false,
+  );
+});
+'''
+          if 'Food Items desalineados fallan cerrados' in s:
+            raise SystemExit('integrity tests already present')
+          p.write_text(s + addition)
+          PY
+      - run: npx prettier --write lib/nutrition/dashboard.ts lib/nutrition/food-item-integrity.ts tests/nutrition-v2.test.ts
+      - run: npm test -- --test-name-pattern="Nutrition V2|Food Items|catálogo visual|catálogo no contiene"
+      - name: Commit patched files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/nutrition/dashboard.ts lib/nutrition/food-item-integrity.ts tests/nutrition-v2.test.ts
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "fix(nutrition): fail closed on malformed food rows"
+          git push origin HEAD:feat/nutrition-v2
