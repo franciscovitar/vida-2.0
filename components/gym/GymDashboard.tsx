@@ -79,9 +79,7 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
           />
           <div className={styles.meta}>
             <span>{data.routine.name}</span>
-            <span>
-              Actualización: {data.routine.lastUpdatedAt?.slice(0, 10) ?? '—'}
-            </span>
+            <span>Actualización: {data.routine.lastUpdatedAt?.slice(0, 10) ?? '—'}</span>
             <span>Fuente: {data.routine.sourceLabel}</span>
           </div>
           {data.routine.notes.length > 0 ? (

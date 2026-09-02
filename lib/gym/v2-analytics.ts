@@ -3,14 +3,7 @@ import type { GymSession, GymSessionSummary } from '@/types/gym';
 export type GymV2Trend = 'up' | 'down' | 'steady' | 'unknown';
 export type GymV2InsightTone = 'positive' | 'watch' | 'neutral';
 export type GymV2MuscleGroupId =
-  | 'back'
-  | 'shoulders'
-  | 'chest'
-  | 'biceps'
-  | 'triceps'
-  | 'legs'
-  | 'core'
-  | 'other';
+  'back' | 'shoulders' | 'chest' | 'biceps' | 'triceps' | 'legs' | 'core' | 'other';
 
 export interface GymV2ExerciseTrend {
   key: string;
@@ -202,7 +195,9 @@ function buildExerciseTrends(sessions: readonly GymSession[]): GymV2ExerciseTren
       if (observation) {
         current.observations.push(observation);
         current.bestLoad =
-          current.bestLoad === null ? observation.load : Math.max(current.bestLoad, observation.load);
+          current.bestLoad === null
+            ? observation.load
+            : Math.max(current.bestLoad, observation.load);
         current.bestPerformance =
           current.bestPerformance === null
             ? observation.performance

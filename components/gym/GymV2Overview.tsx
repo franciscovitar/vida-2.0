@@ -221,7 +221,10 @@ export function GymV2Overview({
                     <small>{baselineLabel(exercise.baselineDeltaPercent)}</small>
                   </div>
 
-                  <div className={styles.spark} aria-label={`Evolución de ${exercise.exerciseName}`}>
+                  <div
+                    className={styles.spark}
+                    aria-label={`Evolución de ${exercise.exerciseName}`}
+                  >
                     {exercise.series.map((value, index) => (
                       <span
                         key={`${exercise.key}-${index}`}
@@ -235,7 +238,9 @@ export function GymV2Overview({
                   <dl className={styles['exercise-meta']}>
                     <div>
                       <dt>Mejor carga</dt>
-                      <dd>{exercise.bestLoad === null ? '—' : `${number(exercise.bestLoad)} kg`}</dd>
+                      <dd>
+                        {exercise.bestLoad === null ? '—' : `${number(exercise.bestLoad)} kg`}
+                      </dd>
                     </div>
                     <div>
                       <dt>Sesiones</dt>
