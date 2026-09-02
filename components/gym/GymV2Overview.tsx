@@ -11,6 +11,7 @@ import type { CSSProperties } from 'react';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { buildMaleStrengthLevelBenchmark } from '@/lib/gym/external-strength-benchmark';
 import { computeGymV2Analytics, type GymV2Trend } from '@/lib/gym/v2-analytics';
 import type { GymSession, GymSessionSummary } from '@/types/gym';
 
@@ -52,6 +53,11 @@ function shortDate(ymd: string | null): string {
   return `${day}/${month}`;
 }
 
+function shortSourceDate(ymd: string): string {
+  const [year, month, day] = ymd.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 function sparkPoints(series: readonly number[]): SparkPoint[] {
   const values = series.slice(-5);
   if (values.length === 0) return [];
@@ -77,6 +83,7 @@ export function GymV2Overview({
   today: string;
 }) {
   const analytics = computeGymV2Analytics({ sessions, summaries, weeklyTarget, today });
+  const benchmark = buildMaleStrengthLevelBenchmark(analytics.exerciseTrends);
   const statusTone =
     analytics.statusLabel === 'Progresando'
       ? 'positive'
@@ -322,13 +329,86 @@ export function GymV2Overview({
         )}
       </Card>
 
-      <aside className={styles['benchmark-strip']}>
-        <Gauge size={19} aria-hidden="true" />
-        <div>
-          <strong>Comparación externa, separada de tu progreso personal</strong>
-          <p>{analytics.benchmark.detail}</p>
-        </div>
-      </aside>
+      {benchmark.status === 'ready' ? (
+        <Card aria-labelledby="gym-v2-benchmark-title">
+          <SectionHeader
+            id="gym-v2-benchmark-title"
+            title="Tu nivel externo"
+            description="Referencia masculina de fuerza. Se muestra aparte de tu progreso personal."
+            domain="health"
+          />
+          <div className={styles['benchmark-layout']}>
+            <div className={styles['benchmark-summary']}>
+              <span>{benchmark.scopeLabel}</span>
+              <strong>{benchmark.label}</strong>
+              <small>{benchmark.confidenceLabel}</small>
+              <p>{benchmark.detail}</p>
+            </div>
+
+            <div className={styles['benchmark-list']}>
+              {benchmark.exercises.map((exercise) => (
+                <article key={exercise.id} className={styles['benchmark-exercise']}>
+                  <div className={styles['benchmark-heading']}>
+                    <div>
+                      <a href={exercise.sourceUrl} target="_blank" rel="noreferrer">
+                        {exercise.benchmarkName}
+                      </a>
+                      <small>
+                        {number(exercise.loadKg)} kg × {exercise.reps} · último{' '}
+                        {shortDate(exercise.latestDate)}
+                      </small>
+                    </div>
+                    <strong>{exercise.levelLabel}</strong>
+                  </div>
+
+                  {exercise.nextLevelProgressPercent !== null ? (
+                    <div className={styles['benchmark-progress']}>
+                      <div className={styles['benchmark-track']} aria-hidden="true">
+                        <span
+                          style={
+                            {
+                              '--share': `${exercise.nextLevelProgressPercent}%`,
+                            } as ShareStyle
+                          }
+                        />
+                      </div>
+                      <div>
+                        <span>e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg</span>
+                        <span>
+                          {exercise.nextLevelLabel && exercise.nextThresholdKg !== null
+                            ? `Próximo: ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
+                            : 'Máximo nivel de la referencia'}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <small className={styles['benchmark-max']}>
+                      e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg
+                    </small>
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+          <div className={styles['benchmark-footnote']}>
+            <Gauge size={16} aria-hidden="true" />
+            <p>
+              Fuente: {benchmark.sourceLabel}, datos hasta{' '}
+              {shortSourceDate(benchmark.sourceDataCutoff)}. {benchmark.populationNote} El e1RM es una
+              estimación a partir del set registrado; máquinas y poleas quedan fuera de esta
+              clasificación.
+            </p>
+          </div>
+        </Card>
+      ) : (
+        <aside className={styles['benchmark-strip']}>
+          <Gauge size={19} aria-hidden="true" />
+          <div>
+            <strong>Comparación externa, separada de tu progreso personal</strong>
+            <p>{benchmark.detail}</p>
+          </div>
+        </aside>
+      )}
     </div>
   );
 }
