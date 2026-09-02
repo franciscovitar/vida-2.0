@@ -51,7 +51,11 @@ export const RD_HABIT_HEADERS: readonly string[] = [
   RD.football,
 ];
 
-/** Encabezados de "Salud y experimentos" (claves internas → nombre en el Sheet). */
+/**
+ * Encabezados de "Salud y experimentos" (claves internas → nombre en el Sheet).
+ * Solo se incluyen columnas compartidas por DEV y Production; metadata opcional
+ * específica de un target no forma parte del contrato de lectura.
+ */
 export const SAL = {
   fecha: 'Fecha',
   sleep: 'Sueño (h)',
@@ -61,12 +65,21 @@ export const SAL = {
   steps: 'Pasos',
   activeCalories: 'Calorías activas',
   workout: 'Entrenamiento',
+  coreSleep: 'Sueño núcleo (h)',
   deepSleep: 'Sueño profundo (h)',
   remSleep: 'Sueño REM (h)',
+  awakeSleep: 'Sueño despierto (h)',
   walkRunKm: 'Distancia caminar + correr (km)',
+  activeEnergyKj: 'Energía activa (kJ)',
   minHr: 'FC mínima',
   maxHr: 'FC máxima',
+  stepLengthCm: 'Longitud de paso (cm)',
+  restingEnergyKj: 'Energía en reposo (kJ)',
+  floors: 'Pisos subidos',
+  walkingAsymmetry: 'Asimetría al caminar (%)',
   spo2: 'Saturación de oxígeno (%)',
+  walkingSpeed: 'Velocidad al caminar (km/h)',
+  activeCaloriesKcal: 'Calorías activas (kcal)',
   importStatus: 'Estado de importación',
 } as const;
 
