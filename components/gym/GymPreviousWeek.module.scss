@@ -1,0 +1,174 @@
+.card {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.range {
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.session {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.sessionHeader {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.75rem 0.8rem 0.65rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sessionHeader > div {
+  display: grid;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.sessionHeader span {
+  color: var(--text-subtle);
+  font-size: 0.64rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sessionHeader h3 {
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.sessionHeader sup {
+  margin-left: 0.12rem;
+  color: var(--c-health);
+  font-size: 0.65em;
+}
+
+.sessionHeader time {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+
+.tableWrap {
+  min-width: 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  padding: 0.55rem 0.65rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.table thead th {
+  color: var(--text-subtle);
+  background: color-mix(in srgb, var(--surface-3) 72%, transparent);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.table thead th:first-child {
+  width: 42%;
+}
+
+.table tbody tr + tr {
+  border-top: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+}
+
+.table tbody th {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 620;
+  line-height: 1.35;
+}
+
+.sets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.22rem;
+}
+
+.sets span {
+  padding: 0.18rem 0.32rem;
+  border: 1px solid var(--border);
+  border-radius: 0.38rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.footnote,
+.empty {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.empty {
+  padding: 0.85rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+@media (max-width <= 1080px) {
+  .weekGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .table thead th:first-child {
+    width: 35%;
+  }
+}
+
+@media (max-width <= 600px) {
+  .sessionHeader {
+    padding-inline: 0.7rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem 0.55rem;
+  }
+
+  .table thead th:first-child {
+    width: 40%;
+  }
+
+  .sets span {
+    white-space: normal;
+  }
+}
