@@ -74,16 +74,32 @@ export interface HabitsPageData extends DomainPageMeta {
 }
 
 export type HealthImportKind = 'partial' | 'complete' | 'none';
+export type HealthMetricCategory = 'sleep' | 'recovery' | 'movement' | 'oxygen' | 'activity';
+export type HealthMetricDirection = 'more-better' | 'less-better' | 'neutral';
+export type HealthSummaryTone = 'good' | 'warning' | 'neutral';
 
 export interface HealthMetricPeriod {
   id: string;
   label: string;
   unit: string;
+  category: HealthMetricCategory;
+  direction: HealthMetricDirection;
   average: number | null;
   averageLabel: string;
   series: (number | null)[];
   compare: PeriodCompare;
+  baselineAverage: number | null;
+  baselineLabel: string;
+  baselineCompare: PeriodCompare;
+  coverageDays: number;
   domain: Domain;
+}
+
+export interface HealthSummaryItem {
+  id: string;
+  label: string;
+  detail: string;
+  tone: HealthSummaryTone;
 }
 
 export interface HealthDayRow {
@@ -104,6 +120,8 @@ export interface HealthTodayState {
 
 export interface HealthPageData extends DomainPageMeta {
   metrics: HealthMetricPeriod[];
+  summary: HealthSummaryItem[];
+  baselineAvailableDays: number;
   today: HealthTodayState;
   history: HealthDayRow[];
 }
