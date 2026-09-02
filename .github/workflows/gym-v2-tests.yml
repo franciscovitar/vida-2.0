@@ -25,5 +25,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Show Gym V2 Prettier diff
+        run: |
+          npx prettier --write components/gym/GymDashboard.tsx components/gym/GymV2Overview.tsx lib/gym/v2-analytics.ts tests/gym-v2.test.ts
+          git diff --no-ext-diff --unified=3 -- components/gym/GymDashboard.tsx components/gym/GymV2Overview.tsx lib/gym/v2-analytics.ts tests/gym-v2.test.ts
+
       - name: Run test suite
         run: npm test
