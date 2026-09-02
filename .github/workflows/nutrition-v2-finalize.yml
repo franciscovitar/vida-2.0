@@ -37,7 +37,6 @@ jobs:
       - name: Format Nutrition V2 files
         run: >-
           npx prettier --write
-          .env.example
           app/'(app)'/dieta/page.tsx
           components/nutrition/NutritionPlanSection.tsx
           components/nutrition/NutritionV2Overview.tsx
