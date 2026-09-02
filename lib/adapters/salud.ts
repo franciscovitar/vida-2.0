@@ -89,7 +89,7 @@ export function parseImportStatus(cell: Cell<string>): 'partial' | 'complete' | 
   if (cell.kind !== 'value') return 'none';
   const text = cell.value.trim().toLowerCase();
   if (text === '') return 'none';
-  if (/parcial/.test(text)) return 'partial';
+  if (/parcial|incompleto/.test(text)) return 'partial';
   if (/completo|completa|\bok\b|importado|listo|done/.test(text)) return 'complete';
   return 'none';
 }
