@@ -2,12 +2,14 @@
  * Puerto real de escritura Gym Sessions / Gym Sets (Google Sheets).
  * PUT a filas libres; sin append/clear/delete. Headers exactos obligatorios.
  */
-import { getGoogleConfig } from '@/lib/data/config';
 import { fetchAccessToken, SHEETS_BASE, SPREADSHEETS_SCOPE } from '@/lib/google/auth';
-import { assertResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 import type { GymSessionCreatePayload } from '@/types/actions';
 import type { GymSessionRowStatus, GymSheetWritePort } from '@/lib/actions/ports';
 
+import {
+  getGymSheetsWriteConfig,
+  type GymSheetsEnv,
+} from '@/lib/gym/sheets-config';
 import { GYM_SESSIONS_HEADERS, GYM_SETS_HEADERS } from '@/lib/gym/sheet-schema';
 
 export { GYM_SESSIONS_HEADERS, GYM_SETS_HEADERS } from '@/lib/gym/sheet-schema';
@@ -263,28 +265,34 @@ export function createGymSheetWritePort(input: {
   };
 }
 
-/** Cliente Sheets real reutilizando auth/target existentes. */
-export function createGoogleSheetsValuesClient(): SheetsValuesClient {
+/**
+ * Cliente Sheets real de Gimnasio. Usa únicamente el spreadsheet dedicado y
+ * exige la compuerta adicional GOOGLE_GYM_SHEETS_ALLOW_WRITES=true.
+ */
+export function createGoogleSheetsValuesClient(
+  env: GymSheetsEnv = process.env,
+): SheetsValuesClient {
   async function withAuth(): Promise<
     { ok: true; token: string; spreadsheetId: string } | { ok: false; message: string }
   > {
-    const config = getGoogleConfig();
-    if (!config.ok) return { ok: false, message: 'Google Sheets no configurado.' };
-    if (!config.config.writesAllowed) {
-      return { ok: false, message: 'Escrituras de Sheets no autorizadas en este entorno.' };
+    const resolved = getGymSheetsWriteConfig(env);
+    if (!resolved.ok) {
+      return {
+        ok: false,
+        message:
+          resolved.reason === 'writes-disabled'
+            ? 'Escrituras de Gimnasio no autorizadas en este entorno.'
+            : 'Google Sheets de Gimnasio no configurado.',
+      };
     }
-    try {
-      assertResolvedSpreadsheetId(config.config.spreadsheetId, config.config.spreadsheetId);
-    } catch {
-      return { ok: false, message: 'Target de spreadsheet inválido.' };
-    }
+
     const token = await fetchAccessToken(
-      config.config.clientEmail,
-      config.config.privateKey,
+      resolved.config.clientEmail,
+      resolved.config.privateKey,
       SPREADSHEETS_SCOPE,
     );
     if (!token.ok) return { ok: false, message: 'Autenticación Google fallida.' };
-    return { ok: true, token: token.token, spreadsheetId: config.config.spreadsheetId };
+    return { ok: true, token: token.token, spreadsheetId: resolved.config.spreadsheetId };
   }
 
   return {
