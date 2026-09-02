@@ -184,6 +184,17 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
     ['mineral', 'Minerales'],
     ['other', 'Otros nutrientes'],
   ] as const;
+  const nutrientTargetsReady = data.optionalSources.nutrientTargets === 'ready';
+  const nutrientSummaryReady = data.optionalSources.nutrientSummary === 'ready';
+  const nutrientSourcesLabel =
+    nutrientTargetsReady && nutrientSummaryReady
+      ? 'Activas'
+      : nutrientTargetsReady || nutrientSummaryReady
+        ? 'Parciales'
+        : data.optionalSources.nutrientTargets === 'missing' &&
+            data.optionalSources.nutrientSummary === 'missing'
+          ? 'Pendientes'
+          : 'No disponibles';
 
   const antioxidant = data.aiInsights.find((insight) => insight.category === 'antioxidants');
   const antiInflammatory = data.aiInsights.find(
@@ -321,8 +332,9 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
             <p className={styles.eyebrow}>MICRONUTRIENTES</p>
             <h2 id="micronutrients-title">Vitaminas, minerales y otros nutrientes</h2>
             <p>
-              La interfaz está preparada para el detalle tipo Cronometer, pero solo muestra
-              cantidades que existan en el store canónico.
+              Vida combina cantidades de `Nutrient Summary` con referencias de `Nutrient Targets` y
+              mantiene como desconocido cualquier valor que Nutrition Intelligence todavía no haya
+              cuantificado.
             </p>
           </div>
           <Microscope size={21} aria-hidden="true" />
@@ -337,18 +349,12 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
           <article>
             <span>Con objetivo</span>
             <strong>{targetedNutrients.length}</strong>
-            <small>metas cargadas en el store</small>
+            <small>referencias activas cargadas en el store</small>
           </article>
           <article>
-            <span>Fuente micronutrientes</span>
-            <strong>
-              {data.optionalSources.nutrientSummary === 'ready'
-                ? 'Activa'
-                : data.optionalSources.nutrientSummary === 'missing'
-                  ? 'Pendiente'
-                  : 'No disponible'}
-            </strong>
-            <small>`Nutrient Summary` es opcional en esta primera pasada</small>
+            <span>Fuentes de micros</span>
+            <strong>{nutrientSourcesLabel}</strong>
+            <small>resumen diario + referencias de objetivos</small>
           </article>
         </div>
 
@@ -374,11 +380,11 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
             <Leaf size={22} aria-hidden="true" />
             <div>
               <strong>
-                La estructura está lista; faltan valores micronutricionales en el store.
+                Las referencias ya están listas; faltan valores micronutricionales de consumo.
               </strong>
               <p>
-                Cuando Nutrition Intelligence guarde vitaminas y minerales por día, aparecerán acá
-                sin necesidad de cambiar la pantalla.
+                Cuando Nutrition Intelligence complete `Nutrient Summary`, las cantidades aparecerán
+                acá contra sus referencias sin necesidad de cambiar la pantalla.
               </p>
             </div>
           </div>
