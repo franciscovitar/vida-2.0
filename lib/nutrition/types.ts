@@ -3,10 +3,7 @@ import type { SheetReadCode } from '@/lib/google/errors';
 export type NutritionCoverage = 'complete' | 'partial' | 'none' | 'unknown';
 export type NutritionEstimateQuality = 'high' | 'medium' | 'low' | 'mixed' | 'unknown';
 export type NutritionInsightCategory =
-  | 'antioxidants'
-  | 'anti-inflammatory'
-  | 'improvement'
-  | 'pattern';
+  'antioxidants' | 'anti-inflammatory' | 'improvement' | 'pattern';
 export type NutritionInsightTone = 'positive' | 'watch' | 'neutral';
 export type NutrientGroup = 'vitamin' | 'mineral' | 'other';
 

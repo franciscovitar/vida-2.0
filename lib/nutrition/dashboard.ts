@@ -120,7 +120,9 @@ function chooseTarget(rows: readonly Row[], today: string): NutritionTarget | nu
       const to = stringValue(row.effectiveTo);
       return Boolean(from && from <= today && (!to || to >= today));
     })
-    .sort((a, b) => (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''));
+    .sort((a, b) =>
+      (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''),
+    );
 
   const row = eligible[0];
   if (!row) return null;
@@ -174,7 +176,13 @@ function macroFromItems(input: {
     target: input.target,
     unit: 'g',
     coverage:
-      active.length === 0 ? 'none' : known.length === active.length ? 'complete' : known.length > 0 ? 'partial' : 'none',
+      active.length === 0
+        ? 'none'
+        : known.length === active.length
+          ? 'complete'
+          : known.length > 0
+            ? 'partial'
+            : 'none',
     knownItemCount: known.length,
     totalItemCount: active.length,
   };
@@ -186,7 +194,11 @@ function mealTimeLabel(timestamp: string | null): string | null {
   return match?.[1] ?? null;
 }
 
-function sumEnergy(items: readonly Row[]): { central: number | null; low: number | null; high: number | null } {
+function sumEnergy(items: readonly Row[]): {
+  central: number | null;
+  low: number | null;
+  high: number | null;
+} {
   if (items.length === 0) return { central: null, low: null, high: null };
   let central = 0;
   let low = 0;
@@ -214,7 +226,11 @@ function sumEnergy(items: readonly Row[]): { central: number | null; low: number
   };
 }
 
-function buildMeals(mealRows: readonly Row[], itemRows: readonly Row[], today: string): NutritionMealSummary[] {
+function buildMeals(
+  mealRows: readonly Row[],
+  itemRows: readonly Row[],
+  today: string,
+): NutritionMealSummary[] {
   const meals = activeRows(mealRows).filter((row) => stringValue(row.date) === today);
   const activeItems = activeRows(itemRows);
   return meals
@@ -227,7 +243,10 @@ function buildMeals(mealRows: readonly Row[], itemRows: readonly Row[], today: s
         .filter((name): name is string => Boolean(name));
       const energy = sumEnergy(items);
       const source = stringValue(meal.sourceText);
-      const title = foodNames.length > 0 ? foodNames.slice(0, 3).join(' · ') : source?.split('\n')[0] ?? 'Comida';
+      const title =
+        foodNames.length > 0
+          ? foodNames.slice(0, 3).join(' · ')
+          : (source?.split('\n')[0] ?? 'Comida');
       return {
         mealId,
         mealType: stringValue(meal.mealType) ?? 'unknown',
@@ -238,7 +257,7 @@ function buildMeals(mealRows: readonly Row[], itemRows: readonly Row[], today: s
         energyKcalLow: energy.low,
         energyKcalHigh: energy.high,
         confidence: aggregateConfidence(items.map((item) => confidenceValue(item.confidence))),
-      } satisfies NutritionMealSummary;
+      } as NutritionMealSummary;
     })
     .filter((meal): meal is NutritionMealSummary => meal !== null)
     .sort((a, b) => (a.timeLabel ?? '99:99').localeCompare(b.timeLabel ?? '99:99'));
@@ -251,7 +270,11 @@ function nutrientGroup(value: PlainCell, fallback: NutrientGroup): NutrientGroup
     : fallback;
 }
 
-function buildNutrients(result: ReadTabResult, todayItems: readonly Row[], today: string): NutritionNutrientValue[] {
+function buildNutrients(
+  result: ReadTabResult,
+  todayItems: readonly Row[],
+  today: string,
+): NutritionNutrientValue[] {
   const rows = rowsFrom(result).filter((row) => stringValue(row.date) === today);
   const byKey = new Map(rows.map((row) => [stringValue(row.nutrientKey) ?? '', row]));
 
@@ -347,7 +370,11 @@ function parseAiInsights(result: ReadTabResult, today: string): NutritionAiInsig
       const date = stringValue(row.date);
       return !date || date <= today;
     })
-    .sort((a, b) => (stringValue(b.createdAt) ?? stringValue(b.date) ?? '').localeCompare(stringValue(a.createdAt) ?? stringValue(a.date) ?? ''));
+    .sort((a, b) =>
+      (stringValue(b.createdAt) ?? stringValue(b.date) ?? '').localeCompare(
+        stringValue(a.createdAt) ?? stringValue(a.date) ?? '',
+      ),
+    );
 
   const seen = new Set<string>();
   const insights: NutritionAiInsight[] = [];
@@ -365,7 +392,8 @@ function parseAiInsights(result: ReadTabResult, today: string): NutritionAiInsig
     const detail = stringValue(row.detail);
     if (!title || !detail) continue;
     const rawTone = stringValue(row.tone)?.toLowerCase();
-    const tone = rawTone === 'positive' || rawTone === 'watch' || rawTone === 'neutral' ? rawTone : 'neutral';
+    const tone =
+      rawTone === 'positive' || rawTone === 'watch' || rawTone === 'neutral' ? rawTone : 'neutral';
     insights.push({
       id: stringValue(row.insightId) ?? `${category}:${stringValue(row.date) ?? 'latest'}`,
       category,
@@ -395,7 +423,9 @@ function optionalStatus(result: ReadTabResult): 'ready' | 'missing' | 'unavailab
   return result.code === 'missing-tab' ? 'missing' : 'unavailable';
 }
 
-export async function loadNutritionDashboardData(now = new Date()): Promise<NutritionDashboardData> {
+export async function loadNutritionDashboardData(
+  now = new Date(),
+): Promise<NutritionDashboardData> {
   const today = cordobaToday(now);
   const [dailyResult, mealsResult, itemsResult, targetsResult, nutrientResult, insightsResult] =
     await Promise.all([
@@ -417,7 +447,9 @@ export async function loadNutritionDashboardData(now = new Date()): Promise<Nutr
   const itemRows = rowsFrom(itemsResult);
   const targetRows = rowsFrom(targetsResult);
   const target = chooseTarget(targetRows, today);
-  const history = parseDailyRows(dailyRows).filter((row) => row.date <= today).slice(-14);
+  const history = parseDailyRows(dailyRows)
+    .filter((row) => row.date <= today)
+    .slice(-14);
   const todayDaily = history.find((row) => row.date === today) ?? null;
   const todayMealIds = new Set(
     activeRows(mealRows)
@@ -488,9 +520,12 @@ export async function loadNutritionDashboardData(now = new Date()): Promise<Nutr
       coverage: todayDaily?.energyCoverage ?? 'none',
       quality: todayDaily?.estimateQuality ?? 'unknown',
       dayStatus:
-        stringValue(dailyRows.find((row) => stringValue(row.date) === today)?.dayStatus) === 'closed'
+        stringValue(dailyRows.find((row) => stringValue(row.date) === today)?.dayStatus ?? null) ===
+        'closed'
           ? 'closed'
-          : stringValue(dailyRows.find((row) => stringValue(row.date) === today)?.dayStatus) === 'open'
+          : stringValue(
+                dailyRows.find((row) => stringValue(row.date) === today)?.dayStatus ?? null,
+              ) === 'open'
             ? 'open'
             : 'unknown',
       trackedMealCount: todayDaily?.trackedMealCount ?? 0,

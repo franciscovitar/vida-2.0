@@ -18,7 +18,10 @@ export async function NutritionPlanSection() {
           icon={BookOpenText}
           domain="health"
         />
-        <p>El Registro Web está desactivado; el dashboard cuantitativo puede funcionar de forma independiente.</p>
+        <p>
+          El Registro Web está desactivado; el dashboard cuantitativo puede funcionar de forma
+          independiente.
+        </p>
       </Card>
     );
   }

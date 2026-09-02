@@ -95,10 +95,7 @@ export async function readNutritionTabValues(tab: string): Promise<ReadTabResult
     }
 
     const plain = JSON.parse(JSON.stringify(sanitizeSheetValues(values))) as (
-      | string
-      | number
-      | boolean
-      | null
+      string | number | boolean | null
     )[][];
     return { ok: true, values: plain };
   } catch {

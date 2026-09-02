@@ -79,7 +79,9 @@ function MacroBar({ macro }: { macro: NutritionMacroProgress }) {
         <span className={styles.fill} style={style} />
       </div>
       <div className={styles['macro-footer']}>
-        <span>{macro.target === null ? 'Objetivo pendiente' : `Meta ${formatNumber(macro.target)} g`}</span>
+        <span>
+          {macro.target === null ? 'Objetivo pendiente' : `Meta ${formatNumber(macro.target)} g`}
+        </span>
         <span>{progress === null ? '—' : `${progress}%`}</span>
       </div>
     </article>
@@ -197,8 +199,9 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
           <p className={styles.eyebrow}>NUTRICIÓN V2 · HOY</p>
           <h2 id="nutrition-v2-title">Tu nutrición, de macros a micros</h2>
           <p>
-            Lo registrado en Nutrition Intelligence se transforma en una vista diaria y longitudinal.
-            Valores desconocidos siguen siendo desconocidos: no se rellenan huecos con ceros.
+            Lo registrado en Nutrition Intelligence se transforma en una vista diaria y
+            longitudinal. Valores desconocidos siguen siendo desconocidos: no se rellenan huecos con
+            ceros.
           </p>
           <div className={styles['source-line']} data-status={data.source.status}>
             <ShieldCheck size={15} aria-hidden="true" />
@@ -207,7 +210,11 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
         </div>
 
         <div className={styles['energy-summary']}>
-          <div className={styles['energy-ring']} style={ringStyle} aria-label="Progreso de calorías">
+          <div
+            className={styles['energy-ring']}
+            style={ringStyle}
+            aria-label="Progreso de calorías"
+          >
             <div>
               <small>Consumidas</small>
               <strong>{formatEnergy(data.todayEnergy)}</strong>
@@ -221,7 +228,9 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
           <div className={styles['energy-meta']}>
             <div>
               <span>Objetivo</span>
-              <strong>{targetEnergy === null ? 'Pendiente' : `${formatNumber(targetEnergy)} kcal`}</strong>
+              <strong>
+                {targetEnergy === null ? 'Pendiente' : `${formatNumber(targetEnergy)} kcal`}
+              </strong>
             </div>
             <div>
               <span>Restante</span>
@@ -246,7 +255,10 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
           <div>
             <p className={styles.eyebrow}>ÚLTIMOS 7 DÍAS</p>
             <h2 id="nutrition-trend-title">Energía y calidad del registro</h2>
-            <p>La banda muestra el rango cuando existe; el punto representa el valor central registrado.</p>
+            <p>
+              La banda muestra el rango cuando existe; el punto representa el valor central
+              registrado.
+            </p>
           </div>
           <CircleGauge size={21} aria-hidden="true" />
         </div>
@@ -284,7 +296,9 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
           <div className={styles['quality-grid']}>
             <article>
               <span>Energía completa</span>
-              <strong>{recent.length === 0 ? '—' : `${energyCompleteDays}/${recent.length}`}</strong>
+              <strong>
+                {recent.length === 0 ? '—' : `${energyCompleteDays}/${recent.length}`}
+              </strong>
               <small>días con cobertura completa</small>
             </article>
             <article>
@@ -307,8 +321,8 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
             <p className={styles.eyebrow}>MICRONUTRIENTES</p>
             <h2 id="micronutrients-title">Vitaminas, minerales y otros nutrientes</h2>
             <p>
-              La interfaz está preparada para el detalle tipo Cronometer, pero solo muestra cantidades
-              que existan en el store canónico.
+              La interfaz está preparada para el detalle tipo Cronometer, pero solo muestra
+              cantidades que existan en el store canónico.
             </p>
           </div>
           <Microscope size={21} aria-hidden="true" />
@@ -344,7 +358,8 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
               <article key={nutrient.key} className={styles.highlight}>
                 <span>{nutrient.name}</span>
                 <strong>
-                  {formatNumber(nutrient.amount, (nutrient.amount ?? 0) < 10 ? 1 : 0)} {nutrient.unit}
+                  {formatNumber(nutrient.amount, (nutrient.amount ?? 0) < 10 ? 1 : 0)}{' '}
+                  {nutrient.unit}
                 </strong>
                 <small>
                   {nutrient.target === null
@@ -358,10 +373,12 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
           <div className={styles['micro-empty']}>
             <Leaf size={22} aria-hidden="true" />
             <div>
-              <strong>La estructura está lista; faltan valores micronutricionales en el store.</strong>
+              <strong>
+                La estructura está lista; faltan valores micronutricionales en el store.
+              </strong>
               <p>
-                Cuando Nutrition Intelligence guarde vitaminas y minerales por día, aparecerán acá sin
-                necesidad de cambiar la pantalla.
+                Cuando Nutrition Intelligence guarde vitaminas y minerales por día, aparecerán acá
+                sin necesidad de cambiar la pantalla.
               </p>
             </div>
           </div>

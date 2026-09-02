@@ -25,7 +25,11 @@
       color-mix(in srgb, var(--c-habits-soft) 56%, transparent),
       transparent 45%
     ),
-    linear-gradient(135deg, color-mix(in srgb, var(--c-health-soft) 74%, var(--surface)), var(--surface) 62%);
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--c-health-soft) 74%, var(--surface)),
+      var(--surface) 62%
+    );
 }
 
 .hero::after {
