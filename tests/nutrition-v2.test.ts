@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { isNutritionFoodItemStructurallyValid } from '@/lib/nutrition/food-item-integrity';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import { getNutritionSheetsConfig, getNutritionSpreadsheetId } from '@/lib/nutrition/sheets-config';
 
@@ -70,4 +71,33 @@ test('el catálogo no contiene valores personales ni objetivos nutricionales', (
   for (const entry of NUTRIENT_CATALOG) {
     assert.deepEqual(Object.keys(entry).sort(), ['group', 'key', 'name', 'unit']);
   }
+});
+
+test('Food Items válidos conservan números y estados canónicos', () => {
+  assert.equal(
+    isNutritionFoodItemStructurallyValid({
+      confidence: 'high',
+      status: 'active',
+      energyKcal: 112,
+      proteinGrams: 2.8,
+      carbohydrateGrams: 9.5,
+      fatGrams: 8.3,
+      fiberGrams: 3.5,
+    }),
+    true,
+  );
+});
+
+test('Food Items desalineados fallan cerrados antes de contaminar macros', () => {
+  assert.equal(
+    isNutritionFoodItemStructurallyValid({
+      confidence: 'product-label',
+      energyKcal: 'high',
+      energyKcalLow: 424,
+      energyKcalHigh: 424,
+      proteinGrams: 424,
+      status: null,
+    }),
+    false,
+  );
 });
