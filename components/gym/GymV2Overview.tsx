@@ -377,7 +377,7 @@ export function GymV2Overview({
                         <span>e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg</span>
                         <span>
                           {exercise.nextLevelLabel && exercise.nextThresholdKg !== null
-                            ? `Próximo: ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
+                            ? `${exercise.nextLevelProgressPercent}% del umbral ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
                             : 'Máximo nivel de la referencia'}
                         </span>
                       </div>
