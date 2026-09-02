@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { normalizeGymSheetValues, isGymSpreadsheetConfigured } from '@/lib/gym/sheets-read';
 import { computeGymV2Analytics } from '@/lib/gym/v2-analytics';
 import type { GymSession, GymSessionSummary } from '@/types/gym';
 
@@ -50,12 +51,17 @@ function summaries(sessions: readonly GymSession[]): GymSessionSummary[] {
   }));
 }
 
-test('Gym V2 compara frecuencia semanal sin convertir días sin sesión en fallos', () => {
+test('Gym V2 compara la semana actual contra el mismo punto de la semana anterior', () => {
   const sessions = [
     session({
       key: 'prev-1',
       date: '2026-08-25',
       exercises: [{ name: 'Remo en máquina', sets: [{ load: 50, reps: 8 }] }],
+    }),
+    session({
+      key: 'prev-late',
+      date: '2026-08-28',
+      exercises: [{ name: 'Remo en máquina', sets: [{ load: 50, reps: 9 }] }],
     }),
     session({
       key: 'current-1',
@@ -82,7 +88,7 @@ test('Gym V2 compara frecuencia semanal sin convertir días sin sesión en fallo
   assert.equal(result.adherencePercent, 67);
 });
 
-test('Gym V2 compara el mejor set contra la sesión anterior del mismo ejercicio', () => {
+test('Gym V2 compara fuerza estimada del mejor set del mismo ejercicio', () => {
   const sessions = [
     session({
       key: 'a',
@@ -125,10 +131,37 @@ test('Gym V2 compara el mejor set contra la sesión anterior del mismo ejercicio
   assert.ok(trend);
   assert.equal(trend.latestLoad, 65);
   assert.equal(trend.latestReps, 8);
-  assert.equal(trend.latestSetVolume, 520);
-  assert.equal(trend.previousSetVolume, 390);
-  assert.equal(trend.deltaPercent, 33.3);
+  assert.equal(trend.latestPerformance, 82.33);
+  assert.equal(trend.previousPerformance, 78);
+  assert.equal(trend.deltaPercent, 5.6);
   assert.equal(trend.trend, 'up');
+});
+
+test('Gym V2 trata cambios pequeños de fuerza estimada como estables', () => {
+  const sessions = [
+    session({
+      key: 'a',
+      date: '2026-08-28',
+      exercises: [{ name: 'Remo en máquina', sets: [{ load: 50, reps: 10 }] }],
+    }),
+    session({
+      key: 'b',
+      date: '2026-09-01',
+      exercises: [{ name: 'Remo en máquina', sets: [{ load: 55, reps: 9 }] }],
+    }),
+  ];
+
+  const result = computeGymV2Analytics({
+    sessions,
+    summaries: summaries(sessions),
+    weeklyTarget: 3,
+    today: '2026-09-02',
+  });
+  const trend = result.exerciseTrends[0];
+
+  assert.ok(trend);
+  assert.equal(trend.trend, 'steady');
+  assert.ok(Math.abs(trend.deltaPercent ?? 99) <= 2);
 });
 
 test('Gym V2 construye una base personal solo con observaciones previas disponibles', () => {
@@ -248,4 +281,25 @@ test('Gym V2 queda en Construyendo base cuando no hay sesiones comparables', () 
   assert.equal(result.statusLabel, 'Construyendo base');
   assert.equal(result.comparableExercises, 0);
   assert.equal(result.improvingExercises, 0);
+});
+
+test('Gym V2 normaliza fechas seriales del registro real sin alterar otras celdas', () => {
+  const values = [
+    ['sessionId', 'date', 'routineKey'],
+    ['gym-a', 46258, 'rutina'],
+    ['gym-b', '2026-08-28', 'rutina'],
+  ];
+
+  const normalized = normalizeGymSheetValues('Gym Sessions', values);
+  assert.equal(normalized[1]?.[1], '2026-08-24');
+  assert.equal(normalized[2]?.[1], '2026-08-28');
+  assert.equal(normalized[1]?.[0], 'gym-a');
+});
+
+test('Gym V2 exige una referencia server-side explícita para su spreadsheet', () => {
+  assert.equal(isGymSpreadsheetConfigured({}), false);
+  assert.equal(
+    isGymSpreadsheetConfigured({ GOOGLE_GYM_SPREADSHEET_ID: 'example_gym_spreadsheet_12345' }),
+    true,
+  );
 });
