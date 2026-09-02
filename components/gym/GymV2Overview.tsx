@@ -57,11 +57,6 @@ function shortDate(ymd: string | null): string {
   return `${day}/${month}`;
 }
 
-function shortSourceDate(ymd: string): string {
-  const [year, month, day] = ymd.split('-');
-  return `${day}/${month}/${year}`;
-}
-
 function sparkPoints(series: readonly number[]): SparkPoint[] {
   const values = series.slice(-5);
   if (values.length === 0) return [];
@@ -104,10 +99,16 @@ export function GymV2Overview({
   );
   const topMuscleGroup = analytics.muscleGroups.at(0) ?? null;
   const featuredBenchmarkExercises = benchmark.exercises.slice(0, 2);
+  const benchmarkedExerciseNames = new Set(benchmark.exercises.map((exercise) => exercise.exerciseName));
+  const unratedBenchmarkExercises = analytics.exerciseTrends.filter(
+    (exercise) =>
+      !benchmarkedExerciseNames.has(exercise.exerciseName) &&
+      isExternalStrengthBenchmarkSupported(exercise.exerciseName),
+  );
   const unsupportedBenchmarkExercises = analytics.exerciseTrends.filter(
     (exercise) => !isExternalStrengthBenchmarkSupported(exercise.exerciseName),
   );
-  const externalExerciseCount = benchmark.exercises.length + unsupportedBenchmarkExercises.length;
+  const externalExerciseCount = analytics.exerciseTrends.length;
 
   return (
     <div className={styles.stack}>
@@ -343,7 +344,7 @@ export function GymV2Overview({
           <SectionHeader
             id="gym-v2-benchmark-title"
             title="Tu nivel externo"
-            description="Referencia masculina de fuerza. Se muestra aparte de tu progreso personal."
+            description="Tabla fija masculina de 1RM. Se muestra aparte de tu progreso personal."
             domain="health"
           />
           <div className={benchmarkStyles.layout}>
@@ -359,12 +360,10 @@ export function GymV2Overview({
                 <article key={exercise.id} className={benchmarkStyles.exercise}>
                   <div className={benchmarkStyles.heading}>
                     <div>
-                      <a href={exercise.sourceUrl} target="_blank" rel="noreferrer">
-                        {exercise.benchmarkName}
-                      </a>
+                      <h3>{exercise.benchmarkName}</h3>
                       <small>
                         {number(exercise.loadKg)} kg × {exercise.reps} · último{' '}
-                        {shortDate(exercise.latestDate)}
+                        {shortDate(exercise.latestDate)} · {exercise.confidenceLabel.toLowerCase()}
                       </small>
                     </div>
                     <strong>{exercise.levelLabel}</strong>
@@ -385,7 +384,7 @@ export function GymV2Overview({
                         <span>e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg</span>
                         <span>
                           {exercise.nextLevelLabel && exercise.nextThresholdKg !== null
-                            ? `${exercise.nextLevelProgressPercent}% del umbral ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
+                            ? `${exercise.nextLevelProgressPercent}% del camino hacia ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
                             : 'Máximo nivel de la referencia'}
                         </span>
                       </div>
@@ -405,8 +404,7 @@ export function GymV2Overview({
               <summary>
                 <span>Ver todos los ejercicios</span>
                 <small>
-                  {externalExerciseCount} en total · {benchmark.exercises.length} con referencia
-                  externa
+                  {externalExerciseCount} registrados · {benchmark.exercises.length} con nivel
                 </small>
               </summary>
 
@@ -414,8 +412,8 @@ export function GymV2Overview({
                 <section>
                   <div className={benchmarkStyles['group-heading']}>
                     <div>
-                      <strong>Con referencia externa</strong>
-                      <span>Nivel comparable con la fuente actual.</span>
+                      <strong>Con benchmark fijo</strong>
+                      <span>e1RM Epley comparado contra la tabla masculina guardada en Vida.</span>
                     </div>
                     <small>{benchmark.exercises.length}</small>
                   </div>
@@ -425,8 +423,8 @@ export function GymV2Overview({
                         <div>
                           <strong>{exercise.benchmarkName}</strong>
                           <small>
-                            {number(exercise.loadKg)} kg × {exercise.reps} · último{' '}
-                            {shortDate(exercise.latestDate)}
+                            {number(exercise.loadKg)} kg × {exercise.reps} → e1RM{' '}
+                            {number(exercise.estimatedOneRepMaxKg)} kg · {exercise.confidenceLabel}
                           </small>
                         </div>
                         <span data-tone="benchmark">{exercise.levelLabel}</span>
@@ -435,14 +433,45 @@ export function GymV2Overview({
                   </div>
                 </section>
 
+                {unratedBenchmarkExercises.length > 0 ? (
+                  <section>
+                    <div className={benchmarkStyles['group-heading']}>
+                      <div>
+                        <strong>En la tabla, sin e1RM calculable</strong>
+                        <span>
+                          La referencia existe, pero el último set no entra en el rango 1–15 reps o
+                          le falta carga/repeticiones.
+                        </span>
+                      </div>
+                      <small>{unratedBenchmarkExercises.length}</small>
+                    </div>
+                    <div className={benchmarkStyles['compact-list']}>
+                      {unratedBenchmarkExercises.map((exercise) => (
+                        <article key={exercise.key} className={benchmarkStyles.compact}>
+                          <div>
+                            <strong>{exercise.exerciseName}</strong>
+                            <small>
+                              {exercise.latestLoad === null || exercise.latestReps === null
+                                ? 'Sin set completo'
+                                : `${number(exercise.latestLoad)} kg × ${exercise.latestReps}`}{' '}
+                              · último {shortDate(exercise.latestDate)}
+                            </small>
+                          </div>
+                          <span data-tone="neutral">Sin e1RM</span>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                ) : null}
+
                 {unsupportedBenchmarkExercises.length > 0 ? (
                   <section>
                     <div className={benchmarkStyles['group-heading']}>
                       <div>
-                        <strong>Sin referencia comparable</strong>
+                        <strong>Sin referencia en la tabla</strong>
                         <span>
-                          Tu progreso personal sí se analiza; solo evitamos asignar un nivel externo
-                          incompatible.
+                          El ejercicio sigue teniendo progreso personal, pero no recibe una categoría
+                          externa hasta agregar un benchmark fijo explícito.
                         </span>
                       </div>
                       <small>{unsupportedBenchmarkExercises.length}</small>
@@ -472,10 +501,9 @@ export function GymV2Overview({
           <div className={benchmarkStyles.footnote}>
             <Gauge size={16} aria-hidden="true" />
             <p>
-              Fuente: {benchmark.sourceLabel}, datos hasta{' '}
-              {shortSourceDate(benchmark.sourceDataCutoff)}. {benchmark.populationNote} El e1RM es
-              una estimación a partir del set registrado; máquinas y poleas quedan fuera de esta
-              clasificación.
+              {benchmark.referenceLabel} · versión {benchmark.baselineVersion}.{' '}
+              {benchmark.methodologyNote} El nivel general es orientativo y no reemplaza tu progreso
+              personal.
             </p>
           </div>
         </Card>
