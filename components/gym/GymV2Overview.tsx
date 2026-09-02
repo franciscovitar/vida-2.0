@@ -255,7 +255,8 @@ export function GymV2Overview({
                     <span>{exercise.sessionCount} sesiones</span>
                     <span>{exercise.completedSets} series</span>
                     <span>
-                      Mejor carga {exercise.bestLoad === null ? '—' : `${number(exercise.bestLoad)} kg`}
+                      Mejor carga{' '}
+                      {exercise.bestLoad === null ? '—' : `${number(exercise.bestLoad)} kg`}
                     </span>
                   </div>
                 </article>
