@@ -12,6 +12,7 @@ import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 type PlainCell = string | number | boolean | null;
 type PlainRows = PlainCell[][];
 type GymSheetsEnv = {
+  [key: string]: string | undefined;
   GOOGLE_GYM_SPREADSHEET_ID?: string;
   GOOGLE_SERVICE_ACCOUNT_EMAIL?: string;
   GOOGLE_PRIVATE_KEY?: string;
