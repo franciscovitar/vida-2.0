@@ -18,10 +18,10 @@ export interface GymV2ExerciseTrend {
   latestDate: string;
   latestLoad: number | null;
   latestReps: number | null;
-  latestSetVolume: number | null;
-  previousSetVolume: number | null;
+  latestPerformance: number | null;
+  previousPerformance: number | null;
   bestLoad: number | null;
-  bestSetVolume: number | null;
+  bestPerformance: number | null;
   deltaPercent: number | null;
   baselineDeltaPercent: number | null;
   trend: GymV2Trend;
@@ -75,7 +75,7 @@ interface ExerciseObservation {
   date: string;
   load: number;
   reps: number;
-  setVolume: number;
+  performance: number;
 }
 
 interface ExerciseAccumulator {
@@ -83,7 +83,7 @@ interface ExerciseAccumulator {
   exerciseName: string;
   completedSets: number;
   bestLoad: number | null;
-  bestSetVolume: number | null;
+  bestPerformance: number | null;
   observations: ExerciseObservation[];
 }
 
@@ -109,6 +109,10 @@ function addDays(ymd: string, delta: number): string {
   return date.toISOString().slice(0, 10);
 }
 
+function daysBetween(start: string, end: string): number {
+  return Math.round((dateFromYmd(end).getTime() - dateFromYmd(start).getTime()) / 86_400_000);
+}
+
 function mondayOf(ymd: string): string {
   const date = dateFromYmd(ymd);
   const day = date.getUTCDay();
@@ -129,6 +133,12 @@ function round(value: number, digits = 1): number {
   return Math.round(value * factor) / factor;
 }
 
+/** Epley e1RM. Se usa solo como índice personal para sets de 1–15 reps. */
+function estimatedStrength(load: number, reps: number): number | null {
+  if (load <= 0 || reps < 1 || reps > 15) return null;
+  return round(load * (1 + reps / 30), 2);
+}
+
 function percentDelta(current: number | null, previous: number | null): number | null {
   if (current === null || previous === null || previous <= 0) return null;
   return round(((current - previous) / previous) * 100);
@@ -136,12 +146,15 @@ function percentDelta(current: number | null, previous: number | null): number |
 
 function trendFromDelta(delta: number | null): GymV2Trend {
   if (delta === null) return 'unknown';
-  if (delta > 0) return 'up';
-  if (delta < 0) return 'down';
+  if (delta > 2) return 'up';
+  if (delta < -2) return 'down';
   return 'steady';
 }
 
-function bestObservationForExercise(session: GymSession, exerciseName: string): ExerciseObservation | null {
+function bestObservationForExercise(
+  session: GymSession,
+  exerciseName: string,
+): ExerciseObservation | null {
   const exercise = session.exercises.find((item) => item.exerciseName === exerciseName);
   if (!exercise) return null;
 
@@ -149,13 +162,14 @@ function bestObservationForExercise(session: GymSession, exerciseName: string): 
   for (const set of exercise.sets) {
     const load = numericLoad(set.load);
     const reps = set.reps;
-    if (load === null || reps === null || reps <= 0) continue;
-    const setVolume = round(load * reps, 2);
-    const candidate: ExerciseObservation = { date: session.date, load, reps, setVolume };
+    if (load === null || reps === null) continue;
+    const performance = estimatedStrength(load, reps);
+    if (performance === null) continue;
+    const candidate: ExerciseObservation = { date: session.date, load, reps, performance };
     if (
       best === null ||
-      candidate.setVolume > best.setVolume ||
-      (candidate.setVolume === best.setVolume && candidate.load > best.load)
+      candidate.performance > best.performance ||
+      (candidate.performance === best.performance && candidate.load > best.load)
     ) {
       best = candidate;
     }
@@ -179,7 +193,7 @@ function buildExerciseTrends(sessions: readonly GymSession[]): GymV2ExerciseTren
           exerciseName: exercise.exerciseName,
           completedSets: 0,
           bestLoad: null,
-          bestSetVolume: null,
+          bestPerformance: null,
           observations: [],
         } satisfies ExerciseAccumulator);
 
@@ -189,10 +203,10 @@ function buildExerciseTrends(sessions: readonly GymSession[]): GymV2ExerciseTren
         current.observations.push(observation);
         current.bestLoad =
           current.bestLoad === null ? observation.load : Math.max(current.bestLoad, observation.load);
-        current.bestSetVolume =
-          current.bestSetVolume === null
-            ? observation.setVolume
-            : Math.max(current.bestSetVolume, observation.setVolume);
+        current.bestPerformance =
+          current.bestPerformance === null
+            ? observation.performance
+            : Math.max(current.bestPerformance, observation.performance);
       }
       byExercise.set(normalized, current);
     }
@@ -206,10 +220,10 @@ function buildExerciseTrends(sessions: readonly GymSession[]): GymV2ExerciseTren
       const baselineAverage =
         baselineObservations.length === 0
           ? null
-          : baselineObservations.reduce((sum, item) => sum + item.setVolume, 0) /
+          : baselineObservations.reduce((sum, item) => sum + item.performance, 0) /
             baselineObservations.length;
-      const deltaPercent = percentDelta(latest?.setVolume ?? null, previous?.setVolume ?? null);
-      const baselineDeltaPercent = percentDelta(latest?.setVolume ?? null, baselineAverage);
+      const deltaPercent = percentDelta(latest?.performance ?? null, previous?.performance ?? null);
+      const baselineDeltaPercent = percentDelta(latest?.performance ?? null, baselineAverage);
 
       return {
         key: exercise.key,
@@ -217,16 +231,16 @@ function buildExerciseTrends(sessions: readonly GymSession[]): GymV2ExerciseTren
         latestDate: latest?.date ?? '',
         latestLoad: latest?.load ?? null,
         latestReps: latest?.reps ?? null,
-        latestSetVolume: latest?.setVolume ?? null,
-        previousSetVolume: previous?.setVolume ?? null,
+        latestPerformance: latest?.performance ?? null,
+        previousPerformance: previous?.performance ?? null,
         bestLoad: exercise.bestLoad,
-        bestSetVolume: exercise.bestSetVolume,
+        bestPerformance: exercise.bestPerformance,
         deltaPercent,
         baselineDeltaPercent,
         trend: trendFromDelta(deltaPercent),
         sessionCount: exercise.observations.length,
         completedSets: exercise.completedSets,
-        series: exercise.observations.map((item) => item.setVolume),
+        series: exercise.observations.map((item) => item.performance),
       } satisfies GymV2ExerciseTrend;
     })
     .sort(
@@ -240,7 +254,11 @@ function buildExerciseTrends(sessions: readonly GymSession[]): GymV2ExerciseTren
 function muscleGroup(exerciseName: string): GymV2MuscleGroupId {
   const name = exerciseName.toLocaleLowerCase('es');
 
-  if (/prensa|sentadilla|femoral|cu[aá]dr|gemel|s[oó]leo|hip thrust|aductor|abductor|zancada|peso muerto/.test(name)) {
+  if (
+    /prensa|sentadilla|femoral|cu[aá]dr|gemel|s[oó]leo|hip thrust|aductor|abductor|zancada|peso muerto/.test(
+      name,
+    )
+  ) {
     return 'legs';
   }
   if (/dead bug|plancha|pallof|abdominal|copenhagen/.test(name)) return 'core';
@@ -315,7 +333,7 @@ function buildInsights(input: {
     insights.push({
       id: 'weekly-frequency',
       title: 'Frecuencia reciente',
-      detail: `${input.currentWeekSessions} sesión(es) esta semana y ${input.previousWeekSessions} la semana anterior.`,
+      detail: `${input.currentWeekSessions} sesión(es) esta semana y ${input.previousWeekSessions} a esta altura de la semana anterior.`,
       tone: weeklyDelta < 0 ? 'watch' : weeklyDelta > 0 ? 'positive' : 'neutral',
     });
   }
@@ -323,21 +341,22 @@ function buildInsights(input: {
   const comparable = input.trends
     .filter((item) => item.deltaPercent !== null)
     .sort((a, b) => Math.abs(b.deltaPercent ?? 0) - Math.abs(a.deltaPercent ?? 0));
-  const strongestPositive = comparable.find((item) => (item.deltaPercent ?? 0) > 0);
-  const strongestNegative = comparable.find((item) => (item.deltaPercent ?? 0) < 0);
+  const strongestPositive = comparable.find((item) => item.trend === 'up');
+  const strongestNegative = comparable.find((item) => item.trend === 'down');
 
   if (strongestPositive) {
     insights.push({
       id: 'exercise-progress',
       title: `${strongestPositive.exerciseName} mejoró`,
-      detail: `Su mejor set subió ${Math.abs(strongestPositive.deltaPercent ?? 0)}% frente a la sesión comparable anterior.`,
+      detail: `La fuerza estimada del mejor set subió ${Math.abs(strongestPositive.deltaPercent ?? 0)}% frente a la sesión comparable anterior.`,
       tone: 'positive',
     });
   } else if (comparable.length > 0) {
     insights.push({
       id: 'exercise-progress',
       title: 'Rendimiento estable',
-      detail: 'Los ejercicios con sesiones comparables no muestran una mejora de mejor set todavía.',
+      detail:
+        'Los ejercicios comparables se mantienen dentro de un margen pequeño frente a su sesión anterior.',
       tone: 'neutral',
     });
   }
@@ -346,7 +365,7 @@ function buildInsights(input: {
     insights.push({
       id: 'exercise-watch',
       title: `${strongestNegative.exerciseName} bajó en la última comparación`,
-      detail: `El mejor set fue ${Math.abs(strongestNegative.deltaPercent ?? 0)}% menor que en la sesión comparable anterior. Es una observación, no una causa.`,
+      detail: `La fuerza estimada del mejor set fue ${Math.abs(strongestNegative.deltaPercent ?? 0)}% menor que en la sesión comparable anterior. Es una observación, no una causa.`,
       tone: 'watch',
     });
   }
@@ -382,12 +401,13 @@ export function computeGymV2Analytics(input: {
 
   const currentWeekStart = mondayOf(input.today);
   const previousWeekStart = addDays(currentWeekStart, -7);
-  const previousWeekEnd = addDays(currentWeekStart, -1);
+  const elapsedWeekDays = Math.max(0, daysBetween(currentWeekStart, input.today));
+  const previousComparisonEnd = addDays(previousWeekStart, elapsedWeekDays);
   const currentWeekSessions = completed.filter(
     (session) => session.date >= currentWeekStart && session.date <= input.today,
   ).length;
   const previousWeekSessions = completed.filter(
-    (session) => session.date >= previousWeekStart && session.date <= previousWeekEnd,
+    (session) => session.date >= previousWeekStart && session.date <= previousComparisonEnd,
   ).length;
   const weeklyDelta = currentWeekSessions - previousWeekSessions;
   const adherencePercent =
@@ -402,7 +422,7 @@ export function computeGymV2Analytics(input: {
   const decliningExercises = comparable.filter((item) => item.trend === 'down').length;
   const baselineComparable = exerciseTrends.filter((item) => item.baselineDeltaPercent !== null);
   const aboveBaselineExercises = baselineComparable.filter(
-    (item) => (item.baselineDeltaPercent ?? 0) > 0,
+    (item) => (item.baselineDeltaPercent ?? 0) > 2,
   ).length;
 
   let statusLabel = 'Construyendo base';
@@ -410,7 +430,7 @@ export function computeGymV2Analytics(input: {
   if (comparable.length > 0) {
     if (improvingExercises > decliningExercises) {
       statusLabel = 'Progresando';
-      statusDetail = `${improvingExercises} de ${comparable.length} ejercicio(s) comparables mejoraron en su mejor set.`;
+      statusDetail = `${improvingExercises} de ${comparable.length} ejercicio(s) comparables mejoraron en fuerza estimada.`;
     } else if (decliningExercises > improvingExercises) {
       statusLabel = 'Tendencia mixta';
       statusDetail = `${decliningExercises} de ${comparable.length} ejercicio(s) comparables bajaron en el último registro.`;
