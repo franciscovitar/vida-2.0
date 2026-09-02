@@ -1,0 +1,106 @@
+name: Temporary Nutrition row-boundary patch
+
+on:
+  push:
+    branches:
+      - feat/nutrition-v2
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/nutrition-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Patch row-level Nutrition integrity handling
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('lib/nutrition/dashboard.ts')
+          s = p.read_text()
+          replacements = [
+            (
+              "import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';",
+              "import { partitionNutritionFoodItemRows } from './food-item-integrity';\nimport { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';",
+            ),
+            (
+              "  const sourceStatus = allUnavailable ? 'unavailable' : failure ? 'partial' : 'ready';",
+              "  const baseSourceStatus = allUnavailable ? 'unavailable' : failure ? 'partial' : 'ready';",
+            ),
+            (
+              "  const itemRows = rowsFrom(itemsResult);\n  const targetRows = rowsFrom(targetsResult);",
+              "  const itemRows = rowsFrom(itemsResult);\n  const itemPartition = partitionNutritionFoodItemRows(itemRows);\n  const targetRows = rowsFrom(targetsResult);",
+            ),
+            (
+              "  const todayItems = activeRows(itemRows).filter((row) => {\n    const mealId = stringValue(row.mealId);\n    return Boolean(mealId && todayMealIds.has(mealId));\n  });",
+              "  const invalidTodayItemCount = itemPartition.invalid.filter((row) => {\n    const mealId = stringValue(row.mealId);\n    return Boolean(mealId && todayMealIds.has(mealId));\n  }).length;\n  const sourceStatus =\n    invalidTodayItemCount > 0 && baseSourceStatus === 'ready' ? 'partial' : baseSourceStatus;\n  const todayItems = activeRows(itemPartition.valid).filter((row) => {\n    const mealId = stringValue(row.mealId);\n    return Boolean(mealId && todayMealIds.has(mealId));\n  });",
+            ),
+            (
+              "    meals: buildMeals(mealRows, itemRows, today),",
+              "    meals: buildMeals(mealRows, itemPartition.valid, today),",
+            ),
+          ]
+          for old, new in replacements:
+            if s.count(old) != 1:
+              raise SystemExit(f'expected one dashboard anchor, got {s.count(old)}: {old[:80]!r}')
+            s = s.replace(old, new)
+          p.write_text(s)
+
+          t = Path('tests/nutrition-v2.test.ts')
+          x = t.read_text()
+          old = "import { isNutritionFoodItemStructurallyValid } from '@/lib/nutrition/food-item-integrity';"
+          new = "import {\n  isNutritionFoodItemStructurallyValid,\n  partitionNutritionFoodItemRows,\n} from '@/lib/nutrition/food-item-integrity';"
+          if x.count(old) != 1:
+            raise SystemExit('nutrition test import anchor mismatch')
+          x = x.replace(old, new)
+          addition = r'''
+
+test('una fila histórica inválida no borra las filas válidas actuales', () => {
+  const current = {
+    mealId: 'meal-current',
+    confidence: 'high',
+    status: 'active',
+    energyKcal: 424,
+    proteinGrams: 12.8,
+    carbohydrateGrams: 68,
+    fatGrams: 11.2,
+    fiberGrams: 4.4,
+  };
+  const malformedHistorical = {
+    mealId: 'meal-old',
+    confidence: 'low',
+    status: 'active',
+    energyKcal: 345,
+    rawWeightGrams: 'nota histórica desplazada',
+  };
+
+  const partition = partitionNutritionFoodItemRows([current, malformedHistorical]);
+  assert.equal(partition.valid.length, 1);
+  assert.equal(partition.valid[0], current);
+  assert.equal(partition.invalid.length, 1);
+  assert.equal(partition.invalid[0], malformedHistorical);
+});
+'''
+          if 'una fila histórica inválida no borra' not in x:
+            x += addition
+          t.write_text(x)
+          PY
+      - run: npx prettier --write lib/nutrition/dashboard.ts lib/nutrition/food-item-integrity.ts lib/nutrition/sheets-read.ts tests/nutrition-v2.test.ts
+      - run: npm test
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/nutrition/dashboard.ts lib/nutrition/food-item-integrity.ts lib/nutrition/sheets-read.ts tests/nutrition-v2.test.ts
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "fix(nutrition): isolate malformed historical food rows"
+          git push origin HEAD:feat/nutrition-v2
