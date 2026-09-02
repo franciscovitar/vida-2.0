@@ -11,12 +11,7 @@ import {
 import { estimateEpleyOneRepMax } from '@/lib/gym/strength-estimation';
 
 export type GymStrengthLevelId =
-  | 'below-beginner'
-  | 'beginner'
-  | 'novice'
-  | 'intermediate'
-  | 'advanced'
-  | 'elite';
+  'below-beginner' | 'beginner' | 'novice' | 'intermediate' | 'advanced' | 'elite';
 
 export type GymStrengthBenchmarkConfidence = 'low' | 'medium';
 
@@ -94,7 +89,10 @@ export function isExternalStrengthBenchmarkSupported(exerciseName: string): bool
   return findGymStrengthBenchmarkBaseline(exerciseName) !== null;
 }
 
-function levelFor(estimatedOneRepMaxKg: number, thresholds: GymStrengthThresholds): GymStrengthLevelId {
+function levelFor(
+  estimatedOneRepMaxKg: number,
+  thresholds: GymStrengthThresholds,
+): GymStrengthLevelId {
   if (estimatedOneRepMaxKg >= thresholds.elite) return 'elite';
   if (estimatedOneRepMaxKg >= thresholds.advanced) return 'advanced';
   if (estimatedOneRepMaxKg >= thresholds.intermediate) return 'intermediate';
@@ -177,7 +175,8 @@ export function buildMaleStrengthLevelBenchmark(
 
     const level = levelFor(trend.estimatedOneRepMaxKg, benchmark.thresholds);
     const nextLevel = nextLevelFor(level);
-    const nextThresholdKg = nextLevel === null ? null : thresholdFor(nextLevel, benchmark.thresholds);
+    const nextThresholdKg =
+      nextLevel === null ? null : thresholdFor(nextLevel, benchmark.thresholds);
 
     return [
       {

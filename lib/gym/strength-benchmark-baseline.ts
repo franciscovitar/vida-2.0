@@ -111,7 +111,8 @@ export const GYM_MALE_ABSOLUTE_1RM_BASELINE: readonly GymStrengthBenchmarkBaseli
   {
     id: 'triceps-pushdown',
     benchmarkName: 'Tríceps pushdown',
-    matches: (name) => /tr[ií]ceps pushdown|pushdown de tr[ií]ceps|jal[oó]n de tr[ií]ceps/i.test(name),
+    matches: (name) =>
+      /tr[ií]ceps pushdown|pushdown de tr[ií]ceps|jal[oó]n de tr[ií]ceps/i.test(name),
     thresholds: { beginner: 19, novice: 34, intermediate: 54, advanced: 79, elite: 107 },
     comparability: 'equipment-dependent',
     confidence: 'medium',
@@ -147,7 +148,8 @@ export const GYM_MALE_ABSOLUTE_1RM_BASELINE: readonly GymStrengthBenchmarkBaseli
   {
     id: 'lying-leg-curl',
     benchmarkName: 'Curl femoral tumbado',
-    matches: (name) => /(?:curl )?femoral.*(?:tumbado|acostado)|(?:tumbado|acostado).*femoral/i.test(name),
+    matches: (name) =>
+      /(?:curl )?femoral.*(?:tumbado|acostado)|(?:tumbado|acostado).*femoral/i.test(name),
     thresholds: { beginner: 26, novice: 43, intermediate: 63, advanced: 89, elite: 116 },
     comparability: 'equipment-dependent',
     confidence: 'low',

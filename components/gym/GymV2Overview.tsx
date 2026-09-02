@@ -99,7 +99,9 @@ export function GymV2Overview({
   );
   const topMuscleGroup = analytics.muscleGroups.at(0) ?? null;
   const featuredBenchmarkExercises = benchmark.exercises.slice(0, 2);
-  const benchmarkedExerciseNames = new Set(benchmark.exercises.map((exercise) => exercise.exerciseName));
+  const benchmarkedExerciseNames = new Set(
+    benchmark.exercises.map((exercise) => exercise.exerciseName),
+  );
   const unratedBenchmarkExercises = analytics.exerciseTrends.filter(
     (exercise) =>
       !benchmarkedExerciseNames.has(exercise.exerciseName) &&
@@ -470,8 +472,8 @@ export function GymV2Overview({
                       <div>
                         <strong>Sin referencia en la tabla</strong>
                         <span>
-                          El ejercicio sigue teniendo progreso personal, pero no recibe una categoría
-                          externa hasta agregar un benchmark fijo explícito.
+                          El ejercicio sigue teniendo progreso personal, pero no recibe una
+                          categoría externa hasta agregar un benchmark fijo explícito.
                         </span>
                       </div>
                       <small>{unsupportedBenchmarkExercises.length}</small>

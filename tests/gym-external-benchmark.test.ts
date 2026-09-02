@@ -213,9 +213,24 @@ test('Gym benchmark ahora compara máquinas y poleas con confianza explícitamen
 
 test('Gym benchmark usa una mediana conservadora para el nivel general', () => {
   const result = buildMaleStrengthLevelBenchmark([
-    { exerciseName: 'Curl de bíceps con mancuernas', latestDate: '2026-09-01', latestLoad: 15, latestReps: 9 },
-    { exerciseName: 'Jalón al pecho en polea', latestDate: '2026-09-01', latestLoad: 65, latestReps: 8 },
-    { exerciseName: 'Press militar en máquina', latestDate: '2026-09-01', latestLoad: 50, latestReps: 7 },
+    {
+      exerciseName: 'Curl de bíceps con mancuernas',
+      latestDate: '2026-09-01',
+      latestLoad: 15,
+      latestReps: 9,
+    },
+    {
+      exerciseName: 'Jalón al pecho en polea',
+      latestDate: '2026-09-01',
+      latestLoad: 65,
+      latestReps: 8,
+    },
+    {
+      exerciseName: 'Press militar en máquina',
+      latestDate: '2026-09-01',
+      latestLoad: 50,
+      latestReps: 7,
+    },
     { exerciseName: 'Face pull', latestDate: '2026-09-01', latestLoad: 45, latestReps: 10 },
   ]);
 
