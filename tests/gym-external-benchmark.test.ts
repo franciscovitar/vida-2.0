@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildMaleStrengthLevelBenchmark } from '@/lib/gym/external-strength-benchmark';
+import {
+  buildMaleStrengthLevelBenchmark,
+  isExternalStrengthBenchmarkSupported,
+} from '@/lib/gym/external-strength-benchmark';
 
 test('Gym benchmark clasifica curl y elevaciones laterales masculinas con referencia compatible', () => {
   const result = buildMaleStrengthLevelBenchmark([
@@ -82,4 +85,11 @@ test('Gym benchmark excluye máquinas y poleas sin forzar una categoría externa
   assert.equal(result.status, 'not-ready');
   assert.equal(result.exercises.length, 0);
   assert.match(result.detail, /máquinas|poleas/i);
+});
+
+test('Gym benchmark distingue ejercicios soportados de máquinas sin referencia comparable', () => {
+  assert.equal(isExternalStrengthBenchmarkSupported('Curl de bíceps con mancuernas'), true);
+  assert.equal(isExternalStrengthBenchmarkSupported('Elevaciones laterales con mancuernas'), true);
+  assert.equal(isExternalStrengthBenchmarkSupported('Press militar en máquina'), false);
+  assert.equal(isExternalStrengthBenchmarkSupported('Jalón al pecho en polea'), false);
 });
