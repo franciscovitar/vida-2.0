@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  buildGymPreviousWeekSnapshot,
-  recognizedGymDayLabel,
-} from '@/lib/gym/previous-week';
+import { buildGymPreviousWeekSnapshot, recognizedGymDayLabel } from '@/lib/gym/previous-week';
 import type { GymExerciseResult, GymSession, GymSessionSummary } from '@/types/gym';
 
 function exercise(key: string, name: string, load = '50', reps = 8): GymExerciseResult {
@@ -142,7 +139,10 @@ test('el lunes rota automáticamente a la semana que acaba de terminar', () => {
 
   assert.equal(result.startDate, '2026-08-31');
   assert.equal(result.endDate, '2026-09-06');
-  assert.deepEqual(result.sessions.map((entry) => entry.session.key), ['week-new']);
+  assert.deepEqual(
+    result.sessions.map((entry) => entry.session.key),
+    ['week-new'],
+  );
 });
 
 test('solo muestra sesiones confirmadas como completas', () => {
@@ -165,7 +165,10 @@ test('solo muestra sesiones confirmadas como completas', () => {
     today: '2026-09-02',
   });
 
-  assert.deepEqual(result.sessions.map((entry) => entry.session.key), ['complete']);
+  assert.deepEqual(
+    result.sessions.map((entry) => entry.session.key),
+    ['complete'],
+  );
 });
 
 test('una coincidencia débil no inventa un nombre de rutina', () => {

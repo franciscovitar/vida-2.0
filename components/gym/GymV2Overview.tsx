@@ -11,6 +11,7 @@ import type { CSSProperties } from 'react';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { GymPreviousWeek } from '@/components/gym/GymPreviousWeek';
 import {
   buildMaleStrengthLevelBenchmark,
   isExternalStrengthBenchmarkSupported,
@@ -185,6 +186,8 @@ export function GymV2Overview({
           </article>
         </div>
       </section>
+
+      <GymPreviousWeek sessions={sessions} summaries={summaries} today={today} />
 
       <Card aria-labelledby="gym-v2-insights-title">
         <SectionHeader
