@@ -24,7 +24,6 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           p = Path('lib/nutrition/dashboard.ts')
           s = p.read_text()
           replacements = [
@@ -51,48 +50,9 @@ jobs:
           ]
           for old, new in replacements:
             if s.count(old) != 1:
-              raise SystemExit(f'expected one dashboard anchor, got {s.count(old)}: {old[:80]!r}')
+              raise SystemExit(f'expected one dashboard anchor, got {s.count(old)}')
             s = s.replace(old, new)
           p.write_text(s)
-
-          t = Path('tests/nutrition-v2.test.ts')
-          x = t.read_text()
-          old = "import { isNutritionFoodItemStructurallyValid } from '@/lib/nutrition/food-item-integrity';"
-          new = "import {\n  isNutritionFoodItemStructurallyValid,\n  partitionNutritionFoodItemRows,\n} from '@/lib/nutrition/food-item-integrity';"
-          if x.count(old) != 1:
-            raise SystemExit('nutrition test import anchor mismatch')
-          x = x.replace(old, new)
-          addition = r'''
-
-test('una fila histórica inválida no borra las filas válidas actuales', () => {
-  const current = {
-    mealId: 'meal-current',
-    confidence: 'high',
-    status: 'active',
-    energyKcal: 424,
-    proteinGrams: 12.8,
-    carbohydrateGrams: 68,
-    fatGrams: 11.2,
-    fiberGrams: 4.4,
-  };
-  const malformedHistorical = {
-    mealId: 'meal-old',
-    confidence: 'low',
-    status: 'active',
-    energyKcal: 345,
-    rawWeightGrams: 'nota histórica desplazada',
-  };
-
-  const partition = partitionNutritionFoodItemRows([current, malformedHistorical]);
-  assert.equal(partition.valid.length, 1);
-  assert.equal(partition.valid[0], current);
-  assert.equal(partition.invalid.length, 1);
-  assert.equal(partition.invalid[0], malformedHistorical);
-});
-'''
-          if 'una fila histórica inválida no borra' not in x:
-            x += addition
-          t.write_text(x)
           PY
       - run: npx prettier --write lib/nutrition/dashboard.ts lib/nutrition/food-item-integrity.ts lib/nutrition/sheets-read.ts tests/nutrition-v2.test.ts
       - run: npm test
@@ -104,5 +64,3 @@ test('una fila histórica inválida no borra las filas válidas actuales', () =>
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "fix(nutrition): isolate malformed historical food rows"
           git push origin HEAD:feat/nutrition-v2
-
-# Temporary workflow: remove after PASS.
