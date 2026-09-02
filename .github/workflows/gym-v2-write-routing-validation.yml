@@ -20,6 +20,25 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Document dedicated Gym Sheets variables
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('.env.example')
+          text = path.read_text(encoding='utf-8')
+          anchor = 'GOOGLE_SHEETS_ALLOW_PROD_WRITES=false\n'
+          addition = '''\n# Spreadsheet dedicado de Gimnasio (solo servidor; puede variar por entorno).\nGOOGLE_GYM_SPREADSHEET_ID=ejemplo_gym\n\n# Compuerta adicional para escrituras de Gimnasio. Solo el literal exacto true habilita.\n# Mantener false hasta validar explícitamente target, permisos y Safe Writes.\nGOOGLE_GYM_SHEETS_ALLOW_WRITES=false\n'''
+          if 'GOOGLE_GYM_SPREADSHEET_ID=' not in text:
+              if anchor not in text:
+                  raise SystemExit('Google Sheets allow anchor missing')
+              text = text.replace(anchor, anchor + addition, 1)
+          text = text.replace(
+              '# Rangos A1 de pesta—as Gym Sessions / Gym Sets (Sheet target resuelto).',
+              '# Rangos A1 de pesta—as Gym Sessions / Gym Sets (spreadsheet dedicado de Gimnasio).',
+          )
+          path.write_text(text, encoding='utf-8')
+          PY
       - name: Run full test suite
         run: npm test
       - name: Keep Gym V2 slice formatted
@@ -32,14 +51,14 @@ jobs:
           lib/gym/sheets-config.ts
           lib/gym/sheets-read.ts
           tests/gym-sheets-routing.test.ts
-      - name: Commit formatting if needed
+      - name: Commit deterministic fixes if needed
         run: |
           if git diff --quiet; then
-            echo "Already formatted"
+            echo "Already clean"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add components/gym/GymV2Overview.tsx docs/gym-v2-source.md lib/actions/config.ts lib/actions/gym-sheets.ts lib/gym/sheets-config.ts lib/gym/sheets-read.ts tests/gym-sheets-routing.test.ts
-          git commit -m "format Gym write routing"
+          git add .env.example components/gym/GymV2Overview.tsx docs/gym-v2-source.md lib/actions/config.ts lib/actions/gym-sheets.ts lib/gym/sheets-config.ts lib/gym/sheets-read.ts tests/gym-sheets-routing.test.ts
+          git commit -m "document Gym write routing"
           git push origin HEAD:feat/gym-v2
