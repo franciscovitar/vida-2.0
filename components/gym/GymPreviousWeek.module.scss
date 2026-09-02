@@ -14,7 +14,7 @@
   white-space: nowrap;
 }
 
-.weekGrid {
+.week-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
@@ -28,7 +28,7 @@
   background: var(--surface-2);
 }
 
-.sessionHeader {
+.session-header {
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
@@ -37,13 +37,13 @@
   border-bottom: 1px solid var(--border);
 }
 
-.sessionHeader > div {
+.session-header > div {
   display: grid;
   gap: 0.08rem;
   min-width: 0;
 }
 
-.sessionHeader span {
+.session-header span {
   color: var(--text-subtle);
   font-size: 0.64rem;
   font-weight: 650;
@@ -51,26 +51,26 @@
   text-transform: uppercase;
 }
 
-.sessionHeader h3 {
+.session-header h3 {
   color: var(--text);
   font-size: 0.95rem;
   line-height: 1.2;
 }
 
-.sessionHeader sup {
+.session-header sup {
   margin-left: 0.12rem;
   color: var(--c-health);
   font-size: 0.65em;
 }
 
-.sessionHeader time {
+.session-header time {
   flex: 0 0 auto;
   color: var(--text-muted);
   font-size: 0.7rem;
   font-weight: 650;
 }
 
-.tableWrap {
+.table-wrap {
   min-width: 0;
 }
 
@@ -145,7 +145,7 @@
 }
 
 @media (max-width <= 1080px) {
-  .weekGrid {
+  .week-grid {
     grid-template-columns: 1fr;
   }
 
@@ -155,7 +155,7 @@
 }
 
 @media (max-width <= 600px) {
-  .sessionHeader {
+  .session-header {
     padding-inline: 0.7rem;
   }
 
