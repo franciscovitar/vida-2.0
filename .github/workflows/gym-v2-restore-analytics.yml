@@ -1,0 +1,31 @@
+name: Temporary Gym V2 restore personal analytics
+
+on:
+  push:
+    branches:
+      - feat/gym-v2
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/gym-v2
+          fetch-depth: 0
+      - name: Restore validated analytics file
+        run: git checkout c898de0237e3098847629f1f3e6c07f1fec8cc84 -- lib/gym/v2-analytics.ts
+      - name: Commit restore if needed
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/gym/v2-analytics.ts
+          git commit -m "chore(gym): preserve validated personal analytics"
+          git push origin HEAD:feat/gym-v2
