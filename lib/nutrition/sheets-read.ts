@@ -5,16 +5,7 @@ import { fetchAccessToken, READONLY_SCOPE, SHEETS_BASE } from '@/lib/google/auth
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 import { assertResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 
-export interface NutritionSheetsEnv {
-  [key: string]: string | undefined;
-  GOOGLE_NUTRITION_SPREADSHEET_ID?: string;
-  GOOGLE_SERVICE_ACCOUNT_EMAIL?: string;
-  GOOGLE_PRIVATE_KEY?: string;
-}
-
-function normalizePrivateKey(raw: string): string {
-  return raw.replace(/\\n/g, '\n');
-}
+import { getNutritionSheetsConfig } from './sheets-config';
 
 function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
   if (status === 401) return 'auth-error';
@@ -25,37 +16,13 @@ function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
   return 'read-error';
 }
 
-export function resolveNutritionSheetsConfig(env: NutritionSheetsEnv = process.env):
-  | {
-      ok: true;
-      config: { spreadsheetId: string; clientEmail: string; privateKey: string };
-    }
-  | { ok: false; code: 'not-configured' } {
-  const spreadsheetId = env.GOOGLE_NUTRITION_SPREADSHEET_ID?.trim() ?? '';
-  const clientEmail = env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim() ?? '';
-  const privateKeyRaw = env.GOOGLE_PRIVATE_KEY?.trim() ?? '';
-
-  if (!spreadsheetId || !clientEmail || !privateKeyRaw) {
-    return { ok: false, code: 'not-configured' };
-  }
-
-  return {
-    ok: true,
-    config: {
-      spreadsheetId,
-      clientEmail,
-      privateKey: normalizePrivateKey(privateKeyRaw),
-    },
-  };
-}
-
 /** Lee una pestaña del store dedicado de Nutrition Intelligence. Nunca escribe ni hace fallback. */
 export async function readNutritionTabValues(tab: string): Promise<ReadTabResult> {
   try {
-    const resolved = resolveNutritionSheetsConfig();
-    if (!resolved.ok) return resolved;
+    const config = getNutritionSheetsConfig();
+    if (!config) return { ok: false, code: 'not-configured' };
 
-    const { spreadsheetId, clientEmail, privateKey } = resolved.config;
+    const { spreadsheetId, clientEmail, privateKey } = config;
     try {
       assertResolvedSpreadsheetId(spreadsheetId, spreadsheetId);
     } catch {
@@ -95,7 +62,10 @@ export async function readNutritionTabValues(tab: string): Promise<ReadTabResult
     }
 
     const plain = JSON.parse(JSON.stringify(sanitizeSheetValues(values))) as (
-      string | number | boolean | null
+      | string
+      | number
+      | boolean
+      | null
     )[][];
     return { ok: true, values: plain };
   } catch {
