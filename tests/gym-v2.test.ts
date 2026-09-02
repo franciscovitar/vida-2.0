@@ -147,7 +147,7 @@ test('Gym V2 trata cambios pequeños de fuerza estimada como estables', () => {
     session({
       key: 'b',
       date: '2026-09-01',
-      exercises: [{ name: 'Remo en máquina', sets: [{ load: 55, reps: 9 }] }],
+      exercises: [{ name: 'Remo en máquina', sets: [{ load: 51, reps: 10 }] }],
     }),
   ];
 
