@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
-import {
-  getNutritionSheetsConfig,
-  getNutritionSpreadsheetId,
-} from '@/lib/nutrition/sheets-config';
+import { getNutritionSheetsConfig, getNutritionSpreadsheetId } from '@/lib/nutrition/sheets-config';
 
 const FAKE_NUTRITION_ID = 'nutrition_sheet_example_1234567890';
 

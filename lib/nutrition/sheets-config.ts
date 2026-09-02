@@ -10,9 +10,7 @@ export type NutritionSheetsConfig = {
 
 const SPREADSHEET_ID_PATTERN = /^[A-Za-z0-9_-]{20,}$/;
 
-export function getNutritionSpreadsheetId(
-  env: NutritionSheetsEnv = process.env,
-): string | null {
+export function getNutritionSpreadsheetId(env: NutritionSheetsEnv = process.env): string | null {
   const value = env.GOOGLE_NUTRITION_SPREADSHEET_ID?.trim();
   if (!value || !SPREADSHEET_ID_PATTERN.test(value)) return null;
   return value;
