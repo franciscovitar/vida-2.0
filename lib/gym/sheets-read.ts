@@ -5,24 +5,16 @@
  * spreadsheet de hábitos. El ID vive únicamente en configuración server-side.
  */
 import { sanitizeSheetValues } from '@/lib/data/plain';
-import { normalizePrivateKey } from '@/lib/data/config';
 import { fetchAccessToken, READONLY_SCOPE, SHEETS_BASE } from '@/lib/google/auth';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
+import {
+  getGymSheetsAuthConfig,
+  getGymSpreadsheetId,
+  type GymSheetsEnv,
+} from '@/lib/gym/sheets-config';
 
 type PlainCell = string | number | boolean | null;
 type PlainRows = PlainCell[][];
-type GymSheetsEnv = {
-  [key: string]: string | undefined;
-  GOOGLE_GYM_SPREADSHEET_ID?: string;
-  GOOGLE_SERVICE_ACCOUNT_EMAIL?: string;
-  GOOGLE_PRIVATE_KEY?: string;
-};
-
-function gymSpreadsheetId(env: GymSheetsEnv = process.env): string | null {
-  const value = env.GOOGLE_GYM_SPREADSHEET_ID?.trim();
-  if (!value || !/^[A-Za-z0-9_-]{20,}$/.test(value)) return null;
-  return value;
-}
 
 function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
   if (status === 401) return 'auth-error';
@@ -54,31 +46,28 @@ export function normalizeGymSheetValues(tab: string, values: PlainRows): PlainRo
 }
 
 export function isGymSpreadsheetConfigured(env: GymSheetsEnv = process.env): boolean {
-  return gymSpreadsheetId(env) !== null;
+  return getGymSpreadsheetId(env) !== null;
 }
 
 export async function readGymTabValues(
   tab: string,
   env: GymSheetsEnv = process.env,
 ): Promise<ReadTabResult> {
-  const clientEmail = env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
-  const rawPrivateKey = env.GOOGLE_PRIVATE_KEY;
-  const spreadsheetId = gymSpreadsheetId(env);
-
-  if (!clientEmail || !rawPrivateKey?.trim() || !spreadsheetId) {
+  const config = getGymSheetsAuthConfig(env);
+  if (!config) {
     return { ok: false, code: 'not-configured' };
   }
 
   const token = await fetchAccessToken(
-    clientEmail,
-    normalizePrivateKey(rawPrivateKey),
+    config.clientEmail,
+    config.privateKey,
     READONLY_SCOPE,
   );
   if (!token.ok) return token;
 
   const range = encodeURIComponent(tab);
   const url =
-    `${SHEETS_BASE}/${encodeURIComponent(spreadsheetId)}/values/${range}` +
+    `${SHEETS_BASE}/${encodeURIComponent(config.spreadsheetId)}/values/${range}` +
     `?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING`;
 
   let response: Response;
