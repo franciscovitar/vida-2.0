@@ -59,3 +59,21 @@ export function isNutritionFoodItemStructurallyValid(row: NutritionFoodItemRow):
 
   return true;
 }
+
+/**
+ * Separa filas válidas e inválidas sin convertir una anomalía histórica aislada
+ * en la pérdida total de la pestaña. Las inválidas nunca llegan a agregaciones.
+ */
+export function partitionNutritionFoodItemRows<T extends NutritionFoodItemRow>(rows: readonly T[]): {
+  valid: T[];
+  invalid: T[];
+} {
+  const valid: T[] = [];
+  const invalid: T[] = [];
+
+  for (const row of rows) {
+    (isNutritionFoodItemStructurallyValid(row) ? valid : invalid).push(row);
+  }
+
+  return { valid, invalid };
+}
