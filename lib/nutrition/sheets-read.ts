@@ -5,6 +5,7 @@ import { fetchAccessToken, READONLY_SCOPE, SHEETS_BASE } from '@/lib/google/auth
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 import { assertResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 
+import { isNutritionFoodItemStructurallyValid } from './food-item-integrity';
 import { getNutritionSheetsConfig } from './sheets-config';
 
 function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
@@ -14,6 +15,23 @@ function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
     return 'missing-tab';
   }
   return 'read-error';
+}
+
+function hasValidFoodItemStructure(
+  values: readonly (string | number | boolean | null)[][],
+): boolean {
+  if (values.length <= 1) return true;
+  const headers = values[0]!.map((cell) => String(cell ?? '').trim());
+
+  for (const cells of values.slice(1)) {
+    if (cells.every((cell) => cell === null)) continue;
+    const row: Record<string, string | number | boolean | null> = {};
+    headers.forEach((header, index) => {
+      if (header) row[header] = cells[index] ?? null;
+    });
+    if (!isNutritionFoodItemStructurallyValid(row)) return false;
+  }
+  return true;
 }
 
 /** Lee una pestaña del store dedicado de Nutrition Intelligence. Nunca escribe ni hace fallback. */
@@ -64,6 +82,11 @@ export async function readNutritionTabValues(tab: string): Promise<ReadTabResult
     const plain = JSON.parse(JSON.stringify(sanitizeSheetValues(values))) as (
       string | number | boolean | null
     )[][];
+
+    if (tab === 'Food Items' && !hasValidFoodItemStructure(plain)) {
+      return { ok: false, code: 'read-error' };
+    }
+
     return { ok: true, values: plain };
   } catch {
     return { ok: false, code: 'read-error' };
