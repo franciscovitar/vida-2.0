@@ -536,17 +536,14 @@ export async function loadNutritionDashboardData(
   ];
 
   const personalFiberTarget = target?.fiberGrams ?? null;
-  const nutrients = buildNutrients(
-    nutrientResult,
-    nutrientTargetsResult,
-    todayItems,
-    today,
-  ).map((nutrient) => {
-    if (nutrient.key === 'fiber' && personalFiberTarget !== null) {
-      return { ...nutrient, target: personalFiberTarget };
-    }
-    return nutrient;
-  });
+  const nutrients = buildNutrients(nutrientResult, nutrientTargetsResult, todayItems, today).map(
+    (nutrient) => {
+      if (nutrient.key === 'fiber' && personalFiberTarget !== null) {
+        return { ...nutrient, target: personalFiberTarget };
+      }
+      return nutrient;
+    },
+  );
 
   return {
     source: {
