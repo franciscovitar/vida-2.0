@@ -32,20 +32,41 @@ Para comparar sets con distinta combinación de carga y repeticiones se usa e1RM
 
 Cambios de fuerza estimada dentro de ±2 % se tratan visualmente como estables para evitar sobrerrepresentar ruido pequeño.
 
-## Benchmarks externos
+## Benchmark externo V2.1
 
-`principiante / intermedio / avanzado` no se asigna todavía de forma automática.
+La referencia externa se mantiene separada de la evolución personal y solo se habilita para ejercicios cuya carga sea compatible con la definición de la fuente.
 
-Las cargas de máquinas y poleas no son directamente comparables entre equipamientos. Antes de habilitar un benchmark externo cada ejercicio elegible debe tener:
+Primer alcance habilitado:
 
-- definición compatible del ejercicio;
-- fuente externa trazable;
-- población/contexto aplicable;
-- fecha de la referencia;
-- unidad y, cuando corresponda, normalización por peso corporal;
-- nivel de confianza explícito.
+- sexo de referencia: masculino;
+- modalidad: estándares absolutos, sin ajuste por peso corporal ni edad;
+- fuente: Strength Level;
+- corte de datos declarado por la fuente: 2026-03-05;
+- ejercicios compatibles: `Dumbbell Curl` y `Dumbbell Lateral Raise`;
+- las cargas publicadas por Strength Level son por mancuerna;
+- se compara el e1RM estimado del último set comparable con los umbrales de 1RM publicados;
+- confianza `media` cuando hay al menos dos ejercicios compatibles y `baja` cuando solo hay uno.
 
-La referencia externa siempre debe aparecer separada de la evolución personal.
+Umbrales masculinos capturados para este slice:
+
+| Nivel | Curl mancuerna | Elevación lateral mancuerna |
+| --- | ---: | ---: |
+| Principiante | 7 kg | 4 kg |
+| Novato | 13 kg | 9 kg |
+| Intermedio | 21 kg | 16 kg |
+| Avanzado | 31 kg | 24 kg |
+| Élite | 42 kg | 34 kg |
+
+Fuentes trazables:
+
+- https://strengthlevel.com/strength-standards/dumbbell-curl/kg
+- https://strengthlevel.com/strength-standards/dumbbell-lateral-raise/kg
+
+La población de referencia son usuarios/lifts de Strength Level; no se presenta como una muestra representativa de la población general. El e1RM sigue siendo una estimación, no un test de 1RM medido.
+
+Máquinas y poleas permanecen excluidas: sus cargas no son directamente comparables entre equipamientos. Para sumar otro ejercicio se exige definición compatible, fuente trazable, población/contexto aplicable, fecha de referencia, unidades consistentes y confianza explícita.
+
+Una futura versión puede agregar normalización por peso corporal y/o edad cuando esos datos formen parte de un contexto explícito y confiable; no se infieren desde otras fuentes.
 
 ## Seguridad
 
