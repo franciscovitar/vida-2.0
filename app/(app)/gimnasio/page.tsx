@@ -18,7 +18,7 @@ export default async function GimnasioPage() {
     <div className={styles.page}>
       <PageHeader
         title="Gimnasio"
-        description="Rutina, contexto e historial para observar progreso sin cargar sesiones desde la web."
+        description="Progreso, comparaciones y contexto para entender cómo estás entrenando."
         icon={Dumbbell}
         domain="health"
       />
