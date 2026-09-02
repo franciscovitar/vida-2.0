@@ -68,11 +68,22 @@ Máquinas y poleas permanecen excluidas: sus cargas no son directamente comparab
 
 Una futura versión puede agregar normalización por peso corporal y/o edad cuando esos datos formen parte de un contexto explícito y confiable; no se infieren desde otras fuentes.
 
+## Frontera de escritura
+
+Gimnasio V2 permanece read-only en este slice. La ruta de escritura existente queda alineada preventivamente con la misma fuente dedicada para evitar split-brain:
+
+- una escritura Gym nunca reutiliza implícitamente `GOOGLE_SHEETS_TARGET`, `GOOGLE_SHEETS_DEV_ID` ni `GOOGLE_SHEETS_PROD_ID` del Sheet general de hábitos;
+- el único target aceptado por el cliente Gym es `GOOGLE_GYM_SPREADSHEET_ID` del entorno actual;
+- además de `WRITE_ACTIONS_ENABLED`, una escritura real exige la compuerta exacta `GOOGLE_GYM_SHEETS_ALLOW_WRITES=true`;
+- si falta el ID dedicado, la credencial o la compuerta, el puerto falla cerrado antes de escribir;
+- la compuerta nace apagada y no se activa en este PR;
+- Preview puede usar en el futuro un valor distinto de `GOOGLE_GYM_SPREADSHEET_ID` mediante configuración de entorno, sin hardcodear targets en código.
+
 ## Seguridad
 
 - lectura solamente en Gimnasio V2;
 - sin IDs reales en el cliente;
-- sin nuevas escrituras;
+- ninguna escritura fue habilitada ni ejecutada en este slice;
 - sin fallback silencioso al spreadsheet de hábitos;
 - faltantes no se convierten en cero;
 - la UI describe asociaciones/cambios, no causas ni diagnósticos.
