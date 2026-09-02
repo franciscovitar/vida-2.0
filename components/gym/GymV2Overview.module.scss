@@ -534,13 +534,13 @@
   line-height: 1.5;
 }
 
-@media (max-width <= 1120px) {
+@media (width <= 1120px) {
   .exercise-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width <= 880px) {
+@media (width <= 880px) {
   .hero {
     grid-template-columns: 1fr;
   }
@@ -568,7 +568,7 @@
   }
 }
 
-@media (max-width <= 640px) {
+@media (width <= 640px) {
   .hero {
     padding: 1rem;
   }
