@@ -1,0 +1,40 @@
+name: Temporary Gym benchmark formatter
+
+on:
+  push:
+    branches:
+      - feat/gym-v2
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/gym-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format benchmark slice
+        run: >-
+          npx prettier --write
+          components/gym/GymV2Overview.tsx
+          docs/gym-v2-source.md
+          lib/gym/external-strength-benchmark.ts
+          tests/gym-external-benchmark.test.ts
+      - name: Commit formatting if needed
+        run: |
+          if git diff --quiet; then
+            echo "Already formatted"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/gym/GymV2Overview.tsx docs/gym-v2-source.md lib/gym/external-strength-benchmark.ts tests/gym-external-benchmark.test.ts
+          git commit -m "format Gym external benchmark"
+          git push origin HEAD:feat/gym-v2
