@@ -22,12 +22,21 @@ export interface SaludRecord {
   steps: Cell<number>;
   activeCalories: Cell<number>;
   workout: Cell<string>;
+  coreSleepHours: Cell<number>;
   deepSleepHours: Cell<number>;
   remSleepHours: Cell<number>;
+  awakeSleepHours: Cell<number>;
   walkRunKm: Cell<number>;
+  activeEnergyKj: Cell<number>;
   minHr: Cell<number>;
   maxHr: Cell<number>;
+  stepLengthCm: Cell<number>;
+  restingEnergyKj: Cell<number>;
+  floors: Cell<number>;
+  walkingAsymmetry: Cell<number>;
   spo2: Cell<number>;
+  walkingSpeed: Cell<number>;
+  activeCaloriesKcal: Cell<number>;
   importStatus: Cell<string>;
 }
 
@@ -54,12 +63,21 @@ export function parseSalud(values: readonly unknown[][]): SaludRecord[] {
       steps: num(row, SAL.steps),
       activeCalories: num(row, SAL.activeCalories),
       workout: text(row, SAL.workout),
+      coreSleepHours: num(row, SAL.coreSleep),
       deepSleepHours: num(row, SAL.deepSleep),
       remSleepHours: num(row, SAL.remSleep),
+      awakeSleepHours: num(row, SAL.awakeSleep),
       walkRunKm: num(row, SAL.walkRunKm),
+      activeEnergyKj: num(row, SAL.activeEnergyKj),
       minHr: num(row, SAL.minHr),
       maxHr: num(row, SAL.maxHr),
+      stepLengthCm: num(row, SAL.stepLengthCm),
+      restingEnergyKj: num(row, SAL.restingEnergyKj),
+      floors: num(row, SAL.floors),
+      walkingAsymmetry: num(row, SAL.walkingAsymmetry),
       spo2: num(row, SAL.spo2),
+      walkingSpeed: num(row, SAL.walkingSpeed),
+      activeCaloriesKcal: num(row, SAL.activeCaloriesKcal),
       importStatus: text(row, SAL.importStatus),
     });
   }
@@ -89,12 +107,21 @@ export function saludHasData(record: SaludRecord): boolean {
     record.meanHr,
     record.steps,
     record.activeCalories,
+    record.coreSleepHours,
     record.deepSleepHours,
     record.remSleepHours,
+    record.awakeSleepHours,
     record.walkRunKm,
+    record.activeEnergyKj,
     record.minHr,
     record.maxHr,
+    record.stepLengthCm,
+    record.restingEnergyKj,
+    record.floors,
+    record.walkingAsymmetry,
     record.spo2,
+    record.walkingSpeed,
+    record.activeCaloriesKcal,
   ];
   if (numeric.some((cell) => cell.kind === 'value')) return true;
   if (record.workout.kind === 'value' && record.workout.value.trim() !== '') return true;
