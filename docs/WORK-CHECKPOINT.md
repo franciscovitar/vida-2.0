@@ -298,7 +298,7 @@ que esa frontera se trate por separado.
 **Registro histórico. No refleja el estado actual de Production.**
 
 Esta sección preserva un checkpoint operativo redactado el 2026-08-29 y recuperado de un clon local
-que nunca se commiteó. Refleja el estado certificado *en esa fecha*, inmediatamente después de la
+que nunca se commiteó. Refleja el estado certificado _en esa fecha_, inmediatamente después de la
 actualización focal de fuentes base, y **puede haber sido superado por checkpoints posteriores** —
 en particular por la sección «Activación de fuentes base en Production — 29/08/2026» (versión
 ampliada del mismo pass) y por los cierres posteriores «OpenClaw Production — activación final
