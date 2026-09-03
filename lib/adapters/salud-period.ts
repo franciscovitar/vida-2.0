@@ -9,12 +9,16 @@ import { formatNumber } from '@/lib/format';
 import type { PeriodWindow } from '@/lib/periods';
 import { inPeriod, periodWindow, previousPeriodWindow } from '@/lib/periods';
 import type {
+  HealthBaselineSignal,
   HealthDayRow,
+  HealthDaySignals,
   HealthImportKind,
   HealthInsight,
   HealthMetricGroupId,
   HealthMetricPeriod,
   HealthPageData,
+  HealthSignalId,
+  HealthSignalsModel,
   HealthTodayState,
 } from '@/types/domain-pages';
 import type { Domain, TodayStatus } from '@/types';
@@ -275,6 +279,86 @@ function seriesOf(
   return out;
 }
 
+/** Ventana de base personal usada por la capa de interpretación (independiente del período). */
+export const HEALTH_SIGNALS_BASELINE_DAYS = 30;
+
+const SIGNAL_PICKERS: Record<HealthSignalId, NumericPicker> = {
+  sleep: (r) => cellValue(r.sleepHours),
+  deepSleep: (r) => cellValue(r.deepSleepHours),
+  remSleep: (r) => cellValue(r.remSleepHours),
+  restingHr: (r) => cellValue(r.restingHr),
+  meanHr: (r) => cellValue(r.meanHr),
+  hrv: (r) => cellValue(r.hrv),
+  steps: (r) => cellValue(r.steps),
+  walkRunKm: (r) => cellValue(r.walkRunKm),
+  activeCalories: (r) => cellValue(r.activeCalories),
+  spo2: (r) => cellValue(r.spo2),
+};
+
+const SIGNAL_IDS = Object.keys(SIGNAL_PICKERS) as HealthSignalId[];
+
+function trimmedText(cell: SaludRecord['workout']): string | null {
+  if (cell.kind !== 'value') return null;
+  const text = cell.value.trim();
+  return text === '' ? null : text;
+}
+
+/** Proyecta un registro a valores exactos. Un faltante queda en null, nunca en 0. */
+function daySignals(record: SaludRecord): HealthDaySignals {
+  const values = {} as Record<HealthSignalId, number | null>;
+  for (const id of SIGNAL_IDS) values[id] = SIGNAL_PICKERS[id](record);
+  return {
+    date: record.date as string,
+    label: formatShortDay(record.date as string),
+    importKind: parseImportStatus(record.importStatus),
+    missingCore: trimmedText(record.missingCore),
+    workout: trimmedText(record.workout),
+    values,
+  };
+}
+
+/** true si el día tiene al menos una señal núcleo (sueño o FC en reposo). */
+function isInterpretableDay(record: SaludRecord): boolean {
+  return cellValue(record.sleepHours) !== null || cellValue(record.restingHr) !== null;
+}
+
+/**
+ * Modelo numérico exacto para interpretar el día actual.
+ * Nunca sustituye hoy por un día anterior: expone ambos por separado.
+ */
+export function buildHealthSignalsModel(
+  records: readonly SaludRecord[],
+  today: string,
+): HealthSignalsModel {
+  const withData = records
+    .filter((record) => record.date !== null && record.date <= today && saludHasData(record))
+    .sort((a, b) => (a.date as string).localeCompare(b.date as string));
+
+  const todayRecord = withData.find((record) => record.date === today) ?? null;
+
+  const lookbackStart = addDaysYmd(today, -HEALTH_SIGNALS_BASELINE_DAYS);
+  const interpretable = withData.filter(
+    (record) => (record.date as string) >= lookbackStart && isInterpretableDay(record),
+  );
+  const lastInterpretable = interpretable.at(-1) ?? null;
+
+  const baselineWindow = periodWindow(addDaysYmd(today, -1), HEALTH_SIGNALS_BASELINE_DAYS);
+  const baselineRecords = saludAvailableDays(records, baselineWindow);
+  const baseline = {} as Record<HealthSignalId, HealthBaselineSignal>;
+  for (const id of SIGNAL_IDS) {
+    const { average, values } = averageOf(baselineRecords, SIGNAL_PICKERS[id]);
+    baseline[id] = { average, days: values.length };
+  }
+
+  return {
+    today: todayRecord ? daySignals(todayRecord) : null,
+    lastInterpretable: lastInterpretable ? daySignals(lastInterpretable) : null,
+    baseline,
+    baselineWindowDays: HEALTH_SIGNALS_BASELINE_DAYS,
+    baselineCoverageDays: baselineRecords.length,
+  };
+}
+
 function cellLabel(cell: Cell<number>, formatter: (n: number) => string): string {
   if (cell.kind !== 'value') return '—';
   return formatter(cell.value);
@@ -332,6 +416,7 @@ function buildInsights(input: {
       title: 'Cambio destacado',
       detail: `${periodCandidate.label} ${changeVerb(periodCandidate.compare.direction)} (${periodCandidate.compare.label}) vs el período anterior.`,
       tone: 'neutral',
+      kind: 'trend',
     });
   }
 
@@ -347,6 +432,7 @@ function buildInsights(input: {
       title: 'Contra tu base personal',
       detail: `${baselineCandidate.label}: ${baselineCandidate.baselineCompare.label} frente a los 30 días previos disponibles.`,
       tone: 'neutral',
+      kind: 'trend',
     });
   }
 
@@ -356,6 +442,7 @@ function buildInsights(input: {
       title: 'Cobertura parcial',
       detail: `${input.partialDays} día(s) del período tienen importación parcial; las tendencias se muestran sin convertir faltantes en cero.`,
       tone: 'watch',
+      kind: 'fact',
     });
   } else if (input.availableDays < Math.min(3, input.periodDays)) {
     insights.push({
@@ -363,6 +450,7 @@ function buildInsights(input: {
       title: 'Pocos datos todavía',
       detail: `Hay ${input.availableDays} día(s) con datos. Conviene acumular más registros antes de interpretar tendencias.`,
       tone: 'watch',
+      kind: 'fact',
     });
   }
 
@@ -375,6 +463,7 @@ function buildInsights(input: {
           ? `La comparación personal usa ${input.baselineDays} día(s) con datos de los 30 días anteriores al período.`
           : 'Todavía no hay una base personal previa suficiente para todas las métricas.',
       tone: 'neutral',
+      kind: 'fact',
     });
   }
 
@@ -450,6 +539,7 @@ export function buildHealthPageData(input: {
     (record) => parseImportStatus(record.importStatus) === 'partial',
   ).length;
   const completeDays = available.length - partialDays;
+  const signals = buildHealthSignalsModel(input.records, input.today);
   const insights = buildInsights({
     metrics,
     availableDays: available.length,
@@ -467,6 +557,7 @@ export function buildHealthPageData(input: {
     periodStart: input.window.start,
     periodEnd: input.window.end,
     availableDays: available.length,
+    signals,
     previousAvailableDays: prev.length,
     metrics,
     today: todayState(map.get(input.today), input.today),

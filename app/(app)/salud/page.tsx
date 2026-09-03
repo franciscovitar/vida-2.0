@@ -8,12 +8,20 @@ import styles from '@/components/domain/DomainPage.module.scss';
 import { PeriodSelector } from '@/components/domain/PeriodSelector';
 import { SparkBars } from '@/components/domain/SparkBars';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
+import {
+  HealthContextSection,
+  HealthPrioritiesSection,
+  HealthTodayHero,
+  HealthTrajectorySection,
+} from '@/components/health/HealthIntelligenceSections';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { getDomainPages } from '@/lib/data/domain-pages';
+import { getHealthContextInputs } from '@/lib/health/context-sources';
+import { buildHealthIntelligence } from '@/lib/health/intelligence';
 import { periodLabel, parsePeriodParam } from '@/lib/periods';
-import type { HealthMetricGroupId } from '@/types/domain-pages';
+import type { HealthInsightKind, HealthMetricGroupId } from '@/types/domain-pages';
 
 import pageStyles from '../page.module.scss';
 import local from './page.module.scss';
@@ -63,6 +71,12 @@ const GROUPS: readonly GroupDefinition[] = [
   },
 ];
 
+const CHANGE_KIND_LABELS: Readonly<Record<HealthInsightKind, string>> = {
+  fact: 'Hecho',
+  trend: 'Tendencia',
+  context: 'Contexto',
+};
+
 export default async function SaludPage({
   searchParams,
 }: {
@@ -70,8 +84,13 @@ export default async function SaludPage({
 }) {
   const params = await searchParams;
   const periodDays = parsePeriodParam(params.period);
-  const data = await getDomainPages(periodDays);
+  const [data, context] = await Promise.all([getDomainPages(periodDays), getHealthContextInputs()]);
   const health = data.health;
+  const intelligence = buildHealthIntelligence({
+    health,
+    gym: context.gym,
+    nutrition: context.nutrition,
+  });
 
   return (
     <div className={pageStyles.page}>
@@ -89,27 +108,53 @@ export default async function SaludPage({
 
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
 
-      <section className={local.hero} aria-labelledby="health-overview-title">
-        <div className={local['hero-top']}>
-          <div>
-            <p className={local.eyebrow}>Salud V2</p>
-            <h2 id="health-overview-title" className={local['hero-title']}>
-              Tu estado en una mirada
-            </h2>
-            <p className={local['hero-text']}>
-              Primero tu evolución personal: período anterior + base de 30 días. Las referencias
-              poblacionales se agregarán aparte y con fuente explícita.
-            </p>
-          </div>
-          <div className={local['today-state']} data-kind={health.today.kind}>
+      <HealthTodayHero state={intelligence.currentState} quality={intelligence.evidenceQuality} />
+
+      <HealthTrajectorySection trajectory={intelligence.trajectory} />
+
+      <Card aria-labelledby="health-insights-title">
+        <SectionHeader
+          id="health-insights-title"
+          title="Qué cambió"
+          description="Observaciones determinísticas separadas en hecho, tendencia y contexto. Una coincidencia nunca se presenta como causa."
+          domain="health"
+        />
+        <div className={local['insight-grid']}>
+          {intelligence.changes.map((insight) => (
+            <article key={insight.id} className={local.insight} data-tone={insight.tone}>
+              <span className={local['insight-dot']} aria-hidden="true" />
+              <div>
+                <p className={local['insight-kind']} data-kind={insight.kind}>
+                  {CHANGE_KIND_LABELS[insight.kind]}
+                </p>
+                <h3>{insight.title}</h3>
+                <p>{insight.detail}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </Card>
+
+      <HealthContextSection context={intelligence.crossDomain} />
+
+      <HealthPrioritiesSection priorities={intelligence.priorities} />
+
+      <Card aria-labelledby="health-coverage-title">
+        <SectionHeader
+          id="health-coverage-title"
+          title="Cobertura del período"
+          description="Base de todo lo anterior. Los faltantes siguen siendo faltantes, nunca ceros."
+          domain="health"
+        />
+        <div className={local['coverage-head']}>
+          <span className={local['today-state']} data-kind={health.today.kind}>
             <Activity size={17} aria-hidden="true" />
             <span>
               <strong>{health.today.label}</strong>
               {health.today.details ? <small>{health.today.details}</small> : null}
             </span>
-          </div>
+          </span>
         </div>
-
         <div className={local['summary-grid']}>
           <div className={local['summary-item']}>
             <span>Con datos</span>
@@ -131,29 +176,9 @@ export default async function SaludPage({
           </div>
           <div className={local['summary-item']}>
             <span>Base personal</span>
-            <strong className="tabular">{health.baselineDays}</strong>
-            <small>días previos disponibles</small>
+            <strong className="tabular">{health.signals.baselineCoverageDays}</strong>
+            <small>de {health.signals.baselineWindowDays} días previos</small>
           </div>
-        </div>
-      </section>
-
-      <Card aria-labelledby="health-insights-title">
-        <SectionHeader
-          id="health-insights-title"
-          title="Qué cambió"
-          description="Observaciones determinísticas. No se presentan asociaciones como causas ni se hacen diagnósticos."
-          domain="health"
-        />
-        <div className={local['insight-grid']}>
-          {health.insights.map((insight) => (
-            <article key={insight.id} className={local.insight} data-tone={insight.tone}>
-              <span className={local['insight-dot']} aria-hidden="true" />
-              <div>
-                <h3>{insight.title}</h3>
-                <p>{insight.detail}</p>
-              </div>
-            </article>
-          ))}
         </div>
       </Card>
 

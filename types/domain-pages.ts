@@ -76,6 +76,21 @@ export interface HabitsPageData extends DomainPageMeta {
 export type HealthImportKind = 'partial' | 'complete' | 'none';
 export type HealthMetricGroupId = 'sleep' | 'cardio' | 'movement' | 'oxygen' | 'energy';
 export type HealthInsightTone = 'neutral' | 'positive' | 'watch';
+/** Naturaleza de una observación: hecho verificable, tendencia personal o contexto temporal. */
+export type HealthInsightKind = 'fact' | 'trend' | 'context';
+
+/** Señales de salud con valor numérico exacto disponibles para interpretación. */
+export type HealthSignalId =
+  | 'sleep'
+  | 'deepSleep'
+  | 'remSleep'
+  | 'restingHr'
+  | 'meanHr'
+  | 'hrv'
+  | 'steps'
+  | 'walkRunKm'
+  | 'activeCalories'
+  | 'spo2';
 
 export interface HealthMetricPeriod {
   id: string;
@@ -98,6 +113,8 @@ export interface HealthInsight {
   title: string;
   detail: string;
   tone: HealthInsightTone;
+  /** Distingue hecho, tendencia y contexto para no presentar asociaciones como causas. */
+  kind: HealthInsightKind;
 }
 
 export interface HealthDayRow {
@@ -117,7 +134,43 @@ export interface HealthTodayState {
   details: string | null;
 }
 
+/** Valores exactos de un día, sin convertir faltantes en cero. */
+export interface HealthDaySignals {
+  date: string;
+  label: string;
+  importKind: HealthImportKind;
+  /** Lista declarada por la fuente de señales núcleo ausentes, cuando existe. */
+  missingCore: string | null;
+  workout: string | null;
+  /** null = desconocido. Nunca 0 por ausencia. */
+  values: Record<HealthSignalId, number | null>;
+}
+
+/** Base personal reciente de una señal. */
+export interface HealthBaselineSignal {
+  average: number | null;
+  days: number;
+}
+
+/**
+ * Modelo numérico exacto que consume la capa de interpretación.
+ * No contiene textos de UI: las cadenas formateadas viven en `metrics` e `insights`.
+ */
+export interface HealthSignalsModel {
+  /** Fila de hoy si existe, aunque sea parcial. */
+  today: HealthDaySignals | null;
+  /** Día más reciente (<= hoy) con sueño o FC en reposo. Puede ser el propio hoy. */
+  lastInterpretable: HealthDaySignals | null;
+  /** Base personal de los 30 días previos a hoy, independiente del período elegido. */
+  baseline: Record<HealthSignalId, HealthBaselineSignal>;
+  baselineWindowDays: number;
+  /** Días con datos dentro de la ventana de base personal. */
+  baselineCoverageDays: number;
+}
+
 export interface HealthPageData extends DomainPageMeta {
+  /** Modelo numérico exacto para la capa de interpretación. */
+  signals: HealthSignalsModel;
   metrics: HealthMetricPeriod[];
   today: HealthTodayState;
   history: HealthDayRow[];

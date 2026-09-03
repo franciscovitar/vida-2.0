@@ -102,7 +102,7 @@ test('Health V2 agrupa métricas y compara período, baseline y calidad', () => 
 
 test('Health V2 conserva una UI visual sin convertirla en diagnóstico', () => {
   const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
-  assert.match(page, /Tu estado en una mirada/);
+  assert.match(page, /<HealthTodayHero/);
   assert.match(page, /base 30d/);
   assert.match(page, /no como diagnóstico/i);
   assert.match(page, /SparkBars/);
