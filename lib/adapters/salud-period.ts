@@ -359,12 +359,46 @@ export function buildHealthSignalsModel(
   };
 }
 
+/* ------------------------------------------------------------------ */
+/* Fuente real no disponible                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Copia única del estado de falla cerrada: la fuente real de salud está
+ * configurada pero no se pudo leer. No se sustituye por historial simulado.
+ */
+export const HEALTH_SOURCE_UNAVAILABLE_TITLE = 'Datos de salud no disponibles';
+export const HEALTH_SOURCE_UNAVAILABLE_DETAIL = 'No pudimos leer la fuente real en este momento.';
+export const HEALTH_SOURCE_UNAVAILABLE_NOTICE = `${HEALTH_SOURCE_UNAVAILABLE_TITLE}. ${HEALTH_SOURCE_UNAVAILABLE_DETAIL}`;
+
+function unavailableInsight(): HealthInsight {
+  return {
+    id: 'source-unavailable',
+    title: HEALTH_SOURCE_UNAVAILABLE_TITLE,
+    detail: `${HEALTH_SOURCE_UNAVAILABLE_DETAIL} No se generan observaciones, base personal ni comparaciones mientras no haya lectura real.`,
+    tone: 'watch',
+    kind: 'fact',
+  };
+}
+
 function cellLabel(cell: Cell<number>, formatter: (n: number) => string): string {
   if (cell.kind !== 'value') return '—';
   return formatter(cell.value);
 }
 
-function todayState(record: SaludRecord | undefined, today: string): HealthTodayState {
+function todayState(
+  record: SaludRecord | undefined,
+  today: string,
+  sourceAvailable: boolean,
+): HealthTodayState {
+  if (!sourceAvailable) {
+    return {
+      kind: 'missing',
+      date: null,
+      label: `Fuente no disponible · ${formatShortDay(today)}`,
+      details: HEALTH_SOURCE_UNAVAILABLE_DETAIL,
+    };
+  }
   if (!record || !saludHasData(record)) {
     return {
       kind: 'missing',
@@ -404,7 +438,10 @@ function buildInsights(input: {
   partialDays: number;
   baselineDays: number;
   periodDays: number;
+  sourceAvailable: boolean;
 }): HealthInsight[] {
+  if (!input.sourceAvailable) return [unavailableInsight()];
+
   const insights: HealthInsight[] = [];
 
   const periodCandidate = [...input.metrics]
@@ -477,7 +514,10 @@ export function buildHealthPageData(input: {
   source: 'mock' | 'google';
   status: TodayStatus;
   notice: string | null;
+  /** false cuando la fuente real falló: se lee vacío, nunca simulado. Por defecto true. */
+  sourceAvailable?: boolean;
 }): HealthPageData {
+  const sourceAvailable = input.sourceAvailable ?? true;
   const map = new Map<string, SaludRecord>();
   for (const record of input.records) {
     if (record.date) map.set(record.date, record);
@@ -546,12 +586,14 @@ export function buildHealthPageData(input: {
     partialDays,
     baselineDays: baseline.length,
     periodDays: input.window.days,
+    sourceAvailable,
   });
 
   return {
     source: input.source,
     status: input.status,
     notice: input.notice,
+    sourceAvailable,
     targetDate: input.today,
     periodDays: input.window.days,
     periodStart: input.window.start,
@@ -560,7 +602,7 @@ export function buildHealthPageData(input: {
     signals,
     previousAvailableDays: prev.length,
     metrics,
-    today: todayState(map.get(input.today), input.today),
+    today: todayState(map.get(input.today), input.today, sourceAvailable),
     history,
     baselineDays: baseline.length,
     completeDays,

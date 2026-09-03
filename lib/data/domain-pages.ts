@@ -18,7 +18,7 @@ import {
   registroHasData,
   type RegistroRecord,
 } from '@/lib/adapters/registro-diario';
-import { buildHealthPageData } from '@/lib/adapters/salud-period';
+import { buildHealthPageData, HEALTH_SOURCE_UNAVAILABLE_NOTICE } from '@/lib/adapters/salud-period';
 import { parseSalud, saludHasData, type SaludRecord } from '@/lib/adapters/salud';
 import { buildSheetToday } from '@/lib/adapters/sheet';
 import { buildTrendsPageData } from '@/lib/adapters/trends';
@@ -62,8 +62,11 @@ function composeFromRecords(
     status: TodayStatus;
     notice: string | null;
     writable: boolean;
+    /** false sólo cuando la fuente real de salud falló. Por defecto true. */
+    healthSourceAvailable?: boolean;
   },
 ): DomainPagesBundle {
+  const healthSourceAvailable = meta.healthSourceAvailable ?? true;
   const window = periodWindow(today, periodDays);
   const registroAvailable = registro
     .filter((r) => r.date && r.date <= today && registroHasData(r))
@@ -109,7 +112,8 @@ function composeFromRecords(
     window,
     source: meta.source,
     status: meta.status,
-    notice: meta.notice,
+    notice: healthSourceAvailable ? meta.notice : HEALTH_SOURCE_UNAVAILABLE_NOTICE,
+    sourceAvailable: healthSourceAvailable,
   });
   const productivity = buildProductivityPageData({
     records: registro,
@@ -158,17 +162,26 @@ function fromSheetValues(
   });
 }
 
+/**
+ * Falla cerrada para la fuente real.
+ *
+ * Salud nunca se rellena con historial simulado cuando la lectura real falla:
+ * un dato personal inventado se leería como propio aunque haya un banner.
+ * Hábitos y productividad conservan su demo simulada, que no produce
+ * conclusiones fisiológicas.
+ */
 function fallbackBundle(
   status: Exclude<TodayStatus, 'mock' | 'ready'>,
   periodDays: PeriodDays,
   today: string,
 ): DomainPagesBundle {
   const mock = buildMockDomainRecords(today);
-  return composeFromRecords(mock.registro, mock.salud, today, periodDays, {
+  return composeFromRecords(mock.registro, [], today, periodDays, {
     source: 'google',
     status,
     notice: NOTICES[status],
     writable: false,
+    healthSourceAvailable: false,
   });
 }
 

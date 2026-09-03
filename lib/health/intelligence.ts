@@ -11,6 +11,10 @@
  * - Un faltante es desconocido, nunca cero.
  * - Una coincidencia temporal es contexto, nunca una causa.
  */
+import {
+  HEALTH_SOURCE_UNAVAILABLE_DETAIL,
+  HEALTH_SOURCE_UNAVAILABLE_TITLE,
+} from '@/lib/adapters/salud-period';
 import { formatNumber } from '@/lib/format';
 import type { GymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
 import type { NutritionCoverage, NutritionDashboardData } from '@/lib/nutrition/types';
@@ -308,6 +312,8 @@ export interface HealthLastInterpretableDay {
 
 export interface HealthCurrentState {
   kind: HealthStateKind;
+  /** false cuando la fuente real falló: no hay lectura personal posible. */
+  sourceAvailable: boolean;
   headline: string;
   explanation: string;
   reasons: readonly string[];
@@ -352,10 +358,38 @@ function partialImportReason(day: HealthDaySignals | null): string {
   return `La fuente marcó la importación de hoy como parcial${missing}.`;
 }
 
+/**
+ * Estado cuando la fuente real está configurada pero no se pudo leer.
+ * No hay día de hoy, ni base personal, ni día histórico interpretable: la
+ * ausencia se informa como ausencia y nunca se rellena con historial simulado.
+ */
+function unavailableState(health: HealthPageData): HealthCurrentState {
+  const reasons = [
+    HEALTH_SOURCE_UNAVAILABLE_DETAIL,
+    'No se muestran métricas del día, base personal, tendencias ni prioridades: no hay dato real que interpretar.',
+  ];
+  return {
+    kind: 'insufficient-data',
+    sourceAvailable: false,
+    headline: HEALTH_SOURCE_UNAVAILABLE_TITLE,
+    explanation: reasons.join(' '),
+    reasons,
+    date: health.targetDate,
+    dateLabel: '',
+    importKind: 'missing',
+    coreAvailable: [],
+    coreMissing: REPORTED_CORE_SIGNALS.map((signal) => HEALTH_MONITORING_THRESHOLDS[signal].label),
+    evidence: [],
+    lastInterpretable: null,
+  };
+}
+
 function buildCurrentState(
   health: HealthPageData,
   evidence: readonly HealthSignalEvidence[],
 ): HealthCurrentState {
+  if (!health.sourceAvailable) return unavailableState(health);
+
   const { signals, targetDate } = health;
   const today = signals.today;
   const importKind: HealthImportKind | 'missing' = today?.importKind ?? 'missing';
@@ -405,6 +439,7 @@ function buildCurrentState(
 
     return {
       kind: 'insufficient-data',
+      sourceAvailable: true,
       headline: STATE_HEADLINES['insufficient-data'],
       explanation: reasons.join(' '),
       reasons,
@@ -439,6 +474,7 @@ function buildCurrentState(
 
   return {
     kind,
+    sourceAvailable: true,
     headline: STATE_HEADLINES[kind],
     explanation: reasons.join(' '),
     reasons,
@@ -560,6 +596,14 @@ function coverageItem(health: HealthPageData): HealthTrajectoryItem {
 }
 
 function buildTrajectory(health: HealthPageData): HealthTrajectory {
+  if (!health.sourceAvailable) {
+    return {
+      headline: 'Sin trayectoria: no hay lectura real del período.',
+      detail: `${HEALTH_SOURCE_UNAVAILABLE_DETAIL} No se compara ningún período contra otro mientras la fuente no responda.`,
+      items: [],
+    };
+  }
+
   const items: HealthTrajectoryItem[] = [];
   for (const entry of TRAJECTORY_SIGNALS) {
     const metric = health.metrics.find((candidate) => candidate.id === entry.metricId);
@@ -838,10 +882,14 @@ function buildEvidenceQuality(
   const missing =
     state.coreMissing.length > 0 ? ` Hoy falta ${joinEs(state.coreMissing.map(lowerEs))}.` : '';
 
+  const detail = health.sourceAvailable
+    ? `${coreAvailable} de ${coreExpected} señales núcleo hoy · ${baselineDays} día(s) de base personal sobre ${health.signals.baselineWindowDays} · ${health.availableDays} de ${health.periodDays} días con datos en el período.${missing}`
+    : `${HEALTH_SOURCE_UNAVAILABLE_DETAIL} Sin señales, sin base personal y sin cobertura del período para evaluar.`;
+
   return {
     level,
     label: EVIDENCE_LABELS[level],
-    detail: `${coreAvailable} de ${coreExpected} señales núcleo hoy · ${baselineDays} día(s) de base personal sobre ${health.signals.baselineWindowDays} · ${health.availableDays} de ${health.periodDays} días con datos en el período.${missing}`,
+    detail,
     todayImport: state.importKind,
     coreSignalsAvailable: coreAvailable,
     coreSignalsExpected: coreExpected,
@@ -878,6 +926,20 @@ function buildPriorities(input: {
   quality: HealthEvidenceQuality;
 }): readonly HealthPriority[] {
   const { health, state, trajectory, quality } = input;
+
+  if (!health.sourceAvailable) {
+    return [
+      {
+        id: 'source-unavailable',
+        category: 'data-quality',
+        title: 'Restablecer la lectura de la fuente de salud',
+        detail: `${HEALTH_SOURCE_UNAVAILABLE_DETAIL} Hasta que vuelva a leerse, cualquier prioridad fisiológica sería inventada.`,
+        evidence: quality.detail,
+        tone: 'watch',
+      },
+    ];
+  }
+
   const priorities: HealthPriority[] = [];
   const bySignal = new Map(state.evidence.map((item) => [item.signal, item]));
 

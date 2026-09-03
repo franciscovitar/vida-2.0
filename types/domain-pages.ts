@@ -169,6 +169,11 @@ export interface HealthSignalsModel {
 }
 
 export interface HealthPageData extends DomainPageMeta {
+  /**
+   * false cuando la fuente real de salud está configurada pero no se pudo leer.
+   * En ese caso no hay ninguna fila real y nada debe interpretarse como propio.
+   */
+  sourceAvailable: boolean;
   /** Modelo numérico exacto para la capa de interpretación. */
   signals: HealthSignalsModel;
   metrics: HealthMetricPeriod[];
