@@ -6,6 +6,7 @@ import { getNotionConfig, getNotionDataSource } from '@/lib/notion/config';
 import { CALENDAR_TIMEZONE } from '@/lib/calendar/constants';
 import { WRITE_CONTRACT_VERSION } from '@/types/actions';
 import { validateEncryptionKey } from '@/lib/actions/encryption';
+import { getGymSheetsWriteConfig } from '@/lib/gym/sheets-config';
 
 export function isWriteActionsEnabled(
   env: Readonly<Record<string, string | undefined>> = process.env,
@@ -389,10 +390,20 @@ export function getWriteRuntimeStatus(
   }
 
   let sheetsGym: IntegrationRuntimeState = 'misconfigured';
-  if (writeConfig.ok && writeConfig.gymSessionsRange && writeConfig.gymSetsRange) {
+  const gymWriteTarget = getGymSheetsWriteConfig(env);
+  if (
+    writeConfig.ok &&
+    writeConfig.gymSessionsRange &&
+    writeConfig.gymSetsRange &&
+    gymWriteTarget.ok
+  ) {
     sheetsGym = 'ready';
-  } else {
+  } else if (!writeConfig.ok || !writeConfig.gymSessionsRange || !writeConfig.gymSetsRange) {
     issues.push('gym-ranges-missing');
+  } else if (!gymWriteTarget.ok && gymWriteTarget.reason === 'writes-disabled') {
+    issues.push('gym-writes-disabled');
+  } else {
+    issues.push('gym-write-target-missing');
   }
 
   let proposalsLedger: IntegrationRuntimeState = 'misconfigured';
