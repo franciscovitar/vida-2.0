@@ -293,6 +293,39 @@ una autorización explícita nueva antes de ampliar el OAuth de Calendar o habil
 `GOOGLE_CALENDAR_WRITE_ID`. OpenClaw proposals y Automatizaciones permanecen fuera de alcance hasta
 que esa frontera se trate por separado.
 
+## Apéndice histórico — checkpoint de fuentes canónicas de Production (2026-08-29)
+
+**Registro histórico. No refleja el estado actual de Production.**
+
+Esta sección preserva un checkpoint operativo redactado el 2026-08-29 y recuperado de un clon local
+que nunca se commiteó. Refleja el estado certificado *en esa fecha*, inmediatamente después de la
+actualización focal de fuentes base, y **puede haber sido superado por checkpoints posteriores** —
+en particular por la sección «Activación de fuentes base en Production — 29/08/2026» (versión
+ampliada del mismo pass) y por los cierres posteriores «OpenClaw Production — activación final
+29/08/2026» y «Safe Writes Core Production — activación final 29/08/2026», que ya dejaron OpenClaw y
+Safe Writes Core activos en Production. Las afirmaciones siguientes se conservan sin alterar como
+historia; revalidar contra las secciones vigentes antes de actuar.
+
+> ### Fuentes canónicas de Production — cierre 2026-08-29
+>
+> Estado verificado después de una actualización focal de fuentes:
+>
+> - Google Sheets Production es el target activo de la aplicación; la fuente sigue siendo Google
+>   Sheets y el gate de escritura de hábitos está habilitado únicamente en Production.
+> - Se conservaron los datos existentes de Salud y se reconciliaron sólo dos hábitos reales del día
+>   actual que faltaban en Production. No se copiaron datos DEV completos ni fixtures.
+> - Se preservó un backup recuperable del Sheet Production antes de la reconciliación.
+> - Google Calendar quedó autenticado con alcance exclusivamente de lectura; `/agenda` carga eventos
+>   reales sin error de autenticación.
+> - ActivityWatch local y su tarea existente volvieron a producir las siete métricas del día actual
+>   en `Registro diario` Production, sin alterar otras columnas.
+> - `/habitos`, `/salud`, `/agenda` y `/productividad` fueron verificados en el deployment Production
+>   READY del SHA principal.
+> - OpenClaw, automatizaciones, escrituras avanzadas y acceso a Journaling continúan apagados; no se
+>   realizaron escrituras en Notion, Calendar ni otros recursos externos fuera de la reconciliación
+>   de hábitos autorizada.
+> - Production no contiene cambios fuera de las variables y datos descritos arriba.
+
 ## Higiene del archivo
 
 - No pegar secretos, tokens, cookies, credenciales, emails, URLs privadas, payloads personales ni
