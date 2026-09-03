@@ -12,6 +12,7 @@ import {
   HEALTH_GYM_UNAVAILABLE,
   HEALTH_MAX_PRIORITIES,
   HEALTH_NUTRITION_UNAVAILABLE,
+  HEALTH_PERIOD_TREND_MIN_DAYS,
   type HealthGymInput,
   type HealthIntelligence,
   type HealthMonitoredSignal,
@@ -495,6 +496,137 @@ test('SpO₂ sólo aporta contexto y nunca se interpreta clínicamente', () => {
   assert.match(spo2.text, /no lo interpreta clínicamente/i);
   // Una señal de contexto no puede mover el estado del día.
   assert.equal(result.currentState.kind, 'normal-for-you');
+});
+
+/**
+ * Historial con base personal y período anterior completos, y un período actual
+ * donde sólo `sleepDays` días llegaron como importación completa. El resto son
+ * importaciones parciales con movimiento y sin señales núcleo, igual que la
+ * lectura real. Los días completos son los más antiguos, así que con cobertura
+ * escasa hoy no aporta ninguna observación núcleo y la única evidencia posible
+ * es la del período.
+ */
+function sparsePeriodRows(options: {
+  sleepDays: number;
+  sleepValue: number;
+  currentSteps?: number;
+}): unknown[][] {
+  const rows: unknown[][] = [];
+  // Base personal y período anterior: días -14 a -7 completos y estables.
+  for (let offset = -14; offset <= -7; offset += 1) {
+    rows.push(
+      row({
+        [SAL.fecha]: shift(offset),
+        [SAL.sleep]: 7.5,
+        [SAL.restingHr]: 55,
+        [SAL.steps]: 8000,
+        [SAL.activeCalories]: 400,
+        [SAL.importStatus]: 'completo',
+      }),
+    );
+  }
+  // Período actual: días -6 a hoy. Sólo los primeros `sleepDays` son completos.
+  let remaining = options.sleepDays;
+  for (let offset = -6; offset <= 0; offset += 1) {
+    const complete = remaining > 0;
+    if (complete) remaining -= 1;
+    rows.push(
+      row({
+        [SAL.fecha]: shift(offset),
+        ...(complete ? { [SAL.sleep]: options.sleepValue, [SAL.restingHr]: 55 } : {}),
+        [SAL.steps]: options.currentSteps ?? 8000,
+        [SAL.importStatus]: complete ? 'completo' : 'parcial',
+        ...(complete ? {} : { [SAL_EXTENDED.missingCore]: 'Sueño, FC reposo' }),
+      }),
+    );
+  }
+  return rows;
+}
+
+function trajectoryOf(intelligence: HealthIntelligence, id: string) {
+  const found = intelligence.trajectory.items.find((item) => item.id === id);
+  assert.ok(found, `falta la trayectoria de ${id}`);
+  return found;
+}
+
+test('un solo día de sueño en el período no se promueve a tendencia', () => {
+  const result = intelligenceFor(sparsePeriodRows({ sleepDays: 1, sleepValue: 6.5 }));
+  const sleep = trajectoryOf(result, 'sleep');
+
+  // El valor observado se sigue mostrando: no se oculta ni se vuelve desconocido.
+  assert.equal(sleep.coverageDays, 1);
+  assert.equal(sleep.currentLabel, '6,5 h');
+  assert.equal(sleep.previousLabel, '7,5 h');
+  // Pero una sola observación no alcanza para una tendencia del período.
+  assert.equal(sleep.material, false);
+  assert.equal(sleep.tone, 'neutral');
+  assert.equal(sleep.direction, 'unknown');
+  assert.match(sleep.summary, /1 día\(s\) de cobertura en el período/);
+  assert.match(sleep.summary, /no alcanza para tratarlo como una tendencia/i);
+  assert.notEqual(result.trajectory.headline, 'Cambio principal del período: sueño total.');
+});
+
+test('la evidencia escasa del período no genera la prioridad de sueño', () => {
+  const result = intelligenceFor(sparsePeriodRows({ sleepDays: 1, sleepValue: 6.5 }));
+
+  assert.equal(
+    result.priorities.some((item) => item.category === 'sleep'),
+    false,
+  );
+  assert.equal(
+    result.priorities.some((item) => item.title === 'Recuperar duración de sueño'),
+    false,
+  );
+  // La prioridad honesta con esta cobertura sigue siendo la calidad de datos.
+  assert.equal(result.evidenceQuality.level, 'limited');
+  assert.equal(result.priorities[0].category, 'data-quality');
+  assert.match(result.priorities[0].title, /Primero necesitamos días completos/);
+});
+
+test('con cobertura suficiente el período vuelve a sostener una tendencia de sueño', () => {
+  const result = intelligenceFor(
+    sparsePeriodRows({ sleepDays: HEALTH_PERIOD_TREND_MIN_DAYS, sleepValue: 6.5 }),
+  );
+  const sleep = trajectoryOf(result, 'sleep');
+
+  assert.equal(sleep.coverageDays, HEALTH_PERIOD_TREND_MIN_DAYS);
+  assert.equal(sleep.material, true);
+  assert.equal(sleep.direction, 'down');
+  assert.equal(sleep.tone, 'watch');
+  assert.equal(result.trajectory.headline, 'Cambio principal del período: sueño total.');
+  assert.ok(result.priorities.some((item) => item.title === 'Recuperar duración de sueño'));
+});
+
+test('una observación de sueño de hoy sigue habilitando la prioridad por sí sola', () => {
+  const result = intelligenceFor([
+    ...baselineRows(),
+    row({
+      [SAL.fecha]: TODAY,
+      [SAL.sleep]: 5.8,
+      [SAL.restingHr]: 55,
+      [SAL.importStatus]: 'completo',
+    }),
+  ]);
+
+  // La trayectoria del período no es material: la prioridad viene del día de hoy.
+  assert.equal(trajectoryOf(result, 'sleep').material, false);
+  assert.equal(evidenceOf(result, 'sleep').concern, true);
+  const sleepPriority = result.priorities.find((item) => item.category === 'sleep');
+  assert.ok(sleepPriority);
+  assert.equal(sleepPriority.evidence, evidenceOf(result, 'sleep').text);
+});
+
+test('el movimiento con cobertura completa conserva su tendencia y su prioridad', () => {
+  const result = intelligenceFor(
+    sparsePeriodRows({ sleepDays: 7, sleepValue: 7.5, currentSteps: 4000 }),
+  );
+  const steps = trajectoryOf(result, 'steps');
+
+  assert.equal(steps.coverageDays, 7);
+  assert.equal(steps.material, true);
+  assert.equal(steps.direction, 'down');
+  assert.equal(steps.tone, 'watch');
+  assert.ok(result.priorities.some((item) => item.category === 'movement'));
 });
 
 test('la trayectoria resume el período sin listar cada métrica', () => {
