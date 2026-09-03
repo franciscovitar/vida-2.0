@@ -137,6 +137,14 @@ export const HEALTH_BASELINE_MIN_DAYS = 5;
 /** Días de base personal a partir de los cuales la lectura se considera sólida. */
 export const HEALTH_BASELINE_STRONG_DAYS = 12;
 
+/**
+ * Días con dato en el período actual necesarios para tratar una comparación de
+ * período como tendencia. Es una heurística de calidad de dato, NO un umbral
+ * clínico: el valor observado se muestra igual, pero una sola observación no
+ * puede promoverse a tendencia del período.
+ */
+export const HEALTH_PERIOD_TREND_MIN_DAYS = 3;
+
 /** Aclaración obligatoria en todo cruce entre dominios. */
 export const HEALTH_CONTEXT_CAVEAT =
   'Coincidencia temporal del mismo período, no una relación demostrada entre dominios.';
@@ -501,7 +509,7 @@ export interface HealthTrajectoryItem {
   currentLabel: string;
   previousLabel: string;
   coverageDays: number;
-  /** true cuando el cambio supera el umbral leve de esa métrica. */
+  /** true sólo si el cambio supera el umbral leve y el período actual tiene cobertura suficiente. */
   material: boolean;
 }
 
@@ -532,6 +540,20 @@ function trajectoryItem(
       id: metric.id,
       label: metric.label,
       summary: `${metric.label}: ${currentLabel} en el período. Todavía no hay período anterior comparable.`,
+      direction: 'unknown',
+      tone: 'neutral',
+      currentLabel,
+      previousLabel,
+      coverageDays: metric.coverageDays,
+      material: false,
+    };
+  }
+
+  if (metric.coverageDays < HEALTH_PERIOD_TREND_MIN_DAYS) {
+    return {
+      id: metric.id,
+      label: metric.label,
+      summary: `${metric.label}: ${currentLabel} con ${metric.coverageDays} ${metric.coverageDays === 1 ? 'día' : 'días'} de cobertura en el período. Todavía no alcanza para tratarlo como una tendencia.`,
       direction: 'unknown',
       tone: 'neutral',
       currentLabel,
