@@ -7,7 +7,7 @@
 import type { HealthView, MetricView, Trend } from '@/types';
 
 import { formatDuration, formatNumber, minutesToHours } from '../format';
-import { SAL, SALUD_HEADERS, SALUD_TAB } from '../google/constants';
+import { SAL, SAL_EXTENDED, SALUD_HEADERS, SALUD_TAB } from '../google/constants';
 import { buildHeaderIndex, columnIndex, requireHeaders } from '../validation/headers';
 import { toNumber, toText, rawCell, type Cell } from './cells';
 import { parseSheetDate } from './dates';
@@ -29,6 +29,17 @@ export interface SaludRecord {
   maxHr: Cell<number>;
   spo2: Cell<number>;
   importStatus: Cell<string>;
+  sleepAsleepHours: Cell<number>;
+  sleepInBedHours: Cell<number>;
+  coreSleepHours: Cell<number>;
+  awakeSleepHours: Cell<number>;
+  activeEnergyKj: Cell<number>;
+  stepLengthCm: Cell<number>;
+  restingEnergyKj: Cell<number>;
+  floorsClimbed: Cell<number>;
+  walkingAsymmetry: Cell<number>;
+  walkingSpeed: Cell<number>;
+  missingCore: Cell<string>;
 }
 
 /** Parsea las filas crudas de "Salud y experimentos" a registros tipados. */
@@ -41,6 +52,14 @@ export function parseSalud(values: readonly unknown[][]): SaludRecord[] {
     toNumber(rawCell(row, columnIndex(index, name, SALUD_TAB)));
   const text = (row: readonly unknown[], name: string): Cell<string> =>
     toText(rawCell(row, columnIndex(index, name, SALUD_TAB)));
+  const optionalNum = (row: readonly unknown[], name: string): Cell<number> => {
+    const position = index.get(name);
+    return position === undefined ? { kind: 'empty' } : toNumber(rawCell(row, position));
+  };
+  const optionalText = (row: readonly unknown[], name: string): Cell<string> => {
+    const position = index.get(name);
+    return position === undefined ? { kind: 'empty' } : toText(rawCell(row, position));
+  };
 
   const records: SaludRecord[] = [];
   for (let r = 1; r < values.length; r += 1) {
@@ -61,6 +80,17 @@ export function parseSalud(values: readonly unknown[][]): SaludRecord[] {
       maxHr: num(row, SAL.maxHr),
       spo2: num(row, SAL.spo2),
       importStatus: text(row, SAL.importStatus),
+      sleepAsleepHours: optionalNum(row, SAL_EXTENDED.sleepAsleep),
+      sleepInBedHours: optionalNum(row, SAL_EXTENDED.sleepInBed),
+      coreSleepHours: optionalNum(row, SAL_EXTENDED.coreSleep),
+      awakeSleepHours: optionalNum(row, SAL_EXTENDED.awakeSleep),
+      activeEnergyKj: optionalNum(row, SAL_EXTENDED.activeEnergyKj),
+      stepLengthCm: optionalNum(row, SAL_EXTENDED.stepLengthCm),
+      restingEnergyKj: optionalNum(row, SAL_EXTENDED.restingEnergyKj),
+      floorsClimbed: optionalNum(row, SAL_EXTENDED.floorsClimbed),
+      walkingAsymmetry: optionalNum(row, SAL_EXTENDED.walkingAsymmetry),
+      walkingSpeed: optionalNum(row, SAL_EXTENDED.walkingSpeed),
+      missingCore: optionalText(row, SAL_EXTENDED.missingCore),
     });
   }
   return records;
@@ -71,7 +101,7 @@ export function parseImportStatus(cell: Cell<string>): 'partial' | 'complete' | 
   if (cell.kind !== 'value') return 'none';
   const text = cell.value.trim().toLowerCase();
   if (text === '') return 'none';
-  if (/parcial/.test(text)) return 'partial';
+  if (/parcial|partial|incomplet|faltante|missing/.test(text)) return 'partial';
   if (/completo|completa|\bok\b|importado|listo|done/.test(text)) return 'complete';
   return 'none';
 }
@@ -95,6 +125,16 @@ export function saludHasData(record: SaludRecord): boolean {
     record.minHr,
     record.maxHr,
     record.spo2,
+    record.sleepAsleepHours,
+    record.sleepInBedHours,
+    record.coreSleepHours,
+    record.awakeSleepHours,
+    record.activeEnergyKj,
+    record.stepLengthCm,
+    record.restingEnergyKj,
+    record.floorsClimbed,
+    record.walkingAsymmetry,
+    record.walkingSpeed,
   ];
   if (numeric.some((cell) => cell.kind === 'value')) return true;
   if (record.workout.kind === 'value' && record.workout.value.trim() !== '') return true;
@@ -122,7 +162,6 @@ function contextFor(
   if (direction === 'more-better') {
     return { context: text, status: up ? 'good' : 'warning' };
   }
-  // less-better (p. ej. FC en reposo).
   return {
     context: up ? 'más alta que el día anterior' : 'más baja que el día anterior',
     status: up ? 'warning' : 'good',

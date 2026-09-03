@@ -51,7 +51,7 @@ export const RD_HABIT_HEADERS: readonly string[] = [
   RD.football,
 ];
 
-/** Encabezados de "Salud y experimentos" (claves internas → nombre en el Sheet). */
+/** Encabezados core de "Salud y experimentos". */
 export const SAL = {
   fecha: 'Fecha',
   sleep: 'Sueño (h)',
@@ -70,5 +70,23 @@ export const SAL = {
   importStatus: 'Estado de importación',
 } as const;
 
-/** Encabezados requeridos en "Salud y experimentos". */
+/** Encabezados requeridos para mantener compatibilidad con la fuente histórica. */
 export const SALUD_HEADERS: readonly string[] = Object.values(SAL);
+
+/**
+ * Columnas adicionales que Health Sync V2 ya escribe en Production.
+ * Son optativas para que datos/mocks históricos sigan siendo legibles.
+ */
+export const SAL_EXTENDED = {
+  sleepAsleep: 'Sueño dormido (h)',
+  sleepInBed: 'Sueño en cama (h)',
+  coreSleep: 'Sueño núcleo (h)',
+  awakeSleep: 'Sueño despierto (h)',
+  activeEnergyKj: 'Energía activa (kJ)',
+  stepLengthCm: 'Longitud de paso (cm)',
+  restingEnergyKj: 'Energía en reposo (kJ)',
+  floorsClimbed: 'Pisos subidos',
+  walkingAsymmetry: 'Asimetría al caminar (%)',
+  walkingSpeed: 'Velocidad al caminar (km/h)',
+  missingCore: 'Faltantes core',
+} as const;

@@ -5,91 +5,229 @@ import { compareTotals } from '@/lib/adapters/compare';
 import type { Cell } from '@/lib/adapters/cells';
 import { addDaysYmd, formatShortDay, isFutureDate } from '@/lib/adapters/dates';
 import { parseImportStatus, saludHasData, type SaludRecord } from '@/lib/adapters/salud';
-import { formatNumber, minutesToHours } from '@/lib/format';
+import { formatNumber } from '@/lib/format';
 import type { PeriodWindow } from '@/lib/periods';
-import { inPeriod, previousPeriodWindow } from '@/lib/periods';
+import { inPeriod, periodWindow, previousPeriodWindow } from '@/lib/periods';
 import type {
+  HealthBaselineSignal,
   HealthDayRow,
+  HealthDaySignals,
   HealthImportKind,
+  HealthInsight,
+  HealthMetricGroupId,
   HealthMetricPeriod,
   HealthPageData,
+  HealthSignalId,
+  HealthSignalsModel,
   HealthTodayState,
 } from '@/types/domain-pages';
 import type { Domain, TodayStatus } from '@/types';
 
-type NumericPicker = (record: SaludRecord) => Cell<number>;
+type NumericPicker = (record: SaludRecord) => number | null;
 
-const METRICS: {
+type MetricDefinition = {
   id: string;
   label: string;
   unit: string;
+  group: HealthMetricGroupId;
   domain: Domain;
   pick: NumericPicker;
   formatAvg: (value: number) => string;
-}[] = [
+  optional?: boolean;
+};
+
+function cellValue(cell: Cell<number>): number | null {
+  return cell.kind === 'value' ? cell.value : null;
+}
+
+const oneDecimal = (value: number): string => String(Math.round(value * 10) / 10);
+const integer = (value: number): string => formatNumber(Math.round(value));
+
+const METRICS: readonly MetricDefinition[] = [
   {
     id: 'sleep',
-    label: 'Sueño promedio',
+    label: 'Sueño total',
     unit: 'h',
+    group: 'sleep',
     domain: 'health',
-    pick: (r) => r.sleepHours,
-    formatAvg: (v) => String(Math.round(v * 10) / 10),
+    pick: (r) => cellValue(r.sleepHours),
+    formatAvg: oneDecimal,
   },
   {
     id: 'deep',
     label: 'Sueño profundo',
     unit: 'h',
+    group: 'sleep',
     domain: 'health',
-    pick: (r) => r.deepSleepHours,
-    formatAvg: (v) => String(Math.round(v * 10) / 10),
+    pick: (r) => cellValue(r.deepSleepHours),
+    formatAvg: oneDecimal,
   },
   {
     id: 'rem',
     label: 'Sueño REM',
     unit: 'h',
+    group: 'sleep',
     domain: 'health',
-    pick: (r) => r.remSleepHours,
-    formatAvg: (v) => String(Math.round(v * 10) / 10),
+    pick: (r) => cellValue(r.remSleepHours),
+    formatAvg: oneDecimal,
   },
   {
-    id: 'steps',
-    label: 'Pasos',
-    unit: '',
+    id: 'coreSleep',
+    label: 'Sueño núcleo',
+    unit: 'h',
+    group: 'sleep',
     domain: 'health',
-    pick: (r) => r.steps,
-    formatAvg: (v) => formatNumber(Math.round(v)),
+    pick: (r) => cellValue(r.coreSleepHours),
+    formatAvg: oneDecimal,
+    optional: true,
   },
   {
-    id: 'calories',
-    label: 'Calorías activas',
-    unit: 'kcal',
+    id: 'awakeSleep',
+    label: 'Tiempo despierto',
+    unit: 'h',
+    group: 'sleep',
     domain: 'health',
-    pick: (r) => r.activeCalories,
-    formatAvg: (v) => formatNumber(Math.round(v)),
+    pick: (r) => cellValue(r.awakeSleepHours),
+    formatAvg: oneDecimal,
+    optional: true,
   },
   {
     id: 'restingHr',
     label: 'FC en reposo',
     unit: 'ppm',
+    group: 'cardio',
     domain: 'health',
-    pick: (r) => r.restingHr,
-    formatAvg: (v) => String(Math.round(v)),
+    pick: (r) => cellValue(r.restingHr),
+    formatAvg: integer,
   },
   {
     id: 'meanHr',
     label: 'FC media',
     unit: 'ppm',
+    group: 'cardio',
     domain: 'health',
-    pick: (r) => r.meanHr,
-    formatAvg: (v) => String(Math.round(v)),
+    pick: (r) => cellValue(r.meanHr),
+    formatAvg: integer,
+  },
+  {
+    id: 'minHr',
+    label: 'FC mínima',
+    unit: 'ppm',
+    group: 'cardio',
+    domain: 'health',
+    pick: (r) => cellValue(r.minHr),
+    formatAvg: integer,
+    optional: true,
+  },
+  {
+    id: 'maxHr',
+    label: 'FC máxima',
+    unit: 'ppm',
+    group: 'cardio',
+    domain: 'health',
+    pick: (r) => cellValue(r.maxHr),
+    formatAvg: integer,
+    optional: true,
   },
   {
     id: 'hrv',
     label: 'HRV',
     unit: 'ms',
+    group: 'cardio',
     domain: 'health',
-    pick: (r) => r.hrv,
-    formatAvg: (v) => String(Math.round(v)),
+    pick: (r) => cellValue(r.hrv),
+    formatAvg: integer,
+    optional: true,
+  },
+  {
+    id: 'steps',
+    label: 'Pasos',
+    unit: '',
+    group: 'movement',
+    domain: 'health',
+    pick: (r) => cellValue(r.steps),
+    formatAvg: integer,
+  },
+  {
+    id: 'distance',
+    label: 'Distancia',
+    unit: 'km',
+    group: 'movement',
+    domain: 'health',
+    pick: (r) => cellValue(r.walkRunKm),
+    formatAvg: oneDecimal,
+  },
+  {
+    id: 'walkingSpeed',
+    label: 'Velocidad al caminar',
+    unit: 'km/h',
+    group: 'movement',
+    domain: 'health',
+    pick: (r) => cellValue(r.walkingSpeed),
+    formatAvg: oneDecimal,
+    optional: true,
+  },
+  {
+    id: 'stepLength',
+    label: 'Longitud de paso',
+    unit: 'cm',
+    group: 'movement',
+    domain: 'health',
+    pick: (r) => cellValue(r.stepLengthCm),
+    formatAvg: oneDecimal,
+    optional: true,
+  },
+  {
+    id: 'floors',
+    label: 'Pisos subidos',
+    unit: '',
+    group: 'movement',
+    domain: 'health',
+    pick: (r) => cellValue(r.floorsClimbed),
+    formatAvg: oneDecimal,
+    optional: true,
+  },
+  {
+    id: 'walkingAsymmetry',
+    label: 'Asimetría al caminar',
+    unit: '%',
+    group: 'movement',
+    domain: 'health',
+    pick: (r) => cellValue(r.walkingAsymmetry),
+    formatAvg: oneDecimal,
+    optional: true,
+  },
+  {
+    id: 'spo2',
+    label: 'SpO₂',
+    unit: '%',
+    group: 'oxygen',
+    domain: 'health',
+    pick: (r) => cellValue(r.spo2),
+    formatAvg: oneDecimal,
+    optional: true,
+  },
+  {
+    id: 'calories',
+    label: 'Calorías activas',
+    unit: 'kcal',
+    group: 'energy',
+    domain: 'health',
+    pick: (r) => cellValue(r.activeCalories),
+    formatAvg: integer,
+  },
+  {
+    id: 'restingEnergy',
+    label: 'Energía en reposo',
+    unit: 'kcal',
+    group: 'energy',
+    domain: 'health',
+    pick: (r) => {
+      const value = cellValue(r.restingEnergyKj);
+      return value === null ? null : value / 4.184;
+    },
+    formatAvg: integer,
+    optional: true,
   },
 ];
 
@@ -114,8 +252,8 @@ function averageOf(
 ): { average: number | null; values: number[] } {
   const values: number[] = [];
   for (const record of available) {
-    const cell = pick(record);
-    if (cell.kind === 'value') values.push(cell.value);
+    const value = pick(record);
+    if (value !== null && Number.isFinite(value)) values.push(value);
   }
   if (values.length === 0) return { average: null, values };
   return {
@@ -135,13 +273,112 @@ function seriesOf(
   while (cursor <= window.end) {
     const record = map.get(cursor);
     if (!record || !availableSet.has(cursor)) out.push(null);
-    else {
-      const cell = pick(record);
-      out.push(cell.kind === 'value' ? cell.value : null);
-    }
+    else out.push(pick(record));
     cursor = addDaysYmd(cursor, 1);
   }
   return out;
+}
+
+/** Ventana de base personal usada por la capa de interpretación (independiente del período). */
+export const HEALTH_SIGNALS_BASELINE_DAYS = 30;
+
+const SIGNAL_PICKERS: Record<HealthSignalId, NumericPicker> = {
+  sleep: (r) => cellValue(r.sleepHours),
+  deepSleep: (r) => cellValue(r.deepSleepHours),
+  remSleep: (r) => cellValue(r.remSleepHours),
+  restingHr: (r) => cellValue(r.restingHr),
+  meanHr: (r) => cellValue(r.meanHr),
+  hrv: (r) => cellValue(r.hrv),
+  steps: (r) => cellValue(r.steps),
+  walkRunKm: (r) => cellValue(r.walkRunKm),
+  activeCalories: (r) => cellValue(r.activeCalories),
+  spo2: (r) => cellValue(r.spo2),
+};
+
+const SIGNAL_IDS = Object.keys(SIGNAL_PICKERS) as HealthSignalId[];
+
+function trimmedText(cell: SaludRecord['workout']): string | null {
+  if (cell.kind !== 'value') return null;
+  const text = cell.value.trim();
+  return text === '' ? null : text;
+}
+
+/** Proyecta un registro a valores exactos. Un faltante queda en null, nunca en 0. */
+function daySignals(record: SaludRecord): HealthDaySignals {
+  const values = {} as Record<HealthSignalId, number | null>;
+  for (const id of SIGNAL_IDS) values[id] = SIGNAL_PICKERS[id](record);
+  return {
+    date: record.date as string,
+    label: formatShortDay(record.date as string),
+    importKind: parseImportStatus(record.importStatus),
+    missingCore: trimmedText(record.missingCore),
+    workout: trimmedText(record.workout),
+    values,
+  };
+}
+
+/** true si el día tiene al menos una señal núcleo (sueño o FC en reposo). */
+function isInterpretableDay(record: SaludRecord): boolean {
+  return cellValue(record.sleepHours) !== null || cellValue(record.restingHr) !== null;
+}
+
+/**
+ * Modelo numérico exacto para interpretar el día actual.
+ * Nunca sustituye hoy por un día anterior: expone ambos por separado.
+ */
+export function buildHealthSignalsModel(
+  records: readonly SaludRecord[],
+  today: string,
+): HealthSignalsModel {
+  const withData = records
+    .filter((record) => record.date !== null && record.date <= today && saludHasData(record))
+    .sort((a, b) => (a.date as string).localeCompare(b.date as string));
+
+  const todayRecord = withData.find((record) => record.date === today) ?? null;
+
+  const lookbackStart = addDaysYmd(today, -HEALTH_SIGNALS_BASELINE_DAYS);
+  const interpretable = withData.filter(
+    (record) => (record.date as string) >= lookbackStart && isInterpretableDay(record),
+  );
+  const lastInterpretable = interpretable.at(-1) ?? null;
+
+  const baselineWindow = periodWindow(addDaysYmd(today, -1), HEALTH_SIGNALS_BASELINE_DAYS);
+  const baselineRecords = saludAvailableDays(records, baselineWindow);
+  const baseline = {} as Record<HealthSignalId, HealthBaselineSignal>;
+  for (const id of SIGNAL_IDS) {
+    const { average, values } = averageOf(baselineRecords, SIGNAL_PICKERS[id]);
+    baseline[id] = { average, days: values.length };
+  }
+
+  return {
+    today: todayRecord ? daySignals(todayRecord) : null,
+    lastInterpretable: lastInterpretable ? daySignals(lastInterpretable) : null,
+    baseline,
+    baselineWindowDays: HEALTH_SIGNALS_BASELINE_DAYS,
+    baselineCoverageDays: baselineRecords.length,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Fuente real no disponible                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Copia única del estado de falla cerrada: la fuente real de salud está
+ * configurada pero no se pudo leer. No se sustituye por historial simulado.
+ */
+export const HEALTH_SOURCE_UNAVAILABLE_TITLE = 'Datos de salud no disponibles';
+export const HEALTH_SOURCE_UNAVAILABLE_DETAIL = 'No pudimos leer la fuente real en este momento.';
+export const HEALTH_SOURCE_UNAVAILABLE_NOTICE = `${HEALTH_SOURCE_UNAVAILABLE_TITLE}. ${HEALTH_SOURCE_UNAVAILABLE_DETAIL}`;
+
+function unavailableInsight(): HealthInsight {
+  return {
+    id: 'source-unavailable',
+    title: HEALTH_SOURCE_UNAVAILABLE_TITLE,
+    detail: `${HEALTH_SOURCE_UNAVAILABLE_DETAIL} No se generan observaciones, base personal ni comparaciones mientras no haya lectura real.`,
+    tone: 'watch',
+    kind: 'fact',
+  };
 }
 
 function cellLabel(cell: Cell<number>, formatter: (n: number) => string): string {
@@ -149,9 +386,26 @@ function cellLabel(cell: Cell<number>, formatter: (n: number) => string): string
   return formatter(cell.value);
 }
 
-function todayState(record: SaludRecord | undefined, today: string): HealthTodayState {
+function todayState(
+  record: SaludRecord | undefined,
+  today: string,
+  sourceAvailable: boolean,
+): HealthTodayState {
+  if (!sourceAvailable) {
+    return {
+      kind: 'missing',
+      date: null,
+      label: `Fuente no disponible · ${formatShortDay(today)}`,
+      details: HEALTH_SOURCE_UNAVAILABLE_DETAIL,
+    };
+  }
   if (!record || !saludHasData(record)) {
-    return { kind: 'missing', date: null, label: `Sin datos · ${formatShortDay(today)}` };
+    return {
+      kind: 'missing',
+      date: null,
+      label: `Sin datos · ${formatShortDay(today)}`,
+      details: null,
+    };
   }
   const kind = parseImportStatus(record.importStatus);
   const importKind: HealthImportKind = kind === 'none' ? 'complete' : kind;
@@ -159,7 +413,98 @@ function todayState(record: SaludRecord | undefined, today: string): HealthToday
     importKind === 'partial'
       ? `Importación parcial · ${formatShortDay(record.date as string)}`
       : `Datos del día · ${formatShortDay(record.date as string)}`;
-  return { kind: importKind, date: record.date, label };
+  const details =
+    importKind === 'partial' && record.missingCore.kind === 'value'
+      ? `Faltan: ${record.missingCore.value}`
+      : null;
+  return { kind: importKind, date: record.date, label, details };
+}
+
+function compareMagnitude(label: string): number {
+  const match = label.match(/([0-9]+(?:[.,][0-9]+)?)\s*%/);
+  return match ? Number(match[1].replace(',', '.')) : -1;
+}
+
+function changeVerb(direction: HealthMetricPeriod['compare']['direction']): string {
+  if (direction === 'up') return 'subió';
+  if (direction === 'down') return 'bajó';
+  if (direction === 'steady') return 'se mantuvo';
+  return 'cambió';
+}
+
+function buildInsights(input: {
+  metrics: readonly HealthMetricPeriod[];
+  availableDays: number;
+  partialDays: number;
+  baselineDays: number;
+  periodDays: number;
+  sourceAvailable: boolean;
+}): HealthInsight[] {
+  if (!input.sourceAvailable) return [unavailableInsight()];
+
+  const insights: HealthInsight[] = [];
+
+  const periodCandidate = [...input.metrics]
+    .filter((metric) => metric.compare.available && metric.coverageDays >= 2)
+    .sort((a, b) => compareMagnitude(b.compare.label) - compareMagnitude(a.compare.label))[0];
+  if (periodCandidate) {
+    insights.push({
+      id: 'period-change',
+      title: 'Cambio destacado',
+      detail: `${periodCandidate.label} ${changeVerb(periodCandidate.compare.direction)} (${periodCandidate.compare.label}) vs el período anterior.`,
+      tone: 'neutral',
+      kind: 'trend',
+    });
+  }
+
+  const baselineCandidate = [...input.metrics]
+    .filter((metric) => metric.baselineCompare.available && metric.coverageDays >= 2)
+    .sort(
+      (a, b) =>
+        compareMagnitude(b.baselineCompare.label) - compareMagnitude(a.baselineCompare.label),
+    )[0];
+  if (baselineCandidate) {
+    insights.push({
+      id: 'baseline-change',
+      title: 'Contra tu base personal',
+      detail: `${baselineCandidate.label}: ${baselineCandidate.baselineCompare.label} frente a los 30 días previos disponibles.`,
+      tone: 'neutral',
+      kind: 'trend',
+    });
+  }
+
+  if (input.partialDays > 0) {
+    insights.push({
+      id: 'partial-data',
+      title: 'Cobertura parcial',
+      detail: `${input.partialDays} día(s) del período tienen importación parcial; las tendencias se muestran sin convertir faltantes en cero.`,
+      tone: 'watch',
+      kind: 'fact',
+    });
+  } else if (input.availableDays < Math.min(3, input.periodDays)) {
+    insights.push({
+      id: 'low-coverage',
+      title: 'Pocos datos todavía',
+      detail: `Hay ${input.availableDays} día(s) con datos. Conviene acumular más registros antes de interpretar tendencias.`,
+      tone: 'watch',
+      kind: 'fact',
+    });
+  }
+
+  if (insights.length < 3) {
+    insights.push({
+      id: 'baseline-coverage',
+      title: 'Base personal',
+      detail:
+        input.baselineDays > 0
+          ? `La comparación personal usa ${input.baselineDays} día(s) con datos de los 30 días anteriores al período.`
+          : 'Todavía no hay una base personal previa suficiente para todas las métricas.',
+      tone: 'neutral',
+      kind: 'fact',
+    });
+  }
+
+  return insights.slice(0, 3);
 }
 
 export function buildHealthPageData(input: {
@@ -169,40 +514,47 @@ export function buildHealthPageData(input: {
   source: 'mock' | 'google';
   status: TodayStatus;
   notice: string | null;
+  /** false cuando la fuente real falló: se lee vacío, nunca simulado. Por defecto true. */
+  sourceAvailable?: boolean;
 }): HealthPageData {
+  const sourceAvailable = input.sourceAvailable ?? true;
   const map = new Map<string, SaludRecord>();
   for (const record of input.records) {
     if (record.date) map.set(record.date, record);
   }
+
   const available = saludAvailableDays(input.records, input.window);
   const availableSet = new Set(available.map((r) => r.date as string));
   const prev = saludAvailableDays(input.records, previousPeriodWindow(input.window));
+  const baselineWindow = periodWindow(addDaysYmd(input.window.start, -1), 30);
+  const baseline = saludAvailableDays(input.records, baselineWindow);
 
   const metrics: HealthMetricPeriod[] = METRICS.map((def) => {
     const current = averageOf(available, def.pick);
     const previous = averageOf(prev, def.pick);
+    const baselineMetric = averageOf(baseline, def.pick);
     return {
       id: def.id,
       label: def.label,
       unit: def.unit,
+      group: def.group,
       domain: def.domain,
       average: current.average,
       averageLabel: current.average === null ? 'Sin datos' : def.formatAvg(current.average),
+      previousAverage: previous.average,
+      baselineAverage: baselineMetric.average,
+      coverageDays: current.values.length,
       series: seriesOf(map, input.window, availableSet, def.pick),
-      compare: compareTotals(
-        current.average ?? 0,
-        previous.average === null && current.average === null ? null : previous.average,
-      ),
+      compare: compareTotals(current.average ?? 0, previous.average),
+      baselineCompare: compareTotals(current.average ?? 0, baselineMetric.average),
     };
-  }).filter((metric) => {
-    // Mostrar HRV solo si hay al menos un valor en el período o el anterior.
-    if (metric.id !== 'hrv') return true;
-    return metric.average !== null || metric.compare.available;
+  }).filter((metric, index) => {
+    const def = METRICS[index];
+    if (!def.optional) return true;
+    return (
+      metric.average !== null || metric.previousAverage !== null || metric.baselineAverage !== null
+    );
   });
-
-  // Si HRV nunca apareció, aún así incluirlo con Sin datos (usuario pidió HRV cuando exista).
-  // Filter above removes only when no data ever - actually user said "HRV cuando exista".
-  // Keep filter.
 
   const history: HealthDayRow[] = available
     .slice()
@@ -212,7 +564,7 @@ export function buildHealthPageData(input: {
       return {
         date: record.date as string,
         label: formatShortDay(record.date as string),
-        sleep: cellLabel(record.sleepHours, (v) => `${minutesToHours(v * 60)} h`),
+        sleep: cellLabel(record.sleepHours, (v) => `${Math.round(v * 10) / 10} h`),
         steps: cellLabel(record.steps, (v) => formatNumber(v)),
         restingHr: cellLabel(record.restingHr, (v) => String(Math.round(v))),
         importKind: importKind === 'none' ? 'complete' : importKind,
@@ -223,26 +575,38 @@ export function buildHealthPageData(input: {
       };
     });
 
-  // Fix sleep display: sleepHours is already in hours, not minutes.
-  for (const row of history) {
-    const record = map.get(row.date);
-    if (record && record.sleepHours.kind === 'value') {
-      row.sleep = `${Math.round(record.sleepHours.value * 10) / 10} h`;
-    }
-  }
+  const partialDays = available.filter(
+    (record) => parseImportStatus(record.importStatus) === 'partial',
+  ).length;
+  const completeDays = available.length - partialDays;
+  const signals = buildHealthSignalsModel(input.records, input.today);
+  const insights = buildInsights({
+    metrics,
+    availableDays: available.length,
+    partialDays,
+    baselineDays: baseline.length,
+    periodDays: input.window.days,
+    sourceAvailable,
+  });
 
   return {
     source: input.source,
     status: input.status,
     notice: input.notice,
+    sourceAvailable,
     targetDate: input.today,
     periodDays: input.window.days,
     periodStart: input.window.start,
     periodEnd: input.window.end,
     availableDays: available.length,
+    signals,
     previousAvailableDays: prev.length,
     metrics,
-    today: todayState(map.get(input.today), input.today),
+    today: todayState(map.get(input.today), input.today, sourceAvailable),
     history,
+    baselineDays: baseline.length,
+    completeDays,
+    partialDays,
+    insights,
   };
 }
