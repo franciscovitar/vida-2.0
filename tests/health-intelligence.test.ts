@@ -561,9 +561,18 @@ test('un solo día de sueño en el período no se promueve a tendencia', () => {
   assert.equal(sleep.material, false);
   assert.equal(sleep.tone, 'neutral');
   assert.equal(sleep.direction, 'unknown');
-  assert.match(sleep.summary, /1 día\(s\) de cobertura en el período/);
+  assert.match(sleep.summary, /con 1 día de cobertura en el período/);
   assert.match(sleep.summary, /no alcanza para tratarlo como una tendencia/i);
   assert.notEqual(result.trajectory.headline, 'Cambio principal del período: sueño total.');
+});
+
+test('la cobertura escasa se enuncia en plural cuando hay más de un día', () => {
+  const result = intelligenceFor(sparsePeriodRows({ sleepDays: 2, sleepValue: 6.5 }));
+  const sleep = trajectoryOf(result, 'sleep');
+
+  assert.equal(sleep.coverageDays, 2);
+  assert.equal(sleep.material, false);
+  assert.match(sleep.summary, /con 2 días de cobertura en el período/);
 });
 
 test('la evidencia escasa del período no genera la prioridad de sueño', () => {

@@ -553,7 +553,7 @@ function trajectoryItem(
     return {
       id: metric.id,
       label: metric.label,
-      summary: `${metric.label}: ${currentLabel} con ${metric.coverageDays} día(s) de cobertura en el período. Todavía no alcanza para tratarlo como una tendencia.`,
+      summary: `${metric.label}: ${currentLabel} con ${metric.coverageDays} ${metric.coverageDays === 1 ? 'día' : 'días'} de cobertura en el período. Todavía no alcanza para tratarlo como una tendencia.`,
       direction: 'unknown',
       tone: 'neutral',
       currentLabel,
