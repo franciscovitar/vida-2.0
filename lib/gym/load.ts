@@ -34,6 +34,10 @@ function isProductionRuntime(): boolean {
 function emptyDashboard(
   partial: Pick<GymDashboardData, 'moduleStatus' | 'moduleNotice' | 'sources' | 'warnings'> & {
     targetDate?: string;
+    sessionSummaries?: GymDashboardData['sessionSummaries'];
+    sessions?: readonly GymSession[];
+    exerciseProgress?: GymDashboardData['exerciseProgress'];
+    sessionsNotice?: string;
   },
 ): GymDashboardData {
   return composeGymDashboard({
@@ -50,7 +54,10 @@ function emptyDashboard(
       commitments: [],
       coverage: null,
     },
-    sessionSummaries: [],
+    sessionSummaries: partial.sessionSummaries ?? [],
+    sessions: partial.sessions ?? [],
+    exerciseProgress: partial.exerciseProgress ?? [],
+    sessionsNotice: partial.sessionsNotice,
     sources: partial.sources,
     extraWarnings: partial.warnings,
   });
@@ -61,8 +68,35 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
   const warnings: GymParseWarning[] = [];
   const sources: GymDataSourceStatus[] = [];
 
+  let sessionSummaries: GymDashboardData['sessionSummaries'] = [];
+  let sessions: readonly GymSession[] = [];
+  let exerciseProgress: GymDashboardData['exerciseProgress'] = [];
+  let sessionsNotice = GYM_SESSIONS_PENDING_NOTICE;
+
+  try {
+    const snapshot = await loadGymSessionsSnapshot();
+    sessionSummaries = snapshot.summaries;
+    sessions = snapshot.sessions;
+    exerciseProgress = snapshot.exerciseProgress;
+    sessionsNotice =
+      snapshot.state === 'ready'
+        ? 'Historial leído desde Gym Sessions y Gym Sets.'
+        : (snapshot.notice ?? GYM_SESSIONS_PENDING_NOTICE);
+    sources.push({ kind: 'sessions', state: snapshot.state, notice: snapshot.notice });
+  } catch {
+    sources.push({
+      kind: 'sessions',
+      state: 'error',
+      notice: 'No se pudo leer el historial estructurado.',
+    });
+    warnings.push({
+      code: 'source-down',
+      message: 'El historial de sesiones no está disponible.',
+      subject: 'sessions',
+    });
+  }
+
   if (!isWebCatalogEnabled()) {
-    sources.push({ kind: 'sessions', state: 'not-applicable', notice: null });
     sources.push({
       kind: 'notion',
       state: 'disabled',
@@ -70,19 +104,24 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
     });
     sources.push({ kind: 'sheets', state: 'not-applicable', notice: null });
     sources.push({ kind: 'calendar', state: 'not-applicable', notice: null });
+    const hasHistory = sessions.length > 0;
     return emptyDashboard({
-      moduleStatus: 'flag-disabled',
-      moduleNotice:
-        'Gimnasio aún no está habilitado. Activá el Registro Web cuando la rutina esté publicada.',
+      moduleStatus: hasHistory ? 'partial' : 'flag-disabled',
+      moduleNotice: hasHistory
+        ? 'Historial de entrenamiento disponible. La rutina de Notion está desactivada.'
+        : 'La rutina de Notion está desactivada; el historial puede seguir cargarse cuando se configure su Sheet.',
       sources,
       warnings,
       targetDate: today,
+      sessionSummaries,
+      sessions,
+      exerciseProgress,
+      sessionsNotice,
     });
   }
 
   const config = getWebCatalogNotionConfig();
   if (!config.ok) {
-    sources.push({ kind: 'sessions', state: 'not-applicable', notice: null });
     sources.push({
       kind: 'notion',
       state: 'unavailable',
@@ -90,12 +129,19 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
     });
     sources.push({ kind: 'sheets', state: 'not-applicable', notice: null });
     sources.push({ kind: 'calendar', state: 'not-applicable', notice: null });
+    const hasHistory = sessions.length > 0;
     return emptyDashboard({
-      moduleStatus: 'not-configured',
-      moduleNotice: 'Falta configuración del Registro Web para leer la rutina.',
+      moduleStatus: hasHistory ? 'partial' : 'not-configured',
+      moduleNotice: hasHistory
+        ? 'Historial de entrenamiento disponible. Falta configurar la rutina de Notion.'
+        : 'Falta configuración del Registro Web para leer la rutina.',
       sources,
       warnings,
       targetDate: today,
+      sessionSummaries,
+      sessions,
+      exerciseProgress,
+      sessionsNotice,
     });
   }
 
@@ -193,39 +239,10 @@ export async function loadGymDashboardData(): Promise<GymDashboardData> {
   let coverage: string | null = null;
   let commitments: string[] = [];
 
-  const [pagesResult, agendaResult, sessionsResult] = await Promise.allSettled([
+  const [pagesResult, agendaResult] = await Promise.allSettled([
     getDomainPages(7),
     getCalendarAgenda('7'),
-    loadGymSessionsSnapshot(),
   ]);
-
-  let sessionSummaries: GymDashboardData['sessionSummaries'] = [];
-  let sessions: readonly GymSession[] = [];
-  let exerciseProgress: GymDashboardData['exerciseProgress'] = [];
-  let sessionsNotice = GYM_SESSIONS_PENDING_NOTICE;
-
-  if (sessionsResult.status === 'fulfilled') {
-    const snapshot = sessionsResult.value;
-    sessionSummaries = snapshot.summaries;
-    sessions = snapshot.sessions;
-    exerciseProgress = snapshot.exerciseProgress;
-    sessionsNotice =
-      snapshot.state === 'ready'
-        ? 'Historial leído desde Gym Sessions y Gym Sets.'
-        : (snapshot.notice ?? GYM_SESSIONS_PENDING_NOTICE);
-    sources.push({ kind: 'sessions', state: snapshot.state, notice: snapshot.notice });
-  } else {
-    sources.push({
-      kind: 'sessions',
-      state: 'error',
-      notice: 'No se pudo leer el historial estructurado.',
-    });
-    warnings.push({
-      code: 'source-down',
-      message: 'El historial de sesiones no está disponible.',
-      subject: 'sessions',
-    });
-  }
 
   if (pagesResult.status === 'fulfilled') {
     const pages = pagesResult.value;

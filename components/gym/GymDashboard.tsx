@@ -1,10 +1,9 @@
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ContentPageView } from '@/components/web-catalog/ContentPageView';
-import { GymProgressInsights } from '@/components/gym/GymProgressInsights';
 import { GymRoutineTabs } from '@/components/gym/GymRoutineTabs';
+import { GymV2Overview } from '@/components/gym/GymV2Overview';
 import type {
   GymDashboardData,
   GymDataSourceKind,
@@ -29,7 +28,7 @@ const SOURCE_KIND_LABELS: Record<GymDataSourceKind, string> = {
   notion: 'Rutina',
   sheets: 'Hábitos y métricas',
   calendar: 'Agenda',
-  sessions: 'Historial de sesiones',
+  sessions: 'Registro de gimnasio',
 };
 
 const SOURCE_STATE_LABELS: Record<GymDataSourceState, string> = {
@@ -48,7 +47,7 @@ function publicWarningSubject(subject: string | null): string | null {
   if (normalized === 'notion') return 'Rutina';
   if (normalized === 'sheets') return 'Métricas';
   if (normalized === 'calendar') return 'Agenda';
-  if (normalized === 'sessions') return 'Historial';
+  if (normalized === 'sessions') return 'Registro';
   return subject;
 }
 
@@ -64,55 +63,25 @@ function publicSourceNotice(notice: string | null): string | null {
 export function GymDashboardView({ data }: { data: GymDashboardData }) {
   return (
     <div className={styles.stack}>
-      <Card>
-        <SectionHeader
-          title={data.routine?.name ?? data.documentaryPage?.title ?? 'Gimnasio'}
-          description={data.moduleNotice ?? 'Rutina y contexto en modo solo lectura.'}
-          domain="health"
-        />
-        <div className={styles.meta}>
-          <Badge domain="health" variant="outline">
-            {MODULE_STATUS_LABELS[data.moduleStatus]}
-          </Badge>
-          <span>
-            Actualización:{' '}
-            {data.routine?.lastUpdatedAt?.slice(0, 10) ??
-              data.documentaryPage?.lastEditedAt?.slice(0, 10) ??
-              '—'}
-          </span>
-          <span>Fuente: {data.routine?.sourceLabel ?? 'Rutina publicada'}</span>
-          <a href={data.areaHref} className={styles.link}>
-            Área Salud
-          </a>
-        </div>
-      </Card>
-
-      <Card>
-        <SectionHeader
-          title="Contexto de hoy"
-          description={data.readiness.disclaimer}
-          domain="health"
-        />
-        <div className={styles.meta}>
-          <span>Sueño: {data.readiness.sleep ?? '—'}</span>
-          <span>Energía: {data.readiness.energy ?? '—'}</span>
-          <span>Ejercicio reciente: {data.readiness.recentExercise ?? '—'}</span>
-          <span>Cobertura: {data.readiness.coverage ?? '—'}</span>
-        </div>
-        {data.readiness.commitments.length > 0 ? (
-          <ul className={styles.notes}>
-            {data.readiness.commitments.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className={styles.body}>Sin compromisos de Calendar relacionados.</p>
-        )}
-      </Card>
+      <GymV2Overview
+        sessions={data.sessions ?? []}
+        summaries={data.sessionSummaries}
+        weeklyTarget={data.weeklyTarget ?? null}
+        today={data.targetDate}
+      />
 
       {data.routine?.presentation === 'structured' ? (
         <Card>
-          <SectionHeader title="Rutina" description="Prescripción desde Notion." domain="health" />
+          <SectionHeader
+            title="Rutina actual"
+            description="Prescripción desde Notion. Se mantiene separada del historial de rendimiento."
+            domain="health"
+          />
+          <div className={styles.meta}>
+            <span>{data.routine.name}</span>
+            <span>Actualización: {data.routine.lastUpdatedAt?.slice(0, 10) ?? '—'}</span>
+            <span>Fuente: {data.routine.sourceLabel}</span>
+          </div>
           {data.routine.notes.length > 0 ? (
             <ul className={styles.notes}>
               {data.routine.notes.map((note) => (
@@ -136,31 +105,26 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
 
       <Card>
         <SectionHeader
-          title="Progreso disponible"
-          description="Solo hechos y tendencias derivados de Sheets. Sin cargas ni récords inventados."
+          title="Contexto de hoy"
+          description={data.readiness.disclaimer}
           domain="health"
         />
-        <div className={styles.metrics}>
-          {data.progress.map((metric) => (
-            <MetricCard
-              key={metric.key}
-              label={metric.label}
-              value={metric.value ?? '—'}
-              unit={metric.unit ?? undefined}
-              context={metric.context ?? undefined}
-              domain="health"
-              status={metric.kind === 'absent' ? 'neutral' : 'good'}
-            />
-          ))}
+        <div className={styles.meta}>
+          <span>Sueño: {data.readiness.sleep ?? '—'}</span>
+          <span>Energía: {data.readiness.energy ?? '—'}</span>
+          <span>Ejercicio reciente: {data.readiness.recentExercise ?? '—'}</span>
+          <span>Cobertura: {data.readiness.coverage ?? '—'}</span>
         </div>
+        {data.readiness.commitments.length > 0 ? (
+          <ul className={styles.notes}>
+            {data.readiness.commitments.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.body}>Sin compromisos de Calendar relacionados.</p>
+        )}
       </Card>
-
-      <GymProgressInsights
-        sessions={data.sessions ?? []}
-        summaries={data.sessionSummaries}
-        weeklyTarget={data.weeklyTarget ?? null}
-        today={data.targetDate}
-      />
 
       <Card>
         <SectionHeader
@@ -196,44 +160,6 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
         )}
       </Card>
 
-      {data.exerciseProgress.length > 0 ? (
-        <Card>
-          <SectionHeader
-            title="Progresión por ejercicio"
-            description="Último registro y mejor carga confirmada en Gym Sets."
-            domain="health"
-          />
-          <div className={styles['progress-list']}>
-            {data.exerciseProgress.slice(0, 16).map((exercise) => (
-              <article key={exercise.key} className={styles['progress-row']}>
-                <div>
-                  <strong>{exercise.exerciseName}</strong>
-                  <span>Último registro: {exercise.latestDate}</span>
-                </div>
-                <dl>
-                  <div>
-                    <dt>Última carga</dt>
-                    <dd>{exercise.latestLoad ?? '—'}</dd>
-                  </div>
-                  <div>
-                    <dt>Mejor carga</dt>
-                    <dd>{exercise.bestLoad ?? '—'}</dd>
-                  </div>
-                  <div>
-                    <dt>Últimas reps</dt>
-                    <dd>{exercise.latestReps ?? '—'}</dd>
-                  </div>
-                  <div>
-                    <dt>Series registradas</dt>
-                    <dd>{exercise.completedSets}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
-          </div>
-        </Card>
-      ) : null}
-
       {data.warnings.length > 0 ? (
         <Card>
           <SectionHeader title="Advertencias" description="No bloquean el panel." />
@@ -252,7 +178,18 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
       ) : null}
 
       <Card>
-        <SectionHeader title="Estado de datos" />
+        <SectionHeader
+          title="Estado de datos"
+          description={data.moduleNotice ?? 'Fuentes y cobertura del módulo.'}
+        />
+        <div className={styles.meta}>
+          <Badge domain="health" variant="outline">
+            {MODULE_STATUS_LABELS[data.moduleStatus]}
+          </Badge>
+          <a href={data.areaHref} className={styles.link}>
+            Área Salud
+          </a>
+        </div>
         <ul className={styles.sources}>
           {data.sources.map((source) => {
             const notice = publicSourceNotice(source.notice);
