@@ -1,36 +1,31 @@
 import { UtensilsCrossed } from 'lucide-react';
 import type { Metadata } from 'next';
 
-import { DocumentaryStableKeyPage } from '@/components/web-catalog/DocumentaryStableKeyPage';
+import pageStyles from '@/app/(app)/page.module.scss';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { NutritionPlanSection } from '@/components/nutrition/NutritionPlanSection';
+import { NutritionV2Overview } from '@/components/nutrition/NutritionV2Overview';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
-import { WEB_CATALOG_FIXED_ROUTES } from '@/lib/web-catalog/section-labels';
+import { loadNutritionDashboardData } from '@/lib/nutrition/dashboard';
 
-export const metadata: Metadata = { title: 'Dieta' };
+export const metadata: Metadata = { title: 'Nutrición' };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function DietaPage() {
   await requireAuthorizedSession();
+  const data = await loadNutritionDashboardData();
 
   return (
-    <DocumentaryStableKeyPage
-      presentation="diet"
-      stableKey={WEB_CATALOG_FIXED_ROUTES.dieta.stableKey}
-      placeholder={{
-        title: 'Dieta',
-        description: 'Meal prep, comidas rápidas, compras y criterios de alimentación.',
-        icon: UtensilsCrossed,
-        domain: 'health',
-        emptyTitle: 'La guía de alimentación todavía no está publicada',
-        emptyDescription:
-          'Con el Registro Web activo verás acá el documento canónico de dieta y meal prep.',
-        preview: [
-          'Objetivo y criterios',
-          'Meal prep semanal',
-          'Comidas rápidas',
-          'Lista principal',
-        ],
-      }}
-    />
+    <div className={pageStyles.page}>
+      <PageHeader
+        title="Nutrición"
+        description="Calorías, macros, micronutrientes y análisis derivados de tu registro real."
+        icon={UtensilsCrossed}
+        domain="health"
+      />
+      <NutritionV2Overview data={data} />
+      <NutritionPlanSection />
+    </div>
   );
 }
