@@ -82,7 +82,11 @@ test('B1-WEB-8. las rutas cotidianas no montan emisores manuales de escritura', 
   assert.equal(taskPage.includes('TaskCreatePanel'), false);
   assert.equal(taskPage.includes('TaskStatusPanel'), false);
 
-  assert.match(projectPage, /ProjectReviewWorkspace/);
+  assert.match(projectPage, /ProjectsIntelligenceDashboard/);
+  assert.equal(projectPage.includes('ProjectReviewWorkspace'), false);
+  assert.equal(projectPage.includes('ProjectsBoard'), false);
+  assert.equal(projectPage.includes('AreasSection'), false);
+  assert.equal(projectPage.includes('getNotionDashboard'), false);
 
   assert.match(inboxPage, /Captura conversacional/);
   assert.equal(inboxPage.includes('InboxPlanningWorkspace'), false);

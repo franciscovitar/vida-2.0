@@ -62,8 +62,8 @@ const ROUTE_CONTRACTS = [
   },
   {
     route: 'app/(app)/proyectos/page.tsx',
-    includes: ['ProjectReviewWorkspace'],
-    excludes: [],
+    includes: ['ProjectsIntelligenceDashboard'],
+    excludes: ['ProjectReviewWorkspace', 'ProjectsBoard', 'AreasSection', 'getNotionDashboard'],
   },
   {
     route: 'app/(app)/bandeja/page.tsx',
