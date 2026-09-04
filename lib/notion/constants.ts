@@ -86,10 +86,8 @@ export type NotionDataSourceKind = 'tasks' | 'projects' | 'areas';
 /**
  * Nombres exactos de propiedades de Proyectos usadas por Projects Intelligence.
  * Reutiliza las propiedades ya canónicas de `PROJECT_PROPS` y agrega los campos
- * nuevos (Fase Projects Intelligence V1). El tipo exacto de propiedad en Notion
- * para `type`, `lastAdvance` y `piConfidence` no fue verificado contra el schema
- * real en este pase; el adaptador los trata de forma robusta (ver
- * `lib/notion/projects-intelligence-adapters.ts`).
+ * nuevos (Fase Projects Intelligence V1). Nota: `Próxima acción` es una
+ * relación a Tareas, no texto (ver `lib/notion/projects-intelligence-adapters.ts`).
  */
 export const PROJECT_INTELLIGENCE_PROPS = {
   title: PROJECT_PROPS.title,
@@ -110,6 +108,25 @@ export const PROJECT_INTELLIGENCE_PROPS = {
   piSummary: 'PI Resumen',
 } as const;
 
+/** Valores permitidos verificados de `Tipo` en Proyectos. */
+export const PROJECT_INTELLIGENCE_TYPES = [
+  'Problema propio',
+  'Idea',
+  'Oportunidad',
+  'Obligatorio',
+  'Experimento',
+  'Mejora de sistema',
+] as const;
+
+/** Valores permitidos verificados de `PI Recomendación` en Proyectos. */
+export const PI_RECOMMENDATIONS = [
+  'Hacer ahora',
+  'Mantener activo',
+  'Investigar',
+  'Esperar',
+  'Cancelar propuesto',
+] as const;
+
 /** Nombres exactos de propiedades de `Hitos de proyecto`. */
 export const MILESTONE_PROPS = {
   title: 'Hito',
@@ -122,3 +139,9 @@ export const MILESTONE_PROPS = {
   completedAt: 'Fecha completado',
   ownership: 'Vida2 Ownership',
 } as const;
+
+/**
+ * Valores permitidos verificados de `Estado` en Hitos de proyecto. Distintos
+ * de `PROJECT_STATUSES`: un hito usa `Hecho`, nunca `Completado`.
+ */
+export const MILESTONE_STATUSES = ['Pendiente', 'En progreso', 'Hecho', 'Descartado'] as const;

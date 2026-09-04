@@ -180,3 +180,55 @@ test('PI-FC12. proyectos vacíos en modo real es "empty", no un fallo silencioso
   assert.equal(data.status, 'empty');
   assertNoMockData(data);
 });
+
+test('PI-FC13. Estado de Proyecto ausente en modo real NUNCA se convierte en Activo: falla cerrado', async () => {
+  const data = await loadProjectsIntelligenceUncached({
+    getDataSource: () => 'notion',
+    getConfig: () => ({ ok: true, config: CONFIG }),
+    createPort: () =>
+      fakePort({
+        'ds-projects': {
+          ok: true,
+          pages: [
+            {
+              id: 'proj-a',
+              properties: { Proyecto: { type: 'title', title: [{ plain_text: 'Sin estado' }] } },
+            },
+          ],
+        },
+        'ds-milestones': { ok: true, pages: [] },
+        'ds-tasks': { ok: true, pages: [] },
+      }),
+  });
+  assert.equal(data.source, 'notion');
+  assert.equal(data.status, 'missing-property');
+  assertNoMockData(data);
+  // Ninguna variante del proyecto real (con status fabricado como Activo) debería colarse.
+  assert.ok(!JSON.stringify(data).includes('Sin estado'));
+});
+
+test('PI-FC14. Estado de Proyecto con valor no reconocido en modo real también falla cerrado', async () => {
+  const data = await loadProjectsIntelligenceUncached({
+    getDataSource: () => 'notion',
+    getConfig: () => ({ ok: true, config: CONFIG }),
+    createPort: () =>
+      fakePort({
+        'ds-projects': {
+          ok: true,
+          pages: [
+            {
+              id: 'proj-b',
+              properties: {
+                Proyecto: { type: 'title', title: [{ plain_text: 'Estado inventado' }] },
+                Estado: { type: 'select', select: { name: 'En curso' } },
+              },
+            },
+          ],
+        },
+        'ds-milestones': { ok: true, pages: [] },
+        'ds-tasks': { ok: true, pages: [] },
+      }),
+  });
+  assert.equal(data.status, 'missing-property');
+  assertNoMockData(data);
+});

@@ -28,13 +28,25 @@ export type ProjectIntelligenceSourceStatus =
 
 export type ProjectsIntelligenceProjectStatus = NotionProjectStatus;
 
+/** Enum cerrado verificado contra el schema canónico de `Hitos de proyecto`. */
+export type ProjectsIntelligenceMilestoneStatus =
+  'Pendiente' | 'En progreso' | 'Hecho' | 'Descartado';
+
+/** Enum cerrado verificado contra el schema canónico de `Tipo` en Proyectos. */
+export type ProjectsIntelligenceProjectType =
+  'Problema propio' | 'Idea' | 'Oportunidad' | 'Obligatorio' | 'Experimento' | 'Mejora de sistema';
+
+/** Enum cerrado verificado contra el schema canónico de `PI Recomendación`. */
+export type ProjectsIntelligencePiRecommendation =
+  'Hacer ahora' | 'Mantener activo' | 'Investigar' | 'Esperar' | 'Cancelar propuesto';
+
 export interface ProjectsIntelligenceMilestone {
   id: string;
   name: string;
   /** Id de la página de Proyecto relacionada; `null` si la relación falta. */
   projectId: string | null;
-  /** Nombre crudo de `Estado` en Notion; sin enum cerrado (schema no verificado en V1). */
-  status: string | null;
+  /** `null` = `Estado` ausente o valor no reconocido (nunca se asume un estado incompleto conocido). */
+  status: ProjectsIntelligenceMilestoneStatus | null;
   /** Peso declarado. `null` = propiedad ausente (no se coacciona a cero). */
   weight: number | null;
   completionCriteria: string | null;
@@ -57,7 +69,8 @@ export type ProjectProgress =
     }
   | {
       measurable: false;
-      reason: 'no-milestones' | 'missing-weight' | 'invalid-weight' | 'invalid-total';
+      reason:
+        'no-milestones' | 'missing-weight' | 'invalid-weight' | 'invalid-total' | 'invalid-status';
     };
 
 /**
@@ -67,6 +80,7 @@ export type ProjectProgress =
  */
 export interface ProjectsIntelligenceProjectQuality {
   missingDefinitionOfDone: boolean;
+  /** `Próxima acción` sin relación presente, o presente pero sin Tarea resoluble. */
   missingNextAction: boolean;
   /** Estado `Bloqueado` o texto de bloqueo presente. */
   blocked: boolean;
@@ -74,17 +88,18 @@ export interface ProjectsIntelligenceProjectQuality {
   staleReview: boolean;
   /** Snapshot PI no revisado en `PI_SNAPSHOT_STALE_AFTER_DAYS` días (heurística). */
   stalePiSnapshot: boolean;
-  /** Progreso no medible por datos de hitos malformados (peso inválido o total != 100). */
+  /** Progreso no medible por datos de hitos malformados (peso inválido, estado inválido o total != 100). */
   invalidMilestones: boolean;
   progressMeasurable: boolean;
+  /** `Próxima acción` tenía más de una relación candidata; solo se conservó la primera. */
+  multipleNextActionCandidates: boolean;
 }
 
 export interface ProjectsIntelligenceProject {
   id: string;
   name: string;
   status: ProjectsIntelligenceProjectStatus;
-  /** Propiedad `Tipo`. Schema exacto no verificado en V1; ver adaptador. */
-  type: string | null;
+  type: ProjectsIntelligenceProjectType | null;
   /**
    * Relación de Área. Este lector no consulta Áreas: `name` permanece `null`
    * y `available` en `false` aun cuando exista relación. No se fabrica un
@@ -93,17 +108,23 @@ export interface ProjectsIntelligenceProject {
   area: NotionRelation | null;
   expectedResult: string | null;
   definitionOfDone: string | null;
-  nextAction: string | null;
-  /** Propiedad `Último avance`. Schema exacto no verificado en V1; ver adaptador. */
+  /**
+   * `Próxima acción` es una relación canónica a Tareas, no texto libre. Se
+   * resuelve contra las Tareas ya cargadas en esta misma lectura; nunca se
+   * fabrica un nombre. Si hay más de una relación candidata se conserva solo
+   * la primera (ver `quality.multipleNextActionCandidates`).
+   */
+  nextAction: NotionRelation | null;
+  /** Propiedad `Último avance` (DATE). */
   lastAdvance: string | null;
   blocker: string | null;
   dueDate: string | null;
   reviewDate: string | null;
   ownership: string | null;
-  /** Snapshot canónico ya persistido en Notion. Nunca generado en TypeScript. */
-  piRecommendation: string | null;
-  /** Snapshot canónico. Schema exacto no verificado en V1; ver adaptador. */
-  piConfidence: string | null;
+  /** Snapshot canónico ya persistido en Notion (SELECT). Nunca generado en TypeScript. */
+  piRecommendation: ProjectsIntelligencePiRecommendation | null;
+  /** Snapshot canónico ya persistido en Notion (NUMBER). Nunca generado en TypeScript. */
+  piConfidence: number | null;
   piReviewedAt: string | null;
   /** Snapshot canónico ya persistido en Notion. Nunca generado en TypeScript. */
   piSummary: string | null;
@@ -138,6 +159,7 @@ export interface ProjectsIntelligenceQualitySummary {
   staleReview: number;
   stalePiSnapshot: number;
   invalidMilestones: number;
+  multipleNextActionCandidates: number;
 }
 
 export interface ProjectsIntelligenceData {

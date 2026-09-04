@@ -15,7 +15,7 @@
  */
 import { cache } from 'react';
 
-import { adaptTask, buildNameMap } from '@/lib/notion/adapters';
+import { adaptTask, buildNameMap, resolveRelation } from '@/lib/notion/adapters';
 import { addDaysYmd, todayInBuenosAires } from '@/lib/adapters/dates';
 import type { NotionReadPort } from '@/lib/notion/client';
 import { classifyDateKind } from '@/lib/notion/classify';
@@ -32,7 +32,7 @@ import {
   adaptProjectIntelligenceBase,
 } from '@/lib/notion/projects-intelligence-adapters';
 import { computeProjectProgress } from '@/lib/notion/projects-intelligence-progress';
-import type { NotionDataSourceMode, NotionTask } from '@/types/notion';
+import type { NotionDataSourceMode, NotionRelation, NotionTask } from '@/types/notion';
 import type {
   ProjectIntelligenceSourceStatus,
   ProjectProgress,
@@ -40,6 +40,7 @@ import type {
   ProjectsIntelligenceMilestone,
   ProjectsIntelligenceProject,
   ProjectsIntelligenceProjectQuality,
+  ProjectsIntelligenceProjectStatus,
   ProjectsIntelligenceQualitySummary,
   ProjectsIntelligenceSourceMode,
   ProjectsIntelligenceSummary,
@@ -75,14 +76,16 @@ function emptyQualitySummary(): ProjectsIntelligenceQualitySummary {
     staleReview: 0,
     stalePiSnapshot: 0,
     invalidMilestones: 0,
+    multipleNextActionCandidates: 0,
   };
 }
 
 function buildProjectQuality(
   project: {
-    status: string;
+    status: ProjectsIntelligenceProjectStatus;
     definitionOfDone: string | null;
-    nextAction: string | null;
+    nextAction: NotionRelation | null;
+    multipleNextActionCandidates: boolean;
     blocker: string | null;
     reviewDate: string | null;
     piReviewedAt: string | null;
@@ -96,18 +99,22 @@ function buildProjectQuality(
   const stalePiSnapshot = project.piReviewedAt !== null && project.piReviewedAt < staleCutoff;
   const invalidMilestones =
     !progress.measurable &&
-    (progress.reason === 'invalid-weight' || progress.reason === 'invalid-total');
+    (progress.reason === 'invalid-weight' ||
+      progress.reason === 'invalid-total' ||
+      progress.reason === 'invalid-status');
 
   return {
     missingDefinitionOfDone:
       project.definitionOfDone === null || project.definitionOfDone.trim() === '',
-    missingNextAction: project.nextAction === null || project.nextAction.trim() === '',
+    // Sin relación resuelta a una Tarea (ausente o no resoluble) cuenta como faltante.
+    missingNextAction: project.nextAction === null || !project.nextAction.available,
     blocked:
       project.status === 'Bloqueado' || (project.blocker !== null && project.blocker.trim() !== ''),
     staleReview,
     stalePiSnapshot,
     invalidMilestones,
     progressMeasurable: progress.measurable,
+    multipleNextActionCandidates: project.multipleNextActionCandidates,
   };
 }
 
@@ -143,6 +150,7 @@ function summarizeQuality(
     if (project.quality.staleReview) summary.staleReview += 1;
     if (project.quality.stalePiSnapshot) summary.stalePiSnapshot += 1;
     if (project.quality.invalidMilestones) summary.invalidMilestones += 1;
+    if (project.quality.multipleNextActionCandidates) summary.multipleNextActionCandidates += 1;
   }
   return summary;
 }
@@ -169,12 +177,20 @@ export async function loadProjectsIntelligenceFromPort(
   if (!tasksResult.ok) return { ok: false, code: tasksResult.code };
 
   const projectBases = projectsResult.pages.map((page) => adaptProjectIntelligenceBase(page));
+
+  // Estado ausente/no reconocido en cualquier Proyecto: fallar cerrado en vez
+  // de fabricar 'Activo' u ocultar el proyecto en silencio.
+  if (projectBases.some((base) => base.status === null)) {
+    return { ok: false, code: 'missing-property' };
+  }
+
   const projectNames = buildNameMap(
     projectBases.map((project) => ({ id: project.id, name: project.name })),
   );
   const milestones = milestonesResult.pages.map((page) => adaptMilestone(page));
   // Sin consulta a Áreas: los nombres de área de las tareas quedan sin resolver.
   const tasks = tasksResult.pages.map((page) => adaptTask(page, projectNames, new Map(), today));
+  const taskNames = buildNameMap(tasks.map((task) => ({ id: task.id, name: task.title })));
 
   const milestonesByProject = new Map<string, ProjectsIntelligenceMilestone[]>();
   for (const milestone of milestones) {
@@ -193,6 +209,12 @@ export async function loadProjectsIntelligenceFromPort(
   }
 
   const projects: ProjectsIntelligenceProject[] = projectBases.map((base) => {
+    // nextActionTaskIds y el status crudo (nullable) no pertenecen al DTO
+    // final: se reemplazan explícitamente por su forma resuelta/validada.
+    const { nextActionTaskIds, status: rawStatus, ...rest } = base;
+    // Validado arriba: ningún projectBases.status es null en este punto.
+    const status = rawStatus as ProjectsIntelligenceProjectStatus;
+
     const projectMilestones = milestonesByProject.get(base.id) ?? [];
     const relatedTasks = tasksByProject.get(base.id) ?? [];
     const progress = computeProjectProgress(projectMilestones);
@@ -200,10 +222,19 @@ export async function loadProjectsIntelligenceFromPort(
       (task) => task.status === 'Pendiente' || task.status === 'En progreso',
     ).length;
     const blockedTaskCount = relatedTasks.filter((task) => task.status === 'Bloqueada').length;
-    const quality = buildProjectQuality(base, progress, today);
+    // Solo se conserva la primera relación candidata; nunca se concatenan en prosa.
+    const nextAction = resolveRelation(nextActionTaskIds, taskNames);
+    const multipleNextActionCandidates = nextActionTaskIds.length > 1;
+    const quality = buildProjectQuality(
+      { ...rest, status, nextAction, multipleNextActionCandidates },
+      progress,
+      today,
+    );
 
     return {
-      ...base,
+      ...rest,
+      status,
+      nextAction,
       relatedTaskCount: relatedTasks.length,
       openTaskCount,
       blockedTaskCount,
