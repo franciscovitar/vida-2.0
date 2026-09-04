@@ -213,6 +213,23 @@ test('PI-V3b. read-error también falla cerrado, sin proyectos', () => {
   assert.equal(view.focus.length, 0);
 });
 
+test('PI-V3c. empty es estado canónico utilizable y llega al estado vacío intencional', () => {
+  const data = dataFixture([], {
+    status: 'empty',
+    notice: 'No hay proyectos en las bases canónicas para este momento.',
+  });
+  const view = buildProjectsIntelligenceView(data);
+
+  assert.equal(view.ready, true);
+  assert.equal(view.isEmpty, true);
+  assert.equal(view.unavailableMessage, null);
+  assert.deepEqual(view.focus, []);
+  assert.deepEqual(view.waiting, []);
+  assert.deepEqual(view.blocked, []);
+  assert.deepEqual(view.avoidForNow, []);
+  assert.deepEqual(view.history, []);
+});
+
 test('PI-V4. Snapshot PI: recomendación y resumen exactos, sin generación local', () => {
   const withSnapshot = project({
     id: 'proj-snap',
