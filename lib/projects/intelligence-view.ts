@@ -230,6 +230,7 @@ export function buildQualityRows(quality: ProjectsIntelligenceQualitySummary): Q
 export interface ProjectsIntelligenceView {
   status: ProjectIntelligenceSourceStatus;
   source: ProjectsIntelligenceSourceMode;
+  /** `true` cuando la fuente respondió de forma utilizable, incluso si el portfolio está vacío. */
   ready: boolean;
   isEmpty: boolean;
   unavailableMessage: string | null;
@@ -248,8 +249,10 @@ export interface ProjectsIntelligenceView {
 export function buildProjectsIntelligenceView(
   data: ProjectsIntelligenceData,
 ): ProjectsIntelligenceView {
-  const ready = data.status === 'ready';
-  const cards = ready ? data.projects.map(buildProjectCardView) : [];
+  // `empty` es un estado canónico válido de la fuente, no un fallo de integración.
+  // Debe atravesar el guard de disponibilidad para que la UI renderice su estado vacío intencional.
+  const ready = data.status === 'ready' || data.status === 'empty';
+  const cards = data.status === 'ready' ? data.projects.map(buildProjectCardView) : [];
   const qualityRows = buildQualityRows(data.quality);
 
   return {
