@@ -13,6 +13,14 @@ import {
   TASK_STATUSES,
 } from '@/lib/notion/constants';
 import { projectDateKind, taskDateKind } from '@/lib/notion/classify';
+import {
+  dateStart,
+  inList,
+  relationIds,
+  richTextPlain,
+  selectName,
+  titlePlain,
+} from '@/lib/notion/property-parsers';
 import type { Domain } from '@/types';
 import type {
   NotionArea,
@@ -32,72 +40,6 @@ export type NotionRawPage = {
   id: string;
   properties: Record<string, unknown>;
 };
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
-}
-
-function richTextPlain(prop: unknown): string | null {
-  const obj = asRecord(prop);
-  if (!obj) return null;
-  const rich = obj.rich_text;
-  if (!Array.isArray(rich)) {
-    const title = obj.title;
-    if (!Array.isArray(title)) return null;
-    const text = title
-      .map((part) => {
-        const p = asRecord(part);
-        return typeof p?.plain_text === 'string' ? p.plain_text : '';
-      })
-      .join('')
-      .trim();
-    return text === '' ? null : text;
-  }
-  const text = rich
-    .map((part) => {
-      const p = asRecord(part);
-      return typeof p?.plain_text === 'string' ? p.plain_text : '';
-    })
-    .join('')
-    .trim();
-  return text === '' ? null : text;
-}
-
-function titlePlain(prop: unknown): string {
-  return richTextPlain(prop) ?? 'Sin título';
-}
-
-function selectName(prop: unknown): string | null {
-  const obj = asRecord(prop);
-  if (!obj) return null;
-  const select = asRecord(obj.select) ?? asRecord(obj.status);
-  if (!select) return null;
-  return typeof select.name === 'string' ? select.name : null;
-}
-
-function dateStart(prop: unknown): string | null {
-  const obj = asRecord(prop);
-  if (!obj) return null;
-  const date = asRecord(obj.date);
-  if (!date || typeof date.start !== 'string') return null;
-  return date.start.slice(0, 10);
-}
-
-function relationIds(prop: unknown): string[] {
-  const obj = asRecord(prop);
-  if (!obj || !Array.isArray(obj.relation)) return [];
-  const ids: string[] = [];
-  for (const item of obj.relation) {
-    const rel = asRecord(item);
-    if (rel && typeof rel.id === 'string') ids.push(rel.id);
-  }
-  return ids;
-}
-
-function inList<T extends string>(value: string | null, list: readonly T[]): T | null {
-  if (!value) return null;
-  return (list as readonly string[]).includes(value) ? (value as T) : null;
-}
 
 export function areaDomain(name: string): Domain {
   const n = name.toLowerCase();

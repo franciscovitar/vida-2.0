@@ -22,13 +22,21 @@ function createSdkClient(token: string): Client {
 /**
  * Puerto real: solo `dataSources.query` sobre IDs autorizados.
  * Sin operaciones de escritura ni búsqueda global.
+ *
+ * `isAllowedDataSourceId` es inyectable para que otros lectores (p. ej.
+ * Projects Intelligence) reutilicen este puerto con su propia allowlist sin
+ * acoplarse a `isAllowedNotionDataSourceId` (la del dashboard genérico) ni
+ * debilitarla. Por defecto preserva el comportamiento existente.
  */
-export function createNotionReadPort(token: string): NotionReadPort {
+export function createNotionReadPort(
+  token: string,
+  isAllowedDataSourceId: (dataSourceId: string) => boolean = isAllowedNotionDataSourceId,
+): NotionReadPort {
   const client = createSdkClient(token);
 
   return {
     async queryDataSource(dataSourceId: string): Promise<NotionQueryPortResult> {
-      if (!isAllowedNotionDataSourceId(dataSourceId)) {
+      if (!isAllowedDataSourceId(dataSourceId)) {
         return { ok: false, code: 'forbidden-data-source' };
       }
 
