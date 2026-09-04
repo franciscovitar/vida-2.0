@@ -82,3 +82,66 @@ export const PROJECT_STATUSES = [
 export const AREA_STATUSES = ['Activa', 'En pausa', 'Inactiva'] as const;
 
 export type NotionDataSourceKind = 'tasks' | 'projects' | 'areas';
+
+/**
+ * Nombres exactos de propiedades de Proyectos usadas por Projects Intelligence.
+ * Reutiliza las propiedades ya canónicas de `PROJECT_PROPS` y agrega los campos
+ * nuevos (Fase Projects Intelligence V1). Nota: `Próxima acción` es una
+ * relación a Tareas, no texto (ver `lib/notion/projects-intelligence-adapters.ts`).
+ */
+export const PROJECT_INTELLIGENCE_PROPS = {
+  title: PROJECT_PROPS.title,
+  status: PROJECT_PROPS.status,
+  area: PROJECT_PROPS.area,
+  expectedResult: PROJECT_PROPS.expectedResult,
+  nextAction: PROJECT_PROPS.nextAction,
+  dueDate: PROJECT_PROPS.dueDate,
+  reviewDate: PROJECT_PROPS.reviewDate,
+  blocker: PROJECT_PROPS.blocker,
+  type: 'Tipo',
+  definitionOfDone: 'Definition of Done',
+  lastAdvance: 'Último avance',
+  ownership: 'Vida2 Ownership',
+  piRecommendation: 'PI Recomendación',
+  piConfidence: 'PI Confianza',
+  piReviewedAt: 'PI Revisado',
+  piSummary: 'PI Resumen',
+} as const;
+
+/** Valores permitidos verificados de `Tipo` en Proyectos. */
+export const PROJECT_INTELLIGENCE_TYPES = [
+  'Problema propio',
+  'Idea',
+  'Oportunidad',
+  'Obligatorio',
+  'Experimento',
+  'Mejora de sistema',
+] as const;
+
+/** Valores permitidos verificados de `PI Recomendación` en Proyectos. */
+export const PI_RECOMMENDATIONS = [
+  'Hacer ahora',
+  'Mantener activo',
+  'Investigar',
+  'Esperar',
+  'Cancelar propuesto',
+] as const;
+
+/** Nombres exactos de propiedades de `Hitos de proyecto`. */
+export const MILESTONE_PROPS = {
+  title: 'Hito',
+  project: 'Proyecto',
+  status: 'Estado',
+  weight: 'Peso',
+  completionCriteria: 'Criterio de completitud',
+  evidence: 'Evidencia',
+  order: 'Orden',
+  completedAt: 'Fecha completado',
+  ownership: 'Vida2 Ownership',
+} as const;
+
+/**
+ * Valores permitidos verificados de `Estado` en Hitos de proyecto. Distintos
+ * de `PROJECT_STATUSES`: un hito usa `Hecho`, nunca `Completado`.
+ */
+export const MILESTONE_STATUSES = ['Pendiente', 'En progreso', 'Hecho', 'Descartado'] as const;

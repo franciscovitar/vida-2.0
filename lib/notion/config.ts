@@ -68,3 +68,73 @@ export function getNotionConfig(env: Env = process.env): NotionConfigResult {
     },
   };
 }
+
+/**
+ * Configuración Projects Intelligence (lectura, V1).
+ * Sibling deliberado de `NotionConfig`: no reutiliza `getNotionConfig` ni su
+ * allowlist para no acoplar ni debilitar la validación de la lectura genérica.
+ * Reutiliza los mismos IDs canónicos de Proyectos y Tareas (mismas variables de
+ * entorno que el dashboard genérico) y agrega Hitos de proyecto como único
+ * origen nuevo.
+ */
+export interface ProjectsIntelligenceNotionConfig {
+  token: string;
+  projectsDataSourceId: string;
+  tasksDataSourceId: string;
+  milestonesDataSourceId: string;
+}
+
+export type ProjectsIntelligenceConfigResult =
+  | { ok: true; config: ProjectsIntelligenceNotionConfig }
+  | { ok: false; reason: 'not-configured' | 'forbidden-data-source' };
+
+function configuredProjectsIntelligenceDataSourceIds(env: Env): string[] | null {
+  const ids = [
+    env.NOTION_PROJECTS_DATA_SOURCE_ID?.trim(),
+    env.NOTION_TASKS_DATA_SOURCE_ID?.trim(),
+    env.NOTION_MILESTONES_DATA_SOURCE_ID?.trim(),
+  ];
+
+  if (ids.some((id) => !id)) return null;
+  const resolved = ids as string[];
+  if (resolved.some((id) => !NOTION_ID_PATTERN.test(id))) return [];
+  if (new Set(resolved.map((id) => id.toLowerCase())).size !== resolved.length) return [];
+  return resolved;
+}
+
+/** true solo si el ID coincide con una referencia Projects Intelligence explícita del entorno actual. */
+export function isAllowedProjectsIntelligenceDataSourceId(
+  id: string,
+  env: Env = process.env,
+): boolean {
+  const configured = configuredProjectsIntelligenceDataSourceIds(env);
+  if (!configured || configured.length !== 3) return false;
+  const normalized = id.trim().toLowerCase();
+  return configured.some((candidate) => candidate.toLowerCase() === normalized);
+}
+
+/**
+ * Lee configuración Projects Intelligence explícita. No usa IDs hardcodeados
+ * ni fallback entre recursos.
+ */
+export function getProjectsIntelligenceNotionConfig(
+  env: Env = process.env,
+): ProjectsIntelligenceConfigResult {
+  const token = env.NOTION_API_TOKEN?.trim();
+  if (!token) return { ok: false, reason: 'not-configured' };
+
+  const configured = configuredProjectsIntelligenceDataSourceIds(env);
+  if (configured === null) return { ok: false, reason: 'not-configured' };
+  if (configured.length !== 3) return { ok: false, reason: 'forbidden-data-source' };
+
+  const [projectsDataSourceId, tasksDataSourceId, milestonesDataSourceId] = configured;
+  return {
+    ok: true,
+    config: {
+      token,
+      projectsDataSourceId: projectsDataSourceId!,
+      tasksDataSourceId: tasksDataSourceId!,
+      milestonesDataSourceId: milestonesDataSourceId!,
+    },
+  };
+}
