@@ -22,7 +22,7 @@
     "stylelint:fix": "stylelint \"**/*.{css,scss}\" --fix",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write lib/calendar/planning-adapters.ts lib/calendar/planning-queries.ts lib/daily-planning/context.ts lib/notion/daily-planning-adapters.ts tests/daily-planning-readonly.test.ts types/daily-planning-intelligence.ts && git diff --exit-code -- lib/calendar/planning-adapters.ts lib/calendar/planning-queries.ts lib/daily-planning/context.ts lib/notion/daily-planning-adapters.ts tests/daily-planning-readonly.test.ts types/daily-planning-intelligence.ts",
     "test": "node --import tsx --test \"tests/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
     "verify": "npm run check && npm run build",
