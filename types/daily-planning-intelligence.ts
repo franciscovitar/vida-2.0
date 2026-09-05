@@ -52,11 +52,7 @@ export interface DailyPlanningProject {
 export type DailyPlanningCalendarRole = 'capacity-block' | 'date-marker' | 'informational';
 
 export type DailyPlanningCalendarProvenance =
-  | 'user-confirmed'
-  | 'official-source'
-  | 'schedule-derived'
-  | 'probable'
-  | 'unknown';
+  'user-confirmed' | 'official-source' | 'schedule-derived' | 'probable' | 'unknown';
 
 export interface DailyPlanningCalendarEvidence {
   provenance: DailyPlanningCalendarProvenance;
