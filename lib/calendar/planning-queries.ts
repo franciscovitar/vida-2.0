@@ -9,8 +9,7 @@ import { rangeBoundsRfc3339 } from '@/lib/calendar/time';
 import type { DailyPlanningCalendarEvent } from '@/types/daily-planning-intelligence';
 
 export type LoadDailyPlanningCalendarEventsResult =
-  | { ok: true; events: DailyPlanningCalendarEvent[] }
-  | { ok: false; code: CalendarReadCode };
+  { ok: true; events: DailyPlanningCalendarEvent[] } | { ok: false; code: CalendarReadCode };
 
 /**
  * Reader Calendar específico para Daily Planning.
@@ -36,12 +35,7 @@ export async function loadDailyPlanningCalendarEventsInRange(
 
     const label = calendarLabelFor(calendarId, sourceIndex);
     for (const raw of result.events) {
-      const event = adaptDailyPlanningCalendarEvent(
-        raw,
-        calendarId,
-        config.timezone,
-        label,
-      );
+      const event = adaptDailyPlanningCalendarEvent(raw, calendarId, config.timezone, label);
       if (event) events.push(event);
     }
   }
