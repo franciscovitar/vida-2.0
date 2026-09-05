@@ -1,17 +1,11 @@
-import {
-  adaptCalendarEvent,
-  type GoogleCalendarEventRaw,
-} from '@/lib/calendar/adapters';
+import { adaptCalendarEvent, type GoogleCalendarEventRaw } from '@/lib/calendar/adapters';
 import type {
   DailyPlanningCalendarEvent,
   DailyPlanningCalendarProvenance,
   DailyPlanningCalendarRole,
 } from '@/types/daily-planning-intelligence';
 
-function roleFor(event: {
-  allDay: boolean;
-  blocksTime: boolean;
-}): DailyPlanningCalendarRole {
+function roleFor(event: { allDay: boolean; blocksTime: boolean }): DailyPlanningCalendarRole {
   // Contrato Daily Planning: un all-day es marcador de fecha, no 24 h de capacidad ocupada.
   if (event.allDay) return 'date-marker';
   if (event.blocksTime) return 'capacity-block';
@@ -27,7 +21,10 @@ function provenanceFor(description: string | null | undefined): DailyPlanningCal
   return 'unknown';
 }
 
-function normalizeExplicitDate(description: string | null | undefined, eventDate: string): string | null {
+function normalizeExplicitDate(
+  description: string | null | undefined,
+  eventDate: string,
+): string | null {
   if (!description) return null;
   const match = description.match(
     /fecha(?:\s+confirmada\s+por\s+vos)?\s*:\s*(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/i,
