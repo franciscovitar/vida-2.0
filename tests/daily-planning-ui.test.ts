@@ -72,7 +72,15 @@ function context(overrides: Partial<DailyPlanningContext> = {}): DailyPlanningCo
       milestones: { status: 'ready', available: true, notice: null },
       calendar: { status: 'ready', available: true, notice: null, mode: 'google' },
     },
-    tasks: [task(), task({ id: 'task-blocked', title: 'Tarea bloqueada', status: 'Bloqueada', blocker: 'Falta una respuesta' })],
+    tasks: [
+      task(),
+      task({
+        id: 'task-blocked',
+        title: 'Tarea bloqueada',
+        status: 'Bloqueada',
+        blocker: 'Falta una respuesta',
+      }),
+    ],
     projects: [],
     calendarEvents: [
       event(),
