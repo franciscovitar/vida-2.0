@@ -32,11 +32,7 @@ export interface DailyPlanSnapshot {
   payload: DailyPlanSnapshotPayload;
 }
 
-export type DailyPlanSnapshotReadStatus =
-  | 'ready'
-  | 'empty'
-  | 'invalid'
-  | 'unavailable';
+export type DailyPlanSnapshotReadStatus = 'ready' | 'empty' | 'invalid' | 'unavailable';
 
 export interface DailyPlanSnapshotRead {
   status: DailyPlanSnapshotReadStatus;
