@@ -16,10 +16,7 @@ import type {
 } from '@/lib/notion/config';
 import type { NotionReadCode } from '@/lib/notion/errors';
 import type { NotionDataSourceMode } from '@/types/notion';
-import type {
-  CalendarConfigResult,
-  CalendarOAuthConfig,
-} from '@/lib/calendar/config-resolve';
+import type { CalendarConfigResult, CalendarOAuthConfig } from '@/lib/calendar/config-resolve';
 import type { CalendarReadCode } from '@/lib/calendar/errors';
 import type { CalendarDataSourceMode } from '@/types/calendar';
 import type { LoadDailyPlanningCalendarEventsResult } from '@/lib/calendar/planning-queries';
@@ -338,8 +335,7 @@ export async function loadDailyPlanningContextUncached(
   const notionModule =
     deps.getNotionDataSource && deps.getNotionConfig ? null : await import('@/lib/notion/config');
   const getNotionDataSource = deps.getNotionDataSource ?? notionModule!.getNotionDataSource;
-  const getNotionConfig =
-    deps.getNotionConfig ?? notionModule!.getProjectsIntelligenceNotionConfig;
+  const getNotionConfig = deps.getNotionConfig ?? notionModule!.getProjectsIntelligenceNotionConfig;
   const createNotionPort =
     deps.createNotionPort ??
     (async (token: string) => {
@@ -352,17 +348,14 @@ export async function loadDailyPlanningContextUncached(
     deps.getCalendarDataSource && deps.getCalendarConfig && deps.getCalendarTimezone
       ? null
       : await import('@/lib/calendar/config');
-  const getCalendarDataSource =
-    deps.getCalendarDataSource ?? calendarModule!.getCalendarDataSource;
+  const getCalendarDataSource = deps.getCalendarDataSource ?? calendarModule!.getCalendarDataSource;
   const getCalendarConfig = deps.getCalendarConfig ?? calendarModule!.getCalendarConfig;
-  const getCalendarTimezone =
-    deps.getCalendarTimezone ?? calendarModule!.getCalendarTimezone;
+  const getCalendarTimezone = deps.getCalendarTimezone ?? calendarModule!.getCalendarTimezone;
   const loadCalendar =
     deps.loadCalendar ??
     (async (config: CalendarOAuthConfig, startYmd: string, endYmd: string) => {
-      const { loadDailyPlanningCalendarEventsInRange } = await import(
-        '@/lib/calendar/planning-queries'
-      );
+      const { loadDailyPlanningCalendarEventsInRange } =
+        await import('@/lib/calendar/planning-queries');
       return loadDailyPlanningCalendarEventsInRange(config, startYmd, endYmd);
     });
 
