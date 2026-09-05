@@ -22,7 +22,7 @@
     "stylelint:fix": "stylelint \"**/*.{css,scss}\" --fix",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write components/dashboard/DailyPlanningPanel.tsx lib/daily-planning/view.ts tests/daily-planning-ui.test.ts types/daily-planning-view.ts && git diff -- components/dashboard/DailyPlanningPanel.tsx lib/daily-planning/view.ts tests/daily-planning-ui.test.ts types/daily-planning-view.ts && exit 1",
     "test": "node --import tsx --test \"tests/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
     "verify": "npm run check && npm run build",
