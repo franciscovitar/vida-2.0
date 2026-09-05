@@ -112,6 +112,19 @@ function emptyNotionStates(status: DailyPlanningNotionSourceStatus) {
   };
 }
 
+type NotionQueryResult = Awaited<ReturnType<NotionReadPort['queryDataSource']>>;
+
+async function queryNotionDataSourceSafely(
+  port: NotionReadPort,
+  dataSourceId: string,
+): Promise<NotionQueryResult> {
+  try {
+    return await port.queryDataSource(dataSourceId);
+  } catch {
+    return { ok: false, code: 'read-error' };
+  }
+}
+
 async function loadNotionFacts(
   mode: NotionDataSourceMode,
   configResult: ProjectsIntelligenceConfigResult,
@@ -140,9 +153,9 @@ async function loadNotionFacts(
 
   const config: ProjectsIntelligenceNotionConfig = configResult.config;
   const [tasksResult, projectsResult, milestonesResult] = await Promise.all([
-    port.queryDataSource(config.tasksDataSourceId),
-    port.queryDataSource(config.projectsDataSourceId),
-    port.queryDataSource(config.milestonesDataSourceId),
+    queryNotionDataSourceSafely(port, config.tasksDataSourceId),
+    queryNotionDataSourceSafely(port, config.projectsDataSourceId),
+    queryNotionDataSourceSafely(port, config.milestonesDataSourceId),
   ]);
 
   let projectState = projectsResult.ok
