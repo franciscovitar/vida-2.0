@@ -1,3 +1,4 @@
+import { DailyPlanningPanel } from '@/components/dashboard/DailyPlanningPanel';
 import { DailySummary } from '@/components/dashboard/DailySummary';
 import { DayHeader } from '@/components/dashboard/DayHeader';
 import { FocusCard } from '@/components/dashboard/FocusCard';
@@ -9,6 +10,7 @@ import { ProductivityToday } from '@/components/dashboard/ProductivityToday';
 import { QuickInbox } from '@/components/dashboard/QuickInbox';
 import { TodayAgenda } from '@/components/dashboard/TodayAgenda';
 import { WeeklyProgress } from '@/components/dashboard/WeeklyProgress';
+import { getDailyPlanningView } from '@/lib/data/daily-planning-view-source';
 import { getTodayData } from '@/lib/data/source';
 
 import styles from './page.module.scss';
@@ -19,7 +21,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function TodayPage() {
-  const today = await getTodayData();
+  const [today, dailyPlan] = await Promise.all([getTodayData(), getDailyPlanningView()]);
 
   return (
     <div className={styles.page}>
@@ -34,6 +36,7 @@ export default async function TodayPage() {
 
       <div className={styles.columns}>
         <div className={styles.main}>
+          <DailyPlanningPanel plan={dailyPlan} />
           <HoyNotionPanel notion={today.notion} sources={today.sources} calendar={today.calendar} />
           <TodayAgenda calendar={today.calendar} />
           <HabitsToday
