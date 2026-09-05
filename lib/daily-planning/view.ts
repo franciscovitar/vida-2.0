@@ -46,8 +46,7 @@ function resolveItem(
   if (item.kind === 'project') {
     const project = context.projects.find((candidate) => candidate.id === item.ref);
     if (!project) return null;
-    const progress =
-      project.progress?.measurable === true ? `${project.progress.percent}%` : null;
+    const progress = project.progress?.measurable === true ? `${project.progress.percent}%` : null;
     const meta = [project.status, progress].filter(Boolean).join(' · ') || null;
     return { title: project.name, reason: item.reason, meta };
   }
