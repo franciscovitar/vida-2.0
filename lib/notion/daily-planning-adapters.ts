@@ -11,12 +11,10 @@ import {
 import { computeProjectProgress } from '@/lib/notion/projects-intelligence-progress';
 
 export type DailyPlanningTaskAdaptResult =
-  | { ok: true; task: DailyPlanningTask }
-  | { ok: false; code: 'missing-property' };
+  { ok: true; task: DailyPlanningTask } | { ok: false; code: 'missing-property' };
 
 export type DailyPlanningProjectBaseAdaptResult =
-  | { ok: true; project: ProjectsIntelligenceProjectBase }
-  | { ok: false; code: 'missing-property' };
+  { ok: true; project: ProjectsIntelligenceProjectBase } | { ok: false; code: 'missing-property' };
 
 /**
  * Adaptador estricto para Daily Planning.
