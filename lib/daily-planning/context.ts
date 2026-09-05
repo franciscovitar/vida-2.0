@@ -5,7 +5,10 @@ import {
   adaptDailyPlanningTask,
   assembleDailyPlanningProject,
 } from '@/lib/notion/daily-planning-adapters';
-import { adaptMilestone } from '@/lib/notion/projects-intelligence-adapters';
+import {
+  adaptMilestone,
+  type ProjectsIntelligenceProjectBase,
+} from '@/lib/notion/projects-intelligence-adapters';
 import type { NotionReadPort } from '@/lib/notion/client';
 import type {
   ProjectsIntelligenceConfigResult,
@@ -29,10 +32,7 @@ import type {
   DailyPlanningSourceState,
   DailyPlanningTask,
 } from '@/types/daily-planning-intelligence';
-import type {
-  ProjectsIntelligenceMilestone,
-  ProjectsIntelligenceProjectBase,
-} from '@/types/projects-intelligence';
+import type { ProjectsIntelligenceMilestone } from '@/types/projects-intelligence';
 
 export const DAILY_PLANNING_HORIZON_DAYS = 30;
 
@@ -164,10 +164,12 @@ async function loadNotionFacts(
     }
   }
 
-  const projectNames = buildNameMap(projectBases.map((project) => ({
-    id: project.id,
-    name: project.name,
-  })));
+  const projectNames = buildNameMap(
+    projectBases.map((project) => ({
+      id: project.id,
+      name: project.name,
+    })),
+  );
 
   let taskState = tasksResult.ok
     ? notionState(tasksResult.pages.length === 0 ? 'empty' : 'ready', 'Tareas')
@@ -205,8 +207,11 @@ async function loadNotionFacts(
 
   const projects = projectState.available
     ? projectBases
-        .filter((project) =>
-          project.status === 'Activo' || project.status === 'En espera' || project.status === 'Bloqueado',
+        .filter(
+          (project) =>
+            project.status === 'Activo' ||
+            project.status === 'En espera' ||
+            project.status === 'Bloqueado',
         )
         .map((project) =>
           assembleDailyPlanningProject(
@@ -220,7 +225,9 @@ async function loadNotionFacts(
   const tasks = taskState.available
     ? allTasks.filter(
         (task) =>
-          task.status === 'Pendiente' || task.status === 'En progreso' || task.status === 'Bloqueada',
+          task.status === 'Pendiente' ||
+          task.status === 'En progreso' ||
+          task.status === 'Bloqueada',
       )
     : [];
 
@@ -288,7 +295,9 @@ function buildQuality(
   milestonesAvailable: boolean,
 ) {
   return {
-    tasksWithAmbiguousDate: tasks.filter((task) => task.dateSemantics === 'relevant-date-unspecified').length,
+    tasksWithAmbiguousDate: tasks.filter(
+      (task) => task.dateSemantics === 'relevant-date-unspecified',
+    ).length,
     tasksMissingDuration: tasks.filter((task) => task.duration === null).length,
     tasksMissingPriority: tasks.filter((task) => task.priority === null).length,
     blockedTasksWithoutDetail: tasks.filter(
@@ -329,7 +338,8 @@ export async function loadDailyPlanningContextUncached(
   const notionModule =
     deps.getNotionDataSource && deps.getNotionConfig ? null : await import('@/lib/notion/config');
   const getNotionDataSource = deps.getNotionDataSource ?? notionModule!.getNotionDataSource;
-  const getNotionConfig = deps.getNotionConfig ?? notionModule!.getProjectsIntelligenceNotionConfig;
+  const getNotionConfig =
+    deps.getNotionConfig ?? notionModule!.getProjectsIntelligenceNotionConfig;
   const createNotionPort =
     deps.createNotionPort ??
     (async (token: string) => {
@@ -342,9 +352,11 @@ export async function loadDailyPlanningContextUncached(
     deps.getCalendarDataSource && deps.getCalendarConfig && deps.getCalendarTimezone
       ? null
       : await import('@/lib/calendar/config');
-  const getCalendarDataSource = deps.getCalendarDataSource ?? calendarModule!.getCalendarDataSource;
+  const getCalendarDataSource =
+    deps.getCalendarDataSource ?? calendarModule!.getCalendarDataSource;
   const getCalendarConfig = deps.getCalendarConfig ?? calendarModule!.getCalendarConfig;
-  const getCalendarTimezone = deps.getCalendarTimezone ?? calendarModule!.getCalendarTimezone;
+  const getCalendarTimezone =
+    deps.getCalendarTimezone ?? calendarModule!.getCalendarTimezone;
   const loadCalendar =
     deps.loadCalendar ??
     (async (config: CalendarOAuthConfig, startYmd: string, endYmd: string) => {
