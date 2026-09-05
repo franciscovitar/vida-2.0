@@ -36,7 +36,12 @@ export async function loadDailyPlanningCalendarEventsInRange(
 
     const label = calendarLabelFor(calendarId, sourceIndex);
     for (const raw of result.events) {
-      const event = adaptDailyPlanningCalendarEvent(raw, calendarId, config.timezone, label);
+      const event = adaptDailyPlanningCalendarEvent(
+        raw,
+        calendarId,
+        config.timezone,
+        label,
+      );
       if (event) events.push(event);
     }
   }
