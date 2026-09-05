@@ -30,10 +30,10 @@ function shortDate(value: string): string {
 function ItemList({ items, empty }: { items: DailyPlanningViewItem[]; empty: string }) {
   if (items.length === 0) return <p className={styles.empty}>{empty}</p>;
   return (
-    <ul className={styles.itemList}>
+    <ul className={styles['item-list']}>
       {items.map((item, index) => (
         <li key={`${item.title}-${index}`}>
-          <p className={styles.itemTitle}>{item.title}</p>
+          <p className={styles['item-title']}>{item.title}</p>
           {item.meta ? <p className={styles.meta}>{item.meta}</p> : null}
           <p className={styles.reason}>{item.reason}</p>
         </li>
@@ -108,7 +108,7 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
                       ? `${event.startTime}–${event.endTime}`
                       : event.startTime ?? '—'}
                   </span>
-                  <span className={styles.commitmentBody}>
+                  <span className={styles['commitment-body']}>
                     <strong>{event.title}</strong>
                     {event.location ? <small>{event.location}</small> : null}
                   </span>
@@ -118,7 +118,7 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
           )}
         </div>
 
-        <div className={styles.planGrid} data-empty={!hasPlan}>
+        <div className={styles['plan-grid']} data-empty={!hasPlan}>
           <section>
             <p className={styles.group}>MUST</p>
             <ItemList items={plan.must} empty="Sin MUST persistidos." />
@@ -141,8 +141,10 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
             <ol className={styles.blocks}>
               {plan.suggestedBlocks.map((block, index) => (
                 <li key={`${block.start}-${block.end}-${block.item.title}-${index}`}>
-                  <span className={`${styles.time} tabular`}>{block.start}–{block.end}</span>
-                  <span className={styles.blockBody}>
+                  <span className={`${styles.time} tabular`}>
+                    {block.start}–{block.end}
+                  </span>
+                  <span className={styles['block-body']}>
                     <strong>{block.item.title}</strong>
                     <small>{block.item.reason}</small>
                   </span>
@@ -153,7 +155,7 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
           )}
         </div>
 
-        <div className={styles.twoCol}>
+        <div className={styles['two-col']}>
           <section>
             <p className={styles.group}>Versión mínima</p>
             <ItemList items={plan.minimumViable} empty="Sin versión mínima persistida." />
@@ -164,13 +166,13 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
           </section>
         </div>
 
-        <div className={styles.twoCol}>
+        <div className={styles['two-col']}>
           <section>
             <p className={styles.group}>Bloqueadas</p>
             {plan.blockedTasks.length === 0 ? (
               <p className={styles.empty}>No hay tareas bloqueadas verificadas.</p>
             ) : (
-              <ul className={styles.simpleList}>
+              <ul className={styles['simple-list']}>
                 {plan.blockedTasks.map((task, index) => (
                   <li key={`${task.title}-${index}`}>
                     <strong>{task.title}</strong>
@@ -185,12 +187,13 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
             {plan.dateMarkers.length === 0 ? (
               <p className={styles.empty}>No hay marcadores próximos verificables.</p>
             ) : (
-              <ul className={styles.simpleList}>
+              <ul className={styles['simple-list']}>
                 {plan.dateMarkers.map((marker, index) => (
                   <li key={`${marker.title}-${marker.date}-${index}`}>
                     <strong>{marker.title}</strong>
                     <span>
-                      {shortDate(marker.date)}{marker.note ? ` · ${marker.note}` : ''}
+                      {shortDate(marker.date)}
+                      {marker.note ? ` · ${marker.note}` : ''}
                     </span>
                   </li>
                 ))}
@@ -199,7 +202,7 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
           </section>
         </div>
 
-        <div className={styles.sourceSection}>
+        <div className={styles['source-section']}>
           <p className={styles.group}>Calidad de fuentes</p>
           <ul className={styles.sources}>
             {plan.sources.map((source) => (
