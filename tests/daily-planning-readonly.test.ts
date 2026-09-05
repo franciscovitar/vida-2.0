@@ -115,7 +115,12 @@ function fakePort(responses: Record<string, PortResult>): NotionReadPort {
   };
 }
 
-function baseDeps(port: NotionReadPort, calendarResult: { ok: true; events: DailyPlanningCalendarEvent[] } | { ok: false; code: 'read-error' | 'network-error' }) {
+function baseDeps(
+  port: NotionReadPort,
+  calendarResult:
+    | { ok: true; events: DailyPlanningCalendarEvent[] }
+    | { ok: false; code: 'read-error' | 'network-error' },
+) {
   return {
     today: () => '2026-09-05',
     now: () => new Date('2026-09-05T15:00:00.000Z'),
@@ -221,9 +226,7 @@ test('DP-R5. Estado de tarea inválido falla cerrado; nunca se fabrica Pendiente
     'ds-tasks': { ok: true, pages: [invalidTask] },
     'ds-milestones': { ok: true, pages: MILESTONES },
   });
-  const data = await loadDailyPlanningContextUncached(
-    baseDeps(port, { ok: true, events: [] }),
-  );
+  const data = await loadDailyPlanningContextUncached(baseDeps(port, { ok: true, events: [] }));
 
   assert.equal(data.sources.tasks.status, 'missing-property');
   assert.equal(data.sources.tasks.available, false);
@@ -245,9 +248,7 @@ test('DP-R6. Hecha y Algún día no entran al contexto operativo diario', async 
     'ds-tasks': { ok: true, pages: [done, someday] },
     'ds-milestones': { ok: true, pages: [] },
   });
-  const data = await loadDailyPlanningContextUncached(
-    baseDeps(port, { ok: true, events: [] }),
-  );
+  const data = await loadDailyPlanningContextUncached(baseDeps(port, { ok: true, events: [] }));
 
   assert.deepEqual(data.tasks, []);
   assert.equal(data.sources.tasks.status, 'ready');
