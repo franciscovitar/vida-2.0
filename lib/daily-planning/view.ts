@@ -1,4 +1,7 @@
-import type { DailyPlanningContext, DailyPlanningCalendarEvent } from '@/types/daily-planning-intelligence';
+import type {
+  DailyPlanningCalendarEvent,
+  DailyPlanningContext,
+} from '@/types/daily-planning-intelligence';
 import type {
   DailyPlanSnapshotItem,
   DailyPlanSnapshotRead,
@@ -43,7 +46,8 @@ function resolveItem(
   if (item.kind === 'project') {
     const project = context.projects.find((candidate) => candidate.id === item.ref);
     if (!project) return null;
-    const progress = project.progress === null ? null : `${project.progress.percent}%`;
+    const progress =
+      project.progress?.measurable === true ? `${project.progress.percent}%` : null;
     const meta = [project.status, progress].filter(Boolean).join(' · ') || null;
     return { title: project.name, reason: item.reason, meta };
   }
@@ -168,7 +172,12 @@ export function buildDailyPlanningView(
 
   let status: DailyPlanningView['status'];
   if (!snapshot) {
-    status = context.status === 'unavailable' ? 'unavailable' : snapshotRead.status === 'empty' ? 'empty' : 'degraded';
+    status =
+      context.status === 'unavailable'
+        ? 'unavailable'
+        : snapshotRead.status === 'empty'
+          ? 'empty'
+          : 'degraded';
   } else if (
     context.status !== 'ready' ||
     snapshotRead.status !== 'ready' ||
@@ -183,7 +192,8 @@ export function buildDailyPlanningView(
   if (unresolvedPlanRefs > 0) {
     notice = `${notice ? `${notice} ` : ''}${unresolvedPlanRefs} referencia(s) del plan ya no pudieron resolverse contra las fuentes actuales.`;
   } else if (context.status === 'degraded' && !notice) {
-    notice = 'Algunas fuentes actuales no pudieron verificarse; el plan se muestra con calidad degradada.';
+    notice =
+      'Algunas fuentes actuales no pudieron verificarse; el plan se muestra con calidad degradada.';
   }
 
   return {
