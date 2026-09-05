@@ -106,7 +106,7 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
                   <span className={`${styles.time} tabular`}>
                     {event.startTime && event.endTime
                       ? `${event.startTime}–${event.endTime}`
-                      : event.startTime ?? '—'}
+                      : (event.startTime ?? '—')}
                   </span>
                   <span className={styles['commitment-body']}>
                     <strong>{event.title}</strong>
