@@ -15,6 +15,12 @@ import type {
 export interface GoogleCalendarEventRaw {
   id?: string | null;
   summary?: string | null;
+  /**
+   * Se conserva en el raw plano para lectores server-only que necesitan
+   * provenance/contexto (p. ej. Daily Planning). CalendarEvent público no lo
+   * expone por defecto.
+   */
+  description?: string | null;
   status?: string | null;
   transparency?: string | null;
   location?: string | null;
@@ -47,6 +53,7 @@ export function toPlainGoogleEvent(value: unknown): GoogleCalendarEventRaw | nul
   return {
     id: asOptionalString(record.id),
     summary: asOptionalString(record.summary),
+    description: asOptionalString(record.description),
     status: asOptionalString(record.status),
     transparency: asOptionalString(record.transparency),
     location: asOptionalString(record.location),
