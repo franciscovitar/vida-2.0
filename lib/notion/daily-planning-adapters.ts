@@ -2,14 +2,8 @@ import { adaptTask, resolveRelation, type NotionRawPage } from '@/lib/notion/ada
 import { TASK_PROPS, TASK_STATUSES } from '@/lib/notion/constants';
 import { inList, selectName, titlePlain } from '@/lib/notion/property-parsers';
 import type { NotionRelation, NotionTask, NotionTaskStatus } from '@/types/notion';
-import type {
-  DailyPlanningProject,
-  DailyPlanningTask,
-} from '@/types/daily-planning-intelligence';
-import type {
-  ProjectProgress,
-  ProjectsIntelligenceMilestone,
-} from '@/types/projects-intelligence';
+import type { DailyPlanningProject, DailyPlanningTask } from '@/types/daily-planning-intelligence';
+import type { ProjectProgress, ProjectsIntelligenceMilestone } from '@/types/projects-intelligence';
 import {
   adaptProjectIntelligenceBase,
   type ProjectsIntelligenceProjectBase,
