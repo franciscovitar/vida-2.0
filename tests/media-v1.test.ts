@@ -87,7 +87,9 @@ function filters(patch: Partial<MediaFilters> = {}): MediaFilters {
   };
 }
 
-function title(input: Partial<MediaTitleView> & Pick<MediaTitleView, 'key' | 'title'>): MediaTitleView {
+function title(
+  input: Partial<MediaTitleView> & Pick<MediaTitleView, 'key' | 'title'>,
+): MediaTitleView {
   const { key, title: titleText, ...overrides } = input;
   return {
     key,
@@ -123,7 +125,9 @@ test('Media usa exclusivamente su spreadsheet dedicado', () => {
     null,
   );
   assert.equal(
-    getMediaSpreadsheetId({ GOOGLE_MEDIA_SPREADSHEET_ID: 'media_sheet_example_1234567890' }),
+    getMediaSpreadsheetId({
+      GOOGLE_MEDIA_SPREADSHEET_ID: 'media_sheet_example_1234567890',
+    }),
     'media_sheet_example_1234567890',
   );
 });
