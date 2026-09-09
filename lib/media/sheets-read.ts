@@ -1,7 +1,10 @@
 import { sanitizeSheetValues } from '@/lib/data/plain';
 import { fetchAccessToken, READONLY_SCOPE, SHEETS_BASE } from '@/lib/google/auth';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
-import { getMediaSheetsAuthConfig, type MediaSheetsEnv } from '@/lib/media/sheets-config';
+import {
+  getMediaSheetsAuthConfig,
+  type MediaSheetsEnv,
+} from '@/lib/media/sheets-config';
 
 export type MediaTab = 'Movies' | 'Series';
 
@@ -21,7 +24,11 @@ export async function readMediaTabValues(
   const config = getMediaSheetsAuthConfig(env);
   if (!config) return { ok: false, code: 'not-configured' };
 
-  const token = await fetchAccessToken(config.clientEmail, config.privateKey, READONLY_SCOPE);
+  const token = await fetchAccessToken(
+    config.clientEmail,
+    config.privateKey,
+    READONLY_SCOPE,
+  );
   if (!token.ok) return token;
 
   const range = encodeURIComponent(tab);
