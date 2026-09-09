@@ -8,6 +8,7 @@ import {
   CheckSquare,
   Dumbbell,
   FileText,
+  Film,
   HeartPulse,
   Inbox,
   LayoutDashboard,
@@ -42,6 +43,7 @@ export type NavIconKey =
   | 'areas'
   | 'gimnasio'
   | 'dieta'
+  | 'media'
   | 'aprobaciones'
   | 'bandeja'
   | 'journaling'
@@ -81,6 +83,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   areas: Boxes,
   gimnasio: Dumbbell,
   dieta: UtensilsCrossed,
+  media: Film,
   aprobaciones: ShieldCheck,
   bandeja: Inbox,
   journaling: NotebookPen,
@@ -104,6 +107,7 @@ export const primaryNav: NavItemData[] = [
   { label: 'Áreas', href: '/areas', icon: 'areas', domain: 'projects' },
   { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },
   { label: 'Dieta', href: '/dieta', icon: 'dieta', domain: 'health' },
+  { label: 'Media', href: '/media', icon: 'media', domain: 'neutral' },
   { label: 'Aprobaciones', href: '/aprobaciones', icon: 'aprobaciones', domain: 'neutral' },
   { label: 'Aprendizaje', href: '/aprendizaje', icon: 'aprendizaje', domain: 'learning' },
   { label: 'Compras', href: '/compras', icon: 'compras', domain: 'neutral' },
