@@ -164,12 +164,12 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
       {data.notice ? <p className={styles.notice}>{data.notice}</p> : null}
 
       <section className={styles.hero} aria-label="Resumen de Media">
-        <div className={styles.mediumTabs} role="tablist" aria-label="Tipo de contenido">
+        <div className={styles['medium-tabs']} role="tablist" aria-label="Tipo de contenido">
           <button
             type="button"
             role="tab"
             aria-selected={filters.medium === 'movie'}
-            className={styles.mediumTab}
+            className={styles['medium-tab']}
             data-active={filters.medium === 'movie'}
             onClick={() => switchMedium('movie')}
           >
@@ -180,7 +180,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             type="button"
             role="tab"
             aria-selected={filters.medium === 'series'}
-            className={styles.mediumTab}
+            className={styles['medium-tab']}
             data-active={filters.medium === 'series'}
             onClick={() => switchMedium('series')}
           >
@@ -188,32 +188,48 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             Series
           </button>
         </div>
-        <p className={styles.bankPrinciple}>
+        <p className={styles['bank-principle']}>
           <strong>Banco = opciones, no pendientes.</strong> Filtrá lo que tenga sentido para hoy.
         </p>
       </section>
 
       <section className={styles.metrics} aria-label={`Resumen de ${mediumLabel(filters.medium)}`}>
-        <button type="button" className={styles.metric} onClick={() => patchFilters({ collection: 'all' })}>
+        <button
+          type="button"
+          className={styles.metric}
+          onClick={() => patchFilters({ collection: 'all' })}
+        >
           <span>Total</span>
           <strong>{totals.total}</strong>
         </button>
-        <button type="button" className={styles.metric} onClick={() => patchFilters({ collection: 'bank' })}>
+        <button
+          type="button"
+          className={styles.metric}
+          onClick={() => patchFilters({ collection: 'bank' })}
+        >
           <span>Banco</span>
           <strong>{totals.bank}</strong>
         </button>
-        <button type="button" className={styles.metric} onClick={() => patchFilters({ collection: 'seen' })}>
+        <button
+          type="button"
+          className={styles.metric}
+          onClick={() => patchFilters({ collection: 'seen' })}
+        >
           <span>{filters.medium === 'movie' ? 'Vistas' : 'Terminadas'}</span>
           <strong>{totals.seen}</strong>
         </button>
-        <button type="button" className={styles.metric} onClick={() => patchFilters({ collection: 'active' })}>
+        <button
+          type="button"
+          className={styles.metric}
+          onClick={() => patchFilters({ collection: 'active' })}
+        >
           <span>En curso</span>
           <strong>{totals.active}</strong>
         </button>
       </section>
 
       <section className={styles.controls} aria-label="Filtros de Media">
-        <div className={styles.collectionTabs} role="group" aria-label="Colección">
+        <div className={styles['collection-tabs']} role="group" aria-label="Colección">
           {COLLECTIONS.map((collection) => (
             <button
               key={collection.value}
@@ -228,9 +244,9 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           ))}
         </div>
 
-        <label className={styles.searchField}>
+        <label className={styles['search-field']}>
           <Search size={17} aria-hidden="true" />
-          <span className={styles.srOnly}>Buscar</span>
+          <span className={styles['sr-only']}>Buscar</span>
           <input
             type="search"
             value={filters.query}
@@ -239,52 +255,72 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           />
         </label>
 
-        <div className={styles.filterHeader}>
+        <div className={styles['filter-header']}>
           <span>
             <SlidersHorizontal size={16} aria-hidden="true" />
             Filtros
           </span>
           {hasExtraFilters(filters) ? (
-            <button type="button" className={styles.clearButton} onClick={clearFilters}>
+            <button type="button" className={styles['clear-button']} onClick={clearFilters}>
               Limpiar
             </button>
           ) : null}
         </div>
 
-        <div className={styles.filterGrid}>
+        <div className={styles['filter-grid']}>
           <label>
             <span>Género</span>
-            <select value={filters.genre} onChange={(event) => patchFilters({ genre: event.target.value })}>
+            <select
+              value={filters.genre}
+              onChange={(event) => patchFilters({ genre: event.target.value })}
+            >
               <option value="">Todos</option>
               {options.genres.map((genre) => (
-                <option key={genre} value={genre}>{genre}</option>
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
               ))}
             </select>
           </label>
           <label>
             <span>País</span>
-            <select value={filters.country} onChange={(event) => patchFilters({ country: event.target.value })}>
+            <select
+              value={filters.country}
+              onChange={(event) => patchFilters({ country: event.target.value })}
+            >
               <option value="">Todos</option>
               {options.countries.map((country) => (
-                <option key={country} value={country}>{country}</option>
+                <option key={country} value={country}>
+                  {country}
+                </option>
               ))}
             </select>
           </label>
           <label>
             <span>{filters.medium === 'movie' ? 'Director' : 'Creador'}</span>
-            <select value={filters.creator} onChange={(event) => patchFilters({ creator: event.target.value })}>
+            <select
+              value={filters.creator}
+              onChange={(event) => patchFilters({ creator: event.target.value })}
+            >
               <option value="">Todos</option>
               {options.creators.map((creator) => (
-                <option key={creator} value={creator}>{creator}</option>
+                <option key={creator} value={creator}>
+                  {creator}
+                </option>
               ))}
             </select>
           </label>
           <label>
             <span>Década</span>
-            <select value={filters.decade} onChange={(event) => patchFilters({ decade: event.target.value })}>
+            <select
+              value={filters.decade}
+              onChange={(event) => patchFilters({ decade: event.target.value })}
+            >
               <option value="">Todas</option>
               {options.decades.map((decade) => (
-                <option key={decade} value={decade}>{decade}s</option>
+                <option key={decade} value={decade}>
+                  {decade}s
+                </option>
               ))}
             </select>
           </label>
@@ -292,16 +328,23 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             <span>{filters.medium === 'movie' ? 'Duración' : 'Temporadas'}</span>
             <select
               value={filters.commitment}
-              onChange={(event) => patchFilters({ commitment: event.target.value as MediaCommitmentFilter })}
+              onChange={(event) =>
+                patchFilters({ commitment: event.target.value as MediaCommitmentFilter })
+              }
             >
               {commitmentOptions(filters.medium).map((item) => (
-                <option key={item.value} value={item.value}>{item.label}</option>
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
               ))}
             </select>
           </label>
           <label>
             <span>Ordenar</span>
-            <select value={filters.sort} onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}>
+            <select
+              value={filters.sort}
+              onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}
+            >
               <option value="bank-priority">Prioridad del banco</option>
               <option value="rating-desc">Mi nota</option>
               <option value="year-desc">Más recientes</option>
@@ -312,13 +355,18 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
         </div>
       </section>
 
-      <div className={styles.resultHeader}>
+      <div className={styles['result-header']}>
         <div>
           <strong>{results.length}</strong> {results.length === 1 ? 'resultado' : 'resultados'}
-          <span> de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}</span>
+          <span>
+            {' '}
+            de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}
+          </span>
         </div>
         {!options.hasScores ? (
-          <span className={styles.scoreNote}>Scores personales aún no certificados/persistidos.</span>
+          <span className={styles['score-note']}>
+            Scores personales aún no certificados/persistidos.
+          </span>
         ) : null}
       </div>
 
@@ -328,7 +376,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           title="No hay coincidencias"
           description="Probá quitando uno de los filtros. El Banco no se modifica: esta vista sólo explora la fuente canónica."
           action={
-            <button type="button" className={styles.emptyAction} onClick={clearFilters}>
+            <button type="button" className={styles['empty-action']} onClick={clearFilters}>
               Limpiar filtros
             </button>
           }
@@ -344,19 +392,21 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
               item.generalScore !== null;
 
             return (
-              <article key={item.key} className={styles.titleCard}>
-                <div className={styles.titleTop}>
-                  <div className={styles.titleBlock}>
+              <article key={item.key} className={styles['title-card']}>
+                <div className={styles['title-top']}>
+                  <div className={styles['title-block']}>
                     <h2>{item.title}</h2>
                     {item.originalTitle && item.originalTitle !== item.title ? (
-                      <p className={styles.originalTitle}>{item.originalTitle}</p>
+                      <p className={styles['original-title']}>{item.originalTitle}</p>
                     ) : null}
                   </div>
                   {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
                 </div>
 
                 <div className={styles.badges}>
-                  <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>{item.state}</Badge>
+                  <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>
+                    {item.state}
+                  </Badge>
                   {item.bankTier ? <Badge variant="outline">Tier {item.bankTier}</Badge> : null}
                   {item.radar ? <Badge domain="projects">Radar</Badge> : null}
                 </div>
@@ -369,23 +419,41 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
 
                 {item.genres.length > 0 ? (
                   <div className={styles.genres}>
-                    {item.genres.map((genre) => <span key={genre}>{genre}</span>)}
+                    {item.genres.map((genre) => (
+                      <span key={genre}>{genre}</span>
+                    ))}
                   </div>
                 ) : null}
 
                 <div className={styles.scores}>
                   {item.rating !== null ? (
-                    <div className={styles.observedScore}>
+                    <div className={styles['observed-score']}>
                       <span>Mi nota</span>
                       <strong>{score(item.rating)}</strong>
                     </div>
                   ) : null}
                   {hasInference ? (
-                    <div className={styles.inferredScores}>
-                      {item.affinity !== null ? <span>Afinidad <strong>{score(item.affinity)}</strong></span> : null}
-                      {item.cinephileValue !== null ? <span>Cinéfilo <strong>{score(item.cinephileValue)}</strong></span> : null}
-                      {item.culturalImpact !== null ? <span>Impacto <strong>{score(item.culturalImpact)}</strong></span> : null}
-                      {item.generalScore !== null ? <span>General <strong>{score(item.generalScore)}</strong></span> : null}
+                    <div className={styles['inferred-scores']}>
+                      {item.affinity !== null ? (
+                        <span>
+                          Afinidad <strong>{score(item.affinity)}</strong>
+                        </span>
+                      ) : null}
+                      {item.cinephileValue !== null ? (
+                        <span>
+                          Cinéfilo <strong>{score(item.cinephileValue)}</strong>
+                        </span>
+                      ) : null}
+                      {item.culturalImpact !== null ? (
+                        <span>
+                          Impacto <strong>{score(item.culturalImpact)}</strong>
+                        </span>
+                      ) : null}
+                      {item.generalScore !== null ? (
+                        <span>
+                          General <strong>{score(item.generalScore)}</strong>
+                        </span>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>
@@ -400,7 +468,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
       {visibleCount < results.length ? (
         <button
           type="button"
-          className={styles.loadMore}
+          className={styles['load-more']}
           onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
         >
           Mostrar {Math.min(PAGE_SIZE, results.length - visibleCount)} más
