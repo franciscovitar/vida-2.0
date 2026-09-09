@@ -27,9 +27,13 @@ function noticeFor(medium: MediaKind, state: MediaSourceState): string {
   const label = LABEL[medium];
   if (state === 'not-configured') return `${label}: falta configurar la fuente de Media.`;
   if (state === 'auth-error') return `${label}: no se pudo autenticar la lectura de Google Sheets.`;
-  if (state === 'permission-error') return `${label}: la cuenta de servicio no tiene permiso de lectura.`;
+  if (state === 'permission-error') {
+    return `${label}: la cuenta de servicio no tiene permiso de lectura.`;
+  }
   if (state === 'missing-tab') return `${label}: no se encontró la pestaña canónica esperada.`;
-  if (state === 'missing-header') return `${label}: la estructura del Sheet no coincide con el contrato.`;
+  if (state === 'missing-header') {
+    return `${label}: la estructura del Sheet no coincide con el contrato.`;
+  }
   if (state === 'read-error') return `${label}: Google Sheets no respondió correctamente.`;
   return `${label}: fuente disponible.`;
 }
@@ -47,7 +51,11 @@ async function loadSource(tab: MediaTab): Promise<LoadedSource> {
   const parsed = parseMediaTab(tab, read.values);
   if (!parsed.ok) {
     return {
-      source: { medium, state: 'missing-header', notice: noticeFor(medium, 'missing-header') },
+      source: {
+        medium,
+        state: 'missing-header',
+        notice: noticeFor(medium, 'missing-header'),
+      },
       titles: [],
     };
   }
@@ -71,7 +79,8 @@ export async function loadMediaDashboard(): Promise<MediaDashboardData> {
   if (readyCount > 0) {
     return {
       status: 'partial',
-      notice: 'Media está parcialmente disponible. La fuente con error no se reemplaza por datos simulados.',
+      notice:
+        'Media está parcialmente disponible. La fuente con error no se reemplaza por datos simulados.',
       titles,
       sources,
     };
