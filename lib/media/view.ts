@@ -34,7 +34,9 @@ function isSeen(item: MediaTitleView): boolean {
 }
 
 function isActive(item: MediaTitleView): boolean {
-  return item.medium === 'series' && (item.state === 'Viendo' || item.state === 'En pausa');
+  return (
+    item.medium === 'series' && (item.state === 'Viendo' || item.state === 'En pausa')
+  );
 }
 
 export function matchesCollection(
@@ -95,12 +97,18 @@ function exactNormalized(value: string | null, expected: string): boolean {
   return value !== null && normalize(value) === normalize(expected);
 }
 
-export function filterMediaTitles(titles: MediaTitleView[], filters: MediaFilters): MediaTitleView[] {
+export function filterMediaTitles(
+  titles: MediaTitleView[],
+  filters: MediaFilters,
+): MediaTitleView[] {
   return titles.filter((item) => {
     if (item.medium !== filters.medium) return false;
     if (!matchesCollection(item, filters.collection)) return false;
     if (!matchesQuery(item, filters.query)) return false;
-    if (filters.genre && !item.genres.some((genre) => exactNormalized(genre, filters.genre))) {
+    if (
+      filters.genre &&
+      !item.genres.some((genre) => exactNormalized(genre, filters.genre))
+    ) {
       return false;
     }
     if (
@@ -130,10 +138,15 @@ function tierRank(tier: string | null): number {
   return 4;
 }
 
-export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): MediaTitleView[] {
+export function sortMediaTitles(
+  titles: MediaTitleView[],
+  sort: MediaSort,
+): MediaTitleView[] {
   return [...titles].sort((left, right) => {
     if (sort === 'rating-desc') {
-      return nullableDesc(left.rating, right.rating) || left.title.localeCompare(right.title, 'es');
+      return (
+        nullableDesc(left.rating, right.rating) || left.title.localeCompare(right.title, 'es')
+      );
     }
     if (sort === 'year-desc') {
       return nullableDesc(left.year, right.year) || left.title.localeCompare(right.title, 'es');
@@ -156,7 +169,9 @@ export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): Medi
 }
 
 function uniqueSorted(values: string[]): string[] {
-  return [...new Set(values.filter(Boolean))].sort((left, right) => left.localeCompare(right, 'es'));
+  return [...new Set(values.filter(Boolean))].sort((left, right) =>
+    left.localeCompare(right, 'es'),
+  );
 }
 
 export function deriveMediaFilterOptions(
@@ -182,5 +197,7 @@ export function countCollection(
   medium: MediaKind,
   collection: MediaCollectionFilter,
 ): number {
-  return titles.filter((item) => item.medium === medium && matchesCollection(item, collection)).length;
+  return titles.filter(
+    (item) => item.medium === medium && matchesCollection(item, collection),
+  ).length;
 }
