@@ -2,14 +2,14 @@ name: Media format helper
 
 on:
   push:
-    branches: [feature/media-v1-dashboard]
+    branches:
+      - 'feature/media-v1-dashboard'
 
 permissions:
   contents: write
 
 jobs:
   format:
-    if: ${{ !contains(github.event.head_commit.message, 'chore(media): apply prettier output') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -51,5 +51,5 @@ jobs:
             lib/media/sheets-read.ts \
             lib/media/view.ts \
             tests/media-v1.test.ts
-          git commit -m "chore(media): apply prettier output"
+          git commit -m "chore(media): apply prettier output [skip ci]"
           git push origin HEAD:feature/media-v1-dashboard
