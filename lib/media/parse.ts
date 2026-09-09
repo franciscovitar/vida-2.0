@@ -5,8 +5,7 @@ type PlainCell = string | number | boolean | null;
 type PlainRows = PlainCell[][];
 
 export type MediaParseResult =
-  | { ok: true; titles: MediaTitleView[] }
-  | { ok: false; missing: string[] };
+  { ok: true; titles: MediaTitleView[] } | { ok: false; missing: string[] };
 
 const COMMON_HEADERS = [
   'Título',
@@ -119,8 +118,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       genres: listValue(valueAt(row, indexes, 'Géneros')),
       countries: listValue(valueAt(row, indexes, 'País')),
       runtimeMinutes: numberValue(valueAt(row, indexes, runtimeHeader)),
-      seasons:
-        medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null,
+      seasons: medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null,
       affinity: numberValue(valueAt(row, indexes, 'Afinidad personal')),
       cinephileValue: numberValue(valueAt(row, indexes, 'Valor cinéfilo')),
       culturalImpact: numberValue(valueAt(row, indexes, 'Impacto cultural')),

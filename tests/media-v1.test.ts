@@ -221,11 +221,10 @@ test('orden del Banco prioriza Radar y Tier sin inventar score', () => {
     title({ key: 'a', title: 'A', bankTier: 'A' }),
     title({ key: 'radar', title: 'Radar', bankTier: 'B', radar: true }),
   ];
-  assert.deepEqual(sortMediaTitles(titles, 'bank-priority').map((item) => item.key), [
-    'radar',
-    'a',
-    'b',
-  ]);
+  assert.deepEqual(
+    sortMediaTitles(titles, 'bank-priority').map((item) => item.key),
+    ['radar', 'a', 'b'],
+  );
 });
 
 test('Media aparece en la navegación principal', () => {

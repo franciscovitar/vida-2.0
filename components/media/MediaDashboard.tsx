@@ -82,13 +82,13 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
 function hasExtraFilters(filters: MediaFilters): boolean {
   return Boolean(
     filters.query ||
-      filters.genre ||
-      filters.country ||
-      filters.creator ||
-      filters.decade ||
-      filters.commitment !== 'all' ||
-      filters.collection !== 'all' ||
-      filters.sort !== 'bank-priority',
+    filters.genre ||
+    filters.country ||
+    filters.creator ||
+    filters.decade ||
+    filters.commitment !== 'all' ||
+    filters.collection !== 'all' ||
+    filters.sort !== 'bank-priority',
   );
 }
 
@@ -101,7 +101,8 @@ interface MediaDashboardViewProps {
 }
 
 export function MediaDashboardView({ data }: MediaDashboardViewProps) {
-  const firstReadyMedium = data.sources.find((source) => source.state === 'ready')?.medium ?? 'movie';
+  const firstReadyMedium =
+    data.sources.find((source) => source.state === 'ready')?.medium ?? 'movie';
   const [filters, setFilters] = useState<MediaFilters>(() => initialFilters(firstReadyMedium));
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
