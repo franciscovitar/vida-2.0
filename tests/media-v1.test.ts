@@ -88,10 +88,11 @@ function filters(patch: Partial<MediaFilters> = {}): MediaFilters {
 }
 
 function title(input: Partial<MediaTitleView> & Pick<MediaTitleView, 'key' | 'title'>): MediaTitleView {
+  const { key, title: titleText, ...overrides } = input;
   return {
-    key: input.key,
+    key,
     medium: 'movie',
-    title: input.title,
+    title: titleText,
     originalTitle: null,
     year: null,
     state: 'Por ver',
@@ -109,7 +110,7 @@ function title(input: Partial<MediaTitleView> & Pick<MediaTitleView, 'key' | 'ti
     culturalImpact: null,
     generalScore: null,
     whyForMe: null,
-    ...input,
+    ...overrides,
   };
 }
 
