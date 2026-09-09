@@ -62,7 +62,10 @@ function listValue(value: PlainCell | undefined): string[] {
 }
 
 function isRadar(value: PlainCell | undefined): boolean {
-  const normalized = text(value)?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const normalized = text(value)
+    ?.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
   return normalized === 'si' || normalized === 'yes' || normalized === 'true';
 }
 
@@ -75,7 +78,11 @@ function headerIndexes(headerRow: PlainCell[]): Map<string, number> {
   return indexes;
 }
 
-function valueAt(row: PlainCell[], indexes: Map<string, number>, header: string): PlainCell | undefined {
+function valueAt(
+  row: PlainCell[],
+  indexes: Map<string, number>,
+  header: string,
+): PlainCell | undefined {
   const index = indexes.get(header);
   return index === undefined ? undefined : row[index];
 }
@@ -112,7 +119,8 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       genres: listValue(valueAt(row, indexes, 'Géneros')),
       countries: listValue(valueAt(row, indexes, 'País')),
       runtimeMinutes: numberValue(valueAt(row, indexes, runtimeHeader)),
-      seasons: medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null,
+      seasons:
+        medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null,
       affinity: numberValue(valueAt(row, indexes, 'Afinidad personal')),
       cinephileValue: numberValue(valueAt(row, indexes, 'Valor cinéfilo')),
       culturalImpact: numberValue(valueAt(row, indexes, 'Impacto cultural')),
