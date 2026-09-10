@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 import { GymDashboardView } from '@/components/gym/GymDashboard';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { loadGymWeeklyCardio } from '@/lib/gym/cardio-dashboard';
 import { loadGymDashboard } from '@/lib/gym/load';
 import { loadGymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
 import type { GymDashboardData } from '@/types/gym';
@@ -46,14 +47,19 @@ async function withCanonicalGymHistory(data: GymDashboardData): Promise<GymDashb
 }
 
 export default async function GimnasioPage() {
+  // loadGymDashboard autentica la ruta antes de que se lean fuentes complementarias.
   const base = await loadGymDashboard();
-  const data = await withCanonicalGymHistory(base);
+  const [withHistory, weeklyCardio] = await Promise.all([
+    withCanonicalGymHistory(base),
+    loadGymWeeklyCardio(base.targetDate),
+  ]);
+  const data: GymDashboardData = { ...withHistory, weeklyCardio };
 
   return (
     <div className={styles.page}>
       <PageHeader
         title="Gimnasio"
-        description="Progreso, comparaciones y contexto para entender cómo estás entrenando."
+        description="Progreso, comparaciones, cardio y contexto para entender cómo estás entrenando."
         icon={Dumbbell}
         domain="health"
       />

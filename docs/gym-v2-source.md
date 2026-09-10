@@ -11,12 +11,13 @@ Configuración server-side requerida:
 
 El ID real no se hardcodea en código, tests ni documentación. La cuenta de servicio debe tener el permiso mínimo necesario sobre el archivo.
 
-Pestañas consumidas en este slice:
+Pestañas consumidas:
 
 - `Gym Sessions`
 - `Gym Sets`
+- `Cardio Sessions`
 
-`Cardio Sessions` queda fuera del primer slice de Gimnasio V2.
+`Cardio Sessions` conserva actividad, modalidad, duración y las métricas que realmente existan. Vida no rellena distancia, potencia, FC, RPE ni estado cuando la fuente no los aporta.
 
 ## Comparaciones personales V2.0
 
@@ -30,6 +31,24 @@ La pantalla distingue:
 Para comparar sets con distinta combinación de carga y repeticiones se usa e1RM de Epley como índice personal únicamente en sets de 1–15 repeticiones. El set observado (`kg × reps`) permanece visible. La estimación no se presenta como 1RM medido.
 
 Cambios de fuerza estimada dentro de ±2 % se tratan visualmente como estables para evitar sobrerrepresentar ruido pequeño.
+
+## Cardio semanal por MET-min
+
+La carga aeróbica semanal se muestra en Gimnasio como una vista derivada y no reemplaza los registros originales. La unidad común es:
+
+`MET-min = MET × minutos`
+
+La referencia de esta fase es `600 MET-min/semana`, equivalente de forma aproximada a 120 minutos a 5 MET. La barra puede superar el 100 %; alcanzar la cuota no implica que más sea automáticamente mejor.
+
+Reglas de conversión:
+
+- bicicleta: prioriza potencia media en watts cuando existe; en ausencia de watts usa RPE y, como último recurso, el rol registrado de la sesión con confianza menor;
+- fútbol: usa una equivalencia específica para fútbol general o competitivo según la evidencia disponible;
+- caminata: solo suma cuando hay distancia y velocidad compatibles para estimar duración e intensidad;
+- pasos sin evidencia suficiente de intensidad permanecen como actividad general y no se convierten automáticamente en cardio;
+- en días con fútbol registrado no se vuelve a acreditar caminata diaria para evitar doble conteo obvio del movimiento del partido.
+
+Las equivalencias de intensidad están fijadas en código a partir del Compendium of Physical Activities 2024 y cada contribución comunica su nivel de confianza. La FC de wearable puede aportar contexto, pero no se usa por sí sola para inventar un MET individual.
 
 ## Benchmark fijo V2.2
 
@@ -63,9 +82,16 @@ Para cada ejercicio se muestra:
 - e1RM estimado;
 - nivel actual (`Principiante`, `Novato`, `Intermedio`, `Avanzado` o `Élite`; por debajo del primer umbral se muestra `Inicial`);
 - próximo umbral;
-- porcentaje recorrido dentro del nivel actual hacia el siguiente.
+- porcentaje recorrido dentro del nivel actual hacia el siguiente;
+- una ETA orientativa al siguiente nivel únicamente cuando el historial repetido permite sostener una tendencia positiva.
 
-El nivel general usa una mediana conservadora de los niveles disponibles por ejercicio, para que una sola marca extrema no domine el resumen.
+Los umbrales no cambian con la presentación visual. La UI usa una jerarquía de rangos inspirada en videojuegos para hacer visible el progreso sin alterar la clasificación subyacente.
+
+### ETA al siguiente rango
+
+La ETA no extrapola una suma fija de kilos por mes. Usa observaciones fechadas de e1RM del mismo ejercicio, ajusta la tendencia en escala logarítmica y aplica una desaceleración conservadora antes de proyectar el siguiente umbral. Si hay pocas exposiciones, una ventana temporal insuficiente, pendiente nula/negativa o una proyección poco razonable, la interfaz muestra `Sin ETA confiable`.
+
+La ETA es una estimación descriptiva del ritmo reciente, no una promesa de fecha ni una prescripción de aumentar carga.
 
 ### Comparabilidad y confianza
 
@@ -82,6 +108,12 @@ La pantalla mantiene unos pocos ejercicios destacados y `Ver todos los ejercicio
 
 No se ajusta por peso corporal ni edad en este slice. No se realizan ni recomiendan tests reales de 1RM para alimentar el dashboard.
 
+## Revisión mensual a demanda
+
+Gimnasio y Nutrición exponen una acción de revisión de 30 días que prepara un pedido para el coach. No corre en segundo plano, no programa tareas y no cambia planes automáticamente. La regla explícita es conservar lo que funciona y proponer ajustes solo cuando los datos repetidos o una incompatibilidad clara justifican el cambio.
+
+La revisión de gimnasio considera adherencia, rendimiento comparable, cardio, movilidad con limitación medida, recuperación, posibles señales de descarga y eficiencia. La revisión de nutrición considera cobertura del registro, energía, macros, micronutrientes, alimentos y suplementos únicamente cuando existen datos suficientes.
+
 ## Frontera de escritura
 
 Gimnasio V2 permanece read-only en este slice. La ruta de escritura existente queda alineada preventivamente con la misma fuente dedicada para evitar split-brain:
@@ -93,11 +125,13 @@ Gimnasio V2 permanece read-only en este slice. La ruta de escritura existente qu
 - la compuerta nace apagada y no se activa en este PR;
 - Preview puede usar en el futuro un valor distinto de `GOOGLE_GYM_SPREADSHEET_ID` mediante configuración de entorno, sin hardcodear targets en código.
 
+Cardio y fútbol dejan de mostrarse como checks del Habit Tracker, pero sus columnas históricas no se borran ni se migran. La whitelist de escritura se conserva por compatibilidad; la UI deja de tratarlos como hábitos porque el cardio pasa a evaluarse en Gimnasio mediante actividad estructurada.
+
 ## Seguridad
 
 - lectura solamente en Gimnasio V2;
 - sin IDs reales en el cliente;
-- ninguna escritura fue habilitada ni ejecutada en este slice;
+- ninguna escritura nueva fue habilitada ni ejecutada en este slice;
 - sin fallback silencioso al spreadsheet de hábitos;
 - faltantes no se convierten en cero;
 - la UI distingue observación, estimación y benchmark;

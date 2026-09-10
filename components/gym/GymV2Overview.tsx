@@ -9,9 +9,9 @@ import {
 } from 'lucide-react';
 import type { CSSProperties } from 'react';
 
+import { GymPreviousWeek } from '@/components/gym/GymPreviousWeek';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { GymPreviousWeek } from '@/components/gym/GymPreviousWeek';
 import {
   buildMaleStrengthLevelBenchmark,
   isExternalStrengthBenchmarkSupported,
@@ -348,13 +348,16 @@ export function GymV2Overview({
         <Card aria-labelledby="gym-v2-benchmark-title">
           <SectionHeader
             id="gym-v2-benchmark-title"
-            title="Tu nivel externo"
-            description="Tabla fija masculina de 1RM. Se muestra aparte de tu progreso personal."
+            title="Tu rango de fuerza"
+            description="Mismos benchmarks fijos de siempre, con una presentación de rango y una ETA dinámica separada del progreso personal."
             domain="health"
           />
           <div className={benchmarkStyles.layout}>
-            <div className={benchmarkStyles.summary}>
-              <span>{benchmark.scopeLabel}</span>
+            <div
+              className={benchmarkStyles.summary}
+              data-rank={benchmark.level ?? 'below-beginner'}
+            >
+              <span>RANGO ACTUAL · {benchmark.scopeLabel}</span>
               <strong>{benchmark.label}</strong>
               <small>{benchmark.confidenceLabel}</small>
               <p>{benchmark.detail}</p>
@@ -362,7 +365,11 @@ export function GymV2Overview({
 
             <div className={benchmarkStyles.list}>
               {featuredBenchmarkExercises.map((exercise) => (
-                <article key={exercise.id} className={benchmarkStyles.exercise}>
+                <article
+                  key={exercise.id}
+                  className={benchmarkStyles.exercise}
+                  data-rank={exercise.level}
+                >
                   <div className={benchmarkStyles.heading}>
                     <div>
                       <h3>{exercise.benchmarkName}</h3>
@@ -389,10 +396,19 @@ export function GymV2Overview({
                         <span>e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg</span>
                         <span>
                           {exercise.nextLevelLabel && exercise.nextThresholdKg !== null
-                            ? `${exercise.nextLevelProgressPercent}% del camino hacia ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
+                            ? `${exercise.nextLevelProgressPercent}% del rango hacia ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
                             : 'Máximo nivel de la referencia'}
                         </span>
                       </div>
+                      {exercise.nextLevelEtaLabel ? (
+                        <div className={benchmarkStyles.eta}>
+                          <span>ETA dinámica</span>
+                          <strong>{exercise.nextLevelEtaLabel}</strong>
+                          {exercise.nextLevelEtaDetail ? (
+                            <small>{exercise.nextLevelEtaDetail}</small>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <small className={benchmarkStyles.max}>
@@ -424,12 +440,19 @@ export function GymV2Overview({
                   </div>
                   <div className={benchmarkStyles['compact-list']}>
                     {benchmark.exercises.map((exercise) => (
-                      <article key={`all-${exercise.id}`} className={benchmarkStyles.compact}>
+                      <article
+                        key={`all-${exercise.id}`}
+                        className={benchmarkStyles.compact}
+                        data-rank={exercise.level}
+                      >
                         <div>
                           <strong>{exercise.benchmarkName}</strong>
                           <small>
                             {number(exercise.loadKg)} kg × {exercise.reps} → e1RM{' '}
                             {number(exercise.estimatedOneRepMaxKg)} kg · {exercise.confidenceLabel}
+                            {exercise.nextLevelEtaLabel
+                              ? ` · ETA ${exercise.nextLevelEtaLabel}`
+                              : ''}
                           </small>
                         </div>
                         <span data-tone="benchmark">{exercise.levelLabel}</span>
