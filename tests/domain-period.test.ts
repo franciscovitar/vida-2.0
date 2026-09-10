@@ -198,7 +198,7 @@ test('7. comparación con período anterior cero no produce infinito', () => {
   assert.doesNotMatch(cmp.label, /∞|Infinity|NaN/i);
 });
 
-test('8. metas semanales 3/3/3/1/2', () => {
+test('8. metas semanales del tracker excluyen cardio y fútbol', () => {
   const mock = buildMockDomainRecords(TODAY);
   const page = buildHabitsPageData({
     records: mock.registro,
@@ -215,10 +215,8 @@ test('8. metas semanales 3/3/3/1/2', () => {
   const targets = Object.fromEntries(page.weeklyGoals.map((g) => [g.id, g.target]));
   assert.deepEqual(targets, {
     'goal-gym': 3,
-    'goal-cardio': 3,
     'goal-stretch': 3,
     'goal-mealprep': 1,
-    'goal-football': 2,
   });
 });
 
@@ -232,7 +230,7 @@ test('10. salud parcial se identifica correctamente', () => {
   const salud = parseSalud([
     [...SALUD_HEADERS],
     rowFor(SALUD_HEADERS, {
-      [SAL.fecha]: TODAY,
+      [RD.fecha]: TODAY,
       [SAL.importStatus]: 'parcial',
       [SAL.steps]: 10,
     }),
