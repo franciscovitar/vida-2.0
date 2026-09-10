@@ -1,8 +1,4 @@
-import type {
-  GymCardioContribution,
-  GymCardioSession,
-  GymWeeklyCardioSummary,
-} from '@/types/gym';
+import type { GymCardioContribution, GymCardioSession, GymWeeklyCardioSummary } from '@/types/gym';
 
 export const WEEKLY_CARDIO_TARGET_MET_MINUTES = 600;
 
@@ -235,7 +231,9 @@ export function buildWeeklyCardioSummary(input: {
     uncreditedWalkingDays = steps.series.filter((value) => (value ?? 0) > 0).length;
   }
 
-  contributions.sort((a, b) => a.date.localeCompare(b.date) || a.label.localeCompare(b.label, 'es'));
+  contributions.sort(
+    (a, b) => a.date.localeCompare(b.date) || a.label.localeCompare(b.label, 'es'),
+  );
   const totalMetMinutes = rounded(
     contributions.reduce((sum, contribution) => sum + contribution.metMinutes, 0),
     0,
@@ -266,7 +264,6 @@ export function buildWeeklyCardioSummary(input: {
     moderateEquivalentMinutes,
     contributions,
     uncreditedWalkingDays,
-    note:
-      'MET-min = intensidad (MET) × minutos. Bici prioriza watts; luego RPE/rol. Caminata solo suma con distancia y velocidad compatibles y no se duplica en días con fútbol. Pasos sin intensidad quedan como actividad general.',
+    note: 'MET-min = intensidad (MET) × minutos. Bici prioriza watts; luego RPE/rol. Caminata solo suma con distancia y velocidad compatibles y no se duplica en días con fútbol. Pasos sin intensidad quedan como actividad general.',
   };
 }

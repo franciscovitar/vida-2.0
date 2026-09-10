@@ -3,10 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import type {
-  GymCardioContributionKind,
-  GymWeeklyCardioSummary,
-} from '@/types/gym';
+import type { GymCardioContributionKind, GymWeeklyCardioSummary } from '@/types/gym';
 
 import styles from './GymWeeklyCardio.module.scss';
 
@@ -46,7 +43,11 @@ function groupContributions(summary: GymWeeklyCardioSummary): Group[] {
     .filter((group) => group.metMinutes > 0);
 }
 
-export function GymWeeklyCardio({ summary }: { summary: GymWeeklyCardioSummary | null | undefined }) {
+export function GymWeeklyCardio({
+  summary,
+}: {
+  summary: GymWeeklyCardioSummary | null | undefined;
+}) {
   if (!summary) return null;
   const groups = groupContributions(summary);
   const cappedProgress = Math.min(summary.progressPercent, 100);

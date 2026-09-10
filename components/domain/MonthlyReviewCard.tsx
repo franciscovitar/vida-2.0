@@ -8,7 +8,10 @@ import styles from './MonthlyReviewCard.module.scss';
 
 type MonthlyReviewDomain = 'gym' | 'nutrition';
 
-const COPY: Record<MonthlyReviewDomain, { title: string; description: string; prompt: string; checks: string[] }> = {
+const COPY: Record<
+  MonthlyReviewDomain,
+  { title: string; description: string; prompt: string; checks: string[] }
+> = {
   gym: {
     title: 'Revisión mensual a demanda',
     description: '30 días de rendimiento, rutina, cardio, movilidad, recuperación y eficiencia.',
@@ -59,7 +62,9 @@ export function MonthlyReviewCard({ domain }: { domain: MonthlyReviewDomain }) {
       </div>
       <div className={styles.footer}>
         <BrainCircuit size={15} aria-hidden="true" />
-        <span>El análisis debe usar tus fuentes reales del período, no una recomendación genérica.</span>
+        <span>
+          El análisis debe usar tus fuentes reales del período, no una recomendación genérica.
+        </span>
       </div>
     </Card>
   );

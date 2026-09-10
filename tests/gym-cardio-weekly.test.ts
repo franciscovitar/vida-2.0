@@ -60,11 +60,7 @@ test('cardio semanal usa 600 MET-min como cuota equivalente de la fase actual', 
 test('caminata suma solo cuando hay distancia y velocidad moderada compatibles', () => {
   const summary = buildWeeklyCardioSummary({
     cardioSessions: [],
-    healthMetrics: [
-      metric('steps', [8000]),
-      metric('distance', [5]),
-      metric('walkingSpeed', [5]),
-    ],
+    healthMetrics: [metric('steps', [8000]), metric('distance', [5]), metric('walkingSpeed', [5])],
     healthPeriodStart: '2026-09-07',
     today: '2026-09-07',
     cardioSourceAvailable: true,

@@ -104,7 +104,8 @@ export async function loadGymCardioSnapshot(
   const sessions = mapRows(result.values.slice(1));
   return {
     state: sessions.length > 0 ? 'ready' : 'empty',
-    notice: sessions.length > 0 ? null : 'Cardio Sessions está listo, pero todavía no tiene actividades.',
+    notice:
+      sessions.length > 0 ? null : 'Cardio Sessions está listo, pero todavía no tiene actividades.',
     sessions,
   };
 }

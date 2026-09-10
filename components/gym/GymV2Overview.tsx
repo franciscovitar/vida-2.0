@@ -353,7 +353,10 @@ export function GymV2Overview({
             domain="health"
           />
           <div className={benchmarkStyles.layout}>
-            <div className={benchmarkStyles.summary} data-rank={benchmark.level ?? 'below-beginner'}>
+            <div
+              className={benchmarkStyles.summary}
+              data-rank={benchmark.level ?? 'below-beginner'}
+            >
               <span>RANGO ACTUAL · {benchmark.scopeLabel}</span>
               <strong>{benchmark.label}</strong>
               <small>{benchmark.confidenceLabel}</small>
@@ -401,7 +404,9 @@ export function GymV2Overview({
                         <div className={benchmarkStyles.eta}>
                           <span>ETA dinámica</span>
                           <strong>{exercise.nextLevelEtaLabel}</strong>
-                          {exercise.nextLevelEtaDetail ? <small>{exercise.nextLevelEtaDetail}</small> : null}
+                          {exercise.nextLevelEtaDetail ? (
+                            <small>{exercise.nextLevelEtaDetail}</small>
+                          ) : null}
                         </div>
                       ) : null}
                     </div>
@@ -445,7 +450,9 @@ export function GymV2Overview({
                           <small>
                             {number(exercise.loadKg)} kg × {exercise.reps} → e1RM{' '}
                             {number(exercise.estimatedOneRepMaxKg)} kg · {exercise.confidenceLabel}
-                            {exercise.nextLevelEtaLabel ? ` · ETA ${exercise.nextLevelEtaLabel}` : ''}
+                            {exercise.nextLevelEtaLabel
+                              ? ` · ETA ${exercise.nextLevelEtaLabel}`
+                              : ''}
                           </small>
                         </div>
                         <span data-tone="benchmark">{exercise.levelLabel}</span>

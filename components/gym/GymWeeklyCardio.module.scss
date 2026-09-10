@@ -11,7 +11,11 @@
   border: 1px solid color-mix(in srgb, var(--c-health-border) 74%, var(--border));
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--c-health) 13%, transparent), transparent 38%),
+    radial-gradient(
+      circle at 88% 12%,
+      color-mix(in srgb, var(--c-health) 13%, transparent),
+      transparent 38%
+    ),
     color-mix(in srgb, var(--c-health-soft) 35%, var(--surface));
 }
 

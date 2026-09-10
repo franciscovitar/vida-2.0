@@ -205,13 +205,15 @@ function estimateNextLevelEta(
   if (rawRate === null || rawRate <= 0.00005) {
     return {
       label: 'Sin ETA confiable',
-      detail: 'El historial reciente no muestra todavía una velocidad positiva y repetible para proyectar el próximo rango.',
+      detail:
+        'El historial reciente no muestra todavía una velocidad positiva y repetible para proyectar el próximo rango.',
     };
   }
 
   // La proyección usa crecimiento relativo (log), no kg/semana. Se reduce el ritmo
   // observado y se limita el máximo para que un PR aislado no produzca una ETA absurda.
-  const evidenceShrink = usable.length >= 5 && spanDays >= 28 ? 0.72 : usable.length >= 4 ? 0.62 : 0.52;
+  const evidenceShrink =
+    usable.length >= 5 && spanDays >= 28 ? 0.72 : usable.length >= 4 ? 0.62 : 0.52;
   const projectedDailyRate = Math.min(rawRate * evidenceShrink * 0.7, 0.0015);
   if (projectedDailyRate <= 0) return { label: 'Sin ETA confiable', detail: null };
 
@@ -219,7 +221,8 @@ function estimateNextLevelEta(
   if (!Number.isFinite(centralDays) || centralDays <= 0 || centralDays > 730) {
     return {
       label: 'Sin ETA confiable',
-      detail: 'El próximo rango queda demasiado lejos para una proyección útil con los datos actuales.',
+      detail:
+        'El próximo rango queda demasiado lejos para una proyección útil con los datos actuales.',
     };
   }
 
@@ -255,7 +258,9 @@ function latestEligibleTrend(
   );
 }
 
-function overallLevel(exercises: readonly GymStrengthBenchmarkExercise[]): GymStrengthLevelId | null {
+function overallLevel(
+  exercises: readonly GymStrengthBenchmarkExercise[],
+): GymStrengthLevelId | null {
   if (exercises.length === 0) return null;
   const ordered = exercises
     .map((exercise) => LEVEL_ORDER.indexOf(exercise.level))

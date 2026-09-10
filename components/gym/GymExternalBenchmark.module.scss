@@ -58,7 +58,11 @@
   border-radius: var(--radius);
   background:
     radial-gradient(circle at 84% 14%, var(--rank-glow), transparent 42%),
-    linear-gradient(145deg, color-mix(in srgb, var(--rank-color) 8%, var(--surface)), var(--surface));
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--rank-color) 8%, var(--surface)),
+      var(--surface)
+    );
   box-shadow: 0 0.65rem 1.7rem color-mix(in srgb, var(--rank-color) 9%, transparent);
 }
 
@@ -123,8 +127,11 @@
   padding: 0.85rem;
   border: 1px solid color-mix(in srgb, var(--rank-color) 36%, var(--border));
   border-radius: var(--radius);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--rank-color) 5%, var(--surface-2)), var(--surface-2));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--rank-color) 5%, var(--surface-2)),
+    var(--surface-2)
+  );
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--rank-color) 72%, transparent);
 }
 
@@ -183,7 +190,11 @@
   width: var(--share);
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--rank-color) 58%, var(--text-subtle)), var(--rank-color));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rank-color) 58%, var(--text-subtle)),
+    var(--rank-color)
+  );
   box-shadow: 0 0 0.8rem var(--rank-glow);
 }
 
