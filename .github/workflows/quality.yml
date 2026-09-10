@@ -30,14 +30,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Format changed cardio files in runner
-        run: npx prettier --write components/gym/GymWeeklyCardio.tsx lib/gym/cardio-weekly.ts
-
-      - name: Show formatting diff
-        run: git diff -- components/gym/GymWeeklyCardio.tsx lib/gym/cardio-weekly.ts
-
       - name: Verify project
         run: npm run verify
-
-      - name: Run tests
-        run: npm test
