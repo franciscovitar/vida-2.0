@@ -5,6 +5,11 @@ export type GymV2InsightTone = 'positive' | 'watch' | 'neutral';
 export type GymV2MuscleGroupId =
   'back' | 'shoulders' | 'chest' | 'biceps' | 'triceps' | 'legs' | 'core' | 'other';
 
+export interface GymV2PerformanceObservation {
+  date: string;
+  performance: number;
+}
+
 export interface GymV2ExerciseTrend {
   key: string;
   exerciseName: string;
@@ -21,6 +26,8 @@ export interface GymV2ExerciseTrend {
   sessionCount: number;
   completedSets: number;
   series: readonly number[];
+  /** Observaciones comparables fechadas para proyecciones conservadoras. */
+  observations: readonly GymV2PerformanceObservation[];
 }
 
 export interface GymV2MuscleGroupSummary {
@@ -236,6 +243,10 @@ function buildExerciseTrends(sessions: readonly GymSession[]): GymV2ExerciseTren
         sessionCount: exercise.observations.length,
         completedSets: exercise.completedSets,
         series: exercise.observations.map((item) => item.performance),
+        observations: exercise.observations.map((item) => ({
+          date: item.date,
+          performance: item.performance,
+        })),
       } satisfies GymV2ExerciseTrend;
     })
     .sort(
