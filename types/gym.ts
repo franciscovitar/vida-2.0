@@ -128,8 +128,24 @@ export interface GymWeeklyCardioSummary {
   /** Equivalencia informativa contra una actividad moderada de 4 MET. */
   moderateEquivalentMinutes: number;
   contributions: readonly GymCardioContribution[];
-  /** Días con pasos pero sin intensidad suficiente para convertirlos sin inventar. */
+  /** Compatibilidad temporal: los pasos ya no quedan sin acreditar cuando existe un conteo usable. */
   uncreditedWalkingDays: number;
+  /** Días donde los pasos se convirtieron con el proxy conservador por falta de velocidad/distancia usable. */
+  estimatedWalkingDays: number;
+  /** Progreso directo del plan personal semanal. */
+  weeklySteps: number;
+  weeklyStepsTarget: number;
+  remainingSteps: number;
+  weeklyBikeMinutes: number;
+  weeklyBikeMinutesTarget: number;
+  remainingBikeMinutes: number;
+  weeklyFootballMatches: number;
+  weeklyFootballMatchesTarget: number;
+  remainingFootballMatches: number;
+  /** Alternativas para cubrir toda la carga equivalente restante con una sola modalidad. */
+  remainingEquivalentSteps: number;
+  remainingEquivalentBikeMinutes: number;
+  remainingEquivalentFootballMatches: number;
   note: string;
 }
 

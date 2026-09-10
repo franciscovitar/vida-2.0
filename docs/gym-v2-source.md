@@ -34,19 +34,34 @@ Cambios de fuerza estimada dentro de ±2 % se tratan visualmente como estables p
 
 ## Cardio semanal por MET-min
 
-La carga aeróbica semanal se muestra en Gimnasio como una vista derivada y no reemplaza los registros originales. La unidad común es:
+La carga semanal se muestra en Gimnasio como una vista derivada y no reemplaza los registros originales. La unidad común es:
 
 `MET-min = MET × minutos`
 
-La referencia de esta fase es `600 MET-min/semana`, equivalente de forma aproximada a 120 minutos a 5 MET. La barra puede superar el 100 %; alcanzar la cuota no implica que más sea automáticamente mejor.
+La referencia ya no es un mínimo genérico de 600 MET-min. Se deriva del plan personal activo:
+
+- `8.000 pasos/día` → `56.000 pasos/semana`;
+- `120 min/semana` de bicicleta tipo Zona 2;
+- `1 partido/semana` de fútbol.
+
+Para construir una equivalencia común sin fingir precisión individual, el objetivo del plan usa proxies explícitos y conservadores:
+
+- pasos sin velocidad/distancia usable: `100 pasos/min × 3,5 MET`;
+- bicicleta objetivo sin watts/RPE: `5 MET`;
+- partido de referencia para equivalencias: `60 min × 7 MET`.
+
+Con esas convenciones, la cuota derivada del plan es `2.980 MET-min equivalentes/semana`. La barra puede superar el 100 %. Cubrir esa equivalencia no significa que más sea automáticamente mejor ni reemplaza el seguimiento directo de los tres componentes.
 
 Reglas de conversión:
 
 - bicicleta: prioriza potencia media en watts cuando existe; en ausencia de watts usa RPE y, como último recurso, el rol registrado de la sesión con confianza menor;
 - fútbol: usa una equivalencia específica para fútbol general o competitivo según la evidencia disponible;
-- caminata: solo suma cuando hay distancia y velocidad compatibles para estimar duración e intensidad;
-- pasos sin evidencia suficiente de intensidad permanecen como actividad general y no se convierten automáticamente en cardio;
-- en días con fútbol registrado no se vuelve a acreditar caminata diaria para evitar doble conteo obvio del movimiento del partido.
+- pasos/caminata: los pasos positivos siempre cuentan dentro de la semana actual;
+- si además hay distancia y velocidad compatibles, se usa esa información para estimar mejor duración e intensidad;
+- si faltan velocidad/distancia utilizables, los pasos se convierten con el proxy de `100 pasos/min × 3,5 MET` y confianza baja;
+- los pasos también cuentan en un día con fútbol porque `8.000 pasos/día` es un objetivo separado y explícito del plan. Como una parte de esos pasos puede provenir del propio partido, el total MET-min se presenta como **equivalencia práctica de cumplimiento**, no como medición exacta de gasto energético.
+
+La UI muestra por separado el cumplimiento directo de `pasos / bici / fútbol` y, además, cuánto representa la carga equivalente restante si se cubriera enteramente con una sola modalidad: pasos estimados, minutos de bici tipo Zona 2 o partidos de referencia de 60 minutos. Estas equivalencias son comparativas; no son una recomendación de sustituir el plan base.
 
 Las equivalencias de intensidad están fijadas en código a partir del Compendium of Physical Activities 2024 y cada contribución comunica su nivel de confianza. La FC de wearable puede aportar contexto, pero no se usa por sí sola para inventar un MET individual.
 
@@ -68,7 +83,7 @@ Los valores de mancuernas son por mancuerna. La tabla no se duplica en este docu
 
 ### Cálculo
 
-El benchmark no usa directamente el peso de una serie. Calcula e1RM mediante Epley:
+El benchmark no usa directamente el peso de una serie. Calcula e1RM mediante Epley como índice personal:
 
 `e1RM = carga × (1 + repeticiones / 30)`
 
