@@ -4,11 +4,7 @@ import { test } from 'node:test';
 import { primaryNav } from '@/lib/constants/navigation';
 import { parseMediaTab } from '@/lib/media/parse';
 import { getMediaSpreadsheetId } from '@/lib/media/sheets-config';
-import {
-  deriveMediaFilterOptions,
-  filterMediaTitles,
-  sortMediaTitles,
-} from '@/lib/media/view';
+import { deriveMediaFilterOptions, filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
 import type { MediaFilters, MediaTitleView } from '@/types/media';
 
 const MOVIE_HEADERS = [
