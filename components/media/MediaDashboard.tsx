@@ -41,7 +41,8 @@ function initialFilters(medium: MediaKind): MediaFilters {
     genre: '',
     country: '',
     creator: '',
-    decade: '',
+    yearFrom: '',
+    yearTo: '',
     commitment: 'all',
     sort: 'bank-priority',
   };
@@ -85,7 +86,8 @@ function hasExtraFilters(filters: MediaFilters): boolean {
     filters.genre ||
     filters.country ||
     filters.creator ||
-    filters.decade ||
+    filters.yearFrom ||
+    filters.yearTo ||
     filters.commitment !== 'all' ||
     filters.collection !== 'all' ||
     filters.sort !== 'bank-priority',
@@ -130,6 +132,30 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
 
   function patchFilters(patch: Partial<MediaFilters>) {
     setFilters((current) => ({ ...current, ...patch }));
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  function patchYearFrom(yearFrom: string) {
+    setFilters((current) => ({
+      ...current,
+      yearFrom,
+      yearTo:
+        yearFrom && current.yearTo && Number(yearFrom) > Number(current.yearTo)
+          ? yearFrom
+          : current.yearTo,
+    }));
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  function patchYearTo(yearTo: string) {
+    setFilters((current) => ({
+      ...current,
+      yearFrom:
+        yearTo && current.yearFrom && Number(yearTo) < Number(current.yearFrom)
+          ? yearTo
+          : current.yearFrom,
+      yearTo,
+    }));
     setVisibleCount(PAGE_SIZE);
   }
 
@@ -312,15 +338,23 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             </select>
           </label>
           <label>
-            <span>Década</span>
-            <select
-              value={filters.decade}
-              onChange={(event) => patchFilters({ decade: event.target.value })}
-            >
-              <option value="">Todas</option>
-              {options.decades.map((decade) => (
-                <option key={decade} value={decade}>
-                  {decade}s
+            <span>Año desde</span>
+            <select value={filters.yearFrom} onChange={(event) => patchYearFrom(event.target.value)}>
+              <option value="">Cualquiera</option>
+              {options.years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Año hasta</span>
+            <select value={filters.yearTo} onChange={(event) => patchYearTo(event.target.value)}>
+              <option value="">Cualquiera</option>
+              {options.years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
                 </option>
               ))}
             </select>
@@ -348,9 +382,16 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             >
               <option value="bank-priority">Prioridad del banco</option>
               <option value="rating-desc">Mi nota</option>
+              {options.hasAffinity ? <option value="affinity-desc">Afinidad personal</option> : null}
+              {options.hasCultural ? (
+                <option value="cultural-desc">Popularidad / impacto cultural</option>
+              ) : null}
+              {options.hasCinephile ? (
+                <option value="cinephile-desc">Valor cinéfilo / culto</option>
+              ) : null}
+              {options.hasScores ? <option value="score-desc">Score general</option> : null}
               <option value="year-desc">Más recientes</option>
               <option value="title">Título A–Z</option>
-              {options.hasScores ? <option value="score-desc">Score general</option> : null}
             </select>
           </label>
         </div>
