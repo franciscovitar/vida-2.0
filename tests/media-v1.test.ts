@@ -28,6 +28,9 @@ const MOVIE_HEADERS = [
   'Impacto cultural',
   'Score general',
   'Por qué para mí',
+  'Resumen sin spoilers',
+  'Qué esperar',
+  'Confianza experiencia',
   'Provenance',
   'Source URL',
 ] as const;
@@ -44,6 +47,9 @@ function movieRow(input: {
   country?: string;
   runtime?: number;
   generalScore?: number;
+  summary?: string;
+  whatToExpect?: string;
+  experienceConfidence?: number;
 }) {
   const values: Record<(typeof MOVIE_HEADERS)[number], string | number> = {
     'Media ID': input.id,
@@ -66,6 +72,9 @@ function movieRow(input: {
     'Impacto cultural': '',
     'Score general': input.generalScore ?? '',
     'Por qué para mí': '',
+    'Resumen sin spoilers': input.summary ?? '',
+    'Qué esperar': input.whatToExpect ?? '',
+    'Confianza experiencia': input.experienceConfidence ?? '',
     Provenance: 'internal evidence',
     'Source URL': 'https://example.invalid/internal',
   };
@@ -113,6 +122,9 @@ function title(
     culturalImpact: null,
     generalScore: null,
     whyForMe: null,
+    spoilerFreeSummary: null,
+    whatToExpect: null,
+    experienceConfidence: null,
     ...overrides,
   };
 }
@@ -145,6 +157,9 @@ test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance
       country: 'Corea del Sur',
       runtime: 132,
       rating: 9,
+      summary: 'Una familia se cruza con otra de una posición social muy distinta.',
+      whatToExpect: 'Thriller social de tono cambiante, con humor negro y tensión creciente.',
+      experienceConfidence: 90,
     }),
   ]);
 
@@ -154,17 +169,33 @@ test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance
   assert.equal(parsed.titles[0]?.title, 'Parásitos');
   assert.equal(parsed.titles[0]?.creator, 'Bong Joon-ho');
   assert.deepEqual(parsed.titles[0]?.genres, ['Drama', 'Thriller']);
+  assert.equal(
+    parsed.titles[0]?.spoilerFreeSummary,
+    'Una familia se cruza con otra de una posición social muy distinta.',
+  );
+  assert.equal(
+    parsed.titles[0]?.whatToExpect,
+    'Thriller social de tono cambiante, con humor negro y tensión creciente.',
+  );
+  assert.equal(parsed.titles[0]?.experienceConfidence, 90);
   assert.equal('mediaId' in parsed.titles[0]!, false);
   assert.equal('tmdbId' in parsed.titles[0]!, false);
   assert.equal('imdbId' in parsed.titles[0]!, false);
   assert.equal('provenance' in parsed.titles[0]!, false);
   assert.equal('sourceUrl' in parsed.titles[0]!, false);
+  assert.equal('experienceProfile' in parsed.titles[0]!, false);
 });
 
 test('parser falla cerrado cuando falta un header canónico de presentación', () => {
   const headers = MOVIE_HEADERS.filter((header) => header !== 'Duración min');
   const parsed = parseMediaTab('Movies', [headers]);
   assert.deepEqual(parsed, { ok: false, missing: ['Duración min'] });
+});
+
+test('parser exige las dos columnas de experiencia que la UI presenta', () => {
+  const headers = MOVIE_HEADERS.filter((header) => header !== 'Qué esperar');
+  const parsed = parseMediaTab('Movies', [headers]);
+  assert.deepEqual(parsed, { ok: false, missing: ['Qué esperar'] });
 });
 
 test('búsqueda y filtros son tolerantes a acentos y respetan el Banco', () => {
