@@ -143,7 +143,9 @@ export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): Medi
       return nullableDesc(left.rating, right.rating) || left.title.localeCompare(right.title, 'es');
     }
     if (sort === 'affinity-desc') {
-      return nullableDesc(left.affinity, right.affinity) || left.title.localeCompare(right.title, 'es');
+      return (
+        nullableDesc(left.affinity, right.affinity) || left.title.localeCompare(right.title, 'es')
+      );
     }
     if (sort === 'cinephile-desc') {
       return (
@@ -188,9 +190,9 @@ export function deriveMediaFilterOptions(
   medium: MediaKind,
 ): MediaFilterOptions {
   const scoped = titles.filter((item) => item.medium === medium);
-  const years = [...new Set(scoped.flatMap((item) => (item.year === null ? [] : [item.year])))].sort(
-    (left, right) => right - left,
-  );
+  const years = [
+    ...new Set(scoped.flatMap((item) => (item.year === null ? [] : [item.year]))),
+  ].sort((left, right) => right - left);
 
   return {
     genres: uniqueSorted(scoped.flatMap((item) => item.genres)),
