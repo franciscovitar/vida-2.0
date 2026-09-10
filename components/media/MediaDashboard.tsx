@@ -437,6 +437,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
               item.cinephileValue !== null ||
               item.culturalImpact !== null ||
               item.generalScore !== null;
+            const hasExperience = Boolean(item.spoilerFreeSummary || item.whatToExpect);
 
             return (
               <article key={item.key} className={styles['title-card']}>
@@ -469,6 +470,23 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                     {item.genres.map((genre) => (
                       <span key={genre}>{genre}</span>
                     ))}
+                  </div>
+                ) : null}
+
+                {hasExperience ? (
+                  <div className={styles.experience}>
+                    {item.spoilerFreeSummary ? (
+                      <div className={styles['experience-block']}>
+                        <span className={styles['experience-label']}>Sin spoilers</span>
+                        <p>{item.spoilerFreeSummary}</p>
+                      </div>
+                    ) : null}
+                    {item.whatToExpect ? (
+                      <div className={styles['experience-block']}>
+                        <span className={styles['experience-label']}>Qué esperar</span>
+                        <p>{item.whatToExpect}</p>
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -505,7 +523,12 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                   ) : null}
                 </div>
 
-                {item.whyForMe ? <p className={styles.why}>{item.whyForMe}</p> : null}
+                {item.whyForMe ? (
+                  <div className={styles['personal-reference']}>
+                    <span>Del estilo de</span>
+                    <p>{item.whyForMe}</p>
+                  </div>
+                ) : null}
               </article>
             );
           })}
