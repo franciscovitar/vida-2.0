@@ -87,6 +87,52 @@ export interface GymSessionSummary {
   completed: boolean | null;
 }
 
+export type GymCardioContributionKind = 'bike' | 'football' | 'walking' | 'other';
+export type GymCardioConfidence = 'high' | 'medium' | 'low';
+
+/** Actividad cardio sanitizada leída desde la pestaña canónica Cardio Sessions. */
+export interface GymCardioSession {
+  key: string;
+  date: string;
+  activityType: string;
+  modality: string;
+  durationMinutes: number | null;
+  distanceKm: number | null;
+  averageSpeed: number | null;
+  averagePowerWatts: number | null;
+  averageHeartRate: number | null;
+  maxHeartRate: number | null;
+  rpe: number | null;
+  note: string | null;
+}
+
+export interface GymCardioContribution {
+  key: string;
+  date: string;
+  kind: GymCardioContributionKind;
+  label: string;
+  durationMinutes: number;
+  met: number;
+  metMinutes: number;
+  confidence: GymCardioConfidence;
+  detail: string;
+}
+
+export interface GymWeeklyCardioSummary {
+  status: 'ready' | 'partial' | 'empty' | 'unavailable';
+  targetMetMinutes: number;
+  totalMetMinutes: number;
+  remainingMetMinutes: number;
+  /** Puede superar 100; la UI decide si la barra se limita visualmente. */
+  progressPercent: number;
+  /** Equivalencia informativa contra una actividad moderada de 4 MET. */
+  moderateEquivalentMinutes: number;
+  contributions: readonly GymCardioContribution[];
+  /** Días con pasos pero sin intensidad suficiente para convertirlos sin inventar. */
+  uncreditedWalkingDays: number;
+  note: string;
+}
+
 export interface GymExerciseProgress {
   key: string;
   exerciseName: string;
@@ -140,6 +186,8 @@ export interface GymDashboardData {
   exerciseProgress: readonly GymExerciseProgress[];
   /** Objetivo semanal confirmado cuando existe. */
   weeklyTarget?: number | null;
+  /** Carga aeróbica semanal derivada; nunca se convierte en nueva fuente de verdad. */
+  weeklyCardio?: GymWeeklyCardioSummary | null;
   sources: readonly GymDataSourceStatus[];
   warnings: readonly GymParseWarning[];
   /** Mensaje discreto de preparación 8E. */
