@@ -1,9 +1,11 @@
+import { MonthlyReviewCard } from '@/components/domain/MonthlyReviewCard';
+import { GymRoutineTabs } from '@/components/gym/GymRoutineTabs';
+import { GymV2Overview } from '@/components/gym/GymV2Overview';
+import { GymWeeklyCardio } from '@/components/gym/GymWeeklyCardio';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ContentPageView } from '@/components/web-catalog/ContentPageView';
-import { GymRoutineTabs } from '@/components/gym/GymRoutineTabs';
-import { GymV2Overview } from '@/components/gym/GymV2Overview';
 import type {
   GymDashboardData,
   GymDataSourceKind,
@@ -69,6 +71,9 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
         weeklyTarget={data.weeklyTarget ?? null}
         today={data.targetDate}
       />
+
+      <GymWeeklyCardio summary={data.weeklyCardio} />
+      <MonthlyReviewCard domain="gym" />
 
       {data.routine?.presentation === 'structured' ? (
         <Card>
