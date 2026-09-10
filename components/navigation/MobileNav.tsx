@@ -93,11 +93,7 @@ export function MobileNav({ primary, secondary }: MobileNavProps) {
           </button>
         </div>
         <div className={styles.body}>
-          <NavSections
-            primary={primary}
-            secondary={secondary}
-            onNavigate={() => setOpen(false)}
-          />
+          <NavSections primary={primary} secondary={secondary} onNavigate={() => setOpen(false)} />
         </div>
       </div>
     </div>
@@ -117,9 +113,7 @@ export function MobileNav({ primary, secondary }: MobileNavProps) {
         <Menu size={18} strokeWidth={2} aria-hidden="true" />
       </button>
 
-      {drawer && typeof document !== 'undefined'
-        ? createPortal(drawer, document.body)
-        : null}
+      {drawer && typeof document !== 'undefined' ? createPortal(drawer, document.body) : null}
     </div>
   );
 }
