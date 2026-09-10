@@ -339,7 +339,10 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           </label>
           <label>
             <span>Año desde</span>
-            <select value={filters.yearFrom} onChange={(event) => patchYearFrom(event.target.value)}>
+            <select
+              value={filters.yearFrom}
+              onChange={(event) => patchYearFrom(event.target.value)}
+            >
               <option value="">Cualquiera</option>
               {options.years.map((year) => (
                 <option key={year} value={year}>
@@ -350,7 +353,10 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           </label>
           <label>
             <span>Año hasta</span>
-            <select value={filters.yearTo} onChange={(event) => patchYearTo(event.target.value)}>
+            <select
+              value={filters.yearTo}
+              onChange={(event) => patchYearTo(event.target.value)}
+            >
               <option value="">Cualquiera</option>
               {options.years.map((year) => (
                 <option key={year} value={year}>
@@ -382,7 +388,9 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             >
               <option value="bank-priority">Prioridad del banco</option>
               <option value="rating-desc">Mi nota</option>
-              {options.hasAffinity ? <option value="affinity-desc">Afinidad personal</option> : null}
+              {options.hasAffinity ? (
+                <option value="affinity-desc">Afinidad personal</option>
+              ) : null}
               {options.hasCultural ? (
                 <option value="cultural-desc">Popularidad / impacto cultural</option>
               ) : null}
