@@ -5,7 +5,6 @@ import {
   buildWeeklyCardioSummary,
   WEEKLY_CARDIO_TARGET_MET_MINUTES,
 } from '@/lib/gym/cardio-weekly';
-import type { HealthMetricPeriod } from '@/types/domain-pages';
 import type { GymCardioSession } from '@/types/gym';
 
 function session(overrides: Partial<GymCardioSession>): GymCardioSession {
@@ -26,22 +25,8 @@ function session(overrides: Partial<GymCardioSession>): GymCardioSession {
   };
 }
 
-function metric(id: string, series: (number | null)[]): HealthMetricPeriod {
-  return {
-    id,
-    label: id,
-    unit: '',
-    group: 'movement',
-    average: null,
-    averageLabel: '—',
-    previousAverage: null,
-    baselineAverage: null,
-    coverageDays: 0,
-    series,
-    compare: { direction: 'unknown', label: '—' },
-    baselineCompare: { direction: 'unknown', label: '—' },
-    domain: 'health',
-  };
+function metric(id: string, series: (number | null)[]) {
+  return { id, series };
 }
 
 test('cardio semanal usa 600 MET-min como cuota equivalente de la fase actual', () => {
