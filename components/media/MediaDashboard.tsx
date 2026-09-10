@@ -353,10 +353,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           </label>
           <label>
             <span>Año hasta</span>
-            <select
-              value={filters.yearTo}
-              onChange={(event) => patchYearTo(event.target.value)}
-            >
+            <select value={filters.yearTo} onChange={(event) => patchYearTo(event.target.value)}>
               <option value="">Cualquiera</option>
               {options.years.map((year) => (
                 <option key={year} value={year}>
