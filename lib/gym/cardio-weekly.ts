@@ -1,4 +1,3 @@
-import type { HealthMetricPeriod } from '@/types/domain-pages';
 import type {
   GymCardioContribution,
   GymCardioSession,
@@ -8,6 +7,11 @@ import type {
 export const WEEKLY_CARDIO_TARGET_MET_MINUTES = 600;
 
 const DAY_MS = 86_400_000;
+
+type CardioHealthMetric = {
+  id: string;
+  series: readonly (number | null)[];
+};
 
 function dateFromYmd(ymd: string): Date {
   const [year, month, day] = ymd.split('-').map(Number);
@@ -30,7 +34,7 @@ function rounded(value: number, digits = 1): number {
   return Math.round(value * factor) / factor;
 }
 
-function metricById(metrics: readonly HealthMetricPeriod[], id: string): HealthMetricPeriod | null {
+function metricById(metrics: readonly CardioHealthMetric[], id: string): CardioHealthMetric | null {
   return metrics.find((metric) => metric.id === id) ?? null;
 }
 
@@ -73,7 +77,16 @@ function bikeMet(session: GymCardioSession): {
   }
 
   if (session.rpe !== null) {
-    const met = session.rpe <= 2 ? 3.5 : session.rpe <= 3 ? 4 : session.rpe <= 5 ? 5 : session.rpe <= 6 ? 6.8 : 9;
+    const met =
+      session.rpe <= 2
+        ? 3.5
+        : session.rpe <= 3
+          ? 4
+          : session.rpe <= 5
+            ? 5
+            : session.rpe <= 6
+              ? 6.8
+              : 9;
     return {
       met,
       confidence: 'medium',
@@ -102,7 +115,8 @@ function footballMet(session: GymCardioSession): {
   detail: string;
 } {
   const competitive =
-    (session.rpe !== null && session.rpe >= 8) || /compet|partido intenso|torneo/i.test(session.note ?? '');
+    (session.rpe !== null && session.rpe >= 8) ||
+    /compet|partido intenso|torneo/i.test(session.note ?? '');
   if (competitive) {
     return {
       met: 9.5,
@@ -152,7 +166,7 @@ function contributionFromSession(session: GymCardioSession): GymCardioContributi
 
 export function buildWeeklyCardioSummary(input: {
   cardioSessions: readonly GymCardioSession[];
-  healthMetrics: readonly HealthMetricPeriod[];
+  healthMetrics: readonly CardioHealthMetric[];
   healthPeriodStart: string | null;
   today: string;
   cardioSourceAvailable: boolean;
