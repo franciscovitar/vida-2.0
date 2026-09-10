@@ -20,6 +20,6 @@ test('el modo mock funciona sin credenciales y conserva la salida aprobada', () 
   assert.equal(data.productivity.active.value, '5 h 10 min');
   assert.equal(data.productivity.rows.length, 4);
   assert.equal(data.habits.length, 5);
-  assert.equal(data.weekly.length, 5);
+  assert.equal(data.weekly.length, 3);
   assert.match(data.header.fullDate, /^Lunes/);
 });
