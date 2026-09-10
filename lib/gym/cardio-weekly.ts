@@ -302,10 +302,7 @@ export function buildWeeklyCardioSummary(input: {
   const remainingEquivalentSteps = roundedSteps(
     (remainingMetMinutes / WALKING_FALLBACK_MET) * WALKING_FALLBACK_STEPS_PER_MINUTE,
   );
-  const remainingEquivalentBikeMinutes = rounded(
-    remainingMetMinutes / BIKE_REFERENCE_MET,
-    0,
-  );
+  const remainingEquivalentBikeMinutes = rounded(remainingMetMinutes / BIKE_REFERENCE_MET, 0);
   const remainingEquivalentFootballMatches = rounded(
     remainingMetMinutes / (FOOTBALL_REFERENCE_MET * FOOTBALL_REFERENCE_MINUTES),
     1,
