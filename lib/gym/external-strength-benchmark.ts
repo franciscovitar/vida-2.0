@@ -15,11 +15,17 @@ export type GymStrengthLevelId =
 
 export type GymStrengthBenchmarkConfidence = 'low' | 'medium';
 
+export interface GymStrengthBenchmarkObservation {
+  date: string;
+  performance: number;
+}
+
 export interface GymStrengthBenchmarkTrendInput {
   exerciseName: string;
   latestDate: string;
   latestLoad: number | null;
   latestReps: number | null;
+  observations?: readonly GymStrengthBenchmarkObservation[];
 }
 
 export interface GymStrengthBenchmarkExercise {
@@ -36,6 +42,8 @@ export interface GymStrengthBenchmarkExercise {
   nextLevelLabel: string | null;
   nextThresholdKg: number | null;
   nextLevelProgressPercent: number | null;
+  nextLevelEtaLabel: string | null;
+  nextLevelEtaDetail: string | null;
   comparability: GymStrengthBenchmarkComparability;
   confidence: GymStrengthExerciseConfidence;
   confidenceLabel: string;
@@ -44,6 +52,7 @@ export interface GymStrengthBenchmarkExercise {
 
 export interface GymExternalStrengthBenchmark {
   status: 'ready' | 'not-ready';
+  level: GymStrengthLevelId | null;
   label: string;
   detail: string;
   confidence: GymStrengthBenchmarkConfidence | null;
@@ -84,6 +93,8 @@ const CONFIDENCE_ORDER: Readonly<Record<GymStrengthExerciseConfidence, number>> 
   medium: 1,
   low: 2,
 };
+
+const DAY_MS = 86_400_000;
 
 export function isExternalStrengthBenchmarkSupported(exerciseName: string): boolean {
   return findGymStrengthBenchmarkBaseline(exerciseName) !== null;
@@ -126,6 +137,103 @@ function progressToNextLevel(
   return Math.max(0, Math.min(100, Math.round(fraction * 100)));
 }
 
+function dateMs(ymd: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
+  const value = Date.parse(`${ymd}T00:00:00Z`);
+  return Number.isFinite(value) ? value : null;
+}
+
+function median(values: readonly number[]): number | null {
+  if (values.length === 0) return null;
+  const ordered = values.slice().sort((a, b) => a - b);
+  const middle = Math.floor(ordered.length / 2);
+  if (ordered.length % 2 === 1) return ordered[middle] ?? null;
+  const left = ordered[middle - 1];
+  const right = ordered[middle];
+  return left === undefined || right === undefined ? null : (left + right) / 2;
+}
+
+function durationLabel(days: number): string {
+  if (days < 45) return `${Math.max(1, Math.round(days / 7))} sem`;
+  return `${Math.max(1, Math.round(days / 30.4))} meses`;
+}
+
+function estimateNextLevelEta(
+  observations: readonly GymStrengthBenchmarkObservation[] | undefined,
+  current: number,
+  target: number | null,
+): { label: string | null; detail: string | null } {
+  if (!observations || target === null || target <= current) return { label: null, detail: null };
+
+  const usable = observations
+    .filter(
+      (item) =>
+        dateMs(item.date) !== null && Number.isFinite(item.performance) && item.performance > 0,
+    )
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-6);
+  if (usable.length < 3) {
+    return {
+      label: 'Más datos para estimar',
+      detail: 'La ETA aparece con al menos 3 exposiciones comparables fechadas.',
+    };
+  }
+
+  const firstMs = dateMs(usable[0]!.date)!;
+  const lastMs = dateMs(usable.at(-1)!.date)!;
+  const spanDays = Math.round((lastMs - firstMs) / DAY_MS);
+  if (spanDays < 7) {
+    return {
+      label: 'Más datos para estimar',
+      detail: 'Las exposiciones todavía están demasiado juntas para proyectar una fecha útil.',
+    };
+  }
+
+  const dailyLogRates: number[] = [];
+  for (let index = 1; index < usable.length; index += 1) {
+    const previous = usable[index - 1]!;
+    const next = usable[index]!;
+    const previousMs = dateMs(previous.date)!;
+    const nextMs = dateMs(next.date)!;
+    const days = (nextMs - previousMs) / DAY_MS;
+    if (days <= 0 || previous.performance <= 0 || next.performance <= 0) continue;
+    dailyLogRates.push(Math.log(next.performance / previous.performance) / days);
+  }
+
+  const rawRate = median(dailyLogRates);
+  if (rawRate === null || rawRate <= 0.00005) {
+    return {
+      label: 'Sin ETA confiable',
+      detail: 'El historial reciente no muestra todavía una velocidad positiva y repetible para proyectar el próximo rango.',
+    };
+  }
+
+  // La proyección usa crecimiento relativo (log), no kg/semana. Se reduce el ritmo
+  // observado y se limita el máximo para que un PR aislado no produzca una ETA absurda.
+  const evidenceShrink = usable.length >= 5 && spanDays >= 28 ? 0.72 : usable.length >= 4 ? 0.62 : 0.52;
+  const projectedDailyRate = Math.min(rawRate * evidenceShrink * 0.7, 0.0015);
+  if (projectedDailyRate <= 0) return { label: 'Sin ETA confiable', detail: null };
+
+  const centralDays = Math.log(target / current) / projectedDailyRate;
+  if (!Number.isFinite(centralDays) || centralDays <= 0 || centralDays > 730) {
+    return {
+      label: 'Sin ETA confiable',
+      detail: 'El próximo rango queda demasiado lejos para una proyección útil con los datos actuales.',
+    };
+  }
+
+  const confidenceMedium = usable.length >= 5 && spanDays >= 28;
+  const lowFactor = confidenceMedium ? 0.75 : 0.6;
+  const highFactor = confidenceMedium ? 1.4 : 1.8;
+  const lowDays = Math.max(7, centralDays * lowFactor);
+  const highDays = Math.max(lowDays + 7, centralDays * highFactor);
+  return {
+    label: `≈ ${durationLabel(lowDays)}–${durationLabel(highDays)}`,
+    detail: `Proyección dinámica con ${usable.length} exposiciones en ${spanDays} días; usa crecimiento relativo y desaceleración conservadora.`,
+  };
+}
+
 function latestEligibleTrend(
   benchmark: GymStrengthBenchmarkBaselineEntry,
   trends: readonly GymStrengthBenchmarkTrendInput[],
@@ -147,14 +255,14 @@ function latestEligibleTrend(
   );
 }
 
-function overallLabel(exercises: readonly GymStrengthBenchmarkExercise[]): string {
-  if (exercises.length === 0) return 'Sin nivel comparable';
+function overallLevel(exercises: readonly GymStrengthBenchmarkExercise[]): GymStrengthLevelId | null {
+  if (exercises.length === 0) return null;
   const ordered = exercises
     .map((exercise) => LEVEL_ORDER.indexOf(exercise.level))
     .filter((value) => value >= 0)
     .sort((a, b) => a - b);
   const conservativeMedian = ordered[Math.floor((ordered.length - 1) / 2)] ?? 0;
-  return LEVEL_LABELS[LEVEL_ORDER[conservativeMedian] ?? 'below-beginner'];
+  return LEVEL_ORDER[conservativeMedian] ?? 'below-beginner';
 }
 
 function overallConfidence(
@@ -177,6 +285,11 @@ export function buildMaleStrengthLevelBenchmark(
     const nextLevel = nextLevelFor(level);
     const nextThresholdKg =
       nextLevel === null ? null : thresholdFor(nextLevel, benchmark.thresholds);
+    const eta = estimateNextLevelEta(
+      trend.observations,
+      trend.estimatedOneRepMaxKg,
+      nextThresholdKg,
+    );
 
     return [
       {
@@ -198,6 +311,8 @@ export function buildMaleStrengthLevelBenchmark(
           nextLevel,
           benchmark.thresholds,
         ),
+        nextLevelEtaLabel: eta.label,
+        nextLevelEtaDetail: eta.detail,
         comparability: benchmark.comparability,
         confidence: benchmark.confidence,
         confidenceLabel: CONFIDENCE_LABELS[benchmark.confidence],
@@ -214,6 +329,7 @@ export function buildMaleStrengthLevelBenchmark(
   if (exercises.length === 0) {
     return {
       status: 'not-ready',
+      level: null,
       label: 'Sin nivel comparable',
       detail:
         'Todavía no hay un set de 1–15 repeticiones que pueda convertirse a e1RM dentro de la tabla fija de referencia.',
@@ -229,10 +345,12 @@ export function buildMaleStrengthLevelBenchmark(
   }
 
   const confidence = overallConfidence(exercises);
+  const level = overallLevel(exercises);
 
   return {
     status: 'ready',
-    label: overallLabel(exercises),
+    level,
+    label: level ? LEVEL_LABELS[level] : 'Sin nivel comparable',
     detail: `${exercises.length} ejercicio(s) evaluables con la tabla fija. El nivel general usa una mediana conservadora de los niveles por ejercicio.`,
     confidence,
     confidenceLabel: confidence === 'medium' ? 'Confianza media' : 'Confianza baja',
@@ -240,7 +358,7 @@ export function buildMaleStrengthLevelBenchmark(
     referenceLabel: 'Referencia fija Vida 2.0',
     baselineVersion: GYM_MALE_ABSOLUTE_1RM_BASELINE_VERSION,
     methodologyNote:
-      'e1RM por Epley, solo para sets de 1–15 reps. Mancuernas se comparan por mancuerna; máquinas y poleas conservan una advertencia de comparabilidad.',
+      'e1RM por Epley, solo para sets de 1–15 reps. Mancuernas se comparan por mancuerna; máquinas y poleas conservan una advertencia de comparabilidad. Las ETA usan varias exposiciones y se ocultan cuando la tendencia no es suficientemente estable.',
     exercises,
   };
 }
