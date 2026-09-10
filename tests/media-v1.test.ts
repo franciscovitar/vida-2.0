@@ -4,7 +4,11 @@ import { test } from 'node:test';
 import { primaryNav } from '@/lib/constants/navigation';
 import { parseMediaTab } from '@/lib/media/parse';
 import { getMediaSpreadsheetId } from '@/lib/media/sheets-config';
-import { filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
+import {
+  deriveMediaFilterOptions,
+  filterMediaTitles,
+  sortMediaTitles,
+} from '@/lib/media/view';
 import type { MediaFilters, MediaTitleView } from '@/types/media';
 
 const MOVIE_HEADERS = [
@@ -80,7 +84,8 @@ function filters(patch: Partial<MediaFilters> = {}): MediaFilters {
     genre: '',
     country: '',
     creator: '',
-    decade: '',
+    yearFrom: '',
+    yearTo: '',
     commitment: 'all',
     sort: 'bank-priority',
     ...patch,
@@ -204,6 +209,24 @@ test('búsqueda y filtros son tolerantes a acentos y respetan el Banco', () => {
   );
 });
 
+test('filtro de años devuelve el rango inclusivo y omite años desconocidos', () => {
+  const titles = [
+    title({ key: '1999', title: '1999', year: 1999 }),
+    title({ key: '2000', title: '2000', year: 2000 }),
+    title({ key: '2005', title: '2005', year: 2005 }),
+    title({ key: '2010', title: '2010', year: 2010 }),
+    title({ key: '2011', title: '2011', year: 2011 }),
+    title({ key: 'unknown', title: 'Sin año', year: null }),
+  ];
+
+  assert.deepEqual(
+    filterMediaTitles(titles, filters({ yearFrom: '2000', yearTo: '2010' })).map(
+      (item) => item.key,
+    ),
+    ['2000', '2005', '2010'],
+  );
+});
+
 test('filtro de duración no interpreta metadata faltante como una duración real', () => {
   const titles = [
     title({ key: 'short', title: 'Corta', runtimeMinutes: 88 }),
@@ -225,6 +248,44 @@ test('orden del Banco prioriza Radar y Tier sin inventar score', () => {
     sortMediaTitles(titles, 'bank-priority').map((item) => item.key),
     ['radar', 'a', 'b'],
   );
+});
+
+test('las tres dimensiones inferidas se pueden ordenar de mayor a menor', () => {
+  const titles = [
+    title({
+      key: 'a',
+      title: 'A',
+      affinity: 7.2,
+      cinephileValue: 9.1,
+      culturalImpact: 6.5,
+    }),
+    title({
+      key: 'b',
+      title: 'B',
+      affinity: 9.3,
+      cinephileValue: 7.4,
+      culturalImpact: 8.8,
+    }),
+    title({ key: 'unknown', title: 'Sin scores' }),
+  ];
+
+  assert.deepEqual(
+    sortMediaTitles(titles, 'affinity-desc').map((item) => item.key),
+    ['b', 'a', 'unknown'],
+  );
+  assert.deepEqual(
+    sortMediaTitles(titles, 'cinephile-desc').map((item) => item.key),
+    ['a', 'b', 'unknown'],
+  );
+  assert.deepEqual(
+    sortMediaTitles(titles, 'cultural-desc').map((item) => item.key),
+    ['b', 'a', 'unknown'],
+  );
+
+  const options = deriveMediaFilterOptions(titles, 'movie');
+  assert.equal(options.hasAffinity, true);
+  assert.equal(options.hasCinephile, true);
+  assert.equal(options.hasCultural, true);
 });
 
 test('Media aparece en la navegación principal', () => {
