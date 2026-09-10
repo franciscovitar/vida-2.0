@@ -44,14 +44,6 @@ const WEEKLY_DEFS = [
     header: RD.gym,
   },
   {
-    id: 'goal-cardio',
-    name: 'Cardio',
-    domain: 'health' as const,
-    target: 3,
-    unit: 'veces',
-    header: RD.cardio,
-  },
-  {
     id: 'goal-stretch',
     name: 'Estiramiento',
     domain: 'health' as const,
@@ -66,14 +58,6 @@ const WEEKLY_DEFS = [
     target: 1,
     unit: 'vez',
     header: RD.mealPrep,
-  },
-  {
-    id: 'goal-football',
-    name: 'Fútbol',
-    domain: 'habits' as const,
-    target: 2,
-    unit: 'veces',
-    header: RD.football,
   },
 ];
 
