@@ -1,0 +1,92 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(15rem, 0.75fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.copy {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid var(--c-health-border);
+  border-radius: 0.8rem;
+  place-items: center;
+  color: var(--c-health);
+  background: var(--c-health-soft);
+}
+
+.copy > div {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.copy strong {
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.copy p {
+  max-width: 74ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.actions {
+  display: grid;
+  gap: 0.7rem;
+  justify-items: start;
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.checks span {
+  padding: 0.25rem 0.48rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-subtle);
+  background: var(--surface-2);
+  font-size: 0.64rem;
+  font-weight: 650;
+}
+
+.footer {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+  line-height: 1.4;
+}
+
+.footer svg {
+  flex: 0 0 auto;
+  margin-top: 0.05rem;
+  color: var(--c-health);
+}
+
+@media (width <= 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
