@@ -5,8 +5,8 @@
 import { RD, RD_HABIT_HEADERS } from '@/lib/google/constants';
 
 /**
- * La whitelist conserva columnas históricas como cardio/fútbol para no romper
- * compatibilidad de escritura, aunque ya no se muestren como hábitos diarios.
+ * La whitelist conserva las 10 columnas históricas, incluyendo Cardio y Fútbol,
+ * para no romper compatibilidad de escritura aunque ya no se muestren como hábitos diarios.
  */
 export const AUTHORIZED_HABIT_NAMES: readonly string[] = RD_HABIT_HEADERS;
 
