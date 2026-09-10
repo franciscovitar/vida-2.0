@@ -63,7 +63,15 @@ export type MediaCommitmentFilter =
   | 'one-season'
   | 'two-three-seasons'
   | 'four-plus-seasons';
-export type MediaSort = 'bank-priority' | 'rating-desc' | 'year-desc' | 'title' | 'score-desc';
+export type MediaSort =
+  | 'bank-priority'
+  | 'rating-desc'
+  | 'affinity-desc'
+  | 'cinephile-desc'
+  | 'cultural-desc'
+  | 'score-desc'
+  | 'year-desc'
+  | 'title';
 
 export interface MediaFilters {
   medium: MediaKind;
@@ -72,7 +80,8 @@ export interface MediaFilters {
   genre: string;
   country: string;
   creator: string;
-  decade: string;
+  yearFrom: string;
+  yearTo: string;
   commitment: MediaCommitmentFilter;
   sort: MediaSort;
 }
