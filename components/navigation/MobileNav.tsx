@@ -2,6 +2,7 @@
 
 import { Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Brand } from '@/components/layout/Brand';
 import type { NavItemData } from '@/lib/constants/navigation';
@@ -68,6 +69,40 @@ export function MobileNav({ primary, secondary }: MobileNavProps) {
     };
   }, [open]);
 
+  const drawer = open ? (
+    <div className={styles.overlay} role="presentation" onClick={() => setOpen(false)}>
+      <div
+        ref={drawerRef}
+        id="mobile-navigation-drawer"
+        className={styles.drawer}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navegación"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={styles.head}>
+          <Brand />
+          <button
+            ref={closeRef}
+            type="button"
+            className={styles.close}
+            aria-label="Cerrar menú"
+            onClick={() => setOpen(false)}
+          >
+            <X size={18} strokeWidth={2} aria-hidden="true" />
+          </button>
+        </div>
+        <div className={styles.body}>
+          <NavSections
+            primary={primary}
+            secondary={secondary}
+            onNavigate={() => setOpen(false)}
+          />
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div className={styles.root}>
       <button
@@ -82,39 +117,7 @@ export function MobileNav({ primary, secondary }: MobileNavProps) {
         <Menu size={18} strokeWidth={2} aria-hidden="true" />
       </button>
 
-      {open ? (
-        <div className={styles.overlay} role="presentation" onClick={() => setOpen(false)}>
-          <div
-            ref={drawerRef}
-            id="mobile-navigation-drawer"
-            className={styles.drawer}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Navegación"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className={styles.head}>
-              <Brand />
-              <button
-                ref={closeRef}
-                type="button"
-                className={styles.close}
-                aria-label="Cerrar menú"
-                onClick={() => setOpen(false)}
-              >
-                <X size={18} strokeWidth={2} aria-hidden="true" />
-              </button>
-            </div>
-            <div className={styles.body}>
-              <NavSections
-                primary={primary}
-                secondary={secondary}
-                onNavigate={() => setOpen(false)}
-              />
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {drawer && typeof document !== 'undefined' ? createPortal(drawer, document.body) : null}
     </div>
   );
 }
