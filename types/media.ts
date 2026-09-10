@@ -14,8 +14,9 @@ export type MediaDashboardStatus = 'ready' | 'partial' | 'unavailable';
 /**
  * Vista pública de un título para `/media`.
  *
- * Deliberadamente no contiene Media ID, TMDB/IMDb IDs, URLs de fuente ni
- * provenance: esos identificadores internos siguen del lado servidor.
+ * Deliberadamente no contiene Media ID, TMDB/IMDb IDs, URLs de fuente,
+ * provenance ni el Perfil experiencia crudo: esos identificadores y la
+ * estructura interna siguen del lado servidor.
  */
 export interface MediaTitleView {
   key: string;
@@ -38,6 +39,9 @@ export interface MediaTitleView {
   culturalImpact: number | null;
   generalScore: number | null;
   whyForMe: string | null;
+  spoilerFreeSummary: string | null;
+  whatToExpect: string | null;
+  experienceConfidence: number | null;
 }
 
 export interface MediaSourceView {

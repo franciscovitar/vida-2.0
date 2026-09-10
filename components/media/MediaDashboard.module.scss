@@ -366,6 +366,39 @@
   border-radius: var(--radius-full);
 }
 
+.experience {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.experience-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.experience-label,
+.personal-reference > span {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+}
+
+.experience-block p,
+.personal-reference p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.48;
+}
+
 .scores {
   display: flex;
   flex-direction: column;
@@ -415,11 +448,14 @@
   color: var(--text);
 }
 
-.why {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  line-height: 1.5;
+.personal-reference {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.7rem 0.75rem;
+  background: var(--c-learning-soft);
+  border: 1px solid var(--c-learning-border);
+  border-radius: var(--radius);
 }
 
 .load-more {

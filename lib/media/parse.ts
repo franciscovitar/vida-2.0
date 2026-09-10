@@ -23,6 +23,8 @@ const COMMON_HEADERS = [
   'Impacto cultural',
   'Score general',
   'Por qué para mí',
+  'Resumen sin spoilers',
+  'Qué esperar',
 ] as const;
 
 const MOVIE_HEADERS = [...COMMON_HEADERS, 'Director', 'Duración min'] as const;
@@ -124,6 +126,9 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       culturalImpact: numberValue(valueAt(row, indexes, 'Impacto cultural')),
       generalScore: numberValue(valueAt(row, indexes, 'Score general')),
       whyForMe: text(valueAt(row, indexes, 'Por qué para mí')),
+      spoilerFreeSummary: text(valueAt(row, indexes, 'Resumen sin spoilers')),
+      whatToExpect: text(valueAt(row, indexes, 'Qué esperar')),
+      experienceConfidence: numberValue(valueAt(row, indexes, 'Confianza experiencia')),
     });
   }
 
