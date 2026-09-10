@@ -35,7 +35,7 @@ export interface RegistroRecord {
   habits: Record<string, Cell<boolean>>;
 }
 
-/** Los diez hábitos autorizados (misma lista blanca que la escritura). */
+/** Hábitos visibles en dashboard (subconjunto de la whitelist de escritura). */
 export const DASHBOARD_HABITS: readonly {
   header: string;
   name: string;
@@ -55,14 +55,6 @@ interface WeeklyGoalDef {
 const WEEKLY_GOALS: readonly WeeklyGoalDef[] = [
   { id: 'goal-gym', name: 'Gimnasio', domain: 'habits', target: 3, unit: 'veces', header: RD.gym },
   {
-    id: 'goal-cardio',
-    name: 'Cardio',
-    domain: 'health',
-    target: 3,
-    unit: 'veces',
-    header: RD.cardio,
-  },
-  {
     id: 'goal-stretch',
     name: 'Estiramiento',
     domain: 'health',
@@ -77,14 +69,6 @@ const WEEKLY_GOALS: readonly WeeklyGoalDef[] = [
     target: 1,
     unit: 'vez',
     header: RD.mealPrep,
-  },
-  {
-    id: 'goal-football',
-    name: 'Fútbol',
-    domain: 'habits',
-    target: 2,
-    unit: 'veces',
-    header: RD.football,
   },
 ];
 
@@ -199,7 +183,7 @@ export function buildHabitViews(
   });
 }
 
-/** Deriva las metas semanales contando hábitos en true dentro de la semana. */
+/** Deriva las metas semanales visibles contando hábitos en true dentro de la semana. */
 export function buildWeeklyGoals(
   available: readonly RegistroRecord[],
   today: string,
