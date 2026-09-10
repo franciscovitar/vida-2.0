@@ -28,7 +28,11 @@ function groupContributions(summary: GymWeeklyCardioSummary): Group[] {
   const definitions: readonly Omit<Group, 'metMinutes' | 'sessions'>[] = [
     { kind: 'bike', label: 'Bicicleta', icon: <Bike size={18} aria-hidden="true" /> },
     { kind: 'football', label: 'Fútbol', icon: <Trophy size={18} aria-hidden="true" /> },
-    { kind: 'walking', label: 'Pasos / caminata', icon: <Footprints size={18} aria-hidden="true" /> },
+    {
+      kind: 'walking',
+      label: 'Pasos / caminata',
+      icon: <Footprints size={18} aria-hidden="true" />,
+    },
   ];
 
   return definitions
@@ -124,7 +128,9 @@ export function GymWeeklyCardio({
         <div className={styles['plan-heading']}>
           <div>
             <strong>Tu plan real</strong>
-            <span>{planDone ? 'Objetivos base cubiertos' : 'Lo que falta según lo registrado'}</span>
+            <span>
+              {planDone ? 'Objetivos base cubiertos' : 'Lo que falta según lo registrado'}
+            </span>
           </div>
           <span className={styles['plan-status']} data-complete={planDone}>
             {planDone ? 'Completo' : 'En curso'}
@@ -152,7 +158,8 @@ export function GymWeeklyCardio({
             <div>
               <small>Bicicleta</small>
               <strong className="tabular">
-                {number(summary.weeklyBikeMinutes, 1)} / {number(summary.weeklyBikeMinutesTarget)} min
+                {number(summary.weeklyBikeMinutes, 1)} / {number(summary.weeklyBikeMinutesTarget)}{' '}
+                min
               </strong>
               <span>
                 {summary.remainingBikeMinutes > 0
@@ -167,7 +174,8 @@ export function GymWeeklyCardio({
             <div>
               <small>Fútbol</small>
               <strong className="tabular">
-                {number(summary.weeklyFootballMatches)} / {number(summary.weeklyFootballMatchesTarget)} partido
+                {number(summary.weeklyFootballMatches)} /{' '}
+                {number(summary.weeklyFootballMatchesTarget)} partido
               </strong>
               <span>
                 {summary.remainingFootballMatches > 0
@@ -186,10 +194,13 @@ export function GymWeeklyCardio({
             <span>≈ {number(summary.remainingEquivalentSteps)} pasos</span>
             <span>o {number(summary.remainingEquivalentBikeMinutes)} min de bici tipo Zona 2</span>
             <span>
-              o {number(summary.remainingEquivalentFootballMatches, 1)} partidos de referencia de 60 min
+              o {number(summary.remainingEquivalentFootballMatches, 1)} partidos de referencia de 60
+              min
             </span>
           </div>
-          <small>Son equivalencias de carga, no una recomendación de reemplazar tu plan base.</small>
+          <small>
+            Son equivalencias de carga, no una recomendación de reemplazar tu plan base.
+          </small>
         </section>
       ) : null}
 
