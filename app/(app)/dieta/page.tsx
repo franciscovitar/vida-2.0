@@ -2,6 +2,7 @@ import { UtensilsCrossed } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import pageStyles from '@/app/(app)/page.module.scss';
+import { MonthlyReviewCard } from '@/components/domain/MonthlyReviewCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { NutritionPlanSection } from '@/components/nutrition/NutritionPlanSection';
 import { NutritionV2Overview } from '@/components/nutrition/NutritionV2Overview';
@@ -25,6 +26,7 @@ export default async function DietaPage() {
         domain="health"
       />
       <NutritionV2Overview data={data} />
+      <MonthlyReviewCard domain="nutrition" />
       <NutritionPlanSection />
     </div>
   );
