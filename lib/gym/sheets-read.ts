@@ -33,7 +33,7 @@ function googleSerialDate(value: number): string | null {
 }
 
 export function normalizeGymSheetValues(tab: string, values: PlainRows): PlainRows {
-  if (tab !== 'Gym Sessions' || values.length <= 1) return values;
+  if (!['Gym Sessions', 'Cardio Sessions'].includes(tab) || values.length <= 1) return values;
 
   return values.map((row, index) => {
     if (index === 0 || typeof row[1] !== 'number') return row;
