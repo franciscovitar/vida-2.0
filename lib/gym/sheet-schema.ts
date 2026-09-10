@@ -26,3 +26,24 @@ export const GYM_SETS_HEADERS = [
   'completed',
   'notes',
 ] as const;
+
+export const CARDIO_SESSIONS_HEADERS = [
+  'activityId',
+  'date',
+  'activityType',
+  'modality',
+  'durationMinutes',
+  'distanceKm',
+  'averagePaceOrSpeed',
+  'averagePowerWatts',
+  'normalizedPowerWatts',
+  'averageHeartRate',
+  'maxHeartRate',
+  'rpe',
+  'workIntervalStructure',
+  'recoveryIntervalStructure',
+  'notes',
+  'status',
+  'idempotencyKey',
+  'createdAt',
+] as const;
