@@ -11,7 +11,10 @@ export interface MediaFilterOptions {
   genres: string[];
   countries: string[];
   creators: string[];
-  decades: string[];
+  years: number[];
+  hasAffinity: boolean;
+  hasCinephile: boolean;
+  hasCultural: boolean;
   hasScores: boolean;
 }
 
@@ -69,8 +72,12 @@ function matchesCommitment(item: MediaTitleView, commitment: MediaCommitmentFilt
   return false;
 }
 
-function decadeOf(year: number | null): string {
-  return year === null ? '' : String(Math.floor(year / 10) * 10);
+function matchesYearRange(item: MediaTitleView, yearFrom: string, yearTo: string): boolean {
+  if (!yearFrom && !yearTo) return true;
+  if (item.year === null) return false;
+  if (yearFrom && item.year < Number(yearFrom)) return false;
+  if (yearTo && item.year > Number(yearTo)) return false;
+  return true;
 }
 
 function matchesQuery(item: MediaTitleView, query: string): boolean {
@@ -110,7 +117,7 @@ export function filterMediaTitles(
       return false;
     }
     if (filters.creator && !exactNormalized(item.creator, filters.creator)) return false;
-    if (filters.decade && decadeOf(item.year) !== filters.decade) return false;
+    if (!matchesYearRange(item, filters.yearFrom, filters.yearTo)) return false;
     return matchesCommitment(item, filters.commitment);
   });
 }
@@ -134,6 +141,21 @@ export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): Medi
   return [...titles].sort((left, right) => {
     if (sort === 'rating-desc') {
       return nullableDesc(left.rating, right.rating) || left.title.localeCompare(right.title, 'es');
+    }
+    if (sort === 'affinity-desc') {
+      return nullableDesc(left.affinity, right.affinity) || left.title.localeCompare(right.title, 'es');
+    }
+    if (sort === 'cinephile-desc') {
+      return (
+        nullableDesc(left.cinephileValue, right.cinephileValue) ||
+        left.title.localeCompare(right.title, 'es')
+      );
+    }
+    if (sort === 'cultural-desc') {
+      return (
+        nullableDesc(left.culturalImpact, right.culturalImpact) ||
+        left.title.localeCompare(right.title, 'es')
+      );
     }
     if (sort === 'year-desc') {
       return nullableDesc(left.year, right.year) || left.title.localeCompare(right.title, 'es');
@@ -166,15 +188,18 @@ export function deriveMediaFilterOptions(
   medium: MediaKind,
 ): MediaFilterOptions {
   const scoped = titles.filter((item) => item.medium === medium);
-  const decades = uniqueSorted(scoped.map((item) => decadeOf(item.year))).sort(
-    (left, right) => Number(right) - Number(left),
+  const years = [...new Set(scoped.flatMap((item) => (item.year === null ? [] : [item.year])))].sort(
+    (left, right) => right - left,
   );
 
   return {
     genres: uniqueSorted(scoped.flatMap((item) => item.genres)),
     countries: uniqueSorted(scoped.flatMap((item) => item.countries)),
     creators: uniqueSorted(scoped.map((item) => item.creator ?? '')),
-    decades,
+    years,
+    hasAffinity: scoped.some((item) => item.affinity !== null),
+    hasCinephile: scoped.some((item) => item.cinephileValue !== null),
+    hasCultural: scoped.some((item) => item.culturalImpact !== null),
     hasScores: scoped.some((item) => item.generalScore !== null),
   };
 }
