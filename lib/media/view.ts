@@ -204,9 +204,7 @@ export function deriveMediaFilterOptions(
     countries: uniqueSorted(scoped.flatMap((item) => item.countries)),
     creators: uniqueSorted(scoped.map((item) => item.creator ?? '')),
     years,
-    hasAffinity: scoped.some(
-      (item) => item.personalFitEstimate !== null || item.affinity !== null,
-    ),
+    hasAffinity: scoped.some((item) => item.personalFitEstimate !== null || item.affinity !== null),
     hasCinephile: scoped.some((item) => item.cinephileValue !== null),
     hasCultural: scoped.some((item) => item.culturalImpact !== null),
     hasScores: scoped.some((item) => item.generalScore !== null),
