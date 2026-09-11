@@ -4,13 +4,7 @@ type FeatureFamily = 'genres' | 'creator' | 'decade' | 'countries' | 'runtime' |
 type OrdinalLevel = 'low' | 'medium' | 'high' | 'uncertain';
 type Pace = 'slow' | 'moderate' | 'fast' | 'variable';
 type HorrorMode =
-  | 'none'
-  | 'psychological'
-  | 'thematic'
-  | 'supernatural'
-  | 'slasher'
-  | 'body_horror'
-  | 'mixed';
+  'none' | 'psychological' | 'thematic' | 'supernatural' | 'slasher' | 'body_horror' | 'mixed';
 type RomanceMode = 'none' | 'grounded' | 'heightened' | 'melodramatic' | 'comedic' | 'mixed';
 type TwistStyle = 'none' | 'fair_setup' | 'ambiguity_driven' | 'reveal_driven' | 'uncertain';
 
@@ -171,7 +165,8 @@ function seasonBucket(value: number | null): string | null {
 }
 
 function featureValues(item: MediaTitleView, family: FeatureFamily): string[] {
-  if (family === 'genres') return item.genres.map((value) => normalize(value)).filter(Boolean) as string[];
+  if (family === 'genres')
+    return item.genres.map((value) => normalize(value)).filter(Boolean) as string[];
   if (family === 'creator') {
     const value = normalize(item.creator);
     return value ? [value] : [];
@@ -238,7 +233,10 @@ function similarity(
   if (left.medium === 'series' && left.seasons !== null && right.seasons !== null) {
     components.set(
       'seasons',
-      Math.max(0, 1 - Math.abs(left.seasons - right.seasons) / Math.max(left.seasons, right.seasons, 1)),
+      Math.max(
+        0,
+        1 - Math.abs(left.seasons - right.seasons) / Math.max(left.seasons, right.seasons, 1),
+      ),
     );
   }
 
@@ -246,10 +244,9 @@ function similarity(
   const denominator = [...components.keys()].reduce((sum, family) => sum + weights[family], 0);
   if (denominator === 0) return { score: 0, familyCount: components.size };
 
-  const score = [...components.entries()].reduce(
-    (sum, [family, value]) => sum + weights[family] * value,
-    0,
-  ) / denominator;
+  const score =
+    [...components.entries()].reduce((sum, [family, value]) => sum + weights[family] * value, 0) /
+    denominator;
 
   return { score, familyCount: components.size };
 }
@@ -278,8 +275,7 @@ function neighborPrediction(candidate: MediaTitleView, history: MediaTitleView[]
   const denominator = comparable.reduce((sum, entry) => sum + entry.score, 0);
   if (denominator === 0) return null;
   return (
-    comparable.reduce((sum, entry) => sum + entry.score * (entry.item.rating ?? 0), 0) /
-    denominator
+    comparable.reduce((sum, entry) => sum + entry.score * (entry.item.rating ?? 0), 0) / denominator
   );
 }
 
@@ -390,7 +386,8 @@ function profilePreferenceAdjustment(profile: MediaExperienceProfile | null): nu
   }
 
   if (profile.formula_risk && profile.formula_risk !== 'uncertain') {
-    const riskEffect = profile.formula_risk === 'high' ? -1 : profile.formula_risk === 'low' ? 0.6 : 0;
+    const riskEffect =
+      profile.formula_risk === 'high' ? -1 : profile.formula_risk === 'low' ? 0.6 : 0;
     weighted += 0.28 * riskEffect;
     denominator += 0.28;
   }
@@ -438,10 +435,7 @@ export function movieEraHandicap(year: number | null): number {
   return -Math.min(0.4, decadesAway * 0.08);
 }
 
-function estimatePersonalFit(
-  row: PersonalFitScoringRow,
-  history: MediaTitleView[],
-): number | null {
+function estimatePersonalFit(row: PersonalFitScoringRow, history: MediaTitleView[]): number | null {
   if (row.view.rating !== null) return null;
   if (history.length === 0) return row.view.affinity;
 
