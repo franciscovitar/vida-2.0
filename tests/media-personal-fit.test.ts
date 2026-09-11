@@ -9,10 +9,7 @@ import {
 } from '@/lib/media/personal-fit';
 import type { MediaTitleView } from '@/types/media';
 
-function movie(
-  key: string,
-  overrides: Partial<MediaTitleView> = {},
-): MediaTitleView {
+function movie(key: string, overrides: Partial<MediaTitleView> = {}): MediaTitleView {
   return {
     key,
     medium: 'movie',
