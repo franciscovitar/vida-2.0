@@ -77,13 +77,13 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
 function hasExtraFilters(filters: MediaFilters): boolean {
   return Boolean(
     filters.query ||
-    filters.genre ||
-    filters.country ||
-    filters.creator ||
-    filters.yearFrom ||
-    filters.yearTo ||
-    filters.commitment !== 'all' ||
-    filters.sort !== 'bank-priority',
+      filters.genre ||
+      filters.country ||
+      filters.creator ||
+      filters.yearFrom ||
+      filters.yearTo ||
+      filters.commitment !== 'all' ||
+      filters.sort !== 'bank-priority',
   );
 }
 
@@ -129,9 +129,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
 
   const selectedFocus = focusByLevel.get(level) ?? [];
   const focus =
-    filters.sort === 'bank-priority'
-      ? selectedFocus
-      : sortMediaTitles(selectedFocus, filters.sort);
+    filters.sort === 'bank-priority' ? selectedFocus : sortMediaTitles(selectedFocus, filters.sort);
 
   function patchFilters(patch: Partial<MediaFilters>) {
     setFilters((current) => ({ ...current, ...patch, collection: 'all' }));
@@ -366,7 +364,9 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             >
               <option value="bank-priority">Prioridad del Foco</option>
               <option value="rating-desc">Mi nota</option>
-              {options.hasAffinity ? <option value="affinity-desc">Afinidad estimada</option> : null}
+              {options.hasAffinity ? (
+                <option value="affinity-desc">Afinidad estimada</option>
+              ) : null}
               {options.hasCultural ? (
                 <option value="cultural-desc">Popularidad / impacto cultural</option>
               ) : null}
