@@ -78,7 +78,10 @@ function diversify(ranked: MediaTitleView[]): MediaTitleView[] {
       }
     });
 
-    const [{ item }] = remaining.splice(bestIndex, 1);
+    const selected = remaining.splice(bestIndex, 1)[0];
+    if (!selected) break;
+
+    const { item } = selected;
     output.push(item);
 
     const creator = normalize(item.creator);
