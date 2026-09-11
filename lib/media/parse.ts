@@ -1,4 +1,9 @@
 import type { MediaTab } from '@/lib/media/sheets-read';
+import {
+  attachProvisionalPersonalFit,
+  parseExperienceProfile,
+  type PersonalFitScoringRow,
+} from '@/lib/media/personal-fit';
 import type { MediaKind, MediaTitleView } from '@/types/media';
 
 type PlainCell = string | number | boolean | null;
@@ -95,7 +100,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
   const missing = required.filter((header) => !indexes.has(header));
   if (missing.length > 0) return { ok: false, missing: [...missing] };
 
-  const titles: MediaTitleView[] = [];
+  const scoringRows: PersonalFitScoringRow[] = [];
 
   for (const row of values.slice(1)) {
     const title = text(valueAt(row, indexes, 'Título'));
@@ -105,7 +110,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
     const creatorHeader = medium === 'movie' ? 'Director' : 'Creador / showrunner';
     const runtimeHeader = medium === 'movie' ? 'Duración min' : 'Duración episodio min';
 
-    titles.push({
+    const view: MediaTitleView = {
       key: `${medium}:${title}:${year ?? 'sin-año'}`,
       medium,
       title,
@@ -122,6 +127,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       runtimeMinutes: numberValue(valueAt(row, indexes, runtimeHeader)),
       seasons: medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null,
       affinity: numberValue(valueAt(row, indexes, 'Afinidad personal')),
+      personalFitEstimate: null,
       cinephileValue: numberValue(valueAt(row, indexes, 'Valor cinéfilo')),
       culturalImpact: numberValue(valueAt(row, indexes, 'Impacto cultural')),
       generalScore: numberValue(valueAt(row, indexes, 'Score general')),
@@ -129,8 +135,13 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       spoilerFreeSummary: text(valueAt(row, indexes, 'Resumen sin spoilers')),
       whatToExpect: text(valueAt(row, indexes, 'Qué esperar')),
       experienceConfidence: numberValue(valueAt(row, indexes, 'Confianza experiencia')),
+    };
+
+    scoringRows.push({
+      view,
+      experienceProfile: parseExperienceProfile(valueAt(row, indexes, 'Perfil experiencia JSON')),
     });
   }
 
-  return { ok: true, titles };
+  return { ok: true, titles: attachProvisionalPersonalFit(scoringRows) };
 }
