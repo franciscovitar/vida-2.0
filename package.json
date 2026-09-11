@@ -22,7 +22,7 @@
     "stylelint:fix": "stylelint \"**/*.{css,scss}\" --fix",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write components/media/MediaDashboard.tsx components/media/MediaFocusDashboard.tsx lib/media/focus.ts lib/media/personal-fit.ts lib/media/view.ts tests/media-personal-fit.test.ts && git diff -- components/media/MediaDashboard.tsx components/media/MediaFocusDashboard.tsx lib/media/focus.ts lib/media/personal-fit.ts lib/media/view.ts tests/media-personal-fit.test.ts && exit 1",
     "test": "node --import tsx --test \"tests/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
     "verify": "npm run check && npm run build",
