@@ -114,7 +114,9 @@ test('Radar y Tier A conservan prioridad antes de la diversidad blanda', () => {
 
   const focus = deriveFocusTitles(titles, 'movie', 1);
   assert.equal(focus[0]?.key, 'radar');
-  assert.ok(focus.findIndex((item) => item.key === 'a1') < focus.findIndex((item) => item.key === 'b1'));
+  assert.ok(
+    focus.findIndex((item) => item.key === 'a1') < focus.findIndex((item) => item.key === 'b1'),
+  );
 });
 
 test('derivar Foco no muta el Banco original', () => {
