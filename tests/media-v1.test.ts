@@ -118,6 +118,7 @@ function title(
     runtimeMinutes: null,
     seasons: null,
     affinity: null,
+    personalFitEstimate: null,
     cinephileValue: null,
     culturalImpact: null,
     generalScore: null,
@@ -313,6 +314,17 @@ test('las tres dimensiones inferidas se pueden ordenar de mayor a menor', () => 
   assert.equal(options.hasAffinity, true);
   assert.equal(options.hasCinephile, true);
   assert.equal(options.hasCultural, true);
+});
+
+test('Afinidad estimada read-time tiene prioridad sobre una afinidad persistida anterior', () => {
+  const titles = [
+    title({ key: 'a', title: 'A', affinity: 9.5, personalFitEstimate: 7 }),
+    title({ key: 'b', title: 'B', affinity: 7, personalFitEstimate: 9.5 }),
+  ];
+  assert.deepEqual(
+    sortMediaTitles(titles, 'affinity-desc').map((item) => item.key),
+    ['b', 'a'],
+  );
 });
 
 test('Media aparece en la navegación principal', () => {
