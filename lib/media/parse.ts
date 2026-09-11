@@ -122,6 +122,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       runtimeMinutes: numberValue(valueAt(row, indexes, runtimeHeader)),
       seasons: medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null,
       affinity: numberValue(valueAt(row, indexes, 'Afinidad personal')),
+      estimatedAffinity: null,
       cinephileValue: numberValue(valueAt(row, indexes, 'Valor cinéfilo')),
       culturalImpact: numberValue(valueAt(row, indexes, 'Impacto cultural')),
       generalScore: numberValue(valueAt(row, indexes, 'Score general')),

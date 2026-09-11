@@ -118,6 +118,7 @@ function title(
     runtimeMinutes: null,
     seasons: null,
     affinity: null,
+    estimatedAffinity: null,
     cinephileValue: null,
     culturalImpact: null,
     generalScore: null,
@@ -169,6 +170,7 @@ test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance
   assert.equal(parsed.titles[0]?.title, 'Parásitos');
   assert.equal(parsed.titles[0]?.creator, 'Bong Joon-ho');
   assert.deepEqual(parsed.titles[0]?.genres, ['Drama', 'Thriller']);
+  assert.equal(parsed.titles[0]?.estimatedAffinity, null);
   assert.equal(
     parsed.titles[0]?.spoilerFreeSummary,
     'Una familia se cruza con otra de una posición social muy distinta.',
@@ -277,12 +279,13 @@ test('orden del Banco prioriza Radar y Tier sin inventar score', () => {
   );
 });
 
-test('las tres dimensiones inferidas se pueden ordenar de mayor a menor', () => {
+test('dimensiones inferidas y estimación provisional se ordenan por separado', () => {
   const titles = [
     title({
       key: 'a',
       title: 'A',
       affinity: 7.2,
+      estimatedAffinity: 9.4,
       cinephileValue: 9.1,
       culturalImpact: 6.5,
     }),
@@ -290,6 +293,7 @@ test('las tres dimensiones inferidas se pueden ordenar de mayor a menor', () => 
       key: 'b',
       title: 'B',
       affinity: 9.3,
+      estimatedAffinity: 7.1,
       cinephileValue: 7.4,
       culturalImpact: 8.8,
     }),
@@ -299,6 +303,10 @@ test('las tres dimensiones inferidas se pueden ordenar de mayor a menor', () => 
   assert.deepEqual(
     sortMediaTitles(titles, 'affinity-desc').map((item) => item.key),
     ['b', 'a', 'unknown'],
+  );
+  assert.deepEqual(
+    sortMediaTitles(titles, 'estimated-affinity-desc').map((item) => item.key),
+    ['a', 'b', 'unknown'],
   );
   assert.deepEqual(
     sortMediaTitles(titles, 'cinephile-desc').map((item) => item.key),
@@ -311,6 +319,7 @@ test('las tres dimensiones inferidas se pueden ordenar de mayor a menor', () => 
 
   const options = deriveMediaFilterOptions(titles, 'movie');
   assert.equal(options.hasAffinity, true);
+  assert.equal(options.hasEstimatedAffinity, true);
   assert.equal(options.hasCinephile, true);
   assert.equal(options.hasCultural, true);
 });

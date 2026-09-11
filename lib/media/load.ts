@@ -1,4 +1,6 @@
 import type { SheetReadCode } from '@/lib/google/errors';
+import { loadPrivatePersonalFitV12 } from '@/lib/media/estimated-affinity';
+import { adjustEstimatedAffinity } from '@/lib/media/focus';
 import { parseMediaTab } from '@/lib/media/parse';
 import { readMediaTabValues, type MediaTab } from '@/lib/media/sheets-read';
 import type {
@@ -66,10 +68,31 @@ async function loadSource(tab: MediaTab): Promise<LoadedSource> {
   };
 }
 
+function withEstimatedAffinity(titles: MediaTitleView[]): MediaTitleView[] {
+  let predictions: ReturnType<typeof loadPrivatePersonalFitV12>;
+  try {
+    predictions = loadPrivatePersonalFitV12();
+  } catch {
+    console.error('Media Personal Fit privado inválido; se omite la estimación provisional.');
+    return titles;
+  }
+
+  if (predictions.size === 0) return titles;
+
+  return titles.map((item) => {
+    const prediction = predictions.get(item.key);
+    if (!prediction) return item;
+    return {
+      ...item,
+      estimatedAffinity: adjustEstimatedAffinity(item.medium, item.year, prediction.affinity),
+    };
+  });
+}
+
 export async function loadMediaDashboard(): Promise<MediaDashboardData> {
   const [movies, series] = await Promise.all([loadSource('Movies'), loadSource('Series')]);
   const sources = [movies.source, series.source];
-  const titles = [...movies.titles, ...series.titles];
+  const titles = withEstimatedAffinity([...movies.titles, ...series.titles]);
   const readyCount = sources.filter((source) => source.state === 'ready').length;
 
   if (readyCount === sources.length) {
