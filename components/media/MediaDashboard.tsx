@@ -386,7 +386,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
               <option value="bank-priority">Prioridad del banco</option>
               <option value="rating-desc">Mi nota</option>
               {options.hasAffinity ? (
-                <option value="affinity-desc">Afinidad personal</option>
+                <option value="affinity-desc">Afinidad estimada</option>
               ) : null}
               {options.hasCultural ? (
                 <option value="cultural-desc">Popularidad / impacto cultural</option>
@@ -410,11 +410,9 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}
           </span>
         </div>
-        {!options.hasScores ? (
-          <span className={styles['score-note']}>
-            Scores personales aún no certificados/persistidos.
-          </span>
-        ) : null}
+        <span className={styles['score-note']}>
+          Afinidad estimada en lectura; tu Nota observada sigue separada.
+        </span>
       </div>
 
       {visible.length === 0 ? (
@@ -432,8 +430,9 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
         <section className={styles.grid} aria-label="Resultados de Media">
           {visible.map((item) => {
             const commitment = runtimeLabel(item);
+            const personalFit = item.personalFitEstimate ?? item.affinity;
             const hasInference =
-              item.affinity !== null ||
+              personalFit !== null ||
               item.cinephileValue !== null ||
               item.culturalImpact !== null ||
               item.generalScore !== null;
@@ -499,9 +498,9 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                   ) : null}
                   {hasInference ? (
                     <div className={styles['inferred-scores']}>
-                      {item.affinity !== null ? (
+                      {personalFit !== null ? (
                         <span>
-                          Afinidad <strong>{score(item.affinity)}</strong>
+                          Para vos (est.) <strong>{score(personalFit)}</strong>
                         </span>
                       ) : null}
                       {item.cinephileValue !== null ? (

@@ -3,8 +3,8 @@ import type { MediaKind, MediaTitleView } from '@/types/media';
 export type MediaFocusLevel = 1 | 2 | 3;
 
 const FOCUS_LIMITS: Record<MediaKind, Record<MediaFocusLevel, number>> = {
-  movie: { 1: 6, 2: 18, 3: 40 },
-  series: { 1: 3, 2: 8, 3: 16 },
+  movie: { 1: 10, 2: 50, 3: 100 },
+  series: { 1: 5, 2: 25, 3: 50 },
 };
 
 function normalize(value: string | null): string {
@@ -25,7 +25,7 @@ function tierRank(tier: string | null): number {
   return 2;
 }
 
-function isFocusEligible(item: MediaTitleView, medium: MediaKind): boolean {
+export function isFocusEligible(item: MediaTitleView, medium: MediaKind): boolean {
   if (item.medium !== medium || item.state !== 'Por ver') return false;
   if (medium === 'series') return true;
 
@@ -36,10 +36,32 @@ function isFocusEligible(item: MediaTitleView, medium: MediaKind): boolean {
   );
 }
 
+export function focusEligibleTitles(titles: MediaTitleView[], medium: MediaKind): MediaTitleView[] {
+  return titles.filter((item) => isFocusEligible(item, medium));
+}
+
+function personalFit(item: MediaTitleView): number | null {
+  return item.personalFitEstimate ?? item.affinity;
+}
+
+function focusComposite(item: MediaTitleView): number | null {
+  const dimensions = [
+    { value: personalFit(item), weight: 0.5 },
+    { value: item.cinephileValue, weight: 0.3 },
+    { value: item.culturalImpact, weight: 0.2 },
+  ].filter((entry): entry is { value: number; weight: number } => entry.value !== null);
+
+  if (dimensions.length === 0) return null;
+  const denominator = dimensions.reduce((sum, entry) => sum + entry.weight, 0);
+  return dimensions.reduce((sum, entry) => sum + entry.value * entry.weight, 0) / denominator;
+}
+
 function compareFocusBase(left: MediaTitleView, right: MediaTitleView): number {
   return (
     Number(right.radar) - Number(left.radar) ||
     tierRank(left.bankTier) - tierRank(right.bankTier) ||
+    nullableDesc(focusComposite(left), focusComposite(right)) ||
+    nullableDesc(personalFit(left), personalFit(right)) ||
     nullableDesc(left.cinephileValue, right.cinephileValue) ||
     nullableDesc(left.culturalImpact, right.culturalImpact) ||
     nullableDesc(left.year, right.year) ||
@@ -52,8 +74,8 @@ function primaryGenre(item: MediaTitleView): string {
 }
 
 /**
- * Adds a light diversity penalty without replacing the certified bank/external ranking.
- * The same deterministic ranking is sliced for every focus level, so levels are nested.
+ * Adds a light diversity penalty without replacing the bank gate or the personalized ranking.
+ * The same deterministic ranking is sliced for every focus level, so levels remain nested.
  */
 function diversify(ranked: MediaTitleView[]): MediaTitleView[] {
   const remaining = ranked.map((item, baseIndex) => ({ item, baseIndex }));
@@ -102,6 +124,6 @@ export function deriveFocusTitles(
   medium: MediaKind,
   level: MediaFocusLevel,
 ): MediaTitleView[] {
-  const ranked = titles.filter((item) => isFocusEligible(item, medium)).sort(compareFocusBase);
+  const ranked = focusEligibleTitles(titles, medium).sort(compareFocusBase);
   return diversify(ranked).slice(0, focusLimit(medium, level));
 }

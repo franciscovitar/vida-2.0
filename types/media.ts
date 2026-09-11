@@ -35,6 +35,7 @@ export interface MediaTitleView {
   runtimeMinutes: number | null;
   seasons: number | null;
   affinity: number | null;
+  personalFitEstimate: number | null;
   cinephileValue: number | null;
   culturalImpact: number | null;
   generalScore: number | null;

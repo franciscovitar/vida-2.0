@@ -129,6 +129,10 @@ function nullableDesc(left: number | null, right: number | null): number {
   return right - left;
 }
 
+function personalAffinity(item: MediaTitleView): number | null {
+  return item.personalFitEstimate ?? item.affinity;
+}
+
 function tierRank(tier: string | null): number {
   if (tier === 'A') return 0;
   if (tier === 'B') return 1;
@@ -144,7 +148,8 @@ export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): Medi
     }
     if (sort === 'affinity-desc') {
       return (
-        nullableDesc(left.affinity, right.affinity) || left.title.localeCompare(right.title, 'es')
+        nullableDesc(personalAffinity(left), personalAffinity(right)) ||
+        left.title.localeCompare(right.title, 'es')
       );
     }
     if (sort === 'cinephile-desc') {
@@ -199,7 +204,7 @@ export function deriveMediaFilterOptions(
     countries: uniqueSorted(scoped.flatMap((item) => item.countries)),
     creators: uniqueSorted(scoped.map((item) => item.creator ?? '')),
     years,
-    hasAffinity: scoped.some((item) => item.affinity !== null),
+    hasAffinity: scoped.some((item) => item.personalFitEstimate !== null || item.affinity !== null),
     hasCinephile: scoped.some((item) => item.cinephileValue !== null),
     hasCultural: scoped.some((item) => item.culturalImpact !== null),
     hasScores: scoped.some((item) => item.generalScore !== null),
