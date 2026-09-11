@@ -36,10 +36,7 @@ export function isFocusEligible(item: MediaTitleView, medium: MediaKind): boolea
   );
 }
 
-export function focusEligibleTitles(
-  titles: MediaTitleView[],
-  medium: MediaKind,
-): MediaTitleView[] {
+export function focusEligibleTitles(titles: MediaTitleView[], medium: MediaKind): MediaTitleView[] {
   return titles.filter((item) => isFocusEligible(item, medium));
 }
 
