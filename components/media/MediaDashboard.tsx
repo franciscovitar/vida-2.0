@@ -83,14 +83,14 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
 function hasExtraFilters(filters: MediaFilters): boolean {
   return Boolean(
     filters.query ||
-      filters.genre ||
-      filters.country ||
-      filters.creator ||
-      filters.yearFrom ||
-      filters.yearTo ||
-      filters.commitment !== 'all' ||
-      filters.collection !== 'all' ||
-      filters.sort !== 'bank-priority',
+    filters.genre ||
+    filters.country ||
+    filters.creator ||
+    filters.yearFrom ||
+    filters.yearTo ||
+    filters.commitment !== 'all' ||
+    filters.collection !== 'all' ||
+    filters.sort !== 'bank-priority',
   );
 }
 
