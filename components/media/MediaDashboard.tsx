@@ -83,14 +83,14 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
 function hasExtraFilters(filters: MediaFilters): boolean {
   return Boolean(
     filters.query ||
-    filters.genre ||
-    filters.country ||
-    filters.creator ||
-    filters.yearFrom ||
-    filters.yearTo ||
-    filters.commitment !== 'all' ||
-    filters.collection !== 'all' ||
-    filters.sort !== 'bank-priority',
+      filters.genre ||
+      filters.country ||
+      filters.creator ||
+      filters.yearFrom ||
+      filters.yearTo ||
+      filters.commitment !== 'all' ||
+      filters.collection !== 'all' ||
+      filters.sort !== 'bank-priority',
   );
 }
 
@@ -385,7 +385,9 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             >
               <option value="bank-priority">Prioridad del banco</option>
               <option value="rating-desc">Mi nota</option>
-              {options.hasAffinity ? <option value="affinity-desc">Afinidad estimada</option> : null}
+              {options.hasAffinity ? (
+                <option value="affinity-desc">Afinidad estimada</option>
+              ) : null}
               {options.hasCultural ? (
                 <option value="cultural-desc">Popularidad / impacto cultural</option>
               ) : null}
