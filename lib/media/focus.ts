@@ -3,26 +3,19 @@ import type { MediaKind, MediaTitleView } from '@/types/media';
 export type MediaFocusLevel = 1 | 2 | 3;
 
 const FOCUS_LIMITS: Record<MediaKind, Record<MediaFocusLevel, number>> = {
-  movie: { 1: 6, 2: 18, 3: 40 },
-  series: { 1: 3, 2: 8, 3: 16 },
+  movie: { 1: 10, 2: 50, 3: 100 },
+  series: { 1: 5, 2: 20, 3: 40 },
 };
 
 function normalize(value: string | null): string {
   return (value ?? '').trim().toLocaleLowerCase('es-AR');
 }
 
-function nullableDesc(left: number | null, right: number | null): number {
-  if (left === null && right === null) return 0;
-  if (left === null) return 1;
-  if (right === null) return -1;
-  return right - left;
-}
-
-function tierRank(tier: string | null): number {
+function tierBonus(tier: string | null): number {
   const normalized = normalize(tier).toUpperCase();
-  if (normalized === 'A') return 0;
-  if (normalized === 'B') return 1;
-  return 2;
+  if (normalized === 'A') return 0.3;
+  if (normalized === 'B') return 0.15;
+  return 0;
 }
 
 function isFocusEligible(item: MediaTitleView, medium: MediaKind): boolean {
@@ -36,13 +29,53 @@ function isFocusEligible(item: MediaTitleView, medium: MediaKind): boolean {
   );
 }
 
+/**
+ * Preferencia personal declarada para películas, no una valoración histórica.
+ * 1990+ queda neutro. Hacia atrás resta 0,0125 por año hasta un máximo de -0,5.
+ * Series quedan fuera de este ajuste hasta contar con evidencia específica.
+ */
+export function eraPreferenceAdjustment(medium: MediaKind, year: number | null): number {
+  if (medium !== 'movie' || year === null || year >= 1990) return 0;
+  return -Math.min(0.5, (1990 - year) * 0.0125);
+}
+
+export function adjustEstimatedAffinity(
+  medium: MediaKind,
+  year: number | null,
+  affinity: number | null,
+): number | null {
+  if (affinity === null) return null;
+  const adjusted = affinity + eraPreferenceAdjustment(medium, year);
+  return Math.min(10, Math.max(0, adjusted));
+}
+
+function focusPriorityScore(item: MediaTitleView): number {
+  let weighted = 0;
+  let weight = 0;
+
+  if (item.estimatedAffinity !== null) {
+    weighted += item.estimatedAffinity * 0.55;
+    weight += 0.55;
+  }
+  if (item.cinephileValue !== null) {
+    weighted += item.cinephileValue * 0.25;
+    weight += 0.25;
+  }
+  if (item.culturalImpact !== null) {
+    weighted += item.culturalImpact * 0.2;
+    weight += 0.2;
+  }
+
+  const base = weight > 0 ? weighted / weight : 0;
+  return base + (item.radar ? 0.45 : 0) + tierBonus(item.bankTier);
+}
+
 function compareFocusBase(left: MediaTitleView, right: MediaTitleView): number {
   return (
+    focusPriorityScore(right) - focusPriorityScore(left) ||
     Number(right.radar) - Number(left.radar) ||
-    tierRank(left.bankTier) - tierRank(right.bankTier) ||
-    nullableDesc(left.cinephileValue, right.cinephileValue) ||
-    nullableDesc(left.culturalImpact, right.culturalImpact) ||
-    nullableDesc(left.year, right.year) ||
+    tierBonus(right.bankTier) - tierBonus(left.bankTier) ||
+    (right.year ?? -Infinity) - (left.year ?? -Infinity) ||
     left.title.localeCompare(right.title, 'es')
   );
 }
@@ -52,8 +85,9 @@ function primaryGenre(item: MediaTitleView): string {
 }
 
 /**
- * Adds a light diversity penalty without replacing the certified bank/external ranking.
- * The same deterministic ranking is sliced for every focus level, so levels are nested.
+ * Agrega diversidad suave sin cambiar el universo elegible.
+ * El ranking determinístico se calcula una sola vez y luego se corta por nivel,
+ * por lo que Foco 1 ⊂ Foco 2 ⊂ Foco 3.
  */
 function diversify(ranked: MediaTitleView[]): MediaTitleView[] {
   const remaining = ranked.map((item, baseIndex) => ({ item, baseIndex }));

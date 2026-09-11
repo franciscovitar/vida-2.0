@@ -35,6 +35,7 @@ export interface MediaTitleView {
   runtimeMinutes: number | null;
   seasons: number | null;
   affinity: number | null;
+  estimatedAffinity: number | null;
   cinephileValue: number | null;
   culturalImpact: number | null;
   generalScore: number | null;
@@ -69,8 +70,10 @@ export type MediaCommitmentFilter =
   | 'four-plus-seasons';
 export type MediaSort =
   | 'bank-priority'
+  | 'focus-priority'
   | 'rating-desc'
   | 'affinity-desc'
+  | 'estimated-affinity-desc'
   | 'cinephile-desc'
   | 'cultural-desc'
   | 'score-desc'

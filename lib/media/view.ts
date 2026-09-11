@@ -13,6 +13,7 @@ export interface MediaFilterOptions {
   creators: string[];
   years: number[];
   hasAffinity: boolean;
+  hasEstimatedAffinity: boolean;
   hasCinephile: boolean;
   hasCultural: boolean;
   hasScores: boolean;
@@ -138,6 +139,8 @@ function tierRank(tier: string | null): number {
 }
 
 export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): MediaTitleView[] {
+  if (sort === 'focus-priority') return [...titles];
+
   return [...titles].sort((left, right) => {
     if (sort === 'rating-desc') {
       return nullableDesc(left.rating, right.rating) || left.title.localeCompare(right.title, 'es');
@@ -145,6 +148,12 @@ export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): Medi
     if (sort === 'affinity-desc') {
       return (
         nullableDesc(left.affinity, right.affinity) || left.title.localeCompare(right.title, 'es')
+      );
+    }
+    if (sort === 'estimated-affinity-desc') {
+      return (
+        nullableDesc(left.estimatedAffinity, right.estimatedAffinity) ||
+        left.title.localeCompare(right.title, 'es')
       );
     }
     if (sort === 'cinephile-desc') {
@@ -200,6 +209,7 @@ export function deriveMediaFilterOptions(
     creators: uniqueSorted(scoped.map((item) => item.creator ?? '')),
     years,
     hasAffinity: scoped.some((item) => item.affinity !== null),
+    hasEstimatedAffinity: scoped.some((item) => item.estimatedAffinity !== null),
     hasCinephile: scoped.some((item) => item.cinephileValue !== null),
     hasCultural: scoped.some((item) => item.culturalImpact !== null),
     hasScores: scoped.some((item) => item.generalScore !== null),
