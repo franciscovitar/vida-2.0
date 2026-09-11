@@ -6,11 +6,7 @@ import { useMemo, useState } from 'react';
 import { MediaDashboardView } from '@/components/media/MediaDashboard';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import {
-  deriveFocusTitles,
-  focusLimit,
-  type MediaFocusLevel,
-} from '@/lib/media/focus';
+import { deriveFocusTitles, focusLimit, type MediaFocusLevel } from '@/lib/media/focus';
 import type { MediaDashboardData, MediaKind, MediaTitleView } from '@/types/media';
 
 import styles from './MediaDashboard.module.scss';
