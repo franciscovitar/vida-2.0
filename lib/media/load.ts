@@ -84,7 +84,11 @@ function withEstimatedAffinity(titles: MediaTitleView[]): MediaTitleView[] {
     if (!prediction) return item;
     return {
       ...item,
-      estimatedAffinity: adjustEstimatedAffinity(item.medium, item.year, prediction.affinity),
+      estimatedAffinity: adjustEstimatedAffinity(
+        item.medium,
+        item.ageFeelScore,
+        prediction.affinity,
+      ),
     };
   });
 }

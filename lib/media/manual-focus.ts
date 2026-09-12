@@ -1,12 +1,12 @@
 import { mediaPublicKey } from '@/lib/media/key';
-import type { MediaFocusLevel, MediaKind } from '@/types/media';
+import type { MediaKind, MediaManualFocus } from '@/types/media';
 
 type PlainCell = string | number | boolean | null;
 
 export interface ManualFocusRequest {
   key: string;
   medium: MediaKind;
-  level: MediaFocusLevel | null;
+  level: MediaManualFocus;
 }
 
 export type ManualFocusTargetResult =
@@ -35,7 +35,9 @@ export function parseManualFocusRequest(value: unknown): ManualFocusRequest | nu
   const key = input.key.trim();
   if (!key || key.length > 512) return null;
   const level = input.level;
-  if (level !== null && level !== 1 && level !== 2 && level !== 3) return null;
+  if (level !== null && level !== 1 && level !== 2 && level !== 3 && level !== 'exclude') {
+    return null;
+  }
   return { key, medium: input.medium, level };
 }
 

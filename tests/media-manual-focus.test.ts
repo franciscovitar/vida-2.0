@@ -7,19 +7,19 @@ import {
   resolveManualFocusTarget,
 } from '@/lib/media/manual-focus';
 
-test('request de lote manual acepta sólo contrato mínimo válido', () => {
+test('request de lote manual acepta prioridad, exclusión y automático', () => {
   assert.deepEqual(parseManualFocusRequest({ key: 'movie:A:2020', medium: 'movie', level: 2 }), {
     key: 'movie:A:2020',
     medium: 'movie',
     level: 2,
   });
   assert.deepEqual(
+    parseManualFocusRequest({ key: 'series:B:2021', medium: 'series', level: 'exclude' }),
+    { key: 'series:B:2021', medium: 'series', level: 'exclude' },
+  );
+  assert.deepEqual(
     parseManualFocusRequest({ key: 'series:B:2021', medium: 'series', level: null }),
-    {
-      key: 'series:B:2021',
-      medium: 'series',
-      level: null,
-    },
+    { key: 'series:B:2021', medium: 'series', level: null },
   );
   assert.equal(parseManualFocusRequest({ key: '', medium: 'movie', level: 1 }), null);
   assert.equal(parseManualFocusRequest({ key: 'x', medium: 'movie', level: 4 }), null);
@@ -66,10 +66,12 @@ test('resolver falla cerrado ante duplicado, estado no escribible o header ausen
   );
 });
 
-test('conversión de columna a A1 cubre columnas de Media actuales', () => {
+test('conversión de columna a A1 cubre columnas actuales de Media', () => {
   assert.equal(columnNumberToA1(1), 'A');
   assert.equal(columnNumberToA1(26), 'Z');
   assert.equal(columnNumberToA1(27), 'AA');
   assert.equal(columnNumberToA1(41), 'AO');
+  assert.equal(columnNumberToA1(42), 'AP');
   assert.equal(columnNumberToA1(43), 'AQ');
+  assert.equal(columnNumberToA1(44), 'AR');
 });
