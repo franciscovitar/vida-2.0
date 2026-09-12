@@ -1,3 +1,4 @@
+import { compareFocusPriority, watchPriorityScore } from '@/lib/media/focus';
 import type {
   MediaCollectionFilter,
   MediaCommitmentFilter,
@@ -17,6 +18,7 @@ export interface MediaFilterOptions {
   hasCinephile: boolean;
   hasCultural: boolean;
   hasScores: boolean;
+  hasWatchPriority: boolean;
 }
 
 function normalize(value: string): string {
@@ -139,7 +141,7 @@ function tierRank(tier: string | null): number {
 }
 
 export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): MediaTitleView[] {
-  if (sort === 'focus-priority') return [...titles];
+  if (sort === 'focus-priority') return [...titles].sort(compareFocusPriority);
 
   return [...titles].sort((left, right) => {
     if (sort === 'rating-desc') {
@@ -213,6 +215,7 @@ export function deriveMediaFilterOptions(
     hasCinephile: scoped.some((item) => item.cinephileValue !== null),
     hasCultural: scoped.some((item) => item.culturalImpact !== null),
     hasScores: scoped.some((item) => item.generalScore !== null),
+    hasWatchPriority: scoped.some((item) => watchPriorityScore(item) !== null),
   };
 }
 
