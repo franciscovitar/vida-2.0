@@ -251,11 +251,15 @@ test('búsqueda y filtros son tolerantes a acentos y respetan el Banco', () => {
   ];
 
   assert.deepEqual(
-    filterMediaTitles(titles, filters({ query: 'parasitos', collection: 'bank' })).map((item) => item.key),
+    filterMediaTitles(titles, filters({ query: 'parasitos', collection: 'bank' })).map(
+      (item) => item.key,
+    ),
     ['parasitos'],
   );
   assert.deepEqual(
-    filterMediaTitles(titles, filters({ country: 'Francia', collection: 'seen' })).map((item) => item.key),
+    filterMediaTitles(titles, filters({ country: 'Francia', collection: 'seen' })).map(
+      (item) => item.key,
+    ),
     ['amélie'],
   );
 });
@@ -269,9 +273,18 @@ test('filtro de años devuelve rango inclusivo y el orden puede invertirse', () 
     title({ key: 'unknown', title: 'Sin año', year: null }),
   ];
   const scoped = filterMediaTitles(titles, filters({ yearFrom: '2000', yearTo: '2010' }));
-  assert.deepEqual(scoped.map((item) => item.key), ['2000', '2005', '2010']);
-  assert.deepEqual(sortMediaTitles(scoped, 'year-asc').map((item) => item.key), ['2000', '2005', '2010']);
-  assert.deepEqual(sortMediaTitles(scoped, 'year-desc').map((item) => item.key), ['2010', '2005', '2000']);
+  assert.deepEqual(
+    scoped.map((item) => item.key),
+    ['2000', '2005', '2010'],
+  );
+  assert.deepEqual(
+    sortMediaTitles(scoped, 'year-asc').map((item) => item.key),
+    ['2000', '2005', '2010'],
+  );
+  assert.deepEqual(
+    sortMediaTitles(scoped, 'year-desc').map((item) => item.key),
+    ['2010', '2005', '2000'],
+  );
 });
 
 test('filtro de duración no interpreta metadata faltante como duración real', () => {
@@ -279,7 +292,10 @@ test('filtro de duración no interpreta metadata faltante como duración real', 
     title({ key: 'short', title: 'Corta', runtimeMinutes: 88 }),
     title({ key: 'unknown', title: 'Sin duración', runtimeMinutes: null }),
   ];
-  assert.deepEqual(filterMediaTitles(titles, filters({ commitment: 'under-90' })).map((item) => item.key), ['short']);
+  assert.deepEqual(
+    filterMediaTitles(titles, filters({ commitment: 'under-90' })).map((item) => item.key),
+    ['short'],
+  );
 });
 
 test('orden del Banco prioriza Radar y Tier sin inventar score', () => {
@@ -288,19 +304,46 @@ test('orden del Banco prioriza Radar y Tier sin inventar score', () => {
     title({ key: 'a', title: 'A', bankTier: 'A' }),
     title({ key: 'radar', title: 'Radar', bankTier: 'B', radar: true }),
   ];
-  assert.deepEqual(sortMediaTitles(titles, 'bank-priority').map((item) => item.key), ['radar', 'a', 'b']);
+  assert.deepEqual(
+    sortMediaTitles(titles, 'bank-priority').map((item) => item.key),
+    ['radar', 'a', 'b'],
+  );
 });
 
 test('dimensiones inferidas, prioridad y afinidad se ordenan por separado y en ambos sentidos', () => {
   const titles = [
-    title({ key: 'a', title: 'A', estimatedAffinity: 9.41, cinephileValue: 9.1, culturalImpact: 6.5 }),
-    title({ key: 'b', title: 'B', estimatedAffinity: 7.13, cinephileValue: 7.4, culturalImpact: 8.8 }),
+    title({
+      key: 'a',
+      title: 'A',
+      estimatedAffinity: 9.41,
+      cinephileValue: 9.1,
+      culturalImpact: 6.5,
+    }),
+    title({
+      key: 'b',
+      title: 'B',
+      estimatedAffinity: 7.13,
+      cinephileValue: 7.4,
+      culturalImpact: 8.8,
+    }),
     title({ key: 'unknown', title: 'Sin scores' }),
   ];
-  assert.deepEqual(sortMediaTitles(titles, 'estimated-affinity-desc').map((item) => item.key), ['a', 'b', 'unknown']);
-  assert.deepEqual(sortMediaTitles(titles, 'estimated-affinity-asc').map((item) => item.key), ['b', 'a', 'unknown']);
-  assert.deepEqual(sortMediaTitles(titles, 'focus-priority').map((item) => item.key), ['a', 'b', 'unknown']);
-  assert.deepEqual(sortMediaTitles(titles, 'focus-priority-asc').map((item) => item.key), ['b', 'a', 'unknown']);
+  assert.deepEqual(
+    sortMediaTitles(titles, 'estimated-affinity-desc').map((item) => item.key),
+    ['a', 'b', 'unknown'],
+  );
+  assert.deepEqual(
+    sortMediaTitles(titles, 'estimated-affinity-asc').map((item) => item.key),
+    ['b', 'a', 'unknown'],
+  );
+  assert.deepEqual(
+    sortMediaTitles(titles, 'focus-priority').map((item) => item.key),
+    ['a', 'b', 'unknown'],
+  );
+  assert.deepEqual(
+    sortMediaTitles(titles, 'focus-priority-asc').map((item) => item.key),
+    ['b', 'a', 'unknown'],
+  );
   const options = deriveMediaFilterOptions(titles, 'movie');
   assert.equal(options.hasEstimatedAffinity, true);
   assert.equal(options.hasCinephile, true);

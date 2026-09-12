@@ -22,7 +22,10 @@ export function MediaPoster({ title, posterPath }: MediaPosterProps) {
           className={styles['poster-image']}
         />
       ) : (
-        <div className={styles['poster-fallback']} aria-label={`Sin portada disponible para ${title}`}>
+        <div
+          className={styles['poster-fallback']}
+          aria-label={`Sin portada disponible para ${title}`}
+        >
           <Film size={30} aria-hidden="true" />
         </div>
       )}

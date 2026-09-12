@@ -110,7 +110,10 @@ test('películas automáticas excluyen vistas, Tier C/D y pools no operativos', 
     title('reserve', 'movie', { bankTier: 'C', pool: 'Reserva' }),
     title('exit', 'movie', { bankTier: 'D', pool: 'Salida candidata' }),
   ];
-  assert.deepEqual(new Set(keys(deriveFocusCandidates(titles, 'movie'))), new Set(['ok-a', 'ok-b']));
+  assert.deepEqual(
+    new Set(keys(deriveFocusCandidates(titles, 'movie'))),
+    new Set(['ok-a', 'ok-b']),
+  );
 });
 
 test('una prioridad manual vuelve elegible una película Por ver fuera del pool automático', () => {
@@ -179,7 +182,10 @@ test('filtrar primero recalcula top 50 del universo filtrado', () => {
     }),
   );
   const candidates = deriveFocusCandidates(titles, 'movie');
-  const filtered = filterMediaTitles(candidates, filters('movie', { yearFrom: '1990', yearTo: '2026' }));
+  const filtered = filterMediaTitles(
+    candidates,
+    filters('movie', { yearFrom: '1990', yearTo: '2026' }),
+  );
   const lot2 = deriveFocusTitles(filtered, 'movie', 2);
   assert.equal(filtered.length, 60);
   assert.equal(lot2.length, 50);

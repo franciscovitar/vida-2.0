@@ -82,13 +82,13 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
 function hasExtraFilters(filters: MediaFilters): boolean {
   return Boolean(
     filters.query ||
-      filters.genre ||
-      filters.country ||
-      filters.creator ||
-      filters.yearFrom ||
-      filters.yearTo ||
-      filters.commitment !== 'all' ||
-      filters.sort !== 'focus-priority',
+    filters.genre ||
+    filters.country ||
+    filters.creator ||
+    filters.yearFrom ||
+    filters.yearTo ||
+    filters.commitment !== 'all' ||
+    filters.sort !== 'focus-priority',
   );
 }
 
@@ -183,7 +183,11 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             <strong>Estás explorando el Banco completo.</strong> Podés fijar un título en un lote o
             marcarlo como no prioritario para excluirlo de todos los lotes.
           </p>
-          <button type="button" className={styles['empty-action']} onClick={() => setExploring(false)}>
+          <button
+            type="button"
+            className={styles['empty-action']}
+            onClick={() => setExploring(false)}
+          >
             Volver a lotes
           </button>
         </section>
@@ -198,51 +202,215 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
 
       <section className={styles.hero} aria-label="Lotes de Media">
         <div className={styles['medium-tabs']} role="tablist" aria-label="Tipo de contenido">
-          <button type="button" role="tab" aria-selected={filters.medium === 'movie'} className={styles['medium-tab']} data-active={filters.medium === 'movie'} onClick={() => switchMedium('movie')}><Film size={17} aria-hidden="true" /> Películas</button>
-          <button type="button" role="tab" aria-selected={filters.medium === 'series'} className={styles['medium-tab']} data-active={filters.medium === 'series'} onClick={() => switchMedium('series')}><Tv size={17} aria-hidden="true" /> Series</button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filters.medium === 'movie'}
+            className={styles['medium-tab']}
+            data-active={filters.medium === 'movie'}
+            onClick={() => switchMedium('movie')}
+          >
+            <Film size={17} aria-hidden="true" /> Películas
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={filters.medium === 'series'}
+            className={styles['medium-tab']}
+            data-active={filters.medium === 'series'}
+            onClick={() => switchMedium('series')}
+          >
+            <Tv size={17} aria-hidden="true" /> Series
+          </button>
         </div>
         <p className={styles['bank-principle']}>
           <strong>Los lotes se recalculan con tus filtros.</strong> Primero definís el universo y
-          después entran las mejores opciones por Prioridad de visionado; cada nivel contiene al anterior.
+          después entran las mejores opciones por Prioridad de visionado; cada nivel contiene al
+          anterior.
         </p>
         <div className={styles['collection-tabs']} role="group" aria-label="Nivel de lote">
           {FOCUS_LEVELS.map((focusLevel) => {
             const count = focusByLevel.get(focusLevel)?.length ?? 0;
-            return <button key={focusLevel} type="button" className={styles.chip} data-active={level === focusLevel} aria-pressed={level === focusLevel} onClick={() => setLevel(focusLevel)}>Lote {focusLevel} · {count}</button>;
+            return (
+              <button
+                key={focusLevel}
+                type="button"
+                className={styles.chip}
+                data-active={level === focusLevel}
+                aria-pressed={level === focusLevel}
+                onClick={() => setLevel(focusLevel)}
+              >
+                Lote {focusLevel} · {count}
+              </button>
+            );
           })}
         </div>
       </section>
 
       <section className={styles.controls} aria-label="Filtros del lote">
-        <label className={styles['search-field']}><Search size={17} aria-hidden="true" /><span className={styles['sr-only']}>Buscar y recalcular lote</span><input type="search" value={filters.query} placeholder="Buscar y recalcular lote…" onChange={(event) => patchFilters({ query: event.target.value })} /></label>
-        <div className={styles['filter-header']}><span><SlidersHorizontal size={16} aria-hidden="true" /> Filtros que recalculan Lote {level}</span>{hasExtraFilters(filters) ? <button type="button" className={styles['clear-button']} onClick={clearFilters}>Limpiar</button> : null}</div>
+        <label className={styles['search-field']}>
+          <Search size={17} aria-hidden="true" />
+          <span className={styles['sr-only']}>Buscar y recalcular lote</span>
+          <input
+            type="search"
+            value={filters.query}
+            placeholder="Buscar y recalcular lote…"
+            onChange={(event) => patchFilters({ query: event.target.value })}
+          />
+        </label>
+        <div className={styles['filter-header']}>
+          <span>
+            <SlidersHorizontal size={16} aria-hidden="true" /> Filtros que recalculan Lote {level}
+          </span>
+          {hasExtraFilters(filters) ? (
+            <button type="button" className={styles['clear-button']} onClick={clearFilters}>
+              Limpiar
+            </button>
+          ) : null}
+        </div>
         <div className={styles['filter-grid']}>
-          <label><span>Género</span><select value={filters.genre} onChange={(event) => patchFilters({ genre: event.target.value })}><option value="">Todos</option>{options.genres.map((genre) => <option key={genre} value={genre}>{genre}</option>)}</select></label>
-          <label><span>País</span><select value={filters.country} onChange={(event) => patchFilters({ country: event.target.value })}><option value="">Todos</option>{options.countries.map((country) => <option key={country} value={country}>{country}</option>)}</select></label>
-          <label><span>{filters.medium === 'movie' ? 'Director' : 'Creador'}</span><select value={filters.creator} onChange={(event) => patchFilters({ creator: event.target.value })}><option value="">Todos</option>{options.creators.map((creator) => <option key={creator} value={creator}>{creator}</option>)}</select></label>
-          <label><span>Año desde</span><select value={filters.yearFrom} onChange={(event) => patchYearFrom(event.target.value)}><option value="">Cualquiera</option>{options.years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
-          <label><span>Año hasta</span><select value={filters.yearTo} onChange={(event) => patchYearTo(event.target.value)}><option value="">Cualquiera</option>{options.years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
-          <label><span>{filters.medium === 'movie' ? 'Duración' : 'Temporadas'}</span><select value={filters.commitment} onChange={(event) => patchFilters({ commitment: event.target.value as MediaCommitmentFilter })}>{commitmentOptions(filters.medium).map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+          <label>
+            <span>Género</span>
+            <select
+              value={filters.genre}
+              onChange={(event) => patchFilters({ genre: event.target.value })}
+            >
+              <option value="">Todos</option>
+              {options.genres.map((genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>País</span>
+            <select
+              value={filters.country}
+              onChange={(event) => patchFilters({ country: event.target.value })}
+            >
+              <option value="">Todos</option>
+              {options.countries.map((country) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>{filters.medium === 'movie' ? 'Director' : 'Creador'}</span>
+            <select
+              value={filters.creator}
+              onChange={(event) => patchFilters({ creator: event.target.value })}
+            >
+              <option value="">Todos</option>
+              {options.creators.map((creator) => (
+                <option key={creator} value={creator}>
+                  {creator}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Año desde</span>
+            <select
+              value={filters.yearFrom}
+              onChange={(event) => patchYearFrom(event.target.value)}
+            >
+              <option value="">Cualquiera</option>
+              {options.years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Año hasta</span>
+            <select value={filters.yearTo} onChange={(event) => patchYearTo(event.target.value)}>
+              <option value="">Cualquiera</option>
+              {options.years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>{filters.medium === 'movie' ? 'Duración' : 'Temporadas'}</span>
+            <select
+              value={filters.commitment}
+              onChange={(event) =>
+                patchFilters({ commitment: event.target.value as MediaCommitmentFilter })
+              }
+            >
+              {commitmentOptions(filters.medium).map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <label>
             <span>Ordenar visualmente</span>
-            <select value={filters.sort} onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}>
-              <option value="focus-priority">Prioridad · mayor a menor</option><option value="focus-priority-asc">Prioridad · menor a mayor</option>
-              {options.hasEstimatedAffinity ? <><option value="estimated-affinity-desc">Afinidad para mí · mayor a menor</option><option value="estimated-affinity-asc">Afinidad para mí · menor a mayor</option></> : null}
-              {options.hasCinephile ? <><option value="cinephile-desc">Valor cinéfilo · mayor a menor</option><option value="cinephile-asc">Valor cinéfilo · menor a mayor</option></> : null}
-              {options.hasCultural ? <><option value="cultural-desc">Impacto cultural · mayor a menor</option><option value="cultural-asc">Impacto cultural · menor a mayor</option></> : null}
-              <option value="year-desc">Más recientes</option><option value="year-asc">Más antiguas</option><option value="title">Título A–Z</option><option value="title-desc">Título Z–A</option>
+            <select
+              value={filters.sort}
+              onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}
+            >
+              <option value="focus-priority">Prioridad · mayor a menor</option>
+              <option value="focus-priority-asc">Prioridad · menor a mayor</option>
+              {options.hasEstimatedAffinity ? (
+                <>
+                  <option value="estimated-affinity-desc">Afinidad para mí · mayor a menor</option>
+                  <option value="estimated-affinity-asc">Afinidad para mí · menor a mayor</option>
+                </>
+              ) : null}
+              {options.hasCinephile ? (
+                <>
+                  <option value="cinephile-desc">Valor cinéfilo · mayor a menor</option>
+                  <option value="cinephile-asc">Valor cinéfilo · menor a mayor</option>
+                </>
+              ) : null}
+              {options.hasCultural ? (
+                <>
+                  <option value="cultural-desc">Impacto cultural · mayor a menor</option>
+                  <option value="cultural-asc">Impacto cultural · menor a mayor</option>
+                </>
+              ) : null}
+              <option value="year-desc">Más recientes</option>
+              <option value="year-asc">Más antiguas</option>
+              <option value="title">Título A–Z</option>
+              <option value="title-desc">Título Z–A</option>
             </select>
           </label>
         </div>
       </section>
 
       <div className={styles['result-header']}>
-        <div><strong>{focus.length}</strong> {focus.length === 1 ? 'resultado' : 'resultados'} <span>· top de {filteredCandidates.length} coincidencias · Lote {level} · {levelPurpose(level)} · objetivo {focusLimit(filters.medium, level)}</span></div>
-        <span className={styles['score-note']}>Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% impacto cultural. “Se siente de época” ajusta sólo tu afinidad.</span>
+        <div>
+          <strong>{focus.length}</strong> {focus.length === 1 ? 'resultado' : 'resultados'}{' '}
+          <span>
+            · top de {filteredCandidates.length} coincidencias · Lote {level} ·{' '}
+            {levelPurpose(level)} · objetivo {focusLimit(filters.medium, level)}
+          </span>
+        </div>
+        <span className={styles['score-note']}>
+          Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% impacto cultural.
+          “Se siente de época” ajusta sólo tu afinidad.
+        </span>
       </div>
 
       {focus.length === 0 ? (
-        <EmptyState icon={Search} title="No hay coincidencias para este lote" description="Probá quitando un filtro. Al cambiar el universo, el lote se vuelve a calcular automáticamente." action={<button type="button" className={styles['empty-action']} onClick={clearFilters}>Limpiar filtros</button>} />
+        <EmptyState
+          icon={Search}
+          title="No hay coincidencias para este lote"
+          description="Probá quitando un filtro. Al cambiar el universo, el lote se vuelve a calcular automáticamente."
+          action={
+            <button type="button" className={styles['empty-action']} onClick={clearFilters}>
+              Limpiar filtros
+            </button>
+          }
+        />
       ) : (
         <section className={styles.grid} aria-label={`Lote ${level}`}>
           {focus.map((item) => {
@@ -253,19 +421,89 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
               <article key={item.key} className={styles['title-card']}>
                 <MediaPoster title={item.title} posterPath={item.posterPath} />
                 <div className={styles['card-content']}>
-                  <div className={styles['title-top']}><div className={styles['title-block']}><h2>{item.title}</h2>{item.originalTitle && item.originalTitle !== item.title ? <p className={styles['original-title']}>{item.originalTitle}</p> : null}</div>{item.year !== null ? <span className={styles.year}>{item.year}</span> : null}</div>
-                  <div className={styles.badges}>{item.key === firstFocusKey ? <Badge domain="projects">Primera del lote</Badge> : null}{item.manualFocusLevel !== null ? <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge> : null}{item.radar ? <Badge domain="projects">Radar</Badge> : null}</div>
-                  <div className={styles.meta}>{item.creator ? <span>{item.creator}</span> : null}{commitment ? <span>{commitment}</span> : null}<MediaCountryFlags countries={item.countries} /></div>
-                  {item.genres.length > 0 ? <div className={styles.genres}>{item.genres.slice(0, 3).map((genre) => <span key={genre}>{genre}</span>)}</div> : null}
-                  {item.ageFeelLabel ? <p className={styles['age-feel']} title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva.">{item.ageFeelLabel}</p> : null}
+                  <div className={styles['title-top']}>
+                    <div className={styles['title-block']}>
+                      <h2>{item.title}</h2>
+                      {item.originalTitle && item.originalTitle !== item.title ? (
+                        <p className={styles['original-title']}>{item.originalTitle}</p>
+                      ) : null}
+                    </div>
+                    {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
+                  </div>
+                  <div className={styles.badges}>
+                    {item.key === firstFocusKey ? (
+                      <Badge domain="projects">Primera del lote</Badge>
+                    ) : null}
+                    {item.manualFocusLevel !== null ? (
+                      <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge>
+                    ) : null}
+                    {item.radar ? <Badge domain="projects">Radar</Badge> : null}
+                  </div>
+                  <div className={styles.meta}>
+                    {item.creator ? <span>{item.creator}</span> : null}
+                    {commitment ? <span>{commitment}</span> : null}
+                    <MediaCountryFlags countries={item.countries} />
+                  </div>
+                  {item.genres.length > 0 ? (
+                    <div className={styles.genres}>
+                      {item.genres.slice(0, 3).map((genre) => (
+                        <span key={genre}>{genre}</span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {item.ageFeelLabel ? (
+                    <p
+                      className={styles['age-feel']}
+                      title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva."
+                    >
+                      {item.ageFeelLabel}
+                    </p>
+                  ) : null}
 
                   <div className={styles['primary-scores']}>
-                    {item.estimatedAffinity !== null ? <div className={styles['primary-score']}><span>Afinidad para mí</span><strong>{score(item.estimatedAffinity)}</strong></div> : null}
-                    {priority !== null ? <div className={styles['primary-score']}><span>Prioridad de visionado</span><strong>{score(priority)}</strong></div> : null}
+                    {item.estimatedAffinity !== null ? (
+                      <div className={styles['primary-score']}>
+                        <span>Afinidad para mí</span>
+                        <strong>{score(item.estimatedAffinity)}</strong>
+                      </div>
+                    ) : null}
+                    {priority !== null ? (
+                      <div className={styles['primary-score']}>
+                        <span>Prioridad de visionado</span>
+                        <strong>{score(priority)}</strong>
+                      </div>
+                    ) : null}
                   </div>
-                  {item.cinephileValue !== null || item.culturalImpact !== null ? <div className={styles['inferred-scores']}>{item.cinephileValue !== null ? <span>Cinéfilo <strong>{score(item.cinephileValue)}</strong></span> : null}{item.culturalImpact !== null ? <span>Impacto <strong>{score(item.culturalImpact)}</strong></span> : null}</div> : null}
-                  {guidance ? <div className={styles.experience}><div className={styles['experience-block']}><span className={styles['experience-label']}>Para elegir</span><p>{guidance}</p></div></div> : null}
-                  <ManualFocusControl itemKey={item.key} medium={item.medium} state={item.state} value={item.manualFocusLevel} excluded={item.manualFocusExcluded} defaultLevel={level} />
+                  {item.cinephileValue !== null || item.culturalImpact !== null ? (
+                    <div className={styles['inferred-scores']}>
+                      {item.cinephileValue !== null ? (
+                        <span>
+                          Cinéfilo <strong>{score(item.cinephileValue)}</strong>
+                        </span>
+                      ) : null}
+                      {item.culturalImpact !== null ? (
+                        <span>
+                          Impacto <strong>{score(item.culturalImpact)}</strong>
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {guidance ? (
+                    <div className={styles.experience}>
+                      <div className={styles['experience-block']}>
+                        <span className={styles['experience-label']}>Para elegir</span>
+                        <p>{guidance}</p>
+                      </div>
+                    </div>
+                  ) : null}
+                  <ManualFocusControl
+                    itemKey={item.key}
+                    medium={item.medium}
+                    state={item.state}
+                    value={item.manualFocusLevel}
+                    excluded={item.manualFocusExcluded}
+                    defaultLevel={level}
+                  />
                 </div>
               </article>
             );
@@ -273,8 +511,17 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
         </section>
       )}
 
-      <section className={styles.controls} aria-label="Banco completo"><p className={styles['bank-principle']}>¿Querés forzar o excluir una opción que no apareció? Buscala en el Banco completo.</p><button type="button" className={styles['empty-action']} onClick={() => setExploring(true)}>Explorar Banco completo</button></section>
-      <p className={styles.attribution}>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      <section className={styles.controls} aria-label="Banco completo">
+        <p className={styles['bank-principle']}>
+          ¿Querés forzar o excluir una opción que no apareció? Buscala en el Banco completo.
+        </p>
+        <button type="button" className={styles['empty-action']} onClick={() => setExploring(true)}>
+          Explorar Banco completo
+        </button>
+      </section>
+      <p className={styles.attribution}>
+        This product uses the TMDB API but is not endorsed or certified by TMDB.
+      </p>
     </div>
   );
 }

@@ -89,14 +89,14 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
 function hasExtraFilters(filters: MediaFilters): boolean {
   return Boolean(
     filters.query ||
-      filters.genre ||
-      filters.country ||
-      filters.creator ||
-      filters.yearFrom ||
-      filters.yearTo ||
-      filters.commitment !== 'all' ||
-      filters.collection !== 'all' ||
-      filters.sort !== 'bank-priority',
+    filters.genre ||
+    filters.country ||
+    filters.creator ||
+    filters.yearFrom ||
+    filters.yearTo ||
+    filters.commitment !== 'all' ||
+    filters.collection !== 'all' ||
+    filters.sort !== 'bank-priority',
   );
 }
 
@@ -271,42 +271,167 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
         </label>
 
         <div className={styles['filter-header']}>
-          <span><SlidersHorizontal size={16} aria-hidden="true" /> Filtros</span>
+          <span>
+            <SlidersHorizontal size={16} aria-hidden="true" /> Filtros
+          </span>
           {hasExtraFilters(filters) ? (
-            <button type="button" className={styles['clear-button']} onClick={clearFilters}>Limpiar</button>
+            <button type="button" className={styles['clear-button']} onClick={clearFilters}>
+              Limpiar
+            </button>
           ) : null}
         </div>
 
         <div className={styles['filter-grid']}>
-          <label><span>Género</span><select value={filters.genre} onChange={(event) => patchFilters({ genre: event.target.value })}><option value="">Todos</option>{options.genres.map((genre) => <option key={genre} value={genre}>{genre}</option>)}</select></label>
-          <label><span>País</span><select value={filters.country} onChange={(event) => patchFilters({ country: event.target.value })}><option value="">Todos</option>{options.countries.map((country) => <option key={country} value={country}>{country}</option>)}</select></label>
-          <label><span>{filters.medium === 'movie' ? 'Director' : 'Creador'}</span><select value={filters.creator} onChange={(event) => patchFilters({ creator: event.target.value })}><option value="">Todos</option>{options.creators.map((creator) => <option key={creator} value={creator}>{creator}</option>)}</select></label>
-          <label><span>Año desde</span><select value={filters.yearFrom} onChange={(event) => patchYearFrom(event.target.value)}><option value="">Cualquiera</option>{options.years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
-          <label><span>Año hasta</span><select value={filters.yearTo} onChange={(event) => patchYearTo(event.target.value)}><option value="">Cualquiera</option>{options.years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
-          <label><span>{filters.medium === 'movie' ? 'Duración' : 'Temporadas'}</span><select value={filters.commitment} onChange={(event) => patchFilters({ commitment: event.target.value as MediaCommitmentFilter })}>{commitmentOptions(filters.medium).map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+          <label>
+            <span>Género</span>
+            <select
+              value={filters.genre}
+              onChange={(event) => patchFilters({ genre: event.target.value })}
+            >
+              <option value="">Todos</option>
+              {options.genres.map((genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>País</span>
+            <select
+              value={filters.country}
+              onChange={(event) => patchFilters({ country: event.target.value })}
+            >
+              <option value="">Todos</option>
+              {options.countries.map((country) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>{filters.medium === 'movie' ? 'Director' : 'Creador'}</span>
+            <select
+              value={filters.creator}
+              onChange={(event) => patchFilters({ creator: event.target.value })}
+            >
+              <option value="">Todos</option>
+              {options.creators.map((creator) => (
+                <option key={creator} value={creator}>
+                  {creator}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Año desde</span>
+            <select
+              value={filters.yearFrom}
+              onChange={(event) => patchYearFrom(event.target.value)}
+            >
+              <option value="">Cualquiera</option>
+              {options.years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Año hasta</span>
+            <select value={filters.yearTo} onChange={(event) => patchYearTo(event.target.value)}>
+              <option value="">Cualquiera</option>
+              {options.years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>{filters.medium === 'movie' ? 'Duración' : 'Temporadas'}</span>
+            <select
+              value={filters.commitment}
+              onChange={(event) =>
+                patchFilters({ commitment: event.target.value as MediaCommitmentFilter })
+              }
+            >
+              {commitmentOptions(filters.medium).map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <label>
             <span>Ordenar</span>
-            <select value={filters.sort} onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}>
+            <select
+              value={filters.sort}
+              onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}
+            >
               <option value="bank-priority">Prioridad del banco</option>
-              {options.hasWatchPriority ? <><option value="focus-priority">Prioridad · mayor a menor</option><option value="focus-priority-asc">Prioridad · menor a mayor</option></> : null}
-              <option value="rating-desc">Mi nota · mayor a menor</option><option value="rating-asc">Mi nota · menor a mayor</option>
-              {options.hasEstimatedAffinity ? <><option value="estimated-affinity-desc">Afinidad para mí · mayor a menor</option><option value="estimated-affinity-asc">Afinidad para mí · menor a mayor</option></> : null}
-              {options.hasCinephile ? <><option value="cinephile-desc">Valor cinéfilo · mayor a menor</option><option value="cinephile-asc">Valor cinéfilo · menor a mayor</option></> : null}
-              {options.hasCultural ? <><option value="cultural-desc">Impacto cultural · mayor a menor</option><option value="cultural-asc">Impacto cultural · menor a mayor</option></> : null}
-              <option value="year-desc">Más recientes</option><option value="year-asc">Más antiguas</option>
-              <option value="title">Título A–Z</option><option value="title-desc">Título Z–A</option>
+              {options.hasWatchPriority ? (
+                <>
+                  <option value="focus-priority">Prioridad · mayor a menor</option>
+                  <option value="focus-priority-asc">Prioridad · menor a mayor</option>
+                </>
+              ) : null}
+              <option value="rating-desc">Mi nota · mayor a menor</option>
+              <option value="rating-asc">Mi nota · menor a mayor</option>
+              {options.hasEstimatedAffinity ? (
+                <>
+                  <option value="estimated-affinity-desc">Afinidad para mí · mayor a menor</option>
+                  <option value="estimated-affinity-asc">Afinidad para mí · menor a mayor</option>
+                </>
+              ) : null}
+              {options.hasCinephile ? (
+                <>
+                  <option value="cinephile-desc">Valor cinéfilo · mayor a menor</option>
+                  <option value="cinephile-asc">Valor cinéfilo · menor a mayor</option>
+                </>
+              ) : null}
+              {options.hasCultural ? (
+                <>
+                  <option value="cultural-desc">Impacto cultural · mayor a menor</option>
+                  <option value="cultural-asc">Impacto cultural · menor a mayor</option>
+                </>
+              ) : null}
+              <option value="year-desc">Más recientes</option>
+              <option value="year-asc">Más antiguas</option>
+              <option value="title">Título A–Z</option>
+              <option value="title-desc">Título Z–A</option>
             </select>
           </label>
         </div>
       </section>
 
       <div className={styles['result-header']}>
-        <div><strong>{results.length}</strong> {results.length === 1 ? 'resultado' : 'resultados'} <span>de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}</span></div>
-        {options.hasWatchPriority ? <span className={styles['score-note']}>Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% impacto cultural.</span> : null}
+        <div>
+          <strong>{results.length}</strong> {results.length === 1 ? 'resultado' : 'resultados'}{' '}
+          <span>
+            de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}
+          </span>
+        </div>
+        {options.hasWatchPriority ? (
+          <span className={styles['score-note']}>
+            Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% impacto
+            cultural.
+          </span>
+        ) : null}
       </div>
 
       {visible.length === 0 ? (
-        <EmptyState icon={Search} title="No hay coincidencias" description="Probá quitando uno de los filtros. El Banco no se modifica: esta vista sólo explora la fuente canónica." action={<button type="button" className={styles['empty-action']} onClick={clearFilters}>Limpiar filtros</button>} />
+        <EmptyState
+          icon={Search}
+          title="No hay coincidencias"
+          description="Probá quitando uno de los filtros. El Banco no se modifica: esta vista sólo explora la fuente canónica."
+          action={
+            <button type="button" className={styles['empty-action']} onClick={clearFilters}>
+              Limpiar filtros
+            </button>
+          }
+        />
       ) : (
         <section className={styles.grid} aria-label="Resultados de Media">
           {visible.map((item) => {
@@ -318,14 +443,25 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                 <MediaPoster title={item.title} posterPath={item.posterPath} />
                 <div className={styles['card-content']}>
                   <div className={styles['title-top']}>
-                    <div className={styles['title-block']}><h2>{item.title}</h2>{item.originalTitle && item.originalTitle !== item.title ? <p className={styles['original-title']}>{item.originalTitle}</p> : null}</div>
+                    <div className={styles['title-block']}>
+                      <h2>{item.title}</h2>
+                      {item.originalTitle && item.originalTitle !== item.title ? (
+                        <p className={styles['original-title']}>{item.originalTitle}</p>
+                      ) : null}
+                    </div>
                     {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
                   </div>
 
                   <div className={styles.badges}>
-                    <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>{item.state}</Badge>
-                    {item.manualFocusExcluded ? <Badge variant="outline">Excluida de lotes</Badge> : null}
-                    {item.manualFocusLevel !== null ? <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge> : null}
+                    <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>
+                      {item.state}
+                    </Badge>
+                    {item.manualFocusExcluded ? (
+                      <Badge variant="outline">Excluida de lotes</Badge>
+                    ) : null}
+                    {item.manualFocusLevel !== null ? (
+                      <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge>
+                    ) : null}
                     {item.radar ? <Badge domain="projects">Radar</Badge> : null}
                   </div>
 
@@ -334,19 +470,81 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                     {commitment ? <span>{commitment}</span> : null}
                     <MediaCountryFlags countries={item.countries} />
                   </div>
-                  {item.genres.length > 0 ? <div className={styles.genres}>{item.genres.slice(0, 4).map((genre) => <span key={genre}>{genre}</span>)}</div> : null}
-                  {item.ageFeelLabel ? <p className={styles['age-feel']} title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva.">{item.ageFeelLabel}</p> : null}
+                  {item.genres.length > 0 ? (
+                    <div className={styles.genres}>
+                      {item.genres.slice(0, 4).map((genre) => (
+                        <span key={genre}>{genre}</span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {item.ageFeelLabel ? (
+                    <p
+                      className={styles['age-feel']}
+                      title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva."
+                    >
+                      {item.ageFeelLabel}
+                    </p>
+                  ) : null}
 
                   <div className={styles['primary-scores']}>
-                    {item.estimatedAffinity !== null ? <div className={styles['primary-score']}><span>Afinidad para mí</span><strong>{score(item.estimatedAffinity)}</strong></div> : null}
-                    {priority !== null ? <div className={styles['primary-score']}><span>Prioridad de visionado</span><strong>{score(priority)}</strong></div> : null}
-                    {item.rating !== null ? <div className={`${styles['primary-score']} ${styles.observed}`}><span>Mi nota</span><strong>{score(item.rating)}</strong></div> : null}
+                    {item.estimatedAffinity !== null ? (
+                      <div className={styles['primary-score']}>
+                        <span>Afinidad para mí</span>
+                        <strong>{score(item.estimatedAffinity)}</strong>
+                      </div>
+                    ) : null}
+                    {priority !== null ? (
+                      <div className={styles['primary-score']}>
+                        <span>Prioridad de visionado</span>
+                        <strong>{score(priority)}</strong>
+                      </div>
+                    ) : null}
+                    {item.rating !== null ? (
+                      <div className={`${styles['primary-score']} ${styles.observed}`}>
+                        <span>Mi nota</span>
+                        <strong>{score(item.rating)}</strong>
+                      </div>
+                    ) : null}
                   </div>
-                  {item.cinephileValue !== null || item.culturalImpact !== null ? <div className={styles['inferred-scores']}>{item.cinephileValue !== null ? <span>Cinéfilo <strong>{score(item.cinephileValue)}</strong></span> : null}{item.culturalImpact !== null ? <span>Impacto <strong>{score(item.culturalImpact)}</strong></span> : null}</div> : null}
+                  {item.cinephileValue !== null || item.culturalImpact !== null ? (
+                    <div className={styles['inferred-scores']}>
+                      {item.cinephileValue !== null ? (
+                        <span>
+                          Cinéfilo <strong>{score(item.cinephileValue)}</strong>
+                        </span>
+                      ) : null}
+                      {item.culturalImpact !== null ? (
+                        <span>
+                          Impacto <strong>{score(item.culturalImpact)}</strong>
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
 
-                  {hasExperience ? <div className={styles.experience}>{item.spoilerFreeSummary ? <div className={styles['experience-block']}><span className={styles['experience-label']}>Sin spoilers</span><p>{item.spoilerFreeSummary}</p></div> : null}{item.whatToExpect ? <div className={styles['experience-block']}><span className={styles['experience-label']}>Qué esperar</span><p>{item.whatToExpect}</p></div> : null}</div> : null}
+                  {hasExperience ? (
+                    <div className={styles.experience}>
+                      {item.spoilerFreeSummary ? (
+                        <div className={styles['experience-block']}>
+                          <span className={styles['experience-label']}>Sin spoilers</span>
+                          <p>{item.spoilerFreeSummary}</p>
+                        </div>
+                      ) : null}
+                      {item.whatToExpect ? (
+                        <div className={styles['experience-block']}>
+                          <span className={styles['experience-label']}>Qué esperar</span>
+                          <p>{item.whatToExpect}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
 
-                  <ManualFocusControl itemKey={item.key} medium={item.medium} state={item.state} value={item.manualFocusLevel} excluded={item.manualFocusExcluded} />
+                  <ManualFocusControl
+                    itemKey={item.key}
+                    medium={item.medium}
+                    state={item.state}
+                    value={item.manualFocusLevel}
+                    excluded={item.manualFocusExcluded}
+                  />
                 </div>
               </article>
             );
@@ -354,8 +552,18 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
         </section>
       )}
 
-      {visibleCount < results.length ? <button type="button" className={styles['load-more']} onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}>Mostrar {Math.min(PAGE_SIZE, results.length - visibleCount)} más</button> : null}
-      <p className={styles.attribution}>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      {visibleCount < results.length ? (
+        <button
+          type="button"
+          className={styles['load-more']}
+          onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+        >
+          Mostrar {Math.min(PAGE_SIZE, results.length - visibleCount)} más
+        </button>
+      ) : null}
+      <p className={styles.attribution}>
+        This product uses the TMDB API but is not endorsed or certified by TMDB.
+      </p>
     </div>
   );
 }

@@ -73,7 +73,11 @@ export function deriveAgeFeel(
   rawExperienceProfile: string | null,
 ): AgeFeelSignal | null {
   if (medium !== 'movie' || year === null) return null;
-  const score = clamp(baseAgeFeel(year) + profileAdjustment(parseProfile(rawExperienceProfile)), 0, 10);
+  const score = clamp(
+    baseAgeFeel(year) + profileAdjustment(parseProfile(rawExperienceProfile)),
+    0,
+    10,
+  );
   const rounded = Math.round(score * 100) / 100;
   return { score: rounded, label: ageFeelLabel(rounded) };
 }

@@ -127,11 +127,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
     const creatorHeader = medium === 'movie' ? 'Director' : 'Creador / showrunner';
     const runtimeHeader = medium === 'movie' ? 'Duración min' : 'Duración episodio min';
     const manual = manualFocusValue(valueAt(row, indexes, 'Lote manual'));
-    const ageFeel = deriveAgeFeel(
-      medium,
-      year,
-      text(valueAt(row, indexes, 'Perfil experiencia')),
-    );
+    const ageFeel = deriveAgeFeel(medium, year, text(valueAt(row, indexes, 'Perfil experiencia')));
 
     titles.push({
       key: mediaPublicKey(medium, title, year),
