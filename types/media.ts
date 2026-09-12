@@ -1,4 +1,5 @@
 export type MediaKind = 'movie' | 'series';
+export type MediaFocusLevel = 1 | 2 | 3;
 
 export type MediaSourceState =
   | 'ready'
@@ -39,6 +40,7 @@ export interface MediaTitleView {
   cinephileValue: number | null;
   culturalImpact: number | null;
   generalScore: number | null;
+  manualFocusLevel: MediaFocusLevel | null;
   whyForMe: string | null;
   spoilerFreeSummary: string | null;
   whatToExpect: string | null;
