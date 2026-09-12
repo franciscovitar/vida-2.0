@@ -72,8 +72,12 @@ function withEstimatedAffinity(titles: MediaTitleView[]): MediaTitleView[] {
   let predictions: ReturnType<typeof loadPrivatePersonalFitV12>;
   try {
     predictions = loadPrivatePersonalFitV12();
-  } catch {
-    console.error('Media Personal Fit privado inválido; se omite la estimación provisional.');
+  } catch (error) {
+    const diagnostic = error instanceof Error ? error.message : 'unknown-error';
+    const encodedLength = process.env.MEDIA_PERSONAL_FIT_V12_SNAPSHOT?.trim().length ?? 0;
+    console.error(
+      `Media Personal Fit privado inválido; diag=${diagnostic}; encodedLength=${encodedLength}`,
+    );
     return titles;
   }
 
