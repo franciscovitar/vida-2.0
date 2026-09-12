@@ -1,24 +1,26 @@
-import type { MediaKind, MediaTitleView } from '@/types/media';
-
-export type MediaFocusLevel = 1 | 2 | 3;
+import type { MediaFocusLevel, MediaKind, MediaTitleView } from '@/types/media';
 
 const FOCUS_LIMITS: Record<MediaKind, Record<MediaFocusLevel, number>> = {
   movie: { 1: 10, 2: 50, 3: 100 },
   series: { 1: 5, 2: 20, 3: 40 },
 };
 
+const FOCUS_LEVELS: MediaFocusLevel[] = [1, 2, 3];
+
 function normalize(value: string | null): string {
   return (value ?? '').trim().toLocaleLowerCase('es-AR');
 }
 
-function tierBonus(tier: string | null): number {
+function tierRank(tier: string | null): number {
   const normalized = normalize(tier).toUpperCase();
-  if (normalized === 'A') return 0.3;
-  if (normalized === 'B') return 0.15;
-  return 0;
+  if (normalized === 'A') return 0;
+  if (normalized === 'B') return 1;
+  if (normalized === 'C') return 2;
+  if (normalized === 'D') return 3;
+  return 4;
 }
 
-function isFocusEligible(item: MediaTitleView, medium: MediaKind): boolean {
+function autoEligible(item: MediaTitleView, medium: MediaKind): boolean {
   if (item.medium !== medium || item.state !== 'Por ver') return false;
   if (medium === 'series') return true;
 
@@ -27,6 +29,24 @@ function isFocusEligible(item: MediaTitleView, medium: MediaKind): boolean {
     (normalize(item.bankTier).toUpperCase() === 'A' ||
       normalize(item.bankTier).toUpperCase() === 'B')
   );
+}
+
+/**
+ * Una prioridad manual siempre vuelve elegible un título `Por ver`, incluso si
+ * la película está fuera del Pool operativo automático. La decisión humana no
+ * altera Estado, Tier, Pool ni ninguna otra dimensión canónica.
+ */
+export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boolean {
+  if (item.medium !== medium || item.state !== 'Por ver') return false;
+  if (item.manualFocusLevel !== null) return true;
+  return autoEligible(item, medium);
+}
+
+export function deriveFocusCandidates(
+  titles: MediaTitleView[],
+  medium: MediaKind,
+): MediaTitleView[] {
+  return titles.filter((item) => isFocusCandidate(item, medium));
 }
 
 /**
@@ -49,7 +69,12 @@ export function adjustEstimatedAffinity(
   return Math.min(10, Math.max(0, adjusted));
 }
 
-function focusPriorityScore(item: MediaTitleView): number {
+/**
+ * Nota derivada de 0 a 10 que responde "¿qué tan prioritaria es verla?".
+ * No se persiste: se recalcula desde las tres dimensiones disponibles.
+ * Cuando falta una dimensión, las ponderaciones restantes se renormalizan.
+ */
+export function watchPriorityScore(item: MediaTitleView): number | null {
   let weighted = 0;
   let weight = 0;
 
@@ -66,69 +91,79 @@ function focusPriorityScore(item: MediaTitleView): number {
     weight += 0.2;
   }
 
-  const base = weight > 0 ? weighted / weight : 0;
-  return base + (item.radar ? 0.45 : 0) + tierBonus(item.bankTier);
+  if (weight === 0) return null;
+  return Math.min(10, Math.max(0, weighted / weight));
 }
 
-function compareFocusBase(left: MediaTitleView, right: MediaTitleView): number {
+function compareNullablePriority(left: number | null, right: number | null): number {
+  if (left === null && right === null) return 0;
+  if (left === null) return 1;
+  if (right === null) return -1;
+  return right - left;
+}
+
+/**
+ * Radar/Tier no alteran la nota global: sólo desempatan dos títulos con la
+ * misma Prioridad de visionado. Así la métrica sigue siendo interpretable.
+ */
+export function compareFocusPriority(left: MediaTitleView, right: MediaTitleView): number {
   return (
-    focusPriorityScore(right) - focusPriorityScore(left) ||
+    compareNullablePriority(watchPriorityScore(left), watchPriorityScore(right)) ||
     Number(right.radar) - Number(left.radar) ||
-    tierBonus(right.bankTier) - tierBonus(left.bankTier) ||
+    tierRank(left.bankTier) - tierRank(right.bankTier) ||
     (right.year ?? -Infinity) - (left.year ?? -Infinity) ||
     left.title.localeCompare(right.title, 'es')
   );
 }
 
-function primaryGenre(item: MediaTitleView): string {
-  return normalize(item.genres[0] ?? null);
+export function focusLimit(medium: MediaKind, level: MediaFocusLevel): number {
+  return FOCUS_LIMITS[medium][level];
+}
+
+function manualApplies(item: MediaTitleView, level: MediaFocusLevel): boolean {
+  return item.manualFocusLevel !== null && item.manualFocusLevel <= level;
 }
 
 /**
- * Agrega diversidad suave sin cambiar el universo elegible.
- * El ranking determinístico se calcula una sola vez y luego se corta por nivel,
- * por lo que Foco 1 ⊂ Foco 2 ⊂ Foco 3.
+ * Construye niveles anidados. Sin overrides manuales son prefijos exactos del
+ * ranking (top 10/50/100 o 5/20/40). Un override manual aparece desde el nivel
+ * elegido en adelante; si hubiera más overrides que el cupo base, se conservan
+ * todos en vez de descartar una decisión explícita del usuario.
  */
-function diversify(ranked: MediaTitleView[]): MediaTitleView[] {
-  const remaining = ranked.map((item, baseIndex) => ({ item, baseIndex }));
-  const creatorUse = new Map<string, number>();
-  const genreUse = new Map<string, number>();
-  const output: MediaTitleView[] = [];
+function buildFocusLevels(
+  titles: MediaTitleView[],
+  medium: MediaKind,
+): Map<MediaFocusLevel, MediaTitleView[]> {
+  const ranked = deriveFocusCandidates(titles, medium).sort(compareFocusPriority);
+  const levels = new Map<MediaFocusLevel, MediaTitleView[]>();
+  const selected = new Set<string>();
+  let previous: MediaTitleView[] = [];
 
-  while (remaining.length > 0) {
-    let bestIndex = 0;
-    let bestCost = Number.POSITIVE_INFINITY;
+  for (const level of FOCUS_LEVELS) {
+    const current = [...previous];
 
-    remaining.forEach((entry, index) => {
-      const creator = normalize(entry.item.creator);
-      const genre = primaryGenre(entry.item);
-      const creatorPenalty = creator ? (creatorUse.get(creator) ?? 0) * 6 : 0;
-      const genrePenalty = genre ? (genreUse.get(genre) ?? 0) * 3 : 0;
-      const cost = entry.baseIndex + creatorPenalty + genrePenalty;
-
-      if (cost < bestCost) {
-        bestCost = cost;
-        bestIndex = index;
+    for (const item of ranked) {
+      if (!selected.has(item.key) && manualApplies(item, level)) {
+        current.push(item);
+        selected.add(item.key);
       }
-    });
+    }
 
-    const selected = remaining.splice(bestIndex, 1)[0];
-    if (!selected) break;
+    const limit = focusLimit(medium, level);
+    for (const item of ranked) {
+      if (current.length >= limit) break;
+      if (selected.has(item.key)) continue;
+      if (item.manualFocusLevel !== null && item.manualFocusLevel > level) continue;
+      current.push(item);
+      selected.add(item.key);
+    }
 
-    const { item } = selected;
-    output.push(item);
-
-    const creator = normalize(item.creator);
-    const genre = primaryGenre(item);
-    if (creator) creatorUse.set(creator, (creatorUse.get(creator) ?? 0) + 1);
-    if (genre) genreUse.set(genre, (genreUse.get(genre) ?? 0) + 1);
+    current.sort(compareFocusPriority);
+    levels.set(level, current);
+    previous = current;
   }
 
-  return output;
-}
-
-export function focusLimit(medium: MediaKind, level: MediaFocusLevel): number {
-  return FOCUS_LIMITS[medium][level];
+  return levels;
 }
 
 export function deriveFocusTitles(
@@ -136,6 +171,5 @@ export function deriveFocusTitles(
   medium: MediaKind,
   level: MediaFocusLevel,
 ): MediaTitleView[] {
-  const ranked = titles.filter((item) => isFocusEligible(item, medium)).sort(compareFocusBase);
-  return diversify(ranked).slice(0, focusLimit(medium, level));
+  return buildFocusLevels(titles, medium).get(level) ?? [];
 }

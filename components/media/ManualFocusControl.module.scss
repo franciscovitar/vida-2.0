@@ -1,0 +1,52 @@
+.control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.toggle {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+}
+
+.select {
+  min-height: 34px;
+  padding: 0.35rem 1.8rem 0.35rem 0.55rem;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.toggle input:focus-visible,
+.select:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.status {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+}
+
+.error {
+  color: var(--danger, #b42318);
+}

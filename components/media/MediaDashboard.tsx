@@ -3,8 +3,10 @@
 import { Film, Search, SlidersHorizontal, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { ManualFocusControl } from '@/components/media/ManualFocusControl';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { watchPriorityScore } from '@/lib/media/focus';
 import {
   countCollection,
   deriveMediaFilterOptions,
@@ -216,7 +218,8 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           </button>
         </div>
         <p className={styles['bank-principle']}>
-          <strong>Banco = opciones, no pendientes.</strong> Filtrá lo que tenga sentido para hoy.
+          <strong>Banco = opciones, no pendientes.</strong> Buscá cualquier título por ver y podés
+          fijarlo manualmente en un lote.
         </p>
       </section>
 
@@ -384,9 +387,15 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
               onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}
             >
               <option value="bank-priority">Prioridad del banco</option>
+              {options.hasWatchPriority ? (
+                <option value="focus-priority">Prioridad de visionado</option>
+              ) : null}
               <option value="rating-desc">Mi nota</option>
               {options.hasAffinity ? (
                 <option value="affinity-desc">Afinidad personal</option>
+              ) : null}
+              {options.hasEstimatedAffinity ? (
+                <option value="estimated-affinity-desc">Estimación para vos</option>
               ) : null}
               {options.hasCultural ? (
                 <option value="cultural-desc">Popularidad / impacto cultural</option>
@@ -410,7 +419,11 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}
           </span>
         </div>
-        {!options.hasScores ? (
+        {options.hasWatchPriority ? (
+          <span className={styles['score-note']}>
+            La Prioridad de visionado es derivada; tu Lote manual sí se guarda.
+          </span>
+        ) : !options.hasScores ? (
           <span className={styles['score-note']}>
             Scores personales aún no certificados/persistidos.
           </span>
@@ -432,8 +445,10 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
         <section className={styles.grid} aria-label="Resultados de Media">
           {visible.map((item) => {
             const commitment = runtimeLabel(item);
+            const priority = watchPriorityScore(item);
             const hasInference =
               item.affinity !== null ||
+              item.estimatedAffinity !== null ||
               item.cinephileValue !== null ||
               item.culturalImpact !== null ||
               item.generalScore !== null;
@@ -455,6 +470,9 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                   <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>
                     {item.state}
                   </Badge>
+                  {item.manualFocusLevel !== null ? (
+                    <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge>
+                  ) : null}
                   {item.bankTier ? <Badge variant="outline">Tier {item.bankTier}</Badge> : null}
                   {item.radar ? <Badge domain="projects">Radar</Badge> : null}
                 </div>
@@ -497,11 +515,22 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                       <strong>{score(item.rating)}</strong>
                     </div>
                   ) : null}
+                  {priority !== null ? (
+                    <div className={styles['observed-score']}>
+                      <span>Prioridad de visionado</span>
+                      <strong>{score(priority)} / 10</strong>
+                    </div>
+                  ) : null}
                   {hasInference ? (
                     <div className={styles['inferred-scores']}>
                       {item.affinity !== null ? (
                         <span>
                           Afinidad <strong>{score(item.affinity)}</strong>
+                        </span>
+                      ) : null}
+                      {item.estimatedAffinity !== null ? (
+                        <span>
+                          Estimación <strong>{score(item.estimatedAffinity)}</strong>
                         </span>
                       ) : null}
                       {item.cinephileValue !== null ? (
@@ -529,6 +558,13 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                     <p>{item.whyForMe}</p>
                   </div>
                 ) : null}
+
+                <ManualFocusControl
+                  itemKey={item.key}
+                  medium={item.medium}
+                  state={item.state}
+                  value={item.manualFocusLevel}
+                />
               </article>
             );
           })}

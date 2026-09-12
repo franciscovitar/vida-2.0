@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import { primaryNav } from '@/lib/constants/navigation';
 import { parseMediaTab } from '@/lib/media/parse';
-import { getMediaSpreadsheetId } from '@/lib/media/sheets-config';
+import { areMediaSheetWritesAllowed, getMediaSpreadsheetId } from '@/lib/media/sheets-config';
 import { deriveMediaFilterOptions, filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
 import type { MediaFilters, MediaTitleView } from '@/types/media';
 
@@ -27,6 +27,7 @@ const MOVIE_HEADERS = [
   'Valor cinéfilo',
   'Impacto cultural',
   'Score general',
+  'Lote manual',
   'Por qué para mí',
   'Resumen sin spoilers',
   'Qué esperar',
@@ -47,6 +48,7 @@ function movieRow(input: {
   country?: string;
   runtime?: number;
   generalScore?: number;
+  manualFocusLevel?: number;
   summary?: string;
   whatToExpect?: string;
   experienceConfidence?: number;
@@ -71,6 +73,7 @@ function movieRow(input: {
     'Valor cinéfilo': '',
     'Impacto cultural': '',
     'Score general': input.generalScore ?? '',
+    'Lote manual': input.manualFocusLevel ?? '',
     'Por qué para mí': '',
     'Resumen sin spoilers': input.summary ?? '',
     'Qué esperar': input.whatToExpect ?? '',
@@ -122,6 +125,7 @@ function title(
     cinephileValue: null,
     culturalImpact: null,
     generalScore: null,
+    manualFocusLevel: null,
     whyForMe: null,
     spoilerFreeSummary: null,
     whatToExpect: null,
@@ -146,6 +150,12 @@ test('Media usa exclusivamente su spreadsheet dedicado', () => {
   );
 });
 
+test('escrituras Media nacen apagadas y requieren literal exacto true', () => {
+  assert.equal(areMediaSheetWritesAllowed({}), false);
+  assert.equal(areMediaSheetWritesAllowed({ GOOGLE_MEDIA_SHEETS_ALLOW_WRITES: 'TRUE' }), false);
+  assert.equal(areMediaSheetWritesAllowed({ GOOGLE_MEDIA_SHEETS_ALLOW_WRITES: 'true' }), true);
+});
+
 test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance/source URL', () => {
   const parsed = parseMediaTab('Movies', [
     [...MOVIE_HEADERS],
@@ -158,6 +168,7 @@ test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance
       country: 'Corea del Sur',
       runtime: 132,
       rating: 9,
+      manualFocusLevel: 2,
       summary: 'Una familia se cruza con otra de una posición social muy distinta.',
       whatToExpect: 'Thriller social de tono cambiante, con humor negro y tensión creciente.',
       experienceConfidence: 90,
@@ -171,6 +182,7 @@ test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance
   assert.equal(parsed.titles[0]?.creator, 'Bong Joon-ho');
   assert.deepEqual(parsed.titles[0]?.genres, ['Drama', 'Thriller']);
   assert.equal(parsed.titles[0]?.estimatedAffinity, null);
+  assert.equal(parsed.titles[0]?.manualFocusLevel, 2);
   assert.equal(
     parsed.titles[0]?.spoilerFreeSummary,
     'Una familia se cruza con otra de una posición social muy distinta.',
@@ -194,10 +206,15 @@ test('parser falla cerrado cuando falta un header canónico de presentación', (
   assert.deepEqual(parsed, { ok: false, missing: ['Duración min'] });
 });
 
-test('parser exige las dos columnas de experiencia que la UI presenta', () => {
-  const headers = MOVIE_HEADERS.filter((header) => header !== 'Qué esperar');
-  const parsed = parseMediaTab('Movies', [headers]);
-  assert.deepEqual(parsed, { ok: false, missing: ['Qué esperar'] });
+test('parser exige Lote manual y las columnas de experiencia que la UI presenta', () => {
+  const missingLot = MOVIE_HEADERS.filter((header) => header !== 'Lote manual');
+  assert.deepEqual(parseMediaTab('Movies', [missingLot]), { ok: false, missing: ['Lote manual'] });
+
+  const missingExperience = MOVIE_HEADERS.filter((header) => header !== 'Qué esperar');
+  assert.deepEqual(parseMediaTab('Movies', [missingExperience]), {
+    ok: false,
+    missing: ['Qué esperar'],
+  });
 });
 
 test('búsqueda y filtros son tolerantes a acentos y respetan el Banco', () => {
@@ -279,7 +296,7 @@ test('orden del Banco prioriza Radar y Tier sin inventar score', () => {
   );
 });
 
-test('dimensiones inferidas y estimación provisional se ordenan por separado', () => {
+test('dimensiones inferidas, prioridad y estimación provisional se ordenan por separado', () => {
   const titles = [
     title({
       key: 'a',
@@ -316,12 +333,17 @@ test('dimensiones inferidas y estimación provisional se ordenan por separado', 
     sortMediaTitles(titles, 'cultural-desc').map((item) => item.key),
     ['b', 'a', 'unknown'],
   );
+  assert.deepEqual(
+    sortMediaTitles(titles, 'focus-priority').map((item) => item.key),
+    ['a', 'b', 'unknown'],
+  );
 
   const options = deriveMediaFilterOptions(titles, 'movie');
   assert.equal(options.hasAffinity, true);
   assert.equal(options.hasEstimatedAffinity, true);
   assert.equal(options.hasCinephile, true);
   assert.equal(options.hasCultural, true);
+  assert.equal(options.hasWatchPriority, true);
 });
 
 test('Media aparece en la navegación principal', () => {
