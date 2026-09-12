@@ -4,7 +4,9 @@ import { Film, Search, SlidersHorizontal, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { ManualFocusControl } from '@/components/media/ManualFocusControl';
+import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaDashboardView } from '@/components/media/MediaDashboard';
+import { MediaPoster } from '@/components/media/MediaPoster';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
@@ -44,14 +46,15 @@ function initialFocusFilters(medium: MediaKind): MediaFilters {
 }
 
 function score(value: number | null): string {
-  return value === null ? '—' : value.toLocaleString('es-AR', { maximumFractionDigits: 1 });
+  return value === null
+    ? '—'
+    : value.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function commitmentLabel(item: MediaTitleView): string | null {
   if (item.medium === 'movie') {
     return item.runtimeMinutes === null ? null : `${Math.round(item.runtimeMinutes)} min`;
   }
-
   const parts: string[] = [];
   if (item.runtimeMinutes !== null) parts.push(`${Math.round(item.runtimeMinutes)} min/ep`);
   if (item.seasons !== null) parts.push(`${item.seasons} temp.`);
@@ -170,27 +173,23 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
     setFilters(initialFocusFilters(filters.medium));
   }
 
-  if (data.status === 'unavailable') {
-    return <MediaDashboardView data={data} />;
-  }
+  if (data.status === 'unavailable') return <MediaDashboardView data={data} />;
 
   if (exploring) {
     return (
       <div className={styles.stack}>
         <section className={styles.hero} aria-label="Explorador completo">
           <p className={styles['bank-principle']}>
-            <strong>Estás explorando el Banco completo.</strong> Buscá cualquier título por ver y
-            marcá tu prioridad manual cuando quieras forzarlo a un lote.
+            <strong>Estás explorando el Banco completo.</strong> Podés fijar un título en un lote o
+            marcarlo como no prioritario para excluirlo de todos los lotes.
           </p>
-          <div>
-            <button
-              type="button"
-              className={styles['empty-action']}
-              onClick={() => setExploring(false)}
-            >
-              Volver a lotes
-            </button>
-          </div>
+          <button
+            type="button"
+            className={styles['empty-action']}
+            onClick={() => setExploring(false)}
+          >
+            Volver a lotes
+          </button>
         </section>
         <MediaDashboardView data={data} />
       </div>
@@ -211,8 +210,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             data-active={filters.medium === 'movie'}
             onClick={() => switchMedium('movie')}
           >
-            <Film size={17} aria-hidden="true" />
-            Películas
+            <Film size={17} aria-hidden="true" /> Películas
           </button>
           <button
             type="button"
@@ -222,17 +220,14 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             data-active={filters.medium === 'series'}
             onClick={() => switchMedium('series')}
           >
-            <Tv size={17} aria-hidden="true" />
-            Series
+            <Tv size={17} aria-hidden="true" /> Series
           </button>
         </div>
-
         <p className={styles['bank-principle']}>
           <strong>Los lotes se recalculan con tus filtros.</strong> Primero definís el universo y
           después entran las mejores opciones por Prioridad de visionado; cada nivel contiene al
           anterior.
         </p>
-
         <div className={styles['collection-tabs']} role="group" aria-label="Nivel de lote">
           {FOCUS_LEVELS.map((focusLevel) => {
             const count = focusByLevel.get(focusLevel)?.length ?? 0;
@@ -263,11 +258,9 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             onChange={(event) => patchFilters({ query: event.target.value })}
           />
         </label>
-
         <div className={styles['filter-header']}>
           <span>
-            <SlidersHorizontal size={16} aria-hidden="true" />
-            Filtros que recalculan Lote {level}
+            <SlidersHorizontal size={16} aria-hidden="true" /> Filtros que recalculan Lote {level}
           </span>
           {hasExtraFilters(filters) ? (
             <button type="button" className={styles['clear-button']} onClick={clearFilters}>
@@ -275,7 +268,6 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             </button>
           ) : null}
         </div>
-
         <div className={styles['filter-grid']}>
           <label>
             <span>Género</span>
@@ -365,14 +357,30 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
               value={filters.sort}
               onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}
             >
-              <option value="focus-priority">Prioridad de visionado</option>
+              <option value="focus-priority">Prioridad · mayor a menor</option>
+              <option value="focus-priority-asc">Prioridad · menor a mayor</option>
               {options.hasEstimatedAffinity ? (
-                <option value="estimated-affinity-desc">Estimación para vos</option>
+                <>
+                  <option value="estimated-affinity-desc">Afinidad para mí · mayor a menor</option>
+                  <option value="estimated-affinity-asc">Afinidad para mí · menor a mayor</option>
+                </>
               ) : null}
-              {options.hasCinephile ? <option value="cinephile-desc">Valor cinéfilo</option> : null}
-              {options.hasCultural ? <option value="cultural-desc">Impacto cultural</option> : null}
+              {options.hasCinephile ? (
+                <>
+                  <option value="cinephile-desc">Valor cinéfilo · mayor a menor</option>
+                  <option value="cinephile-asc">Valor cinéfilo · menor a mayor</option>
+                </>
+              ) : null}
+              {options.hasCultural ? (
+                <>
+                  <option value="cultural-desc">Impacto cultural · mayor a menor</option>
+                  <option value="cultural-asc">Impacto cultural · menor a mayor</option>
+                </>
+              ) : null}
               <option value="year-desc">Más recientes</option>
+              <option value="year-asc">Más antiguas</option>
               <option value="title">Título A–Z</option>
+              <option value="title-desc">Título Z–A</option>
             </select>
           </label>
         </div>
@@ -380,17 +388,15 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
 
       <div className={styles['result-header']}>
         <div>
-          <strong>{focus.length}</strong> {focus.length === 1 ? 'resultado' : 'resultados'}
+          <strong>{focus.length}</strong> {focus.length === 1 ? 'resultado' : 'resultados'}{' '}
           <span>
-            {' '}
             · top de {filteredCandidates.length} coincidencias · Lote {level} ·{' '}
             {levelPurpose(level)} · objetivo {focusLimit(filters.medium, level)}
           </span>
         </div>
         <span className={styles['score-note']}>
-          Prioridad de visionado = 55% afinidad estimada + 25% valor cinéfilo + 20% impacto
-          cultural; si falta una dimensión, se renormaliza. Tu prioridad manual prevalece sobre el
-          corte, no sobre los filtros.
+          Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% impacto cultural.
+          “Se siente de época” ajusta sólo tu afinidad.
         </span>
       </div>
 
@@ -411,71 +417,65 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             const commitment = commitmentLabel(item);
             const guidance = item.whatToExpect ?? item.spoilerFreeSummary;
             const priority = watchPriorityScore(item);
-
             return (
               <article key={item.key} className={styles['title-card']}>
-                <div className={styles['title-top']}>
-                  <div className={styles['title-block']}>
-                    <h2>{item.title}</h2>
-                    {item.originalTitle && item.originalTitle !== item.title ? (
-                      <p className={styles['original-title']}>{item.originalTitle}</p>
-                    ) : null}
-                  </div>
-                  {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
-                </div>
-
-                <div className={styles.badges}>
-                  {item.key === firstFocusKey ? (
-                    <Badge domain="projects">Primera del lote</Badge>
-                  ) : null}
-                  {item.manualFocusLevel !== null ? (
-                    <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge>
-                  ) : null}
-                  {item.radar ? <Badge domain="projects">Radar</Badge> : null}
-                  {item.bankTier ? <Badge variant="outline">Tier {item.bankTier}</Badge> : null}
-                </div>
-
-                <div className={styles.meta}>
-                  {item.creator ? <span>{item.creator}</span> : null}
-                  {commitment ? <span>{commitment}</span> : null}
-                  {item.countries.length > 0 ? <span>{item.countries.join(', ')}</span> : null}
-                </div>
-
-                {item.genres.length > 0 ? (
-                  <div className={styles.genres}>
-                    {item.genres.slice(0, 3).map((genre) => (
-                      <span key={genre}>{genre}</span>
-                    ))}
-                  </div>
-                ) : null}
-
-                {guidance ? (
-                  <div className={styles.experience}>
-                    <div className={styles['experience-block']}>
-                      <span className={styles['experience-label']}>Para elegir</span>
-                      <p>{guidance}</p>
+                <MediaPoster title={item.title} posterPath={item.posterPath} />
+                <div className={styles['card-content']}>
+                  <div className={styles['title-top']}>
+                    <div className={styles['title-block']}>
+                      <h2>{item.title}</h2>
+                      {item.originalTitle && item.originalTitle !== item.title ? (
+                        <p className={styles['original-title']}>{item.originalTitle}</p>
+                      ) : null}
                     </div>
+                    {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
                   </div>
-                ) : null}
+                  <div className={styles.badges}>
+                    {item.key === firstFocusKey ? (
+                      <Badge domain="projects">Primera del lote</Badge>
+                    ) : null}
+                    {item.manualFocusLevel !== null ? (
+                      <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge>
+                    ) : null}
+                    {item.radar ? <Badge domain="projects">Radar</Badge> : null}
+                  </div>
+                  <div className={styles.meta}>
+                    {item.creator ? <span>{item.creator}</span> : null}
+                    {commitment ? <span>{commitment}</span> : null}
+                    <MediaCountryFlags countries={item.countries} />
+                  </div>
+                  {item.genres.length > 0 ? (
+                    <div className={styles.genres}>
+                      {item.genres.slice(0, 3).map((genre) => (
+                        <span key={genre}>{genre}</span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {item.ageFeelLabel ? (
+                    <p
+                      className={styles['age-feel']}
+                      title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva."
+                    >
+                      {item.ageFeelLabel}
+                    </p>
+                  ) : null}
 
-                {priority !== null ||
-                item.estimatedAffinity !== null ||
-                item.cinephileValue !== null ||
-                item.culturalImpact !== null ? (
-                  <div className={styles.scores}>
-                    {priority !== null ? (
-                      <div className={styles['observed-score']}>
-                        <span>Prioridad de visionado</span>
-                        <strong>{score(priority)} / 10</strong>
+                  <div className={styles['primary-scores']}>
+                    {item.estimatedAffinity !== null ? (
+                      <div className={styles['primary-score']}>
+                        <span>Afinidad para mí</span>
+                        <strong>{score(item.estimatedAffinity)}</strong>
                       </div>
                     ) : null}
+                    {priority !== null ? (
+                      <div className={styles['primary-score']}>
+                        <span>Prioridad de visionado</span>
+                        <strong>{score(priority)}</strong>
+                      </div>
+                    ) : null}
+                  </div>
+                  {item.cinephileValue !== null || item.culturalImpact !== null ? (
                     <div className={styles['inferred-scores']}>
-                      {item.estimatedAffinity !== null ? (
-                        <span>
-                          Estimación para vos <strong>{score(item.estimatedAffinity)} / 10</strong>{' '}
-                          <small>(provisional)</small>
-                        </span>
-                      ) : null}
                       {item.cinephileValue !== null ? (
                         <span>
                           Cinéfilo <strong>{score(item.cinephileValue)}</strong>
@@ -487,16 +487,24 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                         </span>
                       ) : null}
                     </div>
-                  </div>
-                ) : null}
-
-                <ManualFocusControl
-                  itemKey={item.key}
-                  medium={item.medium}
-                  state={item.state}
-                  value={item.manualFocusLevel}
-                  defaultLevel={level}
-                />
+                  ) : null}
+                  {guidance ? (
+                    <div className={styles.experience}>
+                      <div className={styles['experience-block']}>
+                        <span className={styles['experience-label']}>Para elegir</span>
+                        <p>{guidance}</p>
+                      </div>
+                    </div>
+                  ) : null}
+                  <ManualFocusControl
+                    itemKey={item.key}
+                    medium={item.medium}
+                    state={item.state}
+                    value={item.manualFocusLevel}
+                    excluded={item.manualFocusExcluded}
+                    defaultLevel={level}
+                  />
+                </div>
               </article>
             );
           })}
@@ -505,19 +513,15 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
 
       <section className={styles.controls} aria-label="Banco completo">
         <p className={styles['bank-principle']}>
-          ¿Querés forzar una opción que no apareció? Buscala en el Banco completo y marcala como
-          prioritaria para elegir su lote.
+          ¿Querés forzar o excluir una opción que no apareció? Buscala en el Banco completo.
         </p>
-        <div>
-          <button
-            type="button"
-            className={styles['empty-action']}
-            onClick={() => setExploring(true)}
-          >
-            Explorar Banco completo
-          </button>
-        </div>
+        <button type="button" className={styles['empty-action']} onClick={() => setExploring(true)}>
+          Explorar Banco completo
+        </button>
       </section>
+      <p className={styles.attribution}>
+        This product uses the TMDB API but is not endorsed or certified by TMDB.
+      </p>
     </div>
   );
 }

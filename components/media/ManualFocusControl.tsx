@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import type { MediaFocusLevel, MediaKind } from '@/types/media';
+import type { MediaFocusLevel, MediaKind, MediaManualFocus } from '@/types/media';
 
 import styles from './ManualFocusControl.module.scss';
 
@@ -12,6 +12,7 @@ interface ManualFocusControlProps {
   medium: MediaKind;
   state: string;
   value: MediaFocusLevel | null;
+  excluded: boolean;
   defaultLevel?: MediaFocusLevel;
 }
 
@@ -20,16 +21,18 @@ export function ManualFocusControl({
   medium,
   state,
   value,
+  excluded,
   defaultLevel = 1,
 }: ManualFocusControlProps) {
   const router = useRouter();
   const [selected, setSelected] = useState<MediaFocusLevel | null>(value);
+  const [isExcluded, setIsExcluded] = useState(excluded);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
 
   if (state !== 'Por ver') return null;
 
-  async function save(next: MediaFocusLevel | null) {
+  async function save(next: MediaManualFocus) {
     setSaving(true);
     setError(false);
     try {
@@ -42,7 +45,8 @@ export function ManualFocusControl({
         setError(true);
         return;
       }
-      setSelected(next);
+      setSelected(typeof next === 'number' ? next : null);
+      setIsExcluded(next === 'exclude');
       router.refresh();
     } catch {
       setError(true);
@@ -51,19 +55,32 @@ export function ManualFocusControl({
     }
   }
 
-  const checked = selected !== null;
+  const checked = selected !== null && !isExcluded;
 
   return (
     <div className={styles.control}>
-      <label className={styles.toggle}>
-        <input
-          type="checkbox"
-          checked={checked}
+      <div className={styles.actions}>
+        <label className={styles.toggle}>
+          <input
+            type="checkbox"
+            checked={checked}
+            disabled={saving}
+            onChange={(event) => void save(event.target.checked ? defaultLevel : null)}
+          />
+          <span>Prioritaria para mí</span>
+        </label>
+
+        <button
+          type="button"
+          className={styles.exclude}
+          data-active={isExcluded}
           disabled={saving}
-          onChange={(event) => void save(event.target.checked ? defaultLevel : null)}
-        />
-        <span>Prioritaria para mí</span>
-      </label>
+          aria-pressed={isExcluded}
+          onClick={() => void save(isExcluded ? null : 'exclude')}
+        >
+          {isExcluded ? 'Excluida de lotes' : 'No es prioritaria para mí'}
+        </button>
+      </div>
 
       {checked ? (
         <select
@@ -79,6 +96,9 @@ export function ManualFocusControl({
         </select>
       ) : null}
 
+      {isExcluded ? (
+        <p className={styles.hint}>No entra en ningún lote automático hasta que lo cambies.</p>
+      ) : null}
       {saving ? <p className={styles.status}>Guardando…</p> : null}
       {error ? (
         <p className={`${styles.status} ${styles.error}`}>No se pudo guardar la prioridad.</p>

@@ -1,5 +1,6 @@
 export type MediaKind = 'movie' | 'series';
 export type MediaFocusLevel = 1 | 2 | 3;
+export type MediaManualFocus = MediaFocusLevel | 'exclude' | null;
 
 export type MediaSourceState =
   | 'ready'
@@ -35,12 +36,16 @@ export interface MediaTitleView {
   countries: string[];
   runtimeMinutes: number | null;
   seasons: number | null;
+  posterPath: string | null;
   affinity: number | null;
   estimatedAffinity: number | null;
   cinephileValue: number | null;
   culturalImpact: number | null;
   generalScore: number | null;
   manualFocusLevel: MediaFocusLevel | null;
+  manualFocusExcluded: boolean;
+  ageFeelScore: number | null;
+  ageFeelLabel: string | null;
   whyForMe: string | null;
   spoilerFreeSummary: string | null;
   whatToExpect: string | null;
@@ -73,14 +78,23 @@ export type MediaCommitmentFilter =
 export type MediaSort =
   | 'bank-priority'
   | 'focus-priority'
+  | 'focus-priority-asc'
   | 'rating-desc'
+  | 'rating-asc'
   | 'affinity-desc'
+  | 'affinity-asc'
   | 'estimated-affinity-desc'
+  | 'estimated-affinity-asc'
   | 'cinephile-desc'
+  | 'cinephile-asc'
   | 'cultural-desc'
+  | 'cultural-asc'
   | 'score-desc'
+  | 'score-asc'
   | 'year-desc'
-  | 'title';
+  | 'year-asc'
+  | 'title'
+  | 'title-desc';
 
 export interface MediaFilters {
   medium: MediaKind;

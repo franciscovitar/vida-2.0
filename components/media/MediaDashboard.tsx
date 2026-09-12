@@ -4,6 +4,8 @@ import { Film, Search, SlidersHorizontal, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { ManualFocusControl } from '@/components/media/ManualFocusControl';
+import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
+import { MediaPoster } from '@/components/media/MediaPoster';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { watchPriorityScore } from '@/lib/media/focus';
@@ -51,7 +53,9 @@ function initialFilters(medium: MediaKind): MediaFilters {
 }
 
 function score(value: number | null): string {
-  return value === null ? '—' : value.toLocaleString('es-AR', { maximumFractionDigits: 1 });
+  return value === null
+    ? '—'
+    : value.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function runtimeLabel(item: MediaTitleView): string | null {
@@ -114,13 +118,11 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
     () => deriveMediaFilterOptions(data.titles, filters.medium),
     [data.titles, filters.medium],
   );
-
   const results = useMemo(
     () => sortMediaTitles(filterMediaTitles(data.titles, filters), filters.sort),
     [data.titles, filters],
   );
   const visible = results.slice(0, visibleCount);
-
   const totals = useMemo(
     () => ({
       total: data.titles.filter((item) => item.medium === filters.medium).length,
@@ -202,8 +204,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             data-active={filters.medium === 'movie'}
             onClick={() => switchMedium('movie')}
           >
-            <Film size={17} aria-hidden="true" />
-            Películas
+            <Film size={17} aria-hidden="true" /> Películas
           </button>
           <button
             type="button"
@@ -213,49 +214,33 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             data-active={filters.medium === 'series'}
             onClick={() => switchMedium('series')}
           >
-            <Tv size={17} aria-hidden="true" />
-            Series
+            <Tv size={17} aria-hidden="true" /> Series
           </button>
         </div>
         <p className={styles['bank-principle']}>
-          <strong>Banco = opciones, no pendientes.</strong> Buscá cualquier título por ver y podés
-          fijarlo manualmente en un lote.
+          <strong>Banco = opciones, no pendientes.</strong> Afinidad para mí responde cuánto
+          probablemente te guste; Prioridad de visionado combina esa afinidad con valor cinéfilo e
+          impacto cultural.
         </p>
       </section>
 
       <section className={styles.metrics} aria-label={`Resumen de ${mediumLabel(filters.medium)}`}>
-        <button
-          type="button"
-          className={styles.metric}
-          onClick={() => patchFilters({ collection: 'all' })}
-        >
-          <span>Total</span>
-          <strong>{totals.total}</strong>
-        </button>
-        <button
-          type="button"
-          className={styles.metric}
-          onClick={() => patchFilters({ collection: 'bank' })}
-        >
-          <span>Banco</span>
-          <strong>{totals.bank}</strong>
-        </button>
-        <button
-          type="button"
-          className={styles.metric}
-          onClick={() => patchFilters({ collection: 'seen' })}
-        >
-          <span>{filters.medium === 'movie' ? 'Vistas' : 'Terminadas'}</span>
-          <strong>{totals.seen}</strong>
-        </button>
-        <button
-          type="button"
-          className={styles.metric}
-          onClick={() => patchFilters({ collection: 'active' })}
-        >
-          <span>En curso</span>
-          <strong>{totals.active}</strong>
-        </button>
+        {[
+          ['all', 'Total', totals.total],
+          ['bank', 'Banco', totals.bank],
+          ['seen', filters.medium === 'movie' ? 'Vistas' : 'Terminadas', totals.seen],
+          ['active', 'En curso', totals.active],
+        ].map(([collection, label, value]) => (
+          <button
+            key={String(collection)}
+            type="button"
+            className={styles.metric}
+            onClick={() => patchFilters({ collection: collection as MediaCollectionFilter })}
+          >
+            <span>{label}</span>
+            <strong>{value}</strong>
+          </button>
+        ))}
       </section>
 
       <section className={styles.controls} aria-label="Filtros de Media">
@@ -287,8 +272,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
 
         <div className={styles['filter-header']}>
           <span>
-            <SlidersHorizontal size={16} aria-hidden="true" />
-            Filtros
+            <SlidersHorizontal size={16} aria-hidden="true" /> Filtros
           </span>
           {hasExtraFilters(filters) ? (
             <button type="button" className={styles['clear-button']} onClick={clearFilters}>
@@ -388,24 +372,35 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             >
               <option value="bank-priority">Prioridad del banco</option>
               {options.hasWatchPriority ? (
-                <option value="focus-priority">Prioridad de visionado</option>
+                <>
+                  <option value="focus-priority">Prioridad · mayor a menor</option>
+                  <option value="focus-priority-asc">Prioridad · menor a mayor</option>
+                </>
               ) : null}
-              <option value="rating-desc">Mi nota</option>
-              {options.hasAffinity ? (
-                <option value="affinity-desc">Afinidad personal</option>
-              ) : null}
+              <option value="rating-desc">Mi nota · mayor a menor</option>
+              <option value="rating-asc">Mi nota · menor a mayor</option>
               {options.hasEstimatedAffinity ? (
-                <option value="estimated-affinity-desc">Estimación para vos</option>
-              ) : null}
-              {options.hasCultural ? (
-                <option value="cultural-desc">Popularidad / impacto cultural</option>
+                <>
+                  <option value="estimated-affinity-desc">Afinidad para mí · mayor a menor</option>
+                  <option value="estimated-affinity-asc">Afinidad para mí · menor a mayor</option>
+                </>
               ) : null}
               {options.hasCinephile ? (
-                <option value="cinephile-desc">Valor cinéfilo / culto</option>
+                <>
+                  <option value="cinephile-desc">Valor cinéfilo · mayor a menor</option>
+                  <option value="cinephile-asc">Valor cinéfilo · menor a mayor</option>
+                </>
               ) : null}
-              {options.hasScores ? <option value="score-desc">Score general</option> : null}
+              {options.hasCultural ? (
+                <>
+                  <option value="cultural-desc">Impacto cultural · mayor a menor</option>
+                  <option value="cultural-asc">Impacto cultural · menor a mayor</option>
+                </>
+              ) : null}
               <option value="year-desc">Más recientes</option>
+              <option value="year-asc">Más antiguas</option>
               <option value="title">Título A–Z</option>
+              <option value="title-desc">Título Z–A</option>
             </select>
           </label>
         </div>
@@ -413,19 +408,15 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
 
       <div className={styles['result-header']}>
         <div>
-          <strong>{results.length}</strong> {results.length === 1 ? 'resultado' : 'resultados'}
+          <strong>{results.length}</strong> {results.length === 1 ? 'resultado' : 'resultados'}{' '}
           <span>
-            {' '}
             de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}
           </span>
         </div>
         {options.hasWatchPriority ? (
           <span className={styles['score-note']}>
-            La Prioridad de visionado es derivada; tu Lote manual sí se guarda.
-          </span>
-        ) : !options.hasScores ? (
-          <span className={styles['score-note']}>
-            Scores personales aún no certificados/persistidos.
+            Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% impacto
+            cultural.
           </span>
         ) : null}
       </div>
@@ -446,93 +437,77 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           {visible.map((item) => {
             const commitment = runtimeLabel(item);
             const priority = watchPriorityScore(item);
-            const hasInference =
-              item.affinity !== null ||
-              item.estimatedAffinity !== null ||
-              item.cinephileValue !== null ||
-              item.culturalImpact !== null ||
-              item.generalScore !== null;
             const hasExperience = Boolean(item.spoilerFreeSummary || item.whatToExpect);
-
             return (
               <article key={item.key} className={styles['title-card']}>
-                <div className={styles['title-top']}>
-                  <div className={styles['title-block']}>
-                    <h2>{item.title}</h2>
-                    {item.originalTitle && item.originalTitle !== item.title ? (
-                      <p className={styles['original-title']}>{item.originalTitle}</p>
-                    ) : null}
+                <MediaPoster title={item.title} posterPath={item.posterPath} />
+                <div className={styles['card-content']}>
+                  <div className={styles['title-top']}>
+                    <div className={styles['title-block']}>
+                      <h2>{item.title}</h2>
+                      {item.originalTitle && item.originalTitle !== item.title ? (
+                        <p className={styles['original-title']}>{item.originalTitle}</p>
+                      ) : null}
+                    </div>
+                    {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
                   </div>
-                  {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
-                </div>
 
-                <div className={styles.badges}>
-                  <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>
-                    {item.state}
-                  </Badge>
-                  {item.manualFocusLevel !== null ? (
-                    <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge>
-                  ) : null}
-                  {item.bankTier ? <Badge variant="outline">Tier {item.bankTier}</Badge> : null}
-                  {item.radar ? <Badge domain="projects">Radar</Badge> : null}
-                </div>
-
-                <div className={styles.meta}>
-                  {item.creator ? <span>{item.creator}</span> : null}
-                  {commitment ? <span>{commitment}</span> : null}
-                  {item.countries.length > 0 ? <span>{item.countries.join(', ')}</span> : null}
-                </div>
-
-                {item.genres.length > 0 ? (
-                  <div className={styles.genres}>
-                    {item.genres.map((genre) => (
-                      <span key={genre}>{genre}</span>
-                    ))}
-                  </div>
-                ) : null}
-
-                {hasExperience ? (
-                  <div className={styles.experience}>
-                    {item.spoilerFreeSummary ? (
-                      <div className={styles['experience-block']}>
-                        <span className={styles['experience-label']}>Sin spoilers</span>
-                        <p>{item.spoilerFreeSummary}</p>
-                      </div>
+                  <div className={styles.badges}>
+                    <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>
+                      {item.state}
+                    </Badge>
+                    {item.manualFocusExcluded ? (
+                      <Badge variant="outline">Excluida de lotes</Badge>
                     ) : null}
-                    {item.whatToExpect ? (
-                      <div className={styles['experience-block']}>
-                        <span className={styles['experience-label']}>Qué esperar</span>
-                        <p>{item.whatToExpect}</p>
-                      </div>
+                    {item.manualFocusLevel !== null ? (
+                      <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge>
                     ) : null}
+                    {item.radar ? <Badge domain="projects">Radar</Badge> : null}
                   </div>
-                ) : null}
 
-                <div className={styles.scores}>
-                  {item.rating !== null ? (
-                    <div className={styles['observed-score']}>
-                      <span>Mi nota</span>
-                      <strong>{score(item.rating)}</strong>
+                  <div className={styles.meta}>
+                    {item.creator ? <span>{item.creator}</span> : null}
+                    {commitment ? <span>{commitment}</span> : null}
+                    <MediaCountryFlags countries={item.countries} />
+                  </div>
+                  {item.genres.length > 0 ? (
+                    <div className={styles.genres}>
+                      {item.genres.slice(0, 4).map((genre) => (
+                        <span key={genre}>{genre}</span>
+                      ))}
                     </div>
                   ) : null}
-                  {priority !== null ? (
-                    <div className={styles['observed-score']}>
-                      <span>Prioridad de visionado</span>
-                      <strong>{score(priority)} / 10</strong>
-                    </div>
+                  {item.ageFeelLabel ? (
+                    <p
+                      className={styles['age-feel']}
+                      title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva."
+                    >
+                      {item.ageFeelLabel}
+                    </p>
                   ) : null}
-                  {hasInference ? (
+
+                  <div className={styles['primary-scores']}>
+                    {item.estimatedAffinity !== null ? (
+                      <div className={styles['primary-score']}>
+                        <span>Afinidad para mí</span>
+                        <strong>{score(item.estimatedAffinity)}</strong>
+                      </div>
+                    ) : null}
+                    {priority !== null ? (
+                      <div className={styles['primary-score']}>
+                        <span>Prioridad de visionado</span>
+                        <strong>{score(priority)}</strong>
+                      </div>
+                    ) : null}
+                    {item.rating !== null ? (
+                      <div className={`${styles['primary-score']} ${styles.observed}`}>
+                        <span>Mi nota</span>
+                        <strong>{score(item.rating)}</strong>
+                      </div>
+                    ) : null}
+                  </div>
+                  {item.cinephileValue !== null || item.culturalImpact !== null ? (
                     <div className={styles['inferred-scores']}>
-                      {item.affinity !== null ? (
-                        <span>
-                          Afinidad <strong>{score(item.affinity)}</strong>
-                        </span>
-                      ) : null}
-                      {item.estimatedAffinity !== null ? (
-                        <span>
-                          Estimación <strong>{score(item.estimatedAffinity)}</strong>
-                        </span>
-                      ) : null}
                       {item.cinephileValue !== null ? (
                         <span>
                           Cinéfilo <strong>{score(item.cinephileValue)}</strong>
@@ -543,28 +518,34 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                           Impacto <strong>{score(item.culturalImpact)}</strong>
                         </span>
                       ) : null}
-                      {item.generalScore !== null ? (
-                        <span>
-                          General <strong>{score(item.generalScore)}</strong>
-                        </span>
+                    </div>
+                  ) : null}
+
+                  {hasExperience ? (
+                    <div className={styles.experience}>
+                      {item.spoilerFreeSummary ? (
+                        <div className={styles['experience-block']}>
+                          <span className={styles['experience-label']}>Sin spoilers</span>
+                          <p>{item.spoilerFreeSummary}</p>
+                        </div>
+                      ) : null}
+                      {item.whatToExpect ? (
+                        <div className={styles['experience-block']}>
+                          <span className={styles['experience-label']}>Qué esperar</span>
+                          <p>{item.whatToExpect}</p>
+                        </div>
                       ) : null}
                     </div>
                   ) : null}
+
+                  <ManualFocusControl
+                    itemKey={item.key}
+                    medium={item.medium}
+                    state={item.state}
+                    value={item.manualFocusLevel}
+                    excluded={item.manualFocusExcluded}
+                  />
                 </div>
-
-                {item.whyForMe ? (
-                  <div className={styles['personal-reference']}>
-                    <span>Del estilo de</span>
-                    <p>{item.whyForMe}</p>
-                  </div>
-                ) : null}
-
-                <ManualFocusControl
-                  itemKey={item.key}
-                  medium={item.medium}
-                  state={item.state}
-                  value={item.manualFocusLevel}
-                />
               </article>
             );
           })}
@@ -580,6 +561,9 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
           Mostrar {Math.min(PAGE_SIZE, results.length - visibleCount)} más
         </button>
       ) : null}
+      <p className={styles.attribution}>
+        This product uses the TMDB API but is not endorsed or certified by TMDB.
+      </p>
     </div>
   );
 }
