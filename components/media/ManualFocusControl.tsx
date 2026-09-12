@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { MediaFocusLevel, MediaKind } from '@/types/media';
 
@@ -26,10 +26,6 @@ export function ManualFocusControl({
   const [selected, setSelected] = useState<MediaFocusLevel | null>(value);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setSelected(value);
-  }, [value]);
 
   if (state !== 'Por ver') return null;
 
