@@ -126,9 +126,9 @@ function manualApplies(item: MediaTitleView, level: MediaFocusLevel): boolean {
 
 /**
  * Construye niveles anidados. Sin overrides manuales son prefijos exactos del
- * ranking (top 10/50/100 o 5/20/40). Un override manual entra en el nivel
- * elegido y todos los superiores; si hubiera más overrides que el cupo base,
- * se conservan todos en vez de descartar una decisión explícita del usuario.
+ * ranking (top 10/50/100 o 5/20/40). Un override manual aparece desde el nivel
+ * elegido en adelante; si hubiera más overrides que el cupo base, se conservan
+ * todos en vez de descartar una decisión explícita del usuario.
  */
 function buildFocusLevels(
   titles: MediaTitleView[],
@@ -153,6 +153,7 @@ function buildFocusLevels(
     for (const item of ranked) {
       if (current.length >= limit) break;
       if (selected.has(item.key)) continue;
+      if (item.manualFocusLevel !== null && item.manualFocusLevel > level) continue;
       current.push(item);
       selected.add(item.key);
     }
