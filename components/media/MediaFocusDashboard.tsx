@@ -519,9 +519,16 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
           Explorar Banco completo
         </button>
       </section>
-      <p className={styles.attribution}>
-        This product uses the TMDB API but is not endorsed or certified by TMDB.
-      </p>
+      <section className={styles.attribution} aria-label="Créditos de datos e imágenes">
+        <a
+          className={styles['tmdb-logo']}
+          href="https://www.themoviedb.org"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="TMDB"
+        />
+        <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      </section>
     </div>
   );
 }

@@ -533,11 +533,30 @@
 }
 
 .attribution {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
   margin: 0.25rem 0 0;
+  padding: 0.6rem;
   color: var(--text-subtle);
   font-size: 0.66rem;
   line-height: 1.35;
   text-align: center;
+}
+
+.attribution p {
+  margin: 0;
+}
+
+.tmdb-logo {
+  display: block;
+  width: 52px;
+  height: 52px;
+  background-image: url('https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
 @media (width >= 620px) {
