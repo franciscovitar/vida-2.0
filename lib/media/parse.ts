@@ -1,3 +1,4 @@
+import { deriveAgeFeel } from '@/lib/media/age-feel';
 import { mediaPublicKey } from '@/lib/media/key';
 import type { MediaTab } from '@/lib/media/sheets-read';
 import type { MediaFocusLevel, MediaKind, MediaTitleView } from '@/types/media';
@@ -55,9 +56,23 @@ function integerValue(value: PlainCell | undefined): number | null {
   return parsed === null ? null : Math.trunc(parsed);
 }
 
-function focusLevelValue(value: PlainCell | undefined): MediaFocusLevel | null {
+function manualFocusValue(value: PlainCell | undefined): {
+  level: MediaFocusLevel | null;
+  excluded: boolean;
+} {
+  const raw = text(value);
+  if (raw?.toLocaleLowerCase('en-US') === 'exclude') return { level: null, excluded: true };
   const parsed = integerValue(value);
-  return parsed === 1 || parsed === 2 || parsed === 3 ? parsed : null;
+  return {
+    level: parsed === 1 || parsed === 2 || parsed === 3 ? parsed : null,
+    excluded: false,
+  };
+}
+
+function posterPathValue(value: PlainCell | undefined): string | null {
+  const raw = text(value);
+  if (!raw || !raw.startsWith('/') || raw.includes('://')) return null;
+  return raw;
 }
 
 function listValue(value: PlainCell | undefined): string[] {
@@ -111,6 +126,12 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
     const year = integerValue(valueAt(row, indexes, 'Año'));
     const creatorHeader = medium === 'movie' ? 'Director' : 'Creador / showrunner';
     const runtimeHeader = medium === 'movie' ? 'Duración min' : 'Duración episodio min';
+    const manual = manualFocusValue(valueAt(row, indexes, 'Lote manual'));
+    const ageFeel = deriveAgeFeel(
+      medium,
+      year,
+      text(valueAt(row, indexes, 'Perfil experiencia')),
+    );
 
     titles.push({
       key: mediaPublicKey(medium, title, year),
@@ -128,12 +149,16 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       countries: listValue(valueAt(row, indexes, 'País')),
       runtimeMinutes: numberValue(valueAt(row, indexes, runtimeHeader)),
       seasons: medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null,
+      posterPath: posterPathValue(valueAt(row, indexes, 'Poster TMDB')),
       affinity: numberValue(valueAt(row, indexes, 'Afinidad personal')),
       estimatedAffinity: null,
       cinephileValue: numberValue(valueAt(row, indexes, 'Valor cinéfilo')),
       culturalImpact: numberValue(valueAt(row, indexes, 'Impacto cultural')),
       generalScore: numberValue(valueAt(row, indexes, 'Score general')),
-      manualFocusLevel: focusLevelValue(valueAt(row, indexes, 'Lote manual')),
+      manualFocusLevel: manual.level,
+      manualFocusExcluded: manual.excluded,
+      ageFeelScore: ageFeel?.score ?? null,
+      ageFeelLabel: ageFeel?.label ?? null,
       whyForMe: text(valueAt(row, indexes, 'Por qué para mí')),
       spoilerFreeSummary: text(valueAt(row, indexes, 'Resumen sin spoilers')),
       whatToExpect: text(valueAt(row, indexes, 'Qué esperar')),
