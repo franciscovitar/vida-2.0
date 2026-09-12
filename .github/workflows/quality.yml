@@ -32,3 +32,51 @@ jobs:
 
       - name: Verify project
         run: npm run verify
+
+  media-format-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format Media files
+        run: >-
+          npx prettier --write
+          components/media/MediaDashboard.tsx
+          components/media/MediaFocusDashboard.tsx
+          components/media/MediaPoster.tsx
+          lib/media/age-feel.ts
+          lib/media/parse.ts
+          tests/media-country-flags.test.ts
+          tests/media-focus.test.ts
+          tests/media-v1.test.ts
+
+      - name: Package formatted files
+        run: |
+          mkdir -p formatted/components/media formatted/lib/media formatted/tests
+          cp components/media/MediaDashboard.tsx formatted/components/media/
+          cp components/media/MediaFocusDashboard.tsx formatted/components/media/
+          cp components/media/MediaPoster.tsx formatted/components/media/
+          cp lib/media/age-feel.ts formatted/lib/media/
+          cp lib/media/parse.ts formatted/lib/media/
+          cp tests/media-country-flags.test.ts formatted/tests/
+          cp tests/media-focus.test.ts formatted/tests/
+          cp tests/media-v1.test.ts formatted/tests/
+
+      - name: Upload formatted Media files
+        uses: actions/upload-artifact@v4
+        with:
+          name: media-formatted-files
+          path: formatted
+          retention-days: 1
