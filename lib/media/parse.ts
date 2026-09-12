@@ -1,5 +1,6 @@
+import { mediaPublicKey } from '@/lib/media/key';
 import type { MediaTab } from '@/lib/media/sheets-read';
-import type { MediaKind, MediaTitleView } from '@/types/media';
+import type { MediaFocusLevel, MediaKind, MediaTitleView } from '@/types/media';
 
 type PlainCell = string | number | boolean | null;
 type PlainRows = PlainCell[][];
@@ -22,6 +23,7 @@ const COMMON_HEADERS = [
   'Valor cinéfilo',
   'Impacto cultural',
   'Score general',
+  'Lote manual',
   'Por qué para mí',
   'Resumen sin spoilers',
   'Qué esperar',
@@ -51,6 +53,11 @@ function numberValue(value: PlainCell | undefined): number | null {
 function integerValue(value: PlainCell | undefined): number | null {
   const parsed = numberValue(value);
   return parsed === null ? null : Math.trunc(parsed);
+}
+
+function focusLevelValue(value: PlainCell | undefined): MediaFocusLevel | null {
+  const parsed = integerValue(value);
+  return parsed === 1 || parsed === 2 || parsed === 3 ? parsed : null;
 }
 
 function listValue(value: PlainCell | undefined): string[] {
@@ -106,7 +113,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
     const runtimeHeader = medium === 'movie' ? 'Duración min' : 'Duración episodio min';
 
     titles.push({
-      key: `${medium}:${title}:${year ?? 'sin-año'}`,
+      key: mediaPublicKey(medium, title, year),
       medium,
       title,
       originalTitle: text(valueAt(row, indexes, 'Título original')),
@@ -126,6 +133,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       cinephileValue: numberValue(valueAt(row, indexes, 'Valor cinéfilo')),
       culturalImpact: numberValue(valueAt(row, indexes, 'Impacto cultural')),
       generalScore: numberValue(valueAt(row, indexes, 'Score general')),
+      manualFocusLevel: focusLevelValue(valueAt(row, indexes, 'Lote manual')),
       whyForMe: text(valueAt(row, indexes, 'Por qué para mí')),
       spoilerFreeSummary: text(valueAt(row, indexes, 'Resumen sin spoilers')),
       whatToExpect: text(valueAt(row, indexes, 'Qué esperar')),
