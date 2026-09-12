@@ -3,15 +3,22 @@
 import { Film, Search, SlidersHorizontal, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { ManualFocusControl } from '@/components/media/ManualFocusControl';
 import { MediaDashboardView } from '@/components/media/MediaDashboard';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { deriveFocusTitles, focusLimit, type MediaFocusLevel } from '@/lib/media/focus';
+import {
+  deriveFocusCandidates,
+  deriveFocusTitles,
+  focusLimit,
+  watchPriorityScore,
+} from '@/lib/media/focus';
 import { deriveMediaFilterOptions, filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
 import type {
   MediaCommitmentFilter,
   MediaDashboardData,
   MediaFilters,
+  MediaFocusLevel,
   MediaKind,
   MediaSort,
   MediaTitleView,
@@ -99,25 +106,32 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
   const [level, setLevel] = useState<MediaFocusLevel>(1);
   const [exploring, setExploring] = useState(false);
 
+  const candidateUniverse = useMemo(
+    () => deriveFocusCandidates(data.titles, filters.medium),
+    [data.titles, filters.medium],
+  );
+  const options = useMemo(
+    () => deriveMediaFilterOptions(candidateUniverse, filters.medium),
+    [candidateUniverse, filters.medium],
+  );
+  const filteredCandidates = useMemo(
+    () => filterMediaTitles(candidateUniverse, filters),
+    [candidateUniverse, filters],
+  );
   const focusByLevel = useMemo(
     () =>
       new Map(
         FOCUS_LEVELS.map((focusLevel) => [
           focusLevel,
-          deriveFocusTitles(data.titles, filters.medium, focusLevel),
+          deriveFocusTitles(filteredCandidates, filters.medium, focusLevel),
         ]),
       ),
-    [data.titles, filters.medium],
+    [filteredCandidates, filters.medium],
   );
-
   const focusUniverse = useMemo(() => focusByLevel.get(level) ?? [], [focusByLevel, level]);
-  const options = useMemo(
-    () => deriveMediaFilterOptions(focusUniverse, filters.medium),
-    [focusUniverse, filters.medium],
-  );
   const focus = useMemo(
-    () => sortMediaTitles(filterMediaTitles(focusUniverse, filters), filters.sort),
-    [focusUniverse, filters],
+    () => sortMediaTitles(focusUniverse, filters.sort),
+    [focusUniverse, filters.sort],
   );
   const firstFocusKey = focusUniverse[0]?.key ?? null;
 
@@ -165,8 +179,8 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
       <div className={styles.stack}>
         <section className={styles.hero} aria-label="Explorador completo">
           <p className={styles['bank-principle']}>
-            <strong>Estás explorando el Banco completo.</strong> Nada de esto es una lista de
-            pendientes.
+            <strong>Estás explorando el Banco completo.</strong> Buscá cualquier título por ver y
+            marcá tu prioridad manual cuando quieras forzarlo a un lote.
           </p>
           <div>
             <button
@@ -174,7 +188,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
               className={styles['empty-action']}
               onClick={() => setExploring(false)}
             >
-              Volver a Foco
+              Volver a lotes
             </button>
           </div>
         </section>
@@ -187,7 +201,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
     <div className={styles.stack}>
       {data.notice ? <p className={styles.notice}>{data.notice}</p> : null}
 
-      <section className={styles.hero} aria-label="Foco de Media">
+      <section className={styles.hero} aria-label="Lotes de Media">
         <div className={styles['medium-tabs']} role="tablist" aria-label="Tipo de contenido">
           <button
             type="button"
@@ -214,11 +228,12 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
         </div>
 
         <p className={styles['bank-principle']}>
-          <strong>Foco reduce opciones sin borrar nada.</strong> Cada nivel contiene al anterior;
-          ampliá sólo cuando quieras más variedad.
+          <strong>Los lotes se recalculan con tus filtros.</strong> Primero definís el universo y
+          después entran las mejores opciones por Prioridad de visionado; cada nivel contiene al
+          anterior.
         </p>
 
-        <div className={styles['collection-tabs']} role="group" aria-label="Nivel de Foco">
+        <div className={styles['collection-tabs']} role="group" aria-label="Nivel de lote">
           {FOCUS_LEVELS.map((focusLevel) => {
             const count = focusByLevel.get(focusLevel)?.length ?? 0;
             return (
@@ -230,21 +245,21 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                 aria-pressed={level === focusLevel}
                 onClick={() => setLevel(focusLevel)}
               >
-                Foco {focusLevel} · {count}
+                Lote {focusLevel} · {count}
               </button>
             );
           })}
         </div>
       </section>
 
-      <section className={styles.controls} aria-label="Filtros del Foco">
+      <section className={styles.controls} aria-label="Filtros del lote">
         <label className={styles['search-field']}>
           <Search size={17} aria-hidden="true" />
-          <span className={styles['sr-only']}>Buscar dentro del Foco</span>
+          <span className={styles['sr-only']}>Buscar y recalcular lote</span>
           <input
             type="search"
             value={filters.query}
-            placeholder="Buscar dentro de este Foco…"
+            placeholder="Buscar y recalcular lote…"
             onChange={(event) => patchFilters({ query: event.target.value })}
           />
         </label>
@@ -252,7 +267,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
         <div className={styles['filter-header']}>
           <span>
             <SlidersHorizontal size={16} aria-hidden="true" />
-            Filtros sobre Foco {level}
+            Filtros que recalculan Lote {level}
           </span>
           {hasExtraFilters(filters) ? (
             <button type="button" className={styles['clear-button']} onClick={clearFilters}>
@@ -345,12 +360,12 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             </select>
           </label>
           <label>
-            <span>Ordenar</span>
+            <span>Ordenar visualmente</span>
             <select
               value={filters.sort}
               onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}
             >
-              <option value="focus-priority">Prioridad del Foco</option>
+              <option value="focus-priority">Prioridad de visionado</option>
               {options.hasEstimatedAffinity ? (
                 <option value="estimated-affinity-desc">Estimación para vos</option>
               ) : null}
@@ -368,22 +383,22 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
           <strong>{focus.length}</strong> {focus.length === 1 ? 'resultado' : 'resultados'}
           <span>
             {' '}
-            · de {focusUniverse.length} en Foco {level} · {levelPurpose(level)} · hasta{' '}
-            {focusLimit(filters.medium, level)} opciones
+            · top de {filteredCandidates.length} coincidencias · Lote {level} · {levelPurpose(level)}
+            {' '}· objetivo {focusLimit(filters.medium, level)}
           </span>
         </div>
         <span className={styles['score-note']}>
-          {options.hasEstimatedAffinity
-            ? 'Estimación personal provisional/read-only; el Banco completo sigue intacto.'
-            : 'Foco derivado; el Banco completo sigue intacto.'}
+          Prioridad de visionado = 55% afinidad estimada + 25% valor cinéfilo + 20% impacto
+          cultural; si falta una dimensión, se renormaliza. Tu prioridad manual prevalece sobre el
+          corte, no sobre los filtros.
         </span>
       </div>
 
       {focus.length === 0 ? (
         <EmptyState
           icon={Search}
-          title="No hay coincidencias dentro de este Foco"
-          description="Probá quitando un filtro o ampliando el nivel. Los filtros nunca expanden el universo elegido."
+          title="No hay coincidencias para este lote"
+          description="Probá quitando un filtro. Al cambiar el universo, el lote se vuelve a calcular automáticamente."
           action={
             <button type="button" className={styles['empty-action']} onClick={clearFilters}>
               Limpiar filtros
@@ -391,10 +406,11 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
           }
         />
       ) : (
-        <section className={styles.grid} aria-label={`Foco ${level}`}>
+        <section className={styles.grid} aria-label={`Lote ${level}`}>
           {focus.map((item) => {
             const commitment = commitmentLabel(item);
             const guidance = item.whatToExpect ?? item.spoilerFreeSummary;
+            const priority = watchPriorityScore(item);
 
             return (
               <article key={item.key} className={styles['title-card']}>
@@ -410,7 +426,10 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
 
                 <div className={styles.badges}>
                   {item.key === firstFocusKey ? (
-                    <Badge domain="projects">Primera del Foco</Badge>
+                    <Badge domain="projects">Primera del lote</Badge>
+                  ) : null}
+                  {item.manualFocusLevel !== null ? (
+                    <Badge domain="projects">Fijada · Lote {item.manualFocusLevel}</Badge>
                   ) : null}
                   {item.radar ? <Badge domain="projects">Radar</Badge> : null}
                   {item.bankTier ? <Badge variant="outline">Tier {item.bankTier}</Badge> : null}
@@ -439,10 +458,17 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                   </div>
                 ) : null}
 
-                {item.estimatedAffinity !== null ||
+                {priority !== null ||
+                item.estimatedAffinity !== null ||
                 item.cinephileValue !== null ||
                 item.culturalImpact !== null ? (
                   <div className={styles.scores}>
+                    {priority !== null ? (
+                      <div className={styles['observed-score']}>
+                        <span>Prioridad de visionado</span>
+                        <strong>{score(priority)} / 10</strong>
+                      </div>
+                    ) : null}
                     <div className={styles['inferred-scores']}>
                       {item.estimatedAffinity !== null ? (
                         <span>
@@ -463,6 +489,14 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                     </div>
                   </div>
                 ) : null}
+
+                <ManualFocusControl
+                  itemKey={item.key}
+                  medium={item.medium}
+                  state={item.state}
+                  value={item.manualFocusLevel}
+                  defaultLevel={level}
+                />
               </article>
             );
           })}
@@ -471,8 +505,8 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
 
       <section className={styles.controls} aria-label="Banco completo">
         <p className={styles['bank-principle']}>
-          ¿Querés salir de estos niveles? El resto sigue disponible, sólo está fuera de vista para
-          reducir ruido.
+          ¿Querés forzar una opción que no apareció? Buscala en el Banco completo y marcala como
+          prioritaria para elegir su lote.
         </p>
         <div>
           <button
