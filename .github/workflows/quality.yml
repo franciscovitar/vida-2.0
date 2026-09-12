@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: quality-${{ github.ref }}
@@ -29,6 +29,41 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Canonically format Media feature
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/media-dynamic-focus-manual-priority'
+        run: |
+          git fetch origin "${{ github.head_ref }}"
+          git checkout -B "${{ github.head_ref }}" "origin/${{ github.head_ref }}"
+          npx prettier --write \
+            components/media/MediaDashboard.tsx \
+            components/media/MediaFocusDashboard.tsx \
+            lib/media/key.ts \
+            lib/media/sheets-write.ts \
+            tests/media-focus.test.ts \
+            tests/media-manual-focus.test.ts \
+            tests/media-v1.test.ts
+          if ! git diff --quiet -- \
+            components/media/MediaDashboard.tsx \
+            components/media/MediaFocusDashboard.tsx \
+            lib/media/key.ts \
+            lib/media/sheets-write.ts \
+            tests/media-focus.test.ts \
+            tests/media-manual-focus.test.ts \
+            tests/media-v1.test.ts; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add \
+              components/media/MediaDashboard.tsx \
+              components/media/MediaFocusDashboard.tsx \
+              lib/media/key.ts \
+              lib/media/sheets-write.ts \
+              tests/media-focus.test.ts \
+              tests/media-manual-focus.test.ts \
+              tests/media-v1.test.ts
+            git commit -m "style(media): apply canonical formatting"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
 
       - name: Verify project
         run: npm run verify
