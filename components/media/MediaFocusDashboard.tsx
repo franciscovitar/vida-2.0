@@ -383,8 +383,8 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
           <strong>{focus.length}</strong> {focus.length === 1 ? 'resultado' : 'resultados'}
           <span>
             {' '}
-            · top de {filteredCandidates.length} coincidencias · Lote {level} · {levelPurpose(level)}
-            {' '}· objetivo {focusLimit(filters.medium, level)}
+            · top de {filteredCandidates.length} coincidencias · Lote {level} ·{' '}
+            {levelPurpose(level)} · objetivo {focusLimit(filters.medium, level)}
           </span>
         </div>
         <span className={styles['score-note']}>

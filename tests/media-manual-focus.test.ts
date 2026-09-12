@@ -13,11 +13,14 @@ test('request de lote manual acepta sólo contrato mínimo válido', () => {
     medium: 'movie',
     level: 2,
   });
-  assert.deepEqual(parseManualFocusRequest({ key: 'series:B:2021', medium: 'series', level: null }), {
-    key: 'series:B:2021',
-    medium: 'series',
-    level: null,
-  });
+  assert.deepEqual(
+    parseManualFocusRequest({ key: 'series:B:2021', medium: 'series', level: null }),
+    {
+      key: 'series:B:2021',
+      medium: 'series',
+      level: null,
+    },
+  );
   assert.equal(parseManualFocusRequest({ key: '', medium: 'movie', level: 1 }), null);
   assert.equal(parseManualFocusRequest({ key: 'x', medium: 'movie', level: 4 }), null);
   assert.equal(parseManualFocusRequest({ key: 'x', medium: 'book', level: 1 }), null);

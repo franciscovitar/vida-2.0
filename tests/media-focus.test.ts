@@ -116,7 +116,10 @@ test('películas automáticas excluyen vistas, Tier C/D y pools no operativos', 
     title('wrong-pool', 'movie', { bankTier: 'A', pool: 'Reserva' }),
   ];
 
-  assert.deepEqual(new Set(keys(deriveFocusCandidates(titles, 'movie'))), new Set(['ok-a', 'ok-b']));
+  assert.deepEqual(
+    new Set(keys(deriveFocusCandidates(titles, 'movie'))),
+    new Set(['ok-a', 'ok-b']),
+  );
 });
 
 test('una prioridad manual vuelve elegible una película Por ver fuera del pool automático', () => {
@@ -175,7 +178,10 @@ test('filtrar primero recalcula top 50 del universo filtrado', () => {
     }),
   );
   const candidates = deriveFocusCandidates(titles, 'movie');
-  const filtered = filterMediaTitles(candidates, filters('movie', { yearFrom: '1990', yearTo: '2026' }));
+  const filtered = filterMediaTitles(
+    candidates,
+    filters('movie', { yearFrom: '1990', yearTo: '2026' }),
+  );
   const lot2 = deriveFocusTitles(filtered, 'movie', 2);
 
   assert.equal(filtered.length, 60);
@@ -192,7 +198,10 @@ test('cambiar un filtro puede traer nuevos títulos al lote porque el ranking se
     }),
   );
   const originalLot1 = deriveFocusTitles(titles, 'movie', 1);
-  const comedies = filterMediaTitles(deriveFocusCandidates(titles, 'movie'), filters('movie', { genre: 'Comedia' }));
+  const comedies = filterMediaTitles(
+    deriveFocusCandidates(titles, 'movie'),
+    filters('movie', { genre: 'Comedia' }),
+  );
   const comedyLot1 = deriveFocusTitles(comedies, 'movie', 1);
 
   assert.equal(comedyLot1.length, 10);

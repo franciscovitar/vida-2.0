@@ -25,9 +25,7 @@ export type ManualFocusWriteCode =
   | 'write-error'
   | 'verification-error';
 
-export type ManualFocusWriteResult =
-  | { ok: true }
-  | { ok: false; code: ManualFocusWriteCode };
+export type ManualFocusWriteResult = { ok: true } | { ok: false; code: ManualFocusWriteCode };
 
 function tabForMedium(medium: ManualFocusRequest['medium']): MediaTab {
   return medium === 'movie' ? 'Movies' : 'Series';
@@ -62,11 +60,7 @@ export async function writeManualFocusLevel(
   const target = resolveManualFocusTarget(input.medium, read.values, input.key);
   if (!target.ok) return target;
 
-  const token = await fetchAccessToken(
-    config.clientEmail,
-    config.privateKey,
-    SPREADSHEETS_SCOPE,
-  );
+  const token = await fetchAccessToken(config.clientEmail, config.privateKey, SPREADSHEETS_SCOPE);
   if (!token.ok) return { ok: false, code: mapReadCode(token.code) };
 
   const cell = `${columnNumberToA1(target.columnNumber)}${target.rowNumber}`;
