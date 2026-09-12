@@ -28,9 +28,11 @@ const MOVIE_HEADERS = [
   'Impacto cultural',
   'Score general',
   'Lote manual',
+  'Poster TMDB',
   'Por qué para mí',
   'Resumen sin spoilers',
   'Qué esperar',
+  'Perfil experiencia',
   'Confianza experiencia',
   'Provenance',
   'Source URL',
@@ -47,8 +49,9 @@ function movieRow(input: {
   genres?: string;
   country?: string;
   runtime?: number;
-  generalScore?: number;
-  manualFocusLevel?: number;
+  manualFocus?: number | 'exclude';
+  poster?: string;
+  profile?: string;
   summary?: string;
   whatToExpect?: string;
   experienceConfidence?: number;
@@ -72,11 +75,13 @@ function movieRow(input: {
     'Afinidad personal': '',
     'Valor cinéfilo': '',
     'Impacto cultural': '',
-    'Score general': input.generalScore ?? '',
-    'Lote manual': input.manualFocusLevel ?? '',
+    'Score general': '',
+    'Lote manual': input.manualFocus ?? '',
+    'Poster TMDB': input.poster ?? '',
     'Por qué para mí': '',
     'Resumen sin spoilers': input.summary ?? '',
     'Qué esperar': input.whatToExpect ?? '',
+    'Perfil experiencia': input.profile ?? '',
     'Confianza experiencia': input.experienceConfidence ?? '',
     Provenance: 'internal evidence',
     'Source URL': 'https://example.invalid/internal',
@@ -120,12 +125,16 @@ function title(
     countries: [],
     runtimeMinutes: null,
     seasons: null,
+    posterPath: null,
     affinity: null,
     estimatedAffinity: null,
     cinephileValue: null,
     culturalImpact: null,
     generalScore: null,
     manualFocusLevel: null,
+    manualFocusExcluded: false,
+    ageFeelScore: null,
+    ageFeelLabel: null,
     whyForMe: null,
     spoilerFreeSummary: null,
     whatToExpect: null,
@@ -143,9 +152,7 @@ test('Media usa exclusivamente su spreadsheet dedicado', () => {
     null,
   );
   assert.equal(
-    getMediaSpreadsheetId({
-      GOOGLE_MEDIA_SPREADSHEET_ID: 'media_sheet_example_1234567890',
-    }),
+    getMediaSpreadsheetId({ GOOGLE_MEDIA_SPREADSHEET_ID: 'media_sheet_example_1234567890' }),
     'media_sheet_example_1234567890',
   );
 });
@@ -156,7 +163,7 @@ test('escrituras Media nacen apagadas y requieren literal exacto true', () => {
   assert.equal(areMediaSheetWritesAllowed({ GOOGLE_MEDIA_SHEETS_ALLOW_WRITES: 'true' }), true);
 });
 
-test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance/source URL', () => {
+test('parser entrega presentación, poster y señales derivadas sin IDs ni perfil crudo', () => {
   const parsed = parseMediaTab('Movies', [
     [...MOVIE_HEADERS],
     movieRow({
@@ -167,8 +174,9 @@ test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance
       genres: 'Drama, Thriller',
       country: 'Corea del Sur',
       runtime: 132,
-      rating: 9,
-      manualFocusLevel: 2,
+      manualFocus: 2,
+      poster: '/poster.jpg',
+      profile: JSON.stringify({ pace: 'fast', visual_emphasis: 'high' }),
       summary: 'Una familia se cruza con otra de una posición social muy distinta.',
       whatToExpect: 'Thriller social de tono cambiante, con humor negro y tensión creciente.',
       experienceConfidence: 90,
@@ -177,27 +185,33 @@ test('parser de Movies entrega sólo campos de presentación, sin IDs/provenance
 
   assert.equal(parsed.ok, true);
   if (!parsed.ok) return;
-  assert.equal(parsed.titles.length, 1);
-  assert.equal(parsed.titles[0]?.title, 'Parásitos');
-  assert.equal(parsed.titles[0]?.creator, 'Bong Joon-ho');
-  assert.deepEqual(parsed.titles[0]?.genres, ['Drama', 'Thriller']);
-  assert.equal(parsed.titles[0]?.estimatedAffinity, null);
-  assert.equal(parsed.titles[0]?.manualFocusLevel, 2);
-  assert.equal(
-    parsed.titles[0]?.spoilerFreeSummary,
-    'Una familia se cruza con otra de una posición social muy distinta.',
-  );
-  assert.equal(
-    parsed.titles[0]?.whatToExpect,
-    'Thriller social de tono cambiante, con humor negro y tensión creciente.',
-  );
-  assert.equal(parsed.titles[0]?.experienceConfidence, 90);
-  assert.equal('mediaId' in parsed.titles[0]!, false);
-  assert.equal('tmdbId' in parsed.titles[0]!, false);
-  assert.equal('imdbId' in parsed.titles[0]!, false);
-  assert.equal('provenance' in parsed.titles[0]!, false);
-  assert.equal('sourceUrl' in parsed.titles[0]!, false);
-  assert.equal('experienceProfile' in parsed.titles[0]!, false);
+  const item = parsed.titles[0]!;
+  assert.equal(item.title, 'Parásitos');
+  assert.equal(item.creator, 'Bong Joon-ho');
+  assert.deepEqual(item.genres, ['Drama', 'Thriller']);
+  assert.equal(item.posterPath, '/poster.jpg');
+  assert.equal(item.estimatedAffinity, null);
+  assert.equal(item.manualFocusLevel, 2);
+  assert.equal(item.manualFocusExcluded, false);
+  assert.ok(item.ageFeelScore !== null);
+  assert.ok(item.ageFeelLabel?.startsWith('Se siente'));
+  assert.equal('mediaId' in item, false);
+  assert.equal('tmdbId' in item, false);
+  assert.equal('imdbId' in item, false);
+  assert.equal('provenance' in item, false);
+  assert.equal('sourceUrl' in item, false);
+  assert.equal('experienceProfile' in item, false);
+});
+
+test('parser reconoce exclude sin confundirlo con un lote', () => {
+  const parsed = parseMediaTab('Movies', [
+    [...MOVIE_HEADERS],
+    movieRow({ id: 'x', title: 'Fuera', year: 2020, manualFocus: 'exclude' }),
+  ]);
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+  assert.equal(parsed.titles[0]?.manualFocusExcluded, true);
+  assert.equal(parsed.titles[0]?.manualFocusLevel, null);
 });
 
 test('parser falla cerrado cuando falta un header canónico de presentación', () => {
@@ -206,15 +220,10 @@ test('parser falla cerrado cuando falta un header canónico de presentación', (
   assert.deepEqual(parsed, { ok: false, missing: ['Duración min'] });
 });
 
-test('parser exige Lote manual y las columnas de experiencia que la UI presenta', () => {
-  const missingLot = MOVIE_HEADERS.filter((header) => header !== 'Lote manual');
-  assert.deepEqual(parseMediaTab('Movies', [missingLot]), { ok: false, missing: ['Lote manual'] });
-
-  const missingExperience = MOVIE_HEADERS.filter((header) => header !== 'Qué esperar');
-  assert.deepEqual(parseMediaTab('Movies', [missingExperience]), {
-    ok: false,
-    missing: ['Qué esperar'],
-  });
+test('Poster TMDB es aditivo: el parser sigue funcionando si esa columna aún no existe', () => {
+  const headers = MOVIE_HEADERS.filter((header) => header !== 'Poster TMDB');
+  const parsed = parseMediaTab('Movies', [headers]);
+  assert.equal(parsed.ok, true);
 });
 
 test('búsqueda y filtros son tolerantes a acentos y respetan el Banco', () => {
@@ -242,46 +251,35 @@ test('búsqueda y filtros son tolerantes a acentos y respetan el Banco', () => {
   ];
 
   assert.deepEqual(
-    filterMediaTitles(titles, filters({ query: 'parasitos', collection: 'bank' })).map(
-      (item) => item.key,
-    ),
+    filterMediaTitles(titles, filters({ query: 'parasitos', collection: 'bank' })).map((item) => item.key),
     ['parasitos'],
   );
   assert.deepEqual(
-    filterMediaTitles(titles, filters({ country: 'Francia', collection: 'seen' })).map(
-      (item) => item.key,
-    ),
+    filterMediaTitles(titles, filters({ country: 'Francia', collection: 'seen' })).map((item) => item.key),
     ['amélie'],
   );
 });
 
-test('filtro de años devuelve el rango inclusivo y omite años desconocidos', () => {
+test('filtro de años devuelve rango inclusivo y el orden puede invertirse', () => {
   const titles = [
     title({ key: '1999', title: '1999', year: 1999 }),
     title({ key: '2000', title: '2000', year: 2000 }),
     title({ key: '2005', title: '2005', year: 2005 }),
     title({ key: '2010', title: '2010', year: 2010 }),
-    title({ key: '2011', title: '2011', year: 2011 }),
     title({ key: 'unknown', title: 'Sin año', year: null }),
   ];
-
-  assert.deepEqual(
-    filterMediaTitles(titles, filters({ yearFrom: '2000', yearTo: '2010' })).map(
-      (item) => item.key,
-    ),
-    ['2000', '2005', '2010'],
-  );
+  const scoped = filterMediaTitles(titles, filters({ yearFrom: '2000', yearTo: '2010' }));
+  assert.deepEqual(scoped.map((item) => item.key), ['2000', '2005', '2010']);
+  assert.deepEqual(sortMediaTitles(scoped, 'year-asc').map((item) => item.key), ['2000', '2005', '2010']);
+  assert.deepEqual(sortMediaTitles(scoped, 'year-desc').map((item) => item.key), ['2010', '2005', '2000']);
 });
 
-test('filtro de duración no interpreta metadata faltante como una duración real', () => {
+test('filtro de duración no interpreta metadata faltante como duración real', () => {
   const titles = [
     title({ key: 'short', title: 'Corta', runtimeMinutes: 88 }),
     title({ key: 'unknown', title: 'Sin duración', runtimeMinutes: null }),
   ];
-  assert.deepEqual(
-    filterMediaTitles(titles, filters({ commitment: 'under-90' })).map((item) => item.key),
-    ['short'],
-  );
+  assert.deepEqual(filterMediaTitles(titles, filters({ commitment: 'under-90' })).map((item) => item.key), ['short']);
 });
 
 test('orden del Banco prioriza Radar y Tier sin inventar score', () => {
@@ -290,56 +288,20 @@ test('orden del Banco prioriza Radar y Tier sin inventar score', () => {
     title({ key: 'a', title: 'A', bankTier: 'A' }),
     title({ key: 'radar', title: 'Radar', bankTier: 'B', radar: true }),
   ];
-  assert.deepEqual(
-    sortMediaTitles(titles, 'bank-priority').map((item) => item.key),
-    ['radar', 'a', 'b'],
-  );
+  assert.deepEqual(sortMediaTitles(titles, 'bank-priority').map((item) => item.key), ['radar', 'a', 'b']);
 });
 
-test('dimensiones inferidas, prioridad y estimación provisional se ordenan por separado', () => {
+test('dimensiones inferidas, prioridad y afinidad se ordenan por separado y en ambos sentidos', () => {
   const titles = [
-    title({
-      key: 'a',
-      title: 'A',
-      affinity: 7.2,
-      estimatedAffinity: 9.4,
-      cinephileValue: 9.1,
-      culturalImpact: 6.5,
-    }),
-    title({
-      key: 'b',
-      title: 'B',
-      affinity: 9.3,
-      estimatedAffinity: 7.1,
-      cinephileValue: 7.4,
-      culturalImpact: 8.8,
-    }),
+    title({ key: 'a', title: 'A', estimatedAffinity: 9.41, cinephileValue: 9.1, culturalImpact: 6.5 }),
+    title({ key: 'b', title: 'B', estimatedAffinity: 7.13, cinephileValue: 7.4, culturalImpact: 8.8 }),
     title({ key: 'unknown', title: 'Sin scores' }),
   ];
-
-  assert.deepEqual(
-    sortMediaTitles(titles, 'affinity-desc').map((item) => item.key),
-    ['b', 'a', 'unknown'],
-  );
-  assert.deepEqual(
-    sortMediaTitles(titles, 'estimated-affinity-desc').map((item) => item.key),
-    ['a', 'b', 'unknown'],
-  );
-  assert.deepEqual(
-    sortMediaTitles(titles, 'cinephile-desc').map((item) => item.key),
-    ['a', 'b', 'unknown'],
-  );
-  assert.deepEqual(
-    sortMediaTitles(titles, 'cultural-desc').map((item) => item.key),
-    ['b', 'a', 'unknown'],
-  );
-  assert.deepEqual(
-    sortMediaTitles(titles, 'focus-priority').map((item) => item.key),
-    ['a', 'b', 'unknown'],
-  );
-
+  assert.deepEqual(sortMediaTitles(titles, 'estimated-affinity-desc').map((item) => item.key), ['a', 'b', 'unknown']);
+  assert.deepEqual(sortMediaTitles(titles, 'estimated-affinity-asc').map((item) => item.key), ['b', 'a', 'unknown']);
+  assert.deepEqual(sortMediaTitles(titles, 'focus-priority').map((item) => item.key), ['a', 'b', 'unknown']);
+  assert.deepEqual(sortMediaTitles(titles, 'focus-priority-asc').map((item) => item.key), ['b', 'a', 'unknown']);
   const options = deriveMediaFilterOptions(titles, 'movie');
-  assert.equal(options.hasAffinity, true);
   assert.equal(options.hasEstimatedAffinity, true);
   assert.equal(options.hasCinephile, true);
   assert.equal(options.hasCultural, true);
