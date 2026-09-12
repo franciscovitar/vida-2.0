@@ -132,6 +132,13 @@ function nullableDesc(left: number | null, right: number | null): number {
   return right - left;
 }
 
+function nullableAsc(left: number | null, right: number | null): number {
+  if (left === null && right === null) return 0;
+  if (left === null) return 1;
+  if (right === null) return -1;
+  return left - right;
+}
+
 function tierRank(tier: string | null): number {
   if (tier === 'A') return 0;
   if (tier === 'B') return 1;
@@ -142,43 +149,65 @@ function tierRank(tier: string | null): number {
 
 export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): MediaTitleView[] {
   if (sort === 'focus-priority') return [...titles].sort(compareFocusPriority);
+  if (sort === 'focus-priority-asc') {
+    return [...titles].sort(
+      (left, right) =>
+        nullableAsc(watchPriorityScore(left), watchPriorityScore(right)) ||
+        left.title.localeCompare(right.title, 'es'),
+    );
+  }
 
   return [...titles].sort((left, right) => {
-    if (sort === 'rating-desc') {
-      return nullableDesc(left.rating, right.rating) || left.title.localeCompare(right.title, 'es');
+    if (sort === 'rating-desc' || sort === 'rating-asc') {
+      const compared =
+        sort === 'rating-desc'
+          ? nullableDesc(left.rating, right.rating)
+          : nullableAsc(left.rating, right.rating);
+      return compared || left.title.localeCompare(right.title, 'es');
     }
-    if (sort === 'affinity-desc') {
-      return (
-        nullableDesc(left.affinity, right.affinity) || left.title.localeCompare(right.title, 'es')
-      );
+    if (sort === 'affinity-desc' || sort === 'affinity-asc') {
+      const compared =
+        sort === 'affinity-desc'
+          ? nullableDesc(left.affinity, right.affinity)
+          : nullableAsc(left.affinity, right.affinity);
+      return compared || left.title.localeCompare(right.title, 'es');
     }
-    if (sort === 'estimated-affinity-desc') {
-      return (
-        nullableDesc(left.estimatedAffinity, right.estimatedAffinity) ||
-        left.title.localeCompare(right.title, 'es')
-      );
+    if (sort === 'estimated-affinity-desc' || sort === 'estimated-affinity-asc') {
+      const compared =
+        sort === 'estimated-affinity-desc'
+          ? nullableDesc(left.estimatedAffinity, right.estimatedAffinity)
+          : nullableAsc(left.estimatedAffinity, right.estimatedAffinity);
+      return compared || left.title.localeCompare(right.title, 'es');
     }
-    if (sort === 'cinephile-desc') {
-      return (
-        nullableDesc(left.cinephileValue, right.cinephileValue) ||
-        left.title.localeCompare(right.title, 'es')
-      );
+    if (sort === 'cinephile-desc' || sort === 'cinephile-asc') {
+      const compared =
+        sort === 'cinephile-desc'
+          ? nullableDesc(left.cinephileValue, right.cinephileValue)
+          : nullableAsc(left.cinephileValue, right.cinephileValue);
+      return compared || left.title.localeCompare(right.title, 'es');
     }
-    if (sort === 'cultural-desc') {
-      return (
-        nullableDesc(left.culturalImpact, right.culturalImpact) ||
-        left.title.localeCompare(right.title, 'es')
-      );
+    if (sort === 'cultural-desc' || sort === 'cultural-asc') {
+      const compared =
+        sort === 'cultural-desc'
+          ? nullableDesc(left.culturalImpact, right.culturalImpact)
+          : nullableAsc(left.culturalImpact, right.culturalImpact);
+      return compared || left.title.localeCompare(right.title, 'es');
     }
-    if (sort === 'year-desc') {
-      return nullableDesc(left.year, right.year) || left.title.localeCompare(right.title, 'es');
+    if (sort === 'year-desc' || sort === 'year-asc') {
+      const compared =
+        sort === 'year-desc'
+          ? nullableDesc(left.year, right.year)
+          : nullableAsc(left.year, right.year);
+      return compared || left.title.localeCompare(right.title, 'es');
     }
     if (sort === 'title') return left.title.localeCompare(right.title, 'es');
-    if (sort === 'score-desc') {
-      return (
-        nullableDesc(left.generalScore, right.generalScore) ||
-        left.title.localeCompare(right.title, 'es')
-      );
+    if (sort === 'title-desc') return right.title.localeCompare(left.title, 'es');
+    if (sort === 'score-desc' || sort === 'score-asc') {
+      const compared =
+        sort === 'score-desc'
+          ? nullableDesc(left.generalScore, right.generalScore)
+          : nullableAsc(left.generalScore, right.generalScore);
+      return compared || left.title.localeCompare(right.title, 'es');
     }
 
     return (
