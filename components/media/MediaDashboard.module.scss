@@ -372,7 +372,7 @@
   line-height: 1.35;
 }
 
-.meta > span:not(.country-flags):not(:last-child)::after {
+.meta > span:not(.country-flags, :last-child)::after {
   margin-left: 0.65rem;
   color: var(--text-subtle);
   content: '·';
