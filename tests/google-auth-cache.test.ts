@@ -9,44 +9,47 @@ function privateKey(): string {
   return privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
 }
 
-test('deduplica intercambios concurrentes y reutiliza el access token vigente por cuenta/scope', async () => {
-  const originalFetch = globalThis.fetch;
-  const key = privateKey();
-  let calls = 0;
+test(
+  'deduplica intercambios concurrentes y reutiliza el access token vigente por cuenta/scope',
+  async () => {
+    const originalFetch = globalThis.fetch;
+    const key = privateKey();
+    let calls = 0;
 
-  globalThis.fetch = (async () => {
-    calls += 1;
-    await new Promise((resolve) => setTimeout(resolve, 5));
-    return new Response(JSON.stringify({ access_token: `token-${calls}`, expires_in: 3600 }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }) as typeof fetch;
+    globalThis.fetch = (async () => {
+      calls += 1;
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return new Response(JSON.stringify({ access_token: `token-${calls}`, expires_in: 3600 }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }) as typeof fetch;
 
-  try {
-    const [first, second] = await Promise.all([
-      fetchAccessToken('media-cache@example.test', key, 'scope:readonly'),
-      fetchAccessToken('media-cache@example.test', key, 'scope:readonly'),
-    ]);
-    assert.deepEqual(first, { ok: true, token: 'token-1' });
-    assert.deepEqual(second, { ok: true, token: 'token-1' });
-    assert.equal(calls, 1);
+    try {
+      const [first, second] = await Promise.all([
+        fetchAccessToken('media-cache@example.test', key, 'scope:readonly'),
+        fetchAccessToken('media-cache@example.test', key, 'scope:readonly'),
+      ]);
+      assert.deepEqual(first, { ok: true, token: 'token-1' });
+      assert.deepEqual(second, { ok: true, token: 'token-1' });
+      assert.equal(calls, 1);
 
-    const cached = await fetchAccessToken('media-cache@example.test', key, 'scope:readonly');
-    assert.deepEqual(cached, { ok: true, token: 'token-1' });
-    assert.equal(calls, 1);
+      const cached = await fetchAccessToken('media-cache@example.test', key, 'scope:readonly');
+      assert.deepEqual(cached, { ok: true, token: 'token-1' });
+      assert.equal(calls, 1);
 
-    const differentScope = await fetchAccessToken(
-      'media-cache@example.test',
-      key,
-      'scope:write',
-    );
-    assert.deepEqual(differentScope, { ok: true, token: 'token-2' });
-    assert.equal(calls, 2);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
+      const differentScope = await fetchAccessToken(
+        'media-cache@example.test',
+        key,
+        'scope:write',
+      );
+      assert.deepEqual(differentScope, { ok: true, token: 'token-2' });
+      assert.equal(calls, 2);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  },
+);
 
 test('no cachea respuestas fallidas del endpoint de token', async () => {
   const originalFetch = globalThis.fetch;
