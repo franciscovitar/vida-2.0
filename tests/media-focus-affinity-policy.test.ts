@@ -8,7 +8,7 @@ import {
 } from '@/lib/media/focus';
 import type { MediaTitleView } from '@/types/media';
 
-function movie(overrides: Partial<MediaTitleView> = {}): MediaTitleView {
+function title(overrides: Partial<MediaTitleView> = {}): MediaTitleView {
   return {
     key: 'movie:example:1990',
     medium: 'movie',
@@ -25,6 +25,8 @@ function movie(overrides: Partial<MediaTitleView> = {}): MediaTitleView {
     countries: [],
     runtimeMinutes: 110,
     seasons: null,
+    seasonDetails: [],
+    nextSeasonNumber: null,
     posterPath: null,
     affinity: null,
     estimatedAffinity: null,
@@ -44,23 +46,52 @@ function movie(overrides: Partial<MediaTitleView> = {}): MediaTitleView {
 }
 
 test('una película candidata a lote puede usar Personal Fit provisional aunque quede bajo el umbral histórico', () => {
-  assert.equal(shouldSurfaceEstimatedAffinity(movie(), false), true);
+  assert.equal(shouldSurfaceEstimatedAffinity(title(), false), true);
 });
 
-test('el umbral histórico sigue mandando fuera del foco y para series', () => {
-  assert.equal(
-    shouldSurfaceEstimatedAffinity(movie({ bankTier: 'C', pool: 'Reserva' }), false),
-    false,
-  );
+test('una serie candidata a lote también puede usar Personal Fit provisional sub-umbral', () => {
   assert.equal(
     shouldSurfaceEstimatedAffinity(
-      movie({ medium: 'series', bankTier: null, pool: null, seasons: 1, runtimeMinutes: 45 }),
+      title({
+        key: 'series:example:2020',
+        medium: 'series',
+        bankTier: null,
+        pool: null,
+        seasons: 3,
+        runtimeMinutes: 45,
+      }),
       false,
     ),
+    true,
+  );
+});
+
+test('el umbral histórico sigue mandando fuera del foco', () => {
+  assert.equal(
+    shouldSurfaceEstimatedAffinity(title({ bankTier: 'C', pool: 'Reserva' }), false),
     false,
   );
   assert.equal(
-    shouldSurfaceEstimatedAffinity(movie({ bankTier: 'C', pool: 'Reserva' }), true),
+    shouldSurfaceEstimatedAffinity(title({ bankTier: 'C', pool: 'Reserva' }), true),
+    true,
+  );
+});
+
+test('una serie activa con próxima temporada conocida sigue siendo candidata a afinidad provisional', () => {
+  assert.equal(
+    shouldSurfaceEstimatedAffinity(
+      title({
+        key: 'series:active:2020',
+        medium: 'series',
+        state: 'Viendo',
+        bankTier: null,
+        pool: null,
+        seasons: 5,
+        nextSeasonNumber: 3,
+        runtimeMinutes: 45,
+      }),
+      false,
+    ),
     true,
   );
 });
@@ -73,8 +104,8 @@ test('una película que se siente más de época baja afinidad y también Priori
   assert.ok(currentAffinity !== null && oldAffinity !== null);
   assert.ok(oldAffinity < currentAffinity);
 
-  const currentPriority = watchPriorityScore(movie({ estimatedAffinity: currentAffinity }));
-  const oldPriority = watchPriorityScore(movie({ estimatedAffinity: oldAffinity }));
+  const currentPriority = watchPriorityScore(title({ estimatedAffinity: currentAffinity }));
+  const oldPriority = watchPriorityScore(title({ estimatedAffinity: oldAffinity }));
 
   assert.ok(currentPriority !== null && oldPriority !== null);
   assert.ok(oldPriority < currentPriority);
