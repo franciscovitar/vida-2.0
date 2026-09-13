@@ -11,6 +11,7 @@ import { MediaSortControl } from '@/components/media/MediaSortControl';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { watchPriorityScore } from '@/lib/media/focus';
+import { formatExternalMediaScore } from '@/lib/media/score-format';
 import { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';
 import {
   countCollection,
@@ -389,7 +390,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
         </div>
         {options.hasWatchPriority ? (
           <span className={styles['score-note']}>
-            Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% impacto
+            Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% presencia
             cultural.
           </span>
         ) : null}
@@ -509,12 +510,18 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
                     <div className={styles['inferred-scores']}>
                       {item.cinephileValue !== null ? (
                         <span>
-                          Cinéfilo <strong>{score(item.cinephileValue)}</strong>
+                          Cinéfilo{' '}
+                          <strong>
+                            {formatExternalMediaScore(item.cinephileValue, item.scoreVersion)}
+                          </strong>
                         </span>
                       ) : null}
                       {item.culturalImpact !== null ? (
                         <span>
-                          Presencia cultural <strong>{score(item.culturalImpact)}</strong>
+                          Presencia cultural{' '}
+                          <strong>
+                            {formatExternalMediaScore(item.culturalImpact, item.scoreVersion)}
+                          </strong>
                         </span>
                       ) : null}
                     </div>

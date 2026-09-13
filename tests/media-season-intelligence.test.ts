@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  parseSeasonIntelligence,
-  withSeasonIntelligence,
-} from '@/lib/media/season-intelligence';
+import { parseSeasonIntelligence, withSeasonIntelligence } from '@/lib/media/season-intelligence';
 import type { MediaTitleView } from '@/types/media';
 
 const HEADERS = [

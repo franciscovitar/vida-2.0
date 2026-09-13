@@ -17,6 +17,7 @@ import {
   focusLimit,
   watchPriorityScore,
 } from '@/lib/media/focus';
+import { formatExternalMediaScore } from '@/lib/media/score-format';
 import { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';
 import { deriveMediaFilterOptions, filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
 import type {
@@ -483,12 +484,18 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                     <div className={styles['inferred-scores']}>
                       {item.cinephileValue !== null ? (
                         <span>
-                          Cinéfilo <strong>{score(item.cinephileValue)}</strong>
+                          Cinéfilo{' '}
+                          <strong>
+                            {formatExternalMediaScore(item.cinephileValue, item.scoreVersion)}
+                          </strong>
                         </span>
                       ) : null}
                       {item.culturalImpact !== null ? (
                         <span>
-                          Presencia cultural <strong>{score(item.culturalImpact)}</strong>
+                          Presencia cultural{' '}
+                          <strong>
+                            {formatExternalMediaScore(item.culturalImpact, item.scoreVersion)}
+                          </strong>
                         </span>
                       ) : null}
                     </div>

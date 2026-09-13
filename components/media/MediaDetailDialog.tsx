@@ -7,6 +7,7 @@ import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaPoster } from '@/components/media/MediaPoster';
 import { Badge } from '@/components/ui/Badge';
 import { watchPriorityScore } from '@/lib/media/focus';
+import { formatExternalMediaScore } from '@/lib/media/score-format';
 import { seasonWatchPriorityScore } from '@/lib/media/seasons';
 import type { MediaTitleView } from '@/types/media';
 
@@ -137,12 +138,18 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
               <div className={styles['inferred-scores']}>
                 {item.cinephileValue !== null ? (
                   <span>
-                    Valor cinéfilo <strong>{score(item.cinephileValue)}</strong>
+                    Valor cinéfilo{' '}
+                    <strong>
+                      {formatExternalMediaScore(item.cinephileValue, item.scoreVersion)}
+                    </strong>
                   </span>
                 ) : null}
                 {item.culturalImpact !== null ? (
                   <span>
-                    Presencia cultural <strong>{score(item.culturalImpact)}</strong>
+                    Presencia cultural{' '}
+                    <strong>
+                      {formatExternalMediaScore(item.culturalImpact, item.scoreVersion)}
+                    </strong>
                   </span>
                 ) : null}
               </div>
@@ -186,10 +193,19 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                             Prioridad <strong>{score(seasonPriority)}</strong>
                           </span>
                           <span>
-                            Cinéfilo <strong>{score(season.cinephileValue)}</strong>
+                            Cinéfilo{' '}
+                            <strong>
+                              {formatExternalMediaScore(season.cinephileValue, season.scoreVersion)}
+                            </strong>
                           </span>
                           <span>
-                            Presencia cultural <strong>{score(season.culturalPresence)}</strong>
+                            Presencia cultural{' '}
+                            <strong>
+                              {formatExternalMediaScore(
+                                season.culturalPresence,
+                                season.scoreVersion,
+                              )}
+                            </strong>
                           </span>
                         </div>
                         {season.observedRating !== null ? (
