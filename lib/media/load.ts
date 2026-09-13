@@ -1,6 +1,9 @@
 import type { SheetReadCode } from '@/lib/google/errors';
 import { loadPrivatePersonalFitV12 } from '@/lib/media/estimated-affinity';
-import { adjustEstimatedAffinity } from '@/lib/media/focus';
+import {
+  adjustEstimatedAffinity,
+  shouldSurfaceEstimatedAffinity,
+} from '@/lib/media/focus';
 import { parseMediaTab } from '@/lib/media/parse';
 import { readMediaTabValues, type MediaTab } from '@/lib/media/sheets-read';
 import type {
@@ -81,7 +84,9 @@ function withEstimatedAffinity(titles: MediaTitleView[]): MediaTitleView[] {
 
   return titles.map((item) => {
     const prediction = predictions.get(item.key);
-    if (!prediction) return item;
+    if (!prediction || !shouldSurfaceEstimatedAffinity(item, prediction.meetsDisplayThreshold)) {
+      return item;
+    }
     return {
       ...item,
       estimatedAffinity: adjustEstimatedAffinity(
