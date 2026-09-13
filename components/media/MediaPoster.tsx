@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 import styles from './MediaDashboard.module.scss';
 
-const TMDB_IMAGE_ROOT = 'https://image.tmdb.org/t/p/w500';
+const TMDB_IMAGE_ROOT = 'https://image.tmdb.org/t/p/w780';
 
 interface MediaPosterProps {
   title: string;
@@ -22,6 +22,7 @@ export function MediaPoster({ title, posterPath, onOpen }: MediaPosterProps) {
       src={`${TMDB_IMAGE_ROOT}${posterPath}`}
       alt={`Portada de ${title}`}
       fill
+      unoptimized
       sizes="(min-width: 1180px) 340px, (min-width: 620px) 45vw, 92vw"
       className={styles['poster-image']}
       onError={() => setFailed(true)}
