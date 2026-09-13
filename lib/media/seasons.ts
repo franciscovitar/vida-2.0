@@ -136,7 +136,6 @@ export function clampSeasonAffinity(
   seriesAffinity: number | null,
   adjustment: number | null,
 ): number | null {
-  if (seriesAffinity === null) return null;
-  if (adjustment === null) return seriesAffinity;
+  if (seriesAffinity === null || adjustment === null) return null;
   return Math.min(10, Math.max(0, seriesAffinity + adjustment));
 }
