@@ -2,7 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { mediaPublicKey } from '@/lib/media/key';
-import { parseSeasonIntelligence, withSeasonIntelligence } from '@/lib/media/season-intelligence';
+import {
+  parseSeasonIntelligence,
+  withSeasonIntelligence,
+  withoutVerifiedLegacySeasonRows,
+} from '@/lib/media/season-intelligence';
 import type { MediaTitleView } from '@/types/media';
 
 const HEADERS = [
@@ -123,4 +127,71 @@ test('una temporada sin ajuste específico no hereda la afinidad de la serie', (
   assert.equal(second.estimatedAffinity, null);
   assert.equal(second.cinephileValue, 8.5);
   assert.equal(second.culturalPresence, 8.2);
+});
+
+test('una fila legacy de temporada se oculta sólo con evidencia canónica coincidente', () => {
+  const parsed = parseSeasonIntelligence([
+    [...HEADERS],
+    ['Wednesday', 2022, 2, 2025, '', 8.3, 9.8, '', 'external-scoring-v1.1', 'ready'],
+  ]);
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+
+  const canonical: MediaTitleView = {
+    ...baseSeries(),
+    key: mediaPublicKey('series', 'Wednesday', 2022),
+    title: 'Wednesday',
+    year: 2022,
+    state: 'Terminada',
+    seasons: 2,
+    nextSeasonNumber: null,
+  };
+  const legacySeason: MediaTitleView = {
+    ...baseSeries(),
+    key: mediaPublicKey('series', 'Wednesday 2', 2025),
+    title: 'Wednesday 2',
+    year: 2025,
+    state: 'Terminada',
+    seasons: 1,
+    rating: 7.75,
+    cinephileValue: 8.3,
+    culturalImpact: 9.8,
+    scoreVersion: 'external-scoring-v1.1',
+    nextSeasonNumber: null,
+  };
+
+  assert.deepEqual(
+    withoutVerifiedLegacySeasonRows([canonical, legacySeason], parsed.bySeries).map(
+      (item) => item.key,
+    ),
+    [canonical.key],
+  );
+});
+
+test('una serie numerada real no se oculta si los scores no prueban el vínculo de temporada', () => {
+  const parsed = parseSeasonIntelligence([
+    [...HEADERS],
+    ['Example', 2020, 2, 2021, '', 8.3, 9.8, '', 'external-scoring-v1.1', 'ready'],
+  ]);
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+
+  const canonical: MediaTitleView = {
+    ...baseSeries(),
+    key: mediaPublicKey('series', 'Example', 2020),
+    title: 'Example',
+    year: 2020,
+  };
+  const numberedTitle: MediaTitleView = {
+    ...baseSeries(),
+    key: mediaPublicKey('series', 'Example 2', 2021),
+    title: 'Example 2',
+    year: 2021,
+    seasons: 1,
+    cinephileValue: 7.1,
+    culturalImpact: 9.8,
+    scoreVersion: 'external-scoring-v1.1',
+  };
+
+  assert.equal(withoutVerifiedLegacySeasonRows([canonical, numberedTitle], parsed.bySeries).length, 2);
 });
