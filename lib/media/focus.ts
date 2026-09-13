@@ -45,16 +45,17 @@ export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boole
 
 /**
  * Política de presentación de Personal Fit. El umbral histórico sigue mandando
- * fuera del foco; para películas candidatas a Lote permitimos también la
- * predicción congelada sub-umbral como estimación provisional. La confianza no
- * se expone ni se presenta como certificada.
+ * fuera del foco; para cualquier título que realmente compite por un Lote
+ * permitimos también la predicción congelada sub-umbral como estimación
+ * provisional. La confianza sigue del lado servidor y no se presenta como
+ * certificada.
  */
 export function shouldSurfaceEstimatedAffinity(
   item: MediaTitleView,
   meetsDisplayThreshold: boolean,
 ): boolean {
   if (meetsDisplayThreshold) return true;
-  return item.medium === 'movie' && isFocusCandidate(item, 'movie');
+  return isFocusCandidate(item, item.medium);
 }
 
 export function deriveFocusCandidates(
@@ -67,7 +68,9 @@ export function deriveFocusCandidates(
 /**
  * Capa de preferencia explícita sobre Personal Fit v1.2. El modelo privado se
  * mantiene intacto y trazable; Vida aplica sólo la señal derivada de cuánto se
- * siente de época la película. Series permanecen neutrales por ahora.
+ * siente de época la película. Series permanecen neutrales hasta disponer de
+ * una señal temporal por temporada: penalizar una serie completa por su año de
+ * estreno sería conceptualmente incorrecto.
  */
 export function adjustEstimatedAffinity(
   medium: MediaKind,
