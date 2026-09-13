@@ -8,7 +8,7 @@ import {
   parseObservedSeasonRatings,
   seasonWatchPriorityScore,
 } from '@/lib/media/seasons';
-import { filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
+import { deriveMediaFilterOptions, filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
 import type { MediaFilters, MediaSeasonView, MediaTitleView } from '@/types/media';
 
 function season(seasonNumber: number, overrides: Partial<MediaSeasonView> = {}): MediaSeasonView {
@@ -185,6 +185,18 @@ test('ordenar la serie completa y ordenar la próxima temporada son decisiones i
     ),
     [nextSeasonFirst.key, overallFirst.key],
   );
+});
+
+test('sin próxima temporada conocida no se ofrecen métricas de orden de temporada', () => {
+  const options = deriveMediaFilterOptions(
+    [series({ state: 'Terminada', nextSeasonNumber: null, seasonDetails: [] })],
+    'series',
+  );
+
+  assert.equal(options.hasNextSeasonPriority, false);
+  assert.equal(options.hasNextSeasonAffinity, false);
+  assert.equal(options.hasNextSeasonCinephile, false);
+  assert.equal(options.hasNextSeasonCultural, false);
 });
 
 test('las notas generales de una serie no se recalculan como promedio de temporadas', () => {
