@@ -58,7 +58,11 @@ export function ManualFocusControl({
   const checked = selected !== null && !isExcluded;
 
   return (
-    <div className={styles.control}>
+    <div
+      className={styles.control}
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+    >
       <div className={styles.actions}>
         <label className={styles.toggle}>
           <input

@@ -7,6 +7,7 @@ import { ManualFocusControl } from '@/components/media/ManualFocusControl';
 import { MediaDetailDialog } from '@/components/media/MediaDetailDialog';
 import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaPoster } from '@/components/media/MediaPoster';
+import { MediaSortControl } from '@/components/media/MediaSortControl';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { watchPriorityScore } from '@/lib/media/focus';
@@ -22,7 +23,6 @@ import type {
   MediaDashboardData,
   MediaFilters,
   MediaKind,
-  MediaSort,
   MediaTitleView,
 } from '@/types/media';
 
@@ -366,45 +366,13 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
               ))}
             </select>
           </label>
-          <label>
-            <span>Ordenar</span>
-            <select
-              value={filters.sort}
-              onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}
-            >
-              <option value="bank-priority">Prioridad del banco</option>
-              {options.hasWatchPriority ? (
-                <>
-                  <option value="focus-priority">Prioridad · mayor a menor</option>
-                  <option value="focus-priority-asc">Prioridad · menor a mayor</option>
-                </>
-              ) : null}
-              <option value="rating-desc">Mi nota · mayor a menor</option>
-              <option value="rating-asc">Mi nota · menor a mayor</option>
-              {options.hasEstimatedAffinity ? (
-                <>
-                  <option value="estimated-affinity-desc">Afinidad para mí · mayor a menor</option>
-                  <option value="estimated-affinity-asc">Afinidad para mí · menor a mayor</option>
-                </>
-              ) : null}
-              {options.hasCinephile ? (
-                <>
-                  <option value="cinephile-desc">Valor cinéfilo · mayor a menor</option>
-                  <option value="cinephile-asc">Valor cinéfilo · menor a mayor</option>
-                </>
-              ) : null}
-              {options.hasCultural ? (
-                <>
-                  <option value="cultural-desc">Impacto cultural · mayor a menor</option>
-                  <option value="cultural-asc">Impacto cultural · menor a mayor</option>
-                </>
-              ) : null}
-              <option value="year-desc">Más recientes</option>
-              <option value="year-asc">Más antiguas</option>
-              <option value="title">Título A–Z</option>
-              <option value="title-desc">Título Z–A</option>
-            </select>
-          </label>
+          <MediaSortControl
+            value={filters.sort}
+            options={options}
+            includeBankPriority
+            showRating
+            onChange={(sort) => patchFilters({ sort })}
+          />
         </div>
       </section>
 
@@ -440,12 +408,22 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
             const commitment = runtimeLabel(item);
             const priority = watchPriorityScore(item);
             return (
-              <article key={item.key} className={styles['title-card']}>
-                <MediaPoster
-                  title={item.title}
-                  posterPath={item.posterPath}
-                  onOpen={() => setSelectedItem(item)}
-                />
+              <article
+                key={item.key}
+                className={styles['title-card']}
+                role="button"
+                tabIndex={0}
+                aria-label={`Ver detalles de ${item.title}`}
+                onClick={() => setSelectedItem(item)}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedItem(item);
+                  }
+                }}
+              >
+                <MediaPoster title={item.title} posterPath={item.posterPath} />
                 <div className={styles['card-content']}>
                   <div className={styles['title-top']}>
                     <div className={styles['title-block']}>
@@ -475,21 +453,21 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                     {commitment ? <span>{commitment}</span> : null}
                     <MediaCountryFlags countries={item.countries} />
                   </div>
-                  {item.genres.length > 0 ? (
-                    <div className={styles.genres}>
-                      {item.genres.slice(0, 4).map((genre) => (
-                        <span key={genre}>{genre}</span>
-                      ))}
-                    </div>
-                  ) : null}
-                  {item.ageFeelLabel ? (
-                    <p
-                      className={styles['age-feel']}
-                      title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva."
-                    >
-                      {item.ageFeelLabel}
-                    </p>
-                  ) : null}
+                  <div className={styles.genres}>
+                    {item.genres.slice(0, 2).map((genre) => (
+                      <span key={genre}>{genre}</span>
+                    ))}
+                  </div>
+                  <div className={styles['age-feel-slot']}>
+                    {item.ageFeelLabel ? (
+                      <p
+                        className={styles['age-feel']}
+                        title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva."
+                      >
+                        {item.ageFeelLabel}
+                      </p>
+                    ) : null}
+                  </div>
 
                   <div className={styles['primary-scores']}>
                     {item.estimatedAffinity !== null ? (
@@ -526,13 +504,6 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                     </div>
                   ) : null}
 
-                  <button
-                    type="button"
-                    className={styles['detail-button']}
-                    onClick={() => setSelectedItem(item)}
-                  >
-                    Ver detalles
-                  </button>
                   <ManualFocusControl
                     itemKey={item.key}
                     medium={item.medium}

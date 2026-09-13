@@ -8,6 +8,7 @@ import { MediaDetailDialog } from '@/components/media/MediaDetailDialog';
 import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaDashboardView } from '@/components/media/MediaDashboard';
 import { MediaPoster } from '@/components/media/MediaPoster';
+import { MediaSortControl } from '@/components/media/MediaSortControl';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
@@ -23,7 +24,6 @@ import type {
   MediaFilters,
   MediaFocusLevel,
   MediaKind,
-  MediaSort,
   MediaTitleView,
 } from '@/types/media';
 
@@ -225,11 +225,6 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             <Tv size={17} aria-hidden="true" /> Series
           </button>
         </div>
-        <p className={styles['bank-principle']}>
-          <strong>Los lotes se recalculan con tus filtros.</strong> Primero definís el universo y
-          después entran las mejores opciones por Prioridad de visionado; cada nivel contiene al
-          anterior.
-        </p>
         <div className={styles['collection-tabs']} role="group" aria-label="Nivel de lote">
           {FOCUS_LEVELS.map((focusLevel) => {
             const count = focusByLevel.get(focusLevel)?.length ?? 0;
@@ -361,38 +356,11 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
               ))}
             </select>
           </label>
-          <label>
-            <span>Ordenar visualmente</span>
-            <select
-              value={filters.sort}
-              onChange={(event) => patchFilters({ sort: event.target.value as MediaSort })}
-            >
-              <option value="focus-priority">Prioridad · mayor a menor</option>
-              <option value="focus-priority-asc">Prioridad · menor a mayor</option>
-              {options.hasEstimatedAffinity ? (
-                <>
-                  <option value="estimated-affinity-desc">Afinidad para mí · mayor a menor</option>
-                  <option value="estimated-affinity-asc">Afinidad para mí · menor a mayor</option>
-                </>
-              ) : null}
-              {options.hasCinephile ? (
-                <>
-                  <option value="cinephile-desc">Valor cinéfilo · mayor a menor</option>
-                  <option value="cinephile-asc">Valor cinéfilo · menor a mayor</option>
-                </>
-              ) : null}
-              {options.hasCultural ? (
-                <>
-                  <option value="cultural-desc">Impacto cultural · mayor a menor</option>
-                  <option value="cultural-asc">Impacto cultural · menor a mayor</option>
-                </>
-              ) : null}
-              <option value="year-desc">Más recientes</option>
-              <option value="year-asc">Más antiguas</option>
-              <option value="title">Título A–Z</option>
-              <option value="title-desc">Título Z–A</option>
-            </select>
-          </label>
+          <MediaSortControl
+            value={filters.sort}
+            options={options}
+            onChange={(sort) => patchFilters({ sort })}
+          />
         </div>
       </section>
 
@@ -427,12 +395,22 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             const commitment = commitmentLabel(item);
             const priority = watchPriorityScore(item);
             return (
-              <article key={item.key} className={styles['title-card']}>
-                <MediaPoster
-                  title={item.title}
-                  posterPath={item.posterPath}
-                  onOpen={() => setSelectedItem(item)}
-                />
+              <article
+                key={item.key}
+                className={styles['title-card']}
+                role="button"
+                tabIndex={0}
+                aria-label={`Ver detalles de ${item.title}`}
+                onClick={() => setSelectedItem(item)}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedItem(item);
+                  }
+                }}
+              >
+                <MediaPoster title={item.title} posterPath={item.posterPath} />
                 <div className={styles['card-content']}>
                   <div className={styles['title-top']}>
                     <div className={styles['title-block']}>
@@ -457,21 +435,21 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                     {commitment ? <span>{commitment}</span> : null}
                     <MediaCountryFlags countries={item.countries} />
                   </div>
-                  {item.genres.length > 0 ? (
-                    <div className={styles.genres}>
-                      {item.genres.slice(0, 3).map((genre) => (
-                        <span key={genre}>{genre}</span>
-                      ))}
-                    </div>
-                  ) : null}
-                  {item.ageFeelLabel ? (
-                    <p
-                      className={styles['age-feel']}
-                      title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva."
-                    >
-                      {item.ageFeelLabel}
-                    </p>
-                  ) : null}
+                  <div className={styles.genres}>
+                    {item.genres.slice(0, 2).map((genre) => (
+                      <span key={genre}>{genre}</span>
+                    ))}
+                  </div>
+                  <div className={styles['age-feel-slot']}>
+                    {item.ageFeelLabel ? (
+                      <p
+                        className={styles['age-feel']}
+                        title="Señal derivada de año y perfil de experiencia; no es una valoración objetiva."
+                      >
+                        {item.ageFeelLabel}
+                      </p>
+                    ) : null}
+                  </div>
 
                   <div className={styles['primary-scores']}>
                     {item.estimatedAffinity !== null ? (
@@ -501,13 +479,6 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                       ) : null}
                     </div>
                   ) : null}
-                  <button
-                    type="button"
-                    className={styles['detail-button']}
-                    onClick={() => setSelectedItem(item)}
-                  >
-                    Ver detalles
-                  </button>
                   <ManualFocusControl
                     itemKey={item.key}
                     medium={item.medium}
