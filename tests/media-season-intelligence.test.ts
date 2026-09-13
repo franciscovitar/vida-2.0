@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { mediaPublicKey } from '@/lib/media/key';
 import { parseSeasonIntelligence, withSeasonIntelligence } from '@/lib/media/season-intelligence';
 import type { MediaTitleView } from '@/types/media';
 
@@ -19,7 +20,7 @@ const HEADERS = [
 
 function baseSeries(): MediaTitleView {
   return {
-    key: 'series:example:2020',
+    key: mediaPublicKey('series', 'Example', 2020),
     medium: 'series',
     title: 'Example',
     originalTitle: null,
