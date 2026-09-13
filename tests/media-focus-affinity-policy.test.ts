@@ -46,10 +46,7 @@ function title(overrides: Partial<MediaTitleView> = {}): MediaTitleView {
 }
 
 test('una película no vista muestra Personal Fit aunque esté fuera de los lotes', () => {
-  assert.equal(
-    shouldSurfaceEstimatedAffinity(title({ bankTier: 'C', pool: 'Reserva' })),
-    true,
-  );
+  assert.equal(shouldSurfaceEstimatedAffinity(title({ bankTier: 'C', pool: 'Reserva' })), true);
 });
 
 test('una serie muestra Personal Fit también fuera de los lotes y aunque esté terminada', () => {
