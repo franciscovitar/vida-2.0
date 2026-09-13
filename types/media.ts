@@ -63,6 +63,8 @@ export interface MediaTitleView {
   cinephileValue: number | null;
   culturalImpact: number | null;
   generalScore: number | null;
+  /** External score provenance; optional for backwards-compatible snapshots/tests. */
+  scoreVersion?: string | null;
   manualFocusLevel: MediaFocusLevel | null;
   manualFocusExcluded: boolean;
   ageFeelScore: number | null;
