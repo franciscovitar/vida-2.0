@@ -4,6 +4,7 @@ import { Film, Search, SlidersHorizontal, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { ManualFocusControl } from '@/components/media/ManualFocusControl';
+import { MediaDetailDialog } from '@/components/media/MediaDetailDialog';
 import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaDashboardView } from '@/components/media/MediaDashboard';
 import { MediaPoster } from '@/components/media/MediaPoster';
@@ -108,6 +109,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
   const [filters, setFilters] = useState<MediaFilters>(() => initialFocusFilters(firstReadyMedium));
   const [level, setLevel] = useState<MediaFocusLevel>(1);
   const [exploring, setExploring] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<MediaTitleView | null>(null);
 
   const candidateUniverse = useMemo(
     () => deriveFocusCandidates(data.titles, filters.medium),
@@ -244,6 +246,14 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
               </button>
             );
           })}
+          <button
+            type="button"
+            className={styles.chip}
+            data-active="false"
+            onClick={() => setExploring(true)}
+          >
+            Banco completo
+          </button>
         </div>
       </section>
 
@@ -415,11 +425,14 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
         <section className={styles.grid} aria-label={`Lote ${level}`}>
           {focus.map((item) => {
             const commitment = commitmentLabel(item);
-            const guidance = item.whatToExpect ?? item.spoilerFreeSummary;
             const priority = watchPriorityScore(item);
             return (
               <article key={item.key} className={styles['title-card']}>
-                <MediaPoster title={item.title} posterPath={item.posterPath} />
+                <MediaPoster
+                  title={item.title}
+                  posterPath={item.posterPath}
+                  onOpen={() => setSelectedItem(item)}
+                />
                 <div className={styles['card-content']}>
                   <div className={styles['title-top']}>
                     <div className={styles['title-block']}>
@@ -488,14 +501,13 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                       ) : null}
                     </div>
                   ) : null}
-                  {guidance ? (
-                    <div className={styles.experience}>
-                      <div className={styles['experience-block']}>
-                        <span className={styles['experience-label']}>Para elegir</span>
-                        <p>{guidance}</p>
-                      </div>
-                    </div>
-                  ) : null}
+                  <button
+                    type="button"
+                    className={styles['detail-button']}
+                    onClick={() => setSelectedItem(item)}
+                  >
+                    Ver detalles
+                  </button>
                   <ManualFocusControl
                     itemKey={item.key}
                     medium={item.medium}
@@ -511,14 +523,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
         </section>
       )}
 
-      <section className={styles.controls} aria-label="Banco completo">
-        <p className={styles['bank-principle']}>
-          ¿Querés forzar o excluir una opción que no apareció? Buscala en el Banco completo.
-        </p>
-        <button type="button" className={styles['empty-action']} onClick={() => setExploring(true)}>
-          Explorar Banco completo
-        </button>
-      </section>
+      <MediaDetailDialog item={selectedItem} onClose={() => setSelectedItem(null)} />
       <section className={styles.attribution} aria-label="Créditos de datos e imágenes">
         <a
           className={styles['tmdb-logo']}
