@@ -168,3 +168,65 @@ export function withSeasonIntelligence(
     return { ...item, seasonDetails };
   });
 }
+
+function normalizeTitle(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLocaleLowerCase('es-AR');
+}
+
+function sameScore(left: number | null, right: number | null): boolean {
+  return left !== null && right !== null && Math.abs(left - right) < 0.0001;
+}
+
+/**
+ * Oculta del catálogo visual una fila legacy que modeló una temporada como si
+ * fuera una serie separada, pero sólo cuando Series Seasons aporta evidencia
+ * suficiente para demostrar el vínculo con una única serie base.
+ *
+ * La fila no se borra del Sheet ni de Viewing History: esta función sólo evita
+ * duplicar la card en Vida mientras la migración histórica se conserva.
+ */
+export function withoutVerifiedLegacySeasonRows(
+  titles: MediaTitleView[],
+  bySeries: ReadonlyMap<string, SeasonIntelligenceRow[]>,
+): MediaTitleView[] {
+  const series = titles.filter((item) => item.medium === 'series');
+
+  return titles.filter((item) => {
+    if (item.medium !== 'series') return true;
+
+    const match = item.title.trim().match(/^(.+?)\s+(\d{1,2})$/);
+    if (!match) return true;
+
+    const baseTitle = match[1]?.trim();
+    const seasonNumber = Number(match[2]);
+    if (!baseTitle || !Number.isInteger(seasonNumber) || seasonNumber < 1) return true;
+    if (item.seasons !== null && item.seasons !== 1) return true;
+
+    const baseCandidates = series.filter(
+      (candidate) =>
+        candidate.key !== item.key && normalizeTitle(candidate.title) === normalizeTitle(baseTitle),
+    );
+    if (baseCandidates.length !== 1) return true;
+
+    const base = baseCandidates[0]!;
+    const intel = bySeries
+      .get(base.key)
+      ?.find((season) => season.seasonNumber === seasonNumber);
+    if (!intel || intel.year === null || item.year === null || intel.year !== item.year) return true;
+    if (!sameScore(item.cinephileValue, intel.cinephileValue)) return true;
+    if (!sameScore(item.culturalImpact, intel.culturalPresence)) return true;
+    if (
+      !item.scoreVersion ||
+      !intel.scoreVersion ||
+      item.scoreVersion !== intel.scoreVersion
+    ) {
+      return true;
+    }
+
+    return false;
+  });
+}
