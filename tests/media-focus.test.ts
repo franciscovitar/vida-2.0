@@ -48,6 +48,8 @@ function title(
     whatToExpect: null,
     experienceConfidence: null,
     ...overrides,
+    seasonDetails: overrides.seasonDetails ?? [],
+    nextSeasonNumber: overrides.nextSeasonNumber ?? null,
   };
 }
 
