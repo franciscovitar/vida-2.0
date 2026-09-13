@@ -8,10 +8,14 @@ import styles from './MediaDashboard.module.scss';
 type SortCriterion =
   | 'bank-priority'
   | 'focus-priority'
+  | 'next-season-priority'
   | 'rating'
   | 'estimated-affinity'
+  | 'next-season-affinity'
   | 'cinephile'
+  | 'next-season-cinephile'
   | 'cultural'
+  | 'next-season-cultural'
   | 'year'
   | 'title';
 
@@ -27,10 +31,14 @@ interface MediaSortControlProps {
 
 const ASCENDING: Record<Exclude<SortCriterion, 'bank-priority'>, MediaSort> = {
   'focus-priority': 'focus-priority-asc',
+  'next-season-priority': 'next-season-priority-asc',
   rating: 'rating-asc',
   'estimated-affinity': 'estimated-affinity-asc',
+  'next-season-affinity': 'next-season-affinity-asc',
   cinephile: 'cinephile-asc',
+  'next-season-cinephile': 'next-season-cinephile-asc',
   cultural: 'cultural-asc',
+  'next-season-cultural': 'next-season-cultural-asc',
   year: 'year-asc',
   title: 'title',
 };
@@ -38,10 +46,14 @@ const ASCENDING: Record<Exclude<SortCriterion, 'bank-priority'>, MediaSort> = {
 const DESCENDING: Record<SortCriterion, MediaSort> = {
   'bank-priority': 'bank-priority',
   'focus-priority': 'focus-priority',
+  'next-season-priority': 'next-season-priority-desc',
   rating: 'rating-desc',
   'estimated-affinity': 'estimated-affinity-desc',
+  'next-season-affinity': 'next-season-affinity-desc',
   cinephile: 'cinephile-desc',
+  'next-season-cinephile': 'next-season-cinephile-desc',
   cultural: 'cultural-desc',
+  'next-season-cultural': 'next-season-cultural-desc',
   year: 'year-desc',
   title: 'title-desc',
 };
@@ -49,12 +61,24 @@ const DESCENDING: Record<SortCriterion, MediaSort> = {
 function criterionFor(sort: MediaSort): SortCriterion {
   if (sort === 'bank-priority') return 'bank-priority';
   if (sort === 'focus-priority' || sort === 'focus-priority-asc') return 'focus-priority';
+  if (sort === 'next-season-priority-desc' || sort === 'next-season-priority-asc') {
+    return 'next-season-priority';
+  }
   if (sort === 'rating-desc' || sort === 'rating-asc') return 'rating';
   if (sort === 'estimated-affinity-desc' || sort === 'estimated-affinity-asc') {
     return 'estimated-affinity';
   }
+  if (sort === 'next-season-affinity-desc' || sort === 'next-season-affinity-asc') {
+    return 'next-season-affinity';
+  }
   if (sort === 'cinephile-desc' || sort === 'cinephile-asc') return 'cinephile';
+  if (sort === 'next-season-cinephile-desc' || sort === 'next-season-cinephile-asc') {
+    return 'next-season-cinephile';
+  }
   if (sort === 'cultural-desc' || sort === 'cultural-asc') return 'cultural';
+  if (sort === 'next-season-cultural-desc' || sort === 'next-season-cultural-asc') {
+    return 'next-season-cultural';
+  }
   if (sort === 'year-desc' || sort === 'year-asc') return 'year';
   if (sort === 'title' || sort === 'title-desc') return 'title';
   return 'bank-priority';
@@ -82,15 +106,35 @@ export function MediaSortControl({
 
   const choices: { value: SortCriterion; label: string; visible: boolean }[] = [
     { value: 'bank-priority', label: 'Prioridad del banco', visible: includeBankPriority },
-    { value: 'focus-priority', label: 'Prioridad de visionado', visible: options.hasWatchPriority },
+    { value: 'focus-priority', label: 'Prioridad · serie/obra completa', visible: options.hasWatchPriority },
+    {
+      value: 'next-season-priority',
+      label: 'Prioridad · próxima temporada',
+      visible: options.hasNextSeasonPriority,
+    },
     { value: 'rating', label: 'Mi nota', visible: showRating },
     {
       value: 'estimated-affinity',
-      label: 'Afinidad para mí',
+      label: 'Afinidad · serie/obra completa',
       visible: options.hasEstimatedAffinity,
     },
-    { value: 'cinephile', label: 'Valor cinéfilo', visible: options.hasCinephile },
-    { value: 'cultural', label: 'Impacto cultural', visible: options.hasCultural },
+    {
+      value: 'next-season-affinity',
+      label: 'Afinidad · próxima temporada',
+      visible: options.hasNextSeasonAffinity,
+    },
+    { value: 'cinephile', label: 'Valor cinéfilo · obra completa', visible: options.hasCinephile },
+    {
+      value: 'next-season-cinephile',
+      label: 'Valor cinéfilo · próxima temporada',
+      visible: options.hasNextSeasonCinephile,
+    },
+    { value: 'cultural', label: 'Presencia cultural · obra completa', visible: options.hasCultural },
+    {
+      value: 'next-season-cultural',
+      label: 'Presencia cultural · próxima temporada',
+      visible: options.hasNextSeasonCultural,
+    },
     { value: 'year', label: 'Año', visible: true },
     { value: 'title', label: 'Título', visible: true },
   ];
