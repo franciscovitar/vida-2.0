@@ -138,16 +138,16 @@ test('una exclusión manual saca el título de todos los lotes aunque sea autom�
   assert.deepEqual(deriveFocusTitles([excluded], 'movie', 3), []);
 });
 
-test('series automáticas contienen sólo Por ver', () => {
+test('series automáticas contienen sólo Por ver cuando no se conoce una temporada siguiente', () => {
   const titles = [
     title('watch', 'series'),
     title('done', 'series', { state: 'Terminada' }),
-    title('active', 'series', { state: 'Viendo' }),
+    title('active', 'series', { state: 'Viendo', nextSeasonNumber: null }),
   ];
   assert.deepEqual(keys(deriveFocusTitles(titles, 'series', 3)), ['watch']);
 });
 
-test('Prioridad de visionado usa 50% afinidad, 30% cinéfilo y 20% impacto', () => {
+test('Prioridad de visionado usa 50% afinidad, 30% cinéfilo y 20% Presencia cultural', () => {
   const item = title('weighted', 'movie', {
     estimatedAffinity: 9.58,
     cinephileValue: 8,
