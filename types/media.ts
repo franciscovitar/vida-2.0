@@ -13,6 +13,25 @@ export type MediaSourceState =
 
 export type MediaDashboardStatus = 'ready' | 'partial' | 'unavailable';
 
+export type MediaSeasonEvidenceState = 'ready' | 'partial' | 'unavailable';
+
+/**
+ * Vista derivada de una temporada. La nota observada viene exclusivamente de
+ * la verdad del usuario ya registrada; el resto son señales derivadas y pueden
+ * quedar en null cuando la evidencia todavía no alcanza.
+ */
+export interface MediaSeasonView {
+  seasonNumber: number;
+  year: number | null;
+  episodeCount: number | null;
+  observedRating: number | null;
+  estimatedAffinity: number | null;
+  cinephileValue: number | null;
+  culturalPresence: number | null;
+  scoreVersion: string | null;
+  evidenceState: MediaSeasonEvidenceState;
+}
+
 /**
  * Vista pública de un título para `/media`.
  *
@@ -36,6 +55,8 @@ export interface MediaTitleView {
   countries: string[];
   runtimeMinutes: number | null;
   seasons: number | null;
+  seasonDetails: MediaSeasonView[];
+  nextSeasonNumber: number | null;
   posterPath: string | null;
   affinity: number | null;
   estimatedAffinity: number | null;
@@ -79,16 +100,24 @@ export type MediaSort =
   | 'bank-priority'
   | 'focus-priority'
   | 'focus-priority-asc'
+  | 'next-season-priority-desc'
+  | 'next-season-priority-asc'
   | 'rating-desc'
   | 'rating-asc'
   | 'affinity-desc'
   | 'affinity-asc'
   | 'estimated-affinity-desc'
   | 'estimated-affinity-asc'
+  | 'next-season-affinity-desc'
+  | 'next-season-affinity-asc'
   | 'cinephile-desc'
   | 'cinephile-asc'
+  | 'next-season-cinephile-desc'
+  | 'next-season-cinephile-asc'
   | 'cultural-desc'
   | 'cultural-asc'
+  | 'next-season-cultural-desc'
+  | 'next-season-cultural-asc'
   | 'score-desc'
   | 'score-asc'
   | 'year-desc'
