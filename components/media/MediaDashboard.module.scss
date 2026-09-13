@@ -930,3 +930,121 @@
     height: auto;
   }
 }
+
+/* Series season intelligence v1 */
+.next-season-callout {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.45rem;
+  align-items: baseline;
+  min-height: 42px;
+  padding: 0.52rem 0.6rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.next-season-callout span,
+.next-season-callout small {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+}
+.next-season-callout strong {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+.next-season-callout small {
+  font-variant-numeric: tabular-nums;
+}
+.season-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-top: 0.25rem;
+}
+.season-heading {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.season-heading h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+.season-heading p {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+.season-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+.season-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.65rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.season-card[data-next='true'] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.season-card-heading {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.season-card-heading strong {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+.season-card-heading span {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+}
+.season-score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+.season-score-grid span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+  padding: 0.42rem 0.48rem;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+.season-score-grid strong,
+.season-observed strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.season-observed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  background: var(--c-learning-soft);
+  border: 1px solid var(--c-learning-border);
+  border-radius: var(--radius-sm);
+}
+.season-evidence {
+  color: var(--text-subtle);
+  font-size: 0.64rem;
+  line-height: 1.35;
+}

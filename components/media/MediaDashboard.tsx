@@ -11,6 +11,7 @@ import { MediaSortControl } from '@/components/media/MediaSortControl';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { watchPriorityScore } from '@/lib/media/focus';
+import { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';
 import {
   countCollection,
   deriveMediaFilterOptions,
@@ -107,12 +108,15 @@ function mediumLabel(medium: MediaKind): string {
 
 interface MediaDashboardViewProps {
   data: MediaDashboardData;
+  initialMedium?: MediaKind;
 }
 
-export function MediaDashboardView({ data }: MediaDashboardViewProps) {
+export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewProps) {
   const firstReadyMedium =
     data.sources.find((source) => source.state === 'ready')?.medium ?? 'movie';
-  const [filters, setFilters] = useState<MediaFilters>(() => initialFilters(firstReadyMedium));
+  const [filters, setFilters] = useState<MediaFilters>(() =>
+    initialFilters(initialMedium ?? firstReadyMedium),
+  );
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedItem, setSelectedItem] = useState<MediaTitleView | null>(null);
 
@@ -222,7 +226,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
         <p className={styles['bank-principle']}>
           <strong>Banco = opciones, no pendientes.</strong> Afinidad para mí responde cuánto
           probablemente te guste; Prioridad de visionado combina esa afinidad con valor cinéfilo e
-          impacto cultural.
+          presencia cultural.
         </p>
       </section>
 
@@ -469,6 +473,18 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                     ) : null}
                   </div>
 
+                  {item.medium === 'series' && item.nextSeasonNumber !== null ? (
+                    <div className={styles['next-season-callout']}>
+                      <span>Siguiente</span>
+                      <strong>Temporada {item.nextSeasonNumber}</strong>
+                      {seasonWatchPriorityScore(nextSeasonFor(item)) !== null ? (
+                        <small>
+                          Prioridad {score(seasonWatchPriorityScore(nextSeasonFor(item)))}
+                        </small>
+                      ) : null}
+                    </div>
+                  ) : null}
+
                   <div className={styles['primary-scores']}>
                     {item.estimatedAffinity !== null ? (
                       <div className={styles['primary-score']}>
@@ -498,7 +514,7 @@ export function MediaDashboardView({ data }: MediaDashboardViewProps) {
                       ) : null}
                       {item.culturalImpact !== null ? (
                         <span>
-                          Impacto <strong>{score(item.culturalImpact)}</strong>
+                          Presencia cultural <strong>{score(item.culturalImpact)}</strong>
                         </span>
                       ) : null}
                     </div>

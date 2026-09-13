@@ -7,6 +7,7 @@ import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaPoster } from '@/components/media/MediaPoster';
 import { Badge } from '@/components/ui/Badge';
 import { watchPriorityScore } from '@/lib/media/focus';
+import { seasonWatchPriorityScore } from '@/lib/media/seasons';
 import type { MediaTitleView } from '@/types/media';
 
 import styles from './MediaDashboard.module.scss';
@@ -141,10 +142,74 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                 ) : null}
                 {item.culturalImpact !== null ? (
                   <span>
-                    Impacto cultural <strong>{score(item.culturalImpact)}</strong>
+                    Presencia cultural <strong>{score(item.culturalImpact)}</strong>
                   </span>
                 ) : null}
               </div>
+            ) : null}
+
+            {item.medium === 'series' && item.seasonDetails.length > 0 ? (
+              <section className={styles['season-section']} aria-label="Temporadas">
+                <div className={styles['season-heading']}>
+                  <div>
+                    <h3>Temporadas</h3>
+                    <p>
+                      Las notas de la serie completa son propias; no son un promedio de las
+                      temporadas.
+                    </p>
+                  </div>
+                  {item.nextSeasonNumber !== null ? (
+                    <Badge domain="projects">Siguiente · T{item.nextSeasonNumber}</Badge>
+                  ) : null}
+                </div>
+                <div className={styles['season-grid']}>
+                  {item.seasonDetails.map((season) => {
+                    const seasonPriority = seasonWatchPriorityScore(season);
+                    return (
+                      <article
+                        key={season.seasonNumber}
+                        className={styles['season-card']}
+                        data-next={season.seasonNumber === item.nextSeasonNumber}
+                      >
+                        <div className={styles['season-card-heading']}>
+                          <strong>Temporada {season.seasonNumber}</strong>
+                          <span>
+                            {season.year ?? 'Año sin confirmar'}
+                            {season.episodeCount !== null ? ` · ${season.episodeCount} ep.` : ''}
+                          </span>
+                        </div>
+                        <div className={styles['season-score-grid']}>
+                          <span>
+                            Afinidad para mí <strong>{score(season.estimatedAffinity)}</strong>
+                          </span>
+                          <span>
+                            Prioridad <strong>{score(seasonPriority)}</strong>
+                          </span>
+                          <span>
+                            Cinéfilo <strong>{score(season.cinephileValue)}</strong>
+                          </span>
+                          <span>
+                            Presencia cultural <strong>{score(season.culturalPresence)}</strong>
+                          </span>
+                        </div>
+                        {season.observedRating !== null ? (
+                          <div className={styles['season-observed']}>
+                            <span>Mi nota</span>
+                            <strong>{score(season.observedRating)}</strong>
+                          </div>
+                        ) : null}
+                        {season.evidenceState !== 'ready' ? (
+                          <small className={styles['season-evidence']}>
+                            {season.evidenceState === 'partial'
+                              ? 'Evidencia parcial: lo desconocido no se fuerza a una nota.'
+                              : 'Sin evidencia suficiente para completar todas las notas.'}
+                          </small>
+                        ) : null}
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
             ) : null}
 
             {item.spoilerFreeSummary ? (

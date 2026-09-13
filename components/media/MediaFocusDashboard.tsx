@@ -17,6 +17,7 @@ import {
   focusLimit,
   watchPriorityScore,
 } from '@/lib/media/focus';
+import { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';
 import { deriveMediaFilterOptions, filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
 import type {
   MediaCommitmentFilter,
@@ -175,7 +176,8 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
     setFilters(initialFocusFilters(filters.medium));
   }
 
-  if (data.status === 'unavailable') return <MediaDashboardView data={data} />;
+  if (data.status === 'unavailable')
+    return <MediaDashboardView data={data} initialMedium={filters.medium} />;
 
   if (exploring) {
     return (
@@ -193,7 +195,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             Volver a lotes
           </button>
         </section>
-        <MediaDashboardView data={data} />
+        <MediaDashboardView data={data} initialMedium={filters.medium} />
       </div>
     );
   }
@@ -373,8 +375,8 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
           </span>
         </div>
         <span className={styles['score-note']}>
-          Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% impacto cultural.
-          “Se siente de época” ajusta sólo tu afinidad.
+          Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% presencia
+          cultural. “Se siente de época” ajusta sólo tu afinidad.
         </span>
       </div>
 
@@ -451,6 +453,18 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                     ) : null}
                   </div>
 
+                  {item.medium === 'series' && item.nextSeasonNumber !== null ? (
+                    <div className={styles['next-season-callout']}>
+                      <span>Siguiente</span>
+                      <strong>Temporada {item.nextSeasonNumber}</strong>
+                      {seasonWatchPriorityScore(nextSeasonFor(item)) !== null ? (
+                        <small>
+                          Prioridad {score(seasonWatchPriorityScore(nextSeasonFor(item)))}
+                        </small>
+                      ) : null}
+                    </div>
+                  ) : null}
+
                   <div className={styles['primary-scores']}>
                     {item.estimatedAffinity !== null ? (
                       <div className={styles['primary-score']}>
@@ -474,7 +488,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                       ) : null}
                       {item.culturalImpact !== null ? (
                         <span>
-                          Impacto <strong>{score(item.culturalImpact)}</strong>
+                          Presencia cultural <strong>{score(item.culturalImpact)}</strong>
                         </span>
                       ) : null}
                     </div>
