@@ -168,6 +168,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       cinephileValue: numberValue(valueAt(row, indexes, 'Valor cinéfilo')),
       culturalImpact: numberValue(valueAt(row, indexes, 'Impacto cultural')),
       generalScore: numberValue(valueAt(row, indexes, 'Score general')),
+      scoreVersion: text(valueAt(row, indexes, 'Score versión')),
       manualFocusLevel: manual.level,
       manualFocusExcluded: manual.excluded,
       ageFeelScore: ageFeel?.score ?? null,
