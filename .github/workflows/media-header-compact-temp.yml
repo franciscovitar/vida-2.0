@@ -31,16 +31,17 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           path = Path('components/media/MediaFocusDashboard.tsx')
-          text = path.read_text(encoding='utf-8')
-          old = """        <p className={styles['bank-principle']}>
-          <strong>Los lotes se recalculan con tus filtros.</strong> Primero definís el universo y
-          después entran las mejores opciones por Prioridad de visionado; cada nivel contiene al
-          anterior.
-        </p>
-"""
-          if old not in text:
+          lines = path.read_text(encoding='utf-8').splitlines(keepends=True)
+          marker = 'Los lotes se recalculan con tus filtros.'
+          marker_index = next((i for i, line in enumerate(lines) if marker in line), None)
+          if marker_index is None or marker_index == 0:
               raise SystemExit('Expected lot explainer block not found')
-          path.write_text(text.replace(old, '', 1), encoding='utf-8')
+          start = marker_index - 1
+          end = next((i for i in range(marker_index, len(lines)) if '</p>' in lines[i]), None)
+          if end is None:
+              raise SystemExit('Expected closing paragraph not found')
+          del lines[start:end + 1]
+          path.write_text(''.join(lines), encoding='utf-8')
           PY
 
       - name: Install dependencies
