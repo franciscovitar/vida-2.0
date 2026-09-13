@@ -216,21 +216,12 @@ export function withoutVerifiedLegacySeasonRows(
     const intel = bySeries
       .get(base.key)
       ?.find((season) => season.seasonNumber === seasonNumber);
-    if (
-      !intel ||
-      intel.year === null ||
-      item.year === null ||
-      intel.year !== item.year
-    ) {
+    if (!intel || intel.year === null || item.year === null || intel.year !== item.year) {
       return true;
     }
     if (!sameScore(item.cinephileValue, intel.cinephileValue)) return true;
     if (!sameScore(item.culturalImpact, intel.culturalPresence)) return true;
-    if (
-      !item.scoreVersion ||
-      !intel.scoreVersion ||
-      item.scoreVersion !== intel.scoreVersion
-    ) {
+    if (!item.scoreVersion || !intel.scoreVersion || item.scoreVersion !== intel.scoreVersion) {
       return true;
     }
 
