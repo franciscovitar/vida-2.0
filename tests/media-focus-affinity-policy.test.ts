@@ -45,39 +45,35 @@ function title(overrides: Partial<MediaTitleView> = {}): MediaTitleView {
   };
 }
 
-test('una película candidata a lote puede usar Personal Fit provisional aunque quede bajo el umbral histórico', () => {
-  assert.equal(shouldSurfaceEstimatedAffinity(title(), false), true);
+test('una película no vista muestra Personal Fit aunque esté fuera de los lotes', () => {
+  assert.equal(
+    shouldSurfaceEstimatedAffinity(title({ bankTier: 'C', pool: 'Reserva' })),
+    true,
+  );
 });
 
-test('una serie candidata a lote también puede usar Personal Fit provisional sub-umbral', () => {
+test('una serie muestra Personal Fit también fuera de los lotes y aunque esté terminada', () => {
   assert.equal(
     shouldSurfaceEstimatedAffinity(
       title({
         key: 'series:example:2020',
         medium: 'series',
+        state: 'Terminada',
         bankTier: null,
         pool: null,
         seasons: 3,
         runtimeMinutes: 45,
       }),
-      false,
     ),
     true,
   );
 });
 
-test('el umbral histórico sigue mandando fuera del foco', () => {
-  assert.equal(
-    shouldSurfaceEstimatedAffinity(title({ bankTier: 'C', pool: 'Reserva' }), false),
-    false,
-  );
-  assert.equal(
-    shouldSurfaceEstimatedAffinity(title({ bankTier: 'C', pool: 'Reserva' }), true),
-    true,
-  );
+test('una película ya vista no muestra Personal Fit', () => {
+  assert.equal(shouldSurfaceEstimatedAffinity(title({ state: 'Vista' })), false);
 });
 
-test('una serie activa con próxima temporada conocida sigue siendo candidata a afinidad provisional', () => {
+test('una serie activa con próxima temporada conocida mantiene visible su afinidad', () => {
   assert.equal(
     shouldSurfaceEstimatedAffinity(
       title({
@@ -90,7 +86,6 @@ test('una serie activa con próxima temporada conocida sigue siendo candidata a 
         nextSeasonNumber: 3,
         runtimeMinutes: 45,
       }),
-      false,
     ),
     true,
   );
