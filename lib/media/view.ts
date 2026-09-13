@@ -298,9 +298,15 @@ export function deriveMediaFilterOptions(
     hasNextSeasonPriority: scoped.some(
       (item) => seasonWatchPriorityScore(nextSeasonFor(item)) !== null,
     ),
-    hasNextSeasonAffinity: scoped.some((item) => nextSeasonFor(item)?.estimatedAffinity !== null),
-    hasNextSeasonCinephile: scoped.some((item) => nextSeasonFor(item)?.cinephileValue !== null),
-    hasNextSeasonCultural: scoped.some((item) => nextSeasonFor(item)?.culturalPresence !== null),
+    hasNextSeasonAffinity: scoped.some(
+      (item) => (nextSeasonFor(item)?.estimatedAffinity ?? null) !== null,
+    ),
+    hasNextSeasonCinephile: scoped.some(
+      (item) => (nextSeasonFor(item)?.cinephileValue ?? null) !== null,
+    ),
+    hasNextSeasonCultural: scoped.some(
+      (item) => (nextSeasonFor(item)?.culturalPresence ?? null) !== null,
+    ),
   };
 }
 
