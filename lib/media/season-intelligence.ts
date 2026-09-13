@@ -208,8 +208,7 @@ export function withoutVerifiedLegacySeasonRows(
 
     const baseCandidates = series.filter(
       (candidate) =>
-        candidate.key !== item.key &&
-        normalizeTitle(candidate.title) === normalizeTitle(baseTitle),
+        candidate.key !== item.key && normalizeTitle(candidate.title) === normalizeTitle(baseTitle),
     );
     if (baseCandidates.length !== 1) return true;
 
