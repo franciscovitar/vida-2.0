@@ -135,12 +135,14 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
     const manual = manualFocusValue(valueAt(row, indexes, 'Lote manual'));
     const ageFeel = deriveAgeFeel(medium, year, text(valueAt(row, indexes, 'Perfil experiencia')));
     const state = text(valueAt(row, indexes, 'Estado')) ?? 'Sin estado';
+    const rating = numberValue(valueAt(row, indexes, 'Nota'));
     const seasons = medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null;
     const seasonRatings =
       medium === 'series'
         ? parseObservedSeasonRatings(text(valueAt(row, indexes, 'Notas por temporada')))
         : new Map<number, number>();
-    const seasonDetails = medium === 'series' ? buildSeasonSkeleton(seasons, seasonRatings) : [];
+    const seasonDetails =
+      medium === 'series' ? buildSeasonSkeleton(seasons, seasonRatings, rating) : [];
     const nextSeasonNumber =
       medium === 'series' ? deriveNextSeasonNumber(state, seasons, seasonRatings) : null;
 
@@ -154,7 +156,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       bankTier: text(valueAt(row, indexes, 'Tier banco')),
       pool: text(valueAt(row, indexes, 'Pool')),
       radar: isRadar(valueAt(row, indexes, 'Radar')),
-      rating: numberValue(valueAt(row, indexes, 'Nota')),
+      rating,
       creator: text(valueAt(row, indexes, creatorHeader)),
       genres: listValue(valueAt(row, indexes, 'Géneros')),
       countries: listValue(valueAt(row, indexes, 'País')),
