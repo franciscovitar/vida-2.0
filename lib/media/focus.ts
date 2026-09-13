@@ -52,18 +52,13 @@ export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boole
 }
 
 /**
- * Política de presentación de Personal Fit. El umbral histórico sigue mandando
- * fuera del foco; para cualquier título que realmente compite por un Lote
- * permitimos también la predicción congelada sub-umbral como estimación
- * provisional. La confianza sigue del lado servidor y no se presenta como
- * certificada.
+ * Política explícita de presentación de Personal Fit: si existe una predicción
+ * congelada, Vida la muestra en lotes y Banco completo para todo título salvo
+ * una película ya vista. El umbral histórico de confianza se conserva como
+ * metadata privada para calibración, pero no decide si la afinidad se ve.
  */
-export function shouldSurfaceEstimatedAffinity(
-  item: MediaTitleView,
-  meetsDisplayThreshold: boolean,
-): boolean {
-  if (meetsDisplayThreshold) return true;
-  return isFocusCandidate(item, item.medium);
+export function shouldSurfaceEstimatedAffinity(item: MediaTitleView): boolean {
+  return !(item.medium === 'movie' && normalize(item.state) === 'vista');
 }
 
 export function deriveFocusCandidates(
