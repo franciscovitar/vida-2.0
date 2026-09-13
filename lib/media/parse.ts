@@ -1,5 +1,6 @@
 import { deriveAgeFeel } from '@/lib/media/age-feel';
 import { mediaPublicKey } from '@/lib/media/key';
+import { buildSeasonSkeleton, deriveNextSeasonNumber, parseObservedSeasonRatings } from '@/lib/media/seasons';
 import type { MediaTab } from '@/lib/media/sheets-read';
 import type { MediaFocusLevel, MediaKind, MediaTitleView } from '@/types/media';
 
@@ -36,6 +37,7 @@ const SERIES_HEADERS = [
   'Creador / showrunner',
   'Duración episodio min',
   'Temporadas',
+  'Notas por temporada',
 ] as const;
 
 function text(value: PlainCell | undefined): string | null {
@@ -128,6 +130,15 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
     const runtimeHeader = medium === 'movie' ? 'Duración min' : 'Duración episodio min';
     const manual = manualFocusValue(valueAt(row, indexes, 'Lote manual'));
     const ageFeel = deriveAgeFeel(medium, year, text(valueAt(row, indexes, 'Perfil experiencia')));
+    const state = text(valueAt(row, indexes, 'Estado')) ?? 'Sin estado';
+    const seasons = medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null;
+    const seasonRatings =
+      medium === 'series'
+        ? parseObservedSeasonRatings(text(valueAt(row, indexes, 'Notas por temporada')))
+        : new Map<number, number>();
+    const seasonDetails = medium === 'series' ? buildSeasonSkeleton(seasons, seasonRatings) : [];
+    const nextSeasonNumber =
+      medium === 'series' ? deriveNextSeasonNumber(state, seasons, seasonRatings) : null;
 
     titles.push({
       key: mediaPublicKey(medium, title, year),
@@ -135,7 +146,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       title,
       originalTitle: text(valueAt(row, indexes, 'Título original')),
       year,
-      state: text(valueAt(row, indexes, 'Estado')) ?? 'Sin estado',
+      state,
       bankTier: text(valueAt(row, indexes, 'Tier banco')),
       pool: text(valueAt(row, indexes, 'Pool')),
       radar: isRadar(valueAt(row, indexes, 'Radar')),
@@ -144,7 +155,9 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       genres: listValue(valueAt(row, indexes, 'Géneros')),
       countries: listValue(valueAt(row, indexes, 'País')),
       runtimeMinutes: numberValue(valueAt(row, indexes, runtimeHeader)),
-      seasons: medium === 'series' ? integerValue(valueAt(row, indexes, 'Temporadas')) : null,
+      seasons,
+      seasonDetails,
+      nextSeasonNumber,
       posterPath: posterPathValue(valueAt(row, indexes, 'Poster TMDB')),
       affinity: numberValue(valueAt(row, indexes, 'Afinidad personal')),
       estimatedAffinity: null,
