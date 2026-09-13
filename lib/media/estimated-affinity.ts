@@ -8,6 +8,7 @@ const SNAPSHOT_ENV = 'MEDIA_PERSONAL_FIT_V12_SNAPSHOT';
 export interface FrozenPersonalFit {
   affinity: number;
   confidence: number;
+  meetsDisplayThreshold: boolean;
 }
 
 type UnknownRecord = Record<string, unknown>;
@@ -51,6 +52,11 @@ function decodeSnapshot(encoded: string): UnknownRecord {
 /**
  * Consume un snapshot privado generado por PAS desde una variable server-side.
  * El repo público contiene sólo este contrato; nunca las afinidades personales.
+ *
+ * El snapshot conserva todas las predicciones congeladas. El umbral histórico
+ * de display se retiene como metadata server-side para que la política de Vida
+ * pueda decidir dónde una predicción provisional es útil sin presentar la
+ * confianza como certificada.
  */
 export function loadPrivatePersonalFitV12(
   env: NodeJS.ProcessEnv = process.env,
@@ -75,10 +81,13 @@ export function loadPrivatePersonalFitV12(
     if (affinity < 0 || affinity > 10 || confidence < 0 || confidence > 100) {
       throw new Error('Score de Media Personal Fit fuera de rango.');
     }
-    if (confidence < threshold) continue;
     if (output.has(key)) throw new Error('Clave duplicada en Media Personal Fit.');
 
-    output.set(key, { affinity, confidence });
+    output.set(key, {
+      affinity,
+      confidence,
+      meetsDisplayThreshold: confidence >= threshold,
+    });
   }
 
   return output;
