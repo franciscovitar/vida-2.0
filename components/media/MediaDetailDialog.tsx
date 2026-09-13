@@ -53,6 +53,7 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
 
   const priority = watchPriorityScore(item);
   const commitment = runtimeLabel(item);
+  const showGeneralRating = item.rating !== null && (item.medium === 'movie' || item.seasons !== 1);
 
   return (
     <div
@@ -126,9 +127,9 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                   <strong>{score(priority)}</strong>
                 </div>
               ) : null}
-              {item.rating !== null ? (
+              {showGeneralRating ? (
                 <div className={`${styles['primary-score']} ${styles.observed}`}>
-                  <span>Mi nota</span>
+                  <span>{item.medium === 'series' ? 'Mi nota general' : 'Mi nota'}</span>
                   <strong>{score(item.rating)}</strong>
                 </div>
               ) : null}
@@ -160,10 +161,7 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                 <div className={styles['season-heading']}>
                   <div>
                     <h3>Temporadas</h3>
-                    <p>
-                      Las notas de la serie completa son propias; no son un promedio de las
-                      temporadas.
-                    </p>
+                    <p>Mi nota general y las notas por temporada se conservan por separado.</p>
                   </div>
                   {item.nextSeasonNumber !== null ? (
                     <Badge domain="projects">Siguiente · T{item.nextSeasonNumber}</Badge>

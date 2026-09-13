@@ -83,6 +83,7 @@ export function deriveNextSeasonNumber(
 export function buildSeasonSkeleton(
   totalSeasons: number | null,
   observedRatings: ReadonlyMap<number, number>,
+  seriesRating: number | null = null,
 ): MediaSeasonView[] {
   const lastObserved = observedRatings.size > 0 ? Math.max(...observedRatings.keys()) : 0;
   const count = Math.max(totalSeasons ?? 0, lastObserved);
@@ -90,11 +91,15 @@ export function buildSeasonSkeleton(
 
   return Array.from({ length: count }, (_, index) => {
     const seasonNumber = index + 1;
+    const explicitRating = observedRatings.get(seasonNumber) ?? null;
+    const unambiguousSingleSeasonRating =
+      totalSeasons === 1 && seasonNumber === 1 ? seriesRating : null;
+
     return {
       seasonNumber,
       year: null,
       episodeCount: null,
-      observedRating: observedRatings.get(seasonNumber) ?? null,
+      observedRating: explicitRating ?? unambiguousSingleSeasonRating,
       estimatedAffinity: null,
       cinephileValue: null,
       culturalPresence: null,

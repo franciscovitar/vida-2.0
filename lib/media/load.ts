@@ -86,9 +86,7 @@ function withEstimatedAffinity(titles: MediaTitleView[]): MediaTitleView[] {
 
   return titles.map((item) => {
     const prediction = predictions.get(item.key);
-    if (!prediction || !shouldSurfaceEstimatedAffinity(item, prediction.meetsDisplayThreshold)) {
-      return item;
-    }
+    if (!prediction || !shouldSurfaceEstimatedAffinity(item)) return item;
     return {
       ...item,
       estimatedAffinity: adjustEstimatedAffinity(
