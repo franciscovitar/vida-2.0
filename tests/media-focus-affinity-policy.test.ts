@@ -59,7 +59,10 @@ test('el umbral histórico sigue mandando fuera del foco y para series', () => {
     ),
     false,
   );
-  assert.equal(shouldSurfaceEstimatedAffinity(movie({ bankTier: 'C', pool: 'Reserva' }), true), true);
+  assert.equal(
+    shouldSurfaceEstimatedAffinity(movie({ bankTier: 'C', pool: 'Reserva' }), true),
+    true,
+  );
 });
 
 test('una película que se siente más de época baja afinidad y también Prioridad de visionado', () => {
