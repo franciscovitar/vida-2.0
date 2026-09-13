@@ -2,7 +2,11 @@ import type { SheetReadCode } from '@/lib/google/errors';
 import { loadPrivatePersonalFitV12 } from '@/lib/media/estimated-affinity';
 import { adjustEstimatedAffinity, shouldSurfaceEstimatedAffinity } from '@/lib/media/focus';
 import { parseMediaTab } from '@/lib/media/parse';
-import { parseSeasonIntelligence, withSeasonIntelligence } from '@/lib/media/season-intelligence';
+import {
+  parseSeasonIntelligence,
+  withSeasonIntelligence,
+  withoutVerifiedLegacySeasonRows,
+} from '@/lib/media/season-intelligence';
 import { readMediaTabValues, type MediaTab } from '@/lib/media/sheets-read';
 import type {
   MediaDashboardData,
@@ -111,7 +115,9 @@ export async function loadMediaDashboard(): Promise<MediaDashboardData> {
   ]);
   const sources = [movies.source, series.source];
   const titlesWithAffinity = withEstimatedAffinity([...movies.titles, ...series.titles]);
-  const titles = withSeasonIntelligence(titlesWithAffinity, seasonIntelligence ?? new Map());
+  const seasonsBySeries = seasonIntelligence ?? new Map();
+  const titlesWithSeasons = withSeasonIntelligence(titlesWithAffinity, seasonsBySeries);
+  const titles = withoutVerifiedLegacySeasonRows(titlesWithSeasons, seasonsBySeries);
   const readyCount = sources.filter((source) => source.state === 'ready').length;
 
   if (readyCount === sources.length) {
