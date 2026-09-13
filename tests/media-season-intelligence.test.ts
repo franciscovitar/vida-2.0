@@ -193,5 +193,8 @@ test('una serie numerada real no se oculta si los scores no prueban el vínculo 
     scoreVersion: 'external-scoring-v1.1',
   };
 
-  assert.equal(withoutVerifiedLegacySeasonRows([canonical, numberedTitle], parsed.bySeries).length, 2);
+  assert.equal(
+    withoutVerifiedLegacySeasonRows([canonical, numberedTitle], parsed.bySeries).length,
+    2,
+  );
 });
