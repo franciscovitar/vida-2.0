@@ -11,10 +11,7 @@ import {
 import { filterMediaTitles, sortMediaTitles } from '@/lib/media/view';
 import type { MediaFilters, MediaSeasonView, MediaTitleView } from '@/types/media';
 
-function season(
-  seasonNumber: number,
-  overrides: Partial<MediaSeasonView> = {},
-): MediaSeasonView {
+function season(seasonNumber: number, overrides: Partial<MediaSeasonView> = {}): MediaSeasonView {
   return {
     seasonNumber,
     year: null,
@@ -83,11 +80,14 @@ function bankFilters(): MediaFilters {
 
 test('Notas por temporada conserva el número explícito y la nota observada', () => {
   const ratings = parseObservedSeasonRatings('T1 8.5 / T2 7,75 / T4 9');
-  assert.deepEqual([...ratings.entries()], [
-    [1, 8.5],
-    [2, 7.75],
-    [4, 9],
-  ]);
+  assert.deepEqual(
+    [...ratings.entries()],
+    [
+      [1, 8.5],
+      [2, 7.75],
+      [4, 9],
+    ],
+  );
 });
 
 test('una serie Por ver empieza por temporada 1 sin inventar historial', () => {

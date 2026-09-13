@@ -17,8 +17,7 @@ interface SeasonIntelligenceRow {
 }
 
 export type SeasonIntelligenceParseResult =
-  | { ok: true; bySeries: Map<string, SeasonIntelligenceRow[]> }
-  | { ok: false; missing: string[] };
+  { ok: true; bySeries: Map<string, SeasonIntelligenceRow[]> } | { ok: false; missing: string[] };
 
 const REQUIRED_HEADERS = [
   'Título serie',

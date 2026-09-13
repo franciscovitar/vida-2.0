@@ -106,7 +106,11 @@ export function MediaSortControl({
 
   const choices: { value: SortCriterion; label: string; visible: boolean }[] = [
     { value: 'bank-priority', label: 'Prioridad del banco', visible: includeBankPriority },
-    { value: 'focus-priority', label: 'Prioridad · serie/obra completa', visible: options.hasWatchPriority },
+    {
+      value: 'focus-priority',
+      label: 'Prioridad · serie/obra completa',
+      visible: options.hasWatchPriority,
+    },
     {
       value: 'next-season-priority',
       label: 'Prioridad · próxima temporada',
@@ -129,7 +133,11 @@ export function MediaSortControl({
       label: 'Valor cinéfilo · próxima temporada',
       visible: options.hasNextSeasonCinephile,
     },
-    { value: 'cultural', label: 'Presencia cultural · obra completa', visible: options.hasCultural },
+    {
+      value: 'cultural',
+      label: 'Presencia cultural · obra completa',
+      visible: options.hasCultural,
+    },
     {
       value: 'next-season-cultural',
       label: 'Presencia cultural · próxima temporada',

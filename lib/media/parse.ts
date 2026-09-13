@@ -1,6 +1,10 @@
 import { deriveAgeFeel } from '@/lib/media/age-feel';
 import { mediaPublicKey } from '@/lib/media/key';
-import { buildSeasonSkeleton, deriveNextSeasonNumber, parseObservedSeasonRatings } from '@/lib/media/seasons';
+import {
+  buildSeasonSkeleton,
+  deriveNextSeasonNumber,
+  parseObservedSeasonRatings,
+} from '@/lib/media/seasons';
 import type { MediaTab } from '@/lib/media/sheets-read';
 import type { MediaFocusLevel, MediaKind, MediaTitleView } from '@/types/media';
 

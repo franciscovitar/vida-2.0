@@ -295,7 +295,9 @@ export function deriveMediaFilterOptions(
     hasCultural: scoped.some((item) => item.culturalImpact !== null),
     hasScores: scoped.some((item) => item.generalScore !== null),
     hasWatchPriority: scoped.some((item) => watchPriorityScore(item) !== null),
-    hasNextSeasonPriority: scoped.some((item) => seasonWatchPriorityScore(nextSeasonFor(item)) !== null),
+    hasNextSeasonPriority: scoped.some(
+      (item) => seasonWatchPriorityScore(nextSeasonFor(item)) !== null,
+    ),
     hasNextSeasonAffinity: scoped.some((item) => nextSeasonFor(item)?.estimatedAffinity !== null),
     hasNextSeasonCinephile: scoped.some((item) => nextSeasonFor(item)?.cinephileValue !== null),
     hasNextSeasonCultural: scoped.some((item) => nextSeasonFor(item)?.culturalPresence !== null),
