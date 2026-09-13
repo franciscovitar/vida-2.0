@@ -102,8 +102,24 @@ test('scores o ajustes fuera de rango no se transforman en evidencia válida', (
   const enriched = withSeasonIntelligence([baseSeries()], parsed.bySeries)[0]!;
   const second = enriched.seasonDetails.find((season) => season.seasonNumber === 2)!;
 
-  assert.equal(second.estimatedAffinity, 8.4);
+  assert.equal(second.estimatedAffinity, null);
   assert.equal(second.cinephileValue, null);
   assert.equal(second.culturalPresence, null);
   assert.equal(second.evidenceState, 'partial');
+});
+
+test('una temporada sin ajuste específico no hereda la afinidad de la serie', () => {
+  const parsed = parseSeasonIntelligence([
+    [...HEADERS],
+    ['Example', 2020, 2, 2021, 10, 8.5, 8.2, '', 'external-scoring-v1.2', 'partial'],
+  ]);
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+
+  const enriched = withSeasonIntelligence([baseSeries()], parsed.bySeries)[0]!;
+  const second = enriched.seasonDetails.find((season) => season.seasonNumber === 2)!;
+
+  assert.equal(second.estimatedAffinity, null);
+  assert.equal(second.cinephileValue, 8.5);
+  assert.equal(second.culturalPresence, 8.2);
 });
