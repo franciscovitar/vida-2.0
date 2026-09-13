@@ -53,8 +53,7 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
 
   const priority = watchPriorityScore(item);
   const commitment = runtimeLabel(item);
-  const showGeneralRating =
-    item.rating !== null && (item.medium === 'movie' || item.seasons !== 1);
+  const showGeneralRating = item.rating !== null && (item.medium === 'movie' || item.seasons !== 1);
 
   return (
     <div
