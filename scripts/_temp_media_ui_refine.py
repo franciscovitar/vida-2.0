@@ -1,0 +1,529 @@
+from pathlib import Path
+
+
+def replace_once(path: str, old: str, new: str) -> None:
+    file = Path(path)
+    text = file.read_text(encoding="utf-8")
+    if old not in text:
+        raise SystemExit(f"Expected block not found in {path}: {old[:100]!r}")
+    file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+
+detail = """'use client';
+
+import { X } from 'lucide-react';
+import { useEffect } from 'react';
+
+import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
+import { MediaPoster } from '@/components/media/MediaPoster';
+import { Badge } from '@/components/ui/Badge';
+import { watchPriorityScore } from '@/lib/media/focus';
+import type { MediaTitleView } from '@/types/media';
+
+import styles from './MediaDashboard.module.scss';
+
+interface MediaDetailDialogProps {
+  item: MediaTitleView | null;
+  onClose: () => void;
+}
+
+function score(value: number | null): string {
+  return value === null
+    ? '—'
+    : value.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function runtimeLabel(item: MediaTitleView): string | null {
+  if (item.medium === 'movie') {
+    return item.runtimeMinutes === null ? null : `${Math.round(item.runtimeMinutes)} min`;
+  }
+  const parts: string[] = [];
+  if (item.runtimeMinutes !== null) parts.push(`${Math.round(item.runtimeMinutes)} min/ep`);
+  if (item.seasons !== null) parts.push(`${item.seasons} temp.`);
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
+
+export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
+  useEffect(() => {
+    if (!item) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [item, onClose]);
+
+  if (!item) return null;
+
+  const priority = watchPriorityScore(item);
+  const commitment = runtimeLabel(item);
+
+  return (
+    <div
+      className={styles['detail-backdrop']}
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.currentTarget === event.target) onClose();
+      }}
+    >
+      <section
+        className={styles['detail-panel']}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="media-detail-title"
+      >
+        <button
+          type="button"
+          className={styles['detail-close']}
+          onClick={onClose}
+          aria-label="Cerrar detalle"
+        >
+          <X size={19} aria-hidden="true" />
+        </button>
+
+        <div className={styles['detail-layout']}>
+          <div className={styles['detail-poster']}>
+            <MediaPoster title={item.title} posterPath={item.posterPath} />
+          </div>
+
+          <div className={styles['detail-content']}>
+            <div className={styles['detail-heading']}>
+              <div>
+                <h2 id="media-detail-title">{item.title}</h2>
+                {item.originalTitle && item.originalTitle !== item.title ? (
+                  <p className={styles['original-title']}>{item.originalTitle}</p>
+                ) : null}
+              </div>
+              {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
+            </div>
+
+            <div className={styles.badges}>
+              <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>{item.state}</Badge>
+              {item.ageFeelLabel ? <Badge variant="outline">{item.ageFeelLabel}</Badge> : null}
+              {item.radar ? <Badge domain="projects">Radar</Badge> : null}
+            </div>
+
+            <div className={styles.meta}>
+              {item.creator ? <span>{item.creator}</span> : null}
+              {commitment ? <span>{commitment}</span> : null}
+              <MediaCountryFlags countries={item.countries} />
+            </div>
+
+            {item.genres.length > 0 ? (
+              <div className={styles.genres}>
+                {item.genres.map((genre) => (
+                  <span key={genre}>{genre}</span>
+                ))}
+              </div>
+            ) : null}
+
+            <div className={styles['primary-scores']}>
+              {item.estimatedAffinity !== null ? (
+                <div className={styles['primary-score']}>
+                  <span>Afinidad para mí</span>
+                  <strong>{score(item.estimatedAffinity)}</strong>
+                </div>
+              ) : null}
+              {priority !== null ? (
+                <div className={styles['primary-score']}>
+                  <span>Prioridad de visionado</span>
+                  <strong>{score(priority)}</strong>
+                </div>
+              ) : null}
+              {item.rating !== null ? (
+                <div className={`${styles['primary-score']} ${styles.observed}`}>
+                  <span>Mi nota</span>
+                  <strong>{score(item.rating)}</strong>
+                </div>
+              ) : null}
+            </div>
+
+            {item.cinephileValue !== null || item.culturalImpact !== null ? (
+              <div className={styles['inferred-scores']}>
+                {item.cinephileValue !== null ? (
+                  <span>
+                    Valor cinéfilo <strong>{score(item.cinephileValue)}</strong>
+                  </span>
+                ) : null}
+                {item.culturalImpact !== null ? (
+                  <span>
+                    Impacto cultural <strong>{score(item.culturalImpact)}</strong>
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+
+            {item.spoilerFreeSummary ? (
+              <section className={styles['detail-description']}>
+                <h3>Sin spoilers</h3>
+                <p>{item.spoilerFreeSummary}</p>
+              </section>
+            ) : null}
+            {item.whatToExpect ? (
+              <section className={styles['detail-description']}>
+                <h3>Qué esperar</h3>
+                <p>{item.whatToExpect}</p>
+              </section>
+            ) : null}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+"""
+Path("components/media/MediaDetailDialog.tsx").write_text(detail, encoding="utf-8")
+
+poster = """'use client';
+
+import { Film } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
+
+import styles from './MediaDashboard.module.scss';
+
+const TMDB_IMAGE_ROOT = 'https://image.tmdb.org/t/p/w500';
+
+interface MediaPosterProps {
+  title: string;
+  posterPath: string | null;
+  onOpen?: () => void;
+}
+
+export function MediaPoster({ title, posterPath, onOpen }: MediaPosterProps) {
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(posterPath) && !failed;
+  const content = showImage ? (
+    <Image
+      src={`${TMDB_IMAGE_ROOT}${posterPath}`}
+      alt={`Portada de ${title}`}
+      fill
+      sizes="(min-width: 1180px) 340px, (min-width: 620px) 45vw, 92vw"
+      className={styles['poster-image']}
+      onError={() => setFailed(true)}
+    />
+  ) : (
+    <div className={styles['poster-fallback']} aria-label={`Sin portada disponible para ${title}`}>
+      <Film size={30} aria-hidden="true" />
+    </div>
+  );
+
+  if (onOpen) {
+    return (
+      <button
+        type="button"
+        className={`${styles.poster} ${styles['poster-button']}`}
+        onClick={onOpen}
+        aria-label={`Ver detalles de ${title}`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={styles.poster}>{content}</div>;
+}
+"""
+Path("components/media/MediaPoster.tsx").write_text(poster, encoding="utf-8")
+
+replace_once(
+    "components/media/MediaDashboard.tsx",
+    "import { ManualFocusControl } from '@/components/media/ManualFocusControl';\n",
+    "import { ManualFocusControl } from '@/components/media/ManualFocusControl';\nimport { MediaDetailDialog } from '@/components/media/MediaDetailDialog';\n",
+)
+replace_once(
+    "components/media/MediaDashboard.tsx",
+    "  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);\n",
+    "  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);\n  const [selectedItem, setSelectedItem] = useState<MediaTitleView | null>(null);\n",
+)
+replace_once(
+    "components/media/MediaDashboard.tsx",
+    "            const hasExperience = Boolean(item.spoilerFreeSummary || item.whatToExpect);\n",
+    "",
+)
+replace_once(
+    "components/media/MediaDashboard.tsx",
+    "                <MediaPoster title={item.title} posterPath={item.posterPath} />\n",
+    "                <MediaPoster\n                  title={item.title}\n                  posterPath={item.posterPath}\n                  onOpen={() => setSelectedItem(item)}\n                />\n",
+)
+old_experience = """                  {hasExperience ? (
+                    <div className={styles.experience}>
+                      {item.spoilerFreeSummary ? (
+                        <div className={styles['experience-block']}>
+                          <span className={styles['experience-label']}>Sin spoilers</span>
+                          <p>{item.spoilerFreeSummary}</p>
+                        </div>
+                      ) : null}
+                      {item.whatToExpect ? (
+                        <div className={styles['experience-block']}>
+                          <span className={styles['experience-label']}>Qué esperar</span>
+                          <p>{item.whatToExpect}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+"""
+replace_once("components/media/MediaDashboard.tsx", old_experience, "")
+replace_once(
+    "components/media/MediaDashboard.tsx",
+    "                  <ManualFocusControl\n",
+    "                  <button\n                    type=\"button\"\n                    className={styles['detail-button']}\n                    onClick={() => setSelectedItem(item)}\n                  >\n                    Ver detalles\n                  </button>\n                  <ManualFocusControl\n",
+)
+replace_once(
+    "components/media/MediaDashboard.tsx",
+    "\n      {visibleCount < results.length ? (\n",
+    "\n      <MediaDetailDialog item={selectedItem} onClose={() => setSelectedItem(null)} />\n\n      {visibleCount < results.length ? (\n",
+)
+
+replace_once(
+    "components/media/MediaFocusDashboard.tsx",
+    "import { ManualFocusControl } from '@/components/media/ManualFocusControl';\n",
+    "import { ManualFocusControl } from '@/components/media/ManualFocusControl';\nimport { MediaDetailDialog } from '@/components/media/MediaDetailDialog';\n",
+)
+replace_once(
+    "components/media/MediaFocusDashboard.tsx",
+    "  const [exploring, setExploring] = useState(false);\n",
+    "  const [exploring, setExploring] = useState(false);\n  const [selectedItem, setSelectedItem] = useState<MediaTitleView | null>(null);\n",
+)
+replace_once(
+    "components/media/MediaFocusDashboard.tsx",
+    "          })}\n        </div>\n      </section>\n\n      <section className={styles.controls} aria-label=\"Filtros del lote\">\n",
+    "          })}\n          <button\n            type=\"button\"\n            className={styles.chip}\n            data-active=\"false\"\n            onClick={() => setExploring(true)}\n          >\n            Banco completo\n          </button>\n        </div>\n      </section>\n\n      <section className={styles.controls} aria-label=\"Filtros del lote\">\n",
+)
+replace_once(
+    "components/media/MediaFocusDashboard.tsx",
+    "            const guidance = item.whatToExpect ?? item.spoilerFreeSummary;\n",
+    "",
+)
+replace_once(
+    "components/media/MediaFocusDashboard.tsx",
+    "                <MediaPoster title={item.title} posterPath={item.posterPath} />\n",
+    "                <MediaPoster\n                  title={item.title}\n                  posterPath={item.posterPath}\n                  onOpen={() => setSelectedItem(item)}\n                />\n",
+)
+old_guidance = """                  {guidance ? (
+                    <div className={styles.experience}>
+                      <div className={styles['experience-block']}>
+                        <span className={styles['experience-label']}>Para elegir</span>
+                        <p>{guidance}</p>
+                      </div>
+                    </div>
+                  ) : null}
+"""
+replace_once("components/media/MediaFocusDashboard.tsx", old_guidance, "")
+replace_once(
+    "components/media/MediaFocusDashboard.tsx",
+    "                  <ManualFocusControl\n",
+    "                  <button\n                    type=\"button\"\n                    className={styles['detail-button']}\n                    onClick={() => setSelectedItem(item)}\n                  >\n                    Ver detalles\n                  </button>\n                  <ManualFocusControl\n",
+)
+old_bank_bottom = """
+      <section className={styles.controls} aria-label="Banco completo">
+        <p className={styles['bank-principle']}>
+          ¿Querés forzar o excluir una opción que no apareció? Buscala en el Banco completo.
+        </p>
+        <button type="button" className={styles['empty-action']} onClick={() => setExploring(true)}>
+          Explorar Banco completo
+        </button>
+      </section>
+"""
+replace_once(
+    "components/media/MediaFocusDashboard.tsx",
+    old_bank_bottom,
+    "\n      <MediaDetailDialog item={selectedItem} onClose={() => setSelectedItem(null)} />\n",
+)
+
+css = Path("components/media/MediaDashboard.module.scss")
+css.write_text(
+    css.read_text(encoding="utf-8")
+    + """
+
+/* Catalog refinement: scan-first cards with detail on demand. */
+.title-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.72rem;
+}
+
+.title-card > .poster {
+  height: 270px;
+  aspect-ratio: auto;
+  border-radius: calc(var(--radius-lg) - 4px);
+}
+
+.poster-button {
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  appearance: none;
+}
+
+.poster-button:hover .poster-image {
+  transform: scale(1.025);
+}
+
+.poster-button:focus-visible,
+.detail-button:focus-visible,
+.detail-close:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.poster-image {
+  transition: transform 160ms ease;
+}
+
+.detail-button {
+  width: 100%;
+  min-height: 38px;
+  padding: 0.5rem 0.7rem;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.detail-button:hover {
+  border-color: var(--text-subtle);
+}
+
+.detail-backdrop {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  display: grid;
+  padding: 1rem;
+  overflow-y: auto;
+  background: rgb(5 8 14 / 78%);
+  backdrop-filter: blur(8px);
+  place-items: center;
+}
+
+.detail-panel {
+  position: relative;
+  width: min(920px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 34%);
+}
+
+.detail-close {
+  position: absolute;
+  z-index: 2;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: var(--text);
+  cursor: pointer;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  place-items: center;
+}
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.detail-poster {
+  width: min(280px, 72vw);
+  margin: 0 auto;
+}
+
+.detail-poster .poster {
+  height: auto;
+  aspect-ratio: 2 / 3;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.detail-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-right: 2.6rem;
+}
+
+.detail-heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.25rem, 3vw, 1.8rem);
+  line-height: 1.12;
+}
+
+.detail-description {
+  padding: 0.82rem 0.9rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.detail-description h3 {
+  margin: 0 0 0.35rem;
+  color: var(--text-subtle);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+}
+
+.detail-description p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.58;
+}
+
+@media (width >= 620px) {
+  .title-card > .poster {
+    height: 300px;
+  }
+}
+
+@media (width >= 760px) {
+  .detail-layout {
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 1.25rem;
+    padding: 1.15rem;
+  }
+
+  .detail-poster {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+@media (width >= 1180px) {
+  .title-card > .poster {
+    height: 320px;
+  }
+}
+""",
+    encoding="utf-8",
+)
