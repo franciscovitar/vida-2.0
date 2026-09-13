@@ -2,6 +2,7 @@ import type { SheetReadCode } from '@/lib/google/errors';
 import { loadPrivatePersonalFitV12 } from '@/lib/media/estimated-affinity';
 import { adjustEstimatedAffinity, shouldSurfaceEstimatedAffinity } from '@/lib/media/focus';
 import { parseMediaTab } from '@/lib/media/parse';
+import { parseSeasonIntelligence, withSeasonIntelligence } from '@/lib/media/season-intelligence';
 import { readMediaTabValues, type MediaTab } from '@/lib/media/sheets-read';
 import type {
   MediaDashboardData,
@@ -95,10 +96,22 @@ function withEstimatedAffinity(titles: MediaTitleView[]): MediaTitleView[] {
   });
 }
 
+async function loadSeasonIntelligence() {
+  const read = await readMediaTabValues('Series Seasons');
+  if (!read.ok) return null;
+  const parsed = parseSeasonIntelligence(read.values);
+  return parsed.ok ? parsed.bySeries : null;
+}
+
 export async function loadMediaDashboard(): Promise<MediaDashboardData> {
-  const [movies, series] = await Promise.all([loadSource('Movies'), loadSource('Series')]);
+  const [movies, series, seasonIntelligence] = await Promise.all([
+    loadSource('Movies'),
+    loadSource('Series'),
+    loadSeasonIntelligence(),
+  ]);
   const sources = [movies.source, series.source];
-  const titles = withEstimatedAffinity([...movies.titles, ...series.titles]);
+  const titlesWithAffinity = withEstimatedAffinity([...movies.titles, ...series.titles]);
+  const titles = withSeasonIntelligence(titlesWithAffinity, seasonIntelligence ?? new Map());
   const readyCount = sources.filter((source) => source.state === 'ready').length;
 
   if (readyCount === sources.length) {
