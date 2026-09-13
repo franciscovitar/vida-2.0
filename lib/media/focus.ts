@@ -21,9 +21,14 @@ function tierRank(tier: string | null): number {
   return 4;
 }
 
+function seriesActionable(item: MediaTitleView): boolean {
+  return item.medium === 'series' && (item.state === 'Por ver' || item.nextSeasonNumber !== null);
+}
+
 function autoEligible(item: MediaTitleView, medium: MediaKind): boolean {
-  if (item.medium !== medium || item.state !== 'Por ver') return false;
-  if (medium === 'series') return true;
+  if (item.medium !== medium) return false;
+  if (medium === 'series') return seriesActionable(item);
+  if (item.state !== 'Por ver') return false;
 
   return (
     normalize(item.pool) === 'operativo' &&
@@ -33,12 +38,15 @@ function autoEligible(item: MediaTitleView, medium: MediaKind): boolean {
 }
 
 /**
- * Una prioridad manual vuelve elegible un título `Por ver`; una exclusión
+ * Una prioridad manual vuelve elegible un título accionable; una exclusión
  * manual hace exactamente lo contrario y siempre gana sobre el ranking.
+ * En Series, una temporada siguiente conocida mantiene la serie accionable
+ * aunque el estado general sea Viendo o En pausa.
  */
 export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boolean {
-  if (item.medium !== medium || item.state !== 'Por ver') return false;
-  if (item.manualFocusExcluded) return false;
+  if (item.medium !== medium) return false;
+  const actionable = medium === 'series' ? seriesActionable(item) : item.state === 'Por ver';
+  if (!actionable || item.manualFocusExcluded) return false;
   if (item.manualFocusLevel !== null) return true;
   return autoEligible(item, medium);
 }
