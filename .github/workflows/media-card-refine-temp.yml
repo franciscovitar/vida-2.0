@@ -26,7 +26,10 @@ jobs:
           cache: npm
 
       - name: Apply final Media catalog refinement
-        run: python scripts/media-card-refine-temp.py
+        shell: bash
+        run: |
+          python scripts/media-card-refine-temp.py
+          sed -i "s/^\\\\'use client\\\\';$/'use client';/" components/media/MediaSortControl.tsx
 
       - name: Install dependencies
         run: npm ci
