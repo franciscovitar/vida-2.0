@@ -7,6 +7,15 @@ import type { NextConfig } from 'next';
  */
 const nextConfig: NextConfig = {
   serverExternalPackages: ['googleapis', 'google-auth-library', 'gaxios'],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+        pathname: '/t/p/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

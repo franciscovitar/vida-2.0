@@ -4,6 +4,7 @@ import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 import { getMediaSheetsAuthConfig, type MediaSheetsEnv } from '@/lib/media/sheets-config';
 
 export type MediaTab = 'Movies' | 'Series';
+export type MediaReadTab = MediaTab | 'Series Seasons';
 
 function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
   if (status === 401) return 'auth-error';
@@ -15,7 +16,7 @@ function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
 }
 
 export async function readMediaTabValues(
-  tab: MediaTab,
+  tab: MediaReadTab,
   env: MediaSheetsEnv = process.env,
 ): Promise<ReadTabResult> {
   const config = getMediaSheetsAuthConfig(env);

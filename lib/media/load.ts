@@ -1,7 +1,12 @@
 import type { SheetReadCode } from '@/lib/google/errors';
 import { loadPrivatePersonalFitV12 } from '@/lib/media/estimated-affinity';
-import { adjustEstimatedAffinity } from '@/lib/media/focus';
+import { adjustEstimatedAffinity, shouldSurfaceEstimatedAffinity } from '@/lib/media/focus';
 import { parseMediaTab } from '@/lib/media/parse';
+import {
+  parseSeasonIntelligence,
+  withSeasonIntelligence,
+  withoutVerifiedLegacySeasonRows,
+} from '@/lib/media/season-intelligence';
 import { readMediaTabValues, type MediaTab } from '@/lib/media/sheets-read';
 import type {
   MediaDashboardData,
@@ -81,18 +86,38 @@ function withEstimatedAffinity(titles: MediaTitleView[]): MediaTitleView[] {
 
   return titles.map((item) => {
     const prediction = predictions.get(item.key);
-    if (!prediction) return item;
+    if (!prediction || !shouldSurfaceEstimatedAffinity(item, prediction.meetsDisplayThreshold)) {
+      return item;
+    }
     return {
       ...item,
-      estimatedAffinity: adjustEstimatedAffinity(item.medium, item.year, prediction.affinity),
+      estimatedAffinity: adjustEstimatedAffinity(
+        item.medium,
+        item.ageFeelScore,
+        prediction.affinity,
+      ),
     };
   });
 }
 
+async function loadSeasonIntelligence() {
+  const read = await readMediaTabValues('Series Seasons');
+  if (!read.ok) return null;
+  const parsed = parseSeasonIntelligence(read.values);
+  return parsed.ok ? parsed.bySeries : null;
+}
+
 export async function loadMediaDashboard(): Promise<MediaDashboardData> {
-  const [movies, series] = await Promise.all([loadSource('Movies'), loadSource('Series')]);
+  const [movies, series, seasonIntelligence] = await Promise.all([
+    loadSource('Movies'),
+    loadSource('Series'),
+    loadSeasonIntelligence(),
+  ]);
   const sources = [movies.source, series.source];
-  const titles = withEstimatedAffinity([...movies.titles, ...series.titles]);
+  const titlesWithAffinity = withEstimatedAffinity([...movies.titles, ...series.titles]);
+  const seasonsBySeries = seasonIntelligence ?? new Map();
+  const titlesWithSeasons = withSeasonIntelligence(titlesWithAffinity, seasonsBySeries);
+  const titles = withoutVerifiedLegacySeasonRows(titlesWithSeasons, seasonsBySeries);
   const readyCount = sources.filter((source) => source.state === 'ready').length;
 
   if (readyCount === sources.length) {

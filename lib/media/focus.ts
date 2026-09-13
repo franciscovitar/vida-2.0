@@ -1,3 +1,4 @@
+import { ageFeelAffinityAdjustment } from '@/lib/media/age-feel';
 import type { MediaFocusLevel, MediaKind, MediaTitleView } from '@/types/media';
 
 const FOCUS_LIMITS: Record<MediaKind, Record<MediaFocusLevel, number>> = {
@@ -20,9 +21,14 @@ function tierRank(tier: string | null): number {
   return 4;
 }
 
+function seriesActionable(item: MediaTitleView): boolean {
+  return item.medium === 'series' && (item.state === 'Por ver' || item.nextSeasonNumber !== null);
+}
+
 function autoEligible(item: MediaTitleView, medium: MediaKind): boolean {
-  if (item.medium !== medium || item.state !== 'Por ver') return false;
-  if (medium === 'series') return true;
+  if (item.medium !== medium) return false;
+  if (medium === 'series') return seriesActionable(item);
+  if (item.state !== 'Por ver') return false;
 
   return (
     normalize(item.pool) === 'operativo' &&
@@ -32,14 +38,32 @@ function autoEligible(item: MediaTitleView, medium: MediaKind): boolean {
 }
 
 /**
- * Una prioridad manual siempre vuelve elegible un título `Por ver`, incluso si
- * la película está fuera del Pool operativo automático. La decisión humana no
- * altera Estado, Tier, Pool ni ninguna otra dimensión canónica.
+ * Una prioridad manual vuelve elegible un título accionable; una exclusión
+ * manual hace exactamente lo contrario y siempre gana sobre el ranking.
+ * En Series, una temporada siguiente conocida mantiene la serie accionable
+ * aunque el estado general sea Viendo o En pausa.
  */
 export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boolean {
-  if (item.medium !== medium || item.state !== 'Por ver') return false;
+  if (item.medium !== medium) return false;
+  const actionable = medium === 'series' ? seriesActionable(item) : item.state === 'Por ver';
+  if (!actionable || item.manualFocusExcluded) return false;
   if (item.manualFocusLevel !== null) return true;
   return autoEligible(item, medium);
+}
+
+/**
+ * Política de presentación de Personal Fit. El umbral histórico sigue mandando
+ * fuera del foco; para cualquier título que realmente compite por un Lote
+ * permitimos también la predicción congelada sub-umbral como estimación
+ * provisional. La confianza sigue del lado servidor y no se presenta como
+ * certificada.
+ */
+export function shouldSurfaceEstimatedAffinity(
+  item: MediaTitleView,
+  meetsDisplayThreshold: boolean,
+): boolean {
+  if (meetsDisplayThreshold) return true;
+  return isFocusCandidate(item, item.medium);
 }
 
 export function deriveFocusCandidates(
@@ -50,41 +74,39 @@ export function deriveFocusCandidates(
 }
 
 /**
- * Preferencia personal declarada para películas, no una valoración histórica.
- * 1990+ queda neutro. Hacia atrás resta 0,0125 por año hasta un máximo de -0,5.
- * Series quedan fuera de este ajuste hasta contar con evidencia específica.
+ * Capa de preferencia explícita sobre Personal Fit v1.2. El modelo privado se
+ * mantiene intacto y trazable; Vida aplica sólo la señal derivada de cuánto se
+ * siente de época la película. Series permanecen neutrales hasta disponer de
+ * una señal temporal por temporada: penalizar una serie completa por su año de
+ * estreno sería conceptualmente incorrecto.
  */
-export function eraPreferenceAdjustment(medium: MediaKind, year: number | null): number {
-  if (medium !== 'movie' || year === null || year >= 1990) return 0;
-  return -Math.min(0.5, (1990 - year) * 0.0125);
-}
-
 export function adjustEstimatedAffinity(
   medium: MediaKind,
-  year: number | null,
+  ageFeelScore: number | null,
   affinity: number | null,
 ): number | null {
   if (affinity === null) return null;
-  const adjusted = affinity + eraPreferenceAdjustment(medium, year);
-  return Math.min(10, Math.max(0, adjusted));
+  const adjustment = medium === 'movie' ? ageFeelAffinityAdjustment(ageFeelScore) : 0;
+  return Math.min(10, Math.max(0, affinity + adjustment));
 }
 
 /**
  * Nota derivada de 0 a 10 que responde "¿qué tan prioritaria es verla?".
- * No se persiste: se recalcula desde las tres dimensiones disponibles.
- * Cuando falta una dimensión, las ponderaciones restantes se renormalizan.
+ * Separa la afinidad personal de la importancia cinéfila/cultural y sigue la
+ * fórmula canónica PAS 50/30/20. No se persiste; si falta una dimensión, las
+ * ponderaciones restantes se renormalizan.
  */
 export function watchPriorityScore(item: MediaTitleView): number | null {
   let weighted = 0;
   let weight = 0;
 
   if (item.estimatedAffinity !== null) {
-    weighted += item.estimatedAffinity * 0.55;
-    weight += 0.55;
+    weighted += item.estimatedAffinity * 0.5;
+    weight += 0.5;
   }
   if (item.cinephileValue !== null) {
-    weighted += item.cinephileValue * 0.25;
-    weight += 0.25;
+    weighted += item.cinephileValue * 0.3;
+    weight += 0.3;
   }
   if (item.culturalImpact !== null) {
     weighted += item.culturalImpact * 0.2;
@@ -103,8 +125,9 @@ function compareNullablePriority(left: number | null, right: number | null): num
 }
 
 /**
- * Radar/Tier no alteran la nota global: sólo desempatan dos títulos con la
- * misma Prioridad de visionado. Así la métrica sigue siendo interpretable.
+ * Radar/Tier no alteran la nota visible: sólo desempatan dos títulos con la
+ * misma Prioridad de visionado. La afinidad privada normalmente aporta precisión
+ * sub-decimal, por lo que la UI puede mostrar dos decimales sin inventarlos.
  */
 export function compareFocusPriority(left: MediaTitleView, right: MediaTitleView): number {
   return (
@@ -126,9 +149,7 @@ function manualApplies(item: MediaTitleView, level: MediaFocusLevel): boolean {
 
 /**
  * Construye niveles anidados. Sin overrides manuales son prefijos exactos del
- * ranking (top 10/50/100 o 5/20/40). Un override manual aparece desde el nivel
- * elegido en adelante; si hubiera más overrides que el cupo base, se conservan
- * todos en vez de descartar una decisión explícita del usuario.
+ * ranking. Un override aparece desde el nivel elegido; una exclusión nunca entra.
  */
 function buildFocusLevels(
   titles: MediaTitleView[],
