@@ -208,14 +208,13 @@ export function withoutVerifiedLegacySeasonRows(
 
     const baseCandidates = series.filter(
       (candidate) =>
-        candidate.key !== item.key && normalizeTitle(candidate.title) === normalizeTitle(baseTitle),
+        candidate.key !== item.key &&
+        normalizeTitle(candidate.title) === normalizeTitle(baseTitle),
     );
     if (baseCandidates.length !== 1) return true;
 
     const base = baseCandidates[0]!;
-    const intel = bySeries
-      .get(base.key)
-      ?.find((season) => season.seasonNumber === seasonNumber);
+    const intel = bySeries.get(base.key)?.find((season) => season.seasonNumber === seasonNumber);
     if (!intel || intel.year === null || item.year === null || intel.year !== item.year) {
       return true;
     }
