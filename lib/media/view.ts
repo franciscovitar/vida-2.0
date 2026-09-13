@@ -1,4 +1,5 @@
 import { compareFocusPriority, watchPriorityScore } from '@/lib/media/focus';
+import { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';
 import type {
   MediaCollectionFilter,
   MediaCommitmentFilter,
@@ -19,6 +20,10 @@ export interface MediaFilterOptions {
   hasCultural: boolean;
   hasScores: boolean;
   hasWatchPriority: boolean;
+  hasNextSeasonPriority: boolean;
+  hasNextSeasonAffinity: boolean;
+  hasNextSeasonCinephile: boolean;
+  hasNextSeasonCultural: boolean;
 }
 
 function normalize(value: string): string {
@@ -30,7 +35,8 @@ function normalize(value: string): string {
 }
 
 function isBank(item: MediaTitleView): boolean {
-  return item.state === 'Por ver';
+  if (item.medium === 'movie') return item.state === 'Por ver';
+  return item.state === 'Por ver' || item.nextSeasonNumber !== null;
 }
 
 function isSeen(item: MediaTitleView): boolean {
@@ -147,6 +153,18 @@ function tierRank(tier: string | null): number {
   return 4;
 }
 
+function nextSeasonMetric(
+  item: MediaTitleView,
+  metric: 'priority' | 'affinity' | 'cinephile' | 'cultural',
+): number | null {
+  const season = nextSeasonFor(item);
+  if (!season) return null;
+  if (metric === 'priority') return seasonWatchPriorityScore(season);
+  if (metric === 'affinity') return season.estimatedAffinity;
+  if (metric === 'cinephile') return season.cinephileValue;
+  return season.culturalPresence;
+}
+
 export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): MediaTitleView[] {
   if (sort === 'focus-priority') return [...titles].sort(compareFocusPriority);
   if (sort === 'focus-priority-asc') {
@@ -155,6 +173,17 @@ export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): Medi
         nullableAsc(watchPriorityScore(left), watchPriorityScore(right)) ||
         left.title.localeCompare(right.title, 'es'),
     );
+  }
+  if (sort === 'next-season-priority-desc' || sort === 'next-season-priority-asc') {
+    return [...titles].sort((left, right) => {
+      const leftValue = nextSeasonMetric(left, 'priority');
+      const rightValue = nextSeasonMetric(right, 'priority');
+      const compared =
+        sort === 'next-season-priority-desc'
+          ? nullableDesc(leftValue, rightValue)
+          : nullableAsc(leftValue, rightValue);
+      return compared || compareFocusPriority(left, right);
+    });
   }
 
   return [...titles].sort((left, right) => {
@@ -179,6 +208,13 @@ export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): Medi
           : nullableAsc(left.estimatedAffinity, right.estimatedAffinity);
       return compared || left.title.localeCompare(right.title, 'es');
     }
+    if (sort === 'next-season-affinity-desc' || sort === 'next-season-affinity-asc') {
+      const compared =
+        sort === 'next-season-affinity-desc'
+          ? nullableDesc(nextSeasonMetric(left, 'affinity'), nextSeasonMetric(right, 'affinity'))
+          : nullableAsc(nextSeasonMetric(left, 'affinity'), nextSeasonMetric(right, 'affinity'));
+      return compared || left.title.localeCompare(right.title, 'es');
+    }
     if (sort === 'cinephile-desc' || sort === 'cinephile-asc') {
       const compared =
         sort === 'cinephile-desc'
@@ -186,11 +222,25 @@ export function sortMediaTitles(titles: MediaTitleView[], sort: MediaSort): Medi
           : nullableAsc(left.cinephileValue, right.cinephileValue);
       return compared || left.title.localeCompare(right.title, 'es');
     }
+    if (sort === 'next-season-cinephile-desc' || sort === 'next-season-cinephile-asc') {
+      const compared =
+        sort === 'next-season-cinephile-desc'
+          ? nullableDesc(nextSeasonMetric(left, 'cinephile'), nextSeasonMetric(right, 'cinephile'))
+          : nullableAsc(nextSeasonMetric(left, 'cinephile'), nextSeasonMetric(right, 'cinephile'));
+      return compared || left.title.localeCompare(right.title, 'es');
+    }
     if (sort === 'cultural-desc' || sort === 'cultural-asc') {
       const compared =
         sort === 'cultural-desc'
           ? nullableDesc(left.culturalImpact, right.culturalImpact)
           : nullableAsc(left.culturalImpact, right.culturalImpact);
+      return compared || left.title.localeCompare(right.title, 'es');
+    }
+    if (sort === 'next-season-cultural-desc' || sort === 'next-season-cultural-asc') {
+      const compared =
+        sort === 'next-season-cultural-desc'
+          ? nullableDesc(nextSeasonMetric(left, 'cultural'), nextSeasonMetric(right, 'cultural'))
+          : nullableAsc(nextSeasonMetric(left, 'cultural'), nextSeasonMetric(right, 'cultural'));
       return compared || left.title.localeCompare(right.title, 'es');
     }
     if (sort === 'year-desc' || sort === 'year-asc') {
@@ -245,6 +295,10 @@ export function deriveMediaFilterOptions(
     hasCultural: scoped.some((item) => item.culturalImpact !== null),
     hasScores: scoped.some((item) => item.generalScore !== null),
     hasWatchPriority: scoped.some((item) => watchPriorityScore(item) !== null),
+    hasNextSeasonPriority: scoped.some((item) => seasonWatchPriorityScore(nextSeasonFor(item)) !== null),
+    hasNextSeasonAffinity: scoped.some((item) => nextSeasonFor(item)?.estimatedAffinity !== null),
+    hasNextSeasonCinephile: scoped.some((item) => nextSeasonFor(item)?.cinephileValue !== null),
+    hasNextSeasonCultural: scoped.some((item) => nextSeasonFor(item)?.culturalPresence !== null),
   };
 }
 
