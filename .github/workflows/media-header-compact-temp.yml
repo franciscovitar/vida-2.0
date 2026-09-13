@@ -1,0 +1,60 @@
+name: Media header compact temp
+
+on:
+  push:
+    branches:
+      - feature/media-visual-ranking-v2
+    paths:
+      - .github/workflows/media-header-compact-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  compact:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/media-visual-ranking-v2
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Remove lot explainer copy
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('components/media/MediaFocusDashboard.tsx')
+          text = path.read_text(encoding='utf-8')
+          old = """        <p className={styles['bank-principle']}>
+          <strong>Los lotes se recalculan con tus filtros.</strong> Primero definís el universo y
+          después entran las mejores opciones por Prioridad de visionado; cada nivel contiene al
+          anterior.
+        </p>
+"""
+          if old not in text:
+              raise SystemExit('Expected lot explainer block not found')
+          path.write_text(text.replace(old, '', 1), encoding='utf-8')
+          PY
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify
+        run: npm run verify
+
+      - name: Commit compact header and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/media-header-compact-temp.yml
+          git add components/media/MediaFocusDashboard.tsx .github/workflows/media-header-compact-temp.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'refine media lot header spacing'
+          git push origin HEAD:feature/media-visual-ranking-v2
