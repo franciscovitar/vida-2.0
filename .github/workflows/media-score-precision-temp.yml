@@ -92,13 +92,13 @@ jobs:
               'Presencia cultural <strong>{formatExternalMediaScore(season.culturalPresence, season.scoreVersion)}</strong>',
           )
           PY
-      - run: npx prettier --write components/media/MediaDashboard.tsx components/media/MediaFocusDashboard.tsx components/media/MediaDetailDialog.tsx lib/media/parse.ts types/media.ts lib/media/score-format.ts
+      - run: npx prettier --write components/media/MediaDashboard.tsx components/media/MediaFocusDashboard.tsx components/media/MediaDetailDialog.tsx lib/media/parse.ts types/media.ts lib/media/score-format.ts tests/media-season-intelligence.test.ts
       - name: Commit and self-remove
         shell: bash
         run: |
           git rm .github/workflows/media-score-precision-temp.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add components/media/MediaDashboard.tsx components/media/MediaFocusDashboard.tsx components/media/MediaDetailDialog.tsx lib/media/parse.ts types/media.ts lib/media/score-format.ts
+          git add components/media/MediaDashboard.tsx components/media/MediaFocusDashboard.tsx components/media/MediaDetailDialog.tsx lib/media/parse.ts types/media.ts lib/media/score-format.ts tests/media-season-intelligence.test.ts
           git commit -m 'media: show external scores at evidence-backed precision'
           git push origin HEAD:feature/media-visual-ranking-v2
