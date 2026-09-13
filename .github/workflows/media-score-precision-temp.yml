@@ -38,15 +38,21 @@ jobs:
                   raise SystemExit(f'{path}: expected one match, got {count}: {old[:80]!r}')
               p.write_text(text.replace(old, new, 1))
 
-          for path in [
-              'components/media/MediaDashboard.tsx',
-              'components/media/MediaFocusDashboard.tsx',
-          ]:
-              once(
-                  path,
-                  "import { watchPriorityScore } from '@/lib/media/focus';",
-                  "import { watchPriorityScore } from '@/lib/media/focus';\nimport { formatExternalMediaScore } from '@/lib/media/score-format';",
-              )
+          dashboard = 'components/media/MediaDashboard.tsx'
+          once(
+              dashboard,
+              "import { watchPriorityScore } from '@/lib/media/focus';",
+              "import { watchPriorityScore } from '@/lib/media/focus';\nimport { formatExternalMediaScore } from '@/lib/media/score-format';",
+          )
+
+          focus = 'components/media/MediaFocusDashboard.tsx'
+          once(
+              focus,
+              "} from '@/lib/media/focus';",
+              "} from '@/lib/media/focus';\nimport { formatExternalMediaScore } from '@/lib/media/score-format';",
+          )
+
+          for path in [dashboard, focus]:
               once(
                   path,
                   'Cinéfilo <strong>{score(item.cinephileValue)}</strong>',
@@ -58,7 +64,7 @@ jobs:
                   'Presencia cultural <strong>{formatExternalMediaScore(item.culturalImpact, item.scoreVersion)}</strong>',
               )
 
-          p = Path('components/media/MediaDashboard.tsx')
+          p = Path(dashboard)
           text = p.read_text().replace(
               '30% valor cinéfilo + 20% impacto\n            cultural.',
               '30% valor cinéfilo + 20% presencia\n            cultural.',
