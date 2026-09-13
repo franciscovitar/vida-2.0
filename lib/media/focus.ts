@@ -43,6 +43,20 @@ export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boole
   return autoEligible(item, medium);
 }
 
+/**
+ * Política de presentación de Personal Fit. El umbral histórico sigue mandando
+ * fuera del foco; para películas candidatas a Lote permitimos también la
+ * predicción congelada sub-umbral como estimación provisional. La confianza no
+ * se expone ni se presenta como certificada.
+ */
+export function shouldSurfaceEstimatedAffinity(
+  item: MediaTitleView,
+  meetsDisplayThreshold: boolean,
+): boolean {
+  if (meetsDisplayThreshold) return true;
+  return item.medium === 'movie' && isFocusCandidate(item, 'movie');
+}
+
 export function deriveFocusCandidates(
   titles: MediaTitleView[],
   medium: MediaKind,
