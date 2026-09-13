@@ -1,0 +1,100 @@
+name: Media series UI patch temp
+
+on:
+  push:
+    branches: [feature/media-visual-ranking-v2]
+    paths: [.github/workflows/media-series-ui-patch-temp.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/media-visual-ranking-v2
+          fetch-depth: 0
+
+      - name: Patch Media series UI
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def exact(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text()
+              if text.count(old) != count:
+                  raise SystemExit(f'{path}: {old[:80]!r} count={text.count(old)}, expected={count}')
+              p.write_text(text.replace(old, new))
+
+          dashboard = 'components/media/MediaDashboard.tsx'
+          focus = 'components/media/MediaFocusDashboard.tsx'
+          detail = 'components/media/MediaDetailDialog.tsx'
+          styles = 'components/media/MediaDashboard.module.scss'
+
+          exact(
+              dashboard,
+              "interface MediaDashboardViewProps {\n  data: MediaDashboardData;\n}\n\nexport function MediaDashboardView({ data }: MediaDashboardViewProps) {\n  const firstReadyMedium =\n    data.sources.find((source) => source.state === 'ready')?.medium ?? 'movie';\n  const [filters, setFilters] = useState<MediaFilters>(() => initialFilters(firstReadyMedium));",
+              "interface MediaDashboardViewProps {\n  data: MediaDashboardData;\n  initialMedium?: MediaKind;\n}\n\nexport function MediaDashboardView({ data, initialMedium }: MediaDashboardViewProps) {\n  const firstReadyMedium =\n    data.sources.find((source) => source.state === 'ready')?.medium ?? 'movie';\n  const [filters, setFilters] = useState<MediaFilters>(() =>\n    initialFilters(initialMedium ?? firstReadyMedium),\n  );",
+          )
+          exact(
+              focus,
+              '<MediaDashboardView data={data} />',
+              '<MediaDashboardView data={data} initialMedium={filters.medium} />',
+              count=2,
+          )
+
+          for path in (dashboard, focus, detail):
+              p = Path(path)
+              text = p.read_text()
+              text = text.replace('impacto cultural', 'presencia cultural')
+              text = text.replace('Impacto cultural', 'Presencia cultural')
+              text = text.replace('Impacto <strong>', 'Presencia cultural <strong>')
+              p.write_text(text)
+
+          exact(
+              dashboard,
+              "import { watchPriorityScore } from '@/lib/media/focus';",
+              "import { watchPriorityScore } from '@/lib/media/focus';\nimport { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';",
+          )
+          exact(
+              focus,
+              "import { deriveMediaFilterOptions, filterMediaTitles, sortMediaTitles } from '@/lib/media/view';",
+              "import { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';\nimport { deriveMediaFilterOptions, filterMediaTitles, sortMediaTitles } from '@/lib/media/view';",
+          )
+          exact(
+              detail,
+              "import { watchPriorityScore } from '@/lib/media/focus';",
+              "import { watchPriorityScore } from '@/lib/media/focus';\nimport { seasonWatchPriorityScore } from '@/lib/media/seasons';",
+          )
+
+          anchor = "                  <div className={styles['primary-scores']}>"
+          next_block = """                  {item.medium === 'series' && item.nextSeasonNumber !== null ? (\n                    <div className={styles['next-season-callout']}>\n                      <span>Siguiente</span>\n                      <strong>Temporada {item.nextSeasonNumber}</strong>\n                      {seasonWatchPriorityScore(nextSeasonFor(item)) !== null ? (\n                        <small>Prioridad {score(seasonWatchPriorityScore(nextSeasonFor(item)))}</small>\n                      ) : null}\n                    </div>\n                  ) : null}\n\n""" + anchor
+          exact(dashboard, anchor, next_block)
+          exact(focus, anchor, next_block)
+
+          season_block = """            {item.medium === 'series' && item.seasonDetails.length > 0 ? (\n              <section className={styles['season-section']} aria-label=\"Temporadas\">\n                <div className={styles['season-heading']}>\n                  <div>\n                    <h3>Temporadas</h3>\n                    <p>Las notas de la serie completa son propias; no son un promedio de las temporadas.</p>\n                  </div>\n                  {item.nextSeasonNumber !== null ? (\n                    <Badge domain=\"projects\">Siguiente · T{item.nextSeasonNumber}</Badge>\n                  ) : null}\n                </div>\n                <div className={styles['season-grid']}>\n                  {item.seasonDetails.map((season) => {\n                    const seasonPriority = seasonWatchPriorityScore(season);\n                    return (\n                      <article key={season.seasonNumber} className={styles['season-card']} data-next={season.seasonNumber === item.nextSeasonNumber}>\n                        <div className={styles['season-card-heading']}>\n                          <strong>Temporada {season.seasonNumber}</strong>\n                          <span>{season.year ?? 'Año sin confirmar'}{season.episodeCount !== null ? ` · ${season.episodeCount} ep.` : ''}</span>\n                        </div>\n                        <div className={styles['season-score-grid']}>\n                          <span>Afinidad para mí <strong>{score(season.estimatedAffinity)}</strong></span>\n                          <span>Prioridad <strong>{score(seasonPriority)}</strong></span>\n                          <span>Cinéfilo <strong>{score(season.cinephileValue)}</strong></span>\n                          <span>Presencia cultural <strong>{score(season.culturalPresence)}</strong></span>\n                        </div>\n                        {season.observedRating !== null ? (\n                          <div className={styles['season-observed']}><span>Mi nota</span><strong>{score(season.observedRating)}</strong></div>\n                        ) : null}\n                        {season.evidenceState !== 'ready' ? (\n                          <small className={styles['season-evidence']}>{season.evidenceState === 'partial' ? 'Evidencia parcial: lo desconocido no se fuerza a una nota.' : 'Sin evidencia suficiente para completar todas las notas.'}</small>\n                        ) : null}\n                      </article>\n                    );\n                  })}\n                </div>\n              </section>\n            ) : null}\n\n"""
+          exact(detail, "            {item.spoilerFreeSummary ? (", season_block + "            {item.spoilerFreeSummary ? (")
+
+          p = Path(styles)
+          text = p.read_text()
+          text += """\n\n/* Series season intelligence v1 */\n.next-season-callout { display: grid; grid-template-columns: auto 1fr auto; gap: .45rem; align-items: baseline; min-height: 42px; padding: .52rem .6rem; color: var(--text-muted); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); }\n.next-season-callout span, .next-season-callout small { color: var(--text-subtle); font-size: .68rem; }\n.next-season-callout strong { color: var(--text); font-size: .82rem; }\n.next-season-callout small { font-variant-numeric: tabular-nums; }\n.season-section { display: flex; flex-direction: column; gap: .65rem; padding-top: .25rem; }\n.season-heading { display: flex; gap: .75rem; align-items: flex-start; justify-content: space-between; }\n.season-heading h3 { margin: 0; color: var(--text); font-size: .95rem; }\n.season-heading p { margin: .2rem 0 0; color: var(--text-muted); font-size: .72rem; line-height: 1.4; }\n.season-grid { display: grid; grid-template-columns: 1fr; gap: .55rem; }\n.season-card { display: flex; flex-direction: column; gap: .5rem; padding: .65rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); }\n.season-card[data-next='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent); }\n.season-card-heading { display: flex; gap: .6rem; align-items: baseline; justify-content: space-between; }\n.season-card-heading strong { color: var(--text); font-size: .82rem; }\n.season-card-heading span { color: var(--text-subtle); font-size: .68rem; }\n.season-score-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem; }\n.season-score-grid span { display: flex; flex-direction: column; gap: .12rem; min-width: 0; padding: .42rem .48rem; color: var(--text-muted); font-size: .65rem; background: var(--surface); border-radius: var(--radius-sm); }\n.season-score-grid strong, .season-observed strong { color: var(--text); font-variant-numeric: tabular-nums; }\n.season-observed { display: flex; align-items: center; justify-content: space-between; padding: .4rem .5rem; color: var(--text-muted); font-size: .68rem; background: var(--c-learning-soft); border: 1px solid var(--c-learning-border); border-radius: var(--radius-sm); }\n.season-evidence { color: var(--text-subtle); font-size: .64rem; line-height: 1.35; }\n"""
+          p.write_text(text)
+          PY
+
+      - name: Format
+        run: npx prettier --write components/media/MediaDashboard.tsx components/media/MediaFocusDashboard.tsx components/media/MediaDetailDialog.tsx components/media/MediaDashboard.module.scss
+
+      - name: Commit and self-remove
+        shell: bash
+        run: |
+          git rm .github/workflows/media-series-ui-patch-temp.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add components/media/MediaDashboard.tsx components/media/MediaFocusDashboard.tsx components/media/MediaDetailDialog.tsx components/media/MediaDashboard.module.scss
+          git commit -m 'media: add series season UI and preserve bank medium'
+          git push origin HEAD:feature/media-visual-ranking-v2
