@@ -25,6 +25,8 @@ function movie(
     countries: ['Argentina'],
     runtimeMinutes: 100,
     seasons: null,
+    seasonDetails: [],
+    nextSeasonNumber: null,
     posterPath: null,
     affinity: null,
     estimatedAffinity,
