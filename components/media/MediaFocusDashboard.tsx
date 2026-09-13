@@ -225,11 +225,6 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
             <Tv size={17} aria-hidden="true" /> Series
           </button>
         </div>
-        <p className={styles['bank-principle']}>
-          <strong>Los lotes se recalculan con tus filtros.</strong> Primero definís el universo y
-          después entran las mejores opciones por Prioridad de visionado; cada nivel contiene al
-          anterior.
-        </p>
         <div className={styles['collection-tabs']} role="group" aria-label="Nivel de lote">
           {FOCUS_LEVELS.map((focusLevel) => {
             const count = focusByLevel.get(focusLevel)?.length ?? 0;
