@@ -68,7 +68,9 @@ export function resolveManualFocusTarget(
 
   if (matches.length === 0) return { ok: false, code: 'not-found' };
   if (matches.length !== 1) return { ok: false, code: 'conflict' };
-  if (matches[0]?.state !== 'Por ver') return { ok: false, code: 'invalid-state' };
+  if (matches[0]?.state !== 'Por ver' && matches[0]?.state !== 'Reveer') {
+    return { ok: false, code: 'invalid-state' };
+  }
 
   return { ok: true, rowNumber: matches[0].rowNumber, columnNumber: manualColumn + 1 };
 }
