@@ -132,6 +132,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
     const year = integerValue(valueAt(row, indexes, 'Año'));
     const creatorHeader = medium === 'movie' ? 'Director' : 'Creador / showrunner';
     const runtimeHeader = medium === 'movie' ? 'Duración min' : 'Duración episodio min';
+    const observedDateHeader = medium === 'movie' ? 'Fecha vista' : 'Fecha terminada';
     const manual = manualFocusValue(valueAt(row, indexes, 'Lote manual'));
     const ageFeel = deriveAgeFeel(medium, year, text(valueAt(row, indexes, 'Perfil experiencia')));
     const state = text(valueAt(row, indexes, 'Estado')) ?? 'Sin estado';
@@ -157,6 +158,8 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       pool: text(valueAt(row, indexes, 'Pool')),
       radar: isRadar(valueAt(row, indexes, 'Radar')),
       rating,
+      observedDate: text(valueAt(row, indexes, observedDateHeader)),
+      personalOpinion: text(valueAt(row, indexes, 'Opinión personal')),
       creator: text(valueAt(row, indexes, creatorHeader)),
       genres: listValue(valueAt(row, indexes, 'Géneros')),
       countries: listValue(valueAt(row, indexes, 'País')),
