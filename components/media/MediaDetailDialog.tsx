@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 
 import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaPoster } from '@/components/media/MediaPoster';
+import { MediaTrackerControl } from '@/components/media/MediaTrackerControl';
 import { Badge } from '@/components/ui/Badge';
 import { watchPriorityScore } from '@/lib/media/focus';
 import { formatExternalMediaScore } from '@/lib/media/score-format';
@@ -155,6 +156,8 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                 ) : null}
               </div>
             ) : null}
+
+            <MediaTrackerControl key={item.key} item={item} onSaved={onClose} />
 
             {item.medium === 'series' && item.seasonDetails.length > 0 ? (
               <section className={styles['season-section']} aria-label="Temporadas">
