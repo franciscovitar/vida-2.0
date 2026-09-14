@@ -50,6 +50,10 @@ export interface MediaTitleView {
   pool: string | null;
   radar: boolean;
   rating: number | null;
+  /** Fecha observada del snapshot: vista para películas, terminada para series. */
+  observedDate?: string | null;
+  /** Opinión personal observada, editable sólo por una acción explícita del tracker. */
+  personalOpinion?: string | null;
   creator: string | null;
   genres: string[];
   countries: string[];
