@@ -31,7 +31,8 @@ function seriesActionable(item: MediaTitleView): boolean {
 function autoEligible(item: MediaTitleView, medium: MediaKind): boolean {
   if (item.medium !== medium) return false;
   if (medium === 'series') return seriesActionable(item);
-  if (item.state !== 'Por ver' && item.state !== 'Reveer') return false;
+  if (item.state === 'Reveer') return true;
+  if (item.state !== 'Por ver') return false;
 
   return (
     normalize(item.pool) === 'operativo' &&
