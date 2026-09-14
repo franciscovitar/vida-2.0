@@ -104,17 +104,18 @@ test('los lotes de series son top 5 / 20 / 40 y quedan anidados', () => {
   assert.ok(keys(lot2).every((key) => keys(lot3).includes(key)));
 });
 
-test('películas automáticas excluyen vistas, Tier C/D y pools no operativos', () => {
+test('películas automáticas excluyen Vista y Tier C/D, pero Reveer vuelve a ser accionable', () => {
   const titles = [
     title('ok-a', 'movie', { bankTier: 'A' }),
     title('ok-b', 'movie', { bankTier: 'B' }),
     title('seen', 'movie', { state: 'Vista', bankTier: 'A' }),
+    title('rewatch', 'movie', { state: 'Reveer', bankTier: null, pool: null, rating: 8 }),
     title('reserve', 'movie', { bankTier: 'C', pool: 'Reserva' }),
     title('exit', 'movie', { bankTier: 'D', pool: 'Salida candidata' }),
   ];
   assert.deepEqual(
     new Set(keys(deriveFocusCandidates(titles, 'movie'))),
-    new Set(['ok-a', 'ok-b']),
+    new Set(['ok-a', 'ok-b', 'rewatch']),
   );
 });
 
@@ -138,13 +139,24 @@ test('una exclusión manual saca el título de todos los lotes aunque sea autom�
   assert.deepEqual(deriveFocusTitles([excluded], 'movie', 3), []);
 });
 
-test('series automáticas contienen sólo Por ver cuando no se conoce una temporada siguiente', () => {
+test('series automáticas incluyen Por ver y Reveer cuando no se conoce una temporada siguiente', () => {
   const titles = [
     title('watch', 'series'),
     title('done', 'series', { state: 'Terminada' }),
+    title('rewatch', 'series', { state: 'Reveer', rating: 8 }),
     title('active', 'series', { state: 'Viendo', nextSeasonNumber: null }),
   ];
-  assert.deepEqual(keys(deriveFocusTitles(titles, 'series', 3)), ['watch']);
+  assert.deepEqual(new Set(keys(deriveFocusTitles(titles, 'series', 3))), new Set(['watch', 'rewatch']));
+});
+
+test('el filtro Reveer devuelve sólo títulos marcados Reveer', () => {
+  const titles = [
+    title('watch', 'movie'),
+    title('rewatch', 'movie', { state: 'Reveer', bankTier: null, pool: null, rating: 8 }),
+    title('seen', 'movie', { state: 'Vista', rating: 9 }),
+  ];
+  const filtered = filterMediaTitles(titles, filters('movie', { collection: 'rewatch' }));
+  assert.deepEqual(keys(filtered), ['rewatch']);
 });
 
 test('Prioridad de visionado usa 50% afinidad, 30% cinéfilo y 20% Presencia cultural', () => {
