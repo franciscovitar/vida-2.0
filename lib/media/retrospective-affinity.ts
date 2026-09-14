@@ -5,8 +5,7 @@ type PlainCell = string | number | boolean | null;
 type PlainRows = PlainCell[][];
 
 export type RetrospectiveAffinityParseResult =
-  | { ok: true; bySeries: Map<string, number> }
-  | { ok: false; missing: string[] };
+  { ok: true; bySeries: Map<string, number> } | { ok: false; missing: string[] };
 
 const REQUIRED_HEADERS = [
   'Título serie',
