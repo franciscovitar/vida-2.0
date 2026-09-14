@@ -4,7 +4,14 @@ import type { MediaKind } from '@/types/media';
 type PlainCell = string | number | boolean | null;
 
 const MOVIE_STATES = ['Vista', 'Reveer', 'Abandonada'] as const;
-const SERIES_STATES = ['Viendo', 'En pausa', 'Al día', 'Terminada', 'Abandonada', 'Reveer'] as const;
+const SERIES_STATES = [
+  'Viendo',
+  'En pausa',
+  'Al día',
+  'Terminada',
+  'Abandonada',
+  'Reveer',
+] as const;
 
 export interface MediaIntakeRequest {
   key: string;
@@ -136,14 +143,23 @@ export function parseMediaIntakeRequest(value: unknown): MediaIntakeRequest | nu
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
   const input = value as Record<string, unknown>;
   if (input.medium !== 'movie' && input.medium !== 'series') return null;
-  if (typeof input.key !== 'string' || typeof input.state !== 'string' || typeof input.date !== 'string') {
+  if (
+    typeof input.key !== 'string' ||
+    typeof input.state !== 'string' ||
+    typeof input.date !== 'string'
+  ) {
     return null;
   }
 
   const key = input.key.trim();
   const state = input.state.trim();
   const date = input.date.trim();
-  if (!key || key.length > 512 || !allowedState(input.medium, state) || !isValidIsoDate(date)) {
+  if (
+    !key ||
+    key.length > 512 ||
+    !allowedState(input.medium, state) ||
+    !isValidIsoDate(date)
+  ) {
     return null;
   }
 
@@ -231,7 +247,9 @@ export function inspectViewingHistory(
     if (label) indexes.set(label, index);
   });
   const required = ['Media ID', 'Estado / evento', 'Nota', 'Fecha', 'Comentario'];
-  if (required.some((label) => !indexes.has(label))) return { ok: false, code: 'missing-header' };
+  if (required.some((label) => !indexes.has(label))) {
+    return { ok: false, code: 'missing-header' };
+  }
 
   const mediaIdIndex = indexes.get('Media ID')!;
   const stateIndex = indexes.get('Estado / evento')!;
@@ -245,7 +263,11 @@ export function inspectViewingHistory(
     if (text(row[mediaIdIndex]) !== event.mediaId) return false;
     if (text(row[stateIndex]) !== event.state) return false;
     const currentRating = ratingValue(row[ratingIndex]);
-    if (currentRating === null ? event.rating !== null : event.rating === null || Math.abs(currentRating - event.rating) > 1e-9) {
+    if (
+      currentRating === null
+        ? event.rating !== null
+        : event.rating === null || Math.abs(currentRating - event.rating) > 1e-9
+    ) {
       return false;
     }
     if (canonicalDate(row[dateIndex]) !== expectedDate) return false;
@@ -293,10 +315,16 @@ export function snapshotMatchesRequest(
   const row = values[target.rowNumber - 1] ?? [];
   if (text(row[target.stateColumn - 1]) !== input.state) return false;
   const currentRating = ratingValue(row[target.ratingColumn - 1]);
-  if (currentRating === null ? input.rating !== null : input.rating === null || Math.abs(currentRating - input.rating) > 1e-9) {
+  if (
+    currentRating === null
+      ? input.rating !== null
+      : input.rating === null || Math.abs(currentRating - input.rating) > 1e-9
+  ) {
     return false;
   }
-  if (semanticComment(row[target.commentColumn - 1]) !== semanticComment(input.comment)) return false;
+  if (semanticComment(row[target.commentColumn - 1]) !== semanticComment(input.comment)) {
+    return false;
+  }
   if (shouldWriteCompletionDate(medium, input.state)) {
     if (canonicalDate(row[target.completionDateColumn - 1]) !== input.date) return false;
   }
