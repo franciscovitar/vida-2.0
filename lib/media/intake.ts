@@ -49,8 +49,7 @@ export interface ViewingHistoryEvent {
 }
 
 export type ViewingHistoryInspection =
-  | { ok: true; exists: boolean }
-  | { ok: false; code: 'missing-header' };
+  { ok: true; exists: boolean } | { ok: false; code: 'missing-header' };
 
 export const VIEWING_HISTORY_HEADERS = [
   'Event ID',
@@ -97,9 +96,7 @@ function isValidIsoDate(value: string): boolean {
   const day = Number(match[3]);
   const date = new Date(Date.UTC(year, month - 1, day));
   return (
-    date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day
+    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
   );
 }
 
@@ -154,12 +151,7 @@ export function parseMediaIntakeRequest(value: unknown): MediaIntakeRequest | nu
   const key = input.key.trim();
   const state = input.state.trim();
   const date = input.date.trim();
-  if (
-    !key ||
-    key.length > 512 ||
-    !allowedState(input.medium, state) ||
-    !isValidIsoDate(date)
-  ) {
+  if (!key || key.length > 512 || !allowedState(input.medium, state) || !isValidIsoDate(date)) {
     return null;
   }
 
