@@ -1,4 +1,5 @@
 import type { SheetReadCode } from '@/lib/google/errors';
+import { parseDisplayAffinity, withDisplayAffinity } from '@/lib/media/display-affinity';
 import { loadPrivatePersonalFitV12 } from '@/lib/media/estimated-affinity';
 import { adjustEstimatedAffinity, shouldSurfaceEstimatedAffinity } from '@/lib/media/focus';
 import { parseMediaTab } from '@/lib/media/parse';
@@ -116,18 +117,31 @@ async function loadRetrospectiveAffinity() {
   return parsed.ok ? parsed.bySeries : null;
 }
 
+async function loadDisplayAffinity() {
+  const read = await readMediaTabValues('Media Personal Fit Display');
+  if (!read.ok) return null;
+  const parsed = parseDisplayAffinity(read.values);
+  return parsed.ok ? parsed.byTitle : null;
+}
+
 export async function loadMediaDashboard(): Promise<MediaDashboardData> {
-  const [movies, series, seasonIntelligence, retrospectiveAffinity] = await Promise.all([
-    loadSource('Movies'),
-    loadSource('Series'),
-    loadSeasonIntelligence(),
-    loadRetrospectiveAffinity(),
-  ]);
+  const [movies, series, seasonIntelligence, retrospectiveAffinity, displayAffinity] =
+    await Promise.all([
+      loadSource('Movies'),
+      loadSource('Series'),
+      loadSeasonIntelligence(),
+      loadRetrospectiveAffinity(),
+      loadDisplayAffinity(),
+    ]);
   const sources = [movies.source, series.source];
   const titlesWithPrivateAffinity = withEstimatedAffinity([...movies.titles, ...series.titles]);
-  const titlesWithAffinity = withRetrospectiveSeriesAffinity(
+  const titlesWithRetrospectiveAffinity = withRetrospectiveSeriesAffinity(
     titlesWithPrivateAffinity,
     retrospectiveAffinity ?? new Map(),
+  );
+  const titlesWithAffinity = withDisplayAffinity(
+    titlesWithRetrospectiveAffinity,
+    displayAffinity ?? new Map(),
   );
   const seasonsBySeries = seasonIntelligence ?? new Map();
   const titlesWithSeasons = withSeasonIntelligence(titlesWithAffinity, seasonsBySeries);

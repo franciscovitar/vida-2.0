@@ -70,6 +70,10 @@ test('una película ya vista no muestra Personal Fit', () => {
   assert.equal(shouldSurfaceEstimatedAffinity(title({ state: 'Vista' })), false);
 });
 
+test('una película marcada Reveer tampoco muestra Personal Fit porque ya fue vista', () => {
+  assert.equal(shouldSurfaceEstimatedAffinity(title({ state: 'Reveer' })), false);
+});
+
 test('una serie activa con próxima temporada conocida mantiene visible su afinidad', () => {
   assert.equal(
     shouldSurfaceEstimatedAffinity(

@@ -4,7 +4,8 @@ import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 import { getMediaSheetsAuthConfig, type MediaSheetsEnv } from '@/lib/media/sheets-config';
 
 export type MediaTab = 'Movies' | 'Series';
-export type MediaReadTab = MediaTab | 'Series Seasons' | 'Series Personal Fit';
+export type MediaReadTab =
+  MediaTab | 'Series Seasons' | 'Series Personal Fit' | 'Media Personal Fit Display';
 
 function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
   if (status === 401) return 'auth-error';
