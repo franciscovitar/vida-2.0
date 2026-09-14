@@ -35,14 +35,14 @@ function normalize(value: string): string {
 }
 
 function isBank(item: MediaTitleView): boolean {
-  if (item.medium === 'movie') return item.state === 'Por ver';
-  return item.state === 'Por ver' || item.nextSeasonNumber !== null;
+  if (item.medium === 'movie') return item.state === 'Por ver' || item.state === 'Reveer';
+  return item.state === 'Por ver' || item.state === 'Reveer' || item.nextSeasonNumber !== null;
 }
 
 function isSeen(item: MediaTitleView): boolean {
   return item.medium === 'movie'
     ? item.state === 'Vista' || item.state === 'Reveer'
-    : item.state === 'Terminada';
+    : item.state === 'Terminada' || item.state === 'Reveer';
 }
 
 function isActive(item: MediaTitleView): boolean {
@@ -56,6 +56,7 @@ export function matchesCollection(
   if (collection === 'all') return true;
   if (collection === 'bank') return isBank(item);
   if (collection === 'radar') return item.radar;
+  if (collection === 'rewatch') return item.state === 'Reveer';
   if (collection === 'seen') return isSeen(item);
   return isActive(item);
 }
