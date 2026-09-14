@@ -1,8 +1,5 @@
 import type { SheetReadCode } from '@/lib/google/errors';
-import {
-  parseDisplayAffinity,
-  withDisplayAffinity,
-} from '@/lib/media/display-affinity';
+import { parseDisplayAffinity, withDisplayAffinity } from '@/lib/media/display-affinity';
 import { loadPrivatePersonalFitV12 } from '@/lib/media/estimated-affinity';
 import { adjustEstimatedAffinity, shouldSurfaceEstimatedAffinity } from '@/lib/media/focus';
 import { parseMediaTab } from '@/lib/media/parse';
