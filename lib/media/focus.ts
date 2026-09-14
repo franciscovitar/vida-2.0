@@ -52,13 +52,15 @@ export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boole
 }
 
 /**
- * Política explícita de presentación de Personal Fit: si existe una predicción
- * congelada, Vida la muestra en lotes y Banco completo para todo título salvo
- * una película ya vista. El umbral histórico de confianza se conserva como
- * metadata privada para calibración, pero no decide si la afinidad se ve.
+ * Política explícita de presentación de Personal Fit: si existe una predicción,
+ * Vida la muestra en lotes y Banco completo para Series y películas no vistas.
+ * Las películas Vista/Reveer ya tienen evidencia observada y no muestran
+ * afinidad predictiva. El umbral de confianza queda sólo como metadata privada.
  */
 export function shouldSurfaceEstimatedAffinity(item: MediaTitleView): boolean {
-  return !(item.medium === 'movie' && normalize(item.state) === 'vista');
+  if (item.medium !== 'movie') return true;
+  const state = normalize(item.state);
+  return state !== 'vista' && state !== 'reveer';
 }
 
 export function deriveFocusCandidates(
