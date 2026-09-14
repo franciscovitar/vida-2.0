@@ -139,13 +139,14 @@ test('completa película no vista y conserva el ajuste temporal de afinidad', ()
   assert.equal(result.estimatedAffinity, adjustEstimatedAffinity('movie', 8, 8));
 });
 
-test('no completa películas Vista ni Reveer', () => {
+test('completa películas Vista y Reveer sin mezclar la afinidad con Mi nota', () => {
   const result = withDisplayAffinity(
     [title('movie', 'Vista'), title('movie', 'Reveer')],
     parsedMap(),
   );
-  assert.equal(result[0]!.estimatedAffinity, null);
-  assert.equal(result[1]!.estimatedAffinity, null);
+  const expected = adjustEstimatedAffinity('movie', 8, 8);
+  assert.equal(result[0]!.estimatedAffinity, expected);
+  assert.equal(result[1]!.estimatedAffinity, expected);
 });
 
 test('completa Series sin importar que ya estén terminadas', () => {
