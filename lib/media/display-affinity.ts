@@ -6,8 +6,7 @@ type PlainCell = string | number | boolean | null;
 type PlainRows = PlainCell[][];
 
 export type DisplayAffinityParseResult =
-  | { ok: true; byTitle: Map<string, number> }
-  | { ok: false; missing: string[] };
+  { ok: true; byTitle: Map<string, number> } | { ok: false; missing: string[] };
 
 const REQUIRED_HEADERS = ['Tipo', 'Título', 'Año', 'Afinidad display', 'Modelo', 'Modo'] as const;
 const MODEL_VERSION = 'personal-fit-v1.2';
