@@ -158,7 +158,9 @@ export function MediaTrackerControl({ item, onSaved }: MediaTrackerControlProps)
             {saving ? 'Guardando…' : 'Guardar en tracker'}
           </button>
           {error ? (
-            <p>No se pudo confirmar el guardado completo. Podés reintentar sin duplicar historial.</p>
+            <p>
+              No se pudo confirmar el guardado completo. Podés reintentar sin duplicar historial.
+            </p>
           ) : null}
         </div>
       </form>
