@@ -20,15 +20,21 @@ const MODEL_VERSION = 'personal-fit-v1.2-retrospective-display-v1';
 const MODE = 'retrospective_leave_one_out';
 
 function text(value: PlainCell | undefined): string | null {
-  if (value === null || value === undefined) return null;
+  if (value === null || value === undefined) {
+    return null;
+  }
   const normalized = String(value).trim();
   return normalized ? normalized : null;
 }
 
 function numberValue(value: PlainCell | undefined): number | null {
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
   const raw = text(value);
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
   const parsed = Number(raw.replace(',', '.'));
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -42,7 +48,9 @@ function headerIndexes(headerRow: PlainCell[]): Map<string, number> {
   const indexes = new Map<string, number>();
   headerRow.forEach((value, index) => {
     const label = text(value);
-    if (label) indexes.set(label, index);
+    if (label) {
+      indexes.set(label, index);
+    }
   });
   return indexes;
 }
@@ -61,7 +69,9 @@ export function parseRetrospectiveSeriesAffinity(
 ): RetrospectiveAffinityParseResult {
   const indexes = headerIndexes(values[0] ?? []);
   const missing = REQUIRED_HEADERS.filter((header) => !indexes.has(header));
-  if (missing.length > 0) return { ok: false, missing: [...missing] };
+  if (missing.length > 0) {
+    return { ok: false, missing: [...missing] };
+  }
 
   const bySeries = new Map<string, number>();
 
@@ -70,12 +80,18 @@ export function parseRetrospectiveSeriesAffinity(
     const affinity = numberValue(valueAt(row, indexes, 'Afinidad retrospectiva'));
     const model = text(valueAt(row, indexes, 'Modelo'));
     const mode = text(valueAt(row, indexes, 'Modo'));
-    if (!title || affinity === null || affinity < 0 || affinity > 10) continue;
-    if (model !== MODEL_VERSION || mode !== MODE) continue;
+    if (!title || affinity === null || affinity < 0 || affinity > 10) {
+      continue;
+    }
+    if (model !== MODEL_VERSION || mode !== MODE) {
+      continue;
+    }
 
     const year = integerValue(valueAt(row, indexes, 'Año serie'));
     const key = mediaPublicKey('series', title, year);
-    if (!bySeries.has(key)) bySeries.set(key, affinity);
+    if (!bySeries.has(key)) {
+      bySeries.set(key, affinity);
+    }
   }
 
   return { ok: true, bySeries };
@@ -89,11 +105,18 @@ export function withRetrospectiveSeriesAffinity(
   titles: MediaTitleView[],
   bySeries: ReadonlyMap<string, number>,
 ): MediaTitleView[] {
-  if (bySeries.size === 0) return titles;
+  if (bySeries.size === 0) {
+    return titles;
+  }
 
   return titles.map((item) => {
-    if (item.medium !== 'series' || item.estimatedAffinity !== null) return item;
+    if (item.medium !== 'series' || item.estimatedAffinity !== null) {
+      return item;
+    }
     const affinity = bySeries.get(item.key);
-    return affinity === undefined ? item : { ...item, estimatedAffinity: affinity };
+    if (affinity === undefined) {
+      return item;
+    }
+    return { ...item, estimatedAffinity: affinity };
   });
 }
