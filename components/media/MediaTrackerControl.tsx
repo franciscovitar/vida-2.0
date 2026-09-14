@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 
 import { mediaTrackerStates } from '@/lib/media/intake';
 import type { MediaTitleView } from '@/types/media';
@@ -51,7 +52,10 @@ export function MediaTrackerControl({ item, onSaved }: MediaTrackerControlProps)
     event.preventDefault();
     if (!date) return;
     const numericRating = rating.trim() ? Number(rating.replace(',', '.')) : null;
-    if (numericRating !== null && (!Number.isFinite(numericRating) || numericRating < 0 || numericRating > 10)) {
+    if (
+      numericRating !== null &&
+      (!Number.isFinite(numericRating) || numericRating < 0 || numericRating > 10)
+    ) {
       setError(true);
       return;
     }
@@ -99,7 +103,11 @@ export function MediaTrackerControl({ item, onSaved }: MediaTrackerControlProps)
         <div className={styles.grid}>
           <label>
             <span>Estado</span>
-            <select value={state} disabled={saving} onChange={(event) => setState(event.target.value)}>
+            <select
+              value={state}
+              disabled={saving}
+              onChange={(event) => setState(event.target.value)}
+            >
               {states.map((option) => (
                 <option key={option} value={option}>
                   {option}
