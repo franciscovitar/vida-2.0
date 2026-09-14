@@ -22,13 +22,16 @@ function tierRank(tier: string | null): number {
 }
 
 function seriesActionable(item: MediaTitleView): boolean {
-  return item.medium === 'series' && (item.state === 'Por ver' || item.nextSeasonNumber !== null);
+  return (
+    item.medium === 'series' &&
+    (item.state === 'Por ver' || item.state === 'Reveer' || item.nextSeasonNumber !== null)
+  );
 }
 
 function autoEligible(item: MediaTitleView, medium: MediaKind): boolean {
   if (item.medium !== medium) return false;
   if (medium === 'series') return seriesActionable(item);
-  if (item.state !== 'Por ver') return false;
+  if (item.state !== 'Por ver' && item.state !== 'Reveer') return false;
 
   return (
     normalize(item.pool) === 'operativo' &&
@@ -41,26 +44,28 @@ function autoEligible(item: MediaTitleView, medium: MediaKind): boolean {
  * Una prioridad manual vuelve elegible un título accionable; una exclusión
  * manual hace exactamente lo contrario y siempre gana sobre el ranking.
  * En Series, una temporada siguiente conocida mantiene la serie accionable
- * aunque el estado general sea Viendo o En pausa.
+ * aunque el estado general sea Viendo o En pausa. Reveer es accionable en ambos
+ * medios porque representa una decisión explícita de volver a darle una oportunidad.
  */
 export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boolean {
   if (item.medium !== medium) return false;
-  const actionable = medium === 'series' ? seriesActionable(item) : item.state === 'Por ver';
+  const actionable =
+    medium === 'series'
+      ? seriesActionable(item)
+      : item.state === 'Por ver' || item.state === 'Reveer';
   if (!actionable || item.manualFocusExcluded) return false;
   if (item.manualFocusLevel !== null) return true;
   return autoEligible(item, medium);
 }
 
 /**
- * Política explícita de presentación de Personal Fit: si existe una predicción,
- * Vida la muestra en lotes y Banco completo para Series y películas no vistas.
- * Las películas Vista/Reveer ya tienen evidencia observada y no muestran
- * afinidad predictiva. El umbral de confianza queda sólo como metadata privada.
+ * Personal Fit es una señal distinta de la nota observada. Si existe una
+ * estimación trazable, Vida la muestra tanto antes como después del visionado.
+ * En títulos ya vistos se presenta separada de Mi nota para no confundir
+ * predicción/afinidad con evaluación observada.
  */
-export function shouldSurfaceEstimatedAffinity(item: MediaTitleView): boolean {
-  if (item.medium !== 'movie') return true;
-  const state = normalize(item.state);
-  return state !== 'vista' && state !== 'reveer';
+export function shouldSurfaceEstimatedAffinity(_item: MediaTitleView): boolean {
+  return true;
 }
 
 export function deriveFocusCandidates(
