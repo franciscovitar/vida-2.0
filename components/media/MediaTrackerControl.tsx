@@ -157,7 +157,9 @@ export function MediaTrackerControl({ item, onSaved }: MediaTrackerControlProps)
           <button type="submit" disabled={saving || !date}>
             {saving ? 'Guardando…' : 'Guardar en tracker'}
           </button>
-          {error ? <p>No se pudo guardar. No se confirmó ningún cambio incompleto.</p> : null}
+          {error ? (
+            <p>No se pudo confirmar el guardado completo. Podés reintentar sin duplicar historial.</p>
+          ) : null}
         </div>
       </form>
     </section>
