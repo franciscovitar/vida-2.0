@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import styles from './MediaDashboard.module.scss';
+import posterStyles from './MediaPoster.module.scss';
 
 const TMDB_IMAGE_ROOT = 'https://image.tmdb.org/t/p/w780';
 
@@ -15,8 +16,8 @@ interface MediaPosterProps {
 }
 
 export function MediaPoster({ title, posterPath, onOpen }: MediaPosterProps) {
-  const [failed, setFailed] = useState(false);
-  const showImage = Boolean(posterPath) && !failed;
+  const [failedPosterPath, setFailedPosterPath] = useState<string | null>(null);
+  const showImage = Boolean(posterPath) && failedPosterPath !== posterPath;
   const content = showImage ? (
     <Image
       src={`${TMDB_IMAGE_ROOT}${posterPath}`}
@@ -25,11 +26,17 @@ export function MediaPoster({ title, posterPath, onOpen }: MediaPosterProps) {
       unoptimized
       sizes="(min-width: 1180px) 340px, (min-width: 620px) 45vw, 92vw"
       className={styles['poster-image']}
-      onError={() => setFailed(true)}
+      onError={() => setFailedPosterPath(posterPath)}
     />
   ) : (
     <div className={styles['poster-fallback']} aria-label={`Sin portada disponible para ${title}`}>
-      <Film size={30} aria-hidden="true" />
+      <div className={posterStyles.content}>
+        <Film size={30} aria-hidden="true" />
+        <span className={posterStyles.title}>{title}</span>
+        <span className={posterStyles.label}>
+          {posterPath ? 'Portada no disponible' : 'Portada pendiente'}
+        </span>
+      </div>
     </div>
   );
 
