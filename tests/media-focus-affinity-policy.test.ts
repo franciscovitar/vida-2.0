@@ -66,12 +66,12 @@ test('una serie muestra Personal Fit también fuera de los lotes y aunque esté 
   );
 });
 
-test('una película ya vista no muestra Personal Fit', () => {
-  assert.equal(shouldSurfaceEstimatedAffinity(title({ state: 'Vista' })), false);
+test('una película ya vista mantiene visible Personal Fit separado de Mi nota', () => {
+  assert.equal(shouldSurfaceEstimatedAffinity(title({ state: 'Vista', rating: 8 })), true);
 });
 
-test('una película marcada Reveer tampoco muestra Personal Fit porque ya fue vista', () => {
-  assert.equal(shouldSurfaceEstimatedAffinity(title({ state: 'Reveer' })), false);
+test('una película marcada Reveer mantiene Personal Fit porque vuelve a ser accionable', () => {
+  assert.equal(shouldSurfaceEstimatedAffinity(title({ state: 'Reveer', rating: 8 })), true);
 });
 
 test('una serie activa con próxima temporada conocida mantiene visible su afinidad', () => {
