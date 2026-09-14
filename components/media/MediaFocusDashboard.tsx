@@ -91,6 +91,7 @@ function hasExtraFilters(filters: MediaFilters): boolean {
     filters.yearFrom ||
     filters.yearTo ||
     filters.commitment !== 'all' ||
+    filters.collection !== 'all' ||
     filters.sort !== 'focus-priority',
   );
 }
@@ -185,8 +186,8 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
       <div className={styles.stack}>
         <section className={styles.hero} aria-label="Explorador completo">
           <p className={styles['bank-principle']}>
-            <strong>Estás explorando el Banco completo.</strong> Podés fijar un título en un lote o
-            marcarlo como no prioritario para excluirlo de todos los lotes.
+            <strong>Estás explorando el Banco completo.</strong> Incluye títulos Por ver y Reveer.
+            Podés fijar cualquiera en un lote o marcarlo como no prioritario.
           </p>
           <button
             type="button"
@@ -256,6 +257,24 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
       </section>
 
       <section className={styles.controls} aria-label="Filtros del lote">
+        <div className={styles['collection-tabs']} role="group" aria-label="Estado del lote">
+          <button
+            type="button"
+            className={styles.chip}
+            data-active={filters.collection === 'all'}
+            onClick={() => patchFilters({ collection: 'all' })}
+          >
+            Todo el lote
+          </button>
+          <button
+            type="button"
+            className={styles.chip}
+            data-active={filters.collection === 'rewatch'}
+            onClick={() => patchFilters({ collection: 'rewatch' })}
+          >
+            Solo Reveer
+          </button>
+        </div>
         <label className={styles['search-field']}>
           <Search size={17} aria-hidden="true" />
           <span className={styles['sr-only']}>Buscar y recalcular lote</span>
@@ -377,7 +396,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
         </div>
         <span className={styles['score-note']}>
           Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% presencia
-          cultural. “Se siente de época” ajusta sólo tu afinidad.
+          cultural. Reveer compite en los lotes como una opción accionable más.
         </span>
       </div>
 
@@ -425,6 +444,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                     {item.year !== null ? <span className={styles.year}>{item.year}</span> : null}
                   </div>
                   <div className={styles.badges}>
+                    {item.state === 'Reveer' ? <Badge domain="learning">Reveer</Badge> : null}
                     {item.key === firstFocusKey ? (
                       <Badge domain="projects">Primera del lote</Badge>
                     ) : null}
@@ -466,20 +486,30 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                     </div>
                   ) : null}
 
-                  <div className={styles['primary-scores']}>
-                    {item.estimatedAffinity !== null ? (
-                      <div className={styles['primary-score']}>
-                        <span>Afinidad para mí</span>
-                        <strong>{score(item.estimatedAffinity)}</strong>
-                      </div>
-                    ) : null}
-                    {priority !== null ? (
+                  {item.estimatedAffinity !== null || item.rating !== null ? (
+                    <div className={styles['inferred-scores']} aria-label="Mi referencia personal">
+                      {item.estimatedAffinity !== null ? (
+                        <span>
+                          Afinidad para mí <strong>{score(item.estimatedAffinity)}</strong>
+                        </span>
+                      ) : null}
+                      {item.rating !== null ? (
+                        <span>
+                          Mi nota <strong>{score(item.rating)}</strong>
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {priority !== null ? (
+                    <div className={styles['primary-scores']}>
                       <div className={styles['primary-score']}>
                         <span>Prioridad de visionado</span>
                         <strong>{score(priority)}</strong>
                       </div>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
+
                   {item.cinephileValue !== null || item.culturalImpact !== null ? (
                     <div className={styles['inferred-scores']}>
                       {item.cinephileValue !== null ? (
