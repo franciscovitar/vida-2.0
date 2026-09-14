@@ -92,7 +92,13 @@ export interface MediaDashboardData {
   sources: MediaSourceView[];
 }
 
-export type MediaCollectionFilter = 'all' | 'bank' | 'radar' | 'rewatch' | 'seen' | 'active';
+export type MediaCollectionFilter =
+  | 'all'
+  | 'bank'
+  | 'radar'
+  | 'rewatch'
+  | 'seen'
+  | 'active';
 export type MediaCommitmentFilter =
   | 'all'
   | 'under-90'
