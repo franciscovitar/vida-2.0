@@ -94,22 +94,19 @@ test('Series Personal Fit acepta sólo el modelo y modo retrospectivos versionad
   assert.equal(parsed.bySeries.has(mediaPublicKey('series', 'Ignored', 2021)), false);
 });
 
-test(
-  'la afinidad retrospectiva completa una serie sólo cuando falta una predicción privada',
-  () => {
-    const key = mediaPublicKey('series', 'Example', 2020);
-    const fallback = new Map([[key, 7.625]]);
+test('la afinidad retrospectiva completa una serie sólo cuando falta una predicción privada', () => {
+  const key = mediaPublicKey('series', 'Example', 2020);
+  const fallback = new Map([[key, 7.625]]);
 
-    assert.equal(
-      withRetrospectiveSeriesAffinity([title('series', null)], fallback)[0]!.estimatedAffinity,
-      7.625,
-    );
-    assert.equal(
-      withRetrospectiveSeriesAffinity([title('series', 8.9)], fallback)[0]!.estimatedAffinity,
-      8.9,
-    );
-  },
-);
+  assert.equal(
+    withRetrospectiveSeriesAffinity([title('series', null)], fallback)[0]!.estimatedAffinity,
+    7.625,
+  );
+  assert.equal(
+    withRetrospectiveSeriesAffinity([title('series', 8.9)], fallback)[0]!.estimatedAffinity,
+    8.9,
+  );
+});
 
 test('Movies nunca consumen la afinidad retrospectiva de Series', () => {
   const movie = title('movie', null);
