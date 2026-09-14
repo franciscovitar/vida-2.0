@@ -37,8 +37,8 @@ export function isMediaSpreadsheetConfigured(env: MediaSheetsEnv = process.env):
 }
 
 /**
- * Compuerta independiente para la única escritura de Media soportada por la web:
- * `Lote manual` sobre un título `Por ver`. Ausente o cualquier otro valor => OFF.
+ * Compuerta independiente para escrituras explícitas y acotadas de Media
+ * (lote manual y tracker observado). Ausente o cualquier otro valor => OFF.
  */
 export function areMediaSheetWritesAllowed(env: MediaSheetsEnv = process.env): boolean {
   return env.GOOGLE_MEDIA_SHEETS_ALLOW_WRITES === 'true';
