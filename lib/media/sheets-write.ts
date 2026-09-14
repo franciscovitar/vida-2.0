@@ -2,11 +2,7 @@ import 'server-only';
 
 import { randomUUID } from 'node:crypto';
 
-import {
-  fetchAccessToken,
-  SHEETS_BASE,
-  SPREADSHEETS_SCOPE,
-} from '@/lib/google/auth';
+import { fetchAccessToken, SHEETS_BASE, SPREADSHEETS_SCOPE } from '@/lib/google/auth';
 import {
   buildViewingHistoryRow,
   hasCanonicalViewingHistorySchema,
@@ -42,9 +38,7 @@ export type ManualFocusWriteCode =
   | 'write-error'
   | 'verification-error';
 
-export type ManualFocusWriteResult =
-  | { ok: true }
-  | { ok: false; code: ManualFocusWriteCode };
+export type ManualFocusWriteResult = { ok: true } | { ok: false; code: ManualFocusWriteCode };
 
 export type MediaIntakeWriteCode =
   | 'disabled'
@@ -59,8 +53,7 @@ export type MediaIntakeWriteCode =
   | 'verification-error';
 
 export type MediaIntakeWriteResult =
-  | { ok: true; replay: boolean }
-  | { ok: false; code: MediaIntakeWriteCode };
+  { ok: true; replay: boolean } | { ok: false; code: MediaIntakeWriteCode };
 
 function tabForMedium(medium: MediaKind): MediaTab {
   return medium === 'movie' ? 'Movies' : 'Series';
@@ -108,11 +101,7 @@ export async function writeManualFocusLevel(
   const target = resolveManualFocusTarget(input.medium, read.values, input.key);
   if (!target.ok) return target;
 
-  const token = await fetchAccessToken(
-    config.clientEmail,
-    config.privateKey,
-    SPREADSHEETS_SCOPE,
-  );
+  const token = await fetchAccessToken(config.clientEmail, config.privateKey, SPREADSHEETS_SCOPE);
   if (!token.ok) return { ok: false, code: mapReadCode(token.code) };
 
   const cell = `${columnNumberToA1(target.columnNumber)}${target.rowNumber}`;
@@ -205,11 +194,7 @@ export async function writeMediaIntake(
   const historyInspection = inspectViewingHistory(historyRead.values, event);
   if (!historyInspection.ok) return { ok: false, code: 'missing-header' };
 
-  const token = await fetchAccessToken(
-    config.clientEmail,
-    config.privateKey,
-    SPREADSHEETS_SCOPE,
-  );
+  const token = await fetchAccessToken(config.clientEmail, config.privateKey, SPREADSHEETS_SCOPE);
   if (!token.ok) return { ok: false, code: mapIntakeReadCode(token.code) };
 
   if (!historyInspection.exists) {
