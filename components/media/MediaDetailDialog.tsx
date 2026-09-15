@@ -96,7 +96,11 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
             </div>
 
             <div className={styles.badges}>
-              <Badge domain={item.state === 'Por ver' || item.state === 'Reveer' ? 'learning' : 'neutral'}>
+              <Badge
+                domain={
+                  item.state === 'Por ver' || item.state === 'Reveer' ? 'learning' : 'neutral'
+                }
+              >
                 {item.state}
               </Badge>
               {item.ageFeelLabel ? <Badge variant="outline">{item.ageFeelLabel}</Badge> : null}
