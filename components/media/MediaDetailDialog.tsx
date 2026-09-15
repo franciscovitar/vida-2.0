@@ -55,7 +55,7 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
 
   const priority = watchPriorityScore(item);
   const commitment = runtimeLabel(item);
-  const showGeneralRating = item.rating !== null && (item.medium === 'movie' || item.seasons !== 1);
+  const showGeneralRating = item.rating !== null;
 
   return (
     <div
@@ -140,7 +140,7 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
             ) : null}
 
             {showGeneralRating ? (
-              <div className={styles['observed-score']} aria-label="Mi nota observada">
+              <div className={styles['season-observed']} aria-label="Mi nota observada">
                 <span>{item.medium === 'series' ? 'Mi nota general' : 'Mi nota'}</span>
                 <strong>{score(item.rating)}</strong>
               </div>
