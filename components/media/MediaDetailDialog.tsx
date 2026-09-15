@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaPoster } from '@/components/media/MediaPoster';
 import { MediaTrackerControl } from '@/components/media/MediaTrackerControl';
+import { SeasonRatingControl } from '@/components/media/SeasonRatingControl';
 import { Badge } from '@/components/ui/Badge';
 import { watchPriorityScore } from '@/lib/media/focus';
 import { formatExternalMediaScore } from '@/lib/media/score-format';
@@ -121,28 +122,27 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
               </div>
             ) : null}
 
-            {item.estimatedAffinity !== null || showGeneralRating ? (
-              <div className={styles['inferred-scores']} aria-label="Mi referencia personal">
-                {item.estimatedAffinity !== null ? (
-                  <span>
-                    Afinidad para mí <strong>{score(item.estimatedAffinity)}</strong>
-                  </span>
+            {priority !== null || item.estimatedAffinity !== null ? (
+              <div className={styles['primary-scores']} aria-label="Señales principales">
+                {priority !== null ? (
+                  <div className={styles['primary-score']}>
+                    <span>Prioridad de visionado</span>
+                    <strong>{score(priority)}</strong>
+                  </div>
                 ) : null}
-                {showGeneralRating ? (
-                  <span>
-                    {item.medium === 'series' ? 'Mi nota general' : 'Mi nota'}{' '}
-                    <strong>{score(item.rating)}</strong>
-                  </span>
+                {item.estimatedAffinity !== null ? (
+                  <div className={styles['primary-score']}>
+                    <span>Afinidad para mí</span>
+                    <strong>{score(item.estimatedAffinity)}</strong>
+                  </div>
                 ) : null}
               </div>
             ) : null}
 
-            {priority !== null ? (
-              <div className={styles['primary-scores']}>
-                <div className={styles['primary-score']}>
-                  <span>Prioridad de visionado</span>
-                  <strong>{score(priority)}</strong>
-                </div>
+            {showGeneralRating ? (
+              <div className={styles['observed-score']} aria-label="Mi nota observada">
+                <span>{item.medium === 'series' ? 'Mi nota general' : 'Mi nota'}</span>
+                <strong>{score(item.rating)}</strong>
               </div>
             ) : null}
 
@@ -219,12 +219,12 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                             </strong>
                           </span>
                         </div>
-                        {season.observedRating !== null ? (
-                          <div className={styles['season-observed']}>
-                            <span>Mi nota</span>
-                            <strong>{score(season.observedRating)}</strong>
-                          </div>
-                        ) : null}
+                        <SeasonRatingControl
+                          itemKey={item.key}
+                          seasonNumber={season.seasonNumber}
+                          rating={season.observedRating}
+                          onSaved={onClose}
+                        />
                         {season.evidenceState !== 'ready' ? (
                           <small className={styles['season-evidence']}>
                             {season.evidenceState === 'partial'
