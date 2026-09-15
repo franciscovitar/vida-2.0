@@ -1,7 +1,7 @@
 'use client';
 
 import { Film, Search, SlidersHorizontal, Tv } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ManualFocusControl } from '@/components/media/ManualFocusControl';
 import { MediaDetailDialog } from '@/components/media/MediaDetailDialog';
@@ -31,6 +31,19 @@ import type {
 import styles from './MediaDashboard.module.scss';
 
 const PAGE_SIZE = 60;
+const EXTERNAL_AVERAGE_CONCURRENCY = 4;
+
+type ExternalAverageFilter = '' | '6' | '7' | '8' | '9';
+type ExternalAverageEntry =
+  | { status: 'ready'; average: number }
+  | { status: 'empty' }
+  | { status: 'unavailable' };
+
+interface ExternalAverageProgress {
+  loaded: number;
+  total: number;
+  unavailable: number;
+}
 
 const COLLECTIONS: { value: MediaCollectionFilter; label: string }[] = [
   { value: 'all', label: 'Todo' },
@@ -40,6 +53,36 @@ const COLLECTIONS: { value: MediaCollectionFilter; label: string }[] = [
   { value: 'seen', label: 'Vistas / terminadas' },
   { value: 'active', label: 'En curso' },
 ];
+
+async function loadExternalAverage(
+  itemKey: string,
+  signal: AbortSignal,
+): Promise<ExternalAverageEntry | null> {
+  try {
+    const response = await fetch(`/api/media/external-ratings?key=${encodeURIComponent(itemKey)}`, {
+      method: 'GET',
+      signal,
+      cache: 'no-store',
+    });
+    if (signal.aborted) return null;
+    if (!response.ok) return { status: 'unavailable' };
+
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      data?: { average?: number | null };
+    };
+    if (!payload.ok || !payload.data) return { status: 'unavailable' };
+    const average = payload.data.average;
+    if (typeof average === 'number' && Number.isFinite(average)) {
+      return { status: 'ready', average };
+    }
+    return { status: 'empty' };
+  } catch (error: unknown) {
+    if (signal.aborted) return null;
+    if (error instanceof DOMException && error.name === 'AbortError') return null;
+    return { status: 'unavailable' };
+  }
+}
 
 function initialFilters(medium: MediaKind): MediaFilters {
   return {
@@ -90,7 +133,7 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
   ];
 }
 
-function hasExtraFilters(filters: MediaFilters): boolean {
+function hasExtraFilters(filters: MediaFilters, externalAverageMin: ExternalAverageFilter): boolean {
   return Boolean(
     filters.query ||
     filters.genre ||
@@ -100,7 +143,8 @@ function hasExtraFilters(filters: MediaFilters): boolean {
     filters.yearTo ||
     filters.commitment !== 'all' ||
     filters.collection !== 'all' ||
-    filters.sort !== 'bank-priority',
+    filters.sort !== 'bank-priority' ||
+    externalAverageMin,
   );
 }
 
@@ -121,16 +165,84 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
   );
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedItem, setSelectedItem] = useState<MediaTitleView | null>(null);
+  const [externalAverageMin, setExternalAverageMin] = useState<ExternalAverageFilter>('');
+  const [externalAverageRevision, setExternalAverageRevision] = useState(0);
+  const [externalAverageProgress, setExternalAverageProgress] =
+    useState<ExternalAverageProgress | null>(null);
+  const externalAverageCache = useRef(new Map<string, ExternalAverageEntry>());
 
   const options = useMemo(
     () => deriveMediaFilterOptions(data.titles, filters.medium),
     [data.titles, filters.medium],
   );
-  const results = useMemo(
+  const baseResults = useMemo(
     () => sortMediaTitles(filterMediaTitles(data.titles, filters), filters.sort),
     [data.titles, filters],
   );
+
+  useEffect(() => {
+    if (!externalAverageMin) {
+      setExternalAverageProgress(null);
+      return undefined;
+    }
+
+    const cache = externalAverageCache.current;
+    const missing = baseResults.filter((item) => !cache.has(item.key));
+    const loadedAtStart = baseResults.length - missing.length;
+    let unavailable = baseResults.filter(
+      (item) => cache.get(item.key)?.status === 'unavailable',
+    ).length;
+
+    setExternalAverageProgress({
+      loaded: loadedAtStart,
+      total: baseResults.length,
+      unavailable,
+    });
+
+    if (missing.length === 0) return undefined;
+
+    const controller = new AbortController();
+    let cursor = 0;
+    let loaded = loadedAtStart;
+
+    async function worker() {
+      while (!controller.signal.aborted) {
+        const index = cursor;
+        cursor += 1;
+        const item = missing[index];
+        if (!item) return;
+
+        const entry = await loadExternalAverage(item.key, controller.signal);
+        if (!entry || controller.signal.aborted) return;
+
+        cache.set(item.key, entry);
+        loaded += 1;
+        if (entry.status === 'unavailable') unavailable += 1;
+        setExternalAverageRevision((current) => current + 1);
+        setExternalAverageProgress({ loaded, total: baseResults.length, unavailable });
+      }
+    }
+
+    void Promise.all(
+      Array.from({ length: Math.min(EXTERNAL_AVERAGE_CONCURRENCY, missing.length) }, () => worker()),
+    );
+
+    return () => controller.abort();
+  }, [baseResults, externalAverageMin]);
+
+  void externalAverageRevision;
+  const results = externalAverageMin
+    ? baseResults.filter((item) => {
+        const entry = externalAverageCache.current.get(item.key);
+        return entry?.status === 'ready' && entry.average >= Number(externalAverageMin);
+      })
+    : baseResults;
   const visible = results.slice(0, visibleCount);
+  const externalFilterLoading = Boolean(
+    externalAverageMin &&
+      externalAverageProgress &&
+      externalAverageProgress.loaded < externalAverageProgress.total,
+  );
   const totals = useMemo(
     () => ({
       total: data.titles.filter((item) => item.medium === filters.medium).length,
@@ -145,6 +257,11 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
 
   function patchFilters(patch: Partial<MediaFilters>) {
     setFilters((current) => ({ ...current, ...patch }));
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  function patchExternalAverageMin(value: ExternalAverageFilter) {
+    setExternalAverageMin(value);
     setVisibleCount(PAGE_SIZE);
   }
 
@@ -174,11 +291,13 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
 
   function switchMedium(medium: MediaKind) {
     setFilters(initialFilters(medium));
+    setExternalAverageMin('');
     setVisibleCount(PAGE_SIZE);
   }
 
   function clearFilters() {
     setFilters(initialFilters(filters.medium));
+    setExternalAverageMin('');
     setVisibleCount(PAGE_SIZE);
   }
 
@@ -284,7 +403,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
           <span>
             <SlidersHorizontal size={16} aria-hidden="true" /> Filtros
           </span>
-          {hasExtraFilters(filters) ? (
+          {hasExtraFilters(filters, externalAverageMin) ? (
             <button type="button" className={styles['clear-button']} onClick={clearFilters}>
               Limpiar
             </button>
@@ -374,6 +493,21 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
               ))}
             </select>
           </label>
+          <label>
+            <span>Promedio externo</span>
+            <select
+              value={externalAverageMin}
+              onChange={(event) =>
+                patchExternalAverageMin(event.target.value as ExternalAverageFilter)
+              }
+            >
+              <option value="">Todos</option>
+              <option value="9">9+</option>
+              <option value="8">8+</option>
+              <option value="7">7+</option>
+              <option value="6">6+</option>
+            </select>
+          </label>
           <MediaSortControl
             value={filters.sort}
             options={options}
@@ -391,7 +525,15 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
             de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}
           </span>
         </div>
-        {options.hasWatchPriority ? (
+        {externalAverageMin && externalAverageProgress ? (
+          <span className={styles['score-note']}>
+            {externalFilterLoading
+              ? `Consultando promedios externos ${externalAverageProgress.loaded}/${externalAverageProgress.total}…`
+              : externalAverageProgress.unavailable > 0
+                ? `Promedio externo listo · ${externalAverageProgress.unavailable} sin datos disponibles`
+                : 'Promedio externo listo'}
+          </span>
+        ) : options.hasWatchPriority ? (
           <span className={styles['score-note']}>
             Prioridad de visionado = 50% Afinidad para mí + 30% valor cinéfilo + 20% presencia
             cultural.
@@ -399,7 +541,9 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
         ) : null}
       </div>
 
-      {visible.length === 0 ? (
+      {visible.length === 0 && externalFilterLoading ? (
+        <p className={styles.notice}>Cargando notas externas para aplicar el filtro…</p>
+      ) : visible.length === 0 ? (
         <EmptyState
           icon={Search}
           title="No hay coincidencias"
