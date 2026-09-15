@@ -4,11 +4,7 @@ import type { MediaKind } from '@/types/media';
 type PlainCell = string | number | boolean | null;
 
 export type MediaExternalRatingSource =
-  | 'imdb'
-  | 'letterboxd'
-  | 'rottentomatoes'
-  | 'metacritic'
-  | 'tmdb';
+  'imdb' | 'letterboxd' | 'rottentomatoes' | 'metacritic' | 'tmdb';
 
 export interface MediaExternalRating {
   source: MediaExternalRatingSource;
@@ -31,11 +27,7 @@ export type ExternalRatingsTargetResult =
   | { ok: true; target: ExternalRatingsTarget }
   | {
       ok: false;
-      code:
-        | 'missing-header'
-        | 'not-found'
-        | 'conflict'
-        | 'missing-identity';
+      code: 'missing-header' | 'not-found' | 'conflict' | 'missing-identity';
     };
 
 const SOURCE_ORDER: readonly MediaExternalRatingSource[] = [
@@ -61,8 +53,7 @@ function text(value: unknown): string | null {
 }
 
 function integer(value: unknown): number | null {
-  if (typeof value === 'number' && Number.isFinite(value))
-    return Math.trunc(value);
+  if (typeof value === 'number' && Number.isFinite(value)) return Math.trunc(value);
   const raw = text(value);
   if (!raw) return null;
   const parsed = Number(raw.replace(',', '.'));
@@ -129,8 +120,7 @@ export function resolveExternalRatingsTarget(
   if (matches.length === 0) return { ok: false, code: 'not-found' };
   if (matches.length !== 1) return { ok: false, code: 'conflict' };
   const target = matches[0]!;
-  if (!target.imdbId && target.tmdbId === null)
-    return { ok: false, code: 'missing-identity' };
+  if (!target.imdbId && target.tmdbId === null) return { ok: false, code: 'missing-identity' };
   return { ok: true, target };
 }
 
@@ -146,9 +136,7 @@ function canonicalSource(value: unknown): MediaExternalRatingSource | null {
   return null;
 }
 
-export function normalizeMdblistRatings(
-  payload: unknown,
-): MediaExternalRatingsView {
+export function normalizeMdblistRatings(payload: unknown): MediaExternalRatingsView {
   if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
     return { ratings: [], average: null };
   }
@@ -178,9 +166,7 @@ export function normalizeMdblistRatings(
     ratings.length === 0
       ? null
       : Math.round(
-          (ratings.reduce((sum, rating) => sum + rating.score, 0) /
-            ratings.length) *
-            100,
+          (ratings.reduce((sum, rating) => sum + rating.score, 0) / ratings.length) * 100,
         ) / 100;
 
   return { ratings, average };
@@ -189,17 +175,11 @@ export function normalizeMdblistRatings(
 function providerTypeMatches(value: unknown, medium: MediaKind): boolean {
   const raw = text(value)?.toLowerCase();
   if (!raw) return true;
-  return medium === 'movie'
-    ? raw === 'movie'
-    : raw === 'show' || raw === 'series' || raw === 'tv';
+  return medium === 'movie' ? raw === 'movie' : raw === 'show' || raw === 'series' || raw === 'tv';
 }
 
-export function mdblistIdentityMatches(
-  payload: unknown,
-  target: ExternalRatingsTarget,
-): boolean {
-  if (typeof payload !== 'object' || payload === null || Array.isArray(payload))
-    return false;
+export function mdblistIdentityMatches(payload: unknown, target: ExternalRatingsTarget): boolean {
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) return false;
   const record = payload as Record<string, unknown>;
   if (!providerTypeMatches(record.type, target.medium)) return false;
 
