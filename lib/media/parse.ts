@@ -142,8 +142,7 @@ export function parseMediaTab(tab: MediaTab, values: PlainRows): MediaParseResul
       medium === 'series'
         ? parseObservedSeasonRatings(text(valueAt(row, indexes, 'Notas por temporada')))
         : new Map<number, number>();
-    const seasonDetails =
-      medium === 'series' ? buildSeasonSkeleton(seasons, seasonRatings, rating) : [];
+    const seasonDetails = medium === 'series' ? buildSeasonSkeleton(seasons, seasonRatings) : [];
     const nextSeasonNumber =
       medium === 'series' ? deriveNextSeasonNumber(state, seasons, seasonRatings) : null;
 
