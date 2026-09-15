@@ -168,7 +168,7 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
               </div>
             ) : null}
 
-            <ExternalRatingsPanel itemKey={item.key} />
+            <ExternalRatingsPanel key={item.key} itemKey={item.key} />
 
             <MediaTrackerControl key={item.key} item={item} onSaved={onClose} />
 
