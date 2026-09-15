@@ -1,7 +1,7 @@
 'use client';
 
 import { Film, Search, SlidersHorizontal, Tv } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { ManualFocusControl } from '@/components/media/ManualFocusControl';
 import { MediaDetailDialog } from '@/components/media/MediaDetailDialog';
@@ -39,11 +39,7 @@ type ExternalAverageEntry =
   | { status: 'empty' }
   | { status: 'unavailable' };
 
-interface ExternalAverageProgress {
-  loaded: number;
-  total: number;
-  unavailable: number;
-}
+const externalAverageSessionCache = new Map<string, ExternalAverageEntry>();
 
 const COLLECTIONS: { value: MediaCollectionFilter; label: string }[] = [
   { value: 'all', label: 'Todo' },
@@ -166,10 +162,9 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedItem, setSelectedItem] = useState<MediaTitleView | null>(null);
   const [externalAverageMin, setExternalAverageMin] = useState<ExternalAverageFilter>('');
-  const [externalAverageRevision, setExternalAverageRevision] = useState(0);
-  const [externalAverageProgress, setExternalAverageProgress] =
-    useState<ExternalAverageProgress | null>(null);
-  const externalAverageCache = useRef(new Map<string, ExternalAverageEntry>());
+  const [externalAverageEntries, setExternalAverageEntries] = useState<
+    Record<string, ExternalAverageEntry>
+  >(() => Object.fromEntries(externalAverageSessionCache));
 
   const options = useMemo(
     () => deriveMediaFilterOptions(data.titles, filters.medium),
@@ -181,29 +176,13 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
   );
 
   useEffect(() => {
-    if (!externalAverageMin) {
-      setExternalAverageProgress(null);
-      return undefined;
-    }
+    if (!externalAverageMin) return undefined;
 
-    const cache = externalAverageCache.current;
-    const missing = baseResults.filter((item) => !cache.has(item.key));
-    const loadedAtStart = baseResults.length - missing.length;
-    let unavailable = baseResults.filter(
-      (item) => cache.get(item.key)?.status === 'unavailable',
-    ).length;
-
-    setExternalAverageProgress({
-      loaded: loadedAtStart,
-      total: baseResults.length,
-      unavailable,
-    });
-
+    const missing = baseResults.filter((item) => !externalAverageSessionCache.has(item.key));
     if (missing.length === 0) return undefined;
 
     const controller = new AbortController();
     let cursor = 0;
-    let loaded = loadedAtStart;
 
     async function worker() {
       while (!controller.signal.aborted) {
@@ -215,11 +194,8 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
         const entry = await loadExternalAverage(item.key, controller.signal);
         if (!entry || controller.signal.aborted) return;
 
-        cache.set(item.key, entry);
-        loaded += 1;
-        if (entry.status === 'unavailable') unavailable += 1;
-        setExternalAverageRevision((current) => current + 1);
-        setExternalAverageProgress({ loaded, total: baseResults.length, unavailable });
+        externalAverageSessionCache.set(item.key, entry);
+        setExternalAverageEntries((current) => ({ ...current, [item.key]: entry }));
       }
     }
 
@@ -230,18 +206,28 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
     return () => controller.abort();
   }, [baseResults, externalAverageMin]);
 
-  void externalAverageRevision;
   const results = externalAverageMin
     ? baseResults.filter((item) => {
-        const entry = externalAverageCache.current.get(item.key);
+        const entry = externalAverageEntries[item.key];
         return entry?.status === 'ready' && entry.average >= Number(externalAverageMin);
       })
     : baseResults;
   const visible = results.slice(0, visibleCount);
+  const externalLoadedCount = externalAverageMin
+    ? baseResults.reduce(
+        (count, item) => count + Number(externalAverageEntries[item.key] !== undefined),
+        0,
+      )
+    : 0;
+  const externalUnavailableCount = externalAverageMin
+    ? baseResults.reduce(
+        (count, item) =>
+          count + Number(externalAverageEntries[item.key]?.status === 'unavailable'),
+        0,
+      )
+    : 0;
   const externalFilterLoading = Boolean(
-    externalAverageMin &&
-      externalAverageProgress &&
-      externalAverageProgress.loaded < externalAverageProgress.total,
+    externalAverageMin && externalLoadedCount < baseResults.length,
   );
   const totals = useMemo(
     () => ({
@@ -525,12 +511,12 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
             de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}
           </span>
         </div>
-        {externalAverageMin && externalAverageProgress ? (
+        {externalAverageMin ? (
           <span className={styles['score-note']}>
             {externalFilterLoading
-              ? `Consultando promedios externos ${externalAverageProgress.loaded}/${externalAverageProgress.total}…`
-              : externalAverageProgress.unavailable > 0
-                ? `Promedio externo listo · ${externalAverageProgress.unavailable} sin datos disponibles`
+              ? `Consultando promedios externos ${externalLoadedCount}/${baseResults.length}…`
+              : externalUnavailableCount > 0
+                ? `Promedio externo listo · ${externalUnavailableCount} sin datos disponibles`
                 : 'Promedio externo listo'}
           </span>
         ) : options.hasWatchPriority ? (
