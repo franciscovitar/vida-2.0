@@ -493,27 +493,27 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
                     </div>
                   ) : null}
 
-                  {item.estimatedAffinity !== null || item.rating !== null ? (
-                    <div className={styles['inferred-scores']} aria-label="Mi referencia personal">
-                      {item.estimatedAffinity !== null ? (
-                        <span>
-                          Afinidad para mí <strong>{score(item.estimatedAffinity)}</strong>
-                        </span>
+                  {priority !== null || item.estimatedAffinity !== null ? (
+                    <div className={styles['primary-scores']} aria-label="Señales principales">
+                      {priority !== null ? (
+                        <div className={styles['primary-score']}>
+                          <span>Prioridad de visionado</span>
+                          <strong>{score(priority)}</strong>
+                        </div>
                       ) : null}
-                      {item.rating !== null ? (
-                        <span>
-                          Mi nota <strong>{score(item.rating)}</strong>
-                        </span>
+                      {item.estimatedAffinity !== null ? (
+                        <div className={styles['primary-score']}>
+                          <span>Afinidad para mí</span>
+                          <strong>{score(item.estimatedAffinity)}</strong>
+                        </div>
                       ) : null}
                     </div>
                   ) : null}
 
-                  {priority !== null ? (
-                    <div className={styles['primary-scores']}>
-                      <div className={styles['primary-score']}>
-                        <span>Prioridad de visionado</span>
-                        <strong>{score(priority)}</strong>
-                      </div>
+                  {item.rating !== null ? (
+                    <div className={styles['season-observed']} aria-label="Mi nota observada">
+                      <span>{item.medium === 'series' ? 'Mi nota general' : 'Mi nota'}</span>
+                      <strong>{score(item.rating)}</strong>
                     </div>
                   ) : null}
 
