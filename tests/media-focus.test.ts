@@ -139,21 +139,18 @@ test('una exclusión manual saca el título de todos los lotes aunque sea autom�
   assert.deepEqual(deriveFocusTitles([excluded], 'movie', 3), []);
 });
 
-test(
-  'series automáticas incluyen Por ver y Reveer cuando no se conoce una temporada siguiente',
-  () => {
-    const titles = [
-      title('watch', 'series'),
-      title('done', 'series', { state: 'Terminada' }),
-      title('rewatch', 'series', { state: 'Reveer', rating: 8 }),
-      title('active', 'series', { state: 'Viendo', nextSeasonNumber: null }),
-    ];
-    assert.deepEqual(
-      new Set(keys(deriveFocusTitles(titles, 'series', 3))),
-      new Set(['watch', 'rewatch']),
-    );
-  },
-);
+test('series automáticas incluyen Por ver y Reveer cuando no se conoce una temporada siguiente', () => {
+  const titles = [
+    title('watch', 'series'),
+    title('done', 'series', { state: 'Terminada' }),
+    title('rewatch', 'series', { state: 'Reveer', rating: 8 }),
+    title('active', 'series', { state: 'Viendo', nextSeasonNumber: null }),
+  ];
+  assert.deepEqual(
+    new Set(keys(deriveFocusTitles(titles, 'series', 3))),
+    new Set(['watch', 'rewatch']),
+  );
+});
 
 test('el filtro Reveer devuelve sólo títulos marcados Reveer', () => {
   const titles = [
