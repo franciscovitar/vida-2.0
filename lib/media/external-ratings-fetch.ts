@@ -26,6 +26,7 @@ export type ExternalRatingsFetchResult =
   { ok: true; data: MediaExternalRatingsView } | { ok: false; code: ExternalRatingsFetchCode };
 
 const MDBLIST_BASE = 'https://api.mdblist.com';
+const MDBLIST_REVALIDATE_SECONDS = 6 * 60 * 60;
 
 function providerType(medium: 'movie' | 'series'): 'movie' | 'show' {
   return medium === 'movie' ? 'movie' : 'show';
@@ -75,7 +76,7 @@ export async function loadExternalRatings(
     response = await fetch(url, {
       method: 'GET',
       headers: { Accept: 'application/json' },
-      cache: 'no-store',
+      next: { revalidate: MDBLIST_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(8000),
     });
   } catch {
