@@ -35,9 +35,7 @@ const EXTERNAL_AVERAGE_CONCURRENCY = 4;
 
 type ExternalAverageFilter = '' | '6' | '7' | '8' | '9';
 type ExternalAverageEntry =
-  | { status: 'ready'; average: number }
-  | { status: 'empty' }
-  | { status: 'unavailable' };
+  { status: 'ready'; average: number } | { status: 'empty' } | { status: 'unavailable' };
 
 const externalAverageSessionCache = new Map<string, ExternalAverageEntry>();
 
@@ -203,9 +201,8 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
     }
 
     void Promise.all(
-      Array.from(
-        { length: Math.min(EXTERNAL_AVERAGE_CONCURRENCY, missing.length) },
-        () => worker(),
+      Array.from({ length: Math.min(EXTERNAL_AVERAGE_CONCURRENCY, missing.length) }, () =>
+        worker(),
       ),
     );
 
@@ -227,8 +224,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
     : 0;
   const externalUnavailableCount = externalAverageMin
     ? baseResults.reduce(
-        (count, item) =>
-          count + Number(externalAverageEntries[item.key]?.status === 'unavailable'),
+        (count, item) => count + Number(externalAverageEntries[item.key]?.status === 'unavailable'),
         0,
       )
     : 0;
