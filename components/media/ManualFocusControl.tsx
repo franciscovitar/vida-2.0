@@ -30,7 +30,7 @@ export function ManualFocusControl({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
 
-  if (state !== 'Por ver') return null;
+  if (state !== 'Por ver' && state !== 'Reveer') return null;
 
   async function save(next: MediaManualFocus) {
     setSaving(true);

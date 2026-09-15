@@ -18,6 +18,7 @@ import {
   resolveManualFocusTarget,
   type ManualFocusRequest,
 } from '@/lib/media/manual-focus';
+import { canToggleRewatch } from '@/lib/media/rewatch';
 import {
   areMediaSheetWritesAllowed,
   getMediaSheetsAuthConfig,
@@ -48,6 +49,7 @@ export type MediaIntakeWriteCode =
   | 'missing-header'
   | 'not-found'
   | 'conflict'
+  | 'invalid-state'
   | 'history-error'
   | 'write-error'
   | 'verification-error';
@@ -181,6 +183,14 @@ export async function writeMediaIntake(
   }
 
   const target = targetResult.target;
+  if (input.state === 'Reveer') {
+    const row = titleRead.values[target.rowNumber - 1] ?? [];
+    const currentState = String(row[target.stateColumn - 1] ?? '').trim();
+    if (!canToggleRewatch(input.medium, currentState, true)) {
+      return { ok: false, code: 'invalid-state' };
+    }
+  }
+
   const event: ViewingHistoryEvent = {
     mediaId: target.mediaId,
     medium: input.medium,

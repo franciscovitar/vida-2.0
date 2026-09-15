@@ -96,7 +96,13 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
             </div>
 
             <div className={styles.badges}>
-              <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>{item.state}</Badge>
+              <Badge
+                domain={
+                  item.state === 'Por ver' || item.state === 'Reveer' ? 'learning' : 'neutral'
+                }
+              >
+                {item.state}
+              </Badge>
               {item.ageFeelLabel ? <Badge variant="outline">{item.ageFeelLabel}</Badge> : null}
               {item.radar ? <Badge domain="projects">Radar</Badge> : null}
             </div>
@@ -115,26 +121,30 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
               </div>
             ) : null}
 
-            <div className={styles['primary-scores']}>
-              {item.estimatedAffinity !== null ? (
-                <div className={styles['primary-score']}>
-                  <span>Afinidad para mí</span>
-                  <strong>{score(item.estimatedAffinity)}</strong>
-                </div>
-              ) : null}
-              {priority !== null ? (
+            {item.estimatedAffinity !== null || showGeneralRating ? (
+              <div className={styles['inferred-scores']} aria-label="Mi referencia personal">
+                {item.estimatedAffinity !== null ? (
+                  <span>
+                    Afinidad para mí <strong>{score(item.estimatedAffinity)}</strong>
+                  </span>
+                ) : null}
+                {showGeneralRating ? (
+                  <span>
+                    {item.medium === 'series' ? 'Mi nota general' : 'Mi nota'}{' '}
+                    <strong>{score(item.rating)}</strong>
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+
+            {priority !== null ? (
+              <div className={styles['primary-scores']}>
                 <div className={styles['primary-score']}>
                   <span>Prioridad de visionado</span>
                   <strong>{score(priority)}</strong>
                 </div>
-              ) : null}
-              {showGeneralRating ? (
-                <div className={`${styles['primary-score']} ${styles.observed}`}>
-                  <span>{item.medium === 'series' ? 'Mi nota general' : 'Mi nota'}</span>
-                  <strong>{score(item.rating)}</strong>
-                </div>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
 
             {item.cinephileValue !== null || item.culturalImpact !== null ? (
               <div className={styles['inferred-scores']}>

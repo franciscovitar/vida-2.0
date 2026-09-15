@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 
 import { auth } from '@/auth';
 import { isEmailAuthorized, resolveAllowedEmails } from '@/lib/auth/authorize';
-import { parseMediaIntakeRequest } from '@/lib/media/intake';
-import { writeMediaIntake, type MediaIntakeWriteCode } from '@/lib/media/sheets-write';
+import { parseMediaRewatchRequest } from '@/lib/media/rewatch';
+import { writeMediaRewatch, type MediaRewatchWriteCode } from '@/lib/media/rewatch-write';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function statusForWriteFailure(code: MediaIntakeWriteCode): number {
+function statusForWriteFailure(code: MediaRewatchWriteCode): number {
   if (
     code === 'not-found' ||
     code === 'conflict' ||
@@ -39,15 +39,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'invalid-request' }, { status: 400 });
   }
 
-  const input = parseMediaIntakeRequest(body);
+  const input = parseMediaRewatchRequest(body);
   if (!input) {
     return NextResponse.json({ ok: false, error: 'invalid-request' }, { status: 400 });
   }
 
-  const result = await writeMediaIntake(input);
+  const result = await writeMediaRewatch(input);
   if (!result.ok) {
     return NextResponse.json(
-      { ok: false, error: 'media-intake-write-failed' },
+      { ok: false, error: 'media-rewatch-write-failed' },
       { status: statusForWriteFailure(result.code) },
     );
   }

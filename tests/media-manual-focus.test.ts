@@ -40,6 +40,19 @@ test('resolver identifica una única celda Lote manual sin usar Media ID del cli
   });
 });
 
+test('resolver permite Lote manual en un título Reveer', () => {
+  const values = [
+    ['Media ID', 'Título', 'Año', 'Estado', 'Lote manual'],
+    ['secret-1', 'Película A', 2020, 'Reveer', ''],
+  ];
+
+  assert.deepEqual(resolveManualFocusTarget('movie', values, 'movie:Película A:2020'), {
+    ok: true,
+    rowNumber: 2,
+    columnNumber: 5,
+  });
+});
+
 test('resolver falla cerrado ante duplicado, estado no escribible o header ausente', () => {
   const duplicate = [
     ['Título', 'Año', 'Estado', 'Lote manual'],

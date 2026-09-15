@@ -35,6 +35,7 @@ const PAGE_SIZE = 60;
 const COLLECTIONS: { value: MediaCollectionFilter; label: string }[] = [
   { value: 'all', label: 'Todo' },
   { value: 'bank', label: 'Banco' },
+  { value: 'rewatch', label: 'Reveer' },
   { value: 'radar', label: 'Radar' },
   { value: 'seen', label: 'Vistas / terminadas' },
   { value: 'active', label: 'En curso' },
@@ -134,6 +135,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
     () => ({
       total: data.titles.filter((item) => item.medium === filters.medium).length,
       bank: countCollection(data.titles, filters.medium, 'bank'),
+      rewatch: countCollection(data.titles, filters.medium, 'rewatch'),
       radar: countCollection(data.titles, filters.medium, 'radar'),
       seen: countCollection(data.titles, filters.medium, 'seen'),
       active: countCollection(data.titles, filters.medium, 'active'),
@@ -225,9 +227,9 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
           </button>
         </div>
         <p className={styles['bank-principle']}>
-          <strong>Banco = opciones, no pendientes.</strong> Afinidad para mí responde cuánto
-          probablemente te guste; Prioridad de visionado combina esa afinidad con valor cinéfilo e
-          presencia cultural.
+          <strong>Banco = opciones, no pendientes.</strong> Incluye lo que todavía no viste y lo que
+          marcaste Reveer. Afinidad para mí y Mi nota se muestran separadas para no mezclar una
+          estimación personal con tu evaluación observada.
         </p>
       </section>
 
@@ -262,6 +264,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
             >
               {collection.label}
               {collection.value === 'radar' && totals.radar > 0 ? ` · ${totals.radar}` : ''}
+              {collection.value === 'rewatch' && totals.rewatch > 0 ? ` · ${totals.rewatch}` : ''}
             </button>
           ))}
         </div>
@@ -441,7 +444,11 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
                   </div>
 
                   <div className={styles.badges}>
-                    <Badge domain={item.state === 'Por ver' ? 'learning' : 'neutral'}>
+                    <Badge
+                      domain={
+                        item.state === 'Por ver' || item.state === 'Reveer' ? 'learning' : 'neutral'
+                      }
+                    >
                       {item.state}
                     </Badge>
                     {item.manualFocusExcluded ? (
@@ -486,26 +493,30 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
                     </div>
                   ) : null}
 
-                  <div className={styles['primary-scores']}>
-                    {item.estimatedAffinity !== null ? (
-                      <div className={styles['primary-score']}>
-                        <span>Afinidad para mí</span>
-                        <strong>{score(item.estimatedAffinity)}</strong>
-                      </div>
-                    ) : null}
-                    {priority !== null ? (
+                  {item.estimatedAffinity !== null || item.rating !== null ? (
+                    <div className={styles['inferred-scores']} aria-label="Mi referencia personal">
+                      {item.estimatedAffinity !== null ? (
+                        <span>
+                          Afinidad para mí <strong>{score(item.estimatedAffinity)}</strong>
+                        </span>
+                      ) : null}
+                      {item.rating !== null ? (
+                        <span>
+                          Mi nota <strong>{score(item.rating)}</strong>
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {priority !== null ? (
+                    <div className={styles['primary-scores']}>
                       <div className={styles['primary-score']}>
                         <span>Prioridad de visionado</span>
                         <strong>{score(priority)}</strong>
                       </div>
-                    ) : null}
-                    {item.rating !== null ? (
-                      <div className={`${styles['primary-score']} ${styles.observed}`}>
-                        <span>Mi nota</span>
-                        <strong>{score(item.rating)}</strong>
-                      </div>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
+
                   {item.cinephileValue !== null || item.culturalImpact !== null ? (
                     <div className={styles['inferred-scores']}>
                       {item.cinephileValue !== null ? (
