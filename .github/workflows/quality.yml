@@ -33,5 +33,8 @@ jobs:
       - name: Test project
         run: npm test
 
+      - name: Show formatter output
+        run: npx prettier lib/nutrition/approximate-day-macros.ts
+
       - name: Verify project
         run: npm run verify
