@@ -28,8 +28,7 @@ export type SeriesSeasonRatingWriteCode =
   | 'verification-error';
 
 export type SeriesSeasonRatingWriteResult =
-  | { ok: true }
-  | { ok: false; code: SeriesSeasonRatingWriteCode };
+  { ok: true } | { ok: false; code: SeriesSeasonRatingWriteCode };
 
 function mapReadCode(code: string): SeriesSeasonRatingWriteCode {
   if (code === 'not-configured') return 'not-configured';
