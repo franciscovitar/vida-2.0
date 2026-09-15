@@ -9,7 +9,14 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function statusForWriteFailure(code: MediaIntakeWriteCode): number {
-  if (code === 'not-found' || code === 'conflict' || code === 'missing-header') return 409;
+  if (
+    code === 'not-found' ||
+    code === 'conflict' ||
+    code === 'missing-header' ||
+    code === 'invalid-state'
+  ) {
+    return 409;
+  }
   if (code === 'disabled' || code === 'not-configured') return 503;
   if (code === 'auth-error' || code === 'permission-error') return 503;
   return 500;
