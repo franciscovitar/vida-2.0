@@ -43,10 +43,7 @@ test('request Reveer acepta sólo key, medium y enabled válidos', () => {
     parseMediaRewatchRequest({ key: 'movie:Heat:1995', medium: 'movie', enabled: true }),
     { key: 'movie:Heat:1995', medium: 'movie', enabled: true },
   );
-  assert.equal(
-    parseMediaRewatchRequest({ key: '', medium: 'movie', enabled: true }),
-    null,
-  );
+  assert.equal(parseMediaRewatchRequest({ key: '', medium: 'movie', enabled: true }), null);
   assert.equal(
     parseMediaRewatchRequest({ key: 'movie:Heat:1995', medium: 'book', enabled: true }),
     null,
