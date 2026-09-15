@@ -1,0 +1,61 @@
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.4rem;
+  align-items: end;
+}
+
+.form label {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.form label > span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
+.form input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.48rem 0.55rem;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.form button {
+  min-height: 35px;
+  padding: 0.45rem 0.6rem;
+  color: var(--accent-contrast);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+.form button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.form input:focus-visible,
+.form button:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.form small {
+  grid-column: 1 / -1;
+  color: var(--danger, #b42318);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
