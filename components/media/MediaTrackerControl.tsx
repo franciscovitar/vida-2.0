@@ -172,14 +172,11 @@ export function MediaTrackerControl({ item, onSaved }: MediaTrackerControlProps)
             />
           </label>
           <label>
-            <span>Mi nota</span>
+            <span>{item.medium === 'series' ? 'Mi nota general' : 'Mi nota'}</span>
             <input
-              type="number"
-              min="0"
-              max="10"
-              step="0.25"
+              type="text"
               inputMode="decimal"
-              placeholder="Opcional"
+              placeholder="Opcional · 0–10"
               value={rating}
               disabled={saving}
               onChange={(event) => setRating(event.target.value)}
@@ -205,7 +202,8 @@ export function MediaTrackerControl({ item, onSaved }: MediaTrackerControlProps)
           </button>
           {error ? (
             <p>
-              No se pudo confirmar el guardado completo. Podés reintentar sin duplicar historial.
+              No se pudo confirmar el guardado completo. La nota debe estar entre 0 y 10; podés usar
+              cualquier decimal con coma o punto.
             </p>
           ) : null}
         </div>
