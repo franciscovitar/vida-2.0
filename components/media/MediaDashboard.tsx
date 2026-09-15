@@ -203,7 +203,10 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
     }
 
     void Promise.all(
-      Array.from({ length: Math.min(EXTERNAL_AVERAGE_CONCURRENCY, missing.length) }, () => worker()),
+      Array.from(
+        { length: Math.min(EXTERNAL_AVERAGE_CONCURRENCY, missing.length) },
+        () => worker(),
+      ),
     );
 
     return () => controller.abort();
