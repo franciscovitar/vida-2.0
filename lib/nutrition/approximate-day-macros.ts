@@ -57,10 +57,7 @@ function numberValue(value: PlainCell): number | null {
 }
 
 function activeRows(rows: readonly Row[]): Row[] {
-  return rows.filter(
-    (row) =>
-      (stringValue(row.status)?.toLowerCase() ?? 'active') === 'active',
-  );
+  return rows.filter((row) => (stringValue(row.status)?.toLowerCase() ?? 'active') === 'active');
 }
 
 function itemEnergy(row: Row): number | null {
@@ -111,11 +108,7 @@ function splitFor(row: Row): EnergySplit {
   if (/yogurt|yoghurt|milk|leche/.test(value)) {
     return split(0.22, 0.3, 0.48, 0);
   }
-  if (
-    /mixed_nuts|classic_mix|mix clásico|mix clasico|nuts|nuez|almendra|mani|maní/.test(
-      value,
-    )
-  ) {
+  if (/mixed_nuts|classic_mix|mix clásico|mix clasico|nuts|nuez|almendra|mani|maní/.test(value)) {
     return split(0.12, 0.3, 0.58, 1.3);
   }
   if (/chocolate|cacao|cookie|oreo|gallet/.test(value)) {
@@ -157,23 +150,15 @@ function estimatedItemMacros(row: Row): ItemMacroEstimate {
   if (energy === null) return { protein, carbohydrate, fat, fiber };
 
   const energySplit = splitFor(row);
-  const knownEnergy =
-    (protein ?? 0) * 4 + (carbohydrate ?? 0) * 4 + (fat ?? 0) * 9;
+  const knownEnergy = (protein ?? 0) * 4 + (carbohydrate ?? 0) * 4 + (fat ?? 0) * 9;
   const residual = Math.max(energy - knownEnergy, 0);
   const missing: MacroKey[] = [];
   if (protein === null) missing.push('protein');
   if (carbohydrate === null) missing.push('carbohydrate');
   if (fat === null) missing.push('fat');
 
-  const shareTotal = missing.reduce(
-    (sum, key) => sum + energySplit[key],
-    0,
-  );
-  const allocate = (
-    key: MacroKey,
-    divisor: number,
-    known: number | null,
-  ): number | null => {
+  const shareTotal = missing.reduce((sum, key) => sum + energySplit[key], 0);
+  const allocate = (key: MacroKey, divisor: number, known: number | null): number | null => {
     if (known !== null) return known;
     if (shareTotal <= 0) return 0;
     return (residual * (energySplit[key] / shareTotal)) / divisor;
@@ -220,9 +205,7 @@ export async function loadApproximateDayMacros(
   if (!mealsResult.ok || !itemsResult.ok) return [];
 
   const mealRows = activeRows(rowsFromValues(mealsResult.values));
-  const itemRows = partitionNutritionFoodItemRows(
-    rowsFromValues(itemsResult.values),
-  ).valid;
+  const itemRows = partitionNutritionFoodItemRows(rowsFromValues(itemsResult.values)).valid;
   const mealIds = new Set(
     mealRows
       .filter((row) => stringValue(row.date) === date)
