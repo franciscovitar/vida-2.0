@@ -33,7 +33,11 @@ function providerType(medium: 'movie' | 'series'): 'movie' | 'show' {
 }
 
 function providerUrl(
-  target: { medium: 'movie' | 'series'; imdbId: string | null; tmdbId: number | null },
+  target: {
+    medium: 'movie' | 'series';
+    imdbId: string | null;
+    tmdbId: number | null;
+  },
   apiKey: string,
 ): string | null {
   const kind = providerType(target.medium);
@@ -52,7 +56,8 @@ export async function loadExternalRatings(
 ): Promise<ExternalRatingsFetchResult> {
   const key = publicKey.trim();
   const medium = mediumFromMediaPublicKey(key);
-  if (!medium || !key || key.length > 512) return { ok: false, code: 'invalid-key' };
+  if (!medium || !key || key.length > 512)
+    return { ok: false, code: 'invalid-key' };
 
   const apiKey = env.MDBLIST_API_KEY?.trim();
   if (!apiKey) return { ok: false, code: 'not-configured' };
