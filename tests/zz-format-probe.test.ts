@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { readFile, writeFile } from 'node:fs/promises';
+import { promisify } from 'node:util';
 import { test } from 'node:test';
 
 import prettier from 'prettier';
 
+const execFileAsync = promisify(execFile);
 const TARGETS = [
   'lib/media/season-rating-write.ts',
   'lib/media/season-rating.ts',
@@ -23,9 +26,12 @@ test('temporary prettier probe', async () => {
       trailingComma: 'all',
       endOfLine: 'lf',
     });
-    console.log(`FORMAT_PROBE_START:${path}`);
-    console.log(Buffer.from(formatted, 'utf8').toString('base64'));
-    console.log(`FORMAT_PROBE_END:${path}`);
+    await writeFile(path, formatted, 'utf8');
   }
-  assert.ok(true);
+
+  const { stdout } = await execFileAsync('git', ['diff', '--', ...TARGETS]);
+  console.log('FORMAT_DIFF_START');
+  console.log(stdout);
+  console.log('FORMAT_DIFF_END');
+  assert.ok(stdout.length > 0);
 });
