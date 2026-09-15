@@ -65,7 +65,8 @@ export function isFocusCandidate(item: MediaTitleView, medium: MediaKind): boole
  * En títulos ya vistos se presenta separada de Mi nota para no confundir
  * predicción/afinidad con evaluación observada.
  */
-export function shouldSurfaceEstimatedAffinity(_item: MediaTitleView): boolean {
+export function shouldSurfaceEstimatedAffinity(item: MediaTitleView): boolean {
+  void item;
   return true;
 }
 
