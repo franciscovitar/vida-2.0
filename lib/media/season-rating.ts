@@ -48,7 +48,13 @@ export function parseSeriesSeasonRatingRequest(value: unknown): SeriesSeasonRati
 
   const key = input.key.trim();
   const seasonNumber = input.seasonNumber;
-  if (!key || key.length > 512 || !Number.isInteger(seasonNumber) || seasonNumber < 1 || seasonNumber > 100) {
+  if (
+    !key ||
+    key.length > 512 ||
+    !Number.isInteger(seasonNumber) ||
+    seasonNumber < 1 ||
+    seasonNumber > 100
+  ) {
     return null;
   }
 
