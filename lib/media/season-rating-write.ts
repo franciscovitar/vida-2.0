@@ -7,6 +7,7 @@ import {
   seasonRatingSnapshotMatches,
   type SeriesSeasonRatingRequest,
 } from '@/lib/media/season-rating';
+import { parseObservedSeasonRatings } from '@/lib/media/seasons';
 import {
   areMediaSheetWritesAllowed,
   getMediaSheetsAuthConfig,
@@ -71,10 +72,7 @@ export async function writeSeriesSeasonRating(
   const target = resolved.target;
 
   const existing = target.rawSeasonRatings;
-  const hasExistingSeason = existing
-    ? target.rawSeasonRatings !== null &&
-      seasonRatingSnapshotMatches(read.values, input.key, input.seasonNumber, null) === false
-    : false;
+  const hasExistingSeason = parseObservedSeasonRatings(existing).has(input.seasonNumber);
   if (
     target.totalSeasons !== null &&
     input.seasonNumber > target.totalSeasons &&
