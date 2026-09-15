@@ -1,0 +1,93 @@
+.wrap {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.heading {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.heading > div:first-child {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.heading span {
+  color: var(--text-subtle);
+  font-size: 0.62rem;
+}
+
+.heading strong {
+  color: var(--text);
+  font-size: 0.86rem;
+  text-transform: capitalize;
+}
+
+.arrows {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.arrows a,
+.arrows > span,
+.days a {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.15rem;
+  min-height: 2.05rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+
+.arrows > span {
+  opacity: 0.35;
+}
+
+.arrows .today {
+  min-width: auto;
+  padding-inline: 0.7rem;
+}
+
+.days {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.08rem;
+  scrollbar-width: thin;
+}
+
+.days a {
+  flex: 0 0 auto;
+  min-width: 3.35rem;
+  padding-inline: 0.55rem;
+}
+
+.days a[data-selected='true'] {
+  border-color: var(--c-health-border);
+  color: var(--c-health);
+  background: var(--c-health-soft);
+  font-weight: 700;
+}
+
+@media (max-width <= 640px) {
+  .heading {
+    align-items: flex-start;
+  }
+
+  .heading strong {
+    font-size: 0.8rem;
+  }
+}
