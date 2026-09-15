@@ -32,8 +32,13 @@ export function ExternalRatingsPanel({ itemKey }: ExternalRatingsPanelProps) {
   });
 
   useEffect(() => {
-    if (sessionCache.has(itemKey)) return undefined;
+    const cached = sessionCache.get(itemKey);
+    if (cached) {
+      setState({ status: 'ready', data: cached });
+      return undefined;
+    }
 
+    setState({ status: 'loading' });
     const controller = new AbortController();
 
     void fetch(`/api/media/external-ratings?key=${encodeURIComponent(itemKey)}`, {
