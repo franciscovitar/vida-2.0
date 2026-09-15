@@ -9,13 +9,7 @@ import {
   seasonRatingSnapshotMatches,
 } from '@/lib/media/season-rating';
 
-const HEADERS = [
-  'Media ID',
-  'Título',
-  'Año',
-  'Temporadas',
-  'Notas por temporada',
-] as const;
+const HEADERS = ['Media ID', 'Título', 'Año', 'Temporadas', 'Notas por temporada'] as const;
 
 const ROW = ['series-1', 'Example', 2020, 4, 'T1 8.4 / T3 7.125'] as const;
 
