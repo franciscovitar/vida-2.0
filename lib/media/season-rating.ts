@@ -141,7 +141,5 @@ export function seasonRatingSnapshotMatches(
   if (!resolved.ok) return false;
   const ratings = parseObservedSeasonRatings(resolved.target.rawSeasonRatings);
   const actual = ratings.get(seasonNumber) ?? null;
-  return actual === null
-    ? rating === null
-    : rating !== null && Math.abs(actual - rating) <= 1e-9;
+  return actual === null ? rating === null : rating !== null && Math.abs(actual - rating) <= 1e-9;
 }
