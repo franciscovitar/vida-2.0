@@ -67,6 +67,11 @@
   background: var(--surface-1);
 }
 
+.form select option {
+  color: CanvasText;
+  background: Canvas;
+}
+
 .form textarea {
   resize: vertical;
   line-height: 1.45;
