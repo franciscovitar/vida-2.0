@@ -23,8 +23,7 @@ export type ExternalRatingsFetchCode =
   | 'provider-error';
 
 export type ExternalRatingsFetchResult =
-  | { ok: true; data: MediaExternalRatingsView }
-  | { ok: false; code: ExternalRatingsFetchCode };
+  { ok: true; data: MediaExternalRatingsView } | { ok: false; code: ExternalRatingsFetchCode };
 
 const MDBLIST_BASE = 'https://api.mdblist.com';
 
@@ -56,8 +55,7 @@ export async function loadExternalRatings(
 ): Promise<ExternalRatingsFetchResult> {
   const key = publicKey.trim();
   const medium = mediumFromMediaPublicKey(key);
-  if (!medium || !key || key.length > 512)
-    return { ok: false, code: 'invalid-key' };
+  if (!medium || !key || key.length > 512) return { ok: false, code: 'invalid-key' };
 
   const apiKey = env.MDBLIST_API_KEY?.trim();
   if (!apiKey) return { ok: false, code: 'not-configured' };
