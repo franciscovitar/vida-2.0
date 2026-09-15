@@ -129,7 +129,10 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
   ];
 }
 
-function hasExtraFilters(filters: MediaFilters, externalAverageMin: ExternalAverageFilter): boolean {
+function hasExtraFilters(
+  filters: MediaFilters,
+  externalAverageMin: ExternalAverageFilter,
+): boolean {
   return Boolean(
     filters.query ||
     filters.genre ||
