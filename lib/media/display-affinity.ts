@@ -79,9 +79,10 @@ export function parseDisplayAffinity(values: PlainRows): DisplayAffinityParseRes
 }
 
 /**
- * Último fallback de presentación. Nunca reemplaza una predicción privada o
- * retrospectiva ya aplicada y respeta la política de ocultar Personal Fit en
- * películas ya vistas.
+ * Snapshot canónico de presentación para el catálogo actual. Si existe una fila
+ * válida para un título, esa afinidad es la que Vida debe mostrar aunque exista
+ * un snapshot privado o retrospectivo cargado antes. Así una predicción interna
+ * no puede tapar el valor de display ya resuelto para títulos vistos o no vistos.
  */
 export function withDisplayAffinity(
   titles: MediaTitleView[],
@@ -90,7 +91,7 @@ export function withDisplayAffinity(
   if (byTitle.size === 0) return titles;
 
   return titles.map((item) => {
-    if (item.estimatedAffinity !== null || !shouldSurfaceEstimatedAffinity(item)) return item;
+    if (!shouldSurfaceEstimatedAffinity(item)) return item;
     const rawAffinity = byTitle.get(item.key);
     if (rawAffinity === undefined) return item;
 

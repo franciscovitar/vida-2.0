@@ -154,10 +154,10 @@ test('completa Series sin importar que ya estén terminadas', () => {
   assert.equal(withDisplayAffinity([series], parsedMap())[0]!.estimatedAffinity, 7.5);
 });
 
-test('una afinidad previa privada o retrospectiva siempre gana sobre el fallback amplio', () => {
-  const movie = title('movie', 'Por ver', 8.9);
+test('el snapshot de display gana sobre una afinidad privada o retrospectiva previa', () => {
+  const movie = title('movie', 'Vista', 8.9);
   const series = title('series', 'Terminada', 8.7);
   const result = withDisplayAffinity([movie, series], parsedMap());
-  assert.equal(result[0]!.estimatedAffinity, 8.9);
-  assert.equal(result[1]!.estimatedAffinity, 8.7);
+  assert.equal(result[0]!.estimatedAffinity, adjustEstimatedAffinity('movie', 8, 8));
+  assert.equal(result[1]!.estimatedAffinity, 7.5);
 });
