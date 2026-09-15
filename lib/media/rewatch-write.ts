@@ -29,8 +29,7 @@ export type MediaRewatchWriteCode =
   | 'verification-error';
 
 export type MediaRewatchWriteResult =
-  | { ok: true; replay: boolean }
-  | { ok: false; code: MediaRewatchWriteCode };
+  { ok: true; replay: boolean } | { ok: false; code: MediaRewatchWriteCode };
 
 function tabForMedium(medium: MediaKind): MediaTab {
   return medium === 'movie' ? 'Movies' : 'Series';
