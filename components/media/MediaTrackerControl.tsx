@@ -33,9 +33,16 @@ function dateInputValue(value: string | null | undefined): string {
   return `${String(parsed.getUTCFullYear()).padStart(4, '0')}-${String(parsed.getUTCMonth() + 1).padStart(2, '0')}-${String(parsed.getUTCDate()).padStart(2, '0')}`;
 }
 
+function canShowRewatchToggle(item: MediaTitleView): boolean {
+  if (item.state === 'Reveer') return true;
+  return item.medium === 'movie' ? item.state === 'Vista' : item.state === 'Terminada';
+}
+
 export function MediaTrackerControl({ item, onSaved }: MediaTrackerControlProps) {
   const router = useRouter();
-  const states = mediaTrackerStates(item.medium);
+  const states = mediaTrackerStates(item.medium).filter(
+    (option) => option !== 'Reveer' || item.state === 'Reveer',
+  );
   const initialState = states.includes(item.state)
     ? item.state
     : item.medium === 'movie'
@@ -88,16 +95,55 @@ export function MediaTrackerControl({ item, onSaved }: MediaTrackerControlProps)
     }
   }
 
+  async function toggleRewatch() {
+    setSaving(true);
+    setError(false);
+    try {
+      const response = await fetch('/api/media/rewatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: item.key,
+          medium: item.medium,
+          enabled: item.state !== 'Reveer',
+        }),
+      });
+      if (!response.ok) {
+        setError(true);
+        return;
+      }
+      router.refresh();
+      onSaved?.();
+    } catch {
+      setError(true);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <section className={styles.tracker} aria-label="Tracker personal">
       <div className={styles.heading}>
         <div>
           <h3>Mi tracker</h3>
           <p>
-            Guardá el estado real, la fecha y lo que te dejó. El historial anterior se conserva.
+            Guardá el estado real, la fecha y lo que te dejó. Reveer se activa aparte y sólo cuando
+            el título ya fue visto o terminado; tu nota, fecha y observaciones se conservan.
           </p>
         </div>
       </div>
+
+      {canShowRewatchToggle(item) ? (
+        <div className={styles.footer}>
+          <button type="button" disabled={saving} onClick={() => void toggleRewatch()}>
+            {saving
+              ? 'Guardando…'
+              : item.state === 'Reveer'
+                ? 'Sacar de Reveer'
+                : 'Marcar para Reveer'}
+          </button>
+        </div>
+      ) : null}
 
       <form className={styles.form} onSubmit={(event) => void submit(event)}>
         <div className={styles.grid}>
