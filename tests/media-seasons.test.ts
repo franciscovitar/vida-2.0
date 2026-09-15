@@ -128,21 +128,21 @@ test('el esqueleto de temporadas preserva Mi nota y deja señales derivadas desc
   assert.equal(details[3]?.evidenceState, 'unavailable');
 });
 
-test('una serie de una sola temporada refleja su Nota observada como Mi nota de T1', () => {
-  const details = buildSeasonSkeleton(1, new Map(), 8.25);
-  assert.equal(details[0]?.observedRating, 8.25);
+test('una serie de una sola temporada no inventa una nota de T1 desde la nota general', () => {
+  const details = buildSeasonSkeleton(1, new Map());
+  assert.equal(details[0]?.observedRating, null);
 });
 
 test('una Nota general no se reparte entre varias temporadas', () => {
-  const details = buildSeasonSkeleton(3, new Map(), 8.25);
+  const details = buildSeasonSkeleton(3, new Map());
   assert.deepEqual(
     details.map((item) => item.observedRating),
     [null, null, null],
   );
 });
 
-test('una nota explícita de T1 prevalece sobre la proyección de una serie de una temporada', () => {
-  const details = buildSeasonSkeleton(1, new Map([[1, 7.75]]), 8.25);
+test('una nota explícita de T1 se conserva como dato de temporada', () => {
+  const details = buildSeasonSkeleton(1, new Map([[1, 7.75]]));
   assert.equal(details[0]?.observedRating, 7.75);
 });
 
