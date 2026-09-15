@@ -3,6 +3,7 @@
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 
+import { ExternalRatingsPanel } from '@/components/media/ExternalRatingsPanel';
 import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaPoster } from '@/components/media/MediaPoster';
 import { MediaTrackerControl } from '@/components/media/MediaTrackerControl';
@@ -166,6 +167,8 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                 ) : null}
               </div>
             ) : null}
+
+            <ExternalRatingsPanel itemKey={item.key} />
 
             <MediaTrackerControl key={item.key} item={item} onSaved={onClose} />
 
