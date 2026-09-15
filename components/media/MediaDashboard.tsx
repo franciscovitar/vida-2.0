@@ -444,7 +444,11 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
                   </div>
 
                   <div className={styles.badges}>
-                    <Badge domain={item.state === 'Por ver' || item.state === 'Reveer' ? 'learning' : 'neutral'}>
+                    <Badge
+                      domain={
+                        item.state === 'Por ver' || item.state === 'Reveer' ? 'learning' : 'neutral'
+                      }
+                    >
                       {item.state}
                     </Badge>
                     {item.manualFocusExcluded ? (
