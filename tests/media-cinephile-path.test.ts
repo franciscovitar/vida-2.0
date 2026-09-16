@@ -88,7 +88,10 @@ test('personal rating does not alter cultural progress', () => {
   const disliked = mediaTitle({ key: 'movie:seen', state: 'Vista', rating: 2 });
   const loved = mediaTitle({ key: 'movie:seen', state: 'Vista', rating: 10 });
 
-  assert.equal(buildCinephilePath([disliked]).movie.percent, buildCinephilePath([loved]).movie.percent);
+  assert.equal(
+    buildCinephilePath([disliked]).movie.percent,
+    buildCinephilePath([loved]).movie.percent,
+  );
 });
 
 test('a bank title that opens an era and genre gets a larger marginal gain', () => {
