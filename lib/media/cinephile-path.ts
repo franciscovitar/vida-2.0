@@ -208,10 +208,7 @@ function levelFor(percent: number): { level: string; nextLevel: string | null } 
   return { level: current.label, nextLevel: next };
 }
 
-function exposureForEntry(
-  entry: CinephileCanonEntry,
-  titles: readonly MediaTitleView[],
-): number {
+function exposureForEntry(entry: CinephileCanonEntry, titles: readonly MediaTitleView[]): number {
   let exposure = 0;
   for (const item of titles) {
     if (!canonEntryMatchesItem(entry, item)) continue;
