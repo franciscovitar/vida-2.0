@@ -178,7 +178,7 @@ function eraKey(item: MediaTitleView): string | null {
 function levelFor(percent: number): { level: string; nextLevel: string | null } {
   const currentIndex = LEVELS.findIndex((definition) => percent >= definition.minimum);
   const current = LEVELS[currentIndex] ?? LEVELS[LEVELS.length - 1];
-  const next = currentIndex <= 0 ? null : LEVELS[currentIndex - 1]?.label ?? null;
+  const next = currentIndex <= 0 ? null : (LEVELS[currentIndex - 1]?.label ?? null);
   return { level: current.label, nextLevel: next };
 }
 
@@ -245,12 +245,16 @@ function buildMediumState(titles: readonly MediaTitleView[], kind: MediaKind): M
   };
 }
 
-function globalProgress(movie: CinephilePathProgress, series: CinephilePathProgress): CinephilePathProgress {
+function globalProgress(
+  movie: CinephilePathProgress,
+  series: CinephilePathProgress,
+): CinephilePathProgress {
   const percent = movie.percent * GLOBAL_MOVIE_WEIGHT + series.percent * GLOBAL_SERIES_WEIGHT;
   const foundations =
     movie.breakdown.foundations * GLOBAL_MOVIE_WEIGHT +
     series.breakdown.foundations * GLOBAL_SERIES_WEIGHT;
-  const eras = movie.breakdown.eras * GLOBAL_MOVIE_WEIGHT + series.breakdown.eras * GLOBAL_SERIES_WEIGHT;
+  const eras =
+    movie.breakdown.eras * GLOBAL_MOVIE_WEIGHT + series.breakdown.eras * GLOBAL_SERIES_WEIGHT;
   const genres =
     movie.breakdown.genres * GLOBAL_MOVIE_WEIGHT + series.breakdown.genres * GLOBAL_SERIES_WEIGHT;
   const level = levelFor(percent);
@@ -268,7 +272,10 @@ function globalProgress(movie: CinephilePathProgress, series: CinephilePathProgr
   };
 }
 
-function progressWithFullExposure(state: MediumPathState, item: MediaTitleView): CinephilePathProgress {
+function progressWithFullExposure(
+  state: MediumPathState,
+  item: MediaTitleView,
+): CinephilePathProgress {
   const currentExposure = cinephileExposure(item);
   if (currentExposure >= 1) return state.progress;
 
@@ -329,7 +336,8 @@ function recommendationFor(
   const gain: CinephilePathGain = {
     mediumGain: roundOne(Math.max(0, nextMedium.percent - state.progress.percent)),
     globalGain: roundOne(Math.max(0, nextGlobal.percent - currentGlobal.percent)),
-    importance: cinephileImportance(item) === null ? null : roundOne(cinephileImportance(item) ?? 0),
+    importance:
+      cinephileImportance(item) === null ? null : roundOne(cinephileImportance(item) ?? 0),
     reason,
   };
   return {
