@@ -320,7 +320,10 @@ const MOVIE_ALIASES: Record<string, readonly string[]> = {
   'Spirited Away': ['Sen to Chihiro no kamikakushi', 'El viaje de Chihiro'],
   'Los Olvidados': ['Los olvidados'],
   'Rome, Open City': ['Roma città aperta', 'Roma, ciudad abierta'],
-  'The Good, the Bad and the Ugly': ['Il buono, il brutto, il cattivo', 'El bueno, el malo y el feo'],
+  'The Good, the Bad and the Ugly': [
+    'Il buono, il brutto, il cattivo',
+    'El bueno, el malo y el feo',
+  ],
   'Chungking Express': ['Chung Hing sam lam'],
   'My Neighbour Totoro': ['Tonari no Totoro', 'Mi vecino Totoro'],
   Ran: ['Ran'],
