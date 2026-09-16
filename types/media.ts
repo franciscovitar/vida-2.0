@@ -1,6 +1,14 @@
 export type MediaKind = 'movie' | 'series';
 export type MediaFocusLevel = 1 | 2 | 3;
 export type MediaManualFocus = MediaFocusLevel | 'exclude' | null;
+export type MediaCulturalObligation =
+  | 'imprescindible'
+  | 'esencial'
+  | 'muy-recomendable'
+  | 'recomendable'
+  | 'complementaria'
+  | 'opcional';
+export type MediaObligationFilter = 'all' | MediaCulturalObligation;
 
 export type MediaSourceState =
   | 'ready'
@@ -141,5 +149,6 @@ export interface MediaFilters {
   yearFrom: string;
   yearTo: string;
   commitment: MediaCommitmentFilter;
+  obligation?: MediaObligationFilter;
   sort: MediaSort;
 }

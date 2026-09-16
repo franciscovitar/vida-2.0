@@ -1,3 +1,4 @@
+import { cinephileObligationFor } from '@/lib/media/cinephile-canon';
 import { compareFocusPriority, watchPriorityScore } from '@/lib/media/focus';
 import { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';
 import type {
@@ -128,6 +129,13 @@ export function filterMediaTitles(
     }
     if (filters.creator && !exactNormalized(item.creator, filters.creator)) return false;
     if (!matchesYearRange(item, filters.yearFrom, filters.yearTo)) return false;
+    if (
+      filters.obligation &&
+      filters.obligation !== 'all' &&
+      cinephileObligationFor(item) !== filters.obligation
+    ) {
+      return false;
+    }
     return matchesCommitment(item, filters.commitment);
   });
 }

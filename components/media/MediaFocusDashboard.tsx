@@ -12,6 +12,11 @@ import { MediaSortControl } from '@/components/media/MediaSortControl';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
+  MEDIA_OBLIGATION_OPTIONS,
+  cinephileObligationFor,
+  obligationLabel,
+} from '@/lib/media/cinephile-canon';
+import {
   deriveFocusCandidates,
   deriveFocusTitles,
   focusLimit,
@@ -26,6 +31,7 @@ import type {
   MediaFilters,
   MediaFocusLevel,
   MediaKind,
+  MediaObligationFilter,
   MediaTitleView,
 } from '@/types/media';
 
@@ -44,6 +50,7 @@ function initialFocusFilters(medium: MediaKind): MediaFilters {
     yearFrom: '',
     yearTo: '',
     commitment: 'all',
+    obligation: 'all',
     sort: 'focus-priority',
   };
 }
@@ -91,6 +98,7 @@ function hasExtraFilters(filters: MediaFilters): boolean {
     filters.yearFrom ||
     filters.yearTo ||
     filters.commitment !== 'all' ||
+    (filters.obligation ?? 'all') !== 'all' ||
     filters.collection !== 'all' ||
     filters.sort !== 'focus-priority',
   );
@@ -378,6 +386,22 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
               ))}
             </select>
           </label>
+          <label>
+            <span>Camino cinéfilo</span>
+            <select
+              value={filters.obligation ?? 'all'}
+              onChange={(event) =>
+                patchFilters({ obligation: event.target.value as MediaObligationFilter })
+              }
+            >
+              <option value="all">Todas las categorías</option>
+              {MEDIA_OBLIGATION_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <MediaSortControl
             value={filters.sort}
             options={options}
@@ -416,6 +440,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
           {focus.map((item) => {
             const commitment = commitmentLabel(item);
             const priority = watchPriorityScore(item);
+            const obligation = cinephileObligationFor(item);
             return (
               <article
                 key={item.key}
@@ -445,6 +470,7 @@ export function MediaFocusDashboard({ data }: MediaFocusDashboardProps) {
                   </div>
                   <div className={styles.badges}>
                     {item.state === 'Reveer' ? <Badge domain="learning">Reveer</Badge> : null}
+                    <Badge variant="outline">Camino · {obligationLabel(obligation)}</Badge>
                     {item.key === firstFocusKey ? (
                       <Badge domain="projects">Primera del lote</Badge>
                     ) : null}
