@@ -59,14 +59,18 @@ function priorityText(priority: string | EnglishProfileClaim): string {
   return typeof priority === 'string' ? priority : claimText(priority);
 }
 
+function stateClassName(state: EnglishEvidenceState): string {
+  return styles[`state-${state.replaceAll('_', '-')}`] ?? '';
+}
+
 function SkillMeter({ dimension }: { dimension: EnglishDimension }) {
   const active = STATE_LEVEL[dimension.state];
   return (
-    <div className={styles.skillMeter} aria-label={STATE_LABELS[dimension.state]}>
+    <div className={styles['skill-meter']} aria-label={STATE_LABELS[dimension.state]}>
       {Array.from({ length: 4 }, (_, index) => (
         <span
           key={index}
-          className={`${styles.skillSegment} ${index < active ? styles.segmentActive : ''}`}
+          className={`${styles['skill-segment']} ${index < active ? styles['segment-active'] : ''}`}
         />
       ))}
     </div>
@@ -75,7 +79,7 @@ function SkillMeter({ dimension }: { dimension: EnglishDimension }) {
 
 function EmptyState({ title, body }: { title: string; body: string }) {
   return (
-    <div className={styles.emptyState}>
+    <div className={styles['empty-state']}>
       <CircleDashed size={18} aria-hidden="true" />
       <div>
         <strong>{title}</strong>
@@ -87,8 +91,8 @@ function EmptyState({ title, body }: { title: string; body: string }) {
 
 function SourceUnavailable({ result }: { result: EnglishProfileLoadResult }) {
   return (
-    <Card className={styles.sourceCard}>
-      <div className={styles.sourceIcon} aria-hidden="true">
+    <Card className={styles['source-card']}>
+      <div className={styles['source-icon']} aria-hidden="true">
         <ShieldCheck size={22} />
       </div>
       <div>
@@ -111,41 +115,43 @@ function Hero({ profile, notice }: { profile: EnglishLearnerProfile; notice: str
 
   return (
     <Card className={styles.hero}>
-      <div className={styles.heroMain}>
-        <div className={styles.levelOrb} aria-hidden="true">
+      <div className={styles['hero-main']}>
+        <div className={styles['level-orb']} aria-hidden="true">
           <MessageCircle size={25} />
         </div>
-        <div className={styles.heroCopy}>
+        <div className={styles['hero-copy']}>
           <p className={styles.eyebrow}>English Speaking</p>
-          <div className={styles.levelRow}>
+          <div className={styles['level-row']}>
             <h2>{cefr?.range ?? 'Baseline'}</h2>
-            <span className={styles.statusPill}>
+            <span className={styles['status-pill']}>
               {profile.baseline_status === 'collecting' ? 'Collecting evidence' : 'Profile ready'}
             </span>
           </div>
           <p className={styles.summary}>{profile.summary || notice}</p>
-          <p className={styles.canonicalNote}>{notice}</p>
+          <p className={styles['canonical-note']}>{notice}</p>
         </div>
       </div>
 
-      <div className={styles.heroStats}>
-        <div className={styles.heroStat}>
-          <span className={styles.heroStatIcon} aria-hidden="true">
+      <div className={styles['hero-stats']}>
+        <div className={styles['hero-stat']}>
+          <span className={styles['hero-stat-icon']} aria-hidden="true">
             <Target size={17} />
           </span>
           <div>
-            <span className={styles.statLabel}>Current focus</span>
-            <strong>{
-              currentPriority ? priorityText(currentPriority) : 'Build a reliable speaking baseline'
-            }</strong>
+            <span className={styles['stat-label']}>Current focus</span>
+            <strong>
+              {currentPriority
+                ? priorityText(currentPriority)
+                : 'Build a reliable speaking baseline'}
+            </strong>
           </div>
         </div>
-        <div className={styles.heroStat}>
-          <span className={styles.heroStatIcon} aria-hidden="true">
+        <div className={styles['hero-stat']}>
+          <span className={styles['hero-stat-icon']} aria-hidden="true">
             <Flame size={17} />
           </span>
           <div>
-            <span className={styles.statLabel}>Momentum</span>
+            <span className={styles['stat-label']}>Momentum</span>
             <strong>
               {activity?.conversations_this_week !== undefined
                 ? `${activity.conversations_this_week} conversations this week`
@@ -169,15 +175,15 @@ function Skills({ profile }: { profile: EnglishLearnerProfile }) {
         icon={Sparkles}
         domain="learning"
       />
-      <div className={styles.skillGrid}>
+      <div className={styles['skill-grid']}>
         {dimensions.map(([key, dimension]) => (
-          <div key={key} className={`${styles.skill} ${styles[`state_${dimension.state}`]}`}>
-            <div className={styles.skillTop}>
+          <div key={key} className={`${styles.skill} ${stateClassName(dimension.state)}`}>
+            <div className={styles['skill-top']}>
               <strong>{DIMENSION_LABELS[key] ?? key}</strong>
               <span>{STATE_LABELS[dimension.state]}</span>
             </div>
             <SkillMeter dimension={dimension} />
-            <div className={styles.skillMeta}>
+            <div className={styles['skill-meta']}>
               <span>{dimension.evidence_count} evidence</span>
               <span>{dimension.confidence} confidence</span>
               {dimension.trend !== 'insufficient_evidence' ? <span>{dimension.trend}</span> : null}
@@ -203,11 +209,11 @@ function Quests({ profile }: { profile: EnglishLearnerProfile }) {
         <div className={styles.stack}>
           {profile.quests.map((quest) => (
             <article key={quest.id} className={styles.quest}>
-              <div className={styles.questIcon} aria-hidden="true">
+              <div className={styles['quest-icon']} aria-hidden="true">
                 {quest.status === 'complete' ? <CheckCircle2 size={20} /> : <Target size={20} />}
               </div>
               <div>
-                <div className={styles.questTitleRow}>
+                <div className={styles['quest-title-row']}>
                   <strong>{quest.title}</strong>
                   <span>{quest.status ?? 'available'}</span>
                 </div>
@@ -243,14 +249,16 @@ function Vocabulary({ profile }: { profile: EnglishLearnerProfile }) {
         domain="learning"
       />
       {profile.vocabulary.length ? (
-        <div className={styles.vocabularyList}>
+        <div className={styles['vocabulary-list']}>
           {profile.vocabulary.slice(0, 12).map((item) => (
-            <div key={item.expression} className={styles.vocabularyItem}>
+            <div key={item.expression} className={styles['vocabulary-item']}>
               <div>
                 <strong>{item.expression}</strong>
                 {item.meaning ? <p>{item.meaning}</p> : null}
               </div>
-              <span className={styles.vocabularyStatus}>{item.status.replaceAll('_', ' ')}</span>
+              <span className={styles['vocabulary-status']}>
+                {item.status.replaceAll('_', ' ')}
+              </span>
             </div>
           ))}
         </div>
@@ -273,11 +281,11 @@ function ProgressEvidence({ profile }: { profile: EnglishLearnerProfile }) {
         icon={ShieldCheck}
         domain="learning"
       />
-      <div className={styles.evidenceColumns}>
+      <div className={styles['evidence-columns']}>
         <div>
           <h3>Strengths</h3>
           {profile.strengths.length ? (
-            <ul className={styles.evidenceList}>
+            <ul className={styles['evidence-list']}>
               {profile.strengths.map((strength, index) => (
                 <li key={`${claimText(strength)}-${index}`}>
                   <CheckCircle2 size={16} aria-hidden="true" />
@@ -292,7 +300,7 @@ function ProgressEvidence({ profile }: { profile: EnglishLearnerProfile }) {
         <div>
           <h3>Targets</h3>
           {profile.current_priorities.length ? (
-            <ul className={styles.evidenceList}>
+            <ul className={styles['evidence-list']}>
               {profile.current_priorities.map((target, index) => (
                 <li key={`${priorityText(target)}-${index}`}>
                   <Target size={16} aria-hidden="true" />
@@ -318,7 +326,7 @@ function AchievementsAndCoverage({ profile }: { profile: EnglishLearnerProfile }
         icon={Trophy}
         domain="learning"
       />
-      <div className={styles.evidenceColumns}>
+      <div className={styles['evidence-columns']}>
         <div>
           <h3>Achievements</h3>
           {profile.achievements.length ? (
@@ -339,7 +347,7 @@ function AchievementsAndCoverage({ profile }: { profile: EnglishLearnerProfile }
         </div>
         <div>
           <h3>Recent coverage</h3>
-          <p className={styles.coverageLabel}>Domains</p>
+          <p className={styles['coverage-label']}>Domains</p>
           <div className={styles.tags}>
             {profile.coverage.recent_domains.length ? (
               profile.coverage.recent_domains.map((domain) => <span key={domain}>{domain}</span>)
@@ -347,7 +355,7 @@ function AchievementsAndCoverage({ profile }: { profile: EnglishLearnerProfile }
               <span>No data yet</span>
             )}
           </div>
-          <p className={styles.coverageLabel}>Speaking functions</p>
+          <p className={styles['coverage-label']}>Speaking functions</p>
           <div className={styles.tags}>
             {profile.coverage.recent_functions.length ? (
               profile.coverage.recent_functions.map((fn) => <span key={fn}>{fn}</span>)
@@ -368,11 +376,11 @@ export function EnglishLearningDashboard({ result }: { result: EnglishProfileLoa
     <div className={styles.dashboard}>
       <Hero profile={result.profile} notice={result.notice} />
       <Skills profile={result.profile} />
-      <div className={styles.twoColumns}>
+      <div className={styles['two-columns']}>
         <Quests profile={result.profile} />
         <Vocabulary profile={result.profile} />
       </div>
-      <div className={styles.twoColumns}>
+      <div className={styles['two-columns']}>
         <ProgressEvidence profile={result.profile} />
         <AchievementsAndCoverage profile={result.profile} />
       </div>
