@@ -49,7 +49,8 @@ async function loadFromGithub(): Promise<EnglishProfileLoadResult> {
     return {
       state: 'unconfigured',
       profile: null,
-      notice: 'English Speaking Lab está listo, pero falta configurar la credencial de lectura del perfil canónico.',
+      notice:
+        'English Speaking Lab está listo, pero falta configurar la credencial de lectura del perfil canónico.',
     };
   }
 
