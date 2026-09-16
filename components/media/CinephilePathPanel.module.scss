@@ -27,52 +27,52 @@
   letter-spacing: 0.055em;
 }
 
-.titleRow {
+.title-row {
   display: flex;
   gap: 0.8rem;
   align-items: flex-start;
   justify-content: space-between;
 }
 
-.titleRow h2,
-.recommendationHeading h3,
-.recommendationColumn h4 {
+.title-row h2,
+.recommendation-heading h3,
+.recommendation-column h4 {
   margin: 0;
   color: var(--text);
 }
 
-.titleRow h2 {
+.title-row h2 {
   font-size: clamp(1.1rem, 3vw, 1.45rem);
 }
 
-.titleRow p,
-.recommendationHeading p,
+.title-row p,
+.recommendation-heading p,
 .explanation p,
 .footer,
-.emptyRecommendations {
+.empty-recommendations {
   margin: 0;
   color: var(--text-muted);
   line-height: 1.5;
 }
 
-.titleRow p {
+.title-row p {
   max-width: 780px;
   margin-top: 0.35rem;
   font-size: 0.86rem;
 }
 
-.titleRow > svg {
+.title-row > svg {
   flex: 0 0 auto;
   color: var(--accent);
 }
 
-.pathGrid {
+.path-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.6rem;
 }
 
-.pathCard {
+.path-card {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
@@ -82,32 +82,32 @@
   border-radius: var(--radius);
 }
 
-.pathCard[data-primary='true'] {
+.path-card[data-primary='true'] {
   background: var(--c-learning-soft);
   border-color: var(--c-learning-border);
 }
 
-.pathHeading {
+.path-heading {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.55rem;
   align-items: center;
 }
 
-.pathHeading > div {
+.path-heading > div {
   display: flex;
   flex-direction: column;
   gap: 0.08rem;
   min-width: 0;
 }
 
-.pathHeading span {
+.path-heading span {
   color: var(--text-subtle);
   font-size: 0.68rem;
   font-weight: 700;
 }
 
-.pathHeading strong {
+.path-heading strong {
   overflow: hidden;
   color: var(--text);
   font-size: 0.82rem;
@@ -115,13 +115,13 @@
   white-space: nowrap;
 }
 
-.pathHeading b {
+.path-heading b {
   color: var(--text);
   font-size: 1.05rem;
   font-variant-numeric: tabular-nums;
 }
 
-.pathIcon {
+.path-icon {
   display: grid;
   width: 34px;
   height: 34px;
@@ -132,7 +132,7 @@
   place-items: center;
 }
 
-.progressTrack {
+.progress-track {
   height: 8px;
   overflow: hidden;
   background: var(--surface);
@@ -140,14 +140,14 @@
   border-radius: var(--radius-full);
 }
 
-.progressTrack > span {
+.progress-track > span {
   display: block;
   height: 100%;
   background: var(--accent);
   border-radius: inherit;
 }
 
-.pathCard p {
+.path-card p {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.72rem;
@@ -205,13 +205,13 @@
   padding-top: 0.15rem;
 }
 
-.recommendationHeading {
+.recommendation-heading {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.recommendationHeading span {
+.recommendation-heading span {
   color: var(--text-subtle);
   font-size: 0.66rem;
   font-weight: 800;
@@ -219,32 +219,32 @@
   letter-spacing: 0.055em;
 }
 
-.recommendationHeading h3 {
+.recommendation-heading h3 {
   font-size: 1rem;
 }
 
-.recommendationHeading p {
+.recommendation-heading p {
   font-size: 0.73rem;
 }
 
-.recommendationGrid {
+.recommendation-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.7rem;
 }
 
-.recommendationColumn {
+.recommendation-column {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   min-width: 0;
 }
 
-.recommendationColumn h4 {
+.recommendation-column h4 {
   font-size: 0.82rem;
 }
 
-.recommendationList {
+.recommendation-list {
   display: grid;
   gap: 0.45rem;
 }
@@ -259,14 +259,14 @@
   border-radius: var(--radius-sm);
 }
 
-.recommendationTitle {
+.recommendation-title {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
   justify-content: space-between;
 }
 
-.recommendationTitle strong {
+.recommendation-title strong {
   overflow: hidden;
   color: var(--text);
   font-size: 0.78rem;
@@ -274,7 +274,7 @@
   white-space: nowrap;
 }
 
-.recommendationTitle span {
+.recommendation-title span {
   flex: 0 0 auto;
   color: var(--text-subtle);
   font-size: 0.66rem;
@@ -303,7 +303,7 @@
   border-radius: var(--radius-full);
 }
 
-.emptyRecommendations {
+.empty-recommendations {
   padding: 0.65rem;
   font-size: 0.72rem;
   background: var(--surface-2);
@@ -317,7 +317,7 @@
 }
 
 @media (width >= 680px) {
-  .pathGrid {
+  .path-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -325,7 +325,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .recommendationGrid {
+  .recommendation-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
