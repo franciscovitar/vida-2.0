@@ -3,6 +3,7 @@
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 
+import { useCinephilePath } from '@/components/media/CinephilePathContext';
 import { ExternalRatingsPanel } from '@/components/media/ExternalRatingsPanel';
 import { MediaCountryFlags } from '@/components/media/MediaCountryFlags';
 import { MediaPoster } from '@/components/media/MediaPoster';
@@ -27,6 +28,10 @@ function score(value: number | null): string {
     : value.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function pathPoints(value: number): string {
+  return value.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
 function runtimeLabel(item: MediaTitleView): string | null {
   if (item.medium === 'movie') {
     return item.runtimeMinutes === null ? null : `${Math.round(item.runtimeMinutes)} min`;
@@ -38,6 +43,8 @@ function runtimeLabel(item: MediaTitleView): string | null {
 }
 
 export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
+  const cinephilePath = useCinephilePath();
+
   useEffect(() => {
     if (!item) return undefined;
     const previousOverflow = document.body.style.overflow;
@@ -57,6 +64,8 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
   const priority = watchPriorityScore(item);
   const commitment = runtimeLabel(item);
   const showGeneralRating = item.rating !== null;
+  const pathGain = cinephilePath?.gainsByKey.get(item.key) ?? null;
+  const ratedSeasons = item.seasonDetails.filter((season) => season.observedRating !== null).length;
 
   return (
     <div
@@ -168,6 +177,20 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
               </div>
             ) : null}
 
+            {pathGain && (pathGain.mediumGain > 0 || pathGain.globalGain > 0) ? (
+              <section
+                className={styles['detail-description']}
+                aria-label="Aporte al Camino del cinéfilo"
+              >
+                <h3>Camino del cinéfilo</h3>
+                <p>
+                  Si la ves, suma aproximadamente +{pathPoints(pathGain.mediumGain)} puntos
+                  porcentuales en {item.medium === 'movie' ? 'Películas' : 'Series'} y +
+                  {pathPoints(pathGain.globalGain)} puntos globales. {pathGain.reason}.
+                </p>
+              </section>
+            ) : null}
+
             <ExternalRatingsPanel key={item.key} itemKey={item.key} />
 
             <MediaTrackerControl key={item.key} item={item} onSaved={onClose} />
@@ -177,7 +200,11 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                 <div className={styles['season-heading']}>
                   <div>
                     <h3>Temporadas</h3>
-                    <p>Mi nota general y las notas por temporada se conservan por separado.</p>
+                    <p>
+                      {ratedSeasons}/{item.seasonDetails.length} con nota tuya. Mi nota general y
+                      las notas por temporada se conservan por separado; lo que nunca registraste
+                      queda explícitamente como “Sin registrar”.
+                    </p>
                   </div>
                   {item.nextSeasonNumber !== null ? (
                     <Badge domain="projects">Siguiente · T{item.nextSeasonNumber}</Badge>
@@ -226,7 +253,6 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                           itemKey={item.key}
                           seasonNumber={season.seasonNumber}
                           rating={season.observedRating}
-                          onSaved={onClose}
                         />
                         {season.evidenceState !== 'ready' ? (
                           <small className={styles['season-evidence']}>
