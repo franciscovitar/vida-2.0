@@ -198,11 +198,86 @@
   color: var(--text);
 }
 
+.recommendations-disclosure {
+  padding-top: 0.15rem;
+  border-top: 1px solid var(--border);
+}
+
+.recommendations-summary {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.recommendations-summary::-webkit-details-marker {
+  display: none;
+}
+
+.recommendations-summary > span:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.recommendations-summary strong {
+  color: var(--text);
+  font-size: 0.96rem;
+}
+
+.recommendations-summary-eyebrow {
+  color: var(--text-subtle);
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+}
+
+.recommendations-summary-action {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0.35rem;
+  align-items: center;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.recommendations-summary-action svg {
+  transition: transform 160ms ease;
+}
+
+.hide-label {
+  display: none;
+}
+
+.recommendations-disclosure[open] .show-label {
+  display: none;
+}
+
+.recommendations-disclosure[open] .hide-label {
+  display: inline;
+}
+
+.recommendations-disclosure[open] .recommendations-summary-action svg {
+  transform: rotate(180deg);
+}
+
+.recommendations-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-top: 0.35rem;
+}
+
 .recommendations {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding-top: 0.15rem;
 }
 
 .recommendation-heading {
