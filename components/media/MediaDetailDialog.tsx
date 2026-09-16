@@ -10,6 +10,7 @@ import { MediaPoster } from '@/components/media/MediaPoster';
 import { MediaTrackerControl } from '@/components/media/MediaTrackerControl';
 import { SeasonRatingControl } from '@/components/media/SeasonRatingControl';
 import { Badge } from '@/components/ui/Badge';
+import { cinephileObligationFor, obligationLabel } from '@/lib/media/cinephile-canon';
 import { watchPriorityScore } from '@/lib/media/focus';
 import { formatExternalMediaScore } from '@/lib/media/score-format';
 import { seasonWatchPriorityScore } from '@/lib/media/seasons';
@@ -63,6 +64,7 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
 
   const priority = watchPriorityScore(item);
   const commitment = runtimeLabel(item);
+  const obligation = cinephileObligationFor(item);
   const showGeneralRating = item.rating !== null;
   const pathGain = cinephilePath?.gainsByKey.get(item.key) ?? null;
   const ratedSeasons = item.seasonDetails.filter((season) => season.observedRating !== null).length;
@@ -114,6 +116,7 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
               >
                 {item.state}
               </Badge>
+              <Badge variant="outline">Camino · {obligationLabel(obligation)}</Badge>
               {item.ageFeelLabel ? <Badge variant="outline">{item.ageFeelLabel}</Badge> : null}
               {item.radar ? <Badge domain="projects">Radar</Badge> : null}
             </div>
