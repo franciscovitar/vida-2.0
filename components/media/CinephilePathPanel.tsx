@@ -190,8 +190,8 @@ export function CinephilePathPanel() {
           </div>
 
           <footer className={styles.footer}>
-            Modelo {snapshot.version} · canon {snapshot.canonVersion} ({snapshot.canonAsOf}). Tu nota
-            personal no altera el progreso cultural: que una obra no te guste no borra lo que
+            Modelo {snapshot.version} · canon {snapshot.canonVersion} ({snapshot.canonAsOf}). Tu
+            nota personal no altera el progreso cultural: que una obra no te guste no borra lo que
             ganaste al verla.
           </footer>
         </div>
