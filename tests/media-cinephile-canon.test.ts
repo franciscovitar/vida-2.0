@@ -113,7 +113,8 @@ test('a missing external imprescindible keeps the final milestone open and appea
   assert.ok(missing.series.percent <= 99.4);
   assert.ok(
     missing.recommendations.series.some(
-      (item) => item.title === 'The Wire' && item.inMedia === false && item.obligation === 'imprescindible',
+      (item) =>
+        item.title === 'The Wire' && item.inMedia === false && item.obligation === 'imprescindible',
     ),
   );
 
@@ -133,25 +134,39 @@ test('a missing external imprescindible keeps the final milestone open and appea
   ]);
   assert.equal(withWire.series.coreCovered, withWire.series.coreTotal);
   assert.ok(withWire.series.percent > missing.series.percent);
-  assert.equal(withWire.recommendations.series.some((item) => item.title === 'The Wire'), false);
+  assert.equal(
+    withWire.recommendations.series.some((item) => item.title === 'The Wire'),
+    false,
+  );
 });
 
 test('obligation filter works independently from bank membership', () => {
   const titles = [
     mediaTitle({ key: 'movie:kane', title: 'Citizen Kane', state: 'Vista' }),
     mediaTitle({ key: 'movie:parasite', title: 'Parasite', state: 'Vista' }),
-    mediaTitle({ key: 'movie:optional', title: 'Small Personal Film', state: 'Vista', cinephileValue: 6 }),
+    mediaTitle({
+      key: 'movie:optional',
+      title: 'Small Personal Film',
+      state: 'Vista',
+      cinephileValue: 6,
+    }),
   ];
 
   const indispensable = filterMediaTitles(
     titles,
     filters({ collection: 'seen', obligation: 'imprescindible' }),
   );
-  assert.deepEqual(indispensable.map((item) => item.title), ['Citizen Kane']);
+  assert.deepEqual(
+    indispensable.map((item) => item.title),
+    ['Citizen Kane'],
+  );
 
   const recommended = filterMediaTitles(
     titles,
     filters({ collection: 'seen', obligation: 'recomendable' }),
   );
-  assert.deepEqual(recommended.map((item) => item.title), ['Parasite']);
+  assert.deepEqual(
+    recommended.map((item) => item.title),
+    ['Parasite'],
+  );
 });
