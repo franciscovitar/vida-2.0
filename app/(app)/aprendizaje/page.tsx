@@ -1,6 +1,7 @@
-import { BookOpen } from 'lucide-react';
+import { BookOpen, MessageCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 
+import { Button } from '@/components/ui/Button';
 import { DocumentaryStableKeyPage } from '@/components/web-catalog/DocumentaryStableKeyPage';
 import { WEB_CATALOG_FIXED_ROUTES } from '@/lib/web-catalog/section-labels';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
@@ -16,6 +17,11 @@ export default async function AprendizajePage() {
     <DocumentaryStableKeyPage
       presentation="learning"
       stableKey={WEB_CATALOG_FIXED_ROUTES.aprendizaje.stableKey}
+      action={
+        <Button href="/aprendizaje/ingles" variant="primary" size="sm" iconLeft={MessageCircle}>
+          English Speaking
+        </Button>
+      }
       placeholder={{
         title: 'Aprendizaje',
         description: 'Cursos, lecturas y conocimiento en progreso.',
