@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { Domain } from '@/types';
@@ -14,6 +15,7 @@ interface PlaceholderPageProps {
   emptyDescription: string;
   /** Vista previa de lo que mostrará la sección con datos reales. */
   preview: string[];
+  action?: ReactNode;
 }
 
 /**
@@ -28,10 +30,17 @@ export function PlaceholderPage({
   emptyTitle,
   emptyDescription,
   preview,
+  action,
 }: PlaceholderPageProps) {
   return (
     <div>
-      <PageHeader title={title} description={description} icon={icon} domain={domain} />
+      <PageHeader
+        title={title}
+        description={description}
+        icon={icon}
+        domain={domain}
+        action={action}
+      />
       <EmptyState icon={icon} title={emptyTitle} description={emptyDescription} preview={preview} />
     </div>
   );
