@@ -28,9 +28,9 @@ interface PathCardProps {
 
 function PathCard({ progress, label, icon: Icon, primary = false }: PathCardProps) {
   return (
-    <article className={styles.pathCard} data-primary={primary}>
-      <div className={styles.pathHeading}>
-        <span className={styles.pathIcon} aria-hidden="true">
+    <article className={styles['path-card']} data-primary={primary}>
+      <div className={styles['path-heading']}>
+        <span className={styles['path-icon']} aria-hidden="true">
           <Icon size={17} />
         </span>
         <div>
@@ -40,7 +40,7 @@ function PathCard({ progress, label, icon: Icon, primary = false }: PathCardProp
         <b>{percent(progress.percent)}%</b>
       </div>
       <div
-        className={styles.progressTrack}
+        className={styles['progress-track']}
         role="progressbar"
         aria-label={`Progreso ${label}`}
         aria-valuemin={0}
@@ -67,13 +67,13 @@ interface RecommendationColumnProps {
 
 function RecommendationColumn({ title, items }: RecommendationColumnProps) {
   return (
-    <div className={styles.recommendationColumn}>
+    <div className={styles['recommendation-column']}>
       <h4>{title}</h4>
       {items.length > 0 ? (
-        <div className={styles.recommendationList}>
+        <div className={styles['recommendation-list']}>
           {items.map((item) => (
             <article key={item.key} className={styles.recommendation}>
-              <div className={styles.recommendationTitle}>
+              <div className={styles['recommendation-title']}>
                 <strong>{item.title}</strong>
                 {item.year !== null ? <span>{item.year}</span> : null}
               </div>
@@ -86,7 +86,7 @@ function RecommendationColumn({ title, items }: RecommendationColumnProps) {
           ))}
         </div>
       ) : (
-        <p className={styles.emptyRecommendations}>No hay saltos pendientes en este Banco.</p>
+        <p className={styles['empty-recommendations']}>No hay saltos pendientes en este Banco.</p>
       )}
     </div>
   );
@@ -102,7 +102,7 @@ export function CinephilePathPanel() {
         <div className={styles.eyebrow}>
           <Gamepad2 size={16} aria-hidden="true" /> Camino del cinéfilo
         </div>
-        <div className={styles.titleRow}>
+        <div className={styles['title-row']}>
           <div>
             <h2 id="cinephile-path-title">Tu mapa audiovisual ya construido</h2>
             <p>
@@ -114,7 +114,7 @@ export function CinephilePathPanel() {
         </div>
       </header>
 
-      <div className={styles.pathGrid}>
+      <div className={styles['path-grid']}>
         <PathCard progress={snapshot.global} label="Global" icon={Sparkles} primary />
         <PathCard progress={snapshot.movie} label="Películas" icon={Film} />
         <PathCard progress={snapshot.series} label="Series" icon={Tv} />
@@ -148,14 +148,14 @@ export function CinephilePathPanel() {
       </div>
 
       <div className={styles.recommendations}>
-        <div className={styles.recommendationHeading}>
+        <div className={styles['recommendation-heading']}>
           <div>
             <span>Desde tu Banco</span>
             <h3>Próximos saltos culturales</h3>
           </div>
           <p>Ordenados por cuánto amplían tu camino actual, no por obligación de verlos.</p>
         </div>
-        <div className={styles.recommendationGrid}>
+        <div className={styles['recommendation-grid']}>
           <RecommendationColumn title="Películas" items={snapshot.recommendations.movie} />
           <RecommendationColumn title="Series" items={snapshot.recommendations.series} />
         </div>
