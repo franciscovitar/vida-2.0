@@ -1,0 +1,331 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  width: fit-content;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+}
+
+.titleRow {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.titleRow h2,
+.recommendationHeading h3,
+.recommendationColumn h4 {
+  margin: 0;
+  color: var(--text);
+}
+
+.titleRow h2 {
+  font-size: clamp(1.1rem, 3vw, 1.45rem);
+}
+
+.titleRow p,
+.recommendationHeading p,
+.explanation p,
+.footer,
+.emptyRecommendations {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.titleRow p {
+  max-width: 780px;
+  margin-top: 0.35rem;
+  font-size: 0.86rem;
+}
+
+.titleRow > svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.pathGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+.pathCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.pathCard[data-primary='true'] {
+  background: var(--c-learning-soft);
+  border-color: var(--c-learning-border);
+}
+
+.pathHeading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.pathHeading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.pathHeading span {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.pathHeading strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pathHeading b {
+  color: var(--text);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pathIcon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  place-items: center;
+}
+
+.progressTrack {
+  height: 8px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+}
+
+.progressTrack > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+}
+
+.pathCard p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.breakdown {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+
+.breakdown > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.breakdown span {
+  color: var(--text-muted);
+  font-size: 0.73rem;
+}
+
+.breakdown strong {
+  color: var(--text);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.explanation {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  background: var(--c-neutral-soft);
+  border: 1px solid var(--c-neutral-border);
+  border-radius: var(--radius);
+}
+
+.explanation p {
+  font-size: 0.76rem;
+}
+
+.explanation strong {
+  color: var(--text);
+}
+
+.recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.15rem;
+}
+
+.recommendationHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.recommendationHeading span {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+}
+
+.recommendationHeading h3 {
+  font-size: 1rem;
+}
+
+.recommendationHeading p {
+  font-size: 0.73rem;
+}
+
+.recommendationGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+}
+
+.recommendationColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.recommendationColumn h4 {
+  font-size: 0.82rem;
+}
+
+.recommendationList {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.recommendation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.62rem 0.68rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.recommendationTitle {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.recommendationTitle strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendationTitle span {
+  flex: 0 0 auto;
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+}
+
+.recommendation p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.gains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.gains span {
+  padding: 0.2rem 0.38rem;
+  color: var(--accent);
+  font-size: 0.64rem;
+  font-weight: 750;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+}
+
+.emptyRecommendations {
+  padding: 0.65rem;
+  font-size: 0.72rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+.footer {
+  padding-top: 0.65rem;
+  font-size: 0.66rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (width >= 680px) {
+  .pathGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .breakdown {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .recommendationGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
