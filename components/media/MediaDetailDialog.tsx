@@ -178,7 +178,10 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
             ) : null}
 
             {pathGain && (pathGain.mediumGain > 0 || pathGain.globalGain > 0) ? (
-              <section className={styles['detail-description']} aria-label="Aporte al Camino del cinéfilo">
+              <section
+                className={styles['detail-description']}
+                aria-label="Aporte al Camino del cinéfilo"
+              >
                 <h3>Camino del cinéfilo</h3>
                 <p>
                   Si la ves, suma aproximadamente +{pathPoints(pathGain.mediumGain)} puntos
@@ -198,9 +201,9 @@ export function MediaDetailDialog({ item, onClose }: MediaDetailDialogProps) {
                   <div>
                     <h3>Temporadas</h3>
                     <p>
-                      {ratedSeasons}/{item.seasonDetails.length} con nota tuya. Mi nota general y las
-                      notas por temporada se conservan por separado; lo que nunca registraste queda
-                      explícitamente como “Sin registrar”.
+                      {ratedSeasons}/{item.seasonDetails.length} con nota tuya. Mi nota general y
+                      las notas por temporada se conservan por separado; lo que nunca registraste
+                      queda explícitamente como “Sin registrar”.
                     </p>
                   </div>
                   {item.nextSeasonNumber !== null ? (
