@@ -1,16 +1,8 @@
 export type EnglishEvidenceState =
-  | 'insufficient_evidence'
-  | 'emerging'
-  | 'developing'
-  | 'stable'
-  | 'strong';
+  'insufficient_evidence' | 'emerging' | 'developing' | 'stable' | 'strong';
 
 export type EnglishTrend =
-  | 'improving'
-  | 'stable'
-  | 'inconsistent'
-  | 'regressing_candidate'
-  | 'insufficient_evidence';
+  'improving' | 'stable' | 'inconsistent' | 'regressing_candidate' | 'insufficient_evidence';
 
 export type EnglishConfidence = 'low' | 'medium' | 'high';
 
@@ -42,11 +34,7 @@ export interface EnglishProfileClaim {
 }
 
 export type EnglishVocabularyStatus =
-  | 'seen'
-  | 'understood'
-  | 'used_with_help'
-  | 'used_spontaneously'
-  | 'active';
+  'seen' | 'understood' | 'used_with_help' | 'used_spontaneously' | 'active';
 
 export interface EnglishVocabularyItem {
   expression: string;
