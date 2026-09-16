@@ -2,6 +2,8 @@ import { Film } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { CinephilePathProvider } from '@/components/media/CinephilePathContext';
+import { CinephilePathPanel } from '@/components/media/CinephilePathPanel';
 import { MediaFocusDashboard } from '@/components/media/MediaFocusDashboard';
 import { loadMediaDashboard } from '@/lib/media/load';
 
@@ -22,7 +24,10 @@ export default async function MediaPage() {
         icon={Film}
         domain="learning"
       />
-      <MediaFocusDashboard data={data} />
+      <CinephilePathProvider titles={data.titles}>
+        <CinephilePathPanel />
+        <MediaFocusDashboard data={data} />
+      </CinephilePathProvider>
     </div>
   );
 }
