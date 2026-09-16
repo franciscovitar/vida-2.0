@@ -4,6 +4,7 @@ import { Film, Gamepad2, Sparkles, Tv } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { useCinephilePath } from '@/components/media/CinephilePathContext';
+import { obligationLabel } from '@/lib/media/cinephile-canon';
 import type {
   CinephilePathProgress,
   CinephilePathRecommendation,
@@ -27,6 +28,7 @@ interface PathCardProps {
 }
 
 function PathCard({ progress, label, icon: Icon, primary = false }: PathCardProps) {
+  const coreComplete = progress.coreCovered === progress.coreTotal;
   return (
     <article className={styles['path-card']} data-primary={primary}>
       <div className={styles['path-heading']}>
@@ -50,11 +52,14 @@ function PathCard({ progress, label, icon: Icon, primary = false }: PathCardProp
         <span style={{ width: `${progress.percent}%` }} />
       </div>
       <p>
-        {progress.percent >= 100
-          ? 'Hito amateur alcanzado. Desde acá, explorar es completamente libre.'
-          : progress.nextLevel
-            ? `Siguiente hito: ${progress.nextLevel}.`
-            : 'Tu recorrido sigue sumando sin rachas ni castigos.'}
+        Núcleo imprescindible recorrido: {progress.coreCovered}/{progress.coreTotal}.{' '}
+        {coreComplete
+          ? progress.percent >= 100
+            ? 'Hito amateur de referencia alcanzado.'
+            : progress.nextLevel
+              ? `Siguiente hito: ${progress.nextLevel}.`
+              : 'Tu recorrido sigue sumando.'
+          : 'El 100% queda reservado hasta cubrir este núcleo.'}
       </p>
     </article>
   );
@@ -79,6 +84,8 @@ function RecommendationColumn({ title, items }: RecommendationColumnProps) {
               </div>
               <p>{item.reason}</p>
               <div className={styles.gains}>
+                <span>{obligationLabel(item.obligation)}</span>
+                {!item.inMedia ? <span>Fuera de tu Media</span> : null}
                 <span>+{gain(item.mediumGain)} pp en su camino</span>
                 <span>+{gain(item.globalGain)} pp global</span>
               </div>
@@ -86,7 +93,7 @@ function RecommendationColumn({ title, items }: RecommendationColumnProps) {
           ))}
         </div>
       ) : (
-        <p className={styles['empty-recommendations']}>No hay saltos pendientes en este Banco.</p>
+        <p className={styles['empty-recommendations']}>No hay saltos culturales abiertos acá.</p>
       )}
     </div>
   );
@@ -106,8 +113,9 @@ export function CinephilePathPanel() {
           <div>
             <h2 id="cinephile-path-title">Tu mapa audiovisual ya construido</h2>
             <p>
-              Acá cuenta lo que ya viste. Las obras más importantes pesan más y también suma haber
-              recorrido épocas y géneros distintos. Lo que todavía no viste son opciones, no deuda.
+              Ahora se compara contra un canon externo versionado, no sólo contra tu Banco. Las
+              obras imprescindibles pesan más, pero lo que todavía no viste sigue siendo una guía,
+              no una deuda.
             </p>
           </div>
           <Sparkles size={22} aria-hidden="true" />
@@ -122,7 +130,11 @@ export function CinephilePathPanel() {
 
       <div className={styles.breakdown}>
         <div>
-          <span>Obras fundamentales</span>
+          <span>Canon externo</span>
+          <strong>{percent(snapshot.global.breakdown.externalCanon)}%</strong>
+        </div>
+        <div>
+          <span>Importancia de lo visto</span>
           <strong>{percent(snapshot.global.breakdown.foundations)}%</strong>
         </div>
         <div>
@@ -137,23 +149,27 @@ export function CinephilePathPanel() {
 
       <div className={styles.explanation}>
         <p>
-          <strong>Qué significa 100%:</strong> un hito de cultura audiovisual amateur muy formada,
-          deliberadamente por debajo de una formación profesional. El objetivo es ampliar tu mapa,
-          no completar todo el catálogo.
+          <strong>Qué significa 100%:</strong> un amateur de referencia: cobertura fuerte del canon
+          externo y, además, todos los títulos clasificados como imprescindibles. Sigue estando
+          deliberadamente por debajo de una formación profesional o académica en cine.
         </p>
         <p>
-          El hito es fijo: si mañana aparecen nuevas películas o series, tu porcentaje no baja. Las
-          novedades sólo pueden cambiar cuáles son las mejores próximas opciones.
+          El canon es independiente de tu Banco. Si una obra clave no está cargada en Media, cuenta
+          como no registrada y puede aparecer abajo como próximo salto. Dentro de una misma versión
+          el objetivo es estable; una futura versión del canon puede recalibrar el porcentaje.
         </p>
       </div>
 
       <div className={styles.recommendations}>
         <div className={styles['recommendation-heading']}>
           <div>
-            <span>Desde tu Banco</span>
+            <span>Desde el canon externo + tu Media</span>
             <h3>Próximos saltos culturales</h3>
           </div>
-          <p>Ordenados por cuánto amplían tu camino actual, no por obligación de verlos.</p>
+          <p>
+            Primero aparecen los imprescindibles y esenciales todavía no cubiertos, estén o no en
+            tu Banco.
+          </p>
         </div>
         <div className={styles['recommendation-grid']}>
           <RecommendationColumn title="Películas" items={snapshot.recommendations.movie} />
@@ -162,8 +178,9 @@ export function CinephilePathPanel() {
       </div>
 
       <footer className={styles.footer}>
-        Modelo {snapshot.version}. Tu gusto personal no altera este progreso: que una obra no te
-        guste no borra la cultura que ganaste al verla.
+        Modelo {snapshot.version} · canon {snapshot.canonVersion} ({snapshot.canonAsOf}). Tu nota
+        personal no altera el progreso cultural: que una obra no te guste no borra lo que ganaste al
+        verla.
       </footer>
     </section>
   );
