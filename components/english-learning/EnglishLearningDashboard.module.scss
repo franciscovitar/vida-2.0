@@ -11,13 +11,13 @@
     radial-gradient(circle at 92% 8%, var(--c-learning-soft), transparent 34%), var(--surface);
 }
 
-.heroMain {
+.hero-main {
   display: flex;
   gap: 1rem;
   align-items: flex-start;
 }
 
-.levelOrb {
+.level-orb {
   display: grid;
   width: 52px;
   height: 52px;
@@ -29,7 +29,7 @@
   background: var(--c-learning-soft);
 }
 
-.heroCopy {
+.hero-copy {
   min-width: 0;
 }
 
@@ -42,24 +42,24 @@
   text-transform: uppercase;
 }
 
-.levelRow {
+.level-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem;
   align-items: center;
 }
 
-.levelRow h2,
-.sourceCard h2 {
+.level-row h2,
+.source-card h2 {
   color: var(--text);
   font-size: clamp(1.45rem, 4vw, 2.15rem);
   line-height: 1.08;
   letter-spacing: -0.03em;
 }
 
-.statusPill,
-.vocabularyStatus,
-.questTitleRow span {
+.status-pill,
+.vocabulary-status,
+.quest-title-row span {
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -80,20 +80,20 @@
   font-size: 0.98rem;
 }
 
-.canonicalNote {
+.canonical-note {
   margin-top: 0.4rem;
   color: var(--text-subtle);
   font-size: 0.78rem;
 }
 
-.heroStats {
+.hero-stats {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.75rem;
   margin-top: 1.15rem;
 }
 
-.heroStat {
+.hero-stat {
   display: flex;
   gap: 0.7rem;
   align-items: center;
@@ -104,7 +104,7 @@
   padding: 0.75rem;
 }
 
-.heroStatIcon {
+.hero-stat-icon {
   display: grid;
   width: 34px;
   height: 34px;
@@ -115,7 +115,7 @@
   background: var(--c-learning-soft);
 }
 
-.heroStat strong {
+.hero-stat strong {
   display: block;
   overflow: hidden;
   color: var(--text);
@@ -123,7 +123,7 @@
   text-overflow: ellipsis;
 }
 
-.statLabel {
+.stat-label {
   display: block;
   margin-bottom: 0.08rem;
   color: var(--text-subtle);
@@ -133,7 +133,7 @@
   text-transform: uppercase;
 }
 
-.skillGrid {
+.skill-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.7rem;
@@ -150,59 +150,63 @@
   padding: 0.8rem;
 }
 
-.state_emerging {
+.state-insufficient-evidence {
+  --state-color: var(--text-subtle);
+}
+
+.state-emerging {
   --state-color: var(--c-projects);
 }
 
-.state_developing {
+.state-developing {
   --state-color: var(--c-productivity);
 }
 
-.state_stable {
+.state-stable {
   --state-color: var(--c-health);
 }
 
-.state_strong {
+.state-strong {
   --state-color: var(--c-learning);
 }
 
-.skillTop {
+.skill-top {
   display: flex;
   gap: 0.75rem;
   align-items: baseline;
   justify-content: space-between;
 }
 
-.skillTop strong {
+.skill-top strong {
   color: var(--text);
   font-size: 0.86rem;
 }
 
-.skillTop span {
+.skill-top span {
   color: var(--state-color);
   font-size: 0.72rem;
   font-weight: 700;
   text-align: right;
 }
 
-.skillMeter {
+.skill-meter {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.3rem;
   margin-top: 0.65rem;
 }
 
-.skillSegment {
+.skill-segment {
   height: 5px;
   border-radius: var(--radius-full);
   background: var(--surface-3);
 }
 
-.segmentActive {
+.segment-active {
   background: var(--state-color);
 }
 
-.skillMeta {
+.skill-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem 0.7rem;
@@ -217,7 +221,7 @@
   font-size: 0.78rem;
 }
 
-.twoColumns {
+.two-columns {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
@@ -241,7 +245,7 @@
   padding: 0.8rem;
 }
 
-.questIcon {
+.quest-icon {
   display: grid;
   width: 36px;
   height: 36px;
@@ -252,7 +256,7 @@
   background: var(--c-learning-soft);
 }
 
-.questTitleRow {
+.quest-title-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -262,9 +266,9 @@
 
 .quest p,
 .achievement p,
-.vocabularyItem p,
-.emptyState p,
-.sourceCard p {
+.vocabulary-item p,
+.empty-state p,
+.source-card p {
   color: var(--text-muted);
   font-size: 0.8rem;
 }
@@ -285,14 +289,14 @@
   padding: 0.24rem 0.48rem;
 }
 
-.vocabularyList {
+.vocabulary-list {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
   margin-top: 1rem;
 }
 
-.vocabularyItem {
+.vocabulary-item {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -301,23 +305,23 @@
   padding: 0.55rem 0;
 }
 
-.vocabularyItem:last-child {
+.vocabulary-item:last-child {
   border-bottom: 0;
 }
 
-.vocabularyStatus {
+.vocabulary-status {
   flex: 0 0 auto;
   text-transform: capitalize;
 }
 
-.evidenceColumns {
+.evidence-columns {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
   margin-top: 1rem;
 }
 
-.evidenceColumns h3 {
+.evidence-columns h3 {
   margin-bottom: 0.55rem;
   color: var(--text);
   font-size: 0.8rem;
@@ -325,13 +329,13 @@
   text-transform: uppercase;
 }
 
-.evidenceList {
+.evidence-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.evidenceList li {
+.evidence-list li {
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;
@@ -339,14 +343,14 @@
   font-size: 0.8rem;
 }
 
-.evidenceList svg,
+.evidence-list svg,
 .achievement svg {
   flex: 0 0 auto;
   margin-top: 0.12rem;
   color: var(--c-learning);
 }
 
-.coverageLabel {
+.coverage-label {
   margin-top: 0.7rem;
   color: var(--text-subtle);
   font-size: 0.69rem;
@@ -355,7 +359,7 @@
   text-transform: uppercase;
 }
 
-.emptyState {
+.empty-state {
   display: flex;
   gap: 0.7rem;
   align-items: flex-start;
@@ -367,21 +371,21 @@
   padding: 0.9rem;
 }
 
-.emptyState strong {
+.empty-state strong {
   display: block;
   margin-bottom: 0.15rem;
   color: var(--text-muted);
   font-size: 0.82rem;
 }
 
-.sourceCard {
+.source-card {
   display: flex;
   gap: 1rem;
   align-items: flex-start;
   border-color: var(--c-learning-border);
 }
 
-.sourceIcon {
+.source-icon {
   display: grid;
   width: 44px;
   height: 44px;
@@ -392,7 +396,7 @@
   background: var(--c-learning-soft);
 }
 
-.sourceCard h2 {
+.source-card h2 {
   margin-bottom: 0.65rem;
 }
 
@@ -402,19 +406,19 @@
 }
 
 @media (width >= 700px) {
-  .heroStats,
-  .skillGrid,
-  .evidenceColumns {
+  .hero-stats,
+  .skill-grid,
+  .evidence-columns {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (width >= 980px) {
-  .twoColumns {
+  .two-columns {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .skillGrid {
+  .skill-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
