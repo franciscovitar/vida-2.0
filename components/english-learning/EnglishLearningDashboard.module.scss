@@ -1,0 +1,420 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.hero {
+  overflow: hidden;
+  border-color: var(--c-learning-border);
+  background:
+    radial-gradient(circle at 92% 8%, var(--c-learning-soft), transparent 34%), var(--surface);
+}
+
+.heroMain {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.levelOrb {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--c-learning-border);
+  border-radius: 16px;
+  color: var(--c-learning);
+  background: var(--c-learning-soft);
+}
+
+.heroCopy {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin-bottom: 0.25rem;
+  color: var(--c-learning);
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.levelRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.levelRow h2,
+.sourceCard h2 {
+  color: var(--text);
+  font-size: clamp(1.45rem, 4vw, 2.15rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.statusPill,
+.vocabularyStatus,
+.questTitleRow span {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--c-learning-border);
+  border-radius: var(--radius-full);
+  color: var(--c-learning);
+  background: var(--c-learning-soft);
+  font-size: 0.74rem;
+  font-weight: 650;
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
+}
+
+.summary {
+  max-width: 720px;
+  margin-top: 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+.canonicalNote {
+  margin-top: 0.4rem;
+  color: var(--text-subtle);
+  font-size: 0.78rem;
+}
+
+.heroStats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-top: 1.15rem;
+}
+
+.heroStat {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 86%, var(--c-learning-soft));
+  padding: 0.75rem;
+}
+
+.heroStatIcon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--c-learning);
+  background: var(--c-learning-soft);
+}
+
+.heroStat strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+}
+
+.statLabel {
+  display: block;
+  margin-bottom: 0.08rem;
+  color: var(--text-subtle);
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.skillGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.skill {
+  --state-color: var(--text-subtle);
+
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--state-color);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 0.8rem;
+}
+
+.state_emerging {
+  --state-color: var(--c-projects);
+}
+
+.state_developing {
+  --state-color: var(--c-productivity);
+}
+
+.state_stable {
+  --state-color: var(--c-health);
+}
+
+.state_strong {
+  --state-color: var(--c-learning);
+}
+
+.skillTop {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.skillTop strong {
+  color: var(--text);
+  font-size: 0.86rem;
+}
+
+.skillTop span {
+  color: var(--state-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.skillMeter {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.3rem;
+  margin-top: 0.65rem;
+}
+
+.skillSegment {
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--surface-3);
+}
+
+.segmentActive {
+  background: var(--state-color);
+}
+
+.skillMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  margin-top: 0.55rem;
+  color: var(--text-subtle);
+  font-size: 0.69rem;
+}
+
+.skill > p {
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.quest,
+.achievement {
+  display: flex;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 0.8rem;
+}
+
+.questIcon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--c-learning);
+  background: var(--c-learning-soft);
+}
+
+.questTitleRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quest p,
+.achievement p,
+.vocabularyItem p,
+.emptyState p,
+.sourceCard p {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+}
+
+.tags span {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  background: var(--surface);
+  font-size: 0.68rem;
+  padding: 0.24rem 0.48rem;
+}
+
+.vocabularyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.vocabularyItem {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 0.55rem 0;
+}
+
+.vocabularyItem:last-child {
+  border-bottom: 0;
+}
+
+.vocabularyStatus {
+  flex: 0 0 auto;
+  text-transform: capitalize;
+}
+
+.evidenceColumns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.evidenceColumns h3 {
+  margin-bottom: 0.55rem;
+  color: var(--text);
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.evidenceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.evidenceList li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.evidenceList svg,
+.achievement svg {
+  flex: 0 0 auto;
+  margin-top: 0.12rem;
+  color: var(--c-learning);
+}
+
+.coverageLabel {
+  margin-top: 0.7rem;
+  color: var(--text-subtle);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.emptyState {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  margin-top: 1rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-subtle);
+  background: var(--surface-2);
+  padding: 0.9rem;
+}
+
+.emptyState strong {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.sourceCard {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  border-color: var(--c-learning-border);
+}
+
+.sourceIcon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--c-learning);
+  background: var(--c-learning-soft);
+}
+
+.sourceCard h2 {
+  margin-bottom: 0.65rem;
+}
+
+.muted {
+  color: var(--text-subtle) !important;
+  font-size: 0.77rem !important;
+}
+
+@media (width >= 700px) {
+  .heroStats,
+  .skillGrid,
+  .evidenceColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 980px) {
+  .twoColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .skillGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
