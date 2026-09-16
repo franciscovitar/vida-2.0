@@ -10,6 +10,11 @@ import { MediaPoster } from '@/components/media/MediaPoster';
 import { MediaSortControl } from '@/components/media/MediaSortControl';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import {
+  MEDIA_OBLIGATION_OPTIONS,
+  cinephileObligationFor,
+  obligationLabel,
+} from '@/lib/media/cinephile-canon';
 import { watchPriorityScore } from '@/lib/media/focus';
 import { formatExternalMediaScore } from '@/lib/media/score-format';
 import { nextSeasonFor, seasonWatchPriorityScore } from '@/lib/media/seasons';
@@ -25,6 +30,7 @@ import type {
   MediaDashboardData,
   MediaFilters,
   MediaKind,
+  MediaObligationFilter,
   MediaTitleView,
 } from '@/types/media';
 
@@ -89,6 +95,7 @@ function initialFilters(medium: MediaKind): MediaFilters {
     yearFrom: '',
     yearTo: '',
     commitment: 'all',
+    obligation: 'all',
     sort: 'bank-priority',
   };
 }
@@ -139,6 +146,7 @@ function hasExtraFilters(
     filters.yearFrom ||
     filters.yearTo ||
     filters.commitment !== 'all' ||
+    (filters.obligation ?? 'all') !== 'all' ||
     filters.collection !== 'all' ||
     filters.sort !== 'bank-priority' ||
     externalAverageMin,
@@ -482,6 +490,22 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
             </select>
           </label>
           <label>
+            <span>Camino cinéfilo</span>
+            <select
+              value={filters.obligation ?? 'all'}
+              onChange={(event) =>
+                patchFilters({ obligation: event.target.value as MediaObligationFilter })
+              }
+            >
+              <option value="all">Todas las categorías</option>
+              {MEDIA_OBLIGATION_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
             <span>Promedio externo</span>
             <select
               value={externalAverageMin}
@@ -547,6 +571,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
           {visible.map((item) => {
             const commitment = runtimeLabel(item);
             const priority = watchPriorityScore(item);
+            const obligation = cinephileObligationFor(item);
             return (
               <article
                 key={item.key}
@@ -583,6 +608,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
                     >
                       {item.state}
                     </Badge>
+                    <Badge variant="outline">Camino · {obligationLabel(obligation)}</Badge>
                     {item.manualFocusExcluded ? (
                       <Badge variant="outline">Excluida de lotes</Badge>
                     ) : null}
