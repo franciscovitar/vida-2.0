@@ -1,5 +1,6 @@
 import { FileText, type LucideIcon } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import type { ReactNode } from 'react';
 
 import { Breadcrumbs } from '@/components/web-catalog/Breadcrumbs';
 import { CatalogState } from '@/components/web-catalog/CatalogState';
@@ -33,6 +34,7 @@ function renderCatalogResult(
   result: WebCatalogPageServiceResult,
   fallbackTitle: string,
   presentation?: DocumentPresentation,
+  action?: ReactNode,
 ) {
   if (!result.ok) {
     if (!isWebCatalogVisibleFailure(result.code)) notFound();
@@ -42,6 +44,7 @@ function renderCatalogResult(
           title={fallbackTitle}
           description="Estado de la fuente documental"
           icon={FileText}
+          action={action}
         />
         <CatalogState
           title={`No se pudo cargar ${fallbackTitle}`}
@@ -63,6 +66,7 @@ function renderCatalogResult(
           title={result.entry.editorialName}
           description={result.message}
           icon={FileText}
+          action={action}
         />
         <Card>
           <p>Renderer especializado todavía no disponible.</p>
@@ -76,7 +80,12 @@ function renderCatalogResult(
   return (
     <div className={pageStyles.page}>
       <Breadcrumbs items={[{ label: sectionLabel }, { label: result.page.title }]} />
-      <PageHeader title={result.page.title} description={sectionLabel} icon={FileText} />
+      <PageHeader
+        title={result.page.title}
+        description={sectionLabel}
+        icon={FileText}
+        action={action}
+      />
       <ContentPageView page={result.page} presentation={presentation} />
     </div>
   );
@@ -90,15 +99,17 @@ export async function DocumentaryStableKeyPage({
   stableKey,
   placeholder,
   presentation,
+  action,
 }: {
   stableKey: string;
   placeholder: PlaceholderProps;
   presentation?: DocumentPresentation;
+  action?: ReactNode;
 }) {
   if (!isWebCatalogEnabled()) {
-    return <PlaceholderPage {...placeholder} />;
+    return <PlaceholderPage {...placeholder} action={action} />;
   }
 
   const result = await resolveWebCatalogPageByStableKey(stableKey);
-  return renderCatalogResult(result, placeholder.title, presentation);
+  return renderCatalogResult(result, placeholder.title, presentation, action);
 }
