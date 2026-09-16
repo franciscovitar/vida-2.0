@@ -1,6 +1,6 @@
 'use client';
 
-import { Film, Gamepad2, Sparkles, Tv } from 'lucide-react';
+import { ChevronDown, Film, Gamepad2, Sparkles, Tv } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { useCinephilePath } from '@/components/media/CinephilePathContext';
@@ -160,28 +160,42 @@ export function CinephilePathPanel() {
         </p>
       </div>
 
-      <div className={styles.recommendations}>
-        <div className={styles['recommendation-heading']}>
-          <div>
-            <span>Desde el canon externo + tu Media</span>
-            <h3>Próximos saltos culturales</h3>
-          </div>
-          <p>
-            Primero aparecen los imprescindibles y esenciales todavía no cubiertos, estén o no en tu
-            Banco.
-          </p>
-        </div>
-        <div className={styles['recommendation-grid']}>
-          <RecommendationColumn title="Películas" items={snapshot.recommendations.movie} />
-          <RecommendationColumn title="Series" items={snapshot.recommendations.series} />
-        </div>
-      </div>
+      <details className={styles['recommendations-disclosure']}>
+        <summary className={styles['recommendations-summary']}>
+          <span>
+            <span className={styles['recommendations-summary-eyebrow']}>
+              Desde el canon externo + tu Media
+            </span>
+            <strong>Próximos saltos culturales</strong>
+          </span>
+          <span className={styles['recommendations-summary-action']}>
+            <span className={styles['show-label']}>Ver más</span>
+            <span className={styles['hide-label']}>Ocultar</span>
+            <ChevronDown size={18} aria-hidden="true" />
+          </span>
+        </summary>
 
-      <footer className={styles.footer}>
-        Modelo {snapshot.version} · canon {snapshot.canonVersion} ({snapshot.canonAsOf}). Tu nota
-        personal no altera el progreso cultural: que una obra no te guste no borra lo que ganaste al
-        verla.
-      </footer>
+        <div className={styles['recommendations-content']}>
+          <div className={styles.recommendations}>
+            <div className={styles['recommendation-heading']}>
+              <p>
+                Primero aparecen los imprescindibles y esenciales todavía no cubiertos, estén o no
+                en tu Banco.
+              </p>
+            </div>
+            <div className={styles['recommendation-grid']}>
+              <RecommendationColumn title="Películas" items={snapshot.recommendations.movie} />
+              <RecommendationColumn title="Series" items={snapshot.recommendations.series} />
+            </div>
+          </div>
+
+          <footer className={styles.footer}>
+            Modelo {snapshot.version} · canon {snapshot.canonVersion} ({snapshot.canonAsOf}). Tu
+            nota personal no altera el progreso cultural: que una obra no te guste no borra lo que
+            ganaste al verla.
+          </footer>
+        </div>
+      </details>
     </section>
   );
 }
