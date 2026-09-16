@@ -21,8 +21,10 @@ export function SeasonRatingControl({
 }: SeasonRatingControlProps) {
   const router = useRouter();
   const [value, setValue] = useState(rating === null ? '' : String(rating));
+  const [savedRating, setSavedRating] = useState<number | null>(rating);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,11 +34,13 @@ export function SeasonRatingControl({
       (!Number.isFinite(numericRating) || numericRating < 0 || numericRating > 10)
     ) {
       setError(true);
+      setSaved(false);
       return;
     }
 
     setSaving(true);
     setError(false);
+    setSaved(false);
     try {
       const response = await fetch('/api/media/season-rating', {
         method: 'POST',
@@ -51,6 +55,8 @@ export function SeasonRatingControl({
         setError(true);
         return;
       }
+      setSavedRating(numericRating);
+      setSaved(true);
       router.refresh();
       onSaved?.();
     } catch {
@@ -63,21 +69,25 @@ export function SeasonRatingControl({
   return (
     <form className={styles.form} onSubmit={(event) => void submit(event)}>
       <label>
-        <span>Mi nota</span>
+        <span>{savedRating === null ? 'Mi nota · Sin registrar' : 'Mi nota'}</span>
         <input
           type="text"
           inputMode="decimal"
           placeholder="0–10"
           value={value}
           disabled={saving}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={(event) => {
+            setValue(event.target.value);
+            setSaved(false);
+          }}
           aria-label={`Mi nota para temporada ${seasonNumber}`}
         />
       </label>
       <button type="submit" disabled={saving}>
-        {saving ? 'Guardando…' : rating === null ? 'Puntuar' : 'Guardar'}
+        {saving ? 'Guardando…' : savedRating === null ? 'Puntuar' : 'Guardar'}
       </button>
       {error ? <small>No se pudo confirmar la nota. Revisá que esté entre 0 y 10.</small> : null}
+      {saved && !error ? <small className={styles.success}>Nota guardada.</small> : null}
     </form>
   );
 }
