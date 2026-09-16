@@ -167,8 +167,8 @@ export function CinephilePathPanel() {
             <h3>Próximos saltos culturales</h3>
           </div>
           <p>
-            Primero aparecen los imprescindibles y esenciales todavía no cubiertos, estén o no en
-            tu Banco.
+            Primero aparecen los imprescindibles y esenciales todavía no cubiertos, estén o no en tu
+            Banco.
           </p>
         </div>
         <div className={styles['recommendation-grid']}>
