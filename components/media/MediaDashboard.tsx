@@ -39,7 +39,7 @@ import styles from './MediaDashboard.module.scss';
 const PAGE_SIZE = 60;
 const EXTERNAL_AVERAGE_CONCURRENCY = 4;
 
-type ExternalAverageFilter = '' | '6' | '7' | '8' | '9';
+type ExternalAverageSort = '' | 'desc';
 type ExternalAverageEntry =
   { status: 'ready'; average: number } | { status: 'empty' } | { status: 'unavailable' };
 
@@ -134,10 +134,7 @@ function commitmentOptions(medium: MediaKind): { value: MediaCommitmentFilter; l
   ];
 }
 
-function hasExtraFilters(
-  filters: MediaFilters,
-  externalAverageMin: ExternalAverageFilter,
-): boolean {
+function hasExtraFilters(filters: MediaFilters, externalAverageSort: ExternalAverageSort): boolean {
   return Boolean(
     filters.query ||
     filters.genre ||
@@ -149,7 +146,7 @@ function hasExtraFilters(
     (filters.obligation ?? 'all') !== 'all' ||
     filters.collection !== 'all' ||
     filters.sort !== 'bank-priority' ||
-    externalAverageMin,
+    externalAverageSort,
   );
 }
 
@@ -170,7 +167,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
   );
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedItem, setSelectedItem] = useState<MediaTitleView | null>(null);
-  const [externalAverageMin, setExternalAverageMin] = useState<ExternalAverageFilter>('');
+  const [externalAverageSort, setExternalAverageSort] = useState<ExternalAverageSort>('');
   const [externalAverageEntries, setExternalAverageEntries] = useState<
     Record<string, ExternalAverageEntry>
   >(() => Object.fromEntries(externalAverageSessionCache));
@@ -185,7 +182,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
   );
 
   useEffect(() => {
-    if (!externalAverageMin) return undefined;
+    if (!externalAverageSort) return undefined;
 
     const missing = baseResults.filter((item) => !externalAverageSessionCache.has(item.key));
     if (missing.length === 0) return undefined;
@@ -215,29 +212,35 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
     );
 
     return () => controller.abort();
-  }, [baseResults, externalAverageMin]);
+  }, [baseResults, externalAverageSort]);
 
-  const results = externalAverageMin
-    ? baseResults.filter((item) => {
-        const entry = externalAverageEntries[item.key];
-        return entry?.status === 'ready' && entry.average >= Number(externalAverageMin);
+  const results = externalAverageSort
+    ? [...baseResults].sort((left, right) => {
+        const leftEntry = externalAverageEntries[left.key];
+        const rightEntry = externalAverageEntries[right.key];
+        const leftAverage = leftEntry?.status === 'ready' ? leftEntry.average : null;
+        const rightAverage = rightEntry?.status === 'ready' ? rightEntry.average : null;
+        if (leftAverage === null && rightAverage === null) return 0;
+        if (leftAverage === null) return 1;
+        if (rightAverage === null) return -1;
+        return rightAverage - leftAverage;
       })
     : baseResults;
   const visible = results.slice(0, visibleCount);
-  const externalLoadedCount = externalAverageMin
+  const externalLoadedCount = externalAverageSort
     ? baseResults.reduce(
         (count, item) => count + Number(externalAverageEntries[item.key] !== undefined),
         0,
       )
     : 0;
-  const externalUnavailableCount = externalAverageMin
+  const externalUnavailableCount = externalAverageSort
     ? baseResults.reduce(
         (count, item) => count + Number(externalAverageEntries[item.key]?.status === 'unavailable'),
         0,
       )
     : 0;
-  const externalFilterLoading = Boolean(
-    externalAverageMin && externalLoadedCount < baseResults.length,
+  const externalSortLoading = Boolean(
+    externalAverageSort && externalLoadedCount < baseResults.length,
   );
   const totals = useMemo(
     () => ({
@@ -256,8 +259,8 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
     setVisibleCount(PAGE_SIZE);
   }
 
-  function patchExternalAverageMin(value: ExternalAverageFilter) {
-    setExternalAverageMin(value);
+  function patchExternalAverageSort(value: ExternalAverageSort) {
+    setExternalAverageSort(value);
     setVisibleCount(PAGE_SIZE);
   }
 
@@ -287,13 +290,13 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
 
   function switchMedium(medium: MediaKind) {
     setFilters(initialFilters(medium));
-    setExternalAverageMin('');
+    setExternalAverageSort('');
     setVisibleCount(PAGE_SIZE);
   }
 
   function clearFilters() {
     setFilters(initialFilters(filters.medium));
-    setExternalAverageMin('');
+    setExternalAverageSort('');
     setVisibleCount(PAGE_SIZE);
   }
 
@@ -399,7 +402,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
           <span>
             <SlidersHorizontal size={16} aria-hidden="true" /> Filtros
           </span>
-          {hasExtraFilters(filters, externalAverageMin) ? (
+          {hasExtraFilters(filters, externalAverageSort) ? (
             <button type="button" className={styles['clear-button']} onClick={clearFilters}>
               Limpiar
             </button>
@@ -506,18 +509,15 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
             </select>
           </label>
           <label>
-            <span>Promedio externo</span>
+            <span>Orden por promedio externo</span>
             <select
-              value={externalAverageMin}
+              value={externalAverageSort}
               onChange={(event) =>
-                patchExternalAverageMin(event.target.value as ExternalAverageFilter)
+                patchExternalAverageSort(event.target.value as ExternalAverageSort)
               }
             >
-              <option value="">Todos</option>
-              <option value="9">9+</option>
-              <option value="8">8+</option>
-              <option value="7">7+</option>
-              <option value="6">6+</option>
+              <option value="">Sin ordenar</option>
+              <option value="desc">Mayor a menor</option>
             </select>
           </label>
           <MediaSortControl
@@ -537,13 +537,13 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
             de {totals.total} {mediumLabel(filters.medium).toLocaleLowerCase('es-AR')}
           </span>
         </div>
-        {externalAverageMin ? (
+        {externalAverageSort ? (
           <span className={styles['score-note']}>
-            {externalFilterLoading
-              ? `Consultando promedios externos ${externalLoadedCount}/${baseResults.length}…`
+            {externalSortLoading
+              ? `Ordenando por promedio externo ${externalLoadedCount}/${baseResults.length}…`
               : externalUnavailableCount > 0
-                ? `Promedio externo listo · ${externalUnavailableCount} sin datos disponibles`
-                : 'Promedio externo listo'}
+                ? `Orden externo listo · ${externalUnavailableCount} sin datos disponibles al final`
+                : 'Orden externo listo · mayor a menor'}
           </span>
         ) : options.hasWatchPriority ? (
           <span className={styles['score-note']}>
@@ -553,9 +553,7 @@ export function MediaDashboardView({ data, initialMedium }: MediaDashboardViewPr
         ) : null}
       </div>
 
-      {visible.length === 0 && externalFilterLoading ? (
-        <p className={styles.notice}>Cargando notas externas para aplicar el filtro…</p>
-      ) : visible.length === 0 ? (
+      {visible.length === 0 ? (
         <EmptyState
           icon={Search}
           title="No hay coincidencias"
