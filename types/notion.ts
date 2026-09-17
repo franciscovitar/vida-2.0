@@ -152,7 +152,7 @@ export interface HoySuggestedAction {
   id: string;
   title: string;
   reason: string;
-  href: '/tareas' | '/proyectos' | '/agenda?view=today';
+  href: '/planificacion?view=tareas' | '/proyectos' | '/agenda?view=today';
 }
 
 export interface HoyNotionSummary {
