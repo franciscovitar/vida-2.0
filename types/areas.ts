@@ -3,13 +3,28 @@
  * Independientes de SDK Notion/Google. Sin IDs internos ni URLs privadas.
  */
 import type { Domain } from '@/types';
+import type {
+  AssessmentProgressConfidence,
+  AssessmentReadinessBand,
+} from '@/types/assessment-progress';
 
 export type AreaSlug = 'facultad' | 'genova-trabajo' | 'salud' | 'vida-personal';
 
-export type AreaDataSourceKind = 'notion' | 'calendar' | 'sheets' | 'catalog';
+export type AreaDataSourceKind =
+  | 'notion'
+  | 'calendar'
+  | 'sheets'
+  | 'catalog'
+  | 'assessment-progress';
 
 export type AreaDataSourceState =
-  'ready' | 'mock' | 'unavailable' | 'error' | 'not-applicable' | 'empty';
+  | 'ready'
+  | 'degraded'
+  | 'mock'
+  | 'unavailable'
+  | 'error'
+  | 'not-applicable'
+  | 'empty';
 
 export interface AreaDataSourceStatus {
   kind: AreaDataSourceKind;
@@ -74,6 +89,24 @@ export interface AreaMetricSummary {
   kind: 'confirmed' | 'trend' | 'coverage';
 }
 
+export interface AreaAssessmentSummary {
+  /** Clave opaca solo para render; no expone Snapshot ID ni IDs internos. */
+  key: string;
+  subjectId: string;
+  name: string;
+  assessmentDate: string | null;
+  progressPercent: number | null;
+  progressConfidence: AssessmentProgressConfidence;
+  readinessBand: AssessmentReadinessBand;
+  remainingMinutesLow: number | null;
+  remainingMinutesHigh: number | null;
+  etaConfidence: AssessmentProgressConfidence;
+  criticalGap: string | null;
+  nextBestActivity: string | null;
+  scopeComplete: boolean;
+  generatedAt: string;
+}
+
 export type AreaIntegrityCode =
   | 'project-without-next-action'
   | 'task-area-mismatch'
@@ -93,6 +126,8 @@ export interface AreaVariantFacultad {
   studyHoursWeek: string | null;
   studyTrend: string | null;
   academicSections: readonly string[];
+  assessments: readonly AreaAssessmentSummary[];
+  assessmentNotice: string | null;
 }
 
 export interface AreaVariantTrabajo {
