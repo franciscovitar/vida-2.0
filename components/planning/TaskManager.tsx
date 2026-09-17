@@ -72,7 +72,10 @@ export function TaskManager({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [editor, setEditor] = useState<EditorState>({ mode: 'closed' });
-  const [createDraft, setCreateDraft] = useState<PlanningTaskCreateInput>(() => emptyCreate(catalog));
+  const [createDraft, setCreateDraft] = useState<PlanningTaskCreateInput>(() => ({
+    ...emptyCreate(catalog),
+    operationId: '',
+  }));
   const [editDraft, setEditDraft] = useState<PlanningTaskEditableSnapshot | null>(null);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('abiertas');
@@ -166,8 +169,10 @@ export function TaskManager({
     });
   };
 
-  const projectOptions = (areaKey: string | null) =>
-    catalog.projects.filter((project) => !areaKey || !project.areaKey || project.areaKey === areaKey);
+  const projectOptions = (areaKey: string | null) => {
+    if (!areaKey) return [];
+    return catalog.projects.filter((project) => project.areaKey === areaKey);
+  };
 
   return (
     <div className={styles.manager}>
