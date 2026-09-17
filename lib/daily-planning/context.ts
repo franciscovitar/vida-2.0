@@ -29,7 +29,10 @@ import type {
   DailyPlanningSourceState,
   DailyPlanningTask,
 } from '@/types/daily-planning-intelligence';
-import type { AssessmentProgressRead, AssessmentProgressSnapshot } from '@/types/assessment-progress';
+import type {
+  AssessmentProgressRead,
+  AssessmentProgressSnapshot,
+} from '@/types/assessment-progress';
 import type { ProjectsIntelligenceMilestone } from '@/types/projects-intelligence';
 
 export const DAILY_PLANNING_HORIZON_DAYS = 30;
@@ -309,7 +312,9 @@ function buildQuality(
   assessments: readonly AssessmentProgressSnapshot[],
 ) {
   return {
-    tasksWithAmbiguousDate: tasks.filter((task) => task.dateSemantics === 'relevant-date-unspecified').length,
+    tasksWithAmbiguousDate: tasks.filter(
+      (task) => task.dateSemantics === 'relevant-date-unspecified',
+    ).length,
     tasksMissingDuration: tasks.filter((task) => task.duration === null).length,
     tasksMissingPriority: tasks.filter((task) => task.priority === null).length,
     blockedTasksWithoutDetail: tasks.filter(
@@ -318,7 +323,8 @@ function buildQuality(
     unresolvedTaskRelations: tasks.filter((task) => task.relationUnavailable).length,
     projectsWithoutProgressSource: milestonesAvailable ? 0 : projects.length,
     calendarDateConflicts: events.filter((event) => event.evidence.dateConflict).length,
-    assessmentsWithoutDate: assessments.filter((assessment) => assessment.assessmentDate === null).length,
+    assessmentsWithoutDate: assessments.filter((assessment) => assessment.assessmentDate === null)
+      .length,
     assessmentsWithoutMeasuredProgress: assessments.filter(
       (assessment) => assessment.payload.progressPercent === null,
     ).length,
@@ -342,7 +348,10 @@ function overallStatus(input: {
   if (allAvailable) return input.dataCount === 0 ? 'empty' : 'ready';
 
   const usefulSourceAvailable =
-    input.tasksAvailable || input.projectsAvailable || input.calendarAvailable || input.assessmentsAvailable;
+    input.tasksAvailable ||
+    input.projectsAvailable ||
+    input.calendarAvailable ||
+    input.assessmentsAvailable;
   return usefulSourceAvailable ? 'degraded' : 'unavailable';
 }
 
@@ -375,13 +384,15 @@ export async function loadDailyPlanningContextUncached(
   const loadCalendar =
     deps.loadCalendar ??
     (async (config: CalendarOAuthConfig, startYmd: string, endYmd: string) => {
-      const { loadDailyPlanningCalendarEventsInRange } = await import('@/lib/calendar/planning-queries');
+      const { loadDailyPlanningCalendarEventsInRange } =
+        await import('@/lib/calendar/planning-queries');
       return loadDailyPlanningCalendarEventsInRange(config, startYmd, endYmd);
     });
   const loadAssessments =
     deps.loadAssessments ??
     (async () => {
-      const { loadAssessmentProgressUncached } = await import('@/lib/data/assessment-progress-source');
+      const { loadAssessmentProgressUncached } =
+        await import('@/lib/data/assessment-progress-source');
       return loadAssessmentProgressUncached();
     });
 
@@ -393,14 +404,12 @@ export async function loadDailyPlanningContextUncached(
   const [notion, calendar, assessmentRead] = await Promise.all([
     loadNotionFacts(notionMode, notionConfig, createNotionPort, today),
     loadCalendarFacts(calendarMode, calendarConfig, loadCalendar, today, horizonEnd),
-    loadAssessments().catch(
-      (): AssessmentProgressRead => ({
-        status: 'unavailable',
-        snapshots: [],
-        notice: 'Progreso académico: no se pudo leer la fuente.',
-        invalidRows: 0,
-      }),
-    ),
+    loadAssessments().catch((): AssessmentProgressRead => ({
+      status: 'unavailable',
+      snapshots: [],
+      notice: 'Progreso académico: no se pudo leer la fuente.',
+      invalidRows: 0,
+    })),
   ]);
 
   const assessmentSource = assessmentState(assessmentRead);
@@ -424,7 +433,8 @@ export async function loadDailyPlanningContextUncached(
     milestonesAvailable: notion.states.milestones.available,
     calendarAvailable: calendar.state.available,
     assessmentsAvailable: assessmentSource.available,
-    dataCount: notion.tasks.length + notion.projects.length + calendar.events.length + assessments.length,
+    dataCount:
+      notion.tasks.length + notion.projects.length + calendar.events.length + assessments.length,
   });
 
   return {

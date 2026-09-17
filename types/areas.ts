@@ -11,20 +11,10 @@ import type {
 export type AreaSlug = 'facultad' | 'genova-trabajo' | 'salud' | 'vida-personal';
 
 export type AreaDataSourceKind =
-  | 'notion'
-  | 'calendar'
-  | 'sheets'
-  | 'catalog'
-  | 'assessment-progress';
+  'notion' | 'calendar' | 'sheets' | 'catalog' | 'assessment-progress';
 
 export type AreaDataSourceState =
-  | 'ready'
-  | 'degraded'
-  | 'mock'
-  | 'unavailable'
-  | 'error'
-  | 'not-applicable'
-  | 'empty';
+  'ready' | 'degraded' | 'mock' | 'unavailable' | 'error' | 'not-applicable' | 'empty';
 
 export interface AreaDataSourceStatus {
   kind: AreaDataSourceKind;

@@ -1,10 +1,6 @@
 export type AssessmentProgressConfidence = 'low' | 'medium' | 'high';
 export type AssessmentReadinessBand =
-  | 'not-ready'
-  | 'developing'
-  | 'close'
-  | 'exam-ready'
-  | 'unknown';
+  'not-ready' | 'developing' | 'close' | 'exam-ready' | 'unknown';
 export type AssessmentLifecycleStatus = 'planned' | 'active' | 'complete' | 'cancelled';
 
 export interface AssessmentProgressPayload {
@@ -34,11 +30,7 @@ export interface AssessmentProgressSnapshot {
 }
 
 export type AssessmentProgressReadStatus =
-  | 'ready'
-  | 'degraded'
-  | 'empty'
-  | 'invalid'
-  | 'unavailable';
+  'ready' | 'degraded' | 'empty' | 'invalid' | 'unavailable';
 
 export interface AssessmentProgressRead {
   status: AssessmentProgressReadStatus;

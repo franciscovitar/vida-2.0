@@ -156,10 +156,14 @@ export function findCanonicalNotionArea(
   return null;
 }
 
-function assessmentSummaries(read: AssessmentProgressRead | null | undefined): AreaAssessmentSummary[] {
+function assessmentSummaries(
+  read: AssessmentProgressRead | null | undefined,
+): AreaAssessmentSummary[] {
   if (!read) return [];
   return read.snapshots
-    .filter((snapshot) => snapshot.payload.status === 'active' || snapshot.payload.status === 'planned')
+    .filter(
+      (snapshot) => snapshot.payload.status === 'active' || snapshot.payload.status === 'planned',
+    )
     .sort((a, b) => {
       const ad = a.assessmentDate ?? '9999-12-31';
       const bd = b.assessmentDate ?? '9999-12-31';
@@ -243,19 +247,54 @@ function buildMetrics(slug: AreaSlug, sheets: AreaSheetsSlice | null): AreaMetri
   }
   if (slug === 'salud') {
     if (sheets.sleepHours) {
-      metrics.push({ key: 'sleep', label: 'Sueño', value: sheets.sleepHours, unit: 'h', context: null, kind: 'confirmed' });
+      metrics.push({
+        key: 'sleep',
+        label: 'Sueño',
+        value: sheets.sleepHours,
+        unit: 'h',
+        context: null,
+        kind: 'confirmed',
+      });
     }
     if (sheets.energy) {
-      metrics.push({ key: 'energy', label: 'Energía', value: sheets.energy, unit: null, context: null, kind: 'confirmed' });
+      metrics.push({
+        key: 'energy',
+        label: 'Energía',
+        value: sheets.energy,
+        unit: null,
+        context: null,
+        kind: 'confirmed',
+      });
     }
     if (sheets.mood) {
-      metrics.push({ key: 'mood', label: 'Ánimo', value: sheets.mood, unit: null, context: null, kind: 'confirmed' });
+      metrics.push({
+        key: 'mood',
+        label: 'Ánimo',
+        value: sheets.mood,
+        unit: null,
+        context: null,
+        kind: 'confirmed',
+      });
     }
     if (sheets.exercise) {
-      metrics.push({ key: 'exercise', label: 'Ejercicio', value: sheets.exercise, unit: null, context: null, kind: 'confirmed' });
+      metrics.push({
+        key: 'exercise',
+        label: 'Ejercicio',
+        value: sheets.exercise,
+        unit: null,
+        context: null,
+        kind: 'confirmed',
+      });
     }
     if (sheets.coverage) {
-      metrics.push({ key: 'coverage', label: 'Cobertura de datos', value: sheets.coverage, unit: null, context: 'Solo cobertura de registro.', kind: 'coverage' });
+      metrics.push({
+        key: 'coverage',
+        label: 'Cobertura de datos',
+        value: sheets.coverage,
+        unit: null,
+        context: 'Solo cobertura de registro.',
+        kind: 'coverage',
+      });
     }
   }
   return metrics;
@@ -268,8 +307,13 @@ export function composeAreaSummary(
   tasks: readonly NotionTask[],
 ): AreaSummary {
   const activeProjects = projects.filter((project) => project.status === 'Activo');
-  const pendingTasks = tasks.filter((task) => task.status === 'Pendiente' || task.status === 'En progreso');
-  const primaryFocus = activeProjects.find((project) => project.nextAction)?.nextAction ?? pendingTasks[0]?.title ?? area.purpose;
+  const pendingTasks = tasks.filter(
+    (task) => task.status === 'Pendiente' || task.status === 'En progreso',
+  );
+  const primaryFocus =
+    activeProjects.find((project) => project.nextAction)?.nextAction ??
+    pendingTasks[0]?.title ??
+    area.purpose;
 
   return {
     slug: def.slug,
@@ -296,23 +340,46 @@ export function composeAreaDashboard(input: ComposeAreaInput): AreaDashboardData
   const tasks = tasksForArea(input.notion.tasks, area, def, projects);
   const sheets = input.allowMockMetrics || input.sheets ? input.sheets : null;
 
-  const activeProjects = projects.filter((project) => project.status === 'Activo').map((project) => toProjectSummary(project, def.slug));
-  const blockedProjects = projects.filter((project) => project.status === 'Bloqueado').map((project) => toProjectSummary(project, def.slug));
+  const activeProjects = projects
+    .filter((project) => project.status === 'Activo')
+    .map((project) => toProjectSummary(project, def.slug));
+  const blockedProjects = projects
+    .filter((project) => project.status === 'Bloqueado')
+    .map((project) => toProjectSummary(project, def.slug));
 
-  const pendingTasks = tasks.filter((task) => task.status === 'Pendiente').map((task) => toTaskSummary(task, def.slug));
-  const inProgressTasks = tasks.filter((task) => task.status === 'En progreso').map((task) => toTaskSummary(task, def.slug));
-  const blockedTasks = tasks.filter((task) => task.status === 'Bloqueada').map((task) => toTaskSummary(task, def.slug));
-  const overdueTasks = tasks.filter((task) => task.dateKind === 'overdue' && task.status !== 'Hecha').map((task) => toTaskSummary(task, def.slug));
+  const pendingTasks = tasks
+    .filter((task) => task.status === 'Pendiente')
+    .map((task) => toTaskSummary(task, def.slug));
+  const inProgressTasks = tasks
+    .filter((task) => task.status === 'En progreso')
+    .map((task) => toTaskSummary(task, def.slug));
+  const blockedTasks = tasks
+    .filter((task) => task.status === 'Bloqueada')
+    .map((task) => toTaskSummary(task, def.slug));
+  const overdueTasks = tasks
+    .filter((task) => task.dateKind === 'overdue' && task.status !== 'Hecha')
+    .map((task) => toTaskSummary(task, def.slug));
   const upcomingTasks = tasks
-    .filter((task) => (task.dateKind === 'today' || task.dateKind === 'future') && task.status !== 'Hecha')
+    .filter(
+      (task) =>
+        (task.dateKind === 'today' || task.dateKind === 'future') && task.status !== 'Hecha',
+    )
     .sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''))
     .slice(0, 12)
     .map((task) => toTaskSummary(task, def.slug));
 
-  const nextAction = activeProjects.find((project) => project.nextAction)?.nextAction ?? inProgressTasks[0]?.title ?? pendingTasks[0]?.title ?? null;
+  const nextAction =
+    activeProjects.find((project) => project.nextAction)?.nextAction ??
+    inProgressTasks[0]?.title ??
+    pendingTasks[0]?.title ??
+    null;
 
   const academicSections = [
-    ...new Set(projects.map((project) => project.name).filter((name) => /materia|curso|tp|examen|cursada/i.test(name))),
+    ...new Set(
+      projects
+        .map((project) => project.name)
+        .filter((name) => /materia|curso|tp|examen|cursada/i.test(name)),
+    ),
   ].slice(0, 8);
 
   return {

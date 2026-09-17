@@ -109,8 +109,12 @@ function ProjectList({
               <span>{project.status}</span>
               {project.dueDate ? <span>Límite: {project.dueDate}</span> : null}
             </div>
-            {project.expectedResult ? <p className={styles.body}>{project.expectedResult}</p> : null}
-            {project.nextAction ? <p className={styles.focus}>Próxima: {project.nextAction}</p> : null}
+            {project.expectedResult ? (
+              <p className={styles.body}>{project.expectedResult}</p>
+            ) : null}
+            {project.nextAction ? (
+              <p className={styles.focus}>Próxima: {project.nextAction}</p>
+            ) : null}
             {project.blocker ? <p className={styles.warn}>Bloqueo: {project.blocker}</p> : null}
           </li>
         ))}
@@ -128,11 +132,18 @@ function formatMinutesRange(item: AreaAssessmentSummary): string | null {
     const hours = minutes / 60;
     return Number.isInteger(hours) ? `${hours} h` : `${hours.toFixed(1)} h`;
   };
-  if (low !== null && high !== null) return low === high ? render(low) : `${render(low)}–${render(high)}`;
+  if (low !== null && high !== null)
+    return low === high ? render(low) : `${render(low)}–${render(high)}`;
   return render(low ?? high!);
 }
 
-function AssessmentList({ items, notice }: { items: readonly AreaAssessmentSummary[]; notice: string | null }) {
+function AssessmentList({
+  items,
+  notice,
+}: {
+  items: readonly AreaAssessmentSummary[];
+  notice: string | null;
+}) {
   return (
     <Card>
       <SectionHeader
@@ -140,7 +151,9 @@ function AssessmentList({ items, notice }: { items: readonly AreaAssessmentSumma
         description="Preparación demostrada; no es probabilidad de aprobar."
       />
       {items.length === 0 ? (
-        <p className={styles.body}>{notice ?? 'Todavía no hay evaluaciones con progreso configurado.'}</p>
+        <p className={styles.body}>
+          {notice ?? 'Todavía no hay evaluaciones con progreso configurado.'}
+        </p>
       ) : (
         <ul className={styles['assessment-list']}>
           {items.map((item) => {
@@ -149,7 +162,9 @@ function AssessmentList({ items, notice }: { items: readonly AreaAssessmentSumma
               <li key={item.key} className={styles['assessment-item']}>
                 <div className={styles['assessment-heading']}>
                   <div>
-                    <span className={styles['assessment-subject']}>{item.subjectId.toUpperCase()}</span>
+                    <span className={styles['assessment-subject']}>
+                      {item.subjectId.toUpperCase()}
+                    </span>
                     <span className={styles['assessment-name']}>{item.name}</span>
                   </div>
                   <span className={styles['assessment-percent']}>
@@ -164,7 +179,9 @@ function AssessmentList({ items, notice }: { items: readonly AreaAssessmentSumma
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={item.progressPercent ?? undefined}
-                  aria-valuetext={item.progressPercent === null ? 'Progreso todavía no medible' : undefined}
+                  aria-valuetext={
+                    item.progressPercent === null ? 'Progreso todavía no medible' : undefined
+                  }
                 >
                   {item.progressPercent !== null ? (
                     <span
@@ -175,7 +192,11 @@ function AssessmentList({ items, notice }: { items: readonly AreaAssessmentSumma
                 </div>
 
                 <div className={styles.meta}>
-                  {item.assessmentDate ? <span>Fecha: {item.assessmentDate}</span> : <span>Sin fecha</span>}
+                  {item.assessmentDate ? (
+                    <span>Fecha: {item.assessmentDate}</span>
+                  ) : (
+                    <span>Sin fecha</span>
+                  )}
                   <span>Confianza: {item.progressConfidence}</span>
                   <span>Estado: {item.readinessBand}</span>
                   {eta ? <span>Falta aprox.: {eta}</span> : <span>ETA: sin calibrar</span>}
@@ -183,9 +204,13 @@ function AssessmentList({ items, notice }: { items: readonly AreaAssessmentSumma
                 </div>
 
                 {!item.scopeComplete ? (
-                  <p className={styles['assessment-caveat']}>Alcance todavía incompleto/provisional.</p>
+                  <p className={styles['assessment-caveat']}>
+                    Alcance todavía incompleto/provisional.
+                  </p>
                 ) : null}
-                {item.criticalGap ? <p className={styles.body}>Brecha principal: {item.criticalGap}</p> : null}
+                {item.criticalGap ? (
+                  <p className={styles.body}>Brecha principal: {item.criticalGap}</p>
+                ) : null}
                 {item.nextBestActivity ? (
                   <p className={styles.focus}>Siguiente: {item.nextBestActivity}</p>
                 ) : null}
@@ -237,7 +262,10 @@ export function AreaDashboardView({ data }: { data: AreaDashboardData }) {
         <>
           <AssessmentList items={variant.assessments} notice={variant.assessmentNotice} />
           <Card>
-            <SectionHeader title="Facultad" description="Horas de estudio y secciones académicas." />
+            <SectionHeader
+              title="Facultad"
+              description="Horas de estudio y secciones académicas."
+            />
             <div className={styles.meta}>
               <span>Estudio semanal: {variant.studyHoursWeek ?? 'Sin datos'}</span>
               <span>{variant.studyTrend ?? 'Sin tendencia'}</span>
@@ -258,7 +286,9 @@ export function AreaDashboardView({ data }: { data: AreaDashboardData }) {
       {variant?.kind === 'trabajo' ? (
         <Card>
           <SectionHeader title="Trabajo" description="Tiempo registrado cuando Sheets aplica." />
-          <p className={styles.body}>Horas de trabajo (semana): {variant.workHoursWeek ?? 'Sin datos'}</p>
+          <p className={styles.body}>
+            Horas de trabajo (semana): {variant.workHoursWeek ?? 'Sin datos'}
+          </p>
         </Card>
       ) : null}
 
@@ -284,7 +314,9 @@ export function AreaDashboardView({ data }: { data: AreaDashboardData }) {
             title="Vida personal"
             description="Sin Journaling ni datos sensibles. Compras solo si están autorizadas."
           />
-          <p className={styles.body}>{variant.openPurchasesHint ?? 'Sin listas de compras vinculadas en este panel.'}</p>
+          <p className={styles.body}>
+            {variant.openPurchasesHint ?? 'Sin listas de compras vinculadas en este panel.'}
+          </p>
         </Card>
       ) : null}
 
@@ -297,7 +329,10 @@ export function AreaDashboardView({ data }: { data: AreaDashboardData }) {
       <TaskList title="Próximas por fecha" items={data.upcomingTasks} />
 
       <Card>
-        <SectionHeader title="Calendar" description="Compromisos próximos relacionados (solo lectura)." />
+        <SectionHeader
+          title="Calendar"
+          description="Compromisos próximos relacionados (solo lectura)."
+        />
         {data.calendar.length === 0 ? (
           <p className={styles.body}>Sin eventos relacionados o Calendar no disponible.</p>
         ) : (
@@ -320,7 +355,10 @@ export function AreaDashboardView({ data }: { data: AreaDashboardData }) {
 
       {data.integrity.length > 0 ? (
         <Card>
-          <SectionHeader title="Integridad" description="Advertencias; no se corrigen automáticamente." />
+          <SectionHeader
+            title="Integridad"
+            description="Advertencias; no se corrigen automáticamente."
+          />
           <ul className={styles.list}>
             {data.integrity.map((warning, index) => (
               <li key={`${warning.code}-${index}`} className={styles.warn}>

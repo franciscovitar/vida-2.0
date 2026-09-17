@@ -51,9 +51,7 @@ function calendarSourceStatus(
   return { kind: 'calendar', state: 'error', notice: agenda.notice };
 }
 
-function assessmentProgressSourceStatus(
-  read: AssessmentProgressRead | null,
-): AreaDataSourceStatus {
+function assessmentProgressSourceStatus(read: AssessmentProgressRead | null): AreaDataSourceStatus {
   if (!read) return { kind: 'assessment-progress', state: 'not-applicable', notice: null };
   switch (read.status) {
     case 'ready':
@@ -79,7 +77,11 @@ function sheetsSliceFromDomain(
   if (mode !== 'google' && isProductionRuntime()) {
     return {
       slice: null,
-      status: { kind: 'sheets', state: 'not-applicable', notice: 'Sheets no aplicable en este entorno.' },
+      status: {
+        kind: 'sheets',
+        state: 'not-applicable',
+        notice: 'Sheets no aplicable en este entorno.',
+      },
     };
   }
 
@@ -102,10 +104,14 @@ function sheetsSliceFromDomain(
 
   const slice: AreaSheetsSlice = {
     studyHoursWeek:
-      slug === 'facultad' && faculty ? faculty.totalLabel || String(Math.round(faculty.totalMinutes / 60)) : null,
+      slug === 'facultad' && faculty
+        ? faculty.totalLabel || String(Math.round(faculty.totalMinutes / 60))
+        : null,
     studyTrend: slug === 'facultad' ? (faculty?.compare.label ?? null) : null,
     workHoursWeek:
-      slug === 'genova-trabajo' && work ? work.totalLabel || String(Math.round(work.totalMinutes / 60)) : null,
+      slug === 'genova-trabajo' && work
+        ? work.totalLabel || String(Math.round(work.totalMinutes / 60))
+        : null,
     sleepHours: slug === 'salud' ? (sleep?.averageLabel ?? null) : null,
     energy: slug === 'salud' ? (hr?.averageLabel ?? null) : null,
     mood: null,
@@ -143,8 +149,15 @@ export const loadAreasIndex = cache(async (): Promise<AreasIndexResult> => {
   const notion = await getNotionDashboard();
   const notionStatus = notionSourceStatus(notion);
 
-  if ((notionStatus.state === 'error' || notionStatus.state === 'unavailable') && notion.areas.length === 0) {
-    return { ok: false, code: 'notion-unavailable', message: notion.notice ?? 'Notion no disponible para Áreas.' };
+  if (
+    (notionStatus.state === 'error' || notionStatus.state === 'unavailable') &&
+    notion.areas.length === 0
+  ) {
+    return {
+      ok: false,
+      code: 'notion-unavailable',
+      message: notion.notice ?? 'Notion no disponible para Áreas.',
+    };
   }
 
   const { summaries, sources } = composeAreasIndex(notion, [notionStatus]);
@@ -154,9 +167,11 @@ export const loadAreasIndex = cache(async (): Promise<AreasIndexResult> => {
 export const loadAreaDashboard = cache(async (slugParam: string): Promise<AreaDashboardResult> => {
   await requireAuthorizedSession();
 
-  if (!isAreaSlug(slugParam)) return { ok: false, code: 'not-canonical', message: 'Área no canónica.' };
+  if (!isAreaSlug(slugParam))
+    return { ok: false, code: 'not-canonical', message: 'Área no canónica.' };
   const slug = slugParam;
-  if (!getCanonicalAreaDef(slug)) return { ok: false, code: 'not-found', message: 'Área no encontrada.' };
+  if (!getCanonicalAreaDef(slug))
+    return { ok: false, code: 'not-found', message: 'Área no encontrada.' };
 
   const [notion, agenda, assessmentProgress] = await Promise.all([
     getNotionDashboard(),
@@ -165,11 +180,23 @@ export const loadAreaDashboard = cache(async (slugParam: string): Promise<AreaDa
   ]);
 
   const notionStatus = notionSourceStatus(notion);
-  if (notion.areas.length === 0 && notionStatus.state !== 'ready' && notionStatus.state !== 'mock') {
-    return { ok: false, code: 'notion-unavailable', message: notion.notice ?? 'Notion no disponible.' };
+  if (
+    notion.areas.length === 0 &&
+    notionStatus.state !== 'ready' &&
+    notionStatus.state !== 'mock'
+  ) {
+    return {
+      ok: false,
+      code: 'notion-unavailable',
+      message: notion.notice ?? 'Notion no disponible.',
+    };
   }
 
-  let sheetsStatus: AreaDataSourceStatus = { kind: 'sheets', state: 'not-applicable', notice: null };
+  let sheetsStatus: AreaDataSourceStatus = {
+    kind: 'sheets',
+    state: 'not-applicable',
+    notice: null,
+  };
   let sheets: AreaSheetsSlice | null = null;
   let allowMockMetrics = !isProductionRuntime();
 
@@ -188,7 +215,11 @@ export const loadAreaDashboard = cache(async (slugParam: string): Promise<AreaDa
       };
     }
   } catch {
-    sheetsStatus = { kind: 'sheets', state: 'error', notice: 'No se pudieron leer métricas de Sheets.' };
+    sheetsStatus = {
+      kind: 'sheets',
+      state: 'error',
+      notice: 'No se pudieron leer métricas de Sheets.',
+    };
   }
 
   const calendarStatus = calendarSourceStatus(agenda);
@@ -206,6 +237,11 @@ export const loadAreaDashboard = cache(async (slugParam: string): Promise<AreaDa
     allowMockMetrics,
   });
 
-  if (!data) return { ok: false, code: 'not-found', message: 'El Área canónica no está disponible en Notion.' };
+  if (!data)
+    return {
+      ok: false,
+      code: 'not-found',
+      message: 'El Área canónica no está disponible en Notion.',
+    };
   return { ok: true, data };
 });

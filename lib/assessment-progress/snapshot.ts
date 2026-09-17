@@ -65,7 +65,11 @@ function lifecycle(value: unknown): AssessmentLifecycleStatus | null {
     : null;
 }
 
-function nullableInt(value: unknown, min = 0, max = Number.MAX_SAFE_INTEGER): number | null | undefined {
+function nullableInt(
+  value: unknown,
+  min = 0,
+  max = Number.MAX_SAFE_INTEGER,
+): number | null | undefined {
   if (value === null) return null;
   if (typeof value !== 'number' || !Number.isInteger(value) || value < min || value > max) {
     return undefined;
@@ -166,8 +170,16 @@ function validHeader(row: readonly unknown[]): boolean {
 }
 
 function parseRow(row: readonly unknown[]): AssessmentProgressSnapshot | null {
-  const [snapshotRaw, assessmentRaw, subjectRaw, dateRaw, generatedRaw, payloadRaw, sourceRaw, versionRaw] =
-    row;
+  const [
+    snapshotRaw,
+    assessmentRaw,
+    subjectRaw,
+    dateRaw,
+    generatedRaw,
+    payloadRaw,
+    sourceRaw,
+    versionRaw,
+  ] = row;
   const snapshotId = boundedString(snapshotRaw, 320);
   const assessmentId = boundedString(assessmentRaw, 160);
   const subjectId = boundedString(subjectRaw, 80);
