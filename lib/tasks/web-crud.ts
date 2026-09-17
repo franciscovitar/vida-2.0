@@ -35,8 +35,6 @@ import type {
   PlanningTaskUpdateInput,
 } from '@/types/planning';
 
-const OWNERSHIP_PROP = 'Vida2 Ownership';
-
 function clearRichText(): Record<string, unknown> {
   return { rich_text: [] };
 }
@@ -176,7 +174,7 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       if (!canonical) return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
       const ownership = taskOwnership(operationId);
       const owned = canonical.tasks.filter(
-        (page) => readRichText(page.properties[OWNERSHIP_PROP]) === ownership,
+        (page) => readRichText(page.properties[TASK_PROPS.ownership]) === ownership,
       );
       if (owned.length > 1) {
         return { ok: false, code: 'conflict', message: 'Ownership duplicado; no se escribió.' };
@@ -198,7 +196,7 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         [TASK_PROPS.status]: selectProp('Pendiente'),
         [TASK_PROPS.priority]: selectProp(proposed.priority!),
         [TASK_PROPS.area]: relationProp([relations.area.id]),
-        [OWNERSHIP_PROP]: richTextProp(ownership),
+        [TASK_PROPS.ownership]: richTextProp(ownership),
       };
       if (proposed.date) properties[TASK_PROPS.date] = dateProp(proposed.date);
       if (proposed.duration) properties[TASK_PROPS.duration] = selectProp(proposed.duration);
@@ -223,7 +221,7 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       const after = snapshot(readBack.page, canonical.projects, canonical.areas);
       if (
         !equalSnapshot(after, proposed) ||
-        readRichText(readBack.page.properties[OWNERSHIP_PROP]) !== ownership
+        readRichText(readBack.page.properties[TASK_PROPS.ownership]) !== ownership
       ) {
         return { ok: false, code: 'verification-failed', message: 'La tarea creada no coincide con el payload.' };
       }
