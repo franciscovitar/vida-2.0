@@ -89,13 +89,13 @@ button:disabled {
   border-top: 0;
 }
 
-.taskMain {
+.task-main {
   display: grid;
   gap: 0.35rem;
   min-width: 0;
 }
 
-.taskMain strong {
+.task-main strong {
   overflow-wrap: anywhere;
 }
 
@@ -114,8 +114,8 @@ button:disabled {
 }
 
 .actions button,
-.iconButton,
-.formActions button {
+.icon-button,
+.form-actions button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -161,7 +161,7 @@ button:disabled {
   width: min(30rem, 100%);
 }
 
-.panelHeader {
+.panel-header {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
@@ -169,13 +169,13 @@ button:disabled {
   margin-bottom: 1rem;
 }
 
-.panelHeader h3,
+.panel-header h3,
 .confirm h3 {
   margin: 0;
   font-size: 1.05rem;
 }
 
-.panelHeader p,
+.panel-header p,
 .confirm p {
   margin: 0.25rem 0 0;
   color: var(--text-muted);
@@ -183,7 +183,7 @@ button:disabled {
   line-height: 1.5;
 }
 
-.iconButton {
+.icon-button {
   padding: 0.4rem;
 }
 
@@ -207,18 +207,18 @@ button:disabled {
 }
 
 .full,
-.formActions {
+.form-actions {
   grid-column: 1 / -1;
 }
 
-.formActions {
+.form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
   margin-top: 0.25rem;
 }
 
-button.dangerPrimary {
+button.danger-primary {
   border-color: var(--c-danger-border);
   background: var(--c-danger-soft);
   color: var(--c-danger);
