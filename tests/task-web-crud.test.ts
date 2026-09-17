@@ -5,7 +5,7 @@ import type { NotionActionsClient } from '@/lib/actions/notion-client';
 import { opaqueKey } from '@/lib/actions/opaque';
 import { PROJECT_PROPS, TASK_PROPS } from '@/lib/notion/constants';
 import type { NotionRawPage } from '@/lib/notion/adapters';
-import { createPlanningTaskCrudService } from '@/lib/tasks/web-crud';
+import { createPlanningTaskCrudService } from '@/lib/tasks/web-crud-core';
 import type { PlanningTaskEditableSnapshot } from '@/types/planning';
 
 function title(value: string) {
