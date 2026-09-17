@@ -4,6 +4,10 @@ import { test } from 'node:test';
 import { selectLatestAssessmentProgressSnapshots } from '@/lib/assessment-progress/snapshot';
 import { composeAreaDashboard } from '@/lib/areas/compose';
 import { buildMockNotionDashboard } from '@/lib/mock-data/notion';
+import { summarizeProjects, summarizeTasks } from '@/lib/notion/summaries';
+import type { NotionDashboardData } from '@/types/notion';
+
+const TODAY = '2026-09-17';
 
 const HEADER = [
   'Snapshot ID',
@@ -15,6 +19,19 @@ const HEADER = [
   'Fuente',
   'Versión',
 ];
+
+function fullDashboard(): NotionDashboardData {
+  const base = buildMockNotionDashboard(TODAY);
+  return {
+    ...base,
+    source: 'mock',
+    status: 'mock',
+    notice: null,
+    syncedAt: `${TODAY}T12:00:00.000Z`,
+    taskSummary: summarizeTasks(base.tasks),
+    projectSummary: summarizeProjects(base.projects),
+  };
+}
 
 function payload(overrides: Record<string, unknown> = {}) {
   return JSON.stringify({
@@ -88,7 +105,7 @@ test('null progress remains unknown rather than fake 0', () => {
 });
 
 test('Facultad exposes bounded active assessment summary', () => {
-  const notion = buildMockNotionDashboard('2026-09-17');
+  const notion = fullDashboard();
   const assessmentProgress = selectLatestAssessmentProgressSnapshots([
     HEADER,
     row('2026-09-17T12:00:00-03:00', 55),
