@@ -98,7 +98,7 @@ function toTaskSummary(task: NotionTask, slug: AreaSlug): AreaTaskSummary {
     energy: task.energy,
     projectName: task.project?.available ? (task.project.name ?? null) : null,
     blocker: sanitizePublicNote(task.blocker, slug),
-    href: '/tareas',
+    href: '/planificacion?view=tareas',
   };
 }
 
