@@ -10,6 +10,10 @@ import type {
   ProjectsIntelligenceProjectStatus,
   ProjectsIntelligenceProjectType,
 } from '@/types/projects-intelligence';
+import type {
+  AssessmentProgressReadStatus,
+  AssessmentProgressSnapshot,
+} from '@/types/assessment-progress';
 
 export type DailyPlanningStatus = 'ready' | 'degraded' | 'empty' | 'unavailable';
 
@@ -79,6 +83,8 @@ export interface DailyPlanningQuality {
   unresolvedTaskRelations: number;
   projectsWithoutProgressSource: number;
   calendarDateConflicts: number;
+  assessmentsWithoutDate?: number;
+  assessmentsWithoutMeasuredProgress?: number;
 }
 
 export interface DailyPlanningSources {
@@ -88,6 +94,7 @@ export interface DailyPlanningSources {
   calendar: DailyPlanningSourceState<DailyPlanningCalendarSourceStatus> & {
     mode: CalendarDataSourceMode;
   };
+  assessments?: DailyPlanningSourceState<AssessmentProgressReadStatus>;
 }
 
 /**
@@ -105,5 +112,7 @@ export interface DailyPlanningContext {
   tasks: readonly DailyPlanningTask[];
   projects: readonly DailyPlanningProject[];
   calendarEvents: readonly DailyPlanningCalendarEvent[];
+  /** Evaluaciones activas/planificadas; resumen acotado, no evidencia cruda. */
+  assessments?: readonly AssessmentProgressSnapshot[];
   quality: DailyPlanningQuality;
 }

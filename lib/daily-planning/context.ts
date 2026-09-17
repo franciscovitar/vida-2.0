@@ -29,6 +29,10 @@ import type {
   DailyPlanningSourceState,
   DailyPlanningTask,
 } from '@/types/daily-planning-intelligence';
+import type {
+  AssessmentProgressRead,
+  AssessmentProgressSnapshot,
+} from '@/types/assessment-progress';
 import type { ProjectsIntelligenceMilestone } from '@/types/projects-intelligence';
 
 export const DAILY_PLANNING_HORIZON_DAYS = 30;
@@ -47,6 +51,7 @@ interface DailyPlanningLoaderDeps {
     startYmd: string,
     endYmd: string,
   ) => Promise<LoadDailyPlanningCalendarEventsResult>;
+  loadAssessments?: () => Promise<AssessmentProgressRead>;
 }
 
 function notionStatusFromCode(code: NotionReadCode): DailyPlanningNotionSourceStatus {
@@ -101,6 +106,14 @@ function calendarState(status: DailyPlanningCalendarSourceStatus) {
     status,
     available: status === 'ready' || status === 'empty',
     notice: calendarNotice(status),
+  };
+}
+
+function assessmentState(read: AssessmentProgressRead) {
+  return {
+    status: read.status,
+    available: read.status === 'ready' || read.status === 'degraded' || read.status === 'empty',
+    notice: read.notice,
   };
 }
 
@@ -175,10 +188,7 @@ async function loadNotionFacts(
   }
 
   const projectNames = buildNameMap(
-    projectBases.map((project) => ({
-      id: project.id,
-      name: project.name,
-    })),
+    projectBases.map((project) => ({ id: project.id, name: project.name })),
   );
 
   let taskState = tasksResult.ok
@@ -264,11 +274,7 @@ async function loadCalendarFacts(
   timezone: string | null;
 }> {
   if (mode !== 'google') {
-    return {
-      state: { ...calendarState('not-configured'), mode },
-      events: [],
-      timezone: null,
-    };
+    return { state: { ...calendarState('not-configured'), mode }, events: [], timezone: null };
   }
   if (!configResult.ok) {
     const status: DailyPlanningCalendarSourceStatus = configResult.reason;
@@ -303,6 +309,7 @@ function buildQuality(
   projects: readonly DailyPlanningProject[],
   events: readonly DailyPlanningCalendarEvent[],
   milestonesAvailable: boolean,
+  assessments: readonly AssessmentProgressSnapshot[],
 ) {
   return {
     tasksWithAmbiguousDate: tasks.filter(
@@ -316,6 +323,11 @@ function buildQuality(
     unresolvedTaskRelations: tasks.filter((task) => task.relationUnavailable).length,
     projectsWithoutProgressSource: milestonesAvailable ? 0 : projects.length,
     calendarDateConflicts: events.filter((event) => event.evidence.dateConflict).length,
+    assessmentsWithoutDate: assessments.filter((assessment) => assessment.assessmentDate === null)
+      .length,
+    assessmentsWithoutMeasuredProgress: assessments.filter(
+      (assessment) => assessment.payload.progressPercent === null,
+    ).length,
   };
 }
 
@@ -324,17 +336,22 @@ function overallStatus(input: {
   projectsAvailable: boolean;
   milestonesAvailable: boolean;
   calendarAvailable: boolean;
+  assessmentsAvailable: boolean;
   dataCount: number;
 }): DailyPlanningContext['status'] {
   const allAvailable =
     input.tasksAvailable &&
     input.projectsAvailable &&
     input.milestonesAvailable &&
-    input.calendarAvailable;
+    input.calendarAvailable &&
+    input.assessmentsAvailable;
   if (allAvailable) return input.dataCount === 0 ? 'empty' : 'ready';
 
   const usefulSourceAvailable =
-    input.tasksAvailable || input.projectsAvailable || input.calendarAvailable;
+    input.tasksAvailable ||
+    input.projectsAvailable ||
+    input.calendarAvailable ||
+    input.assessmentsAvailable;
   return usefulSourceAvailable ? 'degraded' : 'unavailable';
 }
 
@@ -371,16 +388,36 @@ export async function loadDailyPlanningContextUncached(
         await import('@/lib/calendar/planning-queries');
       return loadDailyPlanningCalendarEventsInRange(config, startYmd, endYmd);
     });
+  const loadAssessments =
+    deps.loadAssessments ??
+    (async () => {
+      const { loadAssessmentProgressUncached } =
+        await import('@/lib/data/assessment-progress-source');
+      return loadAssessmentProgressUncached();
+    });
 
   const notionMode = getNotionDataSource();
   const notionConfig = getNotionConfig();
   const calendarMode = getCalendarDataSource();
   const calendarConfig = getCalendarConfig();
 
-  const [notion, calendar] = await Promise.all([
+  const [notion, calendar, assessmentRead] = await Promise.all([
     loadNotionFacts(notionMode, notionConfig, createNotionPort, today),
     loadCalendarFacts(calendarMode, calendarConfig, loadCalendar, today, horizonEnd),
+    loadAssessments().catch((): AssessmentProgressRead => ({
+      status: 'unavailable',
+      snapshots: [],
+      notice: 'Progreso académico: no se pudo leer la fuente.',
+      invalidRows: 0,
+    })),
   ]);
+
+  const assessmentSource = assessmentState(assessmentRead);
+  const assessments = assessmentSource.available
+    ? assessmentRead.snapshots.filter(
+        (snapshot) => snapshot.payload.status === 'active' || snapshot.payload.status === 'planned',
+      )
+    : [];
 
   const timezone = calendar.timezone ?? getCalendarTimezone();
   const quality = buildQuality(
@@ -388,13 +425,16 @@ export async function loadDailyPlanningContextUncached(
     notion.projects,
     calendar.events,
     notion.states.milestones.available,
+    assessments,
   );
   const status = overallStatus({
     tasksAvailable: notion.states.tasks.available,
     projectsAvailable: notion.states.projects.available,
     milestonesAvailable: notion.states.milestones.available,
     calendarAvailable: calendar.state.available,
-    dataCount: notion.tasks.length + notion.projects.length + calendar.events.length,
+    assessmentsAvailable: assessmentSource.available,
+    dataCount:
+      notion.tasks.length + notion.projects.length + calendar.events.length + assessments.length,
   });
 
   return {
@@ -406,10 +446,12 @@ export async function loadDailyPlanningContextUncached(
     sources: {
       ...notion.states,
       calendar: calendar.state,
+      assessments: assessmentSource,
     },
     tasks: notion.tasks,
     projects: notion.projects,
     calendarEvents: calendar.events,
+    assessments,
     quality,
   };
 }

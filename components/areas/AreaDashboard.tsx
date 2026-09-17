@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import type { AreaDashboardData, AreaSummary } from '@/types/areas';
+import type { AreaAssessmentSummary, AreaDashboardData, AreaSummary } from '@/types/areas';
 
 import styles from './AreaDashboard.module.scss';
 
@@ -123,6 +123,106 @@ function ProjectList({
   );
 }
 
+function formatMinutesRange(item: AreaAssessmentSummary): string | null {
+  const low = item.remainingMinutesLow;
+  const high = item.remainingMinutesHigh;
+  if (low === null && high === null) return null;
+  const render = (minutes: number) => {
+    if (minutes < 60) return `${minutes} min`;
+    const hours = minutes / 60;
+    return Number.isInteger(hours) ? `${hours} h` : `${hours.toFixed(1)} h`;
+  };
+  if (low !== null && high !== null)
+    return low === high ? render(low) : `${render(low)}–${render(high)}`;
+  return render(low ?? high!);
+}
+
+function AssessmentList({
+  items,
+  notice,
+}: {
+  items: readonly AreaAssessmentSummary[];
+  notice: string | null;
+}) {
+  return (
+    <Card>
+      <SectionHeader
+        title="Instancias evaluativas"
+        description="Preparación demostrada; no es probabilidad de aprobar."
+      />
+      {items.length === 0 ? (
+        <p className={styles.body}>
+          {notice ?? 'Todavía no hay evaluaciones con progreso configurado.'}
+        </p>
+      ) : (
+        <ul className={styles['assessment-list']}>
+          {items.map((item) => {
+            const eta = formatMinutesRange(item);
+            return (
+              <li key={item.key} className={styles['assessment-item']}>
+                <div className={styles['assessment-heading']}>
+                  <div>
+                    <span className={styles['assessment-subject']}>
+                      {item.subjectId.toUpperCase()}
+                    </span>
+                    <span className={styles['assessment-name']}>{item.name}</span>
+                  </div>
+                  <span className={styles['assessment-percent']}>
+                    {item.progressPercent === null ? 'Sin medir' : `${item.progressPercent}%`}
+                  </span>
+                </div>
+
+                <div
+                  className={styles['progress-track']}
+                  role="progressbar"
+                  aria-label={`${item.subjectId} ${item.name}`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={item.progressPercent ?? undefined}
+                  aria-valuetext={
+                    item.progressPercent === null ? 'Progreso todavía no medible' : undefined
+                  }
+                >
+                  {item.progressPercent !== null ? (
+                    <span
+                      className={styles['progress-fill']}
+                      style={{ width: `${item.progressPercent}%` }}
+                    />
+                  ) : null}
+                </div>
+
+                <div className={styles.meta}>
+                  {item.assessmentDate ? (
+                    <span>Fecha: {item.assessmentDate}</span>
+                  ) : (
+                    <span>Sin fecha</span>
+                  )}
+                  <span>Confianza: {item.progressConfidence}</span>
+                  <span>Estado: {item.readinessBand}</span>
+                  {eta ? <span>Falta aprox.: {eta}</span> : <span>ETA: sin calibrar</span>}
+                  {eta ? <span>Confianza ETA: {item.etaConfidence}</span> : null}
+                </div>
+
+                {!item.scopeComplete ? (
+                  <p className={styles['assessment-caveat']}>
+                    Alcance todavía incompleto/provisional.
+                  </p>
+                ) : null}
+                {item.criticalGap ? (
+                  <p className={styles.body}>Brecha principal: {item.criticalGap}</p>
+                ) : null}
+                {item.nextBestActivity ? (
+                  <p className={styles.focus}>Siguiente: {item.nextBestActivity}</p>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
 export function AreaDashboardView({ data }: { data: AreaDashboardData }) {
   const variant = data.variant;
 
@@ -159,22 +259,28 @@ export function AreaDashboardView({ data }: { data: AreaDashboardData }) {
       ) : null}
 
       {variant?.kind === 'facultad' ? (
-        <Card>
-          <SectionHeader title="Facultad" description="Horas de estudio y secciones académicas." />
-          <div className={styles.meta}>
-            <span>Estudio semanal: {variant.studyHoursWeek ?? 'Sin datos'}</span>
-            <span>{variant.studyTrend ?? 'Sin tendencia'}</span>
-          </div>
-          {variant.academicSections.length > 0 ? (
-            <ul className={styles.list}>
-              {variant.academicSections.map((section) => (
-                <li key={section}>{section}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className={styles.body}>Sin secciones académicas detectadas.</p>
-          )}
-        </Card>
+        <>
+          <AssessmentList items={variant.assessments} notice={variant.assessmentNotice} />
+          <Card>
+            <SectionHeader
+              title="Facultad"
+              description="Horas de estudio y secciones académicas."
+            />
+            <div className={styles.meta}>
+              <span>Estudio semanal: {variant.studyHoursWeek ?? 'Sin datos'}</span>
+              <span>{variant.studyTrend ?? 'Sin tendencia'}</span>
+            </div>
+            {variant.academicSections.length > 0 ? (
+              <ul className={styles.list}>
+                {variant.academicSections.map((section) => (
+                  <li key={section}>{section}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.body}>Sin secciones académicas detectadas.</p>
+            )}
+          </Card>
+        </>
       ) : null}
 
       {variant?.kind === 'trabajo' ? (

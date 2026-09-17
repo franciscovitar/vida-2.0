@@ -10,6 +10,7 @@ import {
 import { buildAreaIntegrityWarnings } from '@/lib/areas/integrity';
 import { isExcludedProject, isExcludedTask, sanitizePublicNote } from '@/lib/areas/privacy';
 import type {
+  AreaAssessmentSummary,
   AreaCalendarSummary,
   AreaDashboardData,
   AreaDataSourceStatus,
@@ -20,6 +21,7 @@ import type {
   AreaTaskSummary,
   AreaVariantSection,
 } from '@/types/areas';
+import type { AssessmentProgressRead } from '@/types/assessment-progress';
 import type { CalendarEvent } from '@/types/calendar';
 import type { NotionArea, NotionDashboardData, NotionProject, NotionTask } from '@/types/notion';
 
@@ -136,6 +138,7 @@ export type ComposeAreaInput = {
   notion: NotionDashboardData;
   calendarEvents: readonly CalendarEvent[];
   sheets: AreaSheetsSlice | null;
+  assessmentProgress?: AssessmentProgressRead | null;
   sources: readonly AreaDataSourceStatus[];
   northHint: string | null;
   allowMockMetrics: boolean;
@@ -153,10 +156,42 @@ export function findCanonicalNotionArea(
   return null;
 }
 
+function assessmentSummaries(
+  read: AssessmentProgressRead | null | undefined,
+): AreaAssessmentSummary[] {
+  if (!read) return [];
+  return read.snapshots
+    .filter(
+      (snapshot) => snapshot.payload.status === 'active' || snapshot.payload.status === 'planned',
+    )
+    .sort((a, b) => {
+      const ad = a.assessmentDate ?? '9999-12-31';
+      const bd = b.assessmentDate ?? '9999-12-31';
+      return ad.localeCompare(bd) || b.generatedAt.localeCompare(a.generatedAt);
+    })
+    .map((snapshot) => ({
+      key: opaqueKey('assessment', `${snapshot.assessmentId}:${snapshot.generatedAt}`),
+      subjectId: snapshot.subjectId,
+      name: snapshot.payload.name,
+      assessmentDate: snapshot.assessmentDate,
+      progressPercent: snapshot.payload.progressPercent,
+      progressConfidence: snapshot.payload.progressConfidence,
+      readinessBand: snapshot.payload.readinessBand,
+      remainingMinutesLow: snapshot.payload.remainingMinutesLow,
+      remainingMinutesHigh: snapshot.payload.remainingMinutesHigh,
+      etaConfidence: snapshot.payload.etaConfidence,
+      criticalGap: snapshot.payload.criticalGaps[0] ?? null,
+      nextBestActivity: snapshot.payload.nextBestActivity,
+      scopeComplete: snapshot.payload.scopeComplete,
+      generatedAt: snapshot.generatedAt,
+    }));
+}
+
 function buildVariant(
   slug: AreaSlug,
   sheets: AreaSheetsSlice | null,
   academicSections: readonly string[],
+  assessmentProgress?: AssessmentProgressRead | null,
 ): AreaVariantSection {
   if (slug === 'facultad') {
     return {
@@ -164,6 +199,8 @@ function buildVariant(
       studyHoursWeek: sheets?.studyHoursWeek ?? null,
       studyTrend: sheets?.studyTrend ?? null,
       academicSections,
+      assessments: assessmentSummaries(assessmentProgress),
+      assessmentNotice: assessmentProgress?.notice ?? null,
     };
   }
   if (slug === 'genova-trabajo') {
@@ -360,13 +397,8 @@ export function composeAreaDashboard(input: ComposeAreaInput): AreaDashboardData
     calendar: filterCalendar(input.calendarEvents, def.slug),
     metrics: buildMetrics(def.slug, sheets),
     sources: input.sources,
-    integrity: buildAreaIntegrityWarnings({
-      area,
-      projects,
-      tasks,
-      areaNotionId: area.id,
-    }),
-    variant: buildVariant(def.slug, sheets, academicSections),
+    integrity: buildAreaIntegrityWarnings({ area, projects, tasks, areaNotionId: area.id }),
+    variant: buildVariant(def.slug, sheets, academicSections, input.assessmentProgress),
     targetDate: input.notion.targetDate,
   };
 }

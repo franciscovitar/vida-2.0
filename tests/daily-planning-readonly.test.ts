@@ -131,6 +131,12 @@ function baseDeps(
     getCalendarConfig: () => ({ ok: true as const, config: CALENDAR_CONFIG }),
     getCalendarTimezone: () => CALENDAR_CONFIG.timezone,
     loadCalendar: async () => calendarResult,
+    loadAssessments: async () => ({
+      status: 'empty' as const,
+      snapshots: [],
+      notice: null,
+      invalidRows: 0,
+    }),
   };
 }
 
@@ -161,6 +167,8 @@ test('DP-R1. contexto completo preserva Fecha como ambigua y progreso verificabl
   });
   assert.equal(data.projects[0]?.nextAction?.name, 'Resolver ejercicio de Redes');
   assert.equal(data.calendarEvents[0]?.planningRole, 'capacity-block');
+  assert.equal(data.sources.assessments?.status, 'empty');
+  assert.deepEqual(data.assessments, []);
 });
 
 test('DP-R2. si Hitos falla, Proyectos y Tareas sobreviven pero progress es unknown/null', async () => {

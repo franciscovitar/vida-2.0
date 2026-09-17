@@ -63,7 +63,8 @@
   font-size: 0.92rem;
 }
 
-.list {
+.list,
+.assessment-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -82,7 +83,8 @@
   text-decoration: underline;
 }
 
-.warn {
+.warn,
+.assessment-caveat {
   color: var(--text);
   margin: 0;
   font-size: 0.9rem;
@@ -114,4 +116,59 @@
   margin-top: 0.2rem;
   color: var(--text-muted);
   font-size: 0.85rem;
+}
+
+.assessment-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.assessment-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.assessment-subject {
+  margin-right: 0.55rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.assessment-name {
+  color: var(--text);
+  font-weight: 550;
+}
+
+.assessment-percent {
+  flex: none;
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+  position: relative;
+  height: 0.55rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: currentcolor;
+  color: var(--text);
+  transition: width 180ms ease;
+}
+
+.assessment-caveat {
+  color: var(--text-muted);
 }
