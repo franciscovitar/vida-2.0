@@ -210,7 +210,7 @@ export function TaskManager({
       <ul className={styles.list}>
         {visible.map((task) => (
           <li key={task.key} className={styles.task}>
-            <div className={styles.taskMain}>
+            <div className={styles['task-main']}>
               <strong>{task.title}</strong>
               <div className={styles.meta}>
                 <span>{task.status}</span>
@@ -249,12 +249,12 @@ export function TaskManager({
       {editor.mode !== 'closed' ? (
         <div className={styles.overlay} role="presentation">
           <section className={styles.panel} role="dialog" aria-modal="true" aria-labelledby="task-editor-title">
-            <header className={styles.panelHeader}>
+            <header className={styles['panel-header']}>
               <div>
                 <h3 id="task-editor-title">{editor.mode === 'create' ? 'Nueva tarea' : 'Editar tarea'}</h3>
                 <p>{editor.mode === 'create' ? 'Se crea en Pendiente.' : 'Los cambios usan verificación contra el estado que abriste.'}</p>
               </div>
-              <button type="button" className={styles.iconButton} onClick={closeEditor} aria-label="Cerrar">
+              <button type="button" className={styles['icon-button']} onClick={closeEditor} aria-label="Cerrar">
                 <X size={18} />
               </button>
             </header>
@@ -356,7 +356,7 @@ export function TaskManager({
                     }
                   />
                 </label>
-                <div className={styles.formActions}>
+                <div className={styles['form-actions']}>
                   <button type="button" onClick={closeEditor}>Cancelar</button>
                   <button type="button" className={styles.primary} onClick={submitCreate} disabled={pending || !createDraft.title.trim() || !createDraft.areaKey}>
                     Crear tarea
@@ -422,7 +422,7 @@ export function TaskManager({
                   <span>Nota</span>
                   <textarea value={editDraft.note ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, note: nullable(event.target.value) }) : draft)} />
                 </label>
-                <div className={styles.formActions}>
+                <div className={styles['form-actions']}>
                   <button type="button" onClick={closeEditor}>Cancelar</button>
                   <button type="button" className={styles.primary} onClick={submitEdit} disabled={pending || editDraft.title.trim().length < 3}>
                     Guardar cambios
@@ -441,9 +441,9 @@ export function TaskManager({
             <p>
               <strong>{deleteTask.title}</strong> se enviará a la papelera de Notion. No se borra permanentemente.
             </p>
-            <div className={styles.formActions}>
+            <div className={styles['form-actions']}>
               <button type="button" onClick={() => setDeleteTask(null)} disabled={pending}>Cancelar</button>
-              <button type="button" className={styles.dangerPrimary} onClick={confirmDelete} disabled={pending}>
+              <button type="button" className={styles['danger-primary']} onClick={confirmDelete} disabled={pending}>
                 Eliminar a papelera
               </button>
             </div>
