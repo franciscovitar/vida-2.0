@@ -34,6 +34,7 @@ export const TASK_PROPS = {
   projectArea: 'Área del proyecto',
   blocker: 'Bloqueo',
   note: 'Nota',
+  ownership: 'Vida2 Ownership',
 } as const;
 
 export const PROJECT_PROPS = {
