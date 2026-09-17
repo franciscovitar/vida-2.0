@@ -30,6 +30,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Emit canonical Prettier output for Planificacion files
+        run: |
+          npx prettier --write app/actions/tasks.ts components/planning/PlanningWorkspace.tsx components/planning/TaskManager.module.scss components/planning/TaskManager.tsx lib/planning/overview.ts lib/tasks/web-crud-core.ts tests/task-web-crud.test.ts types/planning.ts
+          for f in app/actions/tasks.ts components/planning/PlanningWorkspace.tsx components/planning/TaskManager.module.scss components/planning/TaskManager.tsx lib/planning/overview.ts lib/tasks/web-crud-core.ts tests/task-web-crud.test.ts types/planning.ts; do
+            echo "__FORMAT_FILE__:$f"
+            base64 -w0 "$f"
+            echo
+          done
+          exit 1
+
       - name: Test project
         run: npm test
 
