@@ -238,3 +238,16 @@ button.danger-primary {
     grid-template-columns: 1fr;
   }
 }
+
+
+.toolbar button,
+.toolbar input,
+.toolbar select,
+.actions button,
+.icon-button,
+.form input,
+.form select,
+.form textarea,
+.form-actions button {
+  min-height: 44px;
+}
