@@ -48,15 +48,15 @@ function AssessmentCards({ assessments }: { assessments: AssessmentProgressRead 
       {items.map((assessment) => {
         const payload = assessment.payload;
         return (
-          <article className={styles.attentionCard} key={assessment.assessmentId}>
-            <div className={styles.cardTop}>
+          <article className={styles['attention-card']} key={assessment.assessmentId}>
+            <div className={styles['card-top']}>
               <div>
                 <strong>{payload.name}</strong>
                 <p>{assessment.subjectId}</p>
               </div>
               <span>{assessment.assessmentDate ?? 'Fecha sin confirmar'}</span>
             </div>
-            <div className={styles.progressLine}>
+            <div className={styles['progress-line']}>
               <span>Preparación</span>
               <strong>{progressLabel(payload.progressPercent)}</strong>
             </div>
@@ -103,7 +103,7 @@ function TaskPressure({ notion }: { notion: NotionDashboardData }) {
               {task.duration ? ` · ${task.duration}` : ''}
             </span>
           </div>
-          <div className={styles.rowSide}>
+          <div className={styles['row-side']}>
             <span>{task.date ? `Fecha ${task.date}` : 'Sin fecha'}</span>
             {task.project?.available ? <span>{task.project.name}</span> : null}
           </div>
@@ -124,14 +124,14 @@ function ProjectPressure({ projects }: { projects: ProjectsIntelligenceData }) {
       ) : (
         <div className={styles.cards}>
           {items.map((project) => (
-            <article className={styles.attentionCard} key={project.id}>
-              <div className={styles.cardTop}>
+            <article className={styles['attention-card']} key={project.id}>
+              <div className={styles['card-top']}>
                 <strong>{project.name}</strong>
                 <span>{project.status}</span>
               </div>
               {project.progress.measurable ? (
                 <>
-                  <div className={styles.progressLine}>
+                  <div className={styles['progress-line']}>
                     <span>Progreso por hitos</span>
                     <strong>{Math.round(project.progress.percent)}%</strong>
                   </div>
@@ -149,7 +149,7 @@ function ProjectPressure({ projects }: { projects: ProjectsIntelligenceData }) {
                 <b>Próxima acción:</b>{' '}
                 {project.nextAction?.available ? project.nextAction.name : 'Sin próxima acción resoluble'}
               </p>
-              {project.dueDate ? <p className={styles.metaLine}>Límite real: {project.dueDate}</p> : null}
+              {project.dueDate ? <p className={styles['meta-line']}>Límite real: {project.dueDate}</p> : null}
               {project.blocker ? <p className={styles.gaps}>Bloqueo: {project.blocker}</p> : null}
             </article>
           ))}
@@ -177,7 +177,6 @@ function WeekView({
   projects: ProjectsIntelligenceData;
 }) {
   const weekTasks = selectWeekTasks(notion.tasks, dailyPlan.targetDate);
-  const activeAssessments = selectPlanningAssessments(assessments.snapshots);
   const activeProjects = projects.status === 'ready' ? selectPlanningProjects(projects.projects) : [];
 
   return (
@@ -201,7 +200,7 @@ function WeekView({
       </Card>
       <Card>
         <SectionHeader title="Compromisos y marcadores" description="Calendar limita capacidad; un hueco libre no se trata como capacidad garantizada." icon={CalendarDays} domain="productivity" />
-        <div className={styles.twoCols}>
+        <div className={styles['two-cols']}>
           <section>
             <h3>Hoy con horario</h3>
             {dailyPlan.fixedCommitments.length === 0 ? <p className={styles.empty}>Sin compromisos horarios verificables hoy.</p> : (
@@ -285,7 +284,7 @@ export function PlanningWorkspace({
             <SectionHeader title="Proyectos" description="Solo Activo/Bloqueado entra al foco. En espera permanece preservado sin ruido diario." icon={Rocket} domain="projects" />
             <ProjectPressure projects={projects} />
           </Card>
-          <p className={styles.capacityNote}>
+          <p className={styles['capacity-note']}>
             Planificación deja margen deliberadamente: Calendar libre no significa energía disponible y no se intenta llenar el 100% del día.
           </p>
         </div>
@@ -306,7 +305,7 @@ export function PlanningWorkspace({
         <Card>
           <SectionHeader title="Proyectos para planificar" description="Vista compacta. La definición, arquitectura y portfolio completo siguen en Proyectos." icon={Rocket} domain="projects" />
           <ProjectPressure projects={projects} />
-          <div className={styles.projectLink}><Link href="/proyectos">Abrir Projects Intelligence completo →</Link></div>
+          <div className={styles['project-link']}><Link href="/proyectos">Abrir Projects Intelligence completo →</Link></div>
         </Card>
       ) : null}
     </div>
