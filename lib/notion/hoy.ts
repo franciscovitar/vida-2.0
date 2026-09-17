@@ -222,7 +222,7 @@ export function suggestNextActions(
         id: `task:${task.id}`,
         title: task.title,
         reason: 'Tarea de hoy · prioridad Alta',
-        href: '/tareas',
+        href: '/planificacion?view=tareas',
       });
     }
   }
@@ -233,7 +233,7 @@ export function suggestNextActions(
         id: `task:${task.id}`,
         title: task.title,
         reason: 'Tarea vencida · prioridad Alta',
-        href: '/tareas',
+        href: '/planificacion?view=tareas',
       });
     }
   }
@@ -244,7 +244,7 @@ export function suggestNextActions(
         id: `task:${task.id}`,
         title: task.title,
         reason: 'En progreso',
-        href: '/tareas',
+        href: '/planificacion?view=tareas',
       });
     }
   }
@@ -270,7 +270,7 @@ export function suggestNextActions(
         id: `task:${task.id}`,
         title: task.title,
         reason: 'Pendiente · prioridad Media',
-        href: '/tareas',
+        href: '/planificacion?view=tareas',
       });
     }
   }
