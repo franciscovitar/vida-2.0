@@ -52,7 +52,7 @@
   margin-top: 0.65rem;
 }
 
-.attentionCard {
+.attention-card {
   display: grid;
   gap: 0.55rem;
   min-width: 0;
@@ -62,35 +62,35 @@
   background: var(--surface-2);
 }
 
-.cardTop,
-.progressLine {
+.card-top,
+.progress-line {
   display: flex;
   gap: 0.75rem;
   justify-content: space-between;
   align-items: baseline;
 }
 
-.cardTop > div {
+.card-top > div {
   min-width: 0;
 }
 
-.cardTop strong {
+.card-top strong {
   overflow-wrap: anywhere;
 }
 
-.cardTop p {
+.card-top p {
   margin: 0.15rem 0 0;
   color: var(--text-muted);
   font-size: 0.73rem;
 }
 
-.cardTop > span,
-.progressLine {
+.card-top > span,
+.progress-line {
   color: var(--text-muted);
   font-size: 0.76rem;
 }
 
-.progressLine strong {
+.progress-line strong {
   color: var(--text);
 }
 
@@ -106,21 +106,21 @@
 .next,
 .gaps,
 .muted,
-.metaLine,
+.meta-line,
 .quiet,
 .empty,
-.capacityNote {
+.capacity-note {
   margin: 0;
   font-size: 0.78rem;
   line-height: 1.5;
 }
 
 .next,
-.metaLine,
+.meta-line,
 .muted,
 .quiet,
 .empty,
-.capacityNote {
+.capacity-note {
   color: var(--text-muted);
 }
 
@@ -133,7 +133,7 @@
 }
 
 .quiet a,
-.projectLink a {
+.project-link a {
   color: var(--text);
 }
 
@@ -169,23 +169,23 @@
   overflow-wrap: anywhere;
 }
 
-.rowSide {
+.row-side {
   text-align: right;
 }
 
-.rowSide span,
+.row-side span,
 .rows li > span {
   color: var(--text-muted);
   font-size: 0.73rem;
 }
 
-.twoCols {
+.two-cols {
   display: grid;
   gap: 1rem;
   margin-top: 0.65rem;
 }
 
-.twoCols h3 {
+.two-cols h3 {
   margin: 0 0 0.4rem;
   font-size: 0.8rem;
 }
@@ -197,19 +197,19 @@
 }
 
 @media (width >= 760px) {
-  .twoCols {
+  .two-cols {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-.capacityNote {
+.capacity-note {
   padding: 0.75rem 0.9rem;
   border: 1px dashed var(--border);
   border-radius: var(--radius);
   background: var(--surface-2);
 }
 
-.projectLink {
+.project-link {
   margin-top: 0.8rem;
   font-size: 0.8rem;
 }
@@ -219,7 +219,7 @@
     grid-template-columns: 1fr;
   }
 
-  .rowSide {
+  .row-side {
     text-align: left;
   }
 
