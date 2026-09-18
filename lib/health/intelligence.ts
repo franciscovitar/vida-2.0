@@ -19,6 +19,7 @@ import { formatNumber } from '@/lib/format';
 import type { GymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
 import type { NutritionCoverage, NutritionDashboardData } from '@/lib/nutrition/types';
 import type {
+  HealthBaselineSignal,
   HealthDaySignals,
   HealthImportKind,
   HealthInsight,
@@ -135,7 +136,7 @@ export const HEALTH_MAX_CHANGES = 4;
 export const HEALTH_BASELINE_MIN_DAYS = 5;
 
 /** Días de base personal a partir de los cuales la lectura se considera sólida. */
-export const HEALTH_BASELINE_STRONG_DAYS = 12;
+export const HEALTH_BASELINE_STRONG_DAYS = 14;
 
 /**
  * Días con dato en el período actual necesarios para tratar una comparación de
@@ -198,6 +199,8 @@ export interface HealthSignalEvidence {
   value: number | null;
   valueLabel: string;
   baselineAverage: number | null;
+  baselineMedian: number | null;
+  baselineMad: number | null;
   baselineLabel: string;
   baselineDays: number;
   deltaAbsolute: number | null;
@@ -262,19 +265,19 @@ function evidenceText(input: {
 function buildSignalEvidence(
   signal: HealthMonitoredSignal,
   day: HealthDaySignals | null,
-  baseline: { average: number | null; days: number },
+  baseline: HealthBaselineSignal,
 ): HealthSignalEvidence {
   const threshold = HEALTH_MONITORING_THRESHOLDS[signal];
   const value = day?.values[signal] ?? null;
-  const average = baseline.average;
+  const center = baseline.median ?? baseline.average;
 
   const classification: Classification | null =
-    value !== null && average !== null && baseline.days >= threshold.minBaselineDays
-      ? classify(value, average, threshold)
+    value !== null && center !== null && baseline.days >= threshold.minBaselineDays
+      ? classify(value, center, threshold)
       : null;
 
   const valueLabel = value === null ? '—' : formatSignalValue(signal, value);
-  const baselineLabel = average === null ? '—' : formatSignalValue(signal, average);
+  const baselineLabel = center === null ? '—' : formatSignalValue(signal, center);
   const direction = classification?.direction ?? 'unknown';
   const materiality = classification?.materiality ?? 'unknown';
   const relative = classification?.relative ?? null;
@@ -285,11 +288,13 @@ function buildSignalEvidence(
     role: HEALTH_CORE_SIGNALS.includes(signal) ? 'core' : 'context',
     value,
     valueLabel,
-    baselineAverage: average,
+    baselineAverage: baseline.average,
+    baselineMedian: baseline.median,
+    baselineMad: baseline.mad,
     baselineLabel,
     baselineDays: baseline.days,
     deltaAbsolute:
-      classification !== null && value !== null && average !== null ? value - average : null,
+      classification !== null && value !== null && center !== null ? value - center : null,
     deltaRelative: relative,
     direction,
     materiality,
