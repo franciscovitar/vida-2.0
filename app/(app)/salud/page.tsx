@@ -108,7 +108,11 @@ export default async function SaludPage({
 
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
 
-      <HealthTodayHero state={intelligence.currentState} quality={intelligence.evidenceQuality} />
+      <HealthTodayHero
+        brief={intelligence.dailyBrief}
+        state={intelligence.currentState}
+        quality={intelligence.evidenceQuality}
+      />
 
       <HealthTrajectorySection trajectory={intelligence.trajectory} />
 
