@@ -41,9 +41,7 @@ const NOTICE_TONE: Partial<Record<ProjectIntelligenceSourceStatus, 'info' | 'war
 };
 
 function ProjectProgress({ project }: { project: ProjectCardView }) {
-  const completedMilestones = project.milestones.filter(
-    (milestone) => milestone.completed,
-  ).length;
+  const completedMilestones = project.milestones.filter((milestone) => milestone.completed).length;
   const totalMilestones = project.milestones.length;
 
   if (!project.progress.measurable) {
@@ -102,9 +100,7 @@ function MilestoneBreakdown({ project }: { project: ProjectCardView }) {
               <p className={styles['milestone-criteria']}>{milestone.completionCriteria}</p>
             ) : null}
             {milestone.completedAtLabel ? (
-              <p className={styles['milestone-date']}>
-                Completado {milestone.completedAtLabel}
-              </p>
+              <p className={styles['milestone-date']}>Completado {milestone.completedAtLabel}</p>
             ) : null}
             {milestone.evidence ? (
               <details className={styles['evidence-details']}>
@@ -121,10 +117,7 @@ function MilestoneBreakdown({ project }: { project: ProjectCardView }) {
 
 function ProjectDetails({ project }: { project: ProjectCardView }) {
   const hasDates =
-    project.lastAdvanceLabel ||
-    project.dueDateLabel ||
-    project.reviewDateLabel ||
-    project.blocker;
+    project.lastAdvanceLabel || project.dueDateLabel || project.reviewDateLabel || project.blocker;
   const hasPi =
     project.pi.hasSnapshot ||
     project.quality.multipleNextActionCandidates ||
@@ -179,9 +172,7 @@ function ProjectDetails({ project }: { project: ProjectCardView }) {
               ) : null}
               {project.pi.hasSnapshot ? (
                 <>
-                  {project.pi.recommendation ? (
-                    <span>PI: {project.pi.recommendation}</span>
-                  ) : null}
+                  {project.pi.recommendation ? <span>PI: {project.pi.recommendation}</span> : null}
                   {project.pi.confidence !== null ? (
                     <span>Confianza: {project.pi.confidence}</span>
                   ) : null}
@@ -361,11 +352,7 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
         ) : (
           <div className={styles['project-grid']} data-density="focus">
             {view.focus.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                emphasis={view.focus.length === 1}
-              />
+              <ProjectCard key={project.id} project={project} emphasis={view.focus.length === 1} />
             ))}
           </div>
         )}
