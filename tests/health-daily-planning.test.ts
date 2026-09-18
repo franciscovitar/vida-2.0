@@ -9,9 +9,7 @@ import {
 } from '@/lib/health/planning-context';
 import type { HealthDailyBrief } from '@/lib/health/intelligence';
 
-function brief(
-  overrides: Partial<HealthDailyBrief> = {},
-): HealthDailyBrief {
+function brief(overrides: Partial<HealthDailyBrief> = {}): HealthDailyBrief {
   return {
     date: '2026-09-18',
     state: 'RECUPERACIÓN',
