@@ -20,6 +20,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import type {
   HealthCrossDomainContext,
   HealthCurrentState,
+  HealthDailyBrief,
   HealthEvidenceQuality,
   HealthPriority,
   HealthTrajectory,
@@ -36,9 +37,11 @@ function TrendIcon({ direction }: { direction: HealthTrajectoryItem['direction']
 
 /** 1. ¿Cómo estoy hoy? */
 export function HealthTodayHero({
+  brief,
   state,
   quality,
 }: {
+  brief: HealthDailyBrief;
   state: HealthCurrentState;
   quality: HealthEvidenceQuality;
 }) {
@@ -47,7 +50,13 @@ export function HealthTodayHero({
   return (
     <section className={styles.hero} aria-labelledby="health-today-title" data-state={state.kind}>
       <div className={styles['hero-copy']}>
-        <p className={styles.eyebrow}>Cómo estás hoy</p>
+        <div className={styles['brief-meta']}>
+          <p className={styles.eyebrow}>Daily Health Brief</p>
+          <span className={styles['brief-state']} data-state={brief.state}>
+            {brief.state}
+          </span>
+          <span className={styles['brief-confidence']}>Confianza {brief.confidence}</span>
+        </div>
         <h2 id="health-today-title" className={styles['hero-title']}>
           {state.headline}
         </h2>
