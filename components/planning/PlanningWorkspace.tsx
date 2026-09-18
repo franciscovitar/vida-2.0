@@ -76,7 +76,9 @@ function AssessmentCards({ assessments }: { assessments: AssessmentProgressRead 
               <span>Confianza: {payload.progressConfidence}</span>
             </div>
             {payload.nextBestActivity ? (
-              <p className={styles.next}><b>Próximo:</b> {payload.nextBestActivity}</p>
+              <p className={styles.next}>
+                <b>Próximo:</b> {payload.nextBestActivity}
+              </p>
             ) : null}
             {payload.criticalGaps.length > 0 ? (
               <p className={styles.gaps}>Gap: {payload.criticalGaps.slice(0, 2).join(' · ')}</p>
@@ -90,7 +92,8 @@ function AssessmentCards({ assessments }: { assessments: AssessmentProgressRead 
 
 function TaskPressure({ notion }: { notion: NotionDashboardData }) {
   const tasks = selectAttentionTasks(notion.tasks);
-  if (tasks.length === 0) return <p className={styles.empty}>No hay presión operativa destacable.</p>;
+  if (tasks.length === 0)
+    return <p className={styles.empty}>No hay presión operativa destacable.</p>;
   return (
     <ul className={styles.rows}>
       {tasks.map((task) => (
@@ -115,7 +118,10 @@ function TaskPressure({ notion }: { notion: NotionDashboardData }) {
 
 function ProjectPressure({ projects }: { projects: ProjectsIntelligenceData }) {
   const items = projects.status === 'ready' ? selectPlanningProjects(projects.projects) : [];
-  const waiting = projects.status === 'ready' ? projects.projects.filter((p) => p.status === 'En espera').length : 0;
+  const waiting =
+    projects.status === 'ready'
+      ? projects.projects.filter((p) => p.status === 'En espera').length
+      : 0;
 
   return (
     <>
@@ -147,9 +153,13 @@ function ProjectPressure({ projects }: { projects: ProjectsIntelligenceData }) {
               )}
               <p className={styles.next}>
                 <b>Próxima acción:</b>{' '}
-                {project.nextAction?.available ? project.nextAction.name : 'Sin próxima acción resoluble'}
+                {project.nextAction?.available
+                  ? project.nextAction.name
+                  : 'Sin próxima acción resoluble'}
               </p>
-              {project.dueDate ? <p className={styles['meta-line']}>Límite real: {project.dueDate}</p> : null}
+              {project.dueDate ? (
+                <p className={styles['meta-line']}>Límite real: {project.dueDate}</p>
+              ) : null}
               {project.blocker ? <p className={styles.gaps}>Bloqueo: {project.blocker}</p> : null}
             </article>
           ))}
@@ -177,21 +187,40 @@ function WeekView({
   projects: ProjectsIntelligenceData;
 }) {
   const weekTasks = selectWeekTasks(notion.tasks, dailyPlan.targetDate);
-  const activeProjects = projects.status === 'ready' ? selectPlanningProjects(projects.projects) : [];
+  const activeProjects =
+    projects.status === 'ready' ? selectPlanningProjects(projects.projects) : [];
 
   return (
     <div className={styles.stack}>
       <Card>
-        <SectionHeader title="Evaluaciones próximas" description="Fechas y carga restante verificadas; sin probabilidades inventadas." icon={GraduationCap} domain="learning" />
+        <SectionHeader
+          title="Evaluaciones próximas"
+          description="Fechas y carga restante verificadas; sin probabilidades inventadas."
+          icon={GraduationCap}
+          domain="learning"
+        />
         <AssessmentCards assessments={assessments} />
       </Card>
       <Card>
-        <SectionHeader title="Tareas con fecha en 7 días" description="Fecha relevante, no se interpreta automáticamente como deadline duro." icon={ListChecks} domain="tasks" />
-        {weekTasks.length === 0 ? <p className={styles.empty}>Sin tareas fechadas en los próximos 7 días.</p> : (
+        <SectionHeader
+          title="Tareas con fecha en 7 días"
+          description="Fecha relevante, no se interpreta automáticamente como deadline duro."
+          icon={ListChecks}
+          domain="tasks"
+        />
+        {weekTasks.length === 0 ? (
+          <p className={styles.empty}>Sin tareas fechadas en los próximos 7 días.</p>
+        ) : (
           <ul className={styles.rows}>
             {weekTasks.map((task) => (
               <li key={task.id}>
-                <div><strong>{task.title}</strong><span>{task.status}{task.duration ? ` · ${task.duration}` : ''}</span></div>
+                <div>
+                  <strong>{task.title}</strong>
+                  <span>
+                    {task.status}
+                    {task.duration ? ` · ${task.duration}` : ''}
+                  </span>
+                </div>
                 <span>{task.date}</span>
               </li>
             ))}
@@ -199,34 +228,68 @@ function WeekView({
         )}
       </Card>
       <Card>
-        <SectionHeader title="Compromisos y marcadores" description="Calendar limita capacidad; un hueco libre no se trata como capacidad garantizada." icon={CalendarDays} domain="productivity" />
+        <SectionHeader
+          title="Compromisos y marcadores"
+          description="Calendar limita capacidad; un hueco libre no se trata como capacidad garantizada."
+          icon={CalendarDays}
+          domain="productivity"
+        />
         <div className={styles['two-cols']}>
           <section>
             <h3>Hoy con horario</h3>
-            {dailyPlan.fixedCommitments.length === 0 ? <p className={styles.empty}>Sin compromisos horarios verificables hoy.</p> : (
+            {dailyPlan.fixedCommitments.length === 0 ? (
+              <p className={styles.empty}>Sin compromisos horarios verificables hoy.</p>
+            ) : (
               <ul className={styles.simple}>
-                {dailyPlan.fixedCommitments.map((event, index) => <li key={`${event.title}-${index}`}><b>{event.startTime ?? '—'}–{event.endTime ?? '—'}</b> {event.title}</li>)}
+                {dailyPlan.fixedCommitments.map((event, index) => (
+                  <li key={`${event.title}-${index}`}>
+                    <b>
+                      {event.startTime ?? '—'}–{event.endTime ?? '—'}
+                    </b>{' '}
+                    {event.title}
+                  </li>
+                ))}
               </ul>
             )}
           </section>
           <section>
             <h3>Próximas fechas</h3>
-            {dailyPlan.dateMarkers.length === 0 ? <p className={styles.empty}>Sin marcadores próximos.</p> : (
+            {dailyPlan.dateMarkers.length === 0 ? (
+              <p className={styles.empty}>Sin marcadores próximos.</p>
+            ) : (
               <ul className={styles.simple}>
-                {dailyPlan.dateMarkers.map((marker, index) => <li key={`${marker.title}-${index}`}><b>{marker.date}</b> {marker.title}</li>)}
+                {dailyPlan.dateMarkers.map((marker, index) => (
+                  <li key={`${marker.title}-${index}`}>
+                    <b>{marker.date}</b> {marker.title}
+                  </li>
+                ))}
               </ul>
             )}
           </section>
         </div>
       </Card>
       <Card>
-        <SectionHeader title="Proyectos que sí compiten por foco" description="Solo Activo/Bloqueado. Los proyectos En espera quedan fuera del radar diario." icon={Rocket} domain="projects" />
-        {activeProjects.length === 0 ? <p className={styles.empty}>Ningún proyecto activo o bloqueado.</p> : (
+        <SectionHeader
+          title="Proyectos que sí compiten por foco"
+          description="Solo Activo/Bloqueado. Los proyectos En espera quedan fuera del radar diario."
+          icon={Rocket}
+          domain="projects"
+        />
+        {activeProjects.length === 0 ? (
+          <p className={styles.empty}>Ningún proyecto activo o bloqueado.</p>
+        ) : (
           <ul className={styles.rows}>
             {activeProjects.map((project) => (
               <li key={project.id}>
-                <div><strong>{project.name}</strong><span>{project.status}</span></div>
-                <span>{project.progress.measurable ? `${Math.round(project.progress.percent)}%` : 'Sin medir'}</span>
+                <div>
+                  <strong>{project.name}</strong>
+                  <span>{project.status}</span>
+                </div>
+                <span>
+                  {project.progress.measurable
+                    ? `${Math.round(project.progress.percent)}%`
+                    : 'Sin medir'}
+                </span>
               </li>
             ))}
           </ul>
@@ -272,40 +335,73 @@ export function PlanningWorkspace({
           <DailyPlanningPanel plan={dailyPlan} />
           <div className={styles.grid}>
             <Card>
-              <SectionHeader title="Facultad" description="Evaluaciones activas/planificadas ordenadas por fecha verificable." icon={GraduationCap} domain="learning" />
+              <SectionHeader
+                title="Facultad"
+                description="Evaluaciones activas/planificadas ordenadas por fecha verificable."
+                icon={GraduationCap}
+                domain="learning"
+              />
               <AssessmentCards assessments={assessments} />
             </Card>
             <Card>
-              <SectionHeader title="Presión operativa" description="Bloqueos, fechas relevantes, trabajo en progreso y prioridad declarada." icon={SlidersHorizontal} domain="tasks" />
+              <SectionHeader
+                title="Presión operativa"
+                description="Bloqueos, fechas relevantes, trabajo en progreso y prioridad declarada."
+                icon={SlidersHorizontal}
+                domain="tasks"
+              />
               <TaskPressure notion={notion} />
             </Card>
           </div>
           <Card>
-            <SectionHeader title="Proyectos" description="Solo Activo/Bloqueado entra al foco. En espera permanece preservado sin ruido diario." icon={Rocket} domain="projects" />
+            <SectionHeader
+              title="Proyectos"
+              description="Solo Activo/Bloqueado entra al foco. En espera permanece preservado sin ruido diario."
+              icon={Rocket}
+              domain="projects"
+            />
             <ProjectPressure projects={projects} />
           </Card>
           <p className={styles['capacity-note']}>
-            Planificación deja margen deliberadamente: Calendar libre no significa energía disponible y no se intenta llenar el 100% del día.
+            Planificación deja margen deliberadamente: Calendar libre no significa energía
+            disponible y no se intenta llenar el 100% del día.
           </p>
         </div>
       ) : null}
 
       {view === 'semana' ? (
-        <WeekView dailyPlan={dailyPlan} notion={notion} assessments={assessments} projects={projects} />
+        <WeekView
+          dailyPlan={dailyPlan}
+          notion={notion}
+          assessments={assessments}
+          projects={projects}
+        />
       ) : null}
 
       {view === 'tareas' ? (
         <Card>
-          <SectionHeader title="Tareas" description="Crear, editar y enviar a papelera directamente sobre la fuente canónica de Notion." icon={ListChecks} domain="tasks" />
+          <SectionHeader
+            title="Tareas"
+            description="Crear, editar y enviar a papelera directamente sobre la fuente canónica de Notion."
+            icon={ListChecks}
+            domain="tasks"
+          />
           <TaskManager catalog={taskCatalog} writable={writable} />
         </Card>
       ) : null}
 
       {view === 'proyectos' ? (
         <Card>
-          <SectionHeader title="Proyectos para planificar" description="Vista compacta. La definición, arquitectura y portfolio completo siguen en Proyectos." icon={Rocket} domain="projects" />
+          <SectionHeader
+            title="Proyectos para planificar"
+            description="Vista compacta. La definición, arquitectura y portfolio completo siguen en Proyectos."
+            icon={Rocket}
+            domain="projects"
+          />
           <ProjectPressure projects={projects} />
-          <div className={styles['project-link']}><Link href="/proyectos">Abrir Projects Intelligence completo →</Link></div>
+          <div className={styles['project-link']}>
+            <Link href="/proyectos">Abrir Projects Intelligence completo →</Link>
+          </div>
         </Card>
       ) : null}
     </div>
