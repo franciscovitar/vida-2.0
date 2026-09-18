@@ -1,11 +1,9 @@
 /**
- * Panel Projects Intelligence V1 (`/proyectos`).
+ * Projects Intelligence portfolio surface.
  *
- * Presentación pura: todo el razonamiento vive en
- * `lib/projects/intelligence-view.ts` y en el lector fail-closed
- * (`lib/data/projects-intelligence-source.ts`). Este componente solo decide
- * cómo mostrar lo que ya viene resuelto — nunca genera un ranking, una
- * recomendación ni un proyecto simulado.
+ * The default view is intentionally compact. Canonical long-form project
+ * definition and milestone evidence remain available through native
+ * progressive disclosure instead of competing with the scan/decision layer.
  */
 import { CircleAlert, Info } from 'lucide-react';
 
@@ -20,8 +18,6 @@ import {
   MULTIPLE_NEXT_ACTION_WARNING,
   PI_NO_SNAPSHOT_LABEL,
   PI_STALE_LABEL,
-  PROGRESS_UNMEASURABLE_LABEL,
-  PROGRESS_VERIFIED_LABEL,
   QUALITY_ALL_CLEAR_MESSAGE,
   type ProjectCardView,
 } from '@/lib/projects/intelligence-view';
@@ -44,38 +40,73 @@ const NOTICE_TONE: Partial<Record<ProjectIntelligenceSourceStatus, 'info' | 'war
   'read-error': 'warning',
 };
 
-function Milestones({ project }: { project: ProjectCardView }) {
-  if (project.milestones.length === 0) return null;
+function ProjectProgress({ project }: { project: ProjectCardView }) {
+  const completedMilestones = project.milestones.filter((milestone) => milestone.completed).length;
+  const totalMilestones = project.milestones.length;
+
+  if (!project.progress.measurable) {
+    return (
+      <div className={styles['progress-compact']} data-measurable="no">
+        <span>Progreso sin medir</span>
+        <small>{project.progress.reasonLabel}</small>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.milestones}>
-      <p className={styles['milestones-note']}>{MILESTONE_WEIGHT_NOTE}</p>
+    <div className={styles['progress-compact']} data-measurable="yes">
+      <div className={styles['progress-line']}>
+        <strong className="tabular">{project.progress.percentLabel}</strong>
+        <span>
+          {totalMilestones > 0
+            ? `${completedMilestones}/${totalMilestones} hitos`
+            : `${project.progress.completedWeight}/${project.progress.totalWeight} pts`}
+        </span>
+      </div>
+      <ProgressBar
+        value={project.progress.completedWeight ?? 0}
+        max={project.progress.totalWeight ?? 100}
+        domain="projects"
+        label={`Progreso verificado por hitos: ${project.progress.percentLabel}`}
+        size="sm"
+      />
+    </div>
+  );
+}
+
+function MilestoneBreakdown({ project }: { project: ProjectCardView }) {
+  if (project.milestones.length === 0) {
+    return <p className={styles['detail-empty']}>Sin hitos definidos.</p>;
+  }
+
+  return (
+    <div className={styles['milestone-breakdown']}>
+      <p className={styles['detail-note']}>{MILESTONE_WEIGHT_NOTE}</p>
       <ul className={styles['milestone-list']}>
         {project.milestones.map((milestone) => (
-          <li
-            key={milestone.id}
-            className={styles.milestone}
-            data-completed={milestone.completed ? 'yes' : 'no'}
-          >
-            <div className={styles['milestone-top']}>
+          <li key={milestone.id} data-completed={milestone.completed ? 'yes' : 'no'}>
+            <div className={styles['milestone-row']}>
               <span className={styles['milestone-name']}>{milestone.name}</span>
-              <Badge domain={milestone.completed ? 'projects' : 'neutral'} variant="outline">
-                {milestone.statusLabel}
-              </Badge>
-            </div>
-            <div className={styles['milestone-meta']}>
-              {milestone.weight !== null ? (
-                <span className="tabular">{milestone.weight} pts</span>
-              ) : null}
-              {milestone.completedAtLabel ? (
-                <span>Completado {milestone.completedAtLabel}</span>
-              ) : null}
+              <span className={styles['milestone-state']}>
+                {milestone.weight !== null ? (
+                  <span className="tabular">{milestone.weight} pts</span>
+                ) : null}
+                <Badge domain={milestone.completed ? 'projects' : 'neutral'} variant="outline">
+                  {milestone.statusLabel}
+                </Badge>
+              </span>
             </div>
             {milestone.completionCriteria ? (
               <p className={styles['milestone-criteria']}>{milestone.completionCriteria}</p>
             ) : null}
+            {milestone.completedAtLabel ? (
+              <p className={styles['milestone-date']}>Completado {milestone.completedAtLabel}</p>
+            ) : null}
             {milestone.evidence ? (
-              <p className={styles['milestone-evidence']}>Evidencia: {milestone.evidence}</p>
+              <details className={styles['evidence-details']}>
+                <summary>Evidencia</summary>
+                <p>{milestone.evidence}</p>
+              </details>
             ) : null}
           </li>
         ))}
@@ -84,62 +115,77 @@ function Milestones({ project }: { project: ProjectCardView }) {
   );
 }
 
-function ProgressBlock({ project }: { project: ProjectCardView }) {
-  const { progress } = project;
-
-  if (!progress.measurable) {
-    return (
-      <div className={styles.progress} data-measurable="no">
-        <span className={styles['progress-label']}>{PROGRESS_UNMEASURABLE_LABEL}</span>
-        <p className={styles['progress-reason']}>{progress.reasonLabel}</p>
-      </div>
-    );
-  }
+function ProjectDetails({ project }: { project: ProjectCardView }) {
+  const hasDates =
+    project.lastAdvanceLabel || project.dueDateLabel || project.reviewDateLabel || project.blocker;
+  const hasPi =
+    project.pi.hasSnapshot ||
+    project.quality.multipleNextActionCandidates ||
+    project.nextAction.kind !== 'resolved';
 
   return (
-    <div className={styles.progress} data-measurable="yes">
-      <div className={styles['progress-top']}>
-        <span className={styles['progress-label']}>{PROGRESS_VERIFIED_LABEL}</span>
-        <strong className={`${styles['progress-percent']} tabular`}>{progress.percentLabel}</strong>
+    <details className={styles['project-details']}>
+      <summary>Ver más</summary>
+      <div className={styles['details-content']}>
+        {project.expectedResult ? (
+          <section>
+            <h4>Resultado</h4>
+            <p>{project.expectedResult}</p>
+          </section>
+        ) : null}
+
+        {project.definitionOfDone ? (
+          <section>
+            <h4>Definition of Done</h4>
+            <p>{project.definitionOfDone}</p>
+          </section>
+        ) : null}
+
+        {hasDates ? (
+          <section>
+            <h4>Estado operativo</h4>
+            <div className={styles['detail-meta']}>
+              {project.blocker ? <span>Bloqueo: {project.blocker}</span> : null}
+              {project.lastAdvanceLabel ? <span>Último avance: {project.lastAdvanceLabel}</span> : null}
+              {project.dueDateLabel ? <span>Límite: {project.dueDateLabel}</span> : null}
+              {project.reviewDateLabel ? <span>Revisión: {project.reviewDateLabel}</span> : null}
+            </div>
+          </section>
+        ) : null}
+
+        <section>
+          <h4>Hitos</h4>
+          <MilestoneBreakdown project={project} />
+        </section>
+
+        {hasPi ? (
+          <section>
+            <h4>Datos adicionales</h4>
+            <div className={styles['detail-meta']}>
+              {project.nextAction.kind !== 'resolved' ? <span>{project.nextAction.label}</span> : null}
+              {project.quality.multipleNextActionCandidates ? (
+                <span>{MULTIPLE_NEXT_ACTION_WARNING}</span>
+              ) : null}
+              {project.pi.hasSnapshot ? (
+                <>
+                  {project.pi.recommendation ? <span>PI: {project.pi.recommendation}</span> : null}
+                  {project.pi.confidence !== null ? (
+                    <span>Confianza: {project.pi.confidence}</span>
+                  ) : null}
+                  {project.pi.reviewedAtLabel ? (
+                    <span>Revisado: {project.pi.reviewedAtLabel}</span>
+                  ) : null}
+                  {project.pi.stale ? <span>{PI_STALE_LABEL}</span> : null}
+                </>
+              ) : (
+                <span>{PI_NO_SNAPSHOT_LABEL}</span>
+              )}
+            </div>
+            {project.pi.summary ? <p className={styles['pi-summary']}>{project.pi.summary}</p> : null}
+          </section>
+        ) : null}
       </div>
-      <ProgressBar
-        value={progress.completedWeight ?? 0}
-        max={progress.totalWeight ?? 100}
-        domain="projects"
-        label={`Progreso verificado por hitos: ${progress.percentLabel}`}
-      />
-      <p className={styles['progress-detail']}>
-        {progress.completedWeight} de {progress.totalWeight} puntos de hitos completados
-      </p>
-    </div>
-  );
-}
-
-function PiSnapshot({ project }: { project: ProjectCardView }) {
-  const { pi } = project;
-
-  if (!pi.hasSnapshot) {
-    return <p className={styles['pi-empty']}>{PI_NO_SNAPSHOT_LABEL}</p>;
-  }
-
-  return (
-    <div className={styles['pi-snapshot']}>
-      {pi.recommendation ? (
-        <Badge domain="projects" variant="soft">
-          {pi.recommendation}
-        </Badge>
-      ) : null}
-      {pi.confidence !== null ? (
-        <span className={styles['pi-confidence']}>
-          Confianza: <span className="tabular">{pi.confidence}</span>
-        </span>
-      ) : null}
-      {pi.reviewedAtLabel ? (
-        <span className={styles['pi-date']}>Revisado {pi.reviewedAtLabel}</span>
-      ) : null}
-      {pi.summary ? <p className={styles['pi-summary']}>{pi.summary}</p> : null}
-      {pi.stale ? <p className={styles['pi-stale']}>{PI_STALE_LABEL}</p> : null}
-    </div>
+    </details>
   );
 }
 
@@ -151,11 +197,15 @@ function ProjectCard({
   emphasis?: boolean;
 }) {
   return (
-    <article className={styles.card} data-emphasis={emphasis ? 'yes' : 'no'}>
-      <header className={styles['card-top']}>
-        <h3 className={styles['card-title']}>{project.name}</h3>
-        <div className={styles['card-badges']}>
-          <Badge domain="projects" variant="outline">
+    <article
+      className={styles['project-card']}
+      data-emphasis={emphasis ? 'yes' : 'no'}
+      data-status={project.status}
+    >
+      <header className={styles['project-card-header']}>
+        <h3>{project.name}</h3>
+        <div className={styles.badges}>
+          <Badge domain={project.status === 'Activo' ? 'projects' : 'neutral'} variant="outline">
             {project.status}
           </Badge>
           {project.type ? (
@@ -166,106 +216,60 @@ function ProjectCard({
         </div>
       </header>
 
-      <ProgressBlock project={project} />
+      {project.summary ? <p className={styles.summary}>{project.summary}</p> : null}
 
-      <div
-        className={styles['next-action']}
-        data-warning={project.quality.missingNextAction ? 'yes' : 'no'}
-      >
-        <span className={styles['next-action-label']}>Próxima acción</span>
-        <p className={styles['next-action-value']}>{project.nextAction.label}</p>
-        {project.quality.multipleNextActionCandidates ? (
-          <p className={styles['next-action-warning']}>{MULTIPLE_NEXT_ACTION_WARNING}</p>
-        ) : null}
-      </div>
+      <ProjectProgress project={project} />
+
+      {project.nextAction.kind === 'resolved' ? (
+        <p className={styles['next-action']}>
+          <span>Ahora</span>
+          {project.nextAction.label}
+        </p>
+      ) : null}
 
       {project.blocker ? (
         <p className={styles.blocker}>
-          <CircleAlert size={13} aria-hidden="true" />
+          <CircleAlert size={14} aria-hidden="true" />
           <span>{project.blocker}</span>
         </p>
       ) : null}
 
-      <div className={styles.meta}>
-        {project.lastAdvanceLabel ? <span>Último avance: {project.lastAdvanceLabel}</span> : null}
-        {project.dueDateLabel ? <span>Límite: {project.dueDateLabel}</span> : null}
-        {project.reviewDateLabel ? <span>Revisión: {project.reviewDateLabel}</span> : null}
-      </div>
-
-      <Milestones project={project} />
-
-      <div className={styles['pi-block']}>
-        <p className={styles['pi-title']}>Última lectura de Projects Intelligence</p>
-        <PiSnapshot project={project} />
-      </div>
+      <ProjectDetails project={project} />
     </article>
   );
 }
 
-function WaitingCard({ project }: { project: ProjectCardView }) {
+function SectionHeading({
+  title,
+  description,
+  count,
+}: {
+  title: string;
+  description: string;
+  count?: number;
+}) {
   return (
-    <article className={styles['compact-card']}>
-      <div className={styles['card-top']}>
-        <h3 className={styles['card-title']}>{project.name}</h3>
-        {project.type ? (
-          <Badge domain="neutral" variant="outline">
-            {project.type}
-          </Badge>
-        ) : null}
+    <div className={styles['section-heading']}>
+      <div>
+        <h2>{title}</h2>
+        <p>{description}</p>
       </div>
-      {project.definitionOfDone ? <p className={styles.body}>{project.definitionOfDone}</p> : null}
-      <ProgressBlock project={project} />
-      <p className={styles['next-action-value']}>{project.nextAction.label}</p>
-      {project.pi.recommendation ? (
-        <Badge domain="projects" variant="soft">
-          {project.pi.recommendation}
-        </Badge>
-      ) : null}
-      {project.reviewDateLabel ? (
-        <p className={styles.meta}>Revisión: {project.reviewDateLabel}</p>
-      ) : null}
-    </article>
+      {count !== undefined ? <span className={styles.count}>{count}</span> : null}
+    </div>
   );
 }
 
-function BlockedCard({ project }: { project: ProjectCardView }) {
+function CompletedRow({ project }: { project: ProjectCardView }) {
   return (
-    <article className={styles['compact-card']}>
-      <div className={styles['card-top']}>
-        <h3 className={styles['card-title']}>{project.name}</h3>
+    <li className={styles['completed-row']}>
+      <div>
+        <strong>{project.name}</strong>
+        {project.type ? <span>{project.type}</span> : null}
       </div>
-      {project.blocker ? <p className={styles.blocker}>{project.blocker}</p> : null}
-      <p className={styles['next-action-value']}>{project.nextAction.label}</p>
-      <ProgressBlock project={project} />
-    </article>
-  );
-}
-
-function AvoidCard({ project }: { project: ProjectCardView }) {
-  return (
-    <article className={styles['compact-card']}>
-      <div className={styles['card-top']}>
-        <h3 className={styles['card-title']}>{project.name}</h3>
-        <Badge domain="neutral" variant="soft">
-          {project.pi.recommendation}
-        </Badge>
+      <div className={styles['completed-status']}>
+        <span className="tabular">{project.progress.percentLabel ?? 'Completado'}</span>
+        {project.lastAdvanceLabel ? <small>{project.lastAdvanceLabel}</small> : null}
       </div>
-      {project.pi.summary ? <p className={styles.body}>{project.pi.summary}</p> : null}
-    </article>
-  );
-}
-
-function HistoryRow({ project }: { project: ProjectCardView }) {
-  return (
-    <li className={styles['history-row']}>
-      <span className={styles['history-name']}>{project.name}</span>
-      <Badge domain="neutral" variant="outline">
-        {project.status}
-      </Badge>
-      {project.progress.measurable ? (
-        <span className="tabular">{project.progress.percentLabel}</span>
-      ) : null}
-      {project.lastAdvanceLabel ? <span>{project.lastAdvanceLabel}</span> : null}
     </li>
   );
 }
@@ -303,163 +307,119 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
           description="No hay proyectos en las bases canónicas para este momento."
           domain="projects"
         />
-        {view.unavailableMessage ? (
-          <div className={styles.notice} data-tone="info" role="status">
-            <Info size={15} strokeWidth={2} aria-hidden="true" />
-            <span>{view.unavailableMessage}</span>
-          </div>
-        ) : null}
       </Card>
     );
   }
 
   return (
     <div className={styles.stack}>
-      <p className={styles['meta-line']}>
-        <span>Fuente: {view.source === 'notion' ? 'Notion' : 'Simulada'}</span>
-        <span>
-          Sync: {new Date(view.syncedAt).toISOString().slice(0, 16).replace('T', ' ')} UTC
-        </span>
-        <span>Fecha objetivo: {view.targetDate}</span>
-      </p>
+      <ul className={styles['summary-strip']} aria-label="Resumen del portfolio">
+        <li>
+          <strong className="tabular">{view.summary.active}</strong>
+          <span>En foco</span>
+        </li>
+        <li>
+          <strong className="tabular">{view.summary.waiting}</strong>
+          <span>En espera</span>
+        </li>
+        <li>
+          <strong className="tabular">{view.summary.blocked}</strong>
+          <span>Bloqueados</span>
+        </li>
+        <li>
+          <strong className="tabular">{view.summary.completed}</strong>
+          <span>Completados</span>
+        </li>
+      </ul>
 
-      <Card aria-labelledby="projects-summary-title">
-        <SectionHeader
-          id="projects-summary-title"
-          title="Resumen"
-          description="Datos reales del portfolio, sin recalcular contadores en la UI."
-          domain="projects"
-        />
-        <ul className={styles['summary-grid']}>
-          <li>
-            <strong className="tabular">{view.summary.active}</strong>
-            <span>Activos</span>
-          </li>
-          <li>
-            <strong className="tabular">{view.summary.waiting}</strong>
-            <span>En espera</span>
-          </li>
-          <li>
-            <strong className="tabular">{view.summary.blocked}</strong>
-            <span>Bloqueados</span>
-          </li>
-          <li>
-            <strong className="tabular">{view.summary.progressMeasurable}</strong>
-            <span>Progreso medible</span>
-          </li>
-          <li>
-            <strong className="tabular">{view.summary.withoutNextAction}</strong>
-            <span>Sin próxima acción</span>
-          </li>
-          <li>
-            <strong className="tabular">{view.summary.completed}</strong>
-            <span>Completados</span>
-          </li>
-        </ul>
-      </Card>
-
-      <Card aria-labelledby="projects-focus-title">
-        <SectionHeader
-          id="projects-focus-title"
+      <section className={styles.section} aria-labelledby="projects-focus-title">
+        <SectionHeading
           title="En foco"
-          description="Proyectos activos, todos con la misma jerarquía cuando hay varios."
-          domain="projects"
+          description="Solo lo que está activo ahora."
+          count={view.focus.length}
         />
         {view.focus.length === 0 ? (
-          <p className={styles.empty}>Ningún proyecto activo en este momento.</p>
+          <p className={styles.empty}>Ningún proyecto activo.</p>
         ) : (
-          <div
-            className={styles['focus-grid']}
-            data-single={view.focus.length === 1 ? 'yes' : 'no'}
-          >
+          <div className={styles['project-grid']} data-density="focus">
             {view.focus.map((project) => (
-              <ProjectCard key={project.id} project={project} emphasis={view.focus.length === 1} />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                emphasis={view.focus.length === 1}
+              />
             ))}
           </div>
         )}
-      </Card>
+      </section>
 
-      {view.avoidForNow.length > 0 ? (
-        <Card aria-labelledby="projects-avoid-title">
-          <SectionHeader
-            id="projects-avoid-title"
-            title="Evitar por ahora"
-            description="Recomendación PI persistida en Notion: Esperar o Cancelar propuesto."
-            domain="neutral"
+      {view.blocked.length > 0 ? (
+        <section className={styles.section} aria-labelledby="projects-blocked-title">
+          <SectionHeading
+            title="Bloqueados"
+            description="Necesitan resolver un bloqueo antes de seguir."
+            count={view.blocked.length}
           />
-          <div className={styles['compact-grid']}>
-            {view.avoidForNow.map((project) => (
-              <AvoidCard key={project.id} project={project} />
+          <div className={styles['project-grid']}>
+            {view.blocked.map((project) => (
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
-        </Card>
+        </section>
       ) : null}
 
       {view.waiting.length > 0 ? (
-        <Card aria-labelledby="projects-waiting-title">
-          <SectionHeader
-            id="projects-waiting-title"
+        <section className={styles.section} aria-labelledby="projects-waiting-title">
+          <SectionHeading
             title="En espera"
-            description="Proyectos pausados. Contexto secundario frente a En foco."
-            domain="neutral"
+            description="Preservados sin competir por tu atención diaria."
+            count={view.waiting.length}
           />
-          <div className={styles['compact-grid']}>
+          <div className={styles['project-grid']}>
             {view.waiting.map((project) => (
-              <WaitingCard key={project.id} project={project} />
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
-        </Card>
+        </section>
       ) : null}
-
-      {view.blocked.length > 0 ? (
-        <Card aria-labelledby="projects-blocked-title">
-          <SectionHeader
-            id="projects-blocked-title"
-            title="Bloqueados"
-            description="Proyectos con estado Bloqueado o bloqueo declarado."
-            domain="neutral"
-          />
-          <div className={styles['compact-grid']}>
-            {view.blocked.map((project) => (
-              <BlockedCard key={project.id} project={project} />
-            ))}
-          </div>
-        </Card>
-      ) : null}
-
-      <Card aria-labelledby="projects-quality-title">
-        <SectionHeader
-          id="projects-quality-title"
-          title="Calidad del portfolio"
-          description="Señales de calidad de datos explícitas. No hay un puntaje único."
-          domain="neutral"
-        />
-        {view.qualityAllClear ? (
-          <p className={styles.empty}>{QUALITY_ALL_CLEAR_MESSAGE}</p>
-        ) : (
-          <ul className={styles['quality-grid']}>
-            {view.qualityRows.map((row) => (
-              <li key={row.key} data-zero={row.count === 0 ? 'yes' : 'no'}>
-                <strong className="tabular">{row.count}</strong>
-                <span>{row.label}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
 
       {view.history.length > 0 ? (
-        <details className={styles.history}>
+        <details className={styles['completed-section']}>
           <summary>
-            <span>Historial · {view.history.length} proyectos</span>
+            <span>Completados e historial</span>
+            <span className={styles.count}>{view.history.length}</span>
           </summary>
-          <ul className={styles['history-list']}>
+          <ul className={styles['completed-list']}>
             {view.history.map((project) => (
-              <HistoryRow key={project.id} project={project} />
+              <CompletedRow key={project.id} project={project} />
             ))}
           </ul>
         </details>
       ) : null}
+
+      <details className={styles.diagnostics}>
+        <summary>Datos y calidad</summary>
+        <div className={styles['diagnostics-content']}>
+          <p>
+            Fuente: {view.source === 'notion' ? 'Notion' : 'Simulada'} · Sync:{' '}
+            {new Date(view.syncedAt).toISOString().slice(0, 16).replace('T', ' ')} UTC · Fecha
+            objetivo: {view.targetDate}
+          </p>
+          {view.qualityAllClear ? (
+            <p>{QUALITY_ALL_CLEAR_MESSAGE}</p>
+          ) : (
+            <ul>
+              {view.qualityRows
+                .filter((row) => row.count > 0)
+                .map((row) => (
+                  <li key={row.key}>
+                    <strong className="tabular">{row.count}</strong> {row.label}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
+      </details>
     </div>
   );
 }
