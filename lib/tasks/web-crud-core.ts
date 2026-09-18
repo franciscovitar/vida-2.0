@@ -46,7 +46,11 @@ function taskOwnership(operationId: string): string {
     .slice(0, 32)}`;
 }
 
-function findOpaque(pages: readonly NotionRawPage[], prefix: string, key: string): NotionRawPage | null {
+function findOpaque(
+  pages: readonly NotionRawPage[],
+  prefix: string,
+  key: string,
+): NotionRawPage | null {
   return pages.find((page) => opaqueKey(prefix, page.id) === key) ?? null;
 }
 
@@ -60,8 +64,9 @@ function snapshot(
   return {
     title: readTitle(page.properties[TASK_PROPS.title]),
     status:
-      (readSelectName(page.properties[TASK_PROPS.status]) as PlanningTaskEditableSnapshot['status']) ??
-      'Pendiente',
+      (readSelectName(
+        page.properties[TASK_PROPS.status],
+      ) as PlanningTaskEditableSnapshot['status']) ?? 'Pendiente',
     date: readDateStart(page.properties[TASK_PROPS.date]),
     priority: readSelectName(
       page.properties[TASK_PROPS.priority],
@@ -74,7 +79,9 @@ function snapshot(
     ) as PlanningTaskEditableSnapshot['energy'],
     areaKey: areaId && areas.some((item) => item.id === areaId) ? opaqueKey('area', areaId) : null,
     projectKey:
-      projectId && projects.some((item) => item.id === projectId) ? opaqueKey('proj', projectId) : null,
+      projectId && projects.some((item) => item.id === projectId)
+        ? opaqueKey('proj', projectId)
+        : null,
     blocker: readRichText(page.properties[TASK_PROPS.blocker]) || null,
     note: readRichText(page.properties[TASK_PROPS.note]) || null,
   };
@@ -86,7 +93,8 @@ function equalSnapshot(a: PlanningTaskEditableSnapshot, b: PlanningTaskEditableS
 
 function validateSnapshot(value: PlanningTaskEditableSnapshot): string | null {
   const title = value.title.trim();
-  if (title.length < 3 || title.length > 200) return 'El título debe tener entre 3 y 200 caracteres.';
+  if (title.length < 3 || title.length > 200)
+    return 'El título debe tener entre 3 y 200 caracteres.';
   if (!(TASK_STATUSES as readonly string[]).includes(value.status)) return 'Estado inválido.';
   if (value.priority && !(TASK_PRIORITIES as readonly string[]).includes(value.priority)) {
     return 'Prioridad inválida.';
@@ -167,7 +175,8 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       if (validation) return { ok: false, code: 'invalid', message: validation };
 
       const canonical = await loadCanonical(deps);
-      if (!canonical) return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
+      if (!canonical)
+        return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
       const ownership = taskOwnership(operationId);
       const owned = canonical.tasks.filter(
         (page) => readRichText(page.properties[TASK_PROPS.ownership]) === ownership,
@@ -178,7 +187,11 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       if (owned.length === 1) {
         const current = snapshot(owned[0]!, canonical.projects, canonical.areas);
         if (equalSnapshot(current, proposed)) {
-          return { ok: true, code: 'idempotent', message: 'La tarea ya estaba guardada; no se duplicó.' };
+          return {
+            ok: true,
+            code: 'idempotent',
+            message: 'La tarea ya estaba guardada; no se duplicó.',
+          };
         }
         return { ok: false, code: 'conflict', message: 'La operación ya existe con otro payload.' };
       }
@@ -212,14 +225,22 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       }
       const readBack = await deps.client.retrievePage(created.page.id);
       if (!readBack.ok) {
-        return { ok: false, code: 'verification-failed', message: 'No pude verificar la creación.' };
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'No pude verificar la creación.',
+        };
       }
       const after = snapshot(readBack.page, canonical.projects, canonical.areas);
       if (
         !equalSnapshot(after, proposed) ||
         readRichText(readBack.page.properties[TASK_PROPS.ownership]) !== ownership
       ) {
-        return { ok: false, code: 'verification-failed', message: 'La tarea creada no coincide con el payload.' };
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'La tarea creada no coincide con el payload.',
+        };
       }
       return { ok: true, code: 'applied', message: 'Tarea creada y verificada.' };
     },
@@ -228,7 +249,8 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       const validation = validateSnapshot(input.next);
       if (validation) return { ok: false, code: 'invalid', message: validation };
       const canonical = await loadCanonical(deps);
-      if (!canonical) return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
+      if (!canonical)
+        return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
       const page = findOpaque(canonical.tasks, 'task', input.taskKey);
       if (!page) return { ok: false, code: 'not-found', message: 'Tarea no encontrada.' };
       const current = snapshot(page, canonical.projects, canonical.areas);
@@ -236,7 +258,11 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         return { ok: true, code: 'idempotent', message: 'El cambio ya estaba aplicado.' };
       }
       if (!verifyExpected(current, input.expected)) {
-        return { ok: false, code: 'conflict', message: 'La tarea cambió desde que abriste el editor. Recargá antes de guardar.' };
+        return {
+          ok: false,
+          code: 'conflict',
+          message: 'La tarea cambió desde que abriste el editor. Recargá antes de guardar.',
+        };
       }
 
       const relations = resolveRelations(canonical, input.next.areaKey, input.next.projectKey);
@@ -261,12 +287,18 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         properties[TASK_PROPS.area] = relationProp(relations.area ? [relations.area.id] : []);
       }
       if (next.projectKey !== before.projectKey || next.areaKey !== before.areaKey) {
-        properties[TASK_PROPS.project] = relationProp(relations.project ? [relations.project.id] : []);
+        properties[TASK_PROPS.project] = relationProp(
+          relations.project ? [relations.project.id] : [],
+        );
         properties[TASK_PROPS.projectArea] =
-          relations.project && relations.area ? relationProp([relations.area.id]) : relationProp([]);
+          relations.project && relations.area
+            ? relationProp([relations.area.id])
+            : relationProp([]);
       }
       if (next.blocker !== before.blocker) {
-        properties[TASK_PROPS.blocker] = next.blocker ? richTextProp(next.blocker) : clearRichText();
+        properties[TASK_PROPS.blocker] = next.blocker
+          ? richTextProp(next.blocker)
+          : clearRichText();
       }
       if (next.note !== before.note) {
         properties[TASK_PROPS.note] = next.note ? richTextProp(next.note) : clearRichText();
@@ -276,14 +308,23 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       }
 
       const updated = await deps.client.updatePage(page.id, properties);
-      if (!updated.ok) return { ok: false, code: 'unavailable', message: 'No se pudo actualizar la tarea.' };
+      if (!updated.ok)
+        return { ok: false, code: 'unavailable', message: 'No se pudo actualizar la tarea.' };
       const readBack = await deps.client.retrievePage(page.id);
       if (!readBack.ok) {
-        return { ok: false, code: 'verification-failed', message: 'No pude verificar la actualización.' };
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'No pude verificar la actualización.',
+        };
       }
       const after = snapshot(readBack.page, canonical.projects, canonical.areas);
       if (!equalSnapshot(after, next)) {
-        return { ok: false, code: 'verification-failed', message: 'La actualización no pudo verificarse.' };
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'La actualización no pudo verificarse.',
+        };
       }
       return { ok: true, code: 'applied', message: 'Tarea actualizada y verificada.' };
     },
@@ -293,23 +334,41 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         return { ok: false, code: 'invalid', message: 'Confirmación inválida.' };
       }
       const canonical = await loadCanonical(deps);
-      if (!canonical) return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
+      if (!canonical)
+        return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
       const page = findOpaque(canonical.tasks, 'task', input.taskKey);
-      if (!page) return { ok: false, code: 'not-found', message: 'Tarea no encontrada o ya archivada.' };
+      if (!page)
+        return { ok: false, code: 'not-found', message: 'Tarea no encontrada o ya archivada.' };
       const current = snapshot(page, canonical.projects, canonical.areas);
       if (current.title !== input.expectedTitle || current.status !== input.expectedStatus) {
-        return { ok: false, code: 'conflict', message: 'La tarea cambió antes de eliminarse. Recargá y revisá.' };
+        return {
+          ok: false,
+          code: 'conflict',
+          message: 'La tarea cambió antes de eliminarse. Recargá y revisá.',
+        };
       }
       const archived = await deps.client.archivePage(page.id);
       if (!archived.ok || !archived.archived) {
-        return { ok: false, code: 'verification-failed', message: 'No pude verificar el archivado.' };
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'No pude verificar el archivado.',
+        };
       }
       const after = await deps.client.queryDataSource(deps.tasksDataSourceId);
       if (!after.ok) {
-        return { ok: false, code: 'verification-failed', message: 'No pude verificar que la tarea salió de la fuente activa.' };
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'No pude verificar que la tarea salió de la fuente activa.',
+        };
       }
       if (findOpaque(after.pages, 'task', input.taskKey)) {
-        return { ok: false, code: 'verification-failed', message: 'La tarea sigue activa después del archivado.' };
+        return {
+          ok: false,
+          code: 'verification-failed',
+          message: 'La tarea sigue activa después del archivado.',
+        };
       }
       return { ok: true, code: 'applied', message: 'Tarea enviada a la papelera de Notion.' };
     },
