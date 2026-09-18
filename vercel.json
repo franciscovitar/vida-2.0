@@ -1,3 +1,0 @@
-{
-  "buildCommand": "npm run typecheck && npm run lint && npm run stylelint && npx prettier --check app components data docs lib tests types && npm run build"
-}
