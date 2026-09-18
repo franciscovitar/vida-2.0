@@ -6,8 +6,9 @@
  * dominios y prioridades. No contiene lógica de presentación ni llamadas de red.
  *
  * Límites explícitos del producto:
- * - No es un sistema de diagnóstico médico ni un puntaje universal de readiness.
- * - No existe un score 0–100 ni una suma ponderada opaca.
+ * - No es un sistema de diagnóstico médico ni un puntaje universal de salud.
+ * - V1.1 permite scores 0–100 sólo cuando son explicables, versionados y acompañados de confianza.
+ * - No existe una suma ponderada opaca ni un score que oculte la evidencia subyacente.
  * - Un faltante es desconocido, nunca cero.
  * - Una coincidencia temporal es contexto, nunca una causa.
  */
@@ -17,6 +18,7 @@ import {
 } from '@/lib/adapters/salud-period';
 import { formatNumber } from '@/lib/format';
 import type { GymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
+import { buildExplainableHealthScores, type HealthScoreboard } from '@/lib/health/scores';
 import type { NutritionCoverage, NutritionDashboardData } from '@/lib/nutrition/types';
 import type {
   HealthBaselineSignal,
@@ -1160,6 +1162,7 @@ export interface HealthIntelligenceInput {
 }
 
 export interface HealthIntelligence {
+  scores: HealthScoreboard;
   dailyBrief: HealthDailyBrief;
   currentState: HealthCurrentState;
   trajectory: HealthTrajectory;
@@ -1195,8 +1198,10 @@ export function buildHealthIntelligence(input: HealthIntelligenceInput): HealthI
     quality: evidenceQuality,
     priorities,
   });
+  const scores = buildExplainableHealthScores(health);
 
   return {
+    scores,
     dailyBrief,
     currentState,
     trajectory,
