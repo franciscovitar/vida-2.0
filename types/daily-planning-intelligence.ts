@@ -19,6 +19,21 @@ export type DailyPlanningStatus = 'ready' | 'degraded' | 'empty' | 'unavailable'
 
 export type DailyPlanningNotionSourceStatus = ProjectIntelligenceSourceStatus;
 export type DailyPlanningCalendarSourceStatus = Exclude<CalendarIntegrationStatus, 'mock'>;
+export type DailyPlanningHealthSourceStatus = 'ready' | 'limited' | 'unavailable';
+export type DailyPlanningHealthState = 'NORMAL' | 'CUIDADO' | 'RECUPERACIÓN' | 'INSUFICIENTE';
+export type DailyPlanningHealthConfidence = 'ALTA' | 'MEDIA' | 'BAJA';
+
+export interface DailyPlanningHealthContext {
+  /** Estado derivado; nunca incluye biometría cruda ni evidencia detallada. */
+  state: DailyPlanningHealthState;
+  confidence: DailyPlanningHealthConfidence;
+  headline: string;
+  /**
+   * false cuando Salud no tiene evidencia suficiente para informar capacidad.
+   * Incluso true es contexto: no decide prioridades ni agenda por sí solo.
+   */
+  canInformCapacity: boolean;
+}
 
 export interface DailyPlanningSourceState<Status extends string> {
   status: Status;
@@ -95,6 +110,8 @@ export interface DailyPlanningSources {
     mode: CalendarDataSourceMode;
   };
   assessments?: DailyPlanningSourceState<AssessmentProgressReadStatus>;
+  /** Fuente no bloqueante: Planificación sigue operativa si Salud falla. */
+  health?: DailyPlanningSourceState<DailyPlanningHealthSourceStatus>;
 }
 
 /**
@@ -114,5 +131,10 @@ export interface DailyPlanningContext {
   calendarEvents: readonly DailyPlanningCalendarEvent[];
   /** Evaluaciones activas/planificadas; resumen acotado, no evidencia cruda. */
   assessments?: readonly AssessmentProgressSnapshot[];
+  /**
+   * Contexto sanitario mínimo y derivado. No contiene métricas crudas y no posee
+   * prioridad de proyecto ni autoridad para reordenar la agenda.
+   */
+  health?: DailyPlanningHealthContext | null;
   quality: DailyPlanningQuality;
 }
