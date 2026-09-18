@@ -1,0 +1,25 @@
+name: Health V1.1 Prettier Diff Helper
+
+on:
+  push:
+    branches:
+      - health-prettier-helper-2026-09-18
+
+permissions:
+  contents: read
+
+jobs:
+  format-diff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Show exact Prettier diff
+        run: |
+          npx prettier --write components/health/HealthIntelligenceSections.tsx
+          git diff -- components/health/HealthIntelligenceSections.tsx
