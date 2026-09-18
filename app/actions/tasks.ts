@@ -33,7 +33,11 @@ async function serviceOrError(): Promise<
   if (!service) {
     return {
       ok: false,
-      result: { ok: false, code: 'unavailable', message: 'Notion no está configurado para escritura.' },
+      result: {
+        ok: false,
+        code: 'unavailable',
+        message: 'Notion no está configurado para escritura.',
+      },
     };
   }
   return { ok: true, service };
