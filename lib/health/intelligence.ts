@@ -935,6 +935,91 @@ function buildEvidenceQuality(
 }
 
 /* ------------------------------------------------------------------ */
+/* Daily Health Brief                                                  */
+/* ------------------------------------------------------------------ */
+
+export type HealthBriefState = 'NORMAL' | 'CUIDADO' | 'RECUPERACIÓN' | 'INSUFICIENTE';
+export type HealthBriefConfidence = 'ALTA' | 'MEDIA' | 'BAJA';
+
+export interface HealthDailyBrief {
+  date: string;
+  state: HealthBriefState;
+  headline: string;
+  confidence: HealthBriefConfidence;
+  confidenceDetail: string;
+  evidence: readonly string[];
+  uncertainties: readonly string[];
+  recommendations: readonly string[];
+  limits: readonly string[];
+  engineVersion: 'health-intelligence-v1';
+}
+
+const BRIEF_STATE: Readonly<Record<HealthStateKind, HealthBriefState>> = {
+  'normal-for-you': 'NORMAL',
+  watch: 'CUIDADO',
+  'below-usual': 'RECUPERACIÓN',
+  'insufficient-data': 'INSUFICIENTE',
+};
+
+const BRIEF_CONFIDENCE: Readonly<Record<HealthEvidenceLevel, HealthBriefConfidence>> = {
+  strong: 'ALTA',
+  partial: 'MEDIA',
+  limited: 'BAJA',
+};
+
+function buildDailyBrief(input: {
+  health: HealthPageData;
+  state: HealthCurrentState;
+  quality: HealthEvidenceQuality;
+  priorities: readonly HealthPriority[];
+}): HealthDailyBrief {
+  const { health, state, quality, priorities } = input;
+
+  const evidence = state.evidence
+    .filter((item) => item.role === 'core' && item.value !== null)
+    .sort((a, b) => Number(b.concern) - Number(a.concern))
+    .slice(0, 3)
+    .map((item) => item.text);
+
+  const uncertainties: string[] = [];
+  if (!health.sourceAvailable) {
+    uncertainties.push('La fuente real de salud no está disponible, así que no hay lectura personal confiable para hoy.');
+  } else {
+    if (state.coreMissing.length > 0) {
+      uncertainties.push(`Faltan señales núcleo de hoy: ${joinEs(state.coreMissing.map(lowerEs))}.`);
+    }
+    if (state.importKind === 'partial') {
+      uncertainties.push('La importación de hoy todavía está dentro de la ventana de reconciliación.');
+    }
+    if (state.importKind === 'source-incomplete') {
+      uncertainties.push(
+        'La interfaz raw sigue incompleta para hoy; eso no demuestra ausencia en Apple Health.',
+      );
+    }
+    if (quality.baselineDays < HEALTH_BASELINE_STRONG_DAYS) {
+      uncertainties.push(
+        `La base personal todavía tiene ${quality.baselineDays} día(s) útiles sobre una ventana de ${quality.baselineWindowDays}.`,
+      );
+    }
+  }
+
+  return {
+    date: health.targetDate,
+    state: BRIEF_STATE[state.kind],
+    headline: state.headline,
+    confidence: BRIEF_CONFIDENCE[quality.level],
+    confidenceDetail: quality.detail,
+    evidence,
+    uncertainties,
+    recommendations: priorities.map((item) => `${item.title}: ${item.detail}`),
+    limits: [
+      'Describe patrones personales de bienestar y recuperación; no realiza diagnósticos clínicos.',
+      'Las coincidencias con entrenamiento o nutrición aportan contexto temporal, no causalidad demostrada.',
+    ],
+    engineVersion: 'health-intelligence-v1',
+  };
+}
+/* ------------------------------------------------------------------ */
 /* Prioridades                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -1059,6 +1144,7 @@ export interface HealthIntelligenceInput {
 }
 
 export interface HealthIntelligence {
+  dailyBrief: HealthDailyBrief;
   currentState: HealthCurrentState;
   trajectory: HealthTrajectory;
   changes: readonly HealthInsight[];
@@ -1081,18 +1167,26 @@ export function buildHealthIntelligence(input: HealthIntelligenceInput): HealthI
   const gym = buildGymContext(input.gym, health.targetDate);
   const nutrition = buildNutritionContext(input.nutrition);
   const evidenceQuality = buildEvidenceQuality(health, currentState, gym, nutrition);
+  const priorities = buildPriorities({
+    health,
+    state: currentState,
+    trajectory,
+    quality: evidenceQuality,
+  });
+  const dailyBrief = buildDailyBrief({
+    health,
+    state: currentState,
+    quality: evidenceQuality,
+    priorities,
+  });
 
   return {
+    dailyBrief,
     currentState,
     trajectory,
     changes: buildChanges(health, gym),
     crossDomain: { gym, nutrition, caveat: HEALTH_CONTEXT_CAVEAT },
-    priorities: buildPriorities({
-      health,
-      state: currentState,
-      trajectory,
-      quality: evidenceQuality,
-    }),
+    priorities,
     evidenceQuality,
   };
 }
