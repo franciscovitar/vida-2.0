@@ -20,11 +20,7 @@ function humanizeToken(value: string): string {
   return value.replaceAll('_', ' ').toLowerCase();
 }
 
-export function ProfessionalDashboard({
-  data,
-}: {
-  data: ProfessionalIntelligenceData;
-}) {
+export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligenceData }) {
   if (data.status !== 'ready' || !data.snapshot) {
     return (
       <Card aria-labelledby="professional-unavailable-title">
@@ -48,11 +44,7 @@ export function ProfessionalDashboard({
   return (
     <div className={styles.stack}>
       {data.notice ? (
-        <div
-          className={styles.notice}
-          data-tone={data.stale ? 'warning' : 'info'}
-          role="status"
-        >
+        <div className={styles.notice} data-tone={data.stale ? 'warning' : 'info'} role="status">
           {data.stale ? (
             <CircleAlert size={16} aria-hidden="true" />
           ) : (
@@ -187,8 +179,7 @@ export function ProfessionalDashboard({
                 <p>{item.capability}</p>
                 <p>{item.application}</p>
                 <small>
-                  {item.priceLabel} · {item.personalEvalStatus} · system-maintenance
-                  decide
+                  {item.priceLabel} · {item.personalEvalStatus} · system-maintenance decide
                 </small>
               </li>
             ))}
