@@ -262,6 +262,19 @@ function averageOf(
   };
 }
 
+function medianOf(values: readonly number[]): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 1) return sorted[middle];
+  return (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+function medianAbsoluteDeviation(values: readonly number[], median: number | null): number | null {
+  if (median === null || values.length === 0) return null;
+  return medianOf(values.map((value) => Math.abs(value - median)));
+}
+
 function seriesOf(
   map: Map<string, SaludRecord>,
   window: PeriodWindow,
@@ -347,7 +360,13 @@ export function buildHealthSignalsModel(
   const baseline = {} as Record<HealthSignalId, HealthBaselineSignal>;
   for (const id of SIGNAL_IDS) {
     const { average, values } = averageOf(baselineRecords, SIGNAL_PICKERS[id]);
-    baseline[id] = { average, days: values.length };
+    const median = medianOf(values);
+    baseline[id] = {
+      average,
+      median,
+      mad: medianAbsoluteDeviation(values, median),
+      days: values.length,
+    };
   }
 
   return {
