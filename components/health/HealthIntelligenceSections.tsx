@@ -57,9 +57,15 @@ function ScoreValue({ score }: { score: number | null }) {
 }
 
 function ScoreTrend({ score }: { score: HealthExplainableScore }) {
-  if (score.trend === 'up') return <TrendingUp size={13} aria-label="Tendencia favorable" />;
-  if (score.trend === 'down') return <TrendingDown size={13} aria-label="Tendencia desfavorable" />;
-  if (score.trend === 'stable') return <Minus size={13} aria-label="Tendencia estable" />;
+  if (score.trend === 'up') {
+    return <TrendingUp size={13} aria-label="Tendencia favorable" />;
+  }
+  if (score.trend === 'down') {
+    return <TrendingDown size={13} aria-label="Tendencia desfavorable" />;
+  }
+  if (score.trend === 'stable') {
+    return <Minus size={13} aria-label="Tendencia estable" />;
+  }
   return null;
 }
 
@@ -120,7 +126,11 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
 
       <div className={styles['domain-score-grid']}>
         {scoreboard.domains.map((score) => (
-          <article key={score.id} className={styles['domain-score-card']} data-band={score.band}>
+          <article
+            key={score.id}
+            className={styles['domain-score-card']}
+            data-band={score.band}
+          >
             <div className={styles['domain-score-top']}>
               <div>
                 <span>{score.label}</span>
@@ -145,7 +155,9 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
                 {score.contributors.map((item) => (
                   <li key={item.id}>
                     <span>{item.label}</span>
-                    <strong>{item.score === null ? 'No disponible' : `${item.score}/100`}</strong>
+                    <strong>
+                      {item.score === null ? 'No disponible' : `${item.score}/100`}
+                    </strong>
                     <small>{item.detail}</small>
                   </li>
                 ))}
@@ -187,6 +199,7 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
     </section>
   );
 }
+
 /** 1. ¿Cómo estoy hoy? */
 export function HealthTodayHero({
   brief,
