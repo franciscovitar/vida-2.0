@@ -163,13 +163,7 @@ function weightedAggregate(
     return {
       score: null,
       confidence: roundScore(
-        100 *
-          geometricMean([
-            Math.max(coverage, 0.01),
-            Math.max(sourceFactor, 0.01),
-            0.35,
-            0.6,
-          ]),
+        100 * geometricMean([Math.max(coverage, 0.01), Math.max(sourceFactor, 0.01), 0.35, 0.6]),
       ),
     };
   }
