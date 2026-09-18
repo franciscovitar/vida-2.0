@@ -103,7 +103,11 @@ export function parseImportStatus(
   if (cell.kind !== 'value') return 'none';
   const text = cell.value.trim().toLowerCase();
   if (text === '') return 'none';
-  if (/incompleto[_\s-]?fuente|fuente[_\s-]?incompleta|source[_\s-]?incomplete|incomplete[_\s-]?source/.test(text)) {
+  if (
+    /incompleto[_\s-]?fuente|fuente[_\s-]?incompleta|source[_\s-]?incomplete|incomplete[_\s-]?source/.test(
+      text,
+    )
+  ) {
     return 'source-incomplete';
   }
   if (/parcial|partial|incomplet|faltante|missing/.test(text)) return 'partial';
