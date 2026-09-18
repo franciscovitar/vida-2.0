@@ -523,6 +523,60 @@ test('los umbrales de monitoreo respetan sus bordes exactos', () => {
   assert.equal(sleepFor(9).concern, false);
 });
 
+test('la base personal usa mediana y MAD para resistir un outlier aislado', () => {
+  const history = baselineRows();
+  const sleepColumn = HEADERS.indexOf(SAL.sleep);
+  assert.ok(sleepColumn >= 0, 'falta la columna de sueño en el fixture');
+  const outlier = [...history[0]];
+  outlier[sleepColumn] = 30;
+
+  const result = intelligenceFor([
+    outlier,
+    ...history.slice(1),
+    row({
+      [SAL.fecha]: TODAY,
+      [SAL.sleep]: 7.5,
+      [SAL.restingHr]: 55,
+      [SAL.importStatus]: 'completo',
+    }),
+  ]);
+
+  const sleep = evidenceOf(result, 'sleep');
+  assert.ok((sleep.baselineAverage ?? 0) > 9);
+  assert.equal(sleep.baselineMedian, 7.5);
+  assert.equal(sleep.baselineMad, 0);
+  assert.equal(sleep.baselineLabel, '7,5 h');
+  assert.equal(sleep.materiality, 'none');
+  assert.equal(sleep.concern, false);
+  assert.equal(result.currentState.kind, 'normal-for-you');
+});
+
+test('la confianza alta exige 14 días útiles de base personal', () => {
+  const rows: unknown[][] = [];
+  for (let offset = -12; offset <= -1; offset += 1) {
+    rows.push(
+      row({
+        [SAL.fecha]: shift(offset),
+        [SAL.sleep]: 7.5,
+        [SAL.restingHr]: 55,
+        [SAL.importStatus]: 'completo',
+      }),
+    );
+  }
+  rows.push(
+    row({
+      [SAL.fecha]: TODAY,
+      [SAL.sleep]: 7.5,
+      [SAL.restingHr]: 55,
+      [SAL.importStatus]: 'completo',
+    }),
+  );
+
+  const result = intelligenceFor(rows);
+  assert.equal(result.evidenceQuality.baselineDays, 12);
+  assert.equal(result.evidenceQuality.level, 'partial');
+  assert.equal(result.dailyBrief.confidence, 'MEDIA');
+});
 test('una base personal insuficiente impide afirmar que el día es normal', () => {
   const result = intelligenceFor([
     row({
