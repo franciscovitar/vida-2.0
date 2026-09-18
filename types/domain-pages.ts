@@ -73,7 +73,7 @@ export interface HabitsPageData extends DomainPageMeta {
   writable: boolean;
 }
 
-export type HealthImportKind = 'partial' | 'complete' | 'none';
+export type HealthImportKind = 'partial' | 'source-incomplete' | 'complete' | 'none';
 export type HealthMetricGroupId = 'sleep' | 'cardio' | 'movement' | 'oxygen' | 'energy';
 export type HealthInsightTone = 'neutral' | 'positive' | 'watch';
 /** Naturaleza de una observación: hecho verificable, tendencia personal o contexto temporal. */
@@ -182,6 +182,8 @@ export interface HealthPageData extends DomainPageMeta {
   baselineDays: number;
   completeDays: number;
   partialDays: number;
+  /** Días cuyo raw quedó incompleto después de la ventana de reconciliación. */
+  sourceIncompleteDays: number;
   insights: HealthInsight[];
 }
 
