@@ -983,7 +983,9 @@ function buildDailyBrief(input: {
 
   const uncertainties: string[] = [];
   if (!health.sourceAvailable) {
-    uncertainties.push('La fuente real de salud no está disponible, así que no hay lectura personal confiable para hoy.');
+    uncertainties.push(
+      'La fuente real de salud no está disponible, así que no hay lectura personal confiable para hoy.',
+    );
   } else {
     if (state.coreMissing.length > 0) {
       uncertainties.push(`Faltan señales núcleo de hoy: ${joinEs(state.coreMissing.map(lowerEs))}.`);
@@ -1019,6 +1021,7 @@ function buildDailyBrief(input: {
     engineVersion: 'health-intelligence-v1',
   };
 }
+
 /* ------------------------------------------------------------------ */
 /* Prioridades                                                         */
 /* ------------------------------------------------------------------ */
