@@ -130,7 +130,8 @@
   color: var(--text-muted);
 }
 
-.badge[data-kind='partial'] {
+.badge[data-kind='partial'],
+.badge[data-kind='source-incomplete'] {
   background: var(--c-projects-soft);
   color: var(--c-projects);
 }
