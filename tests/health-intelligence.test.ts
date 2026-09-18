@@ -140,8 +140,12 @@ test('Daily Health Brief expone estado, confianza, evidencia y límites determin
   assert.equal(stable.dailyBrief.confidence, 'ALTA');
   assert.equal(stable.dailyBrief.engineVersion, 'health-intelligence-v1');
   assert.ok(stable.dailyBrief.evidence.some((item) => /Sueño total/.test(item)));
-  assert.ok(stable.dailyBrief.recommendations.some((item) => /Mantené el patrón actual/.test(item)));
-  assert.ok(stable.dailyBrief.limits.some((item) => /no realiza diagnósticos clínicos/i.test(item)));
+  assert.ok(
+    stable.dailyBrief.recommendations.some((item) => /Mantené el patrón actual/.test(item)),
+  );
+  assert.ok(
+    stable.dailyBrief.limits.some((item) => /no realiza diagnósticos clínicos/i.test(item)),
+  );
 
   const watch = intelligenceFor([
     ...baselineRows(),
@@ -176,8 +180,11 @@ test('Daily Health Brief expone estado, confianza, evidencia y límites determin
   ]);
   assert.equal(insufficient.dailyBrief.state, 'INSUFICIENTE');
   assert.equal(insufficient.dailyBrief.confidence, 'BAJA');
-  assert.ok(insufficient.dailyBrief.uncertainties.some((item) => /reconciliación/i.test(item)));
+  assert.ok(
+    insufficient.dailyBrief.uncertainties.some((item) => /reconciliación/i.test(item)),
+  );
 });
+
 test('movimiento sin sueño ni FC deja el día como datos insuficientes', () => {
   const result = intelligenceFor([
     ...baselineRows(),
