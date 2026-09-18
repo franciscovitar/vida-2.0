@@ -32,7 +32,11 @@ import type {
 /* Umbrales de monitoreo personal                                      */
 /* ------------------------------------------------------------------ */
 
-/** Señales con umbral de monitoreo definido. */
+/** Señales con umbral de monitoreo definido.
+ *
+ * Este archivo forma parte del runtime de Health Intelligence V1 y se mantiene
+ * side-effect free para que el deployment pueda verificarse sin mutaciones de datos.
+ */
 export type HealthMonitoredSignal = Extract<
   HealthSignalId,
   'sleep' | 'restingHr' | 'hrv' | 'steps' | 'activeCalories' | 'spo2'
