@@ -4,12 +4,7 @@ import type {
   ProfessionalSnapshot,
 } from '@/types/professional-intelligence';
 
-const CONFIDENCE = new Set<ProfessionalConfidence>([
-  'LOW',
-  'MEDIUM',
-  'MEDIUM_HIGH',
-  'HIGH',
-]);
+const CONFIDENCE = new Set<ProfessionalConfidence>(['LOW', 'MEDIUM', 'MEDIUM_HIGH', 'HIGH']);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -31,10 +26,7 @@ function isConfidence(value: unknown): value is ProfessionalConfidence {
   return typeof value === 'string' && CONFIDENCE.has(value as ProfessionalConfidence);
 }
 
-function everyArray(
-  value: unknown,
-  predicate: (item: unknown) => boolean,
-): boolean {
+function everyArray(value: unknown, predicate: (item: unknown) => boolean): boolean {
   return Array.isArray(value) && value.every(predicate);
 }
 
@@ -53,9 +45,7 @@ function validEvidence(value: unknown): boolean {
   if (!isRecord(value)) return false;
   return (
     isString(value.capability) &&
-    ['PRACTICED', 'DEMONSTRATED', 'EXTERNALLY_VALIDATED'].includes(
-      String(value.state),
-    ) &&
+    ['PRACTICED', 'DEMONSTRATED', 'EXTERNALLY_VALIDATED'].includes(String(value.state)) &&
     isConfidence(value.confidence) &&
     isString(value.note)
   );
@@ -102,10 +92,7 @@ function validLearning(value: unknown): boolean {
 function validFinding(value: unknown): boolean {
   if (!isRecord(value)) return false;
   return (
-    isString(value.id) &&
-    isString(value.claim) &&
-    isString(value.status) &&
-    isString(value.note)
+    isString(value.id) && isString(value.claim) && isString(value.status) && isString(value.note)
   );
 }
 
@@ -139,12 +126,7 @@ export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot 
   const forecast = value.forecast;
   const aiFluency = value.aiFluency;
 
-  if (
-    !isRecord(source) ||
-    !isRecord(market) ||
-    !isRecord(forecast) ||
-    !isRecord(aiFluency)
-  ) {
+  if (!isRecord(source) || !isRecord(market) || !isRecord(forecast) || !isRecord(aiFluency)) {
     return null;
   }
 
