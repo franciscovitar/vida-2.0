@@ -41,7 +41,9 @@ const NOTICE_TONE: Partial<Record<ProjectIntelligenceSourceStatus, 'info' | 'war
 };
 
 function ProjectProgress({ project }: { project: ProjectCardView }) {
-  const completedMilestones = project.milestones.filter((milestone) => milestone.completed).length;
+  const completedMilestones = project.milestones.filter(
+    (milestone) => milestone.completed,
+  ).length;
   const totalMilestones = project.milestones.length;
 
   if (!project.progress.measurable) {
@@ -100,7 +102,9 @@ function MilestoneBreakdown({ project }: { project: ProjectCardView }) {
               <p className={styles['milestone-criteria']}>{milestone.completionCriteria}</p>
             ) : null}
             {milestone.completedAtLabel ? (
-              <p className={styles['milestone-date']}>Completado {milestone.completedAtLabel}</p>
+              <p className={styles['milestone-date']}>
+                Completado {milestone.completedAtLabel}
+              </p>
             ) : null}
             {milestone.evidence ? (
               <details className={styles['evidence-details']}>
@@ -117,7 +121,10 @@ function MilestoneBreakdown({ project }: { project: ProjectCardView }) {
 
 function ProjectDetails({ project }: { project: ProjectCardView }) {
   const hasDates =
-    project.lastAdvanceLabel || project.dueDateLabel || project.reviewDateLabel || project.blocker;
+    project.lastAdvanceLabel ||
+    project.dueDateLabel ||
+    project.reviewDateLabel ||
+    project.blocker;
   const hasPi =
     project.pi.hasSnapshot ||
     project.quality.multipleNextActionCandidates ||
@@ -146,7 +153,9 @@ function ProjectDetails({ project }: { project: ProjectCardView }) {
             <h4>Estado operativo</h4>
             <div className={styles['detail-meta']}>
               {project.blocker ? <span>Bloqueo: {project.blocker}</span> : null}
-              {project.lastAdvanceLabel ? <span>Último avance: {project.lastAdvanceLabel}</span> : null}
+              {project.lastAdvanceLabel ? (
+                <span>Último avance: {project.lastAdvanceLabel}</span>
+              ) : null}
               {project.dueDateLabel ? <span>Límite: {project.dueDateLabel}</span> : null}
               {project.reviewDateLabel ? <span>Revisión: {project.reviewDateLabel}</span> : null}
             </div>
@@ -162,13 +171,17 @@ function ProjectDetails({ project }: { project: ProjectCardView }) {
           <section>
             <h4>Datos adicionales</h4>
             <div className={styles['detail-meta']}>
-              {project.nextAction.kind !== 'resolved' ? <span>{project.nextAction.label}</span> : null}
+              {project.nextAction.kind !== 'resolved' ? (
+                <span>{project.nextAction.label}</span>
+              ) : null}
               {project.quality.multipleNextActionCandidates ? (
                 <span>{MULTIPLE_NEXT_ACTION_WARNING}</span>
               ) : null}
               {project.pi.hasSnapshot ? (
                 <>
-                  {project.pi.recommendation ? <span>PI: {project.pi.recommendation}</span> : null}
+                  {project.pi.recommendation ? (
+                    <span>PI: {project.pi.recommendation}</span>
+                  ) : null}
                   {project.pi.confidence !== null ? (
                     <span>Confianza: {project.pi.confidence}</span>
                   ) : null}
@@ -181,7 +194,9 @@ function ProjectDetails({ project }: { project: ProjectCardView }) {
                 <span>{PI_NO_SNAPSHOT_LABEL}</span>
               )}
             </div>
-            {project.pi.summary ? <p className={styles['pi-summary']}>{project.pi.summary}</p> : null}
+            {project.pi.summary ? (
+              <p className={styles['pi-summary']}>{project.pi.summary}</p>
+            ) : null}
           </section>
         ) : null}
       </div>
