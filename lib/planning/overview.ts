@@ -12,9 +12,7 @@ export function selectPlanningAssessments(
   snapshots: readonly AssessmentProgressSnapshot[],
 ): AssessmentProgressSnapshot[] {
   return snapshots
-    .filter(
-      (item) => item.payload.status === 'active' || item.payload.status === 'planned',
-    )
+    .filter((item) => item.payload.status === 'active' || item.payload.status === 'planned')
     .sort((a, b) => {
       const byDate = dateValue(a.assessmentDate) - dateValue(b.assessmentDate);
       if (byDate !== 0) return byDate;
@@ -22,10 +20,7 @@ export function selectPlanningAssessments(
     });
 }
 
-export function selectAttentionTasks(
-  tasks: readonly NotionTask[],
-  limit = 8,
-): NotionTask[] {
+export function selectAttentionTasks(tasks: readonly NotionTask[], limit = 8): NotionTask[] {
   const rankStatus = (task: NotionTask): number => {
     if (task.status === 'Bloqueada') return 0;
     if (task.dateKind === 'overdue') return 1;
