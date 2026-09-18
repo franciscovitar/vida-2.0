@@ -44,13 +44,12 @@ const SCORE_BAND_LABELS: Readonly<Record<HealthExplainableScore['band'], string>
   insufficient: 'Sin evidencia',
 };
 
-const SCORE_CONFIDENCE_LABELS: Readonly<
-  Record<HealthExplainableScore['confidenceBand'], string>
-> = {
-  high: 'Alta',
-  medium: 'Media',
-  low: 'Baja',
-};
+const SCORE_CONFIDENCE_LABELS: Readonly<Record<HealthExplainableScore['confidenceBand'], string>> =
+  {
+    high: 'Alta',
+    medium: 'Media',
+    low: 'Baja',
+  };
 
 function ScoreValue({ score }: { score: number | null }) {
   return score === null ? <span aria-label="Sin score">—</span> : <>{score}</>;
@@ -100,8 +99,7 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
             data-confidence={readiness.confidenceBand}
             title="Calidad de la evidencia disponible; no es probabilidad de estar sano."
           >
-            Confianza {readiness.confidence}% ·{' '}
-            {SCORE_CONFIDENCE_LABELS[readiness.confidenceBand]}
+            Confianza {readiness.confidence}% · {SCORE_CONFIDENCE_LABELS[readiness.confidenceBand]}
           </span>
         </div>
 
@@ -126,11 +124,7 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
 
       <div className={styles['domain-score-grid']}>
         {scoreboard.domains.map((score) => (
-          <article
-            key={score.id}
-            className={styles['domain-score-card']}
-            data-band={score.band}
-          >
+          <article key={score.id} className={styles['domain-score-card']} data-band={score.band}>
             <div className={styles['domain-score-top']}>
               <div>
                 <span>{score.label}</span>
@@ -155,9 +149,7 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
                 {score.contributors.map((item) => (
                   <li key={item.id}>
                     <span>{item.label}</span>
-                    <strong>
-                      {item.score === null ? 'No disponible' : `${item.score}/100`}
-                    </strong>
+                    <strong>{item.score === null ? 'No disponible' : `${item.score}/100`}</strong>
                     <small>{item.detail}</small>
                   </li>
                 ))}
