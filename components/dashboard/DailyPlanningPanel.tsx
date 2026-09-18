@@ -80,6 +80,20 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
           </p>
         ) : null}
 
+        {plan.health ? (
+          <div className={styles['health-context']} data-state={plan.health.state}>
+            <div className={styles['health-context-head']}>
+              <p className={styles.group}>Contexto de capacidad</p>
+              <span>{plan.health.state}</span>
+            </div>
+            <strong>{plan.health.headline}</strong>
+            <p>
+              Confianza {plan.health.confidence}. Este contexto puede informar capacidad, pero no
+              reordena prioridades ni agenda por sí solo.
+            </p>
+          </div>
+        ) : null}
+
         <ul className={styles.summary} aria-label="Resumen del plan">
           <li>
             <strong>{plan.pendingCount}</strong>
