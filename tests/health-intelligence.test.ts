@@ -752,7 +752,7 @@ test('la UI de Salud lidera con la lectura y mantiene la evidencia debajo', () =
   assert.ok(contextIndex < prioritiesIndex);
   assert.ok(prioritiesIndex < historyIndex);
   assert.match(page, /no como diagnóstico/i);
-  assert.match(sections, /Daily Health Brief/);
+  assert.match(sections, /Resumen diario de salud/);
   assert.match(page, /brief=\{intelligence\.dailyBrief\}/);
   assert.match(page, /SparkBars/);
 });
