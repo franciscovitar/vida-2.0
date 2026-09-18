@@ -161,6 +161,7 @@ test('FC2. Un fallo de lectura real no deja ninguna observación de salud simula
   assert.equal(health.signals.today, null);
   assert.equal(health.completeDays, 0);
   assert.equal(health.partialDays, 0);
+  assert.equal(health.sourceIncompleteDays, 0);
 
   for (const metric of health.metrics) {
     assert.equal(metric.average, null, `${metric.id} no puede tener promedio simulado`);
