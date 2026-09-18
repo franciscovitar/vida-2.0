@@ -1,3 +1,3 @@
 {
-  "buildCommand": "npx prettier --write components/professional/ProfessionalDashboard.tsx lib/professional/contract.ts lib/professional/snapshot.ts tests/professional-intelligence.test.ts && git diff -- components/professional/ProfessionalDashboard.tsx lib/professional/contract.ts lib/professional/snapshot.ts tests/professional-intelligence.test.ts && exit 1"
+  "buildCommand": "npx prettier --write components/professional lib/professional tests/professional-intelligence.test.ts && git diff -- components/professional lib/professional tests/professional-intelligence.test.ts && false"
 }
