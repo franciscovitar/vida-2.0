@@ -111,11 +111,14 @@ test('HS1. datos estables producen scores explicables y versionados', () => {
     'sin regularidad/timing exactos, la confianza del Sleep Score no debe parecer alta',
   );
   assert.equal(scores.readiness.calculationVersion, 'health-scores-v1.1.0');
+  assert.equal(scores.readiness.evidenceStrength, 'limited');
   assert.equal(scores.domains.length, 5);
 
   for (const domain of scores.domains) {
     assert.ok(domain.contributors.length > 0);
     assert.ok(domain.confidence >= 0 && domain.confidence <= 100);
+    assert.ok(['strong', 'moderate', 'limited'].includes(domain.evidenceStrength));
+    assert.ok(domain.evidenceSummary.length > 20);
     assert.ok(domain.score === null || (domain.score >= 0 && domain.score <= 100));
   }
 
@@ -215,6 +218,7 @@ test('HS8. la UI pone los scores antes del brief y conserva evidencia cruda deba
   assert.ok(briefIndex < rawIndex);
   assert.match(section, /Health Intelligence V1\.1/);
   assert.match(section, /Confianza/);
+  assert.match(section, /Evidencia científica/);
   assert.match(section, /Score de bienestar\/readiness, no diagnóstico/);
   assert.match(section, /Ver cálculo/);
 });

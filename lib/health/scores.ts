@@ -12,6 +12,7 @@ export type HealthScoreBand = 'strong' | 'good' | 'below-usual' | 'low' | 'insuf
 export type HealthScoreTrend = 'up' | 'down' | 'stable' | 'unknown';
 export type HealthScoreConfidenceBand = 'high' | 'medium' | 'low';
 export type HealthScoreReliabilityTier = 'A' | 'B' | 'C';
+export type HealthScoreEvidenceStrength = 'strong' | 'moderate' | 'limited';
 export type HealthScoreContributorDirection = 'positive' | 'negative' | 'neutral' | 'unknown';
 
 export interface HealthScoreContributor {
@@ -35,6 +36,9 @@ export interface HealthExplainableScore {
   band: HealthScoreBand;
   confidence: number;
   confidenceBand: HealthScoreConfidenceBand;
+  /** Scientific support for the score construct; separate from today's data quality. */
+  evidenceStrength: HealthScoreEvidenceStrength;
+  evidenceSummary: string;
   personalPosition: string;
   trend: HealthScoreTrend;
   contributors: readonly HealthScoreContributor[];
@@ -46,6 +50,7 @@ export interface HealthMomentum {
   score: number | null;
   direction: 'improving' | 'stable' | 'declining' | 'insufficient';
   confidence: number;
+  evidenceStrength: HealthScoreEvidenceStrength;
   detail: string;
   contributors: readonly HealthScoreContributor[];
   calculationVersion: 'health-momentum-v1.1.0';
@@ -458,6 +463,9 @@ function buildSleepScore(health: HealthPageData): HealthExplainableScore {
       : null;
 
   return {
+    evidenceStrength: 'moderate',
+    evidenceSummary:
+      'Duración y continuidad aportan señal útil, pero los wearables difieren de PSG y todavía faltan regularidad/timing exactos.',
     id: 'sleep',
     label: 'Sueño',
     question: '¿Qué tan favorable fue tu patrón de sueño para recuperación y continuidad?',
@@ -554,6 +562,9 @@ function buildCardioScore(health: HealthPageData): HealthExplainableScore {
       : null;
 
   return {
+    evidenceStrength: 'moderate',
+    evidenceSummary:
+      'FC en reposo y HRV sirven para tendencia longitudinal; HRV exige medición consistente y no equivale a riesgo cardíaco.',
     id: 'cardio-stability',
     label: 'Estabilidad cardio',
     question: '¿Qué tan estables están tus señales cardiovasculares/autonómicas vs tu normal?',
@@ -646,6 +657,9 @@ function buildActivityScore(health: HealthPageData): HealthExplainableScore {
       : null;
 
   return {
+    evidenceStrength: 'moderate',
+    evidenceSummary:
+      'Los pasos tienen utilidad longitudinal y evidencia dosis-respuesta poblacional; este score no estima riesgo individual.',
     id: 'activity',
     label: 'Actividad',
     question: '¿Qué tan fuerte y consistente fue tu movimiento reciente?',
@@ -742,6 +756,9 @@ function buildMobilityScore(health: HealthPageData): HealthExplainableScore {
       : null;
 
   return {
+    evidenceStrength: 'limited',
+    evidenceSummary:
+      'La marcha sirve para seguimiento longitudinal, pero la validación de estas señales en adultos jóvenes sanos es más limitada.',
     id: 'mobility',
     label: 'Movilidad',
     question: '¿Qué tan estable está tu patrón de marcha respecto de tu propia historia?',
@@ -831,6 +848,9 @@ function buildRecoveryScore(
       : scorePosition(aggregated.score);
 
   return {
+    evidenceStrength: 'limited',
+    evidenceSummary:
+      'Recovery combina dominios fisiológicos plausibles, pero este compuesto todavía necesita calibración prospectiva personal.',
     id: 'recovery',
     label: 'Recuperación',
     question: '¿Qué tan recuperado parece tu cuerpo respecto de su patrón reciente?',
@@ -910,6 +930,9 @@ function buildReadinessScore(
   ];
 
   return {
+    evidenceStrength: 'limited',
+    evidenceSummary:
+      'Readiness es un compuesto explicable de bienestar/capacidad; necesita calibración prospectiva antes de tratarlo como predictor individual.',
     id: 'readiness',
     label: 'Readiness',
     question: '¿Cuánta capacidad fisiológica respalda la evidencia disponible para hoy?',
@@ -1037,6 +1060,7 @@ function buildMomentum(health: HealthPageData): HealthMomentum {
     score,
     direction,
     confidence: aggregated.confidence,
+    evidenceStrength: 'limited',
     detail:
       score === null
         ? 'Falta historia comparable en al menos dos dominios.'

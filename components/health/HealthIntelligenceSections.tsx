@@ -44,6 +44,12 @@ const SCORE_BAND_LABELS: Readonly<Record<HealthExplainableScore['band'], string>
   insufficient: 'Sin evidencia',
 };
 
+const SCORE_EVIDENCE_LABELS: Readonly<Record<HealthExplainableScore['evidenceStrength'], string>> = {
+  strong: 'Alta',
+  moderate: 'Moderada',
+  limited: 'Limitada',
+};
+
 const SCORE_CONFIDENCE_LABELS: Readonly<Record<HealthExplainableScore['confidenceBand'], string>> =
   {
     high: 'Alta',
@@ -97,9 +103,12 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
           <span
             className={styles['score-confidence']}
             data-confidence={readiness.confidenceBand}
-            title="Calidad de la evidencia disponible; no es probabilidad de estar sano."
+            title="Calidad de los datos disponibles hoy; no es probabilidad de estar sano."
           >
             Confianza {readiness.confidence}% · {SCORE_CONFIDENCE_LABELS[readiness.confidenceBand]}
+          </span>
+          <span className={styles['score-confidence']} title={readiness.evidenceSummary}>
+            Evidencia científica {SCORE_EVIDENCE_LABELS[readiness.evidenceStrength]}
           </span>
         </div>
 
@@ -142,6 +151,10 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
             <div className={styles['domain-score-confidence']}>
               <span>Confianza</span>
               <strong className="tabular">{score.confidence}%</strong>
+            </div>
+            <div className={styles['domain-score-confidence']} title={score.evidenceSummary}>
+              <span>Evidencia científica</span>
+              <strong>{SCORE_EVIDENCE_LABELS[score.evidenceStrength]}</strong>
             </div>
             <details className={styles['score-details']}>
               <summary>Ver cálculo</summary>
