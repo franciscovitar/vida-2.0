@@ -26,6 +26,7 @@ import type {
   HealthTrajectory,
   HealthTrajectoryItem,
 } from '@/lib/health/intelligence';
+import type { HealthExplainableScore, HealthScoreboard } from '@/lib/health/scores';
 
 import styles from './HealthIntelligenceSections.module.scss';
 
@@ -33,6 +34,176 @@ function TrendIcon({ direction }: { direction: HealthTrajectoryItem['direction']
   if (direction === 'up') return <TrendingUp size={14} aria-hidden="true" />;
   if (direction === 'down') return <TrendingDown size={14} aria-hidden="true" />;
   return <Minus size={14} aria-hidden="true" />;
+}
+
+const SCORE_BAND_LABELS: Readonly<Record<HealthExplainableScore['band'], string>> = {
+  strong: 'Fuerte',
+  good: 'Bien',
+  'below-usual': 'Bajo tu rango',
+  low: 'Bajo',
+  insufficient: 'Sin evidencia',
+};
+
+const SCORE_EVIDENCE_LABELS: Readonly<Record<HealthExplainableScore['evidenceStrength'], string>> =
+  {
+    strong: 'Alta',
+    moderate: 'Moderada',
+    limited: 'Limitada',
+  };
+
+const SCORE_CONFIDENCE_LABELS: Readonly<Record<HealthExplainableScore['confidenceBand'], string>> =
+  {
+    high: 'Alta',
+    medium: 'Media',
+    low: 'Baja',
+  };
+
+function ScoreValue({ score }: { score: number | null }) {
+  return score === null ? <span aria-label="Sin score">—</span> : <>{score}</>;
+}
+
+function ScoreTrend({ score }: { score: HealthExplainableScore }) {
+  if (score.trend === 'up') {
+    return <TrendingUp size={13} aria-label="Tendencia favorable" />;
+  }
+  if (score.trend === 'down') {
+    return <TrendingDown size={13} aria-label="Tendencia desfavorable" />;
+  }
+  if (score.trend === 'stable') {
+    return <Minus size={13} aria-label="Tendencia estable" />;
+  }
+  return null;
+}
+
+/** Health Intelligence V1.1 — significado primero, evidencia debajo. */
+export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScoreboard }) {
+  const readiness = scoreboard.readiness;
+
+  return (
+    <section className={styles.scoreboard} aria-labelledby="health-scoreboard-title">
+      <article
+        className={styles['readiness-card']}
+        data-band={readiness.band}
+        data-confidence={readiness.confidenceBand}
+      >
+        <div className={styles['readiness-copy']}>
+          <p className={styles.eyebrow}>Health Intelligence V1.1</p>
+          <div className={styles['readiness-title-row']}>
+            <h2 id="health-scoreboard-title">Readiness</h2>
+            <span className={styles['score-band']}>{SCORE_BAND_LABELS[readiness.band]}</span>
+          </div>
+          <p className={styles['readiness-question']}>{readiness.question}</p>
+          <p className={styles['readiness-position']}>{readiness.personalPosition}</p>
+        </div>
+
+        <div className={styles['readiness-score-wrap']}>
+          <div className={`${styles['readiness-score']} tabular`}>
+            <ScoreValue score={readiness.score} />
+            {readiness.score === null ? null : <small>/100</small>}
+          </div>
+          <span
+            className={styles['score-confidence']}
+            data-confidence={readiness.confidenceBand}
+            title="Calidad de los datos disponibles hoy; no es probabilidad de estar sano."
+          >
+            Confianza {readiness.confidence}% · {SCORE_CONFIDENCE_LABELS[readiness.confidenceBand]}
+          </span>
+          <span className={styles['score-confidence']} title={readiness.evidenceSummary}>
+            Evidencia científica {SCORE_EVIDENCE_LABELS[readiness.evidenceStrength]}
+          </span>
+        </div>
+
+        <div className={styles['readiness-why']}>
+          <p>Por qué</p>
+          <ul>
+            {readiness.contributors.map((item) => (
+              <li key={item.id} data-direction={item.direction}>
+                <span>{item.label}</span>
+                <strong className="tabular">{item.score === null ? '?' : item.score}</strong>
+                <small>{item.detail}</small>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className={styles['score-caveat']}>
+          Score de bienestar/readiness, no diagnóstico. Si falta evidencia, baja la confianza o no
+          se muestra un número.
+        </p>
+      </article>
+
+      <div className={styles['domain-score-grid']}>
+        {scoreboard.domains.map((score) => (
+          <article key={score.id} className={styles['domain-score-card']} data-band={score.band}>
+            <div className={styles['domain-score-top']}>
+              <div>
+                <span>{score.label}</span>
+                <small>{SCORE_BAND_LABELS[score.band]}</small>
+              </div>
+              <span className={styles['domain-score-trend']}>
+                <ScoreTrend score={score} />
+              </span>
+            </div>
+            <div className={`${styles['domain-score-value']} tabular`}>
+              <ScoreValue score={score.score} />
+              {score.score === null ? null : <small>/100</small>}
+            </div>
+            <p>{score.personalPosition}</p>
+            <div className={styles['domain-score-confidence']}>
+              <span>Confianza</span>
+              <strong className="tabular">{score.confidence}%</strong>
+            </div>
+            <div className={styles['domain-score-confidence']} title={score.evidenceSummary}>
+              <span>Evidencia científica</span>
+              <strong>{SCORE_EVIDENCE_LABELS[score.evidenceStrength]}</strong>
+            </div>
+            <details className={styles['score-details']}>
+              <summary>Ver cálculo</summary>
+              <ul>
+                {score.contributors.map((item) => (
+                  <li key={item.id}>
+                    <span>{item.label}</span>
+                    <strong>{item.score === null ? 'No disponible' : `${item.score}/100`}</strong>
+                    <small>{item.detail}</small>
+                  </li>
+                ))}
+              </ul>
+              {score.uncertainties.length > 0 ? (
+                <div className={styles['score-uncertainties']}>
+                  {score.uncertainties.map((item) => (
+                    <p key={item}>{item}</p>
+                  ))}
+                </div>
+              ) : null}
+            </details>
+          </article>
+        ))}
+      </div>
+
+      <article className={styles['momentum-card']} data-direction={scoreboard.momentum.direction}>
+        <div>
+          <span>Health Momentum</span>
+          <strong>
+            {scoreboard.momentum.direction === 'improving'
+              ? 'Mejorando'
+              : scoreboard.momentum.direction === 'declining'
+                ? 'Bajando'
+                : scoreboard.momentum.direction === 'stable'
+                  ? 'Estable'
+                  : 'Sin evidencia'}
+          </strong>
+        </div>
+        <div className="tabular">
+          {scoreboard.momentum.score === null ? '—' : scoreboard.momentum.score}
+          {scoreboard.momentum.score === null ? null : <small>/100</small>}
+        </div>
+        <p>{scoreboard.momentum.detail}</p>
+        <span className={styles['momentum-confidence']}>
+          Confianza {scoreboard.momentum.confidence}%
+        </span>
+      </article>
+    </section>
+  );
 }
 
 /** 1. ¿Cómo estoy hoy? */
