@@ -82,6 +82,11 @@ function evidenceOf(intelligence: HealthIntelligence, signal: HealthMonitoredSig
 /** Todas las cadenas generadas por la capa determinística. */
 function allTexts(intelligence: HealthIntelligence): string[] {
   return [
+    intelligence.dailyBrief.headline,
+    ...intelligence.dailyBrief.evidence,
+    ...intelligence.dailyBrief.uncertainties,
+    ...intelligence.dailyBrief.recommendations,
+    ...intelligence.dailyBrief.limits,
     intelligence.currentState.headline,
     intelligence.currentState.explanation,
     ...intelligence.currentState.reasons,
@@ -119,6 +124,60 @@ test('día completo y estable no exagera el estado actual', () => {
   assert.equal(evidenceOf(result, 'restingHr').concern, false);
 });
 
+test('Daily Health Brief expone estado, confianza, evidencia y límites determinísticos', () => {
+  const stable = intelligenceFor([
+    ...baselineRows(),
+    row({
+      [SAL.fecha]: TODAY,
+      [SAL.sleep]: 7.4,
+      [SAL.restingHr]: 55,
+      [SAL.steps]: 8100,
+      [SAL.importStatus]: 'completo',
+    }),
+  ]);
+
+  assert.equal(stable.dailyBrief.state, 'NORMAL');
+  assert.equal(stable.dailyBrief.confidence, 'ALTA');
+  assert.equal(stable.dailyBrief.engineVersion, 'health-intelligence-v1');
+  assert.ok(stable.dailyBrief.evidence.some((item) => /Sueño total/.test(item)));
+  assert.ok(stable.dailyBrief.recommendations.some((item) => /Mantené el patrón actual/.test(item)));
+  assert.ok(stable.dailyBrief.limits.some((item) => /no realiza diagnósticos clínicos/i.test(item)));
+
+  const watch = intelligenceFor([
+    ...baselineRows(),
+    row({
+      [SAL.fecha]: TODAY,
+      [SAL.sleep]: 5.8,
+      [SAL.restingHr]: 55,
+      [SAL.importStatus]: 'completo',
+    }),
+  ]);
+  assert.equal(watch.dailyBrief.state, 'CUIDADO');
+
+  const recovery = intelligenceFor([
+    ...baselineRows(),
+    row({
+      [SAL.fecha]: TODAY,
+      [SAL.sleep]: 5.8,
+      [SAL.restingHr]: 62,
+      [SAL.importStatus]: 'completo',
+    }),
+  ]);
+  assert.equal(recovery.dailyBrief.state, 'RECUPERACIÓN');
+
+  const insufficient = intelligenceFor([
+    ...baselineRows(),
+    row({
+      [SAL.fecha]: TODAY,
+      [SAL.steps]: 5400,
+      [SAL.importStatus]: 'parcial',
+      [SAL_EXTENDED.missingCore]: 'Sueño, FC reposo',
+    }),
+  ]);
+  assert.equal(insufficient.dailyBrief.state, 'INSUFICIENTE');
+  assert.equal(insufficient.dailyBrief.confidence, 'BAJA');
+  assert.ok(insufficient.dailyBrief.uncertainties.some((item) => /reconciliación/i.test(item)));
+});
 test('movimiento sin sueño ni FC deja el día como datos insuficientes', () => {
   const result = intelligenceFor([
     ...baselineRows(),
@@ -682,5 +741,7 @@ test('la UI de Salud lidera con la lectura y mantiene la evidencia debajo', () =
   assert.ok(contextIndex < prioritiesIndex);
   assert.ok(prioritiesIndex < historyIndex);
   assert.match(page, /no como diagnóstico/i);
+  assert.match(page, /Daily Health Brief/);
+  assert.match(page, /brief=\{intelligence\.dailyBrief\}/);
   assert.match(page, /SparkBars/);
 });
