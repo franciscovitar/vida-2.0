@@ -988,10 +988,14 @@ function buildDailyBrief(input: {
     );
   } else {
     if (state.coreMissing.length > 0) {
-      uncertainties.push(`Faltan señales núcleo de hoy: ${joinEs(state.coreMissing.map(lowerEs))}.`);
+      uncertainties.push(
+        `Faltan señales núcleo de hoy: ${joinEs(state.coreMissing.map(lowerEs))}.`,
+      );
     }
     if (state.importKind === 'partial') {
-      uncertainties.push('La importación de hoy todavía está dentro de la ventana de reconciliación.');
+      uncertainties.push(
+        'La importación de hoy todavía está dentro de la ventana de reconciliación.',
+      );
     }
     if (state.importKind === 'source-incomplete') {
       uncertainties.push(
