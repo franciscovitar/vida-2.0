@@ -80,7 +80,7 @@ function sourceViews(
   context: DailyPlanningContext,
   snapshotRead: DailyPlanSnapshotRead,
 ): DailyPlanningSourceView[] {
-  return [
+  const sources: DailyPlanningSourceView[] = [
     {
       label: 'Plan',
       status: snapshotRead.status,
@@ -112,6 +112,15 @@ function sourceViews(
       notice: context.sources.calendar.notice,
     },
   ];
+  if (context.sources.health) {
+    sources.push({
+      label: 'Salud',
+      status: context.sources.health.status,
+      available: context.sources.health.available,
+      notice: context.sources.health.notice,
+    });
+  }
+  return sources;
 }
 
 /** Combina recomendación persistida con verdad factual actual sin re-priorizar. */
@@ -211,6 +220,7 @@ export function buildDailyPlanningView(
     suggestedBlocks,
     minimumViable,
     blockedTasks,
+    health: context.health ?? null,
     pendingCount: context.tasks.length,
     sources: sourceViews(context, snapshotRead),
     quality: {
