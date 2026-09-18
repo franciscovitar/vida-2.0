@@ -5,7 +5,7 @@ import {
   Brain,
   CalendarCheck,
   CalendarClock,
-  CheckSquare,
+  CalendarRange,
   Dumbbell,
   FileText,
   Film,
@@ -35,6 +35,7 @@ export type NavIconKey =
   | 'productividad'
   | 'tendencias'
   | 'agenda'
+  | 'planificacion'
   | 'proyectos'
   | 'tareas'
   | 'aprendizaje'
@@ -75,8 +76,9 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   productividad: ListTodo,
   tendencias: LineChart,
   agenda: CalendarClock,
+  planificacion: CalendarRange,
   proyectos: Boxes,
-  tareas: CheckSquare,
+  tareas: ListTodo,
   aprendizaje: BookOpen,
   compras: ShoppingCart,
   analisis: Brain,
@@ -102,8 +104,13 @@ export const primaryNav: NavItemData[] = [
   { label: 'Productividad', href: '/productividad', icon: 'productividad', domain: 'productivity' },
   { label: 'Tendencias', href: '/tendencias', icon: 'tendencias', domain: 'productivity' },
   { label: 'Agenda', href: '/agenda', icon: 'agenda', domain: 'productivity' },
+  {
+    label: 'Planificación',
+    href: '/planificacion',
+    icon: 'planificacion',
+    domain: 'productivity',
+  },
   { label: 'Proyectos', href: '/proyectos', icon: 'proyectos', domain: 'projects' },
-  { label: 'Tareas', href: '/tareas', icon: 'tareas', domain: 'tasks' },
   { label: 'Áreas', href: '/areas', icon: 'areas', domain: 'projects' },
   { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },
   { label: 'Dieta', href: '/dieta', icon: 'dieta', domain: 'health' },
@@ -131,6 +138,6 @@ export const secondaryNav: NavItemData[] = [
 export const mobileNav: NavItemData[] = [
   primaryNav.find((item) => item.href === '/')!,
   primaryNav.find((item) => item.href === '/habitos')!,
-  primaryNav.find((item) => item.href === '/productividad')!,
+  primaryNav.find((item) => item.href === '/planificacion')!,
   primaryNav.find((item) => item.href === '/agenda')!,
 ];

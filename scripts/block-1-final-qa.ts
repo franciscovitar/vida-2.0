@@ -57,7 +57,12 @@ const ROUTE_CONTRACTS = [
   },
   {
     route: 'app/(app)/tareas/page.tsx',
-    includes: ['TasksBoard'],
+    includes: ["redirect('/planificacion?view=tareas')"],
+    excludes: ['TaskPlanningWorkspace', 'TaskCreatePanel', 'TaskStatusPanel'],
+  },
+  {
+    route: 'app/(app)/planificacion/page.tsx',
+    includes: ['PlanningWorkspace'],
     excludes: ['TaskPlanningWorkspace', 'TaskCreatePanel', 'TaskStatusPanel'],
   },
   {
@@ -222,7 +227,7 @@ export function runBlock1FinalQa(root = process.cwd()): Block1QaCheck[] {
     },
     {
       id: 'routes-wired',
-      label: 'Rutas alineadas con captura conversacional',
+      label: 'Rutas alineadas con límites de escritura',
       ok: ROUTE_CONTRACTS.every(({ route, includes, excludes }) => {
         const routeSource = read(root, route);
         if (!routeSource) return false;
@@ -232,7 +237,7 @@ export function runBlock1FinalQa(root = process.cwd()): Block1QaCheck[] {
         );
       }),
       detail:
-        'Vida Web conserva observación/revisión y no vuelve a montar emisores cotidianos retirados por el contrato conversacional.',
+        'Planificación concentra el CRUD explícito de Tareas; las demás rutas conservan sus límites históricos de escritura.',
     },
     {
       id: 'client-secret-boundary',

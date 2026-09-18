@@ -70,17 +70,22 @@ test('B1-WEB-7. revisiones documentan riesgo y reversibilidad', () => {
   assert.match(reviews, /Cambio esperado/);
 });
 
-test('B1-WEB-8. las rutas cotidianas no montan emisores manuales de escritura', () => {
+test('B1-WEB-8. Planificación es la superficie explícita de tareas y el resto conserva sus límites', () => {
   const taskPage = source('app', '(app)', 'tareas', 'page.tsx');
+  const planningPage = source('app', '(app)', 'planificacion', 'page.tsx');
+  const taskManager = source('components', 'planning', 'TaskManager.tsx');
   const projectPage = source('app', '(app)', 'proyectos', 'page.tsx');
   const inboxPage = source('app', '(app)', 'bandeja', 'page.tsx');
   const reviewPage = source('app', '(app)', 'aprobaciones', 'page.tsx');
   const gymPage = source('app', '(app)', 'gimnasio', 'page.tsx');
 
-  assert.match(taskPage, /TasksBoard/);
-  assert.equal(taskPage.includes('TaskPlanningWorkspace'), false);
-  assert.equal(taskPage.includes('TaskCreatePanel'), false);
-  assert.equal(taskPage.includes('TaskStatusPanel'), false);
+  assert.match(taskPage, /redirect\('\/planificacion\?view=tareas'\)/);
+  assert.match(planningPage, /PlanningWorkspace/);
+  assert.match(taskManager, /createPlanningTask/);
+  assert.match(taskManager, /updatePlanningTask/);
+  assert.match(taskManager, /archivePlanningTask/);
+  assert.equal(taskManager.includes('runWriteAction'), false);
+  assert.equal(taskManager.includes('process.env'), false);
 
   assert.match(projectPage, /ProjectsIntelligenceDashboard/);
   assert.equal(projectPage.includes('ProjectReviewWorkspace'), false);

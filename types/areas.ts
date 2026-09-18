@@ -58,7 +58,7 @@ export interface AreaTaskSummary {
   energy: string | null;
   projectName: string | null;
   blocker: string | null;
-  href: '/tareas';
+  href: '/planificacion?view=tareas';
 }
 
 export interface AreaCalendarSummary {

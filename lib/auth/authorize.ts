@@ -152,6 +152,7 @@ export const PROTECTED_APP_PATHS = [
   '/',
   '/agenda',
   '/tareas',
+  '/planificacion',
   '/proyectos',
   '/habitos',
   '/salud',

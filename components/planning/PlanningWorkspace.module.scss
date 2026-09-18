@@ -1,0 +1,229 @@
+.workspace,
+.stack {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.tabs a {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.tabs a[data-active='true'] {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (width >= 1100px) {
+  .grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  }
+}
+
+.cards {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+}
+
+.attention-card {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.card-top,
+.progress-line {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.card-top > div {
+  min-width: 0;
+}
+
+.card-top strong {
+  overflow-wrap: anywhere;
+}
+
+.card-top p {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.73rem;
+}
+
+.card-top > span,
+.progress-line {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.progress-line strong {
+  color: var(--text);
+}
+
+.meta,
+.rows li > div span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.next,
+.gaps,
+.muted,
+.meta-line,
+.quiet,
+.empty,
+.capacity-note {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.next,
+.meta-line,
+.muted,
+.quiet,
+.empty,
+.capacity-note {
+  color: var(--text-muted);
+}
+
+.gaps {
+  color: var(--c-danger);
+}
+
+.quiet {
+  margin-top: 0.7rem;
+}
+
+.quiet a,
+.project-link a {
+  color: var(--text);
+}
+
+.rows,
+.simple {
+  display: grid;
+  gap: 0;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.rows li:first-child {
+  border-top: 0;
+}
+
+.rows li > div {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.rows li strong {
+  overflow-wrap: anywhere;
+}
+
+.row-side {
+  text-align: right;
+}
+
+.row-side span,
+.rows li > span {
+  color: var(--text-muted);
+  font-size: 0.73rem;
+}
+
+.two-cols {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.65rem;
+}
+
+.two-cols h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+}
+
+.simple {
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+@media (width >= 760px) {
+  .two-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.capacity-note {
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.project-link {
+  margin-top: 0.8rem;
+  font-size: 0.8rem;
+}
+
+@media (width <= 640px) {
+  .rows li {
+    grid-template-columns: 1fr;
+  }
+
+  .row-side {
+    text-align: left;
+  }
+
+  .tabs {
+    position: static;
+  }
+}
