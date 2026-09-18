@@ -294,21 +294,46 @@ function seriesOf(
 
 /** Ventana de base personal usada por la capa de interpretación (independiente del período). */
 export const HEALTH_SIGNALS_BASELINE_DAYS = 30;
+export const HEALTH_SIGNALS_RECENT_DAYS = 7;
 
 const SIGNAL_PICKERS: Record<HealthSignalId, NumericPicker> = {
   sleep: (r) => cellValue(r.sleepHours),
+  sleepInBed: (r) => cellValue(r.sleepInBedHours),
+  awakeSleep: (r) => cellValue(r.awakeSleepHours),
   deepSleep: (r) => cellValue(r.deepSleepHours),
   remSleep: (r) => cellValue(r.remSleepHours),
   restingHr: (r) => cellValue(r.restingHr),
   meanHr: (r) => cellValue(r.meanHr),
+  minHr: (r) => cellValue(r.minHr),
   hrv: (r) => cellValue(r.hrv),
   steps: (r) => cellValue(r.steps),
   walkRunKm: (r) => cellValue(r.walkRunKm),
+  floorsClimbed: (r) => cellValue(r.floorsClimbed),
+  walkingSpeed: (r) => cellValue(r.walkingSpeed),
+  stepLengthCm: (r) => cellValue(r.stepLengthCm),
+  walkingAsymmetry: (r) => cellValue(r.walkingAsymmetry),
   activeCalories: (r) => cellValue(r.activeCalories),
   spo2: (r) => cellValue(r.spo2),
 };
 
 const SIGNAL_IDS = Object.keys(SIGNAL_PICKERS) as HealthSignalId[];
+
+function buildSignalStats(
+  records: readonly SaludRecord[],
+): Record<HealthSignalId, HealthBaselineSignal> {
+  const stats = {} as Record<HealthSignalId, HealthBaselineSignal>;
+  for (const id of SIGNAL_IDS) {
+    const { average, values } = averageOf(records, SIGNAL_PICKERS[id]);
+    const median = medianOf(values);
+    stats[id] = {
+      average,
+      median,
+      mad: medianAbsoluteDeviation(values, median),
+      days: values.length,
+    };
+  }
+  return stats;
+}
 
 function trimmedText(cell: SaludRecord['workout']): string | null {
   if (cell.kind !== 'value') return null;
@@ -357,24 +382,18 @@ export function buildHealthSignalsModel(
 
   const baselineWindow = periodWindow(addDaysYmd(today, -1), HEALTH_SIGNALS_BASELINE_DAYS);
   const baselineRecords = saludAvailableDays(records, baselineWindow);
-  const baseline = {} as Record<HealthSignalId, HealthBaselineSignal>;
-  for (const id of SIGNAL_IDS) {
-    const { average, values } = averageOf(baselineRecords, SIGNAL_PICKERS[id]);
-    const median = medianOf(values);
-    baseline[id] = {
-      average,
-      median,
-      mad: medianAbsoluteDeviation(values, median),
-      days: values.length,
-    };
-  }
+  const recentWindow = periodWindow(today, HEALTH_SIGNALS_RECENT_DAYS);
+  const recentRecords = saludAvailableDays(records, recentWindow);
 
   return {
     today: todayRecord ? daySignals(todayRecord) : null,
     lastInterpretable: lastInterpretable ? daySignals(lastInterpretable) : null,
-    baseline,
+    baseline: buildSignalStats(baselineRecords),
     baselineWindowDays: HEALTH_SIGNALS_BASELINE_DAYS,
     baselineCoverageDays: baselineRecords.length,
+    recent: buildSignalStats(recentRecords),
+    recentWindowDays: HEALTH_SIGNALS_RECENT_DAYS,
+    recentCoverageDays: recentRecords.length,
   };
 }
 
