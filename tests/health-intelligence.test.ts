@@ -575,6 +575,7 @@ test('la confianza alta exige 14 días útiles de base personal', () => {
   assert.equal(result.evidenceQuality.level, 'partial');
   assert.equal(result.dailyBrief.confidence, 'MEDIA');
 });
+
 test('una base personal insuficiente impide afirmar que el día es normal', () => {
   const result = intelligenceFor([
     row({
