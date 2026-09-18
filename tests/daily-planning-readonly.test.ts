@@ -137,6 +137,15 @@ function baseDeps(
       notice: null,
       invalidRows: 0,
     }),
+    loadHealth: async () => ({
+      source: { status: 'ready' as const, available: true, notice: null },
+      context: {
+        state: 'NORMAL' as const,
+        confidence: 'ALTA' as const,
+        headline: 'Dentro de tu rango habitual',
+        canInformCapacity: true,
+      },
+    }),
   };
 }
 
@@ -169,6 +178,9 @@ test('DP-R1. contexto completo preserva Fecha como ambigua y progreso verificabl
   assert.equal(data.calendarEvents[0]?.planningRole, 'capacity-block');
   assert.equal(data.sources.assessments?.status, 'empty');
   assert.deepEqual(data.assessments, []);
+  assert.equal(data.sources.health?.status, 'ready');
+  assert.equal(data.health?.state, 'NORMAL');
+  assert.equal(data.health?.canInformCapacity, true);
 });
 
 test('DP-R2. si Hitos falla, Proyectos y Tareas sobreviven pero progress es unknown/null', async () => {
@@ -279,4 +291,27 @@ test('DP-R7. fuentes personales en modo mock no generan contexto personal simula
   assert.deepEqual(data.tasks, []);
   assert.deepEqual(data.projects, []);
   assert.deepEqual(data.calendarEvents, []);
+});
+
+
+test('DP-R8. Salud no disponible no degrada el plan ni fabrica contexto de capacidad', async () => {
+  const deps = baseDeps(goodPort(), { ok: true, events: [CALENDAR_EVENT] });
+  const data = await loadDailyPlanningContextUncached({
+    ...deps,
+    loadHealth: async () => ({
+      source: {
+        status: 'unavailable' as const,
+        available: false,
+        notice: 'Salud: contexto de capacidad no disponible.',
+      },
+      context: null,
+    }),
+  });
+
+  assert.equal(data.status, 'ready');
+  assert.equal(data.sources.health?.status, 'unavailable');
+  assert.equal(data.sources.health?.available, false);
+  assert.equal(data.health, null);
+  assert.equal(data.tasks.length, 1);
+  assert.equal(data.calendarEvents.length, 1);
 });
