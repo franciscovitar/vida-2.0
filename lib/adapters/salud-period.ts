@@ -421,7 +421,10 @@ function todayState(
       : null;
   const details =
     importKind === 'source-incomplete'
-      ? [missingDetails, 'La ausencia está confirmada en el raw; no prueba ausencia en Apple Health.']
+      ? [
+          missingDetails,
+          'La ausencia está confirmada en el raw; no prueba ausencia en Apple Health.',
+        ]
           .filter(Boolean)
           .join(' · ')
       : importKind === 'partial'
