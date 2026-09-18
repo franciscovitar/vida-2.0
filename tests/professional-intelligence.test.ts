@@ -35,7 +35,10 @@ test('PRO-01. snapshot derivado válido, sanitizado y con provenance de PAS main
 });
 
 test('PRO-02. snapshot faltante falla cerrado', () => {
-  const result = resolveProfessionalSnapshotText(null, new Date('2026-09-18T12:00:00Z'));
+  const result = resolveProfessionalSnapshotText(
+    null,
+    new Date('2026-09-18T12:00:00Z'),
+  );
 
   assert.equal(result.status, 'missing');
   assert.equal(result.snapshot, null);
@@ -44,7 +47,10 @@ test('PRO-02. snapshot faltante falla cerrado', () => {
 });
 
 test('PRO-03. snapshot corrupto o fuera de contrato falla cerrado', () => {
-  const malformed = resolveProfessionalSnapshotText('{', new Date('2026-09-18T12:00:00Z'));
+  const malformed = resolveProfessionalSnapshotText(
+    '{',
+    new Date('2026-09-18T12:00:00Z'),
+  );
   assert.equal(malformed.status, 'invalid');
   assert.equal(malformed.snapshot, null);
 
@@ -79,7 +85,9 @@ test('PRO-05. tecnología conserva ownership de adopción en system-maintenance'
   assert.ok(parsed);
   assert.ok(parsed.technologies.length > 0);
   assert.equal(
-    parsed.technologies.every((item) => item.decisionOwner === 'system-maintenance'),
+    parsed.technologies.every(
+      (item) => item.decisionOwner === 'system-maintenance',
+    ),
     true,
   );
 });
@@ -88,13 +96,22 @@ test('PRO-06. learning permite no recomendar curso ni credencial', () => {
   const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
   assert.ok(parsed);
   assert.ok(parsed.learning.length > 0);
-  assert.equal(parsed.learning.some((item) => !item.courseNeededNow), true);
-  assert.equal(parsed.learning.some((item) => !item.credentialNeededNow), true);
+  assert.equal(
+    parsed.learning.some((item) => !item.courseNeededNow),
+    true,
+  );
+  assert.equal(
+    parsed.learning.some((item) => !item.credentialNeededNow),
+    true,
+  );
 });
 
 test('PRO-07. UI no introduce ranking universal y expone incertidumbre', () => {
   const source = readFileSync(
-    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    join(
+      process.cwd(),
+      'components/professional/ProfessionalDashboard.tsx',
+    ),
     'utf8',
   );
 
@@ -107,8 +124,14 @@ test('PRO-07. UI no introduce ranking universal y expone incertidumbre', () => {
 });
 
 test('PRO-08. ruta autenticada es dinámica y está en navegación primaria', () => {
-  const route = readFileSync(join(process.cwd(), 'app/(app)/professional/page.tsx'), 'utf8');
-  const nav = readFileSync(join(process.cwd(), 'lib/constants/navigation.ts'), 'utf8');
+  const route = readFileSync(
+    join(process.cwd(), 'app/(app)/professional/page.tsx'),
+    'utf8',
+  );
+  const nav = readFileSync(
+    join(process.cwd(), 'lib/constants/navigation.ts'),
+    'utf8',
+  );
 
   assert.match(route, /export const dynamic = 'force-dynamic'/);
   assert.match(route, /getProfessionalIntelligence/);
