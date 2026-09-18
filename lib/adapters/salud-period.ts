@@ -270,7 +270,10 @@ function medianOf(values: readonly number[]): number | null {
   return (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
-function medianAbsoluteDeviation(values: readonly number[], median: number | null): number | null {
+function medianAbsoluteDeviation(
+  values: readonly number[],
+  median: number | null,
+): number | null {
   if (median === null || values.length === 0) return null;
   return medianOf(values.map((value) => Math.abs(value - median)));
 }
