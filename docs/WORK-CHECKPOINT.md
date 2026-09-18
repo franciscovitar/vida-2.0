@@ -328,7 +328,12 @@ historia; revalidar contra las secciones vigentes antes de actuar.
 
 ## Health Intelligence V1 — autorización de despliegue Production 18/09/2026
 
-**Estado: AUTHORIZED / DEPLOYMENT PENDING.**
+**Estado: AUTHORIZED / DEPLOYMENT TRIGGER RETRY.**
+
+El merge funcional y el primer merge de trigger no produjeron un deployment Vercel observable.
+Se emite este checkpoint directamente sobre `main` como segundo trigger Git, sin cambiar código de
+runtime. Production sigue considerándose en la versión anterior hasta observar un deployment nuevo
+`READY`.
 
 El usuario autorizó explícitamente desplegar Health Intelligence V1 a Production.
 
