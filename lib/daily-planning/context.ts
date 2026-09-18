@@ -420,8 +420,7 @@ export async function loadDailyPlanningContextUncached(
       invalidRows: 0,
     })),
     loadHealth(today).catch(async () => {
-      const { unavailableDailyPlanningHealth } =
-        await import('@/lib/health/planning-context');
+      const { unavailableDailyPlanningHealth } = await import('@/lib/health/planning-context');
       return unavailableDailyPlanningHealth();
     }),
   ]);
