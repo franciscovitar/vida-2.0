@@ -180,9 +180,7 @@ test('Daily Health Brief expone estado, confianza, evidencia y límites determin
   ]);
   assert.equal(insufficient.dailyBrief.state, 'INSUFICIENTE');
   assert.equal(insufficient.dailyBrief.confidence, 'BAJA');
-  assert.ok(
-    insufficient.dailyBrief.uncertainties.some((item) => /reconciliación/i.test(item)),
-  );
+  assert.ok(insufficient.dailyBrief.uncertainties.some((item) => /reconciliación/i.test(item)));
 });
 
 test('movimiento sin sueño ni FC deja el día como datos insuficientes', () => {
