@@ -134,8 +134,16 @@ function healthLines(health: HealthPageData): string[] {
   }
   lines.push(`Estado de hoy: ${health.today.label}`);
   const partial = health.history.filter((row) => row.importKind === 'partial').length;
+  const sourceIncomplete = health.history.filter(
+    (row) => row.importKind === 'source-incomplete',
+  ).length;
   if (partial > 0) {
-    lines.push(`Importaciones parciales en el período: ${partial} días.`);
+    lines.push(`Importaciones parciales todavía en reconciliación: ${partial} días.`);
+  }
+  if (sourceIncomplete > 0) {
+    lines.push(
+      `Días incompletos en la interfaz raw: ${sourceIncomplete}. Esto no prueba ausencia en Apple Health.`,
+    );
   }
   lines.push('Sin interpretación médica.');
   return lines;
@@ -166,6 +174,7 @@ function limitationLines(trends: TrendsPageData): string[] {
     `Salud: ${trends.coverage.healthDays} días con datos.`,
     `Productividad: ${trends.coverage.productivityDays} días con datos.`,
     `Días de salud parcial: ${trends.coverage.partialHealthDays}.`,
+    `Días incompletos en la interfaz raw: ${trends.coverage.sourceIncompleteHealthDays}.`,
     `Días sin datos en el período: ${trends.coverage.daysWithoutData}.`,
     'Las asociaciones no demuestran causalidad.',
     'No se completaron días faltantes con cero.',
@@ -198,6 +207,7 @@ function buildPlainText(report: Omit<AnalysisReport, 'plainText'>): string {
     `- Salud: ${d.coverage.healthDays} días`,
     `- Productividad: ${d.coverage.productivityDays} días`,
     `- Salud parcial: ${d.coverage.partialHealthDays} días`,
+    `- Salud incompleta en raw: ${d.coverage.sourceIncompleteHealthDays} días`,
     `- Sin datos: ${d.coverage.daysWithoutData} días`,
     '',
     'HÁBITOS',
