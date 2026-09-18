@@ -1,4 +1,7 @@
-import type { DailyPlanningStatus } from '@/types/daily-planning-intelligence';
+import type {
+  DailyPlanningHealthContext,
+  DailyPlanningStatus,
+} from '@/types/daily-planning-intelligence';
 
 export type DailyPlanItemKind = 'task' | 'project' | 'calendar' | 'derived';
 
@@ -72,7 +75,7 @@ export interface DailyPlanningBlockedView {
 }
 
 export interface DailyPlanningSourceView {
-  label: 'Plan' | 'Tareas' | 'Proyectos' | 'Hitos' | 'Calendar';
+  label: 'Plan' | 'Tareas' | 'Proyectos' | 'Hitos' | 'Calendar' | 'Salud';
   status: string;
   available: boolean;
   notice: string | null;
@@ -102,6 +105,8 @@ export interface DailyPlanningView {
   suggestedBlocks: DailyPlanningViewBlock[];
   minimumViable: DailyPlanningViewItem[];
   blockedTasks: DailyPlanningBlockedView[];
+  /** Contexto derivado mínimo; nunca contiene biometría cruda. */
+  health: DailyPlanningHealthContext | null;
   pendingCount: number;
   sources: DailyPlanningSourceView[];
   quality: DailyPlanningViewQuality;
