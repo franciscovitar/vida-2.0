@@ -293,7 +293,6 @@ test('DP-R7. fuentes personales en modo mock no generan contexto personal simula
   assert.deepEqual(data.calendarEvents, []);
 });
 
-
 test('DP-R8. Salud no disponible no degrada el plan ni fabrica contexto de capacidad', async () => {
   const deps = baseDeps(goodPort(), { ok: true, events: [CALENDAR_EVENT] });
   const data = await loadDailyPlanningContextUncached({
