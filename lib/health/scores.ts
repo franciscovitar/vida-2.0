@@ -6,12 +6,7 @@ import type {
 } from '@/types/domain-pages';
 
 export type HealthScoreId =
-  | 'sleep'
-  | 'recovery'
-  | 'activity'
-  | 'cardio-stability'
-  | 'mobility'
-  | 'readiness';
+  'sleep' | 'recovery' | 'activity' | 'cardio-stability' | 'mobility' | 'readiness';
 
 export type HealthScoreBand = 'strong' | 'good' | 'below-usual' | 'low' | 'insufficient';
 export type HealthScoreTrend = 'up' | 'down' | 'stable' | 'unknown';
@@ -183,13 +178,10 @@ function weightedAggregate(
     available.reduce((sum, item) => sum + (item.score as number) * item.weight, 0) /
     availableWeight;
   const reliability =
-    available.reduce(
-      (sum, item) => sum + RELIABILITY_FACTOR[item.reliability] * item.weight,
-      0,
-    ) / availableWeight;
-  const baseline =
-    available.reduce((sum, item) => sum + item.baselineFactor * item.weight, 0) /
+    available.reduce((sum, item) => sum + RELIABILITY_FACTOR[item.reliability] * item.weight, 0) /
     availableWeight;
+  const baseline =
+    available.reduce((sum, item) => sum + item.baselineFactor * item.weight, 0) / availableWeight;
 
   return {
     score: roundScore(score),
@@ -469,9 +461,9 @@ function buildSleepScore(health: HealthPageData): HealthExplainableScore {
     confidenceBand: confidenceBandFor(aggregated.confidence),
     personalPosition:
       recentAverage !== null && baseline !== null
-        ? `7d ${delta !== null && delta >= 0 ? '+' : ''}${delta === null ? '—' : Math.round(
-            delta * 100,
-          )}% vs tu base`
+        ? `7d ${delta !== null && delta >= 0 ? '+' : ''}${
+            delta === null ? '—' : Math.round(delta * 100)
+          }% vs tu base`
         : scorePosition(aggregated.score),
     trend: directionForDelta(delta),
     contributors,
@@ -533,7 +525,13 @@ function buildCardioScore(health: HealthPageData): HealthExplainableScore {
       weight: 0.35,
       reliability: 'A',
       direction:
-        hrvScore === null ? 'unknown' : hrvScore >= 80 ? 'positive' : hrvScore < 60 ? 'negative' : 'neutral',
+        hrvScore === null
+          ? 'unknown'
+          : hrvScore >= 80
+            ? 'positive'
+            : hrvScore < 60
+              ? 'negative'
+              : 'neutral',
       detail:
         hrv === null || hrvCenter === null
           ? 'HRV no tiene cobertura/semántica suficiente para pesar hoy.'
@@ -564,13 +562,7 @@ function buildCardioScore(health: HealthPageData): HealthExplainableScore {
           }% vs tu base`
         : scorePosition(aggregated.score),
     trend:
-      rhrDelta === null
-        ? 'unknown'
-        : rhrDelta > 0.05
-          ? 'down'
-          : rhrDelta < -0.05
-            ? 'up'
-            : 'stable',
+      rhrDelta === null ? 'unknown' : rhrDelta > 0.05 ? 'down' : rhrDelta < -0.05 ? 'up' : 'stable',
     contributors,
     uncertainties: [
       ...(hrvScore === null ? ['HRV no está aportando al score hoy; la confianza baja.'] : []),
@@ -657,9 +649,9 @@ function buildActivityScore(health: HealthPageData): HealthExplainableScore {
     confidenceBand: confidenceBandFor(aggregated.confidence),
     personalPosition:
       recentSteps !== null && baselineSteps !== null
-        ? `${delta !== null && delta >= 0 ? '+' : ''}${delta === null ? '—' : Math.round(
-            delta * 100,
-          )}% vs tu base de pasos`
+        ? `${delta !== null && delta >= 0 ? '+' : ''}${
+            delta === null ? '—' : Math.round(delta * 100)
+          }% vs tu base de pasos`
         : scorePosition(aggregated.score),
     trend: directionForDelta(delta, 0.08),
     contributors,
@@ -852,7 +844,8 @@ function buildRecoveryScore(
     contributors,
     uncertainties: [
       'La carga de entrenamiento todavía no pesa hasta tener un resumen estructurado de Gym.',
-      ...(health.signals.today?.values.hrv === null || health.signals.today?.values.hrv === undefined
+      ...(health.signals.today?.values.hrv === null ||
+      health.signals.today?.values.hrv === undefined
         ? ['HRV ausente: el score sigue visible, pero pierde confianza.']
         : []),
     ],
