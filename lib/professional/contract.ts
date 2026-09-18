@@ -1,5 +1,6 @@
 import type {
   ProfessionalConfidence,
+  ProfessionalIntelligenceData,
   ProfessionalSnapshot,
 } from '@/types/professional-intelligence';
 
@@ -180,4 +181,51 @@ export function isProfessionalSnapshotStale(
 
   const ageMs = Math.max(0, now.getTime() - observed.getTime());
   return ageMs > snapshot.source.staleAfterDays * 24 * 60 * 60 * 1000;
+}
+
+
+export function resolveProfessionalSnapshotText(
+  raw: string | null,
+  now?: Date,
+): ProfessionalIntelligenceData {
+  if (raw === null) {
+    return {
+      status: 'missing',
+      notice: 'Professional Intelligence no está disponible: falta el snapshot derivado.',
+      stale: false,
+      snapshot: null,
+    };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return {
+      status: 'invalid',
+      notice: 'Professional Intelligence no está disponible: el snapshot no es JSON válido.',
+      stale: false,
+      snapshot: null,
+    };
+  }
+
+  const snapshot = parseProfessionalSnapshot(parsed);
+  if (!snapshot) {
+    return {
+      status: 'invalid',
+      notice: 'Professional Intelligence no está disponible: el snapshot no cumple el contrato.',
+      stale: false,
+      snapshot: null,
+    };
+  }
+
+  const stale = isProfessionalSnapshotStale(snapshot, now);
+  return {
+    status: 'ready',
+    notice: stale
+      ? 'El snapshot profesional está disponible, pero necesita refresh antes de una decisión sensible.'
+      : null,
+    stale,
+    snapshot,
+  };
 }
