@@ -172,7 +172,15 @@ export default async function SaludPage({
           >
             <span>Parciales</span>
             <strong className="tabular">{health.partialDays}</strong>
-            <small>sin inventar faltantes</small>
+            <small>todavía en reconciliación</small>
+          </div>
+          <div
+            className={local['summary-item']}
+            data-tone={health.sourceIncompleteDays > 0 ? 'watch' : 'neutral'}
+          >
+            <span>Incompletos fuente</span>
+            <strong className="tabular">{health.sourceIncompleteDays}</strong>
+            <small>confirmados en raw</small>
           </div>
           <div className={local['summary-item']}>
             <span>Base personal</span>
@@ -263,9 +271,11 @@ export default async function SaludPage({
                       <span className={styles.badge} data-kind={row.importKind}>
                         {row.importKind === 'partial'
                           ? 'Parcial'
-                          : row.importKind === 'complete'
-                            ? 'Completa'
-                            : '—'}
+                          : row.importKind === 'source-incomplete'
+                            ? 'Incompleta fuente'
+                            : row.importKind === 'complete'
+                              ? 'Completa'
+                              : '—'}
                       </span>
                     </td>
                     <td>{row.workout}</td>
