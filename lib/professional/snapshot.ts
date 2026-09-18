@@ -17,7 +17,8 @@ export async function loadProfessionalSnapshot(options?: {
   readText?: () => Promise<string>;
   now?: Date;
 }): Promise<ProfessionalIntelligenceData> {
-  const readText = options?.readText ?? (() => readFile(SNAPSHOT_PATH, 'utf8'));
+  const readText =
+    options?.readText ?? (() => readFile(SNAPSHOT_PATH, 'utf8'));
 
   try {
     const raw = await readText();
