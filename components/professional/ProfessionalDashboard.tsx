@@ -20,7 +20,11 @@ function humanizeToken(value: string): string {
   return value.replaceAll('_', ' ').toLowerCase();
 }
 
-export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligenceData }) {
+export function ProfessionalDashboard({
+  data,
+}: {
+  data: ProfessionalIntelligenceData;
+}) {
   if (data.status !== 'ready' || !data.snapshot) {
     return (
       <Card aria-labelledby="professional-unavailable-title">
@@ -44,7 +48,11 @@ export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligence
   return (
     <div className={styles.stack}>
       {data.notice ? (
-        <div className={styles.notice} data-tone={data.stale ? 'warning' : 'info'} role="status">
+        <div
+          className={styles.notice}
+          data-tone={data.stale ? 'warning' : 'info'}
+          role="status"
+        >
           {data.stale ? (
             <CircleAlert size={16} aria-hidden="true" />
           ) : (
@@ -169,14 +177,18 @@ export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligence
               <li key={item.id}>
                 <div className={styles['item-head']}>
                   <strong>{item.name}</strong>
-                  <Badge domain={item.disposition === 'HOLD' ? 'neutral' : 'productivity'} variant="outline">
+                  <Badge
+                    domain={item.disposition === 'HOLD' ? 'neutral' : 'productivity'}
+                    variant="outline"
+                  >
                     {humanizeToken(item.disposition)}
                   </Badge>
                 </div>
                 <p>{item.capability}</p>
                 <p>{item.application}</p>
                 <small>
-                  {item.priceLabel} · {item.personalEvalStatus} · system-maintenance decide
+                  {item.priceLabel} · {item.personalEvalStatus} · system-maintenance
+                  decide
                 </small>
               </li>
             ))}
@@ -291,7 +303,8 @@ export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligence
 
       <footer className={styles.provenance}>
         <span>
-          PAS <code>{snapshot.source.commit.slice(0, 8)}</code> · observado {snapshot.source.observedAt}
+          PAS <code>{snapshot.source.commit.slice(0, 8)}</code> · observado{' '}
+          {snapshot.source.observedAt}
         </span>
         <span>
           Snapshot derivado {snapshot.source.generatedAt}
