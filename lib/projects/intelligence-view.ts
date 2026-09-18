@@ -172,7 +172,10 @@ export interface ProjectCardView {
   name: string;
   status: ProjectsIntelligenceProjectStatus;
   type: ProjectsIntelligenceProjectType | null;
+  expectedResult: string | null;
   definitionOfDone: string | null;
+  /** Short presentation copy. CSS controls visible line count; source text remains intact in detail. */
+  summary: string | null;
   progress: ProgressView;
   nextAction: NextActionView;
   blocker: string | null;
@@ -190,7 +193,9 @@ export function buildProjectCardView(project: ProjectsIntelligenceProject): Proj
     name: project.name,
     status: project.status,
     type: project.type,
+    expectedResult: project.expectedResult,
     definitionOfDone: project.definitionOfDone,
+    summary: project.expectedResult ?? project.piSummary ?? project.definitionOfDone,
     progress: buildProgressView(project.progress),
     nextAction: buildNextActionView(project.nextAction),
     blocker: project.blocker,

@@ -9,6 +9,7 @@ import { test } from 'node:test';
 
 import {
   buildNextActionView,
+  buildProjectCardView,
   buildProjectsIntelligenceView,
   NEXT_ACTION_MISSING_LABEL,
   NEXT_ACTION_UNRESOLVED_LABEL,
@@ -369,4 +370,38 @@ test('PI-V10. Hitos: orden ascendente solo si todos declaran `order`, si no orde
     fullCard?.milestones.map((m) => m.id),
     ['m4', 'm3'],
   );
+});
+
+test('PI-V11. La card compacta prioriza Resultado esperado sin perder el DoD de detalle', () => {
+  const card = buildProjectCardView(
+    project({
+      expectedResult: 'Resultado corto y orientado a decisión.',
+      definitionOfDone: 'Definition of Done mucho más detallada.',
+      piSummary: 'Resumen PI secundario.',
+    }),
+  );
+
+  assert.equal(card.summary, 'Resultado corto y orientado a decisión.');
+  assert.equal(card.expectedResult, 'Resultado corto y orientado a decisión.');
+  assert.equal(card.definitionOfDone, 'Definition of Done mucho más detallada.');
+});
+
+test('PI-V12. Fallback de resumen: PI antes que DoD cuando no hay Resultado esperado', () => {
+  const piCard = buildProjectCardView(
+    project({
+      expectedResult: null,
+      piSummary: 'Resumen PI persistido.',
+      definitionOfDone: 'DoD completo.',
+    }),
+  );
+  assert.equal(piCard.summary, 'Resumen PI persistido.');
+
+  const dodCard = buildProjectCardView(
+    project({
+      expectedResult: null,
+      piSummary: null,
+      definitionOfDone: 'DoD como último fallback.',
+    }),
+  );
+  assert.equal(dodCard.summary, 'DoD como último fallback.');
 });

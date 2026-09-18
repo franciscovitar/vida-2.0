@@ -20,7 +20,7 @@ export default async function ProyectosPage() {
     <div className={`${pageStyles.page} ${local.page}`}>
       <PageHeader
         title="Proyectos"
-        description="Portfolio real, progreso por hitos y próximas acciones."
+        description="Estado real del portfolio. Resumen primero; detalle solo cuando lo necesitás."
         icon={Boxes}
         domain="projects"
       />
