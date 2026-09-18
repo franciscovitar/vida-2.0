@@ -12,10 +12,6 @@ function title(value: string) {
   return { title: [{ type: 'text', text: { content: value }, plain_text: value }] };
 }
 
-function rich(value: string) {
-  return { rich_text: [{ type: 'text', text: { content: value }, plain_text: value }] };
-}
-
 function select(value: string) {
   return { select: { name: value } };
 }
@@ -231,7 +227,11 @@ test('Task Web CRUD: stale editor conflicts instead of overwriting newer state',
 
   assert.equal(result.ok, false);
   if (!result.ok) assert.equal(result.code, 'conflict');
-  assert.equal((fake.tasks.get(task.id)!.properties[TASK_PROPS.status] as { select: { name: string } }).select.name, 'En progreso');
+  assert.equal(
+    (fake.tasks.get(task.id)!.properties[TASK_PROPS.status] as { select: { name: string } }).select
+      .name,
+    'En progreso',
+  );
 });
 
 test('Task Web CRUD: archive requires exact confirmation context and removes active row', async () => {
