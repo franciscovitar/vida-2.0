@@ -361,8 +361,18 @@ function lastInterpretableSummary(day: HealthDaySignals): string {
   return `Último día interpretable: ${day.label}${detail}. Es historial, no el estado de hoy.`;
 }
 
-function partialImportReason(day: HealthDaySignals | null): string {
+function isIncompleteImport(kind: HealthImportKind | 'missing'): boolean {
+  return kind === 'partial' || kind === 'source-incomplete';
+}
+
+function incompleteImportReason(
+  day: HealthDaySignals | null,
+  kind: HealthImportKind | 'missing',
+): string {
   const missing = day?.missingCore ? ` (faltan: ${day.missingCore})` : '';
+  if (kind === 'source-incomplete') {
+    return `La interfaz raw marcó el día como incompleto fuera de la ventana de reconciliación${missing}. Eso no demuestra ausencia en Apple Health.`;
+  }
   return `La fuente marcó la importación de hoy como parcial${missing}.`;
 }
 
@@ -443,7 +453,7 @@ function buildCurrentState(
         `Hay ${joinEs(coreAvailable.map(lowerEs))}, pero todavía no hay base personal suficiente (${signals.baselineCoverageDays} día(s) con datos en los últimos ${signals.baselineWindowDays}) para comparar.`,
       );
     }
-    if (importKind === 'partial') reasons.push(partialImportReason(today));
+    if (isIncompleteImport(importKind)) reasons.push(incompleteImportReason(today, importKind));
 
     return {
       kind: 'insufficient-data',
@@ -478,7 +488,7 @@ function buildCurrentState(
   if (coreMissing.length > 0) {
     reasons.push(`La lectura es parcial: hoy falta ${joinEs(coreMissing.map(lowerEs))}.`);
   }
-  if (importKind === 'partial') reasons.push(partialImportReason(today));
+  if (isIncompleteImport(importKind)) reasons.push(incompleteImportReason(today, importKind));
 
   return {
     kind,
@@ -893,7 +903,7 @@ function buildEvidenceQuality(
     level = 'limited';
   } else if (
     coreAvailable < coreExpected ||
-    state.importKind === 'partial' ||
+    isIncompleteImport(state.importKind) ||
     baselineDays < HEALTH_BASELINE_STRONG_DAYS
   ) {
     level = 'partial';
