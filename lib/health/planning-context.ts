@@ -32,7 +32,9 @@ export function toDailyPlanningHealth(brief: HealthDailyBrief): DailyPlanningHea
     source: {
       status: limited ? 'limited' : 'ready',
       available: true,
-      notice: limited ? 'Salud: evidencia insuficiente para ajustar capacidad con confianza.' : null,
+      notice: limited
+        ? 'Salud: evidencia insuficiente para ajustar capacidad con confianza.'
+        : null,
     },
     context: {
       state: brief.state,
