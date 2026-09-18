@@ -11,6 +11,7 @@ import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
 import {
   HealthContextSection,
   HealthPrioritiesSection,
+  HealthScoreboardSection,
   HealthTodayHero,
   HealthTrajectorySection,
 } from '@/components/health/HealthIntelligenceSections';
@@ -107,6 +108,8 @@ export default async function SaludPage({
       />
 
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
+
+      <HealthScoreboardSection scoreboard={intelligence.scores} />
 
       <HealthTodayHero
         brief={intelligence.dailyBrief}
