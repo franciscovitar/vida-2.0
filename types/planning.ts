@@ -68,11 +68,6 @@ export type PlanningTaskMutationResult =
   | {
       ok: false;
       code:
-        | 'disabled'
-        | 'invalid'
-        | 'conflict'
-        | 'not-found'
-        | 'unavailable'
-        | 'verification-failed';
+        'disabled' | 'invalid' | 'conflict' | 'not-found' | 'unavailable' | 'verification-failed';
       message: string;
     };
