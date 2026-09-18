@@ -372,7 +372,6 @@ test('PI-V10. Hitos: orden ascendente solo si todos declaran `order`, si no orde
   );
 });
 
-
 test('PI-V11. La card compacta prioriza Resultado esperado sin perder el DoD de detalle', () => {
   const card = buildProjectCardView(
     project({
