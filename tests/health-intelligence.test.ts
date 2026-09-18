@@ -727,6 +727,10 @@ test('la página conserva métricas detalladas, historial y base personal', () =
 
 test('la UI de Salud lidera con la lectura y mantiene la evidencia debajo', () => {
   const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
+  const sections = readFileSync(
+    join(process.cwd(), 'components', 'health', 'HealthIntelligenceSections.tsx'),
+    'utf8',
+  );
   const heroIndex = page.indexOf('<HealthTodayHero');
   const trajectoryIndex = page.indexOf('<HealthTrajectorySection');
   const changesIndex = page.indexOf('health-insights-title');
@@ -741,7 +745,7 @@ test('la UI de Salud lidera con la lectura y mantiene la evidencia debajo', () =
   assert.ok(contextIndex < prioritiesIndex);
   assert.ok(prioritiesIndex < historyIndex);
   assert.match(page, /no como diagnóstico/i);
-  assert.match(page, /Daily Health Brief/);
+  assert.match(sections, /Daily Health Brief/);
   assert.match(page, /brief=\{intelligence\.dailyBrief\}/);
   assert.match(page, /SparkBars/);
 });
