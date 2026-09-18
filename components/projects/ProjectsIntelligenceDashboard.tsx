@@ -240,10 +240,12 @@ function ProjectCard({
 }
 
 function SectionHeading({
+  id,
   title,
   description,
   count,
 }: {
+  id: string;
   title: string;
   description: string;
   count?: number;
@@ -251,7 +253,7 @@ function SectionHeading({
   return (
     <div className={styles['section-heading']}>
       <div>
-        <h2>{title}</h2>
+        <h2 id={id}>{title}</h2>
         <p>{description}</p>
       </div>
       {count !== undefined ? <span className={styles.count}>{count}</span> : null}
@@ -334,6 +336,7 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
 
       <section className={styles.section} aria-labelledby="projects-focus-title">
         <SectionHeading
+          id="projects-focus-title"
           title="En foco"
           description="Solo lo que está activo ahora."
           count={view.focus.length}
@@ -356,6 +359,7 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
       {view.blocked.length > 0 ? (
         <section className={styles.section} aria-labelledby="projects-blocked-title">
           <SectionHeading
+            id="projects-blocked-title"
             title="Bloqueados"
             description="Necesitan resolver un bloqueo antes de seguir."
             count={view.blocked.length}
@@ -371,6 +375,7 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
       {view.waiting.length > 0 ? (
         <section className={styles.section} aria-labelledby="projects-waiting-title">
           <SectionHeading
+            id="projects-waiting-title"
             title="En espera"
             description="Preservados sin competir por tu atención diaria."
             count={view.waiting.length}
