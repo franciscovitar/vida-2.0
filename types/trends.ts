@@ -15,6 +15,7 @@ export interface TrendsCoverage {
   healthDays: number;
   productivityDays: number;
   partialHealthDays: number;
+  sourceIncompleteHealthDays: number;
   daysWithoutData: number;
   periodDays: PeriodDays;
   insufficientSample: boolean;
@@ -86,6 +87,7 @@ export interface DataQualityReport {
   healthDays: number;
   productivityDays: number;
   partialHealthDays: number;
+  sourceIncompleteHealthDays: number;
   daysWithoutAny: number;
   relationPairCounts: { id: string; label: string; pairs: number }[];
 }
