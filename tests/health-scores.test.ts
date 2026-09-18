@@ -104,6 +104,12 @@ test('HS1. datos estables producen scores explicables y versionados', () => {
 
   assert.ok((scores.readiness.score ?? 0) >= 80);
   assert.ok(scores.readiness.confidence > 0);
+  const sleep = scores.domains.find((score) => score.id === 'sleep');
+  assert.ok(sleep);
+  assert.ok(
+    sleep.confidence < 80,
+    'sin regularidad/timing exactos, la confianza del Sleep Score no debe parecer alta',
+  );
   assert.equal(scores.readiness.calculationVersion, 'health-scores-v1.1.0');
   assert.equal(scores.domains.length, 5);
 
@@ -127,6 +133,7 @@ test('HS2. missing HRV baja confianza pero no se convierte en cero', () => {
   assert.ok(full.score !== null);
   assert.ok(withoutHrv.score !== null);
   assert.ok(withoutHrv.confidence < full.confidence);
+  assert.ok(withoutHrv.confidence < 80);
   const hrv = withoutHrv.contributors.find((item) => item.id === 'hrv');
   assert.equal(hrv?.score, null);
   assert.match(hrv?.detail ?? '', /no tiene cobertura/i);
