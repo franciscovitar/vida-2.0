@@ -18,10 +18,7 @@ import {
 } from '@/lib/adapters/salud-period';
 import { formatNumber } from '@/lib/format';
 import type { GymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
-import {
-  buildExplainableHealthScores,
-  type HealthScoreboard,
-} from '@/lib/health/scores';
+import { buildExplainableHealthScores, type HealthScoreboard } from '@/lib/health/scores';
 import type { NutritionCoverage, NutritionDashboardData } from '@/lib/nutrition/types';
 import type {
   HealthBaselineSignal,
