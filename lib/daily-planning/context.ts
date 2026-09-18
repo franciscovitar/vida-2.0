@@ -34,6 +34,7 @@ import type {
   AssessmentProgressSnapshot,
 } from '@/types/assessment-progress';
 import type { ProjectsIntelligenceMilestone } from '@/types/projects-intelligence';
+import type { DailyPlanningHealthRead } from '@/lib/health/planning-context';
 
 export const DAILY_PLANNING_HORIZON_DAYS = 30;
 
@@ -52,6 +53,7 @@ interface DailyPlanningLoaderDeps {
     endYmd: string,
   ) => Promise<LoadDailyPlanningCalendarEventsResult>;
   loadAssessments?: () => Promise<AssessmentProgressRead>;
+  loadHealth?: (targetDate: string) => Promise<DailyPlanningHealthRead>;
 }
 
 function notionStatusFromCode(code: NotionReadCode): DailyPlanningNotionSourceStatus {
@@ -395,13 +397,20 @@ export async function loadDailyPlanningContextUncached(
         await import('@/lib/data/assessment-progress-source');
       return loadAssessmentProgressUncached();
     });
+  const loadHealth =
+    deps.loadHealth ??
+    (async (targetDate: string) => {
+      const { loadDailyPlanningHealthUncached } =
+        await import('@/lib/health/planning-context-source');
+      return loadDailyPlanningHealthUncached(targetDate);
+    });
 
   const notionMode = getNotionDataSource();
   const notionConfig = getNotionConfig();
   const calendarMode = getCalendarDataSource();
   const calendarConfig = getCalendarConfig();
 
-  const [notion, calendar, assessmentRead] = await Promise.all([
+  const [notion, calendar, assessmentRead, healthRead] = await Promise.all([
     loadNotionFacts(notionMode, notionConfig, createNotionPort, today),
     loadCalendarFacts(calendarMode, calendarConfig, loadCalendar, today, horizonEnd),
     loadAssessments().catch((): AssessmentProgressRead => ({
@@ -410,6 +419,11 @@ export async function loadDailyPlanningContextUncached(
       notice: 'Progreso académico: no se pudo leer la fuente.',
       invalidRows: 0,
     })),
+    loadHealth(today).catch(async () => {
+      const { unavailableDailyPlanningHealth } =
+        await import('@/lib/health/planning-context');
+      return unavailableDailyPlanningHealth();
+    }),
   ]);
 
   const assessmentSource = assessmentState(assessmentRead);
@@ -447,11 +461,13 @@ export async function loadDailyPlanningContextUncached(
       ...notion.states,
       calendar: calendar.state,
       assessments: assessmentSource,
+      health: healthRead.source,
     },
     tasks: notion.tasks,
     projects: notion.projects,
     calendarEvents: calendar.events,
     assessments,
+    health: healthRead.context,
     quality,
   };
 }
