@@ -44,7 +44,9 @@ const SCORE_BAND_LABELS: Readonly<Record<HealthExplainableScore['band'], string>
   insufficient: 'Sin evidencia',
 };
 
-const SCORE_EVIDENCE_LABELS: Readonly<Record<HealthExplainableScore['evidenceStrength'], string>> = {
+const SCORE_EVIDENCE_LABELS: Readonly<
+  Record<HealthExplainableScore['evidenceStrength'], string>
+> = {
   strong: 'Alta',
   moderate: 'Moderada',
   limited: 'Limitada',
