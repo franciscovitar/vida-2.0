@@ -88,8 +88,10 @@ export function DailyPlanningPanel({ plan }: { plan: DailyPlanningView }) {
             </div>
             <strong>{plan.health.headline}</strong>
             <p>
-              Confianza {plan.health.confidence}. Este contexto puede informar capacidad, pero no
-              reordena prioridades ni agenda por sí solo.
+              Confianza {plan.health.confidence}.{' '}
+              {plan.health.canInformCapacity
+                ? 'Puede informar capacidad, pero no reordena prioridades ni agenda por sí solo.'
+                : 'La evidencia no alcanza para ajustar capacidad; el resto de la planificación sigue operativo.'}
             </p>
           </div>
         ) : null}
