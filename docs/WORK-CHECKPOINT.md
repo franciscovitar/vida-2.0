@@ -326,6 +326,38 @@ historia; revalidar contra las secciones vigentes antes de actuar.
 >   de hábitos autorizada.
 > - Production no contiene cambios fuera de las variables y datos descritos arriba.
 
+## Health Intelligence V1 — autorización de despliegue Production 18/09/2026
+
+**Estado: AUTHORIZED / DEPLOYMENT PENDING.**
+
+El usuario autorizó explícitamente desplegar Health Intelligence V1 a Production.
+
+Candidato autorizado:
+
+- `vida-2.0/main` contiene el árbol funcional de Health V1 ya validado.
+- El árbol funcional coincide con el candidato que pasó Quality completo y Preview READY antes del
+  merge.
+- El cambio funcional incluye semántica de calidad de ingestión, Daily Health Brief determinístico,
+  baseline personal robusto y contexto sanitario mínimo/no bloqueante para Daily Planning.
+- Este pass **no** autoriza cambios en Health Sync / Apps Script / Health Auto Export ni escrituras
+  adicionales sobre datos personales.
+
+Gate de recuperación:
+
+- El deployment Production anterior permanece como último punto conocido READY sobre el commit
+  `859974106789bfb02abf9152d5a59844bd9f8e15`.
+- Si el nuevo deployment no llega a READY, no promover ni declarar Production actualizado.
+- Si aparece una regresión runtime después de promoción, detener el cierre y restaurar la última
+  versión Production conocida antes de continuar.
+
+Verificación requerida después del deployment:
+
+1. confirmar que Production queda READY sobre el nuevo commit de `main`;
+2. hacer smoke checks focales read-only de `/salud` y `/planificacion`;
+3. revisar errores runtime del nuevo deployment;
+4. no repetir toda la batería de QA pre-merge salvo evidencia de regresión;
+5. actualizar este checkpoint sólo con evidencia observada.
+
 ## Higiene del archivo
 
 - No pegar secretos, tokens, cookies, credenciales, emails, URLs privadas, payloads personales ni
