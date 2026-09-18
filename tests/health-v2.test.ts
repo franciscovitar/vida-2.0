@@ -37,7 +37,36 @@ test('Health V2 parsea columnas extendidas sin volverlas obligatorias', () => {
   assert.equal(extended.coreSleepHours.kind, 'value');
   assert.equal(extended.walkingSpeed.kind, 'value');
   assert.equal(extended.stepLengthCm.kind, 'value');
-  assert.equal(parseImportStatus(extended.importStatus), 'partial');
+  assert.equal(parseImportStatus(extended.importStatus), 'source-incomplete');
+});
+
+test('Health V2 distingue parcial reciente de incompleto confirmado en raw', () => {
+  const rows = [
+    [...EXTENDED_HEADERS],
+    rowFor(EXTENDED_HEADERS, {
+      [SAL.fecha]: '2026-09-01',
+      [SAL.steps]: 6000,
+      [SAL.importStatus]: 'incompleto_fuente',
+      [SAL_EXTENDED.missingCore]: 'Sueño, FC reposo',
+    }),
+  ];
+
+  const page = buildHealthPageData({
+    records: parseSalud(rows),
+    today: '2026-09-01',
+    window: periodWindow('2026-09-01', 7),
+    source: 'google',
+    status: 'ready',
+    notice: null,
+  });
+
+  assert.equal(page.partialDays, 0);
+  assert.equal(page.sourceIncompleteDays, 1);
+  assert.equal(page.completeDays, 0);
+  assert.equal(page.today.kind, 'source-incomplete');
+  assert.match(page.today.label, /Incompleta en fuente raw/);
+  assert.match(page.today.details ?? '', /no prueba ausencia en Apple Health/);
+  assert.ok(page.insights.some((insight) => insight.id === 'source-incomplete-data'));
 });
 
 test('Health V2 agrupa métricas y compara período, baseline y calidad', () => {
