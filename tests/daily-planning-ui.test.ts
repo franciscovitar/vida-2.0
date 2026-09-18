@@ -71,6 +71,13 @@ function context(overrides: Partial<DailyPlanningContext> = {}): DailyPlanningCo
       projects: { status: 'ready', available: true, notice: null },
       milestones: { status: 'ready', available: true, notice: null },
       calendar: { status: 'ready', available: true, notice: null, mode: 'google' },
+      health: { status: 'ready', available: true, notice: null },
+    },
+    health: {
+      state: 'CUIDADO',
+      confidence: 'MEDIA',
+      headline: 'Hay algo para vigilar',
+      canInformCapacity: true,
     },
     tasks: [
       task(),
@@ -211,6 +218,9 @@ test('DPU3. la vista resuelve refs contra datos actuales y no expone IDs interno
   assert.equal(view.fixedCommitments[0]?.title, 'Compromiso actual');
   assert.equal(view.dateMarkers[0]?.note, 'Fecha probable');
   assert.equal(view.blockedTasks[0]?.blocker, 'Falta una respuesta');
+  assert.equal(view.health?.state, 'CUIDADO');
+  assert.equal(view.health?.confidence, 'MEDIA');
+  assert.ok(view.sources.some((source) => source.label === 'Salud' && source.available));
 
   const serialized = JSON.stringify(view);
   assert.doesNotMatch(serialized, /task-ref-1|calendar-ref-1|calendar-marker-1/);
