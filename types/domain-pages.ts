@@ -82,13 +82,20 @@ export type HealthInsightKind = 'fact' | 'trend' | 'context';
 /** Señales de salud con valor numérico exacto disponibles para interpretación. */
 export type HealthSignalId =
   | 'sleep'
+  | 'sleepInBed'
+  | 'awakeSleep'
   | 'deepSleep'
   | 'remSleep'
   | 'restingHr'
   | 'meanHr'
+  | 'minHr'
   | 'hrv'
   | 'steps'
   | 'walkRunKm'
+  | 'floorsClimbed'
+  | 'walkingSpeed'
+  | 'stepLengthCm'
+  | 'walkingAsymmetry'
   | 'activeCalories'
   | 'spo2';
 
@@ -171,6 +178,10 @@ export interface HealthSignalsModel {
   baselineWindowDays: number;
   /** Días con datos dentro de la ventana de base personal. */
   baselineCoverageDays: number;
+  /** Resumen robusto de los 7 días que terminan hoy, también independiente del selector UI. */
+  recent: Record<HealthSignalId, HealthBaselineSignal>;
+  recentWindowDays: number;
+  recentCoverageDays: number;
 }
 
 export interface HealthPageData extends DomainPageMeta {
