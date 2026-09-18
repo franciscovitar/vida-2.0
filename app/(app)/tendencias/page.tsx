@@ -226,6 +226,7 @@ export default async function TendenciasPage({
           <li>Salud: {t.quality.healthDays} días</li>
           <li>Productividad: {t.quality.productivityDays} días</li>
           <li>Salud parcial: {t.quality.partialHealthDays} días</li>
+          <li>Salud incompleta en raw: {t.quality.sourceIncompleteHealthDays} días</li>
           <li>Sin datos: {t.quality.daysWithoutAny} días</li>
         </ul>
         <ul className={local.notes}>

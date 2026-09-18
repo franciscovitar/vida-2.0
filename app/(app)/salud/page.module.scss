@@ -20,7 +20,8 @@
   color: var(--text-muted);
 }
 
-.today-state[data-kind='partial'] {
+.today-state[data-kind='partial'],
+.today-state[data-kind='source-incomplete'] {
   border-color: var(--c-projects-border);
   background: var(--c-projects-soft);
 }

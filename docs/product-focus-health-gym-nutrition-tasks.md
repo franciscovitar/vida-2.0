@@ -44,6 +44,7 @@ La web no duplica esos datos. Lee métricas observadas y deriva vistas.
 - Agrupar visualmente Sueño / Corazón y recuperación / Movimiento / Oxígeno / Energía.
 - Mostrar tendencia del período, comparación contra período anterior y baseline personal de 30 días.
 - Mostrar calidad/cobertura de importación y no convertir faltantes en cero.
+- Distinguir `parcial` (todavía en reconciliación) de `incompleto_fuente` (faltante confirmado en la interfaz raw fuera de la ventana); este último no prueba ausencia en Apple Health ni en el wearable.
 - Generar observaciones determinísticas de cambios y cobertura.
 - Mantener una vista diaria auditable.
 
@@ -76,7 +77,7 @@ Objetivo: convertir Tareas en el centro operativo de Vida Web y combinar:
 - tareas pendientes;
 - prioridades/fechas/duración cuando existan;
 - agenda real;
-- contexto disponible de energía/sueño;
+- contexto sanitario derivado y mínimo (estado + confianza) para informar capacidad, sin copiar biometría cruda ni cederle a Salud la prioridad de tareas/proyectos;
 - propuesta de planificación del día;
 - evaluación al cierre: planeado vs hecho, pendientes y aprendizaje para el día siguiente.
 

@@ -262,6 +262,19 @@ function averageOf(
   };
 }
 
+function medianOf(values: readonly number[]): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 1) return sorted[middle];
+  return (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+function medianAbsoluteDeviation(values: readonly number[], median: number | null): number | null {
+  if (median === null || values.length === 0) return null;
+  return medianOf(values.map((value) => Math.abs(value - median)));
+}
+
 function seriesOf(
   map: Map<string, SaludRecord>,
   window: PeriodWindow,
@@ -347,7 +360,13 @@ export function buildHealthSignalsModel(
   const baseline = {} as Record<HealthSignalId, HealthBaselineSignal>;
   for (const id of SIGNAL_IDS) {
     const { average, values } = averageOf(baselineRecords, SIGNAL_PICKERS[id]);
-    baseline[id] = { average, days: values.length };
+    const median = medianOf(values);
+    baseline[id] = {
+      average,
+      median,
+      mad: medianAbsoluteDeviation(values, median),
+      days: values.length,
+    };
   }
 
   return {
@@ -412,11 +431,24 @@ function todayState(
   const label =
     importKind === 'partial'
       ? `Importación parcial · ${formatShortDay(record.date as string)}`
-      : `Datos del día · ${formatShortDay(record.date as string)}`;
-  const details =
-    importKind === 'partial' && record.missingCore.kind === 'value'
+      : importKind === 'source-incomplete'
+        ? `Incompleta en fuente raw · ${formatShortDay(record.date as string)}`
+        : `Datos del día · ${formatShortDay(record.date as string)}`;
+  const missingDetails =
+    record.missingCore.kind === 'value' && record.missingCore.value.trim() !== ''
       ? `Faltan: ${record.missingCore.value}`
       : null;
+  const details =
+    importKind === 'source-incomplete'
+      ? [
+          missingDetails,
+          'La ausencia está confirmada en el raw; no prueba ausencia en Apple Health.',
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : importKind === 'partial'
+        ? missingDetails
+        : null;
   return { kind: importKind, date: record.date, label, details };
 }
 
@@ -436,6 +468,7 @@ function buildInsights(input: {
   metrics: readonly HealthMetricPeriod[];
   availableDays: number;
   partialDays: number;
+  sourceIncompleteDays: number;
   baselineDays: number;
   periodDays: number;
   sourceAvailable: boolean;
@@ -473,15 +506,29 @@ function buildInsights(input: {
     });
   }
 
-  if (input.partialDays > 0) {
+  if (input.sourceIncompleteDays > 0) {
     insights.push({
-      id: 'partial-data',
-      title: 'Cobertura parcial',
-      detail: `${input.partialDays} día(s) del período tienen importación parcial; las tendencias se muestran sin convertir faltantes en cero.`,
+      id: 'source-incomplete-data',
+      title: 'Faltantes confirmados en el raw',
+      detail: `${input.sourceIncompleteDays} día(s) del período siguen incompletos en la interfaz raw del pipeline. Eso no demuestra que los datos falten en Apple Health.`,
       tone: 'watch',
       kind: 'fact',
     });
-  } else if (input.availableDays < Math.min(3, input.periodDays)) {
+  }
+
+  if (input.partialDays > 0 && insights.length < 3) {
+    insights.push({
+      id: 'partial-data',
+      title: 'Cobertura parcial',
+      detail: `${input.partialDays} día(s) del período todavía están dentro de reconciliación; las tendencias se muestran sin convertir faltantes en cero.`,
+      tone: 'watch',
+      kind: 'fact',
+    });
+  } else if (
+    input.sourceIncompleteDays === 0 &&
+    input.partialDays === 0 &&
+    input.availableDays < Math.min(3, input.periodDays)
+  ) {
     insights.push({
       id: 'low-coverage',
       title: 'Pocos datos todavía',
@@ -578,12 +625,16 @@ export function buildHealthPageData(input: {
   const partialDays = available.filter(
     (record) => parseImportStatus(record.importStatus) === 'partial',
   ).length;
-  const completeDays = available.length - partialDays;
+  const sourceIncompleteDays = available.filter(
+    (record) => parseImportStatus(record.importStatus) === 'source-incomplete',
+  ).length;
+  const completeDays = available.length - partialDays - sourceIncompleteDays;
   const signals = buildHealthSignalsModel(input.records, input.today);
   const insights = buildInsights({
     metrics,
     availableDays: available.length,
     partialDays,
+    sourceIncompleteDays,
     baselineDays: baseline.length,
     periodDays: input.window.days,
     sourceAvailable,
@@ -607,6 +658,7 @@ export function buildHealthPageData(input: {
     baselineDays: baseline.length,
     completeDays,
     partialDays,
+    sourceIncompleteDays,
     insights,
   };
 }

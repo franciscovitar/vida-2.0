@@ -77,7 +77,12 @@ export function buildSheetToday(
   const prevSalud = todaySalud ? previousBefore<SaludRecord>(saludAvailable, today) : null;
 
   const importKind = todaySalud ? parseImportStatus(todaySalud.importStatus) : 'none';
-  const healthEmptyContext = importKind === 'partial' ? 'importación parcial' : 'sin registro';
+  const healthEmptyContext =
+    importKind === 'partial'
+      ? 'importación parcial'
+      : importKind === 'source-incomplete'
+        ? 'incompleto en la fuente raw'
+        : 'sin registro';
 
   // Hábitos: siempre la fila del día objetivo (false/vacío editable → pending).
   const rowExists = todayRegistroRow !== null;
@@ -121,6 +126,9 @@ export function buildSheetToday(
   let notice: string | null = null;
   if (hasRegistro && !hasHealth) {
     notice = 'Salud de hoy sin datos. Hábitos y productividad corresponden al día de hoy.';
+  } else if (hasRegistro && hasHealth && importKind === 'source-incomplete') {
+    notice =
+      'La fuente raw de salud sigue incompleta para hoy. Esto no demuestra ausencia en Apple Health.';
   } else if (hasRegistro && hasHealth && importKind === 'partial') {
     notice = 'Importación de salud parcial para hoy.';
   }

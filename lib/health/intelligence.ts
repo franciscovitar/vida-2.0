@@ -19,6 +19,7 @@ import { formatNumber } from '@/lib/format';
 import type { GymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
 import type { NutritionCoverage, NutritionDashboardData } from '@/lib/nutrition/types';
 import type {
+  HealthBaselineSignal,
   HealthDaySignals,
   HealthImportKind,
   HealthInsight,
@@ -135,7 +136,7 @@ export const HEALTH_MAX_CHANGES = 4;
 export const HEALTH_BASELINE_MIN_DAYS = 5;
 
 /** Días de base personal a partir de los cuales la lectura se considera sólida. */
-export const HEALTH_BASELINE_STRONG_DAYS = 12;
+export const HEALTH_BASELINE_STRONG_DAYS = 14;
 
 /**
  * Días con dato en el período actual necesarios para tratar una comparación de
@@ -198,6 +199,8 @@ export interface HealthSignalEvidence {
   value: number | null;
   valueLabel: string;
   baselineAverage: number | null;
+  baselineMedian: number | null;
+  baselineMad: number | null;
   baselineLabel: string;
   baselineDays: number;
   deltaAbsolute: number | null;
@@ -262,19 +265,19 @@ function evidenceText(input: {
 function buildSignalEvidence(
   signal: HealthMonitoredSignal,
   day: HealthDaySignals | null,
-  baseline: { average: number | null; days: number },
+  baseline: HealthBaselineSignal,
 ): HealthSignalEvidence {
   const threshold = HEALTH_MONITORING_THRESHOLDS[signal];
   const value = day?.values[signal] ?? null;
-  const average = baseline.average;
+  const center = baseline.median ?? baseline.average;
 
   const classification: Classification | null =
-    value !== null && average !== null && baseline.days >= threshold.minBaselineDays
-      ? classify(value, average, threshold)
+    value !== null && center !== null && baseline.days >= threshold.minBaselineDays
+      ? classify(value, center, threshold)
       : null;
 
   const valueLabel = value === null ? '—' : formatSignalValue(signal, value);
-  const baselineLabel = average === null ? '—' : formatSignalValue(signal, average);
+  const baselineLabel = center === null ? '—' : formatSignalValue(signal, center);
   const direction = classification?.direction ?? 'unknown';
   const materiality = classification?.materiality ?? 'unknown';
   const relative = classification?.relative ?? null;
@@ -285,11 +288,13 @@ function buildSignalEvidence(
     role: HEALTH_CORE_SIGNALS.includes(signal) ? 'core' : 'context',
     value,
     valueLabel,
-    baselineAverage: average,
+    baselineAverage: baseline.average,
+    baselineMedian: baseline.median,
+    baselineMad: baseline.mad,
     baselineLabel,
     baselineDays: baseline.days,
     deltaAbsolute:
-      classification !== null && value !== null && average !== null ? value - average : null,
+      classification !== null && value !== null && center !== null ? value - center : null,
     deltaRelative: relative,
     direction,
     materiality,
@@ -361,8 +366,18 @@ function lastInterpretableSummary(day: HealthDaySignals): string {
   return `Último día interpretable: ${day.label}${detail}. Es historial, no el estado de hoy.`;
 }
 
-function partialImportReason(day: HealthDaySignals | null): string {
+function isIncompleteImport(kind: HealthImportKind | 'missing'): boolean {
+  return kind === 'partial' || kind === 'source-incomplete';
+}
+
+function incompleteImportReason(
+  day: HealthDaySignals | null,
+  kind: HealthImportKind | 'missing',
+): string {
   const missing = day?.missingCore ? ` (faltan: ${day.missingCore})` : '';
+  if (kind === 'source-incomplete') {
+    return `La interfaz raw marcó el día como incompleto fuera de la ventana de reconciliación${missing}. Eso no demuestra ausencia en Apple Health.`;
+  }
   return `La fuente marcó la importación de hoy como parcial${missing}.`;
 }
 
@@ -443,7 +458,7 @@ function buildCurrentState(
         `Hay ${joinEs(coreAvailable.map(lowerEs))}, pero todavía no hay base personal suficiente (${signals.baselineCoverageDays} día(s) con datos en los últimos ${signals.baselineWindowDays}) para comparar.`,
       );
     }
-    if (importKind === 'partial') reasons.push(partialImportReason(today));
+    if (isIncompleteImport(importKind)) reasons.push(incompleteImportReason(today, importKind));
 
     return {
       kind: 'insufficient-data',
@@ -478,7 +493,7 @@ function buildCurrentState(
   if (coreMissing.length > 0) {
     reasons.push(`La lectura es parcial: hoy falta ${joinEs(coreMissing.map(lowerEs))}.`);
   }
-  if (importKind === 'partial') reasons.push(partialImportReason(today));
+  if (isIncompleteImport(importKind)) reasons.push(incompleteImportReason(today, importKind));
 
   return {
     kind,
@@ -893,7 +908,7 @@ function buildEvidenceQuality(
     level = 'limited';
   } else if (
     coreAvailable < coreExpected ||
-    state.importKind === 'partial' ||
+    isIncompleteImport(state.importKind) ||
     baselineDays < HEALTH_BASELINE_STRONG_DAYS
   ) {
     level = 'partial';
@@ -921,6 +936,98 @@ function buildEvidenceQuality(
     periodDays: health.periodDays,
     gym: gym.state,
     nutrition: nutrition.state,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Daily Health Brief                                                  */
+/* ------------------------------------------------------------------ */
+
+export type HealthBriefState = 'NORMAL' | 'CUIDADO' | 'RECUPERACIÓN' | 'INSUFICIENTE';
+export type HealthBriefConfidence = 'ALTA' | 'MEDIA' | 'BAJA';
+
+export interface HealthDailyBrief {
+  date: string;
+  state: HealthBriefState;
+  headline: string;
+  confidence: HealthBriefConfidence;
+  confidenceDetail: string;
+  evidence: readonly string[];
+  uncertainties: readonly string[];
+  recommendations: readonly string[];
+  limits: readonly string[];
+  engineVersion: 'health-intelligence-v1';
+}
+
+const BRIEF_STATE: Readonly<Record<HealthStateKind, HealthBriefState>> = {
+  'normal-for-you': 'NORMAL',
+  watch: 'CUIDADO',
+  'below-usual': 'RECUPERACIÓN',
+  'insufficient-data': 'INSUFICIENTE',
+};
+
+const BRIEF_CONFIDENCE: Readonly<Record<HealthEvidenceLevel, HealthBriefConfidence>> = {
+  strong: 'ALTA',
+  partial: 'MEDIA',
+  limited: 'BAJA',
+};
+
+function buildDailyBrief(input: {
+  health: HealthPageData;
+  state: HealthCurrentState;
+  quality: HealthEvidenceQuality;
+  priorities: readonly HealthPriority[];
+}): HealthDailyBrief {
+  const { health, state, quality, priorities } = input;
+
+  const evidence = state.evidence
+    .filter((item) => item.role === 'core' && item.value !== null)
+    .sort((a, b) => Number(b.concern) - Number(a.concern))
+    .slice(0, 3)
+    .map((item) => item.text);
+
+  const uncertainties: string[] = [];
+  if (!health.sourceAvailable) {
+    uncertainties.push(
+      'La fuente real de salud no está disponible, así que no hay lectura personal confiable para hoy.',
+    );
+  } else {
+    if (state.coreMissing.length > 0) {
+      uncertainties.push(
+        `Faltan señales núcleo de hoy: ${joinEs(state.coreMissing.map(lowerEs))}.`,
+      );
+    }
+    if (state.importKind === 'partial') {
+      uncertainties.push(
+        'La importación de hoy todavía está dentro de la ventana de reconciliación.',
+      );
+    }
+    if (state.importKind === 'source-incomplete') {
+      uncertainties.push(
+        'La interfaz raw sigue incompleta para hoy; eso no demuestra ausencia en Apple Health.',
+      );
+    }
+    if (quality.baselineDays < HEALTH_BASELINE_STRONG_DAYS) {
+      uncertainties.push(
+        `La base personal todavía tiene ${quality.baselineDays} día(s) útiles sobre una ventana de ${quality.baselineWindowDays}.`,
+      );
+    }
+  }
+
+  return {
+    date: health.targetDate,
+    state: BRIEF_STATE[state.kind],
+    headline: state.headline,
+    confidence: BRIEF_CONFIDENCE[quality.level],
+    confidenceDetail: quality.detail,
+    evidence,
+    uncertainties,
+    recommendations: priorities.map((item) => `${item.title}: ${item.detail}`),
+    limits: [
+      'Describe patrones personales de bienestar y recuperación; no realiza diagnósticos clínicos.',
+      'Las coincidencias con entrenamiento o nutrición aportan contexto temporal, no causalidad demostrada.',
+    ],
+    engineVersion: 'health-intelligence-v1',
   };
 }
 
@@ -1049,6 +1156,7 @@ export interface HealthIntelligenceInput {
 }
 
 export interface HealthIntelligence {
+  dailyBrief: HealthDailyBrief;
   currentState: HealthCurrentState;
   trajectory: HealthTrajectory;
   changes: readonly HealthInsight[];
@@ -1071,18 +1179,26 @@ export function buildHealthIntelligence(input: HealthIntelligenceInput): HealthI
   const gym = buildGymContext(input.gym, health.targetDate);
   const nutrition = buildNutritionContext(input.nutrition);
   const evidenceQuality = buildEvidenceQuality(health, currentState, gym, nutrition);
+  const priorities = buildPriorities({
+    health,
+    state: currentState,
+    trajectory,
+    quality: evidenceQuality,
+  });
+  const dailyBrief = buildDailyBrief({
+    health,
+    state: currentState,
+    quality: evidenceQuality,
+    priorities,
+  });
 
   return {
+    dailyBrief,
     currentState,
     trajectory,
     changes: buildChanges(health, gym),
     crossDomain: { gym, nutrition, caveat: HEALTH_CONTEXT_CAVEAT },
-    priorities: buildPriorities({
-      health,
-      state: currentState,
-      trajectory,
-      quality: evidenceQuality,
-    }),
+    priorities,
     evidenceQuality,
   };
 }

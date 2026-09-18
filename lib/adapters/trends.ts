@@ -243,9 +243,13 @@ function buildCoverage(
   const productivityDays = productivityAvailableDays(registro, window).length;
   const saludMap = byDateSalud(salud);
   let partial = 0;
+  let sourceIncomplete = 0;
   for (const date of eachDay(window, today)) {
     const row = saludMap.get(date);
-    if (row && parseImportStatus(row.importStatus) === 'partial') partial += 1;
+    if (!row) continue;
+    const importKind = parseImportStatus(row.importStatus);
+    if (importKind === 'partial') partial += 1;
+    if (importKind === 'source-incomplete') sourceIncomplete += 1;
   }
   const days = eachDay(window, today);
   const regMap = byDateRegistro(registro);
@@ -263,6 +267,7 @@ function buildCoverage(
     healthDays,
     productivityDays,
     partialHealthDays: partial,
+    sourceIncompleteHealthDays: sourceIncomplete,
     daysWithoutData: without,
     periodDays,
     insufficientSample: insufficient,
@@ -738,6 +743,7 @@ export function buildTrendsPageData(input: {
     healthDays: coverage.healthDays,
     productivityDays: coverage.productivityDays,
     partialHealthDays: coverage.partialHealthDays,
+    sourceIncompleteHealthDays: coverage.sourceIncompleteHealthDays,
     daysWithoutAny: coverage.daysWithoutData,
     relationPairCounts: relations.map((rel) => ({
       id: rel.id,

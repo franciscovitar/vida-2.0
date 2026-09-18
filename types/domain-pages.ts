@@ -73,7 +73,7 @@ export interface HabitsPageData extends DomainPageMeta {
   writable: boolean;
 }
 
-export type HealthImportKind = 'partial' | 'complete' | 'none';
+export type HealthImportKind = 'partial' | 'source-incomplete' | 'complete' | 'none';
 export type HealthMetricGroupId = 'sleep' | 'cardio' | 'movement' | 'oxygen' | 'energy';
 export type HealthInsightTone = 'neutral' | 'positive' | 'watch';
 /** Naturaleza de una observación: hecho verificable, tendencia personal o contexto temporal. */
@@ -148,7 +148,12 @@ export interface HealthDaySignals {
 
 /** Base personal reciente de una señal. */
 export interface HealthBaselineSignal {
+  /** Media descriptiva; no se usa como centro robusto de decisión. */
   average: number | null;
+  /** Centro robusto de la base personal usado por Health Intelligence. */
+  median: number | null;
+  /** Mediana de las desviaciones absolutas respecto de la mediana. */
+  mad: number | null;
   days: number;
 }
 
@@ -182,6 +187,8 @@ export interface HealthPageData extends DomainPageMeta {
   baselineDays: number;
   completeDays: number;
   partialDays: number;
+  /** Días cuyo raw quedó incompleto después de la ventana de reconciliación. */
+  sourceIncompleteDays: number;
   insights: HealthInsight[];
 }
 

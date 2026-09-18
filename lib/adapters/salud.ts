@@ -97,10 +97,19 @@ export function parseSalud(values: readonly unknown[][]): SaludRecord[] {
 }
 
 /** Interpreta el estado de importación de Salud. */
-export function parseImportStatus(cell: Cell<string>): 'partial' | 'complete' | 'none' {
+export function parseImportStatus(
+  cell: Cell<string>,
+): 'partial' | 'source-incomplete' | 'complete' | 'none' {
   if (cell.kind !== 'value') return 'none';
   const text = cell.value.trim().toLowerCase();
   if (text === '') return 'none';
+  if (
+    /incompleto[_\s-]?fuente|fuente[_\s-]?incompleta|source[_\s-]?incomplete|incomplete[_\s-]?source/.test(
+      text,
+    )
+  ) {
+    return 'source-incomplete';
+  }
   if (/parcial|partial|incomplet|faltante|missing/.test(text)) return 'partial';
   if (/completo|completa|\bok\b|importado|listo|done/.test(text)) return 'complete';
   return 'none';
