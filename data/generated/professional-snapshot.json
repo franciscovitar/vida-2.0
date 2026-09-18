@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "aa80792553e0c7b124bef25b2cdd46cffd17d0c9",
+    "generatedAt": "2026-09-18",
+    "observedAt": "2026-09-18",
+    "staleAfterDays": 45
+  },
+  "profileSummary": "Constructor de productos/sistemas AI-native con evidencia demostrada en entrega web, calidad de software, cambios seguros, producto/UX y orquestación con IA. Producción, bases de datos, seguridad y runtime de IA todavía tienen profundidad personal parcialmente no verificada.",
+  "nowMoves": [
+    {
+      "id": "NM-001",
+      "title": "Construir evidencia real de operación en producción",
+      "why": "Observabilidad, incidentes y recovery siguen siendo gaps explícitos y tienen valor transversal.",
+      "route": "PROJECT_EXPERIENCE",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "NM-002",
+      "title": "Hacer una batería corta de verificación personal",
+      "why": "Arquitectura, testing, SQL y seguridad tienen artefactos fuertes pero juicio personal todavía no verificado en tareas frescas.",
+      "route": "DIRECT_VERIFICATION_PLUS_BOUNDED_LAB",
+      "confidence": "HIGH"
+    }
+  ],
+  "strongestEvidence": [
+    {
+      "capability": "Trabajo AI-native y orquestación de agentes",
+      "state": "DEMONSTRATED",
+      "confidence": "HIGH",
+      "note": "Routing, governance, seguridad, herramientas y evals del PAS."
+    },
+    {
+      "capability": "Full-stack / product web engineering",
+      "state": "DEMONSTRATED",
+      "confidence": "HIGH",
+      "note": "Entregas reales y sistemas actuales con Next.js/TypeScript."
+    },
+    {
+      "capability": "Testing, verificación y cambios seguros",
+      "state": "DEMONSTRATED",
+      "confidence": "HIGH",
+      "note": "QA, fail-closed, migraciones, rollback e idempotencia."
+    },
+    {
+      "capability": "Producto/UX y entrega a clientes",
+      "state": "DEMONSTRATED",
+      "confidence": "MEDIUM_HIGH",
+      "note": "Entregas y decisiones reales; faltan outcomes externos normalizados."
+    }
+  ],
+  "priorities": [
+    {
+      "rank": 1,
+      "capability": "Producción / reliability / observabilidad",
+      "actionType": "BUILD_REAL_EVIDENCE",
+      "action": "Agregar observabilidad accionable y un ejercicio seguro de fallo/recovery en un proyecto real.",
+      "confidence": "HIGH"
+    },
+    {
+      "rank": 2,
+      "capability": "SQL + razonamiento relacional/database",
+      "actionType": "PRACTICE_AND_VERIFY",
+      "action": "Resolver un lab fresco de SQL, índices y transacciones.",
+      "confidence": "HIGH"
+    },
+    {
+      "rank": 3,
+      "capability": "Seguridad / threat modeling / least privilege",
+      "actionType": "VERIFY_AND_DEEPEN",
+      "action": "Modelar amenazas de un trust boundary real.",
+      "confidence": "MEDIUM_HIGH"
+    },
+    {
+      "rank": 4,
+      "capability": "Applied LLM runtime engineering",
+      "actionType": "LEARN_AND_BUILD_CONDITIONALLY",
+      "action": "Construir un experimento con grounding, evals y costo/latencia cuando sea relevante.",
+      "confidence": "MEDIUM_HIGH"
+    },
+    {
+      "rank": 5,
+      "capability": "Arquitectura + juicio de test/debug",
+      "actionType": "DIRECT_VERIFICATION",
+      "action": "Hacer design review y debugging/test-strategy sobre tareas frescas.",
+      "confidence": "HIGH"
+    }
+  ],
+  "market": {
+    "observedAt": "2026-09-18",
+    "status": "CURRENT_MULTI_GEOGRAPHY_BASELINE_WITH_SAMPLE_LIMITS",
+    "signals": [
+      "Software/product mantiene señal positiva pero se transforma con IA.",
+      "Seguridad tiene señal estructural fuerte.",
+      "Data/AI y producción/reliability mantienen señal positiva."
+    ],
+    "limitations": [
+      "Job boards son muestras, no un censo.",
+      "La encuesta salarial argentina 2026.01 envejece para decisiones precisas.",
+      "Exposición a IA no equivale a reemplazo o caída de empleo."
+    ]
+  },
+  "technologies": [
+    {
+      "id": "AIT-000",
+      "name": "ChatGPT",
+      "capability": "Control Tower, research y Work",
+      "disposition": "CURRENT_STACK",
+      "priceLabel": "Freemium; precio se revalida antes de decidir gasto.",
+      "freeTier": true,
+      "application": "Control Tower, research, artefactos y refresh.",
+      "personalEvalStatus": "OBSERVED_USE_ONLY",
+      "decisionOwner": "system-maintenance"
+    },
+    {
+      "id": "AIT-001",
+      "name": "Codex",
+      "capability": "Agente repo-aware",
+      "disposition": "CURRENT_STACK",
+      "priceLabel": "Incluido según plan; costo incremental todavía no calibrado.",
+      "freeTier": true,
+      "application": "Runtime/build/test/debug cuando el estado real del repo importa.",
+      "personalEvalStatus": "OBSERVED_USE_ONLY",
+      "decisionOwner": "system-maintenance"
+    },
+    {
+      "id": "AIT-002",
+      "name": "Claude Code / Claude",
+      "capability": "Especialista de repos y trabajo agente largo",
+      "disposition": "CURRENT_STACK",
+      "priceLabel": "Freemium; costo se revalida antes de cambiar plan.",
+      "freeTier": true,
+      "application": "Alternativa especialista para implementación/análisis largo.",
+      "personalEvalStatus": "OBSERVED_USE_ONLY",
+      "decisionOwner": "system-maintenance"
+    },
+    {
+      "id": "AIT-006",
+      "name": "OpenTelemetry",
+      "capability": "Observabilidad vendor-neutral",
+      "disposition": "ASSESS",
+      "priceLabel": "Open source; backend/hosting puede costar.",
+      "freeTier": true,
+      "application": "Construir evidencia real de observabilidad.",
+      "personalEvalStatus": "NOT_PERSONALLY_EVALUATED",
+      "decisionOwner": "system-maintenance"
+    },
+    {
+      "id": "AIT-008",
+      "name": "Kubernetes",
+      "capability": "Orquestación de contenedores",
+      "disposition": "HOLD",
+      "priceLabel": "Open source con costo operacional.",
+      "freeTier": true,
+      "application": "Solo ante una necesidad real de cluster o un target profesional material.",
+      "personalEvalStatus": "NOT_PERSONALLY_EVALUATED",
+      "decisionOwner": "system-maintenance"
+    }
+  ],
+  "learning": [
+    {
+      "id": "LD-001",
+      "capability": "Arquitectura de software",
+      "mode": "DIRECT_VERIFICATION",
+      "rationale": "Verificar trade-offs personales antes de otro curso.",
+      "courseNeededNow": false,
+      "credentialNeededNow": false
+    },
+    {
+      "id": "LD-003",
+      "capability": "SQL / modelado relacional",
+      "mode": "LAB",
+      "rationale": "Verificar queries, índices y transacciones en tareas frescas.",
+      "courseNeededNow": false,
+      "credentialNeededNow": false
+    },
+    {
+      "id": "LD-004",
+      "capability": "Producción / cloud",
+      "mode": "PROJECT_EXPERIENCE",
+      "rationale": "La evidencia que falta es operacional.",
+      "courseNeededNow": false,
+      "credentialNeededNow": false
+    },
+    {
+      "id": "LD-006",
+      "capability": "Applied LLM systems",
+      "mode": "LAB",
+      "rationale": "El gap es runtime engineering, no conocimiento general de IA.",
+      "courseNeededNow": false,
+      "credentialNeededNow": false
+    }
+  ],
+  "profileFindings": [
+    {
+      "id": "PC-001",
+      "claim": "Full Stack / Web Developer",
+      "status": "SUPPORTED_BUT_UNDERSTATED",
+      "note": "Es cierto, pero quedó chico frente a la evidencia actual."
+    },
+    {
+      "id": "PC-012",
+      "claim": "AI-native workflow/orchestration",
+      "status": "MISSING_FROM_PROFILE",
+      "note": "Evidencia fuerte que casi no aparece en el perfil histórico."
+    },
+    {
+      "id": "PC-016",
+      "claim": "SRE / CloudOps expert",
+      "status": "TOO_BROAD",
+      "note": "Faltan observabilidad sostenida, incidentes y recovery."
+    },
+    {
+      "id": "PC-017",
+      "claim": "Applied AI / LLM Engineer",
+      "status": "TOO_BROAD",
+      "note": "Falta evidencia runtime suficiente para un claim sin matices."
+    }
+  ],
+  "forecast": {
+    "direction": "No abandonar software/web. Mover el diferencial marginal hacia producción/reliability, datos/DB, seguridad y runtime de IA, manteniendo orquestación AI-native.",
+    "confidence": "MEDIUM_HIGH",
+    "items": [
+      {
+        "subject": "ai-native-product-software-engineering",
+        "label": "AI-native product/software",
+        "nearOutlook": "POSITIVE_BUT_TRANSFORMING",
+        "nearConfidence": "MEDIUM_HIGH",
+        "aiInteraction": "Sube el valor de especificación, arquitectura, integración y verificación."
+      },
+      {
+        "subject": "security-privacy-engineering",
+        "label": "Seguridad / privacidad",
+        "nearOutlook": "STRONG_POSITIVE",
+        "nearConfidence": "HIGH",
+        "aiInteraction": "Threat modeling e integración segura siguen siendo críticos."
+      },
+      {
+        "subject": "data-ai-engineering",
+        "label": "Data / AI engineering",
+        "nearOutlook": "STRONG_POSITIVE",
+        "nearConfidence": "MEDIUM_HIGH",
+        "aiInteraction": "Data quality, grounding, evals e integración ganan peso."
+      },
+      {
+        "subject": "web-implementation-only",
+        "label": "Implementación web aislada",
+        "nearOutlook": "PRESSURE_ON_ROUTINE_TASKS",
+        "nearConfidence": "MEDIUM_HIGH",
+        "aiInteraction": "La implementación rutinaria se abarata; systems breadth diferencia más."
+      }
+    ]
+  },
+  "aiFluency": {
+    "status": "BASELINE_NOT_YET_CALIBRATED",
+    "materialOutcomesLogged": 0,
+    "taskFamilies": [
+      {
+        "id": "RESEARCH_SYNTHESIS",
+        "route": "ChatGPT / research route",
+        "evalStatus": "OBSERVED_USE_ONLY",
+        "outcomeEvidenceCount": 0,
+        "nextMeasurement": "Capturar una investigación material con calidad de fuentes y retrabajo."
+      },
+      {
+        "id": "REPO_INSPECTION_DEBUG",
+        "route": "Codex o especialista repo-aware",
+        "evalStatus": "OBSERVED_USE_ONLY",
+        "outcomeEvidenceCount": 0,
+        "nextMeasurement": "Comparar sobre un debugging fresco cuando haya dos rutas elegibles."
+      },
+      {
+        "id": "UNIVERSITY_LEARNING",
+        "route": "ChatGPT Project + adaptive-learning",
+        "evalStatus": "OBSERVED_USE_ONLY",
+        "outcomeEvidenceCount": 0,
+        "nextMeasurement": "Medir transferencia en tareas frescas."
+      }
+    ]
+  }
+}

@@ -36,6 +36,7 @@ test('P2. rutas privadas de app marcan force-dynamic', () => {
     'app/(app)/agenda/page.tsx',
     'app/(app)/tareas/page.tsx',
     'app/(app)/proyectos/page.tsx',
+    'app/(app)/professional/page.tsx',
     'app/(app)/habitos/page.tsx',
   ];
   for (const rel of files) {
