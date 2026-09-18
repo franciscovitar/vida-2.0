@@ -17,12 +17,14 @@ function row(values: Record<string, unknown>): unknown[] {
   return HEADERS.map((header) => (header in values ? values[header] : ''));
 }
 
-function baselineRows(options: {
-  hrv?: boolean;
-  activeCalories?: number;
-  mobility?: boolean;
-  sleepOutlierAtStart?: boolean;
-} = {}): unknown[][] {
+function baselineRows(
+  options: {
+    hrv?: boolean;
+    activeCalories?: number;
+    mobility?: boolean;
+    sleepOutlierAtStart?: boolean;
+  } = {},
+): unknown[][] {
   const rows: unknown[][] = [];
   for (let offset = -14; offset <= -1; offset += 1) {
     const first = offset === -14;
@@ -49,14 +51,16 @@ function baselineRows(options: {
   return rows;
 }
 
-function todayRow(options: {
-  hrv?: boolean;
-  steps?: number;
-  activeCalories?: number;
-  sleep?: number;
-  restingHr?: number;
-  mobility?: boolean;
-} = {}): unknown[] {
+function todayRow(
+  options: {
+    hrv?: boolean;
+    steps?: number;
+    activeCalories?: number;
+    sleep?: number;
+    restingHr?: number;
+    mobility?: boolean;
+  } = {},
+): unknown[] {
   return row({
     [SAL.fecha]: TODAY,
     [SAL.sleep]: options.sleep ?? 7.5,
@@ -153,9 +157,7 @@ test('HS4. calorías activas extremas no inflan Activity Score', () => {
 
 test('HS5. un outlier aislado no destruye la base robusta ni el Sleep Score', () => {
   const health = healthFor([...baselineRows({ sleepOutlierAtStart: true }), todayRow()]);
-  const sleep = buildExplainableHealthScores(health).domains.find(
-    (score) => score.id === 'sleep',
-  );
+  const sleep = buildExplainableHealthScores(health).domains.find((score) => score.id === 'sleep');
 
   assert.equal(health.signals.baseline.sleep.median, 7.5);
   assert.ok((health.signals.baseline.sleep.average ?? 0) > 9);
@@ -191,10 +193,7 @@ test('HS7. movilidad usa señal longitudinal propia y falla cerrado si no existe
 });
 
 test('HS8. la UI pone los scores antes del brief y conserva evidencia cruda debajo', () => {
-  const page = readFileSync(
-    join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'),
-    'utf8',
-  );
+  const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
   const section = readFileSync(
     join(process.cwd(), 'components', 'health', 'HealthIntelligenceSections.tsx'),
     'utf8',
