@@ -51,7 +51,7 @@ export function HealthTodayHero({
     <section className={styles.hero} aria-labelledby="health-today-title" data-state={state.kind}>
       <div className={styles['hero-copy']}>
         <div className={styles['brief-meta']}>
-          <p className={styles.eyebrow}>Daily Health Brief</p>
+          <p className={styles.eyebrow}>Resumen diario de salud</p>
           <span className={styles['brief-state']} data-state={brief.state}>
             {brief.state}
           </span>
