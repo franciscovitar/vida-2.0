@@ -96,9 +96,7 @@ function scoreOf(rows: readonly unknown[][], id: string) {
 }
 
 test('HS1. datos estables producen scores explicables y versionados', () => {
-  const scores = buildExplainableHealthScores(
-    healthFor([...baselineRows(), todayRow()]),
-  );
+  const scores = buildExplainableHealthScores(healthFor([...baselineRows(), todayRow()]));
 
   assert.ok((scores.readiness.score ?? 0) >= 80);
   assert.ok(scores.readiness.confidence > 0);
@@ -150,16 +148,11 @@ test('HS4. calorías activas extremas no inflan Activity Score', () => {
 
   assert.equal(lowCalories.score, hugeCalories.score);
   assert.equal(lowCalories.confidence, hugeCalories.confidence);
-  assert.ok(
-    lowCalories.uncertainties.some((text) => /calorías activas/i.test(text)),
-  );
+  assert.ok(lowCalories.uncertainties.some((text) => /calorías activas/i.test(text)));
 });
 
 test('HS5. un outlier aislado no destruye la base robusta ni el Sleep Score', () => {
-  const health = healthFor([
-    ...baselineRows({ sleepOutlierAtStart: true }),
-    todayRow(),
-  ]);
+  const health = healthFor([...baselineRows({ sleepOutlierAtStart: true }), todayRow()]);
   const sleep = buildExplainableHealthScores(health).domains.find(
     (score) => score.id === 'sleep',
   );
@@ -186,10 +179,7 @@ test('HS6. sin sueño/FC no se fabrica Readiness numérico', () => {
 });
 
 test('HS7. movilidad usa señal longitudinal propia y falla cerrado si no existe', () => {
-  const withMobility = scoreOf(
-    [...baselineRows(), todayRow()],
-    'mobility',
-  );
+  const withMobility = scoreOf([...baselineRows(), todayRow()], 'mobility');
   const withoutMobility = scoreOf(
     [...baselineRows({ mobility: false }), todayRow({ mobility: false })],
     'mobility',
