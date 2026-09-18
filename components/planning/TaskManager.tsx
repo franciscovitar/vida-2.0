@@ -4,11 +4,7 @@ import { Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
-import {
-  archivePlanningTask,
-  createPlanningTask,
-  updatePlanningTask,
-} from '@/app/actions/tasks';
+import { archivePlanningTask, createPlanningTask, updatePlanningTask } from '@/app/actions/tasks';
 import {
   TASK_DURATIONS,
   TASK_ENERGIES,
@@ -85,10 +81,7 @@ export function TaskManager({
   const visible = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('es');
     return catalog.tasks.filter((task) => {
-      if (
-        statusFilter === 'abiertas' &&
-        (task.status === 'Hecha' || task.status === 'Algún día')
-      ) {
+      if (statusFilter === 'abiertas' && (task.status === 'Hecha' || task.status === 'Algún día')) {
         return false;
       }
       if (statusFilter !== 'todas' && statusFilter !== 'abiertas' && task.status !== statusFilter) {
@@ -199,18 +192,31 @@ export function TaskManager({
             ))}
           </select>
         </div>
-        <button type="button" className={styles.primary} onClick={openCreate} disabled={!writable || pending}>
+        <button
+          type="button"
+          className={styles.primary}
+          onClick={openCreate}
+          disabled={!writable || pending}
+        >
           <Plus size={16} aria-hidden="true" />
           Nueva tarea
         </button>
       </div>
 
       {!writable ? (
-        <p className={styles.notice}>Las escrituras están desactivadas; el listado sigue disponible en lectura.</p>
+        <p className={styles.notice}>
+          Las escrituras están desactivadas; el listado sigue disponible en lectura.
+        </p>
       ) : null}
-      {message ? <p className={styles.notice} role="status">{message}</p> : null}
+      {message ? (
+        <p className={styles.notice} role="status">
+          {message}
+        </p>
+      ) : null}
 
-      <p className={styles.count}>{visible.length} de {catalog.tasks.length} tareas</p>
+      <p className={styles.count}>
+        {visible.length} de {catalog.tasks.length} tareas
+      </p>
 
       <ul className={styles.list}>
         {visible.map((task) => (
@@ -249,17 +255,35 @@ export function TaskManager({
         ))}
       </ul>
 
-      {visible.length === 0 ? <p className={styles.empty}>No hay tareas para este filtro.</p> : null}
+      {visible.length === 0 ? (
+        <p className={styles.empty}>No hay tareas para este filtro.</p>
+      ) : null}
 
       {editor.mode !== 'closed' ? (
         <div className={styles.overlay} role="presentation">
-          <section className={styles.panel} role="dialog" aria-modal="true" aria-labelledby="task-editor-title">
+          <section
+            className={styles.panel}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="task-editor-title"
+          >
             <header className={styles['panel-header']}>
               <div>
-                <h3 id="task-editor-title">{editor.mode === 'create' ? 'Nueva tarea' : 'Editar tarea'}</h3>
-                <p>{editor.mode === 'create' ? 'Se crea en Pendiente.' : 'Los cambios usan verificación contra el estado que abriste.'}</p>
+                <h3 id="task-editor-title">
+                  {editor.mode === 'create' ? 'Nueva tarea' : 'Editar tarea'}
+                </h3>
+                <p>
+                  {editor.mode === 'create'
+                    ? 'Se crea en Pendiente.'
+                    : 'Los cambios usan verificación contra el estado que abriste.'}
+                </p>
               </div>
-              <button type="button" className={styles['icon-button']} onClick={closeEditor} aria-label="Cerrar">
+              <button
+                type="button"
+                className={styles['icon-button']}
+                onClick={closeEditor}
+                aria-label="Cerrar"
+              >
                 <X size={18} />
               </button>
             </header>
@@ -270,7 +294,9 @@ export function TaskManager({
                   <span>Título</span>
                   <input
                     value={createDraft.title}
-                    onChange={(event) => setCreateDraft((draft) => ({ ...draft, title: event.target.value }))}
+                    onChange={(event) =>
+                      setCreateDraft((draft) => ({ ...draft, title: event.target.value }))
+                    }
                   />
                 </label>
                 <label>
@@ -284,7 +310,9 @@ export function TaskManager({
                       }))
                     }
                   >
-                    {TASK_PRIORITIES.map((value) => <option key={value}>{value}</option>)}
+                    {TASK_PRIORITIES.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
                   </select>
                 </label>
                 <label>
@@ -292,10 +320,18 @@ export function TaskManager({
                   <select
                     value={createDraft.areaKey}
                     onChange={(event) =>
-                      setCreateDraft((draft) => ({ ...draft, areaKey: event.target.value, projectKey: null }))
+                      setCreateDraft((draft) => ({
+                        ...draft,
+                        areaKey: event.target.value,
+                        projectKey: null,
+                      }))
                     }
                   >
-                    {catalog.areas.map((area) => <option key={area.key} value={area.key}>{area.name}</option>)}
+                    {catalog.areas.map((area) => (
+                      <option key={area.key} value={area.key}>
+                        {area.name}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label>
@@ -303,12 +339,17 @@ export function TaskManager({
                   <select
                     value={createDraft.projectKey ?? ''}
                     onChange={(event) =>
-                      setCreateDraft((draft) => ({ ...draft, projectKey: event.target.value || null }))
+                      setCreateDraft((draft) => ({
+                        ...draft,
+                        projectKey: event.target.value || null,
+                      }))
                     }
                   >
                     <option value="">Sin proyecto</option>
                     {projectOptions(createDraft.areaKey).map((project) => (
-                      <option key={project.key} value={project.key}>{project.name}</option>
+                      <option key={project.key} value={project.key}>
+                        {project.name}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -329,12 +370,15 @@ export function TaskManager({
                     onChange={(event) =>
                       setCreateDraft((draft) => ({
                         ...draft,
-                        duration: (event.target.value || null) as PlanningTaskCreateInput['duration'],
+                        duration: (event.target.value ||
+                          null) as PlanningTaskCreateInput['duration'],
                       }))
                     }
                   >
                     <option value="">Sin estimar</option>
-                    {TASK_DURATIONS.map((value) => <option key={value}>{value}</option>)}
+                    {TASK_DURATIONS.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
                   </select>
                 </label>
                 <label>
@@ -349,7 +393,9 @@ export function TaskManager({
                     }
                   >
                     <option value="">Sin estimar</option>
-                    {TASK_ENERGIES.map((value) => <option key={value}>{value}</option>)}
+                    {TASK_ENERGIES.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
                   </select>
                 </label>
                 <label className={styles.full}>
@@ -362,8 +408,15 @@ export function TaskManager({
                   />
                 </label>
                 <div className={styles['form-actions']}>
-                  <button type="button" onClick={closeEditor}>Cancelar</button>
-                  <button type="button" className={styles.primary} onClick={submitCreate} disabled={pending || !createDraft.title.trim() || !createDraft.areaKey}>
+                  <button type="button" onClick={closeEditor}>
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.primary}
+                    onClick={submitCreate}
+                    disabled={pending || !createDraft.title.trim() || !createDraft.areaKey}
+                  >
                     Crear tarea
                   </button>
                 </div>
@@ -372,64 +425,183 @@ export function TaskManager({
               <div className={styles.form}>
                 <label className={styles.full}>
                   <span>Título</span>
-                  <input value={editDraft.title} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, title: event.target.value }) : draft)} />
+                  <input
+                    value={editDraft.title}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft ? { ...draft, title: event.target.value } : draft,
+                      )
+                    }
+                  />
                 </label>
                 <label>
                   <span>Estado</span>
-                  <select value={editDraft.status} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, status: event.target.value as PlanningTaskEditableSnapshot['status'] }) : draft)}>
-                    {TASK_STATUSES.map((value) => <option key={value}>{value}</option>)}
+                  <select
+                    value={editDraft.status}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft
+                          ? {
+                              ...draft,
+                              status: event.target.value as PlanningTaskEditableSnapshot['status'],
+                            }
+                          : draft,
+                      )
+                    }
+                  >
+                    {TASK_STATUSES.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
                   </select>
                 </label>
                 <label>
                   <span>Prioridad</span>
-                  <select value={editDraft.priority ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, priority: (event.target.value || null) as PlanningTaskEditableSnapshot['priority'] }) : draft)}>
+                  <select
+                    value={editDraft.priority ?? ''}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft
+                          ? {
+                              ...draft,
+                              priority: (event.target.value ||
+                                null) as PlanningTaskEditableSnapshot['priority'],
+                            }
+                          : draft,
+                      )
+                    }
+                  >
                     <option value="">Sin prioridad</option>
-                    {TASK_PRIORITIES.map((value) => <option key={value}>{value}</option>)}
+                    {TASK_PRIORITIES.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
                   </select>
                 </label>
                 <label>
                   <span>Área</span>
-                  <select value={editDraft.areaKey ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, areaKey: event.target.value || null, projectKey: null }) : draft)}>
+                  <select
+                    value={editDraft.areaKey ?? ''}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft
+                          ? { ...draft, areaKey: event.target.value || null, projectKey: null }
+                          : draft,
+                      )
+                    }
+                  >
                     <option value="">Sin área</option>
-                    {catalog.areas.map((area) => <option key={area.key} value={area.key}>{area.name}</option>)}
+                    {catalog.areas.map((area) => (
+                      <option key={area.key} value={area.key}>
+                        {area.name}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label>
                   <span>Proyecto</span>
-                  <select value={editDraft.projectKey ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, projectKey: event.target.value || null }) : draft)}>
+                  <select
+                    value={editDraft.projectKey ?? ''}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft ? { ...draft, projectKey: event.target.value || null } : draft,
+                      )
+                    }
+                  >
                     <option value="">Sin proyecto</option>
-                    {projectOptions(editDraft.areaKey).map((project) => <option key={project.key} value={project.key}>{project.name}</option>)}
+                    {projectOptions(editDraft.areaKey).map((project) => (
+                      <option key={project.key} value={project.key}>
+                        {project.name}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label>
                   <span>Fecha relevante</span>
-                  <input type="date" value={editDraft.date ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, date: event.target.value || null }) : draft)} />
+                  <input
+                    type="date"
+                    value={editDraft.date ?? ''}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft ? { ...draft, date: event.target.value || null } : draft,
+                      )
+                    }
+                  />
                 </label>
                 <label>
                   <span>Duración</span>
-                  <select value={editDraft.duration ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, duration: (event.target.value || null) as PlanningTaskEditableSnapshot['duration'] }) : draft)}>
+                  <select
+                    value={editDraft.duration ?? ''}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft
+                          ? {
+                              ...draft,
+                              duration: (event.target.value ||
+                                null) as PlanningTaskEditableSnapshot['duration'],
+                            }
+                          : draft,
+                      )
+                    }
+                  >
                     <option value="">Sin estimar</option>
-                    {TASK_DURATIONS.map((value) => <option key={value}>{value}</option>)}
+                    {TASK_DURATIONS.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
                   </select>
                 </label>
                 <label>
                   <span>Energía</span>
-                  <select value={editDraft.energy ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, energy: (event.target.value || null) as PlanningTaskEditableSnapshot['energy'] }) : draft)}>
+                  <select
+                    value={editDraft.energy ?? ''}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft
+                          ? {
+                              ...draft,
+                              energy: (event.target.value ||
+                                null) as PlanningTaskEditableSnapshot['energy'],
+                            }
+                          : draft,
+                      )
+                    }
+                  >
                     <option value="">Sin estimar</option>
-                    {TASK_ENERGIES.map((value) => <option key={value}>{value}</option>)}
+                    {TASK_ENERGIES.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
                   </select>
                 </label>
                 <label>
                   <span>Bloqueo</span>
-                  <input value={editDraft.blocker ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, blocker: nullable(event.target.value) }) : draft)} />
+                  <input
+                    value={editDraft.blocker ?? ''}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft ? { ...draft, blocker: nullable(event.target.value) } : draft,
+                      )
+                    }
+                  />
                 </label>
                 <label className={styles.full}>
                   <span>Nota</span>
-                  <textarea value={editDraft.note ?? ''} onChange={(event) => setEditDraft((draft) => draft ? ({ ...draft, note: nullable(event.target.value) }) : draft)} />
+                  <textarea
+                    value={editDraft.note ?? ''}
+                    onChange={(event) =>
+                      setEditDraft((draft) =>
+                        draft ? { ...draft, note: nullable(event.target.value) } : draft,
+                      )
+                    }
+                  />
                 </label>
                 <div className={styles['form-actions']}>
-                  <button type="button" onClick={closeEditor}>Cancelar</button>
-                  <button type="button" className={styles.primary} onClick={submitEdit} disabled={pending || editDraft.title.trim().length < 3}>
+                  <button type="button" onClick={closeEditor}>
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.primary}
+                    onClick={submitEdit}
+                    disabled={pending || editDraft.title.trim().length < 3}
+                  >
                     Guardar cambios
                   </button>
                 </div>
@@ -441,14 +613,27 @@ export function TaskManager({
 
       {deleteTask ? (
         <div className={styles.overlay} role="presentation">
-          <section className={styles.confirm} role="dialog" aria-modal="true" aria-labelledby="delete-task-title">
+          <section
+            className={styles.confirm}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-task-title"
+          >
             <h3 id="delete-task-title">Eliminar tarea</h3>
             <p>
-              <strong>{deleteTask.title}</strong> se enviará a la papelera de Notion. No se borra permanentemente.
+              <strong>{deleteTask.title}</strong> se enviará a la papelera de Notion. No se borra
+              permanentemente.
             </p>
             <div className={styles['form-actions']}>
-              <button type="button" onClick={() => setDeleteTask(null)} disabled={pending}>Cancelar</button>
-              <button type="button" className={styles['danger-primary']} onClick={confirmDelete} disabled={pending}>
+              <button type="button" onClick={() => setDeleteTask(null)} disabled={pending}>
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles['danger-primary']}
+                onClick={confirmDelete}
+                disabled={pending}
+              >
                 Eliminar a papelera
               </button>
             </div>
