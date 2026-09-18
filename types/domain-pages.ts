@@ -148,7 +148,12 @@ export interface HealthDaySignals {
 
 /** Base personal reciente de una señal. */
 export interface HealthBaselineSignal {
+  /** Media descriptiva; no se usa como centro robusto de decisión. */
   average: number | null;
+  /** Centro robusto de la base personal usado por Health Intelligence. */
+  median: number | null;
+  /** Mediana de las desviaciones absolutas respecto de la mediana. */
+  mad: number | null;
   days: number;
 }
 
