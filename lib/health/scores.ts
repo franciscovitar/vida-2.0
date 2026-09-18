@@ -112,6 +112,28 @@ function baselineFactor(days: number): number {
   return clamp(days / STRONG_BASELINE_DAYS);
 }
 
+/**
+ * Confianza de evidencia, no probabilidad de salud.
+ * La cobertura actúa como techo directo: otros factores fuertes no pueden
+ * ocultar que faltan contribuyentes importantes.
+ */
+function evidenceConfidence(
+  coverage: number,
+  source: number,
+  reliability: number,
+  baseline: number,
+): number {
+  return roundScore(
+    100 *
+      clamp(coverage) *
+      geometricMean([
+        Math.max(clamp(source), 0.01),
+        Math.max(clamp(reliability), 0.01),
+        Math.max(clamp(baseline), 0.01),
+      ]),
+  );
+}
+
 function importFactor(kind: HealthImportKind | 'missing'): number {
   if (kind === 'complete') return 1;
   if (kind === 'partial') return 0.82;
@@ -162,9 +184,7 @@ function weightedAggregate(
   if (availableWeight === 0 || coverage < minCoverage) {
     return {
       score: null,
-      confidence: roundScore(
-        100 * geometricMean([Math.max(coverage, 0.01), Math.max(sourceFactor, 0.01), 0.35, 0.6]),
-      ),
+      confidence: evidenceConfidence(coverage, sourceFactor, 0.6, 0.35),
     };
   }
 
@@ -179,15 +199,7 @@ function weightedAggregate(
 
   return {
     score: roundScore(score),
-    confidence: roundScore(
-      100 *
-        geometricMean([
-          Math.max(coverage, 0.01),
-          Math.max(sourceFactor, 0.01),
-          Math.max(reliability, 0.01),
-          Math.max(baseline, 0.01),
-        ]),
-    ),
+    confidence: evidenceConfidence(coverage, sourceFactor, reliability, baseline),
   };
 }
 
