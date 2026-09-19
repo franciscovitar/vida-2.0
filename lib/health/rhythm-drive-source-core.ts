@@ -49,9 +49,7 @@ export type RhythmDriveConfigResult =
   | { ok: true; config: RhythmDriveConfig }
   | { ok: false; code: 'disabled' | 'production-disabled' | 'not-configured' };
 
-export type RhythmDriveTokenResult =
-  | { ok: true; token: string }
-  | { ok: false; code: string };
+export type RhythmDriveTokenResult = { ok: true; token: string } | { ok: false; code: string };
 
 export interface RhythmDriveDeps {
   fetchFn: typeof fetch;
@@ -333,8 +331,7 @@ async function getConfiguredToken(
   env: RhythmDriveEnv,
   deps: RhythmDriveDeps,
 ): Promise<
-  | { ok: true; config: RhythmDriveConfig; token: string }
-  | { ok: false; code: RhythmDriveReadCode }
+  { ok: true; config: RhythmDriveConfig; token: string } | { ok: false; code: RhythmDriveReadCode }
 > {
   const resolved = resolveRhythmDriveConfig(env);
   if (!resolved.ok) return resolved;
@@ -382,13 +379,7 @@ export async function readRhythmDayFromDriveCore(
     };
   }
 
-  return readDayWithToken(
-    input.date,
-    input.previous,
-    access.config,
-    access.token,
-    deps.fetchFn,
-  );
+  return readDayWithToken(input.date, input.previous, access.config, access.token, deps.fetchFn);
 }
 
 export async function readRhythmWindowFromDriveCore(
@@ -400,7 +391,11 @@ export async function readRhythmWindowFromDriveCore(
   deps: RhythmDriveDeps,
 ): Promise<RhythmDriveWindowRead> {
   const dates = [...new Set(input.dates)].sort();
-  if (dates.length === 0 || dates.length > MAX_WINDOW_DAYS || dates.some((date) => !validDay(date))) {
+  if (
+    dates.length === 0 ||
+    dates.length > MAX_WINDOW_DAYS ||
+    dates.some((date) => !validDay(date))
+  ) {
     return {
       status: 'unavailable',
       code: 'invalid-request',

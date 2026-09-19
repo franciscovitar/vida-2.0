@@ -112,7 +112,9 @@ function driveFetch(
 ): typeof fetch {
   return (async (input: string | URL | Request, init?: RequestInit) => {
     const method = init?.method ?? 'GET';
-    const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
+    const url = new URL(
+      typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
+    );
     calls.push({ url: url.href, method });
     assert.equal(method, 'GET');
 
@@ -242,7 +244,9 @@ test('RD3. Preview usa scope Drive readonly y normaliza ambos archivos sin write
   assert.deepEqual(tokenCalls, [DRIVE_READONLY_SCOPE]);
   assert.ok(calls.length >= 4);
   assert.ok(calls.every((call) => call.method === 'GET'));
-  assert.ok(calls.some((call) => call.url.includes(encodeURIComponent('HealthSleep-2026-09-19.json'))));
+  assert.ok(
+    calls.some((call) => call.url.includes(encodeURIComponent('HealthSleep-2026-09-19.json'))),
+  );
 });
 
 test('RD4. si falta un canal, el día queda parcial y el faltante no se convierte en cero', async () => {
@@ -313,7 +317,10 @@ test('RD7. payload declarado demasiado grande falla antes de descargarlo', async
 
   assert.equal(result.status, 'unavailable');
   assert.equal(result.code, 'too-large');
-  assert.equal(calls.some((call) => call.url.includes('/sleep-2026-09-19?')), false);
+  assert.equal(
+    calls.some((call) => call.url.includes('/sleep-2026-09-19?')),
+    false,
+  );
 });
 
 test('RD8. si ambos archivos faltan, una feature previa válida puede quedar preservada', async () => {
