@@ -1,0 +1,33 @@
+name: Rhythm Drive Format Helper
+
+on:
+  push:
+    branches:
+      - health-rhythm-readonly-drive-preview-2026-09-19
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format target files
+        run: npx prettier --write lib/health/rhythm-drive-source-core.ts tests/health-rhythm-drive-source.test.ts
+      - name: Emit formatted files
+        shell: bash
+        run: |
+          echo "===CORE_B64==="
+          base64 -w0 lib/health/rhythm-drive-source-core.ts
+          echo
+          echo "===TEST_B64==="
+          base64 -w0 tests/health-rhythm-drive-source.test.ts
+          echo
+          echo "===END_FORMATTED_FILES==="
