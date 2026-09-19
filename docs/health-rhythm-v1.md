@@ -1,6 +1,6 @@
 # Rhythm Stability V1 — implementation contract
 
-Status: **pure runtime + raw-source adapter prepared; not wired to Production data or UI**.
+Status: **pure runtime + raw-source adapter merged; Preview-only read-only Drive transport prepared behind an explicit fail-closed gate; not wired to Production data or UI**.
 
 ## Purpose
 
@@ -90,6 +90,39 @@ Adapter rules:
 
 Reconciliation is monotonic at the feature boundary: a later incomplete snapshot may advance source-version knowledge while retaining an earlier valid normalized feature. Missing/invalid current evidence is still reported explicitly through availability/diagnostics so preservation cannot masquerade as a fresh measurement.
 
+## Preview-only read-only source transport
+
+The next bounded integration layer is a **server-only Google Drive reader** that feeds already-parsed HAE JSON into the merged pure adapter.
+
+Boundary:
+
+`Google Drive read-only source → parsed HAE payloads → pure adapter → normalized features → pure Rhythm Stability calculator`
+
+Safety rules:
+
+- disabled by default unless `HEALTH_RHYTHM_SOURCE=drive`;
+- hard-disabled when `VERCEL_ENV=production`, even if Drive configuration is present;
+- uses only `https://www.googleapis.com/auth/drive.readonly`;
+- requires two explicit allowlisted folder IDs, one for sleep and one for hourly rhythm/cardio;
+- lists only the exact expected daily filename inside the configured folder;
+- uses only `GET` requests to Drive;
+- rejects duplicate same-name files instead of choosing one silently;
+- caps each JSON payload at 512 KiB;
+- never returns or logs Drive file IDs, folder IDs, credentials or raw payloads to the client;
+- missing files remain missing; a caller may preserve a previously accepted normalized day while marking the current read as preserved rather than fresh;
+- no source preference, no HRV dependency and no canonical write path are introduced.
+
+Configuration names only (values stay in Vercel/local secret boundaries):
+
+- `HEALTH_RHYTHM_SOURCE`;
+- `GOOGLE_HEALTH_SLEEP_FOLDER_ID`;
+- `GOOGLE_HEALTH_RHYTHM_FOLDER_ID`;
+- existing server-side `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_PRIVATE_KEY`.
+
+The Drive folders must be granted only the minimum read access required by the service account. Folder IDs and private health payloads remain out of GitHub.
+
+This transport is intentionally a **Preview/local integration candidate**. Enabling it for Production requires a separate explicit authorization and a code/config change because the current runtime blocks Production unconditionally.
+
 ## Features
 
 For each valid sleep night:
@@ -163,12 +196,12 @@ Again, bands describe the observed personal schedule consistency only.
 
 ## Integration boundary
 
-The implementation remains side-effect free: calculator + raw-source adapter + synthetic tests.
+The calculator and raw-source adapter remain side-effect free. The optional source transport is isolated server-side and read-only; it is not part of the client or score logic.
 
 Do **not** yet:
 
 - add the score to the Production HealthScoreboard;
-- read HAE/Drive folders from the web app;
+- expose HAE/Drive folders or raw payloads to client components;
 - write derived features back to canonical health storage;
 - infer disease/stress/overtraining from irregularity;
 - use HRV as a score dependency;
