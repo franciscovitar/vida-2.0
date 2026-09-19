@@ -89,7 +89,10 @@ test('RP3. resumen sanitizado expone cobertura y estado, no payloads biométrico
     scoreState: 'insufficient',
     calculationVersion: 'rhythm-stability-v1.0.0',
   });
-  assert.doesNotMatch(JSON.stringify(summary), /sleepStart|sleepEnd|steps|sourceRegime|fileName|folder/i);
+  assert.doesNotMatch(
+    JSON.stringify(summary),
+    /sleepStart|sleepEnd|steps|sourceRegime|fileName|folder/i,
+  );
 });
 
 test('RP4. endpoint de diagnóstico queda autenticado y exclusivo de Preview', () => {
@@ -101,5 +104,8 @@ test('RP4. endpoint de diagnóstico queda autenticado y exclusivo de Preview', (
   assert.match(route, /process\.env\.VERCEL_ENV\s*!==\s*['"]preview['"]/);
   assert.match(route, /readRhythmWindowFromDrive/);
   assert.match(route, /summarizeRhythmPreviewCheck/);
-  assert.doesNotMatch(route, /GOOGLE_PRIVATE_KEY|GOOGLE_HEALTH_.*FOLDER_ID|payload|sourceRegime/);
+  assert.doesNotMatch(
+    route,
+    /GOOGLE_PRIVATE_KEY|GOOGLE_HEALTH_.*FOLDER_ID|payload|sourceRegime/,
+  );
 });
