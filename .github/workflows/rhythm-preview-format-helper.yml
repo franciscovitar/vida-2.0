@@ -1,0 +1,30 @@
+name: Rhythm Preview Format Helper
+
+on:
+  push:
+    branches:
+      - health-rhythm-readonly-drive-preview-2026-09-19
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format target file
+        run: npx prettier --write tests/health-rhythm-preview-check.test.ts
+      - name: Emit formatted file
+        shell: bash
+        run: |
+          echo "===FORMATTED_B64==="
+          base64 -w0 tests/health-rhythm-preview-check.test.ts
+          echo
+          echo "===END_FORMATTED_FILE==="
