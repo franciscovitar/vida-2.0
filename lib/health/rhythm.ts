@@ -260,7 +260,7 @@ function contributor(
   label: string,
   weight: number,
   shifts: readonly number[],
-  minimumPairs: number;
+  minimumPairs: number,
 ): RhythmStabilityContributor {
   const shift = median(shifts);
   const available = shift !== null && shifts.length >= minimumPairs;
