@@ -123,6 +123,23 @@ The Drive folders must be granted only the minimum read access required by the s
 
 This transport is intentionally a **Preview/local integration candidate**. Enabling it for Production requires a separate explicit authorization and a code/config change because the current runtime blocks Production unconditionally.
 
+### Sanitized Preview check
+
+After the three Preview-only source variables and least-privilege Drive folder grants exist, an authenticated operator can exercise the real read path without exposing raw health data:
+
+`/api/health/rhythm-preview-check?end=YYYY-MM-DD`
+
+The endpoint:
+
+- exists only in Vercel Preview and returns 404 outside Preview;
+- requires the normal authorized Vida 2.0 session;
+- reads a trailing seven-day window ending on the supplied local date;
+- returns only sanitized coverage/readiness counts plus whether the Rhythm score is computable;
+- never returns sleep timestamps, step counts, source strings, raw HAE payloads, Drive IDs or folder IDs;
+- uses `Cache-Control: no-store`.
+
+This endpoint is an operator verification surface, not a product UI.
+
 ## Features
 
 For each valid sleep night:
