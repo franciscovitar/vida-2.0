@@ -1,6 +1,6 @@
 # Rhythm Stability V1 — implementation contract
 
-Status: **pure runtime prepared; not wired to Production data or UI**.
+Status: **pure runtime + raw-source adapter prepared; not wired to Production data or UI**.
 
 ## Purpose
 
@@ -22,6 +22,20 @@ Current evidence references:
 
 Evidence strength for the **construct** is `moderate`. The exact score mapping below is a versioned product rule, not a validated clinical instrument.
 
+## Production prerequisite already closed
+
+Health Sync V2.1 is already accepted in Production. The accepted evidence includes:
+
+- 21/21 Production self-tests;
+- one subsequent real automatic time-driven sync;
+- `errors=[]`;
+- `filesTrashed=0`;
+- no duplicate logical dates in the post-run readback;
+- no rollback of a newer accepted source winner;
+- no observed evidence loss.
+
+This closes the old prerequisite that blocked adapter work. It does **not** authorize wiring Rhythm Stability to Production or the UI.
+
 ## Inputs
 
 The pure calculator accepts already-normalized observations and performs no Google/HAE I/O.
@@ -39,6 +53,42 @@ Optional activity per local day:
 - input must already have source reconciliation/deduplication applied.
 
 Missing stays `null`. Timestamps without an explicit offset fail closed. The calculator never infers timing from a daily sleep total.
+
+## Raw-source adapter boundary
+
+The source adapter is a separate pure layer:
+
+`HAE raw evidence → adapter → normalized daily/intraday features → pure Rhythm Stability calculator`
+
+The adapter accepts already-parsed JSON payloads plus minimal file metadata. It performs no Drive, Google API, filesystem, environment-variable or database I/O.
+
+Expected source files:
+
+- `HealthSleep-YYYY-MM-DD.json` for detailed sleep;
+- `HealthRhythm-YYYY-MM-DD.json` for hourly rhythm/cardio.
+
+Observed HAE v2 structure is represented only as a contract here; private biometric payloads are not committed to the repository. Synthetic fixtures are used in tests.
+
+Adapter rules:
+
+- validate filename day identity before using evidence;
+- accept payload `date` as either `YYYY-MM-DD` or an offset-aware timestamp;
+- require filename/payload local-day agreement;
+- require explicit offsets for sleep timing and hourly activity bins;
+- normalize valid `sleep_analysis` to `RhythmSleepObservation`;
+- normalize valid hourly `step_count` to `RhythmActivityObservation`;
+- never fabricate zero-valued hours for absent samples;
+- keep missing evidence unavailable rather than coercing it to zero;
+- reject unsupported `step_count` units;
+- do not silently sum ambiguous duplicate hourly step bins;
+- preserve source strings only for provenance/source-regime visibility;
+- do not choose or enforce a preferred provider;
+- expose structural availability of hourly HR, resting HR and HRV without feeding them into the V1 score;
+- preserve prior valid normalized evidence when a later source snapshot is incomplete;
+- skip an older source revision when comparable modification metadata proves it is older;
+- remain deterministic and side-effect free.
+
+Reconciliation is monotonic at the feature boundary: a later incomplete snapshot may advance source-version knowledge while retaining an earlier valid normalized feature. Missing/invalid current evidence is still reported explicitly through availability/diagnostics so preservation cannot masquerade as a fresh measurement.
 
 ## Features
 
@@ -113,22 +163,23 @@ Again, bands describe the observed personal schedule consistency only.
 
 ## Integration boundary
 
-The initial implementation lives as a side-effect-free calculator and synthetic tests only.
+The implementation remains side-effect free: calculator + raw-source adapter + synthetic tests.
 
 Do **not** yet:
 
 - add the score to the Production HealthScoreboard;
-- read the new HAE folders from the web app;
+- read HAE/Drive folders from the web app;
 - write derived features back to canonical health storage;
 - infer disease/stress/overtraining from irregularity;
-- use HRV;
+- use HRV as a score dependency;
+- change preferred-source rules;
 - deploy this branch to Production.
 
-Integration waits until Health Sync V2.1 completes its prospective automatic-run gate and the detailed sleep/hourly source adapter has an explicit ingestion contract.
+The next integration decision comes only after this adapter contract and repository verification are accepted. UI and Production wiring remain separate consequential steps.
 
 ## Acceptance tests
 
-The V1 calculator must prove:
+The V1 calculator proves:
 
 1. stable nights yield a high consistency score;
 2. fewer than five usable nights fail closed;
@@ -138,5 +189,21 @@ The V1 calculator must prove:
 6. stable hourly activity can contribute without dominating sleep;
 7. large repeated schedule shifts lower the consistency index without clinical labeling;
 8. timestamps lacking an explicit offset fail closed.
+
+The source adapter additionally proves with synthetic fixtures:
+
+1. valid detailed sleep normalizes correctly;
+2. payload day strings and offset-aware timestamps preserve local-day identity;
+3. filename/payload date mismatch fails closed;
+4. sleep timing without an offset is unusable;
+5. missing sleep remains missing;
+6. valid step bins normalize without fabricating absent hours;
+7. ambiguous duplicate hours are not silently summed;
+8. invalid step units fail closed;
+9. source strings remain provenance only;
+10. absent HRV remains unavailable;
+11. a newer incomplete snapshot preserves prior valid normalized evidence;
+12. an older revision cannot replace a newer accepted feature when version metadata is comparable;
+13. the adapter feeds the pure calculator across several synthetic days.
 
 Calculation version: `rhythm-stability-v1.0.0`.
