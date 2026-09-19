@@ -89,9 +89,7 @@ test('RS5. actividad ausente queda null y no se convierte en cero', () => {
   const result = buildRhythmStability({
     sleep: nights(['00:10', '00:15', '00:20', '00:25', '00:20', '00:15', '00:10']),
   });
-  const activityContributor = result.contributors.find(
-    (item) => item.id === 'activity-midpoint',
-  );
+  const activityContributor = result.contributors.find((item) => item.id === 'activity-midpoint');
 
   assert.equal(activityContributor?.score, null);
   assert.equal(result.validActivityDays, 0);
@@ -102,9 +100,7 @@ test('RS6. ritmo de actividad consistente puede aportar sin dominar el score', (
   const sleepRows = nights(['00:10', '00:15', '00:20', '00:25', '00:20', '00:15', '00:10']);
   const activityRows = sleepRows.map((item) => activity(item.date));
   const result = buildRhythmStability({ sleep: sleepRows, activity: activityRows });
-  const activityContributor = result.contributors.find(
-    (item) => item.id === 'activity-midpoint',
-  );
+  const activityContributor = result.contributors.find((item) => item.id === 'activity-midpoint');
 
   assert.ok((activityContributor?.score ?? 0) >= 90);
   assert.equal(result.validActivityDays, 7);

@@ -1,9 +1,5 @@
 export type RhythmStabilityBand =
-  | 'very-stable'
-  | 'stable'
-  | 'variable'
-  | 'irregular'
-  | 'insufficient';
+  'very-stable' | 'stable' | 'variable' | 'irregular' | 'insufficient';
 
 export type RhythmStabilityConfidenceBand = 'high' | 'medium' | 'low';
 
@@ -197,7 +193,8 @@ function sleepFeature(observation: RhythmSleepObservation): SleepFeatureDay | nu
   if (!start || !end) return null;
 
   const durationMinutes = (end.epochMs - start.epochMs) / 60_000;
-  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0 || durationMinutes > 1440) return null;
+  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0 || durationMinutes > 1440)
+    return null;
 
   return {
     date: observation.date,
@@ -326,7 +323,13 @@ export function buildRhythmStability(input: RhythmStabilityInput): RhythmStabili
     contributor('sleep-midpoint', 'Midpoint del sueño', 0.45, midpointShifts, MIN_SLEEP_PAIRS),
     contributor('wake-time', 'Hora de despertar', 0.25, wakeShifts, MIN_SLEEP_PAIRS),
     contributor('sleep-duration', 'Duración del sueño', 0.2, durationShifts, MIN_SLEEP_PAIRS),
-    contributor('activity-midpoint', 'Midpoint de actividad', 0.1, activityShifts, MIN_ACTIVITY_PAIRS),
+    contributor(
+      'activity-midpoint',
+      'Midpoint de actividad',
+      0.1,
+      activityShifts,
+      MIN_ACTIVITY_PAIRS,
+    ),
   ] as const;
 
   const requiredSleepAvailable = contributors.slice(0, 3).every((item) => item.score !== null);

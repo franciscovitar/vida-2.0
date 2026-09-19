@@ -72,12 +72,12 @@ If the score cannot be computed, confidence is capped below 50.
 
 ## Contributors and weights
 
-| Contributor | Weight | Required? |
-|---|---:|---|
-| Sleep midpoint consistency | 45% | yes |
-| Wake-time consistency | 25% | yes |
-| Sleep-duration consistency | 20% | yes |
-| Activity-midpoint consistency | 10% | no |
+| Contributor                   | Weight | Required? |
+| ----------------------------- | -----: | --------- |
+| Sleep midpoint consistency    |    45% | yes       |
+| Wake-time consistency         |    25% | yes       |
+| Sleep-duration consistency    |    20% | yes       |
+| Activity-midpoint consistency |    10% | no        |
 
 Available weights are renormalized when activity is unavailable. The three sleep contributors must all be usable before a numeric score is emitted.
 
@@ -86,16 +86,16 @@ Available weights are renormalized when activity is unavailable. The three sleep
 The same consistency utility is applied to median day-to-day shift in V1:
 
 | Median shift | Utility |
-|---:|---:|
-| 0 min | 100 |
-| 15 min | 98 |
-| 30 min | 92 |
-| 45 min | 84 |
-| 60 min | 74 |
-| 90 min | 55 |
-| 120 min | 38 |
-| 180 min | 18 |
-| 240+ min | 5 |
+| -----------: | ------: |
+|        0 min |     100 |
+|       15 min |      98 |
+|       30 min |      92 |
+|       45 min |      84 |
+|       60 min |      74 |
+|       90 min |      55 |
+|      120 min |      38 |
+|      180 min |      18 |
+|     240+ min |       5 |
 
 Intermediate values are linearly interpolated.
 
