@@ -6,8 +6,8 @@ import {
   toRhythmStabilityInput,
   type HaeRhythmRawFile,
   type NormalizedRhythmDay,
-} from './rhythm-source-adapter';
-import { buildRhythmStability } from './rhythm';
+} from '@/lib/health/rhythm-source-adapter';
+import { buildRhythmStability } from '@/lib/health/rhythm';
 
 function sleepFile(
   day: string,

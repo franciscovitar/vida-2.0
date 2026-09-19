@@ -256,7 +256,7 @@ function parseSleep(
       sleepStart: hasExplicitOffset(record.sleepStart) ? record.sleepStart.trim() : null,
       sleepEnd: hasExplicitOffset(record.sleepEnd) ? record.sleepEnd.trim() : null,
       source: sourceOf(record),
-  }))
+    }))
     .filter((item) => item.sleepStart !== null && item.sleepEnd !== null);
 
   if (normalized.length === 0) {
@@ -268,7 +268,9 @@ function parseSleep(
     return {
       value: null,
       availability: 'invalid',
-      sources: uniqueStrings(candidates.map(sourceOf).filter((value): value is string => value !== null)),
+      sources: uniqueStrings(
+        candidates.map(sourceOf).filter((value): value is string => value !== null),
+      ),
       diagnostics,
     };
   }
@@ -296,5 +298,361 @@ function parseSleep(
     availability: 'available',
     sources: uniqueStrings(normalized.map((item) => item.source ?? '')),
     diagnostics,
+  };
+}
+
+function parseActivity(
+  metrics: readonly MetricLike[],
+  expectedDay: string,
+): ParsedChannel<RhythmActivityObservation> {
+  const diagnostics: RhythmAdapterDiagnostic[] = [];
+  const metric = metricByName(metrics, 'step_count');
+  if (!metric) return { value: null, availability: 'missing', sources: [], diagnostics };
+  if (metric.units !== 'count') {
+    diagnostics.push({
+      code: 'invalid-units',
+      channel: 'rhythm',
+      detail: 'step_count debe usar unidades count.',
+    });
+    return { value: null, availability: 'invalid', sources: [], diagnostics };
+  }
+
+  const byHour = new Map<number, Array<{ steps: number; source: string | null }>>();
+  let sawInvalidTimestamp = false;
+  for (const record of metric.data) {
+    const day = localDay(record.date);
+    if (day !== expectedDay) {
+      diagnostics.push({
+        code: 'payload-date-mismatch',
+        channel: 'rhythm',
+        detail: `step_count contiene una fecha que no coincide con ${expectedDay}.`,
+      });
+      return { value: null, availability: 'invalid', sources: [], diagnostics };
+    }
+    const hour = localHour(record.date);
+    if (hour === null) {
+      sawInvalidTimestamp = true;
+      continue;
+    }
+    if (typeof record.qty !== 'number' || !Number.isFinite(record.qty) || record.qty < 0) continue;
+    const bucket = byHour.get(hour) ?? [];
+    bucket.push({ steps: record.qty, source: sourceOf(record) });
+    byHour.set(hour, bucket);
+  }
+
+  if (sawInvalidTimestamp) {
+    diagnostics.push({
+      code: 'invalid-timestamp',
+      channel: 'rhythm',
+      detail: 'Los bins horarios requieren timestamp con offset explícito.',
+    });
+  }
+
+  const hours: Array<{ hour: number; steps: number }> = [];
+  const sources: string[] = [];
+  for (const [hour, bucket] of [...byHour.entries()].sort((a, b) => a[0] - b[0])) {
+    const signatures = uniqueStrings(bucket.map((item) => `${item.steps}|${item.source ?? ''}`));
+    if (signatures.length > 1) {
+      diagnostics.push({
+        code: 'ambiguous-activity-hour',
+        channel: 'rhythm',
+        detail: `La hora ${hour} tiene muestras no equivalentes; se omite ese bin sin sumar.`,
+      });
+      continue;
+    }
+    const selected = bucket[0];
+    hours.push({ hour, steps: selected.steps });
+    if (selected.source) sources.push(selected.source);
+  }
+
+  if (hours.length === 0) {
+    return {
+      value: null,
+      availability: metric.data.length === 0 ? 'missing' : 'invalid',
+      sources: uniqueStrings(sources),
+      diagnostics,
+    };
+  }
+
+  return {
+    value: { date: expectedDay, hours },
+    availability: 'available',
+    sources: uniqueStrings(sources),
+    diagnostics,
+  };
+}
+
+function metricAvailability(
+  metrics: readonly MetricLike[],
+  name: string,
+  expectedDay: string,
+): { availability: RhythmMetricAvailability; sources: string[] } {
+  const metric = metricByName(metrics, name);
+  if (!metric) return { availability: 'missing', sources: [] };
+  const matching = metric.data.filter((record) => localDay(record.date) === expectedDay);
+  if (matching.length === 0) {
+    return { availability: metric.data.length === 0 ? 'missing' : 'invalid', sources: [] };
+  }
+  return {
+    availability: 'available',
+    sources: uniqueStrings(
+      matching.map(sourceOf).filter((value): value is string => value !== null),
+    ),
+  };
+}
+
+function emptyAvailability(): RhythmSourceAvailability {
+  return {
+    sleepTiming: 'missing',
+    activity: 'missing',
+    heartRate: 'missing',
+    restingHeartRate: 'missing',
+    hrv: 'missing',
+  };
+}
+
+function emptySourceRegime(): RhythmSourceRegime {
+  return {
+    sleepSources: [],
+    activitySources: [],
+    heartRateSources: [],
+    restingHeartRateSources: [],
+    hrvSources: [],
+  };
+}
+
+function isOlder(
+  incoming: RhythmSourceVersion | null,
+  previous: RhythmSourceVersion | null,
+): boolean {
+  const incomingMs = parseModifiedAt(incoming?.modifiedAt);
+  const previousMs = parseModifiedAt(previous?.modifiedAt);
+  return incomingMs !== null && previousMs !== null && incomingMs < previousMs;
+}
+
+function preservePreviousSleep(
+  current: NormalizedRhythmDay,
+  previous: NormalizedRhythmDay,
+  reason: 'older' | 'missing',
+): void {
+  if (!previous.sleep) return;
+  current.sleep = previous.sleep;
+  current.sourceRegime = {
+    ...current.sourceRegime,
+    sleepSources: previous.sourceRegime.sleepSources,
+  };
+  current.preservedFromPrevious.sleep = true;
+  current.diagnostics = [
+    ...current.diagnostics,
+    {
+      code: reason === 'older' ? 'older-source-skipped' : 'previous-evidence-preserved',
+      channel: 'sleep',
+      detail:
+        reason === 'older'
+          ? 'Se preservó el sueño aceptado porque la revisión entrante es más antigua.'
+          : 'La captura nueva no aportó timing de sueño válido; se preservó la evidencia ' +
+            'previa.',
+    },
+  ];
+}
+
+function preservePreviousActivity(
+  current: NormalizedRhythmDay,
+  previous: NormalizedRhythmDay,
+  reason: 'older' | 'missing',
+): void {
+  if (!previous.activity) return;
+  current.activity = previous.activity;
+  current.sourceRegime = {
+    ...current.sourceRegime,
+    activitySources: previous.sourceRegime.activitySources,
+  };
+  current.preservedFromPrevious.activity = true;
+  current.diagnostics = [
+    ...current.diagnostics,
+    {
+      code: reason === 'older' ? 'older-source-skipped' : 'previous-evidence-preserved',
+      channel: 'rhythm',
+      detail:
+        reason === 'older'
+          ? 'Se preservó la actividad aceptada porque la revisión entrante es más antigua.'
+          : 'La captura nueva no aportó actividad horaria válida; se preservó la evidencia ' +
+            'previa.',
+    },
+  ];
+}
+
+export function adaptHaeRhythmSources(input: RhythmSourceAdapterInput): NormalizedRhythmDay {
+  const diagnostics: RhythmAdapterDiagnostic[] = [];
+  const sleepDay = input.sleepFile ? parseFileDay(input.sleepFile.fileName, 'HealthSleep') : null;
+  const rhythmDay = input.rhythmFile
+    ? parseFileDay(input.rhythmFile.fileName, 'HealthRhythm')
+    : null;
+
+  if (input.sleepFile && sleepDay === null) {
+    diagnostics.push({
+      code: 'invalid-filename',
+      channel: 'sleep',
+      detail: 'Filename de sueño inválido.',
+    });
+  }
+  if (input.rhythmFile && rhythmDay === null) {
+    diagnostics.push({
+      code: 'invalid-filename',
+      channel: 'rhythm',
+      detail: 'Filename de ritmo inválido.',
+    });
+  }
+
+  if (sleepDay && rhythmDay && sleepDay !== rhythmDay) {
+    diagnostics.push({
+      code: 'file-date-conflict',
+      channel: 'combined',
+      detail: 'Los archivos de sueño y ritmo representan días distintos.',
+    });
+  }
+
+  const date =
+    sleepDay && rhythmDay && sleepDay !== rhythmDay ? null : (sleepDay ?? rhythmDay ?? null);
+  const availability = emptyAvailability();
+  let sourceRegime = emptySourceRegime();
+  let sleep: RhythmSleepObservation | null = null;
+  let activity: RhythmActivityObservation | null = null;
+
+  if (date && input.sleepFile && sleepDay === date) {
+    const parsed = metricsFromPayload(input.sleepFile.payload, 'sleep');
+    diagnostics.push(...parsed.diagnostics);
+    if (parsed.diagnostics.length === 0) {
+      const sleepResult = parseSleep(parsed.metrics, date);
+      sleep = sleepResult.value;
+      availability.sleepTiming = sleepResult.availability;
+      sourceRegime = { ...sourceRegime, sleepSources: sleepResult.sources };
+      diagnostics.push(...sleepResult.diagnostics);
+    } else {
+      availability.sleepTiming = 'invalid';
+    }
+  }
+
+  if (date && input.rhythmFile && rhythmDay === date) {
+    const parsed = metricsFromPayload(input.rhythmFile.payload, 'rhythm');
+    diagnostics.push(...parsed.diagnostics);
+    if (parsed.diagnostics.length === 0) {
+      const relevantDates = validateMetricDates(
+        parsed.metrics,
+        ['heart_rate', 'resting_heart_rate', 'heart_rate_variability'],
+        date,
+        'rhythm',
+      );
+      diagnostics.push(...relevantDates);
+      const activityResult = parseActivity(parsed.metrics, date);
+      activity = activityResult.value;
+      availability.activity = activityResult.availability;
+      diagnostics.push(...activityResult.diagnostics);
+
+      const heartRate = metricAvailability(parsed.metrics, 'heart_rate', date);
+      const restingHeartRate = metricAvailability(parsed.metrics, 'resting_heart_rate', date);
+      const hrv = metricAvailability(parsed.metrics, 'heart_rate_variability', date);
+      availability.heartRate = relevantDates.length > 0 ? 'invalid' : heartRate.availability;
+      availability.restingHeartRate =
+        relevantDates.length > 0 ? 'invalid' : restingHeartRate.availability;
+      availability.hrv = relevantDates.length > 0 ? 'invalid' : hrv.availability;
+      sourceRegime = {
+        ...sourceRegime,
+        activitySources: activityResult.sources,
+        heartRateSources: heartRate.sources,
+        restingHeartRateSources: restingHeartRate.sources,
+        hrvSources: hrv.sources,
+      };
+    } else {
+      availability.activity = 'invalid';
+      availability.heartRate = 'invalid';
+      availability.restingHeartRate = 'invalid';
+      availability.hrv = 'invalid';
+    }
+  }
+
+  const current: NormalizedRhythmDay = {
+    date,
+    sleep,
+    activity,
+    availability,
+    sourceRegime,
+    sourceVersions: {
+      sleep: sourceVersion(input.sleepFile),
+      rhythm: sourceVersion(input.rhythmFile),
+    },
+    preservedFromPrevious: { sleep: false, activity: false },
+    diagnostics,
+  };
+
+  const previous = input.previous;
+  if (!previous || !date || previous.date !== date) return current;
+
+  if (!input.sleepFile) {
+    current.sleep = previous.sleep;
+    current.availability.sleepTiming = previous.availability.sleepTiming;
+    current.sourceRegime = {
+      ...current.sourceRegime,
+      sleepSources: previous.sourceRegime.sleepSources,
+    };
+    current.sourceVersions.sleep = previous.sourceVersions.sleep;
+  } else if (isOlder(current.sourceVersions.sleep, previous.sourceVersions.sleep)) {
+    preservePreviousSleep(current, previous, 'older');
+    current.sourceVersions.sleep = previous.sourceVersions.sleep;
+  } else if (!current.sleep && previous.sleep) {
+    preservePreviousSleep(current, previous, 'missing');
+  }
+
+  if (!input.rhythmFile) {
+    current.activity = previous.activity;
+    current.availability.activity = previous.availability.activity;
+    current.availability.heartRate = previous.availability.heartRate;
+    current.availability.restingHeartRate = previous.availability.restingHeartRate;
+    current.availability.hrv = previous.availability.hrv;
+    current.sourceRegime = {
+      ...current.sourceRegime,
+      activitySources: previous.sourceRegime.activitySources,
+      heartRateSources: previous.sourceRegime.heartRateSources,
+      restingHeartRateSources: previous.sourceRegime.restingHeartRateSources,
+      hrvSources: previous.sourceRegime.hrvSources,
+    };
+    current.sourceVersions.rhythm = previous.sourceVersions.rhythm;
+  } else if (isOlder(current.sourceVersions.rhythm, previous.sourceVersions.rhythm)) {
+    preservePreviousActivity(current, previous, 'older');
+    current.availability.heartRate = previous.availability.heartRate;
+    current.availability.restingHeartRate = previous.availability.restingHeartRate;
+    current.availability.hrv = previous.availability.hrv;
+    current.sourceRegime = {
+      ...current.sourceRegime,
+      heartRateSources: previous.sourceRegime.heartRateSources,
+      restingHeartRateSources: previous.sourceRegime.restingHeartRateSources,
+      hrvSources: previous.sourceRegime.hrvSources,
+    };
+    current.sourceVersions.rhythm = previous.sourceVersions.rhythm;
+  } else if (!current.activity && previous.activity) {
+    preservePreviousActivity(current, previous, 'missing');
+  }
+
+  return current;
+}
+
+export function toRhythmStabilityInput(
+  days: readonly NormalizedRhythmDay[],
+): RhythmStabilityInput {
+  const byDate = new Map<string, NormalizedRhythmDay>();
+  for (const day of days) {
+    if (!day.date) continue;
+    byDate.set(day.date, day);
+  }
+  const ordered = [...byDate.values()].sort((a, b) =>
+    (a.date as string).localeCompare(b.date as string),
+  );
+  return {
+    sleep: ordered
+      .map((day) => day.sleep)
+      .filter((value): value is RhythmSleepObservation => value !== null),
+    activity: ordered
+      .map((day) => day.activity)
+      .filter((value): value is RhythmActivityObservation => value !== null),
   };
 }
