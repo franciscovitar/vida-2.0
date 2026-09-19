@@ -1,0 +1,35 @@
+name: Rhythm Format Helper
+
+on:
+  push:
+    branches:
+      - health-rhythm-stability-v1-2026-09-19
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format target files
+        run: npx prettier --write docs/health-rhythm-v1.md lib/health/rhythm.ts tests/health-rhythm.test.ts
+      - name: Emit formatted files
+        shell: bash
+        run: |
+          echo "===DOC_B64==="
+          base64 -w0 docs/health-rhythm-v1.md
+          echo
+          echo "===RHYTHM_B64==="
+          base64 -w0 lib/health/rhythm.ts
+          echo
+          echo "===TEST_B64==="
+          base64 -w0 tests/health-rhythm.test.ts
+          echo
