@@ -85,14 +85,12 @@ function rhythmFile(
     metrics.push({
       name: 'step_count',
       units: options.stepUnits ?? 'count',
-      data:
-        options.stepRows ??
-        [
-          { date: `${day} 08:00:00 -0300`, qty: 100, source: 'Phone A|Wearable A' },
-          { date: `${day} 11:00:00 -0300`, qty: 400, source: 'Phone A|Wearable A' },
-          { date: `${day} 15:00:00 -0300`, qty: 300, source: 'Phone A|Wearable A' },
-          { date: `${day} 19:00:00 -0300`, qty: 200, source: 'Phone A|Wearable A' },
-        ],
+      data: options.stepRows ?? [
+        { date: `${day} 08:00:00 -0300`, qty: 100, source: 'Phone A|Wearable A' },
+        { date: `${day} 11:00:00 -0300`, qty: 400, source: 'Phone A|Wearable A' },
+        { date: `${day} 15:00:00 -0300`, qty: 300, source: 'Phone A|Wearable A' },
+        { date: `${day} 19:00:00 -0300`, qty: 200, source: 'Phone A|Wearable A' },
+      ],
     });
   }
   if (options.includeHrv) {

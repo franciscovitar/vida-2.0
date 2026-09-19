@@ -636,9 +636,7 @@ export function adaptHaeRhythmSources(input: RhythmSourceAdapterInput): Normaliz
   return current;
 }
 
-export function toRhythmStabilityInput(
-  days: readonly NormalizedRhythmDay[],
-): RhythmStabilityInput {
+export function toRhythmStabilityInput(days: readonly NormalizedRhythmDay[]): RhythmStabilityInput {
   const byDate = new Map<string, NormalizedRhythmDay>();
   for (const day of days) {
     if (!day.date) continue;
