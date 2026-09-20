@@ -33,5 +33,21 @@ jobs:
       - name: Test project
         run: npm test
 
+      - name: Format Health Check-in files for diagnosis
+        run: |
+          npx prettier --write app/actions/health-checkin.ts components/health/HealthCheckinForm.tsx lib/health/checkin-google-port.ts lib/health/checkin.ts
+          echo '=== CHECKIN_ACTION_FORMATTED_START ==='
+          cat app/actions/health-checkin.ts
+          echo '=== CHECKIN_ACTION_FORMATTED_END ==='
+          echo '=== CHECKIN_FORM_FORMATTED_START ==='
+          cat components/health/HealthCheckinForm.tsx
+          echo '=== CHECKIN_FORM_FORMATTED_END ==='
+          echo '=== CHECKIN_PORT_FORMATTED_START ==='
+          cat lib/health/checkin-google-port.ts
+          echo '=== CHECKIN_PORT_FORMATTED_END ==='
+          echo '=== CHECKIN_CORE_FORMATTED_START ==='
+          cat lib/health/checkin.ts
+          echo '=== CHECKIN_CORE_FORMATTED_END ==='
+
       - name: Verify project
         run: npm run verify
