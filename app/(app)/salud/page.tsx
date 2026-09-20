@@ -8,6 +8,7 @@ import styles from '@/components/domain/DomainPage.module.scss';
 import { PeriodSelector } from '@/components/domain/PeriodSelector';
 import { SparkBars } from '@/components/domain/SparkBars';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
+import { HealthCheckinCard } from '@/components/health/HealthCheckinCard';
 import {
   HealthContextSection,
   HealthDeviationRadarSection,
@@ -120,6 +121,8 @@ export default async function SaludPage({
       />
 
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
+
+      <HealthCheckinCard />
 
       <HealthScoreboardSection scoreboard={intelligence.scores} rhythm={rhythm} />
 
