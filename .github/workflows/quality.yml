@@ -33,5 +33,12 @@ jobs:
       - name: Test project
         run: npm test
 
+      - name: Format Rhythm test for diagnosis
+        run: |
+          npx prettier --write tests/health-rhythm-features-sheet.test.ts
+          echo '=== RHYTHM_TEST_FORMATTED_START ==='
+          cat tests/health-rhythm-features-sheet.test.ts
+          echo '=== RHYTHM_TEST_FORMATTED_END ==='
+
       - name: Verify project
         run: npm run verify
