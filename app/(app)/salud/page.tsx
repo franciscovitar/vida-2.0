@@ -21,6 +21,10 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { getDomainPages } from '@/lib/data/domain-pages';
 import { getHealthContextInputs } from '@/lib/health/context-sources';
 import { buildHealthIntelligence } from '@/lib/health/intelligence';
+import {
+  buildRhythmFeaturesViewModel,
+  loadRhythmFeaturesSnapshot,
+} from '@/lib/health/rhythm-features-sheet';
 import { periodLabel, parsePeriodParam } from '@/lib/periods';
 import type { HealthInsightKind, HealthMetricGroupId } from '@/types/domain-pages';
 
@@ -85,8 +89,13 @@ export default async function SaludPage({
 }) {
   const params = await searchParams;
   const periodDays = parsePeriodParam(params.period);
-  const [data, context] = await Promise.all([getDomainPages(periodDays), getHealthContextInputs()]);
+  const [data, context, rhythmSnapshot] = await Promise.all([
+    getDomainPages(periodDays),
+    getHealthContextInputs(),
+    loadRhythmFeaturesSnapshot(),
+  ]);
   const health = data.health;
+  const rhythm = buildRhythmFeaturesViewModel(rhythmSnapshot);
   const intelligence = buildHealthIntelligence({
     health,
     gym: context.gym,
@@ -109,7 +118,7 @@ export default async function SaludPage({
 
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
 
-      <HealthScoreboardSection scoreboard={intelligence.scores} />
+      <HealthScoreboardSection scoreboard={intelligence.scores} rhythm={rhythm} />
 
       <HealthTodayHero
         brief={intelligence.dailyBrief}
