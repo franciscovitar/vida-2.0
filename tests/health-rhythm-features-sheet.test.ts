@@ -224,13 +224,12 @@ test('RF13. una fila completamente vacía no crea un día fantasma', () => {
 test('RF14. view model ready expone Rhythm calculable sin datos raw', () => {
   const snapshot = parseRhythmFeatureValues(
     grid(
-      ['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19'].map(
-        (date, index) =>
-          row({
-            date,
-            sleepStart: `${date}T00:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
-            sleepEnd: `${date}T08:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
-          }),
+      ['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19'].map((date, index) =>
+        row({
+          date,
+          sleepStart: `${date}T00:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
+          sleepEnd: `${date}T08:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
+        }),
       ),
     ),
   );
