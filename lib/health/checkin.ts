@@ -156,6 +156,18 @@ function integerCell(
   value: HealthCheckinCell | undefined,
   min: number,
   max: number,
+  optional: false,
+): number | undefined;
+function integerCell(
+  value: HealthCheckinCell | undefined,
+  min: number,
+  max: number,
+  optional: true,
+): number | null | undefined;
+function integerCell(
+  value: HealthCheckinCell | undefined,
+  min: number,
+  max: number,
   optional: boolean,
 ): number | null | undefined {
   if (isBlank(value)) return optional ? null : undefined;

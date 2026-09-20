@@ -53,7 +53,10 @@ async function withDevSheetAuth(): Promise<
 export const googleHealthCheckinSheetPort: HealthCheckinSheetPort = {
   async readAll() {
     const auth = await withDevSheetAuth();
-    if (!auth.ok) return auth.code === 'write-error' ? { ok: false, code: 'read-error' } : auth;
+    if (!auth.ok) {
+      const code = auth.code === 'write-error' ? 'read-error' : auth.code;
+      return { ok: false, code };
+    }
 
     const range = encodeURIComponent(HEALTH_CHECKIN_TAB);
     const url =
