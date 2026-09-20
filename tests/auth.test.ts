@@ -395,13 +395,6 @@ test('16. /api/auth/* sigue siendo pública', () => {
   assert.equal(isPublicAuthPath('/api/auth/session'), true);
 });
 
-
-test('bootstrap temporal de Rhythm permite sólo la ruta exacta sin sesión', () => {
-  assert.equal(isPublicAuthPath('/api/health/rhythm-preview-bootstrap'), true);
-  assert.equal(isPublicAuthPath('/api/health/rhythm-preview-bootstrap/otro'), false);
-  assert.equal(isPublicAuthPath('/api/health/rhythm-preview-check'), false);
-});
-
 test('/api/openclaw/* conserva acceso al autenticador HMAC propio', () => {
   for (const pathname of ['/api/openclaw', '/api/openclaw/v1/health']) {
     assert.equal(isPublicAuthPath(pathname), true);

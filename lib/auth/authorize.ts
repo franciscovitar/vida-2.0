@@ -140,8 +140,6 @@ export function isPublicAuthPath(pathname: string): boolean {
   if (pathname === '/login' || pathname.startsWith('/login/')) return true;
   if (pathname === '/unauthorized' || pathname.startsWith('/unauthorized/')) return true;
   if (pathname.startsWith('/api/auth')) return true;
-  // Temporary PR #75 bootstrap: exact path only. Route itself is hard-gated to Preview + exact branch.
-  if (pathname === '/api/health/rhythm-preview-bootstrap') return true;
   // API OpenClaw: auth HMAC propia (sin cookie de usuario).
   if (pathname === '/api/openclaw' || pathname.startsWith('/api/openclaw/')) return true;
   // Fronteras machine-to-machine con autenticación propia; comparación deliberadamente exacta.
