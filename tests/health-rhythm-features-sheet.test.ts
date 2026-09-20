@@ -51,13 +51,12 @@ function grid(rows: readonly (readonly TestCell[])[]): TestCell[][] {
 
 test('RF1. cinco días válidos alimentan al calculador puro', () => {
   const values = grid(
-    ['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19'].map(
-      (date, index) =>
-        row({
-          date,
-          sleepStart: `${date}T00:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
-          sleepEnd: `${date}T08:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
-        }),
+    ['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19'].map((date, index) =>
+      row({
+        date,
+        sleepStart: `${date}T00:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
+        sleepEnd: `${date}T08:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
+      }),
     ),
   );
   const snapshot = parseRhythmFeatureValues(values);
@@ -190,12 +189,7 @@ test('RF11. loader lee únicamente la pestaña contractual', async () => {
     reads.push(tab);
     return {
       ok: true,
-      values: grid([row({ date: '2026-09-19' })]) as (
-        | string
-        | number
-        | boolean
-        | null
-      )[][],
+      values: grid([row({ date: '2026-09-19' })]) as (string | number | boolean | null)[][],
     };
   };
 

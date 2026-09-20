@@ -89,12 +89,7 @@ function explicitOffsetTimestamp(value: Cell | undefined): string | null {
 
 function availability(value: Cell | undefined): RhythmFeatureAvailability | null {
   const text = textCell(value);
-  if (
-    text === 'available' ||
-    text === 'missing' ||
-    text === 'invalid' ||
-    text === 'preserved'
-  ) {
+  if (text === 'available' || text === 'missing' || text === 'invalid' || text === 'preserved') {
     return text;
   }
   return null;

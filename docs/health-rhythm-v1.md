@@ -114,17 +114,17 @@ Tab name:
 
 Exact V1 headers:
 
-| Column | Meaning |
-| --- | --- |
-| `Date` | local calendar day `YYYY-MM-DD` |
-| `Sleep Start` | explicit-offset sleep-start timestamp, or blank when unavailable |
-| `Sleep End` | explicit-offset sleep-end timestamp, or blank when unavailable |
-| `Hourly Steps JSON` | normalized observed hourly bins only, e.g. `[{"hour":8,"steps":120}]`; absent hours are not fabricated |
-| `Sleep Availability` | `available`, `missing`, `invalid` or `preserved` |
-| `Activity Availability` | same availability vocabulary for hourly activity |
-| `Sleep Source Modified At` | optional source-version timestamp used for reconciliation evidence |
-| `Rhythm Source Modified At` | optional source-version timestamp used for reconciliation evidence |
-| `Feature Version` | exactly `rhythm-features-v1` |
+| Column                      | Meaning                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `Date`                      | local calendar day `YYYY-MM-DD`                                                                        |
+| `Sleep Start`               | explicit-offset sleep-start timestamp, or blank when unavailable                                       |
+| `Sleep End`                 | explicit-offset sleep-end timestamp, or blank when unavailable                                         |
+| `Hourly Steps JSON`         | normalized observed hourly bins only, e.g. `[{"hour":8,"steps":120}]`; absent hours are not fabricated |
+| `Sleep Availability`        | `available`, `missing`, `invalid` or `preserved`                                                       |
+| `Activity Availability`     | same availability vocabulary for hourly activity                                                       |
+| `Sleep Source Modified At`  | optional source-version timestamp used for reconciliation evidence                                     |
+| `Rhythm Source Modified At` | optional source-version timestamp used for reconciliation evidence                                     |
+| `Feature Version`           | exactly `rhythm-features-v1`                                                                           |
 
 Reader rules:
 
