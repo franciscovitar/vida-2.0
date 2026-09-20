@@ -11,6 +11,8 @@ import {
 import { buildRhythmStability } from '@/lib/health/rhythm';
 import type { ReadTabResult } from '@/lib/google/errors';
 
+type TestCell = string | number | boolean | null;
+
 function row(input: {
   date: string;
   sleepStart?: string | null;
@@ -21,7 +23,7 @@ function row(input: {
   sleepModifiedAt?: string | null;
   rhythmModifiedAt?: string | null;
   version?: string;
-}): (string | null)[] {
+}): TestCell[] {
   return [
     input.date,
     input.sleepStart === undefined ? `${input.date}T00:10:00-03:00` : input.sleepStart,
@@ -43,7 +45,7 @@ function row(input: {
   ];
 }
 
-function grid(rows: readonly (readonly unknown[])[]): unknown[][] {
+function grid(rows: readonly (readonly TestCell[])[]): TestCell[][] {
   return [[...HEALTH_RHYTHM_FEATURES_HEADERS], ...rows.map((value) => [...value])];
 }
 
@@ -162,7 +164,7 @@ test('RF8. versión de features desconocida falla cerrado', () => {
 });
 
 test('RF9. schema de columnas distinto falla cerrado', () => {
-  const headers = [...HEALTH_RHYTHM_FEATURES_HEADERS];
+  const headers: TestCell[] = [...HEALTH_RHYTHM_FEATURES_HEADERS];
   headers[3] = 'Steps';
   const snapshot = parseRhythmFeatureValues([headers, row({ date: '2026-09-19' })]);
 
