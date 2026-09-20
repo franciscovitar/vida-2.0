@@ -10,6 +10,7 @@ import { SparkBars } from '@/components/domain/SparkBars';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
 import {
   HealthContextSection,
+  HealthDeviationRadarSection,
   HealthPrioritiesSection,
   HealthScoreboardSection,
   HealthTodayHero,
@@ -20,6 +21,7 @@ import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { getDomainPages } from '@/lib/data/domain-pages';
 import { getHealthContextInputs } from '@/lib/health/context-sources';
+import { buildPersonalDeviationRadar } from '@/lib/health/deviation-radar';
 import { buildHealthIntelligence } from '@/lib/health/intelligence';
 import {
   buildRhythmFeaturesViewModel,
@@ -96,6 +98,7 @@ export default async function SaludPage({
   ]);
   const health = data.health;
   const rhythm = buildRhythmFeaturesViewModel(rhythmSnapshot);
+  const deviationRadar = buildPersonalDeviationRadar(health);
   const intelligence = buildHealthIntelligence({
     health,
     gym: context.gym,
@@ -119,6 +122,8 @@ export default async function SaludPage({
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
 
       <HealthScoreboardSection scoreboard={intelligence.scores} rhythm={rhythm} />
+
+      <HealthDeviationRadarSection radar={deviationRadar} />
 
       <HealthTodayHero
         brief={intelligence.dailyBrief}
