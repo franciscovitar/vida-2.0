@@ -349,11 +349,12 @@ export function buildPersonalDeviationRadar(health: HealthPageData): PersonalDev
 
   const signals = SIGNALS.map((definition): PersonalDeviationSignal => {
     const baseline = health.signals.baseline[definition.id];
+    const todayValue = health.signals.today?.values[definition.id] ?? null;
     const observed =
       definition.observation === 'today'
         ? {
-            value: health.signals.today?.values[definition.id] ?? null,
-            days: health.signals.today?.values[definition.id] === null ? 0 : 1,
+            value: todayValue,
+            days: todayValue === null ? 0 : 1,
           }
         : {
             value: center(health.signals.recent[definition.id]),
