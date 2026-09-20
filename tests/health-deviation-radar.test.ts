@@ -151,7 +151,9 @@ test('DR3. HRV ausente no participa ni bloquea el radar', () => {
     }),
   );
 
-  const ids = radar.clusters.flatMap((cluster) => cluster.signals.map((signal) => signal.id));
+  const ids: string[] = radar.clusters.flatMap((cluster) =>
+    cluster.signals.map((signal) => signal.id),
+  );
   assert.equal(ids.includes('hrv'), false);
   assert.equal(radar.state, 'ready');
 });
