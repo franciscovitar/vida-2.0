@@ -8,10 +8,12 @@
  */
 import { readTabValues } from '@/lib/google/sheets-read';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
-import type {
-  RhythmActivityObservation,
-  RhythmSleepObservation,
-  RhythmStabilityInput,
+import {
+  buildRhythmStability,
+  type RhythmActivityObservation,
+  type RhythmSleepObservation,
+  type RhythmStabilityInput,
+  type RhythmStabilityResult,
 } from '@/lib/health/rhythm';
 
 export const HEALTH_RHYTHM_FEATURES_TAB = 'Health Rhythm Features';
@@ -48,6 +50,42 @@ export interface RhythmFeaturesSnapshot {
   notice: string | null;
   days: readonly RhythmFeatureDay[];
   input: RhythmStabilityInput;
+}
+
+export type RhythmFeaturesViewState =
+  | 'ready'
+  | 'insufficient'
+  | 'empty'
+  | 'unavailable'
+  | 'error';
+
+export interface RhythmFeaturesViewModel {
+  state: RhythmFeaturesViewState;
+  notice: string | null;
+  result: RhythmStabilityResult | null;
+}
+
+/**
+ * Converts the fail-closed Sheets snapshot into the minimal read-only UI model.
+ * Missing source evidence remains missing; this never fabricates a zero score.
+ */
+export function buildRhythmFeaturesViewModel(
+  snapshot: RhythmFeaturesSnapshot,
+): RhythmFeaturesViewModel {
+  if (snapshot.state !== 'ready') {
+    return {
+      state: snapshot.state,
+      notice: snapshot.notice,
+      result: null,
+    };
+  }
+
+  const result = buildRhythmStability(snapshot.input);
+  return {
+    state: result.score === null ? 'insufficient' : 'ready',
+    notice: null,
+    result,
+  };
 }
 
 type Cell = string | number | boolean | null;
