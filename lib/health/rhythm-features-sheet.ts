@@ -52,12 +52,7 @@ export interface RhythmFeaturesSnapshot {
   input: RhythmStabilityInput;
 }
 
-export type RhythmFeaturesViewState =
-  | 'ready'
-  | 'insufficient'
-  | 'empty'
-  | 'unavailable'
-  | 'error';
+export type RhythmFeaturesViewState = 'ready' | 'insufficient' | 'empty' | 'unavailable' | 'error';
 
 export interface RhythmFeaturesViewModel {
   state: RhythmFeaturesViewState;
