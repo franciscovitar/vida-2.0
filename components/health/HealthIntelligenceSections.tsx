@@ -26,6 +26,7 @@ import type {
   HealthTrajectory,
   HealthTrajectoryItem,
 } from '@/lib/health/intelligence';
+import type { RhythmFeaturesViewModel } from '@/lib/health/rhythm-features-sheet';
 import type { HealthExplainableScore, HealthScoreboard } from '@/lib/health/scores';
 
 import styles from './HealthIntelligenceSections.module.scss';
@@ -58,6 +59,22 @@ const SCORE_CONFIDENCE_LABELS: Readonly<Record<HealthExplainableScore['confidenc
     low: 'Baja',
   };
 
+const RHYTHM_BAND_LABELS = {
+  'very-stable': 'Muy estable',
+  stable: 'Estable',
+  variable: 'Variable',
+  irregular: 'Irregular',
+  insufficient: 'Sin evidencia',
+} as const;
+
+const RHYTHM_STATE_LABELS: Readonly<Record<RhythmFeaturesViewModel['state'], string>> = {
+  ready: 'Disponible',
+  insufficient: 'Sin evidencia suficiente',
+  empty: 'Sin historial',
+  unavailable: 'No disponible',
+  error: 'Error de lectura',
+};
+
 function ScoreValue({ score }: { score: number | null }) {
   return score === null ? <span aria-label="Sin score">—</span> : <>{score}</>;
 }
@@ -75,8 +92,93 @@ function ScoreTrend({ score }: { score: HealthExplainableScore }) {
   return null;
 }
 
+function RhythmStabilityCard({ rhythm }: { rhythm: RhythmFeaturesViewModel }) {
+  const result = rhythm.result;
+  const bandLabel = result ? RHYTHM_BAND_LABELS[result.band] : RHYTHM_STATE_LABELS[rhythm.state];
+  const visualBand =
+    result?.band === 'variable' || result?.band === 'irregular'
+      ? 'below-usual'
+      : result?.band === 'insufficient' || !result
+        ? 'insufficient'
+        : 'good';
+
+  return (
+    <article
+      className={styles['domain-score-card']}
+      data-band={visualBand}
+      data-rhythm-state={rhythm.state}
+    >
+      <div className={styles['domain-score-top']}>
+        <div>
+          <span>Rhythm Stability</span>
+          <small>{bandLabel}</small>
+        </div>
+      </div>
+
+      <div className={`${styles['domain-score-value']} tabular`}>
+        <ScoreValue score={result?.score ?? null} />
+        {result?.score === null || result?.score === undefined ? null : <small>/100</small>}
+      </div>
+
+      <p>
+        {result
+          ? result.question
+          : rhythm.state === 'empty'
+            ? 'Todavía no hay historial normalizado suficiente para calcular estabilidad.'
+            : 'La estabilidad de ritmo no puede calcularse con la evidencia disponible.'}
+      </p>
+      <p>{result?.personalPosition ?? rhythm.notice ?? 'Sin evidencia suficiente para puntuar.'}</p>
+
+      {result ? (
+        <>
+          <div className={styles['domain-score-confidence']}>
+            <span>Confianza</span>
+            <strong className="tabular">{result.confidence}%</strong>
+          </div>
+          <div className={styles['domain-score-confidence']}>
+            <span>Noches válidas</span>
+            <strong className="tabular">{result.validSleepNights}</strong>
+          </div>
+          <div className={styles['domain-score-confidence']}>
+            <span>Días de actividad válidos</span>
+            <strong className="tabular">{result.validActivityDays}</strong>
+          </div>
+
+          <details className={styles['score-details']}>
+            <summary>Ver cálculo</summary>
+            <ul>
+              {result.contributors.map((item) => (
+                <li key={item.id}>
+                  <span>{item.label}</span>
+                  <strong>{item.score === null ? 'No disponible' : `${item.score}/100`}</strong>
+                  <small>{item.detail}</small>
+                </li>
+              ))}
+            </ul>
+            {result.uncertainties.length > 0 ? (
+              <div className={styles['score-uncertainties']}>
+                {result.uncertainties.map((item) => (
+                  <p key={item}>{item}</p>
+                ))}
+              </div>
+            ) : null}
+          </details>
+        </>
+      ) : null}
+
+      <p>Consistencia personal; no mide riesgo clínico.</p>
+    </article>
+  );
+}
+
 /** Health Intelligence V1.1 — significado primero, evidencia debajo. */
-export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScoreboard }) {
+export function HealthScoreboardSection({
+  scoreboard,
+  rhythm,
+}: {
+  scoreboard: HealthScoreboard;
+  rhythm: RhythmFeaturesViewModel;
+}) {
   const readiness = scoreboard.readiness;
 
   return (
@@ -179,6 +281,8 @@ export function HealthScoreboardSection({ scoreboard }: { scoreboard: HealthScor
           </article>
         ))}
       </div>
+
+      <RhythmStabilityCard rhythm={rhythm} />
 
       <article className={styles['momentum-card']} data-direction={scoreboard.momentum.direction}>
         <div>
