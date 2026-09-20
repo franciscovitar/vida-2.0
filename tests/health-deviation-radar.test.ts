@@ -5,11 +5,7 @@ import {
   PERSONAL_DEVIATION_RADAR_VERSION,
   buildPersonalDeviationRadar,
 } from '@/lib/health/deviation-radar';
-import type {
-  HealthBaselineSignal,
-  HealthPageData,
-  HealthSignalId,
-} from '@/types/domain-pages';
+import type { HealthBaselineSignal, HealthPageData, HealthSignalId } from '@/types/domain-pages';
 
 const SIGNAL_IDS: readonly HealthSignalId[] = [
   'sleep',
@@ -136,9 +132,7 @@ test('DR2. tres dimensiones desviadas producen un cambio multiseñal marcado', (
   assert.ok(radar.shiftedClusters >= 3);
   assert.match(radar.headline, /multiseñal marcado/i);
   assert.ok(
-    radar.clusters
-      .flatMap((cluster) => cluster.signals)
-      .some((signal) => signal.persistent),
+    radar.clusters.flatMap((cluster) => cluster.signals).some((signal) => signal.persistent),
   );
 });
 
