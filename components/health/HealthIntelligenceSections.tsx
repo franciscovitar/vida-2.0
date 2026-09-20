@@ -172,11 +172,7 @@ function RhythmStabilityCard({ rhythm }: { rhythm: RhythmFeaturesViewModel }) {
   );
 }
 
-export function HealthDeviationRadarSection({
-  radar,
-}: {
-  radar: PersonalDeviationRadar;
-}) {
+export function HealthDeviationRadarSection({ radar }: { radar: PersonalDeviationRadar }) {
   const levelLabel =
     radar.level === 'usual'
       ? 'Habitual'
