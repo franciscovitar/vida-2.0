@@ -17,6 +17,7 @@ import {
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import type { PersonalDeviationRadar } from '@/lib/health/deviation-radar';
 import type {
   HealthCrossDomainContext,
   HealthCurrentState,
@@ -168,6 +169,76 @@ function RhythmStabilityCard({ rhythm }: { rhythm: RhythmFeaturesViewModel }) {
 
       <p>Consistencia personal; no mide riesgo clínico.</p>
     </article>
+  );
+}
+
+export function HealthDeviationRadarSection({ radar }: { radar: PersonalDeviationRadar }) {
+  const levelLabel =
+    radar.level === 'usual'
+      ? 'Habitual'
+      : radar.level === 'mild'
+        ? 'Cambio leve'
+        : radar.level === 'moderate'
+          ? 'Cambio moderado'
+          : radar.level === 'marked'
+            ? 'Cambio marcado'
+            : 'Sin evidencia suficiente';
+
+  return (
+    <Card aria-labelledby="health-deviation-radar-title">
+      <SectionHeader
+        id="health-deviation-radar-title"
+        title="Personal Deviation Radar"
+        description="Busca cambios simultáneos respecto de tu propio patrón. No es otro score."
+        domain="health"
+      />
+
+      <div className={styles['radar-summary']} data-level={radar.level}>
+        <div>
+          <p className={styles.eyebrow}>Lectura multiseñal</p>
+          <h3>{radar.headline}</h3>
+          <p>{radar.detail}</p>
+        </div>
+        <span>{levelLabel}</span>
+      </div>
+
+      {radar.clusters.length > 0 ? (
+        <div className={styles['radar-grid']}>
+          {radar.clusters.map((cluster) => (
+            <article
+              key={cluster.id}
+              className={styles['radar-card']}
+              data-state={cluster.state}
+              data-direction={cluster.direction}
+            >
+              <div className={styles['radar-card-head']}>
+                <strong>{cluster.label}</strong>
+                <span>
+                  {cluster.state === 'shifted'
+                    ? 'Desviado'
+                    : cluster.state === 'mild'
+                      ? 'Leve'
+                      : cluster.state === 'usual'
+                        ? 'Habitual'
+                        : 'Sin evidencia'}
+                </span>
+              </div>
+              <p>{cluster.detail}</p>
+              <ul>
+                {cluster.signals.map((signal) => (
+                  <li key={signal.id} data-state={signal.state}>
+                    <span>{signal.label}</span>
+                    <small>{signal.detail}</small>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      ) : null}
+
+      <p className={styles.caveat}>{radar.caveat}</p>
+    </Card>
   );
 }
 
