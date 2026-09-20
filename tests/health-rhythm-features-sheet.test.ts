@@ -5,6 +5,7 @@ import {
   HEALTH_RHYTHM_FEATURE_VERSION,
   HEALTH_RHYTHM_FEATURES_HEADERS,
   HEALTH_RHYTHM_FEATURES_TAB,
+  buildRhythmFeaturesViewModel,
   loadRhythmFeaturesSnapshot,
   parseRhythmFeatureValues,
 } from '@/lib/health/rhythm-features-sheet';
@@ -218,4 +219,92 @@ test('RF13. una fila completamente vacía no crea un día fantasma', () => {
 
   assert.equal(snapshot.state, 'empty');
   assert.equal(snapshot.days.length, 0);
+});
+
+
+test('RF14. view model ready expone Rhythm calculable sin datos raw', () => {
+  const snapshot = parseRhythmFeatureValues(
+    grid(
+      ['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19'].map(
+        (date, index) =>
+          row({
+            date,
+            sleepStart: `${date}T00:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
+            sleepEnd: `${date}T08:${String(10 + index * 2).padStart(2, '0')}:00-03:00`,
+          }),
+      ),
+    ),
+  );
+
+  const view = buildRhythmFeaturesViewModel(snapshot);
+
+  assert.equal(view.state, 'ready');
+  assert.notEqual(view.result?.score, null);
+  assert.equal(view.notice, null);
+});
+
+test('RF15. view model ready con evidencia corta queda insufficient sin score inventado', () => {
+  const snapshot = parseRhythmFeatureValues(
+    grid(
+      ['2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19'].map((date) => row({ date })),
+    ),
+  );
+
+  const view = buildRhythmFeaturesViewModel(snapshot);
+
+  assert.equal(snapshot.state, 'ready');
+  assert.equal(view.state, 'insufficient');
+  assert.equal(view.result?.score, null);
+});
+
+test('RF16. view model conserva empty de forma explícita', () => {
+  const snapshot = parseRhythmFeatureValues([[...HEALTH_RHYTHM_FEATURES_HEADERS]]);
+  const view = buildRhythmFeaturesViewModel(snapshot);
+
+  assert.equal(view.state, 'empty');
+  assert.equal(view.result, null);
+  assert.match(view.notice ?? '', /todavía no tiene días normalizados/i);
+});
+
+test('RF17. view model conserva unavailable y su mensaje sanitizado', async () => {
+  const snapshot = await loadRhythmFeaturesSnapshot(async () => ({
+    ok: false,
+    code: 'missing-tab',
+  }));
+  const view = buildRhythmFeaturesViewModel(snapshot);
+
+  assert.equal(view.state, 'unavailable');
+  assert.equal(view.result, null);
+  assert.match(view.notice ?? '', /Health Rhythm Features/i);
+});
+
+test('RF18. view model conserva error sin intentar calcular', () => {
+  const headers: TestCell[] = [...HEALTH_RHYTHM_FEATURES_HEADERS];
+  headers[0] = 'Wrong';
+  const snapshot = parseRhythmFeatureValues([headers]);
+  const view = buildRhythmFeaturesViewModel(snapshot);
+
+  assert.equal(view.state, 'error');
+  assert.equal(view.result, null);
+});
+
+test('RF19. missing sigue missing en la proyección y no se convierte en cero', () => {
+  const snapshot = parseRhythmFeatureValues(
+    grid([
+      row({
+        date: '2026-09-19',
+        sleepStart: null,
+        sleepEnd: null,
+        hourly: null,
+        sleepAvailability: 'missing',
+        activityAvailability: 'missing',
+      }),
+    ]),
+  );
+  const view = buildRhythmFeaturesViewModel(snapshot);
+
+  assert.equal(view.state, 'insufficient');
+  assert.equal(view.result?.score, null);
+  assert.equal(view.result?.validSleepNights, 0);
+  assert.equal(view.result?.validActivityDays, 0);
 });
