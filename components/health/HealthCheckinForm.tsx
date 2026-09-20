@@ -146,7 +146,7 @@ export function HealthCheckinForm({ initial }: { initial: HealthCheckinSnapshot 
             disabled={disabled}
           />
 
-          <label className={styles.selectField}>
+          <label className={styles['select-field']}>
             <span>Workout RPE</span>
             <select
               value={draft.workoutRpe ?? ''}
@@ -167,7 +167,7 @@ export function HealthCheckinForm({ initial }: { initial: HealthCheckinSnapshot 
             </select>
           </label>
 
-          <label className={styles.selectField}>
+          <label className={styles['select-field']}>
             <span>Unwell</span>
             <select
               value={draft.unwell === null || draft.unwell === undefined ? '' : String(draft.unwell)}
@@ -188,7 +188,7 @@ export function HealthCheckinForm({ initial }: { initial: HealthCheckinSnapshot 
             </select>
           </label>
 
-          <label className={styles.noteField}>
+          <label className={styles['note-field']}>
             <span>Nota</span>
             <textarea
               value={draft.note ?? ''}

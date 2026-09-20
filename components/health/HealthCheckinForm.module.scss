@@ -44,8 +44,8 @@
 }
 
 .field legend,
-.selectField > span,
-.noteField > span {
+.select-field > span,
+.note-field > span {
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 700;
@@ -98,14 +98,14 @@
   padding-top: 0.35rem;
 }
 
-.selectField,
-.noteField {
+.select-field,
+.note-field {
   display: grid;
   gap: 0.45rem;
 }
 
-.selectField select,
-.noteField textarea {
+.select-field select,
+.note-field textarea {
   width: 100%;
   min-width: 0;
   border: 1px solid var(--border);
@@ -116,12 +116,12 @@
   font-size: 0.75rem;
 }
 
-.selectField select {
+.select-field select {
   min-height: 2.35rem;
   padding: 0 0.65rem;
 }
 
-.noteField textarea {
+.note-field textarea {
   padding: 0.65rem;
   line-height: 1.45;
   resize: vertical;
@@ -182,7 +182,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .noteField {
+  .note-field {
     grid-column: 1 / -1;
   }
 }
