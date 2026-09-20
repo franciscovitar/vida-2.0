@@ -33,5 +33,18 @@ jobs:
       - name: Test project
         run: npm test
 
+      - name: Format Health Radar files for diagnosis
+        run: |
+          npx prettier --write components/health/HealthIntelligenceSections.tsx lib/health/deviation-radar.ts tests/health-deviation-radar.test.ts
+          echo '=== SECTIONS_FORMATTED_START ==='
+          cat components/health/HealthIntelligenceSections.tsx
+          echo '=== SECTIONS_FORMATTED_END ==='
+          echo '=== RADAR_FORMATTED_START ==='
+          cat lib/health/deviation-radar.ts
+          echo '=== RADAR_FORMATTED_END ==='
+          echo '=== RADAR_TEST_FORMATTED_START ==='
+          cat tests/health-deviation-radar.test.ts
+          echo '=== RADAR_TEST_FORMATTED_END ==='
+
       - name: Verify project
         run: npm run verify
