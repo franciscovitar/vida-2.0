@@ -1,4 +1,4 @@
-import { ClipboardHeart } from 'lucide-react';
+import { HeartPulse } from 'lucide-react';
 
 import { HealthCheckinForm } from '@/components/health/HealthCheckinForm';
 import { Card } from '@/components/ui/Card';
@@ -15,7 +15,7 @@ export async function HealthCheckinCard() {
         title="¿Cómo estás hoy?"
         description="Tres respuestas rápidas para sumar contexto subjetivo a tu historial. No es un diagnóstico."
         domain="health"
-        icon={ClipboardHeart}
+        icon={HeartPulse}
       />
       <HealthCheckinForm initial={initial} />
     </Card>
