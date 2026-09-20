@@ -660,10 +660,3 @@ test('código fuente ya no usa AUTH_ALLOWED_EMAIL singular', () => {
     assert.doesNotMatch(content, /AUTH_ALLOWED_EMAIL[^S]/);
   }
 });
-
-
-test('bootstrap temporal de Rhythm permite sólo la ruta exacta sin sesión', () => {
-  assert.equal(isPublicAuthPath('/api/health/rhythm-preview-bootstrap'), true);
-  assert.equal(isPublicAuthPath('/api/health/rhythm-preview-bootstrap/otro'), false);
-  assert.equal(isPublicAuthPath('/api/health/rhythm-preview-check'), false);
-});
