@@ -1,17 +1,8 @@
-import type {
-  HealthBaselineSignal,
-  HealthPageData,
-  HealthSignalId,
-} from '@/types/domain-pages';
+import type { HealthBaselineSignal, HealthPageData, HealthSignalId } from '@/types/domain-pages';
 
 export const PERSONAL_DEVIATION_RADAR_VERSION = 'personal-deviation-radar-v1.0.0';
 
-export type PersonalDeviationLevel =
-  | 'usual'
-  | 'mild'
-  | 'moderate'
-  | 'marked'
-  | 'insufficient';
+export type PersonalDeviationLevel = 'usual' | 'mild' | 'moderate' | 'marked' | 'insufficient';
 
 export type PersonalDeviationDirection = 'above' | 'below' | 'mixed' | 'unknown';
 
