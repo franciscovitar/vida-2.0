@@ -1,6 +1,6 @@
 # Rhythm Stability V1 — implementation contract
 
-Status: **pure runtime + raw-source adapter merged; Preview-only read-only Drive transport prepared behind an explicit fail-closed gate; not wired to Production data or UI**.
+Status: **pure runtime + raw-source adapter merged; normalized `Health Rhythm Features` Sheets contract prepared; not wired to Production data or UI**.
 
 ## Purpose
 
@@ -90,55 +90,68 @@ Adapter rules:
 
 Reconciliation is monotonic at the feature boundary: a later incomplete snapshot may advance source-version knowledge while retaining an earlier valid normalized feature. Missing/invalid current evidence is still reported explicitly through availability/diagnostics so preservation cannot masquerade as a fresh measurement.
 
-## Preview-only read-only source transport
+## Canonical Sheets feature handoff
 
-The next bounded integration layer is a **server-only Google Drive reader** that feeds already-parsed HAE JSON into the merged pure adapter.
+The web app does **not** read private HAE Drive folders directly.
 
-Boundary:
+The integration boundary is:
 
-`Google Drive read-only source → parsed HAE payloads → pure adapter → normalized features → pure Rhythm Stability calculator`
+`HAE JSON in Drive → Health Sync / Apps Script → normalized Health Rhythm Features → existing Google Sheets reader → pure Rhythm Stability calculator`
 
-Safety rules:
+This preserves the storage model:
 
-- disabled by default unless `HEALTH_RHYTHM_SOURCE=drive`;
-- hard-disabled when `VERCEL_ENV=production`, even if Drive configuration is present;
-- uses only `https://www.googleapis.com/auth/drive.readonly`;
-- requires two explicit allowlisted folder IDs, one for sleep and one for hourly rhythm/cardio;
-- lists only the exact expected daily filename inside the configured folder;
-- uses only `GET` requests to Drive;
-- rejects duplicate same-name files instead of choosing one silently;
-- caps each JSON payload at 512 KiB;
-- never returns or logs Drive file IDs, folder IDs, credentials or raw payloads to the client;
-- missing files remain missing; a caller may preserve a previously accepted normalized day while marking the current read as preserved rather than fresh;
-- no source preference, no HRV dependency and no canonical write path are introduced.
+- Drive keeps original/heavy HAE evidence;
+- Health Sync owns source reconciliation and derives only the minimum normalized features;
+- Google Sheets stores the quantitative feature handoff;
+- Vida Web remains read-only and reuses the already-established Sheets authentication path;
+- the pure calculator remains unaware of Drive, Google APIs and source credentials.
 
-Configuration names only (values stay in Vercel/local secret boundaries):
+### Tab contract
 
-- `HEALTH_RHYTHM_SOURCE`;
-- `GOOGLE_HEALTH_SLEEP_FOLDER_ID`;
-- `GOOGLE_HEALTH_RHYTHM_FOLDER_ID`;
-- existing server-side `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_PRIVATE_KEY`.
+Tab name:
 
-The Drive folders must be granted only the minimum read access required by the service account. Folder IDs and private health payloads remain out of GitHub.
+`Health Rhythm Features`
 
-This transport is intentionally a **Preview/local integration candidate**. Enabling it for Production requires a separate explicit authorization and a code/config change because the current runtime blocks Production unconditionally.
+Exact V1 headers:
 
-### Sanitized Preview check
+| Column | Meaning |
+| --- | --- |
+| `Date` | local calendar day `YYYY-MM-DD` |
+| `Sleep Start` | explicit-offset sleep-start timestamp, or blank when unavailable |
+| `Sleep End` | explicit-offset sleep-end timestamp, or blank when unavailable |
+| `Hourly Steps JSON` | normalized observed hourly bins only, e.g. `[{"hour":8,"steps":120}]`; absent hours are not fabricated |
+| `Sleep Availability` | `available`, `missing`, `invalid` or `preserved` |
+| `Activity Availability` | same availability vocabulary for hourly activity |
+| `Sleep Source Modified At` | optional source-version timestamp used for reconciliation evidence |
+| `Rhythm Source Modified At` | optional source-version timestamp used for reconciliation evidence |
+| `Feature Version` | exactly `rhythm-features-v1` |
 
-After the three Preview-only source variables and least-privilege Drive folder grants exist, an authenticated operator can exercise the real read path without exposing raw health data:
+Reader rules:
 
-`/api/health/rhythm-preview-check?end=YYYY-MM-DD`
+- exact header order is contractual;
+- duplicate dates fail closed;
+- sleep timestamps require explicit UTC offsets;
+- `missing` / `invalid` rows must not carry fabricated sleep/activity values;
+- hourly JSON accepts only unique local hours `0..23` with finite non-negative step counts;
+- duplicate hourly bins fail closed rather than being silently summed;
+- unknown feature versions fail closed;
+- malformed source-version timestamps fail closed;
+- a fully blank trailing row is ignored;
+- no raw HAE payload, Drive ID, folder ID, service-account email or secret is stored in this tab.
 
-The endpoint:
+The TypeScript raw-source adapter remains an executable reference for normalization semantics and synthetic regression tests. The Apps Script implementation must match the same missing-data, timestamp, duplicate and anti-rollback rules before any Production promotion.
 
-- exists only in Vercel Preview and returns 404 outside Preview;
-- requires the normal authorized Vida 2.0 session;
-- reads a trailing seven-day window ending on the supplied local date;
-- returns only sanitized coverage/readiness counts plus whether the Rhythm score is computable;
-- never returns sleep timestamps, step counts, source strings, raw HAE payloads, Drive IDs or folder IDs;
-- uses `Cache-Control: no-store`.
+### Environment and rollout
 
-This endpoint is an operator verification surface, not a product UI.
+No new Vercel Drive variables or Drive permissions are required for Vida Web.
+
+The read path uses the existing resolved Google Sheets target:
+
+- Preview/local continues to use the configured DEV target;
+- Production continues to use the configured PROD target;
+- Preview must never resolve the PROD spreadsheet.
+
+The first real writer implementation belongs in the existing Health Sync / Apps Script path and must be verified against a private QA/DEV destination before any Production change. Adding the tab or derived-feature writes to Production remains a separate consequential action requiring explicit authorization.
 
 ## Features
 
@@ -213,19 +226,19 @@ Again, bands describe the observed personal schedule consistency only.
 
 ## Integration boundary
 
-The calculator and raw-source adapter remain side-effect free. The optional source transport is isolated server-side and read-only; it is not part of the client or score logic.
+The calculator and raw-source adapter remain side-effect free. The web integration reads only normalized feature rows from the existing Sheets transport; it does not read HAE Drive folders.
 
 Do **not** yet:
 
 - add the score to the Production HealthScoreboard;
 - expose HAE/Drive folders or raw payloads to client components;
-- write derived features back to canonical health storage;
+- write derived features from Vida Web; Health Sync remains the only intended writer for the feature handoff;
 - infer disease/stress/overtraining from irregularity;
 - use HRV as a score dependency;
 - change preferred-source rules;
 - deploy this branch to Production.
 
-The next integration decision comes only after this adapter contract and repository verification are accepted. UI and Production wiring remain separate consequential steps.
+The next integration decision is to implement the Health Sync writer against a private QA/DEV destination and prove parity with this sheet contract. UI and Production wiring remain separate consequential steps.
 
 ## Acceptance tests
 
