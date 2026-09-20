@@ -221,7 +221,6 @@ test('RF13. una fila completamente vacía no crea un día fantasma', () => {
   assert.equal(snapshot.days.length, 0);
 });
 
-
 test('RF14. view model ready expone Rhythm calculable sin datos raw', () => {
   const snapshot = parseRhythmFeatureValues(
     grid(
@@ -245,9 +244,7 @@ test('RF14. view model ready expone Rhythm calculable sin datos raw', () => {
 
 test('RF15. view model ready con evidencia corta queda insufficient sin score inventado', () => {
   const snapshot = parseRhythmFeatureValues(
-    grid(
-      ['2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19'].map((date) => row({ date })),
-    ),
+    grid(['2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19'].map((date) => row({ date }))),
   );
 
   const view = buildRhythmFeaturesViewModel(snapshot);
