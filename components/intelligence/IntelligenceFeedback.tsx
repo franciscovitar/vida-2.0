@@ -67,7 +67,12 @@ export function IntelligenceFeedback({
       </div>
 
       <p className={styles['feedback-status']} aria-live="polite">
-        {message ?? (!writable ? 'Feedback temporalmente no disponible.' : selected ? 'Podés cambiar tu respuesta cuando quieras.' : '')}
+        {message ??
+          (!writable
+            ? 'Feedback temporalmente no disponible.'
+            : selected
+              ? 'Podés cambiar tu respuesta cuando quieras.'
+              : '')}
       </p>
     </section>
   );

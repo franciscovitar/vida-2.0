@@ -78,8 +78,7 @@ export type IntelligenceFeedbackWriteSuccess = {
 };
 
 export type IntelligenceFeedbackWriteResult =
-  | IntelligenceFeedbackWriteFailure
-  | IntelligenceFeedbackWriteSuccess;
+  IntelligenceFeedbackWriteFailure | IntelligenceFeedbackWriteSuccess;
 
 export interface IntelligenceFeedbackSheetPort {
   readAll(): Promise<
@@ -136,8 +135,7 @@ function isArticleId(value: string): boolean {
 
 export function isIntelligenceFeedbackValue(value: unknown): value is IntelligenceFeedbackValue {
   return (
-    typeof value === 'string' &&
-    (INTELLIGENCE_FEEDBACK_VALUES as readonly string[]).includes(value)
+    typeof value === 'string' && (INTELLIGENCE_FEEDBACK_VALUES as readonly string[]).includes(value)
   );
 }
 
@@ -174,9 +172,7 @@ export function parseIntelligenceFeedbackRow(
   };
 }
 
-function inspectGrid(
-  values: readonly (readonly IntelligenceFeedbackCell[])[],
-): GridInspection {
+function inspectGrid(values: readonly (readonly IntelligenceFeedbackCell[])[]): GridInspection {
   if (!headersMatch(values[0])) return { ok: false, code: 'invalid-schema' };
 
   const rows: ParsedRow[] = [];

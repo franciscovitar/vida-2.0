@@ -95,7 +95,9 @@ test('IF1. contrato de feedback tiene sólo cuatro columnas y seis valores cerra
     'WANT_DEEPER',
   ]) {
     const parsed = parseIntelligenceFeedbackRow(
-      intelligenceFeedbackToRow(record({ feedback: value as IntelligenceFeedbackRecord['feedback'] })),
+      intelligenceFeedbackToRow(
+        record({ feedback: value as IntelligenceFeedbackRecord['feedback'] }),
+      ),
     );
     assert.ok(parsed);
     assert.equal(parsed.feedback, value);
@@ -104,11 +106,9 @@ test('IF1. contrato de feedback tiene sólo cuatro columnas y seis valores cerra
 
 test('IF2. valor desconocido falla cerrado sin escribir', async () => {
   const port = createMemoryPort([[...INTELLIGENCE_FEEDBACK_HEADERS]]);
-  const result = await upsertIntelligenceFeedbackWithPort(
-    input({ feedback: 'LIKE' }),
-    port,
-    { resolved: resolvedDev() },
-  );
+  const result = await upsertIntelligenceFeedbackWithPort(input({ feedback: 'LIKE' }), port, {
+    resolved: resolvedDev(),
+  });
 
   assert.equal(result.ok, false);
   if (!result.ok) assert.equal(result.code, 'invalid-value');
@@ -196,14 +196,8 @@ test('IF6. Production exige target resuelto y flag de escritura', async () => {
 });
 
 test('IF7. acción exige sesión, usa PUT verificado y UI no admite texto libre', () => {
-  const action = readFileSync(
-    join(process.cwd(), 'app/actions/intelligence-feedback.ts'),
-    'utf8',
-  );
-  const port = readFileSync(
-    join(process.cwd(), 'lib/intelligence/feedback-sheet.ts'),
-    'utf8',
-  );
+  const action = readFileSync(join(process.cwd(), 'app/actions/intelligence-feedback.ts'), 'utf8');
+  const port = readFileSync(join(process.cwd(), 'lib/intelligence/feedback-sheet.ts'), 'utf8');
   const component = readFileSync(
     join(process.cwd(), 'components/intelligence/IntelligenceFeedback.tsx'),
     'utf8',
