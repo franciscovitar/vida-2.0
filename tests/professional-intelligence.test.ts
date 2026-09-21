@@ -161,3 +161,56 @@ test('PRO-11. ruta autenticada es dinámica y está en navegación primaria', ()
   assert.match(nav, /href: '\/professional'/);
   assert.match(nav, /label: 'Profesional'/);
 });
+
+test('PRO-12. biblioteca tecnológica expone las 193 referencias sin confundirlas con adopción', () => {
+  const libraryRaw = readFileSync(
+    join(process.cwd(), 'data', 'generated', 'technology-library.json'),
+    'utf8',
+  );
+  const library = JSON.parse(libraryRaw) as {
+    totalEntries: number;
+    spotlightIds: string[];
+    categories: Array<{ entries: Array<{ id: string; name: string }> }>;
+  };
+  const entries = library.categories.flatMap((category) => category.entries);
+
+  assert.equal(library.totalEntries, 193);
+  assert.equal(entries.length, 193);
+  assert.equal(library.spotlightIds.length, 20);
+  assert.equal(entries.some((item) => item.name === 'n8n'), true);
+  assert.equal(entries.some((item) => item.name === 'OpenClaw'), true);
+});
+
+test('PRO-13. UI separa radar actual de biblioteca y usa progressive disclosure', () => {
+  const dashboard = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+  const library = readFileSync(
+    join(process.cwd(), 'components/professional/TechnologyLibrary.tsx'),
+    'utf8',
+  );
+
+  assert.match(dashboard, /Radar actual de herramientas/);
+  assert.match(library, /Biblioteca de herramientas, repos y tecnología/);
+  assert.match(library, /Destacadas ahora/);
+  assert.match(library, /Ver biblioteca completa/);
+  assert.match(library, /Cómo podría aplicarse a lo que ya usás/);
+  assert.match(library, /Beneficio posible/);
+  assert.match(library, /A tener en cuenta/);
+  assert.match(library, /Guardado no significa instalado/);
+});
+
+test('PRO-14. biblioteca falla cerrada si faltan datos o se rompe el contrato', async () => {
+  const { resolveTechnologyLibraryText } = await import(
+    '@/lib/professional/technology-library-contract'
+  );
+
+  const missing = resolveTechnologyLibraryText(null);
+  assert.equal(missing.status, 'missing');
+  assert.equal(missing.snapshot, null);
+
+  const invalid = resolveTechnologyLibraryText(JSON.stringify({ schemaVersion: 1 }));
+  assert.equal(invalid.status, 'invalid');
+  assert.equal(invalid.snapshot, null);
+});

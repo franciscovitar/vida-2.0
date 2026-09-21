@@ -1,0 +1,3493 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "feat/technology-library-v1",
+    "commit": "82fec319e49bb178ab80ccdaa4d6b79efb158d82",
+    "generatedAt": "2026-09-21",
+    "observedAt": "2026-09-21",
+    "staleAfterDays": 45,
+    "canonicalRef": "AI/projects/professional-intelligence/TECHNOLOGY_LIBRARY_INDEX_V1.json"
+  },
+  "totalEntries": 193,
+  "spotlightIds": [
+    "TL-001",
+    "TL-013",
+    "TL-030",
+    "TL-034",
+    "TL-055",
+    "TL-062",
+    "TL-064",
+    "TL-072",
+    "TL-078",
+    "TL-082",
+    "TL-084",
+    "TL-088",
+    "TL-104",
+    "TL-108",
+    "TL-110",
+    "TL-114",
+    "TL-120",
+    "TL-122",
+    "TL-135",
+    "TL-189"
+  ],
+  "categories": [
+    {
+      "id": "AI_AGENTS_AUTOMATION",
+      "label": "IA, agentes y automatización",
+      "entries": [
+        {
+          "id": "TL-001",
+          "name": "n8n",
+          "kind": "AUTOMATION_PLATFORM",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Plataforma visual de automatización con código e integraciones, además de capacidades de IA.",
+          "application": "Automatizar procesos repetitivos de Genova, PAS o Vida cuando hoy haya demasiado copiar/pegar entre servicios.",
+          "benefit": "Puede ahorrar integraciones a medida y hacer visibles workflows que hoy vivirían como scripts dispersos.",
+          "caution": "Su modelo es fair-code, no una licencia open-source permisiva clásica; revisar licencia, secretos y permisos antes de usarlo con datos reales.",
+          "repository": "n8n-io/n8n",
+          "sourceUrl": "https://github.com/n8n-io/n8n",
+          "tags": [
+            "automation",
+            "workflows",
+            "ai",
+            "integrations"
+          ]
+        },
+        {
+          "id": "TL-002",
+          "name": "Activepieces",
+          "kind": "AUTOMATION_PLATFORM",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Automatización visual orientada a workflows, agentes y conectores MCP.",
+          "application": "Alternativa a n8n si aparece un caso donde importen más el self-hosting o una experiencia distinta de conectores.",
+          "benefit": "Da otra referencia para no casarnos con un único motor de automatización.",
+          "caution": "No sumar dos motores de workflows sin un caso comparativo real.",
+          "repository": "activepieces/activepieces",
+          "sourceUrl": "https://github.com/activepieces/activepieces",
+          "tags": [
+            "automation",
+            "mcp",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-003",
+          "name": "Windmill",
+          "kind": "AUTOMATION_PLATFORM",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma developer-first para convertir scripts en jobs, workflows, APIs y UIs internas.",
+          "application": "Útil si automatizaciones de PAS/Genova crecen desde scripts hacia procesos operables con interfaz.",
+          "benefit": "Puede reutilizar Python/TypeScript existentes en vez de reescribir todo en un constructor visual.",
+          "caution": "Añade infraestructura propia; evaluar sólo cuando un script real ya duela mantener.",
+          "repository": "windmill-labs/windmill",
+          "sourceUrl": "https://github.com/windmill-labs/windmill",
+          "tags": [
+            "automation",
+            "scripts",
+            "internal-tools"
+          ]
+        },
+        {
+          "id": "TL-004",
+          "name": "Temporal",
+          "kind": "WORKFLOW_ENGINE",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Motor de ejecución durable para procesos largos que deben sobrevivir fallos y reintentos.",
+          "application": "Referencia para futuras tareas críticas que duren minutos/horas y no puedan perder estado.",
+          "benefit": "Enseña patrones fuertes de retries, idempotencia y recuperación.",
+          "caution": "Demasiado pesado para automatizaciones simples; no introducirlo por moda.",
+          "repository": "temporalio/temporal",
+          "sourceUrl": "https://github.com/temporalio/temporal",
+          "tags": [
+            "durable-execution",
+            "reliability",
+            "workflows"
+          ]
+        },
+        {
+          "id": "TL-005",
+          "name": "Trigger.dev",
+          "kind": "WORKFLOW_ENGINE",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework para jobs y workflows durables, incluidos agentes, con foco en TypeScript.",
+          "application": "Encaja naturalmente con proyectos Next.js si aparecen tareas largas, colas o agentes en background.",
+          "benefit": "Podría resolver ejecución durable con menos infraestructura que sistemas más pesados.",
+          "caution": "Comparar con Inngest y soluciones nativas antes de agregar dependencia.",
+          "repository": "triggerdotdev/trigger.dev",
+          "sourceUrl": "https://github.com/triggerdotdev/trigger.dev",
+          "tags": [
+            "typescript",
+            "background-jobs",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-006",
+          "name": "Inngest",
+          "kind": "WORKFLOW_ENGINE",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Orquestación de funciones y workflows stateful para serverless, servidores y edge.",
+          "application": "Puede servir para eventos, jobs largos y automatizaciones de Vida/tiendas Next.js.",
+          "benefit": "Reduce código manual de retries, estado y coordinación de pasos.",
+          "caution": "Evaluar costo, lock-in y solapamiento con Trigger.dev antes de adoptar.",
+          "repository": "inngest/inngest",
+          "sourceUrl": "https://github.com/inngest/inngest",
+          "tags": [
+            "typescript",
+            "events",
+            "serverless"
+          ]
+        },
+        {
+          "id": "TL-007",
+          "name": "Kestra",
+          "kind": "WORKFLOW_ENGINE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Orquestador event-driven para pipelines y aplicaciones críticas.",
+          "application": "Referencia si aparecen flujos complejos de datos, scheduling o procesos empresariales.",
+          "benefit": "Aporta ideas de observabilidad y modelado declarativo de workflows.",
+          "caution": "Excesivo para necesidades actuales pequeñas.",
+          "repository": "kestra-io/kestra",
+          "sourceUrl": "https://github.com/kestra-io/kestra",
+          "tags": [
+            "orchestration",
+            "scheduling",
+            "data"
+          ]
+        },
+        {
+          "id": "TL-008",
+          "name": "Hatchet",
+          "kind": "WORKFLOW_ENGINE",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Motor para tareas en background, agentes y workflows durables.",
+          "application": "Candidato si necesitamos ejecución durable con SDKs y workers controlados.",
+          "benefit": "Puede simplificar colas, retries y concurrencia.",
+          "caution": "Validar madurez y necesidad real frente a Trigger.dev/Inngest.",
+          "repository": "hatchet-dev/hatchet",
+          "sourceUrl": "https://github.com/hatchet-dev/hatchet",
+          "tags": [
+            "background-jobs",
+            "agents",
+            "durable"
+          ]
+        },
+        {
+          "id": "TL-009",
+          "name": "Restate",
+          "kind": "WORKFLOW_ENGINE",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Runtime para servicios y workflows resilientes con estado durable.",
+          "application": "Muy útil como referencia de diseño para hacer operaciones reintentables y tolerantes a fallos.",
+          "benefit": "Puede inspirar patrones de idempotencia incluso si no se adopta.",
+          "caution": "No justificar infraestructura adicional sin fallos reales que resolver.",
+          "repository": "restatedev/restate",
+          "sourceUrl": "https://github.com/restatedev/restate",
+          "tags": [
+            "reliability",
+            "durable-execution"
+          ]
+        },
+        {
+          "id": "TL-010",
+          "name": "Prefect",
+          "kind": "DATA_ORCHESTRATION",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Framework Python para pipelines resilientes y orquestación de datos.",
+          "application": "Puede servir en futuros pipelines de ciencia de datos o Football Intelligence.",
+          "benefit": "Aporta scheduling, retries y observabilidad de pipelines Python.",
+          "caution": "No es prioridad para workflows web generales.",
+          "repository": "PrefectHQ/prefect",
+          "sourceUrl": "https://github.com/PrefectHQ/prefect",
+          "tags": [
+            "python",
+            "data-pipelines"
+          ]
+        },
+        {
+          "id": "TL-011",
+          "name": "Dagster",
+          "kind": "DATA_ORCHESTRATION",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Orquestación centrada en activos de datos y su observabilidad.",
+          "application": "Referencia para proyectos donde datasets y transformaciones se vuelvan activos de primera clase.",
+          "benefit": "Ayuda a razonar sobre lineage, dependencias y calidad de datos.",
+          "caution": "Tiene costo conceptual alto para proyectos chicos.",
+          "repository": "dagster-io/dagster",
+          "sourceUrl": "https://github.com/dagster-io/dagster",
+          "tags": [
+            "data-assets",
+            "lineage",
+            "pipelines"
+          ]
+        },
+        {
+          "id": "TL-012",
+          "name": "Node-RED",
+          "kind": "AUTOMATION_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Programación low-code orientada a eventos mediante nodos.",
+          "application": "Referencia para IoT, integraciones locales y prototipos rápidos.",
+          "benefit": "Puede resolver automatizaciones físicas/locales sin construir un backend completo.",
+          "caution": "Menos alineado al stack web actual que n8n/Windmill.",
+          "repository": "node-red/node-red",
+          "sourceUrl": "https://github.com/node-red/node-red",
+          "tags": [
+            "low-code",
+            "events",
+            "iot"
+          ]
+        },
+        {
+          "id": "TL-013",
+          "name": "OpenClaw",
+          "kind": "PERSONAL_AGENT_PLATFORM",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Asistente open source que corre en tus dispositivos y conecta modelos, herramientas y muchos canales de chat.",
+          "application": "Compararlo conceptualmente con PAS: gateway local, plugins, canales, credenciales y ejecución en dispositivos.",
+          "benefit": "Puede aportar ideas de arquitectura local-first, multi-canal y plugin system sin tener que reemplazar PAS.",
+          "caution": "Tiene acceso potencial a credenciales, chats y herramientas; cualquier prueba requiere threat model, aislamiento y mínimo privilegio.",
+          "repository": "openclaw/openclaw",
+          "sourceUrl": "https://github.com/openclaw/openclaw",
+          "tags": [
+            "personal-ai",
+            "local-first",
+            "agents",
+            "plugins"
+          ]
+        },
+        {
+          "id": "TL-014",
+          "name": "OpenAI Agents SDK",
+          "kind": "AGENT_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework liviano para construir workflows multi-agente en Python.",
+          "application": "Útil si un proyecto necesita agentes propios con handoffs, tools y trazas controladas.",
+          "benefit": "Reduce infraestructura artesanal para agentes OpenAI.",
+          "caution": "No hace falta para usar ChatGPT/Codex; sólo para construir un producto agente propio.",
+          "repository": "openai/openai-agents-python",
+          "sourceUrl": "https://github.com/openai/openai-agents-python",
+          "tags": [
+            "agents",
+            "python",
+            "multi-agent"
+          ]
+        },
+        {
+          "id": "TL-015",
+          "name": "LangGraph",
+          "kind": "AGENT_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework para agentes con estado y flujos explícitos orientados a resiliencia.",
+          "application": "Referencia cuando un agente necesite ciclos, checkpoints o control fino del flujo.",
+          "benefit": "Da una estructura más verificable que un loop agente ad hoc.",
+          "caution": "Evitarlo si una función/tool call simple resuelve el caso.",
+          "repository": "langchain-ai/langgraph",
+          "sourceUrl": "https://github.com/langchain-ai/langgraph",
+          "tags": [
+            "agents",
+            "state-machines",
+            "workflows"
+          ]
+        },
+        {
+          "id": "TL-016",
+          "name": "PydanticAI",
+          "kind": "AGENT_FRAMEWORK",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework Python tipado para aplicaciones y agentes de IA.",
+          "application": "Encaja con proyectos Python donde validación fuerte y contratos de salida importen.",
+          "benefit": "Puede reducir errores de integración al mantener tipos y validación end-to-end.",
+          "caution": "Comparar con Agents SDK antes de sumar otra abstracción.",
+          "repository": "pydantic/pydantic-ai",
+          "sourceUrl": "https://github.com/pydantic/pydantic-ai",
+          "tags": [
+            "python",
+            "agents",
+            "typed"
+          ]
+        },
+        {
+          "id": "TL-017",
+          "name": "Mastra",
+          "kind": "AGENT_FRAMEWORK",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework TypeScript para aplicaciones y agentes de IA.",
+          "application": "Candidato natural para experimentos agente dentro de Next.js/TypeScript.",
+          "benefit": "Evita cambiar de lenguaje sólo para orquestar agentes.",
+          "caution": "Evaluar madurez, observabilidad y lock-in frente a Vercel AI SDK/LangGraph.",
+          "repository": "mastra-ai/mastra",
+          "sourceUrl": "https://github.com/mastra-ai/mastra",
+          "tags": [
+            "typescript",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-018",
+          "name": "CrewAI",
+          "kind": "AGENT_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Framework para coordinar múltiples agentes con roles.",
+          "application": "Referencia para problemas realmente descomponibles en especialistas.",
+          "benefit": "Puede inspirar delegación y coordinación de tareas.",
+          "caution": "Multi-agente añade costo y errores; no usar si un agente fuerte alcanza.",
+          "repository": "crewAIInc/crewAI",
+          "sourceUrl": "https://github.com/crewAIInc/crewAI",
+          "tags": [
+            "multi-agent",
+            "orchestration"
+          ]
+        },
+        {
+          "id": "TL-019",
+          "name": "DSPy",
+          "kind": "AI_PROGRAMMING_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework para programar y optimizar pipelines con modelos en vez de ajustar prompts manualmente.",
+          "application": "Puede ser útil si un workflow LLM estable necesita optimización basada en métricas/evals.",
+          "benefit": "Permite tratar prompts/pipelines como algo optimizable y medible.",
+          "caution": "Necesita datasets/evals buenos; sin ellos agrega complejidad sin señal.",
+          "repository": "stanfordnlp/dspy",
+          "sourceUrl": "https://github.com/stanfordnlp/dspy",
+          "tags": [
+            "evals",
+            "optimization",
+            "llm"
+          ]
+        },
+        {
+          "id": "TL-020",
+          "name": "smolagents",
+          "kind": "AGENT_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Librería mínima de Hugging Face para agentes que pueden razonar y actuar con código.",
+          "application": "Buena referencia didáctica para entender un loop agente sin demasiada infraestructura.",
+          "benefit": "Ayuda a separar conceptos básicos de la complejidad de frameworks grandes.",
+          "caution": "No asumir que minimalismo equivale a producción segura.",
+          "repository": "huggingface/smolagents",
+          "sourceUrl": "https://github.com/huggingface/smolagents",
+          "tags": [
+            "agents",
+            "learning",
+            "python"
+          ]
+        },
+        {
+          "id": "TL-021",
+          "name": "OpenHands",
+          "kind": "CODING_AGENT",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma open source de agentes para desarrollo de software.",
+          "application": "Referencia/alternativa para comparar agentes repo-aware con Codex y Claude Code.",
+          "benefit": "Puede aportar ideas sobre sandboxes, ejecución y evaluación de agentes de código.",
+          "caution": "Alto solapamiento con herramientas actuales; sólo evaluar con una tarea comparable.",
+          "repository": "OpenHands/OpenHands",
+          "sourceUrl": "https://github.com/OpenHands/OpenHands",
+          "tags": [
+            "coding-agent",
+            "sandbox"
+          ]
+        },
+        {
+          "id": "TL-022",
+          "name": "OpenCode",
+          "kind": "CODING_AGENT",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Agente de código open source orientado al terminal.",
+          "application": "Alternativa para comparar coste, modelos y control local frente a Codex/Claude Code.",
+          "benefit": "Puede servir como ruta de contingencia o laboratorio de agentes de código.",
+          "caution": "No sumar otro agente diario sin evidencia de mejora.",
+          "repository": "anomalyco/opencode",
+          "sourceUrl": "https://github.com/anomalyco/opencode",
+          "tags": [
+            "coding-agent",
+            "terminal"
+          ]
+        },
+        {
+          "id": "TL-023",
+          "name": "Aider",
+          "kind": "CODING_AGENT",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Pair programmer de terminal que edita repositorios con modelos.",
+          "application": "Referencia madura para workflows de edición, diffs y uso de modelos en código.",
+          "benefit": "Puede aportar patrones para commits, contexto y evaluación de cambios.",
+          "caution": "Solapa fuertemente con Codex/Claude Code.",
+          "repository": "Aider-AI/aider",
+          "sourceUrl": "https://github.com/Aider-AI/aider",
+          "tags": [
+            "coding-agent",
+            "git"
+          ]
+        },
+        {
+          "id": "TL-024",
+          "name": "Browser Use",
+          "kind": "BROWSER_AGENT",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework open source para que agentes controlen navegadores.",
+          "application": "Puede servir cuando Work/Computer Use no alcance o necesitemos una automatización programática reproducible.",
+          "benefit": "Abre una ruta para automatizar web con modelos y navegador controlado.",
+          "caution": "Web + credenciales + prompt injection es una frontera de alto riesgo; sandbox y permisos mínimos obligatorios.",
+          "repository": "browser-use/browser-use",
+          "sourceUrl": "https://github.com/browser-use/browser-use",
+          "tags": [
+            "browser",
+            "agents",
+            "automation"
+          ]
+        },
+        {
+          "id": "TL-025",
+          "name": "Stagehand",
+          "kind": "BROWSER_AGENT",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "SDK para agentes de navegador construido sobre APIs estilo Playwright.",
+          "application": "Puede combinar determinismo de Playwright con acciones/extracción semántica para flujos web.",
+          "benefit": "Puede ser más mantenible que selectores frágiles en ciertas automatizaciones.",
+          "caution": "Mantener fallback determinista y no confiar decisiones sensibles al modelo sin verificación.",
+          "repository": "browserbase/stagehand",
+          "sourceUrl": "https://github.com/browserbase/stagehand",
+          "tags": [
+            "browser",
+            "playwright",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-026",
+          "name": "Skyvern",
+          "kind": "BROWSER_AGENT",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Automatización de navegador con LLMs y visión, además de SDK compatible con Playwright.",
+          "application": "Candidato para sitios variables donde scripts DOM clásicos sean demasiado frágiles.",
+          "benefit": "Puede automatizar formularios y workflows web sin customizar cada sitio.",
+          "caution": "Licencia y uso de datos/telemetría deben revisarse; cualquier credencial exige aislamiento.",
+          "repository": "Skyvern-AI/skyvern",
+          "sourceUrl": "https://github.com/Skyvern-AI/skyvern",
+          "tags": [
+            "browser",
+            "vision",
+            "automation"
+          ]
+        },
+        {
+          "id": "TL-027",
+          "name": "Composio",
+          "kind": "AGENT_TOOL_PLATFORM",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Capa de toolkits, auth y contexto para conectar agentes con muchas aplicaciones.",
+          "application": "Puede reducir el trabajo de OAuth/conectores si construimos agentes propios fuera de ChatGPT plugins.",
+          "benefit": "Ahorra integración repetida y centraliza autenticación de herramientas.",
+          "caution": "Introduce un tercero en el límite de credenciales; revisar permisos, datos y costo.",
+          "repository": "ComposioHQ/composio",
+          "sourceUrl": "https://github.com/ComposioHQ/composio",
+          "tags": [
+            "tools",
+            "auth",
+            "integrations"
+          ]
+        },
+        {
+          "id": "TL-028",
+          "name": "MCP Reference Servers",
+          "kind": "PROTOCOL_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Repos oficiales de servidores de referencia para Model Context Protocol.",
+          "application": "Usarlos como ejemplos cuando construyamos o auditemos integraciones MCP del PAS.",
+          "benefit": "Evita inventar contratos y patrones de servidor desde cero.",
+          "caution": "Los servidores de referencia no implican que cada integración sea segura o necesaria.",
+          "repository": "modelcontextprotocol/servers",
+          "sourceUrl": "https://github.com/modelcontextprotocol/servers",
+          "tags": [
+            "mcp",
+            "reference",
+            "tools"
+          ]
+        },
+        {
+          "id": "TL-029",
+          "name": "MCP SDKs oficiales",
+          "kind": "PROTOCOL_SDK",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "SDKs oficiales de Model Context Protocol para TypeScript y Python.",
+          "application": "Base preferida si alguna integración propia del PAS necesita hablar MCP en esos lenguajes.",
+          "benefit": "Reduce implementación casera del protocolo y mantiene compatibilidad con la especificación.",
+          "caution": "Autorización, confianza del servidor y alcance de tools siguen necesitando AGENT_SECURITY.",
+          "repository": "modelcontextprotocol/typescript-sdk",
+          "sourceUrl": "https://github.com/modelcontextprotocol/typescript-sdk",
+          "tags": [
+            "mcp",
+            "typescript",
+            "python"
+          ]
+        },
+        {
+          "id": "TL-030",
+          "name": "Vercel AI SDK",
+          "kind": "AI_APP_SDK",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Toolkit TypeScript para construir interfaces y aplicaciones con IA.",
+          "application": "Muy alineado con Next.js: chat, streaming, tools y agentes dentro de productos propios.",
+          "benefit": "Podría acelerar features IA sin armar desde cero transporte, streaming y UI.",
+          "caution": "No confundir facilidad de integración con evaluación/calidad del sistema.",
+          "repository": "vercel/ai",
+          "sourceUrl": "https://github.com/vercel/ai",
+          "tags": [
+            "nextjs",
+            "typescript",
+            "ai-sdk"
+          ]
+        },
+        {
+          "id": "TL-031",
+          "name": "LiteLLM",
+          "kind": "AI_GATEWAY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Gateway/SDK para exponer muchos proveedores de modelos detrás de APIs compatibles, con tracking y routing.",
+          "application": "Útil si un producto propio necesita fallback entre proveedores, control de costo o políticas centralizadas.",
+          "benefit": "Reduce código proveedor-específico y facilita cambiar de modelo.",
+          "caution": "Añade una capa crítica en el camino de todas las llamadas; requiere observabilidad y secretos bien gestionados.",
+          "repository": "BerriAI/litellm",
+          "sourceUrl": "https://github.com/BerriAI/litellm",
+          "tags": [
+            "gateway",
+            "llm",
+            "routing"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AI_EVALS_MEMORY_KNOWLEDGE",
+      "label": "Evals, observabilidad, memoria y conocimiento de IA",
+      "entries": [
+        {
+          "id": "TL-032",
+          "name": "Langfuse",
+          "kind": "AI_OBSERVABILITY",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Plataforma open source para tracing, evaluación y observabilidad de aplicaciones LLM.",
+          "application": "Usarla como candidata cuando Vida/PAS tenga un flujo LLM propio que necesite entender calidad, costo, latencia y fallos.",
+          "benefit": "Podría convertir experimentos de IA en sistemas medibles en vez de depender de impresiones.",
+          "caution": "Revisar qué prompts/datos se registran y dónde se almacenan antes de instrumentar producción.",
+          "repository": "langfuse/langfuse",
+          "sourceUrl": "https://github.com/langfuse/langfuse",
+          "tags": [
+            "llm",
+            "observability",
+            "evals"
+          ]
+        },
+        {
+          "id": "TL-033",
+          "name": "Arize Phoenix",
+          "kind": "AI_OBSERVABILITY",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Toolkit open source de observabilidad y evaluación para sistemas de IA y agentes.",
+          "application": "Puede servir para analizar traces, retrieval, errores y comportamiento de agentes en laboratorios propios.",
+          "benefit": "Aporta debugging específico de IA y soporte alrededor de OpenTelemetry.",
+          "caution": "Evitar duplicarlo con Langfuse/OpenLIT sin una comparación real.",
+          "repository": "Arize-ai/phoenix",
+          "sourceUrl": "https://github.com/Arize-ai/phoenix",
+          "tags": [
+            "llm",
+            "observability",
+            "otel"
+          ]
+        },
+        {
+          "id": "TL-034",
+          "name": "Promptfoo",
+          "kind": "AI_EVALS",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Framework para probar prompts, modelos y agentes con evaluaciones reproducibles y red teaming.",
+          "application": "Encaja directo con el PAS cuando necesitemos comparar modelos/rutas o verificar que un cambio no rompa comportamiento.",
+          "benefit": "Puede convertir decisiones de herramientas/modelos en experimentos repetibles y automatizados.",
+          "caution": "La calidad depende de buenos casos de prueba; un score pobremente diseñado puede engañar.",
+          "repository": "promptfoo/promptfoo",
+          "sourceUrl": "https://github.com/promptfoo/promptfoo",
+          "tags": [
+            "evals",
+            "red-team",
+            "testing"
+          ]
+        },
+        {
+          "id": "TL-035",
+          "name": "DeepEval",
+          "kind": "AI_EVALS",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Framework Python para evaluaciones de sistemas LLM con métricas y tests.",
+          "application": "Útil en futuros labs de RAG/agentes Python y para regresiones de calidad.",
+          "benefit": "Permite integrar evaluación de IA al flujo normal de tests.",
+          "caution": "No adoptar junto a múltiples frameworks de evals sin elegir uno por caso.",
+          "repository": "confident-ai/deepeval",
+          "sourceUrl": "https://github.com/confident-ai/deepeval",
+          "tags": [
+            "evals",
+            "python",
+            "testing"
+          ]
+        },
+        {
+          "id": "TL-036",
+          "name": "Ragas",
+          "kind": "AI_EVALS",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Toolkit de evaluación orientado a aplicaciones LLM y RAG.",
+          "application": "Referencia cuando implementemos retrieval y necesitemos medir calidad de respuestas y contexto.",
+          "benefit": "Evita evaluar RAG sólo leyendo ejemplos manuales.",
+          "caution": "Las métricas automáticas necesitan validación humana y datasets representativos.",
+          "repository": "vibrantlabsai/ragas",
+          "sourceUrl": "https://github.com/vibrantlabsai/ragas",
+          "tags": [
+            "rag",
+            "evals"
+          ]
+        },
+        {
+          "id": "TL-037",
+          "name": "OpenLLMetry",
+          "kind": "AI_OBSERVABILITY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Instrumentación basada en OpenTelemetry para aplicaciones LLM.",
+          "application": "Puede acelerar la instrumentación si OpenTelemetry entra en un proyecto con IA.",
+          "benefit": "Reutiliza un estándar ya relevante en tu radar en vez de inventar telemetry específica.",
+          "caution": "Revisar soporte real de cada proveedor y evitar registrar contenido sensible.",
+          "repository": "traceloop/openllmetry",
+          "sourceUrl": "https://github.com/traceloop/openllmetry",
+          "tags": [
+            "otel",
+            "llm",
+            "tracing"
+          ]
+        },
+        {
+          "id": "TL-038",
+          "name": "Helicone",
+          "kind": "AI_OBSERVABILITY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Gateway y observabilidad para llamadas a modelos.",
+          "application": "Podría servir si una app propia necesita centralizar logs, costos, caching y análisis de requests LLM.",
+          "benefit": "Reduce trabajo de construir tracking de uso/modelos desde cero.",
+          "caution": "Introduce una capa en el tráfico del modelo; revisar privacidad, latencia y dependencia.",
+          "repository": "Helicone/helicone",
+          "sourceUrl": "https://github.com/Helicone/helicone",
+          "tags": [
+            "llm",
+            "gateway",
+            "observability"
+          ]
+        },
+        {
+          "id": "TL-039",
+          "name": "OpenLIT",
+          "kind": "AI_OBSERVABILITY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Observabilidad open source para aplicaciones generativas con integración OpenTelemetry.",
+          "application": "Alternativa a evaluar si buscamos una ruta OTel-first para agentes/LLMs.",
+          "benefit": "Puede unificar traces, métricas y costos con estándares abiertos.",
+          "caution": "No sumar observabilidad duplicada; elegir una sola ruta después de un lab.",
+          "repository": "openlit/openlit",
+          "sourceUrl": "https://github.com/openlit/openlit",
+          "tags": [
+            "otel",
+            "llm",
+            "observability"
+          ]
+        },
+        {
+          "id": "TL-040",
+          "name": "Evidently",
+          "kind": "AI_EVALS",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Herramientas open source para evaluación, testing y monitoreo de sistemas ML/AI.",
+          "application": "Puede servir si Football Intelligence o un proyecto de datos necesita drift, calidad o evaluación continua.",
+          "benefit": "Amplía el concepto de QA desde software hacia datos/modelos.",
+          "caution": "No es prioridad si no hay modelos o datasets operativos que monitorear.",
+          "repository": "EvidentlyAI/evidently",
+          "sourceUrl": "https://github.com/EvidentlyAI/evidently",
+          "tags": [
+            "ml",
+            "data-quality",
+            "monitoring"
+          ]
+        },
+        {
+          "id": "TL-041",
+          "name": "Mem0",
+          "kind": "AI_MEMORY",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Capa de memoria para aplicaciones y agentes de IA.",
+          "application": "Referencia/candidato para evitar reimplementar memoria semántica cuando un agente propio necesite recordar preferencias o contexto.",
+          "benefit": "Podría reducir tokens y mejorar continuidad en aplicaciones de IA propias.",
+          "caution": "La memoria puede acumular datos sensibles o incorrectos; requiere reglas de retención, corrección y privacidad.",
+          "repository": "mem0ai/mem0",
+          "sourceUrl": "https://github.com/mem0ai/mem0",
+          "tags": [
+            "memory",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-042",
+          "name": "Graphiti",
+          "kind": "AI_MEMORY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework de memoria temporal en grafo para agentes y sistemas de IA.",
+          "application": "Puede inspirar una memoria más explícita y conectada cuando relaciones/tiempo sean importantes.",
+          "benefit": "Aporta un modelo para recordar entidades y cambios sin reducir todo a embeddings.",
+          "caution": "Mayor complejidad operacional que memoria simple; usar sólo si el problema lo exige.",
+          "repository": "getzep/graphiti",
+          "sourceUrl": "https://github.com/getzep/graphiti",
+          "tags": [
+            "memory",
+            "knowledge-graph",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-043",
+          "name": "Microsoft GraphRAG",
+          "kind": "RAG_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Implementación de referencia de RAG basado en grafos para conectar entidades y comunidades.",
+          "application": "Útil como referencia si una biblioteca de conocimiento compleja necesita responder sobre relaciones globales.",
+          "benefit": "Aporta ideas de extracción, grafos y resúmenes jerárquicos.",
+          "caution": "Puede ser caro y complejo; no usar donde vector search simple alcanza.",
+          "repository": "microsoft/graphrag",
+          "sourceUrl": "https://github.com/microsoft/graphrag",
+          "tags": [
+            "rag",
+            "knowledge-graph"
+          ]
+        },
+        {
+          "id": "TL-044",
+          "name": "LightRAG",
+          "kind": "RAG_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Enfoque ligero de RAG con estructura de grafo y recuperación híbrida.",
+          "application": "Referencia para comparar alternativas a RAG vectorial tradicional.",
+          "benefit": "Puede ofrecer recuperación relacional con una implementación más acotada.",
+          "caution": "Validar calidad en tus propios documentos antes de inferir ventaja.",
+          "repository": "HKUDS/LightRAG",
+          "sourceUrl": "https://github.com/HKUDS/LightRAG",
+          "tags": [
+            "rag",
+            "graph"
+          ]
+        },
+        {
+          "id": "TL-045",
+          "name": "Letta",
+          "kind": "AI_MEMORY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework para agentes stateful con memoria persistente.",
+          "application": "Puede servir como referencia si se construyen asistentes propios que mantienen estado a largo plazo.",
+          "benefit": "Muestra patrones de memoria y agentes persistentes más allá de un chat aislado.",
+          "caution": "Persistencia de estado aumenta superficie de seguridad y gobernanza.",
+          "repository": "letta-ai/letta",
+          "sourceUrl": "https://github.com/letta-ai/letta",
+          "tags": [
+            "memory",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-046",
+          "name": "LlamaIndex",
+          "kind": "RAG_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework para conectar datos, índices, retrieval y agentes alrededor de LLMs.",
+          "application": "Puede acelerar experimentos de RAG sobre documentación o conocimiento propio.",
+          "benefit": "Trae muchos conectores y abstracciones ya resueltas.",
+          "caution": "Evitar framework grande si sólo hace falta una consulta vectorial simple.",
+          "repository": "run-llama/llama_index",
+          "sourceUrl": "https://github.com/run-llama/llama_index",
+          "tags": [
+            "rag",
+            "data",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-047",
+          "name": "Haystack",
+          "kind": "RAG_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework Python modular para pipelines RAG, búsqueda y agentes.",
+          "application": "Alternativa sólida para proyectos Python con retrieval y componentes intercambiables.",
+          "benefit": "Ayuda a mantener pipelines explícitos y testeables.",
+          "caution": "Comparar con LlamaIndex y código propio antes de adoptar.",
+          "repository": "deepset-ai/haystack",
+          "sourceUrl": "https://github.com/deepset-ai/haystack",
+          "tags": [
+            "rag",
+            "python",
+            "pipelines"
+          ]
+        },
+        {
+          "id": "TL-048",
+          "name": "Dify",
+          "kind": "AI_APP_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma open source para crear y operar aplicaciones LLM y workflows.",
+          "application": "Puede ser prototipo rápido para validar una idea de IA antes de construir toda la app.",
+          "benefit": "Acelera iteración y muestra patrones de gestión de prompts/workflows/datasets.",
+          "caution": "No reemplaza evaluación técnica del backend ni las reglas de seguridad del PAS.",
+          "repository": "langgenius/dify",
+          "sourceUrl": "https://github.com/langgenius/dify",
+          "tags": [
+            "llm-apps",
+            "workflows",
+            "rag"
+          ]
+        },
+        {
+          "id": "TL-049",
+          "name": "RAGFlow",
+          "kind": "RAG_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma open source enfocada en RAG y agentes sobre documentos.",
+          "application": "Candidato para prototipos documentales grandes donde parsing/retrieval listo para usar ahorre tiempo.",
+          "benefit": "Puede reducir trabajo de ingestion y pipelines documentales.",
+          "caution": "Revisar recursos, calidad de parsing y privacidad de documentos.",
+          "repository": "infiniflow/ragflow",
+          "sourceUrl": "https://github.com/infiniflow/ragflow",
+          "tags": [
+            "rag",
+            "documents",
+            "agents"
+          ]
+        },
+        {
+          "id": "TL-050",
+          "name": "Flowise",
+          "kind": "AI_APP_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Constructor visual open source para flows de agentes y LLMs.",
+          "application": "Referencia/prototipo para explorar un workflow IA rápidamente.",
+          "benefit": "Hace visibles grafos de herramientas/modelos para entender flujos complejos.",
+          "caution": "No convertir prototipo visual en producción sin tests y gobernanza.",
+          "repository": "FlowiseAI/Flowise",
+          "sourceUrl": "https://github.com/FlowiseAI/Flowise",
+          "tags": [
+            "visual",
+            "agents",
+            "workflows"
+          ]
+        },
+        {
+          "id": "TL-051",
+          "name": "Langflow",
+          "kind": "AI_APP_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Constructor visual de aplicaciones y agentes de IA.",
+          "application": "Similar a Flowise: útil para experimentar y comunicar flujos.",
+          "benefit": "Puede acelerar POCs y enseñar arquitectura de agentes.",
+          "caution": "Evitar solapamiento; elegir sólo si un caso real lo justifica.",
+          "repository": "langflow-ai/langflow",
+          "sourceUrl": "https://github.com/langflow-ai/langflow",
+          "tags": [
+            "visual",
+            "agents",
+            "workflows"
+          ]
+        },
+        {
+          "id": "TL-052",
+          "name": "AnythingLLM",
+          "kind": "LOCAL_AI_APP",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Aplicación open source para trabajar con documentos, modelos y agentes en un entorno propio.",
+          "application": "Referencia para experiencias RAG/local-first que podríamos replicar en productos personales.",
+          "benefit": "Permite estudiar UX de conocimiento personal sin construir todo desde cero.",
+          "caution": "No asumir que self-hosting elimina riesgos de datos/modelos.",
+          "repository": "Mintplex-Labs/anything-llm",
+          "sourceUrl": "https://github.com/Mintplex-Labs/anything-llm",
+          "tags": [
+            "local-ai",
+            "rag",
+            "ux"
+          ]
+        },
+        {
+          "id": "TL-053",
+          "name": "Open WebUI",
+          "kind": "LOCAL_AI_APP",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Interfaz open source extensible para modelos locales y remotos.",
+          "application": "Buena referencia de UX y administración multi-modelo.",
+          "benefit": "Puede inspirar interfaces de modelos/herramientas y experimentos locales.",
+          "caution": "No hace falta duplicar ChatGPT salvo un caso local/privacy concreto.",
+          "repository": "open-webui/open-webui",
+          "sourceUrl": "https://github.com/open-webui/open-webui",
+          "tags": [
+            "local-ai",
+            "ui",
+            "models"
+          ]
+        },
+        {
+          "id": "TL-054",
+          "name": "Qdrant",
+          "kind": "VECTOR_DATABASE",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Base vectorial open source orientada a búsqueda semántica.",
+          "application": "Candidato si pgvector deja de alcanzar por escala/filtros/operación.",
+          "benefit": "Puede ofrecer búsquedas vectoriales especializadas y APIs listas.",
+          "caution": "No introducir otra base si PostgreSQL + pgvector resuelve el problema.",
+          "repository": "qdrant/qdrant",
+          "sourceUrl": "https://github.com/qdrant/qdrant",
+          "tags": [
+            "vector-db",
+            "rag"
+          ]
+        },
+        {
+          "id": "TL-055",
+          "name": "pgvector",
+          "kind": "VECTOR_EXTENSION",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Extensión de PostgreSQL para almacenar y buscar vectores.",
+          "application": "Encaja especialmente bien porque ya usás PostgreSQL/Supabase; sería la primera opción para RAG pequeño/medio.",
+          "benefit": "Permite sumar búsqueda semántica sin operar otra base.",
+          "caution": "Medir índices, latencia y tamaño antes de escalar.",
+          "repository": "pgvector/pgvector",
+          "sourceUrl": "https://github.com/pgvector/pgvector",
+          "tags": [
+            "postgres",
+            "vector",
+            "rag"
+          ]
+        },
+        {
+          "id": "TL-056",
+          "name": "LanceDB",
+          "kind": "VECTOR_DATABASE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Base orientada a datos multimodales y vectores, embebible/cloud.",
+          "application": "Referencia para proyectos con datasets de imágenes/audio/vectoriales.",
+          "benefit": "Puede simplificar pipelines multimodales o locales.",
+          "caution": "Menos alineada al stack actual que PostgreSQL para casos generales.",
+          "repository": "lancedb/lancedb",
+          "sourceUrl": "https://github.com/lancedb/lancedb",
+          "tags": [
+            "vector-db",
+            "multimodal"
+          ]
+        },
+        {
+          "id": "TL-057",
+          "name": "Weaviate",
+          "kind": "VECTOR_DATABASE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Base vectorial open source con búsqueda semántica/híbrida.",
+          "application": "Alternativa de infraestructura cuando se necesite búsqueda vectorial especializada.",
+          "benefit": "Trae capacidades listas de vector search y filtros.",
+          "caution": "Otra infraestructura a operar; no usar sin necesidad de escala/capacidad.",
+          "repository": "weaviate/weaviate",
+          "sourceUrl": "https://github.com/weaviate/weaviate",
+          "tags": [
+            "vector-db",
+            "rag"
+          ]
+        },
+        {
+          "id": "TL-058",
+          "name": "Milvus",
+          "kind": "VECTOR_DATABASE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Base vectorial distribuida orientada a gran escala.",
+          "application": "Referencia para entender cómo escalar búsquedas vectoriales grandes.",
+          "benefit": "Puede ser útil en un futuro dataset masivo.",
+          "caution": "Overkill absoluto para los volúmenes actuales.",
+          "repository": "milvus-io/milvus",
+          "sourceUrl": "https://github.com/milvus-io/milvus",
+          "tags": [
+            "vector-db",
+            "scale"
+          ]
+        },
+        {
+          "id": "TL-059",
+          "name": "Ollama",
+          "kind": "LOCAL_MODELS",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Runtime simple para ejecutar modelos locales.",
+          "application": "Puede servir en pruebas de privacidad, offline, costo o modelos especializados en tu PC.",
+          "benefit": "Da una ruta local sin depender siempre de APIs externas.",
+          "caution": "Hardware, calidad y mantenimiento pueden hacer peor el costo total que una API.",
+          "repository": "ollama/ollama",
+          "sourceUrl": "https://github.com/ollama/ollama",
+          "tags": [
+            "local-models",
+            "privacy",
+            "offline"
+          ]
+        },
+        {
+          "id": "TL-060",
+          "name": "Semantic Kernel",
+          "kind": "AGENT_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "SDK de Microsoft para integrar modelos, plugins, procesos y agentes.",
+          "application": "Referencia para arquitectura de aplicaciones IA empresariales.",
+          "benefit": "Aporta patrones de plugins/orquestación e integración .NET/Python/Java.",
+          "caution": "Menos alineado a tu stack TypeScript actual salvo proyecto específico.",
+          "repository": "microsoft/semantic-kernel",
+          "sourceUrl": "https://github.com/microsoft/semantic-kernel",
+          "tags": [
+            "agents",
+            "plugins"
+          ]
+        },
+        {
+          "id": "TL-061",
+          "name": "Portkey AI Gateway",
+          "kind": "AI_GATEWAY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Gateway open source para enrutar, observar y controlar llamadas a proveedores de IA.",
+          "application": "Candidato si una app usa varios proveedores y necesita políticas centralizadas.",
+          "benefit": "Puede reducir código repetido de retries, fallbacks y observabilidad.",
+          "caution": "Revisar cómo se manejan logs, secretos y dependencia de gateway.",
+          "repository": "Portkey-AI/gateway",
+          "sourceUrl": "https://github.com/Portkey-AI/gateway",
+          "tags": [
+            "gateway",
+            "routing",
+            "llm"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SECURITY_PRIVACY_SUPPLY_CHAIN",
+      "label": "Seguridad, privacidad y supply chain",
+      "entries": [
+        {
+          "id": "TL-062",
+          "name": "Semgrep",
+          "kind": "SECURITY_SCANNER",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Análisis estático con reglas para detectar patrones inseguros y errores en código.",
+          "application": "Puede agregarse a CI de proyectos importantes para detectar clases de fallos antes del merge.",
+          "benefit": "Automatiza controles repetibles de seguridad sin depender sólo de revisión manual.",
+          "caution": "Las reglas pueden dar falsos positivos/negativos; no sustituye threat modeling ni revisión humana.",
+          "repository": "semgrep/semgrep",
+          "sourceUrl": "https://github.com/semgrep/semgrep",
+          "tags": [
+            "sast",
+            "ci",
+            "security"
+          ]
+        },
+        {
+          "id": "TL-063",
+          "name": "Trivy",
+          "kind": "SECURITY_SCANNER",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Escáner de vulnerabilidades, configuraciones, secretos e infraestructura.",
+          "application": "Útil para revisar dependencias, imágenes y configuración cuando haya contenedores o despliegues más complejos.",
+          "benefit": "Da un control amplio con poco esfuerzo y puede entrar en CI.",
+          "caution": "Los findings necesitan triage; no bloquear todo indiscriminadamente.",
+          "repository": "aquasecurity/trivy",
+          "sourceUrl": "https://github.com/aquasecurity/trivy",
+          "tags": [
+            "vulnerabilities",
+            "containers",
+            "ci"
+          ]
+        },
+        {
+          "id": "TL-064",
+          "name": "Gitleaks",
+          "kind": "SECRET_SCANNER",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Detector de secretos y credenciales expuestas en repositorios e historial Git.",
+          "application": "Encaja en todos los repos importantes como guardrail preventivo.",
+          "benefit": "Reduce el riesgo de subir tokens/keys por error.",
+          "caution": "Un match no prueba exposición real; igualmente cualquier secreto detectado debe rotarse si fue publicado.",
+          "repository": "gitleaks/gitleaks",
+          "sourceUrl": "https://github.com/gitleaks/gitleaks",
+          "tags": [
+            "secrets",
+            "git",
+            "ci"
+          ]
+        },
+        {
+          "id": "TL-065",
+          "name": "OSV-Scanner",
+          "kind": "DEPENDENCY_SECURITY",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Escáner de vulnerabilidades de dependencias basado en OSV.",
+          "application": "Puede complementar npm audit y revisar ecosistemas distintos con una fuente común.",
+          "benefit": "Aporta una segunda señal de vulnerabilidades conocida y automatizable.",
+          "caution": "No convertir CVEs sin contexto en cambios automáticos destructivos.",
+          "repository": "google/osv-scanner",
+          "sourceUrl": "https://github.com/google/osv-scanner",
+          "tags": [
+            "dependencies",
+            "vulnerabilities"
+          ]
+        },
+        {
+          "id": "TL-066",
+          "name": "OpenSSF Scorecard",
+          "kind": "SUPPLY_CHAIN_SECURITY",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Chequeos automatizados de prácticas de seguridad de repositorios open source.",
+          "application": "Puede ayudar a decidir si un repo candidato merece confianza antes de incorporarlo a proyectos.",
+          "benefit": "Agrega evidencia sobre mantenimiento, branch protection, releases y supply chain.",
+          "caution": "El score no es una garantía de seguridad; usarlo como señal, no como sentencia.",
+          "repository": "ossf/scorecard",
+          "sourceUrl": "https://github.com/ossf/scorecard",
+          "tags": [
+            "supply-chain",
+            "opensource",
+            "security"
+          ]
+        },
+        {
+          "id": "TL-067",
+          "name": "OWASP ZAP",
+          "kind": "WEB_SECURITY_TESTING",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Proxy y scanner de seguridad para aplicaciones web.",
+          "application": "Útil en auditorías controladas de webs propias antes de producción o cambios sensibles.",
+          "benefit": "Permite descubrir clases de vulnerabilidades web de forma automatizada y exploratoria.",
+          "caution": "Sólo usar contra sistemas propios/autorizados y revisar falsos positivos.",
+          "repository": "zaproxy/zaproxy",
+          "sourceUrl": "https://github.com/zaproxy/zaproxy",
+          "tags": [
+            "web-security",
+            "dast",
+            "testing"
+          ]
+        },
+        {
+          "id": "TL-068",
+          "name": "OWASP Cheat Sheet Series",
+          "kind": "SECURITY_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Colección mantenida de guías prácticas para controles de seguridad concretos.",
+          "application": "Usarla como referencia al implementar auth, sesiones, uploads, headers, secrets y APIs.",
+          "benefit": "Evita inventar checklists de seguridad desde cero.",
+          "caution": "Aplicar sólo las hojas relevantes al contexto; no copiar controles mecánicamente.",
+          "repository": "OWASP/CheatSheetSeries",
+          "sourceUrl": "https://github.com/OWASP/CheatSheetSeries",
+          "tags": [
+            "security",
+            "reference",
+            "best-practices"
+          ]
+        },
+        {
+          "id": "TL-069",
+          "name": "OWASP ASVS",
+          "kind": "SECURITY_STANDARD",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Estándar de requisitos verificables para seguridad de aplicaciones.",
+          "application": "Puede convertirse en checklist de auditoría para Vida, tiendas o software con datos sensibles.",
+          "benefit": "Da un marco estructurado para saber qué verificar y a qué profundidad.",
+          "caution": "No hace falta cumplir el nivel máximo en todo proyecto; calibrar según riesgo.",
+          "repository": "OWASP/ASVS",
+          "sourceUrl": "https://github.com/OWASP/ASVS",
+          "tags": [
+            "security",
+            "verification",
+            "standard"
+          ]
+        },
+        {
+          "id": "TL-070",
+          "name": "OWASP Web Security Testing Guide",
+          "kind": "SECURITY_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Guía metodológica para pruebas de seguridad web.",
+          "application": "Referencia cuando se haga una revisión de seguridad más profunda o se diseñen evals propias.",
+          "benefit": "Aporta cobertura sistemática y casos de prueba.",
+          "caution": "Es extensa; recuperar sólo la sección relevante al problema.",
+          "repository": "OWASP/wstg",
+          "sourceUrl": "https://github.com/OWASP/wstg",
+          "tags": [
+            "web-security",
+            "testing",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-071",
+          "name": "OWASP API Security",
+          "kind": "SECURITY_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Material oficial centrado en riesgos y controles de APIs.",
+          "application": "Aplicable a Supabase, APIs Next.js, webhooks e integraciones externas.",
+          "benefit": "Ayuda a detectar autorizaciones rotas, exposición de objetos y abuso de endpoints.",
+          "caution": "Debe complementarse con threat model específico de cada sistema.",
+          "repository": "OWASP/API-Security",
+          "sourceUrl": "https://github.com/OWASP/API-Security",
+          "tags": [
+            "api",
+            "security",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-072",
+          "name": "OWASP LLM Top 10",
+          "kind": "AI_SECURITY_REFERENCE",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Proyecto OWASP sobre riesgos frecuentes de aplicaciones con LLM y agentes.",
+          "application": "Debe ser referencia obligatoria al construir RAG, agentes, tool use o automatizaciones con datos externos.",
+          "benefit": "Aporta amenazas como prompt injection, tool abuse y fuga de datos al diseño del PAS.",
+          "caution": "Es una taxonomía, no una solución; cada amenaza necesita mitigaciones verificadas.",
+          "repository": "OWASP/www-project-top-10-for-large-language-model-applications",
+          "sourceUrl": "https://github.com/OWASP/www-project-top-10-for-large-language-model-applications",
+          "tags": [
+            "llm-security",
+            "agents",
+            "owasp"
+          ]
+        },
+        {
+          "id": "TL-073",
+          "name": "OWASP NodeGoat",
+          "kind": "SECURITY_TRAINING_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Aplicación deliberadamente vulnerable para aprender fallos de seguridad en Node.js.",
+          "application": "Puede servir para prácticas cortas de seguridad cuando quieras fortalecer criterio real.",
+          "benefit": "Permite aprender explotando/corrigiendo ejemplos en vez de sólo leer teoría.",
+          "caution": "No reutilizar código vulnerable en proyectos reales.",
+          "repository": "OWASP/NodeGoat",
+          "sourceUrl": "https://github.com/OWASP/NodeGoat",
+          "tags": [
+            "nodejs",
+            "training",
+            "security"
+          ]
+        },
+        {
+          "id": "TL-074",
+          "name": "OWASP Juice Shop",
+          "kind": "SECURITY_TRAINING_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Aplicación vulnerable moderna para entrenamiento de seguridad web.",
+          "application": "Útil para practicar detección y mitigación en un entorno seguro.",
+          "benefit": "Convierte conceptos de seguridad web en experiencia práctica.",
+          "caution": "Debe correr aislada; está diseñada para ser insegura.",
+          "repository": "juice-shop/juice-shop",
+          "sourceUrl": "https://github.com/juice-shop/juice-shop",
+          "tags": [
+            "training",
+            "web-security"
+          ]
+        },
+        {
+          "id": "TL-075",
+          "name": "Sigstore Cosign",
+          "kind": "SUPPLY_CHAIN_SECURITY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Herramienta para firmar y verificar artefactos e imágenes de software.",
+          "application": "Relevante si empezamos a distribuir imágenes/artefactos donde la procedencia sea material.",
+          "benefit": "Mejora la verificación de supply chain y releases.",
+          "caution": "Añade gestión de identidad/políticas; no es necesario para cada proyecto chico.",
+          "repository": "sigstore/cosign",
+          "sourceUrl": "https://github.com/sigstore/cosign",
+          "tags": [
+            "supply-chain",
+            "signing"
+          ]
+        },
+        {
+          "id": "TL-076",
+          "name": "SOPS",
+          "kind": "SECRETS_MANAGEMENT",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Herramienta para cifrar secretos dentro de archivos versionados.",
+          "application": "Puede servir si algún proyecto necesita configuración cifrada en Git sin un gestor externo completo.",
+          "benefit": "Permite workflows reproducibles manteniendo secretos cifrados.",
+          "caution": "Las claves maestras y permisos siguen siendo críticos; cifrado no elimina el riesgo de mal diseño.",
+          "repository": "getsops/sops",
+          "sourceUrl": "https://github.com/getsops/sops",
+          "tags": [
+            "secrets",
+            "git",
+            "encryption"
+          ]
+        },
+        {
+          "id": "TL-077",
+          "name": "Infisical",
+          "kind": "SECRETS_MANAGEMENT",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma open source para gestión de secretos y configuración.",
+          "application": "Candidato si varios proyectos/equipos empiezan a sufrir por variables y credenciales dispersas.",
+          "benefit": "Centraliza rotación, acceso y auditoría de secretos.",
+          "caution": "Añade un componente crítico; evaluar disponibilidad, backup y mínimo privilegio.",
+          "repository": "Infisical/infisical",
+          "sourceUrl": "https://github.com/Infisical/infisical",
+          "tags": [
+            "secrets",
+            "devops",
+            "security"
+          ]
+        },
+        {
+          "id": "TL-078",
+          "name": "Better Auth",
+          "kind": "AUTH_LIBRARY",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Framework TypeScript de autenticación extensible para aplicaciones web.",
+          "application": "Muy alineado con Next.js si un proyecto futuro necesita auth más portable que soluciones ad hoc.",
+          "benefit": "Puede ahorrar implementar sesiones, providers y flujos comunes desde cero.",
+          "caution": "Autenticación es frontera sensible: revisar versión, adaptadores y defaults antes de producción.",
+          "repository": "better-auth/better-auth",
+          "sourceUrl": "https://github.com/better-auth/better-auth",
+          "tags": [
+            "auth",
+            "typescript",
+            "nextjs"
+          ]
+        },
+        {
+          "id": "TL-079",
+          "name": "Arcjet",
+          "kind": "APP_SECURITY_LIBRARY",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "SDK orientado a protección de aplicaciones con rate limiting, bot detection y controles de seguridad.",
+          "application": "Puede complementar apps Next.js expuestas públicamente, especialmente formularios, login o APIs.",
+          "benefit": "Permite añadir defensas comunes cerca del código de aplicación.",
+          "caution": "Revisar dependencia externa, datos enviados y costo antes de hacerlo parte del camino crítico.",
+          "repository": "arcjet/arcjet-js",
+          "sourceUrl": "https://github.com/arcjet/arcjet-js",
+          "tags": [
+            "security",
+            "rate-limit",
+            "bots"
+          ]
+        },
+        {
+          "id": "TL-080",
+          "name": "Unkey",
+          "kind": "API_SECURITY_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Infraestructura open source para API keys, rate limiting y controles de APIs.",
+          "application": "Candidato si un producto propio expone API pública o integra terceros con claves.",
+          "benefit": "Evita construir gestión de API keys y cuotas desde cero.",
+          "caution": "Otra capa de auth/infra; sólo tiene sentido con APIs reales para terceros.",
+          "repository": "unkeyed/unkey",
+          "sourceUrl": "https://github.com/unkeyed/unkey",
+          "tags": [
+            "api-keys",
+            "rate-limit",
+            "api"
+          ]
+        },
+        {
+          "id": "TL-081",
+          "name": "Upstash Rate Limit",
+          "kind": "RATE_LIMIT_LIBRARY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Librería de rate limiting basada en infraestructura de Upstash.",
+          "application": "Puede ser útil en endpoints serverless/Next.js donde ya usemos Redis/Upstash.",
+          "benefit": "Añade protección simple contra abuso sin montar un sistema completo.",
+          "caution": "Dependencia de servicio externo y costo por uso; definir fall-open/fail-closed conscientemente.",
+          "repository": "upstash/ratelimit-js",
+          "sourceUrl": "https://github.com/upstash/ratelimit-js",
+          "tags": [
+            "rate-limit",
+            "serverless"
+          ]
+        },
+        {
+          "id": "TL-082",
+          "name": "Renovate",
+          "kind": "DEPENDENCY_AUTOMATION",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Bot open source para mantener dependencias actualizadas con reglas y PRs automáticos.",
+          "application": "Puede reducir trabajo manual de mantenimiento en repos que hoy dependen de upgrades esporádicos.",
+          "benefit": "Hace visibles updates y permite agruparlos, programarlos y testearlos.",
+          "caution": "Nunca auto-mergear cambios sensibles sólo porque CI esté verde; configurar límites.",
+          "repository": "renovatebot/renovate",
+          "sourceUrl": "https://github.com/renovatebot/renovate",
+          "tags": [
+            "dependencies",
+            "automation",
+            "maintenance"
+          ]
+        },
+        {
+          "id": "TL-083",
+          "name": "OWASP Developer Guide",
+          "kind": "SECURITY_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Guía OWASP orientada a integrar seguridad en el trabajo de desarrollo.",
+          "application": "Puede alimentar checklists y prácticas de secure-by-default en nuevos proyectos.",
+          "benefit": "Ayuda a convertir seguridad en proceso continuo y no auditoría tardía.",
+          "caution": "Usar como referencia contextual, no como checklist universal.",
+          "repository": "OWASP/DevGuide",
+          "sourceUrl": "https://github.com/OWASP/DevGuide",
+          "tags": [
+            "secure-development",
+            "reference"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WEB_UI_ACCESSIBILITY_QUALITY",
+      "label": "Web, UI, animación, accesibilidad y calidad",
+      "entries": [
+        {
+          "id": "TL-084",
+          "name": "shadcn/ui",
+          "kind": "UI_REFERENCE",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Colección de componentes y patrones UI copiables, construidos sobre primitivas accesibles.",
+          "application": "Puede servir como referencia/componente base para mejorar Vida, tiendas y webs sin depender de un paquete cerrado.",
+          "benefit": "Acelera interfaces consistentes y deja el código dentro del proyecto para adaptarlo.",
+          "caution": "Copiar componentes no reemplaza diseño ni revisión de accesibilidad; mantenerlos actualizados es responsabilidad propia.",
+          "repository": "shadcn-ui/ui",
+          "sourceUrl": "https://github.com/shadcn-ui/ui",
+          "tags": [
+            "ui",
+            "components",
+            "react"
+          ]
+        },
+        {
+          "id": "TL-085",
+          "name": "Radix Primitives",
+          "kind": "UI_PRIMITIVES",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Primitivas React sin estilo para componentes interactivos accesibles.",
+          "application": "Referencia sólida para dialogs, menus, popovers y controles complejos.",
+          "benefit": "Reduce errores de interacción/teclado/ARIA en componentes comunes.",
+          "caution": "La accesibilidad final depende también de estilos, labels y uso correcto.",
+          "repository": "radix-ui/primitives",
+          "sourceUrl": "https://github.com/radix-ui/primitives",
+          "tags": [
+            "accessibility",
+            "ui",
+            "react"
+          ]
+        },
+        {
+          "id": "TL-086",
+          "name": "Base UI",
+          "kind": "UI_PRIMITIVES",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Primitivas de UI sin estilo para React mantenidas por MUI.",
+          "application": "Alternativa/referencia a Radix para componentes accesibles y composables.",
+          "benefit": "Permite construir diseño propio sin reinventar comportamiento complejo.",
+          "caution": "Evitar mezclar varias familias de primitives sin motivo.",
+          "repository": "mui/base-ui",
+          "sourceUrl": "https://github.com/mui/base-ui",
+          "tags": [
+            "ui",
+            "accessibility",
+            "react"
+          ]
+        },
+        {
+          "id": "TL-087",
+          "name": "React Spectrum / React Aria",
+          "kind": "UI_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Colección de hooks/componentes de Adobe centrados en accesibilidad e interacción robusta.",
+          "application": "Referencia para controles complejos, internacionalización y patrones accesibles.",
+          "benefit": "Puede enseñar detalles de interacción que suelen omitirse en componentes caseros.",
+          "caution": "Puede ser más abstracción de la necesaria para interfaces simples.",
+          "repository": "adobe/react-spectrum",
+          "sourceUrl": "https://github.com/adobe/react-spectrum",
+          "tags": [
+            "accessibility",
+            "react",
+            "ui"
+          ]
+        },
+        {
+          "id": "TL-088",
+          "name": "Motion",
+          "kind": "ANIMATION_LIBRARY",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Librería de animación para interfaces React/web orientada a motion declarativo.",
+          "application": "Muy aplicable para mejorar Vida y sitios de Genova con transiciones, layout animation y microinteracciones.",
+          "benefit": "Puede elevar calidad visual con menos código y mejor consistencia que animaciones ad hoc.",
+          "caution": "Usar movimiento con propósito y respetar reduced-motion; exceso de animación empeora UX.",
+          "repository": "motiondivision/motion",
+          "sourceUrl": "https://github.com/motiondivision/motion",
+          "tags": [
+            "animation",
+            "react",
+            "ui"
+          ]
+        },
+        {
+          "id": "TL-089",
+          "name": "GSAP",
+          "kind": "ANIMATION_LIBRARY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Motor de animación web potente para secuencias, scroll y motion complejo.",
+          "application": "Candidato para landings o piezas de Genova donde Motion se quede corto.",
+          "benefit": "Permite animaciones de alto nivel y control temporal preciso.",
+          "caution": "Mayor complejidad y licencia/uso a revisar según el proyecto; no usar para microinteracciones simples.",
+          "repository": "greensock/GSAP",
+          "sourceUrl": "https://github.com/greensock/GSAP",
+          "tags": [
+            "animation",
+            "web",
+            "creative"
+          ]
+        },
+        {
+          "id": "TL-090",
+          "name": "React Bits",
+          "kind": "UI_INSPIRATION",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Colección de componentes React visuales y animados.",
+          "application": "Biblioteca de inspiración para hero sections, efectos y microinteracciones reutilizables.",
+          "benefit": "Puede acelerar exploración visual sin empezar cada efecto desde cero.",
+          "caution": "No copiar efectos sin revisar performance, accesibilidad y encaje con la marca.",
+          "repository": "DavidHDev/react-bits",
+          "sourceUrl": "https://github.com/DavidHDev/react-bits",
+          "tags": [
+            "animation",
+            "components",
+            "inspiration"
+          ]
+        },
+        {
+          "id": "TL-091",
+          "name": "Animate UI",
+          "kind": "UI_INSPIRATION",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Colección de componentes animados para interfaces modernas.",
+          "application": "Referencia para patrones de motion y estados interactivos en productos propios.",
+          "benefit": "Da ejemplos listos para estudiar/adaptar.",
+          "caution": "Validar dependencias y accesibilidad antes de incorporar código.",
+          "repository": "imskyleen/animate-ui",
+          "sourceUrl": "https://github.com/imskyleen/animate-ui",
+          "tags": [
+            "animation",
+            "ui",
+            "inspiration"
+          ]
+        },
+        {
+          "id": "TL-092",
+          "name": "Magic UI",
+          "kind": "UI_INSPIRATION",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Colección de componentes y efectos visuales orientados a interfaces de producto/marketing.",
+          "application": "Puede alimentar ideas para páginas de Genova, portfolios y productos.",
+          "benefit": "Reduce tiempo de exploración visual y muestra patrones de presentación modernos.",
+          "caution": "Evitar estética genérica o exceso de efectos; adaptar al sistema de diseño propio.",
+          "repository": "magicuidesign/magicui",
+          "sourceUrl": "https://github.com/magicuidesign/magicui",
+          "tags": [
+            "ui",
+            "animation",
+            "marketing"
+          ]
+        },
+        {
+          "id": "TL-093",
+          "name": "Lucide",
+          "kind": "ICON_LIBRARY",
+          "status": "CURRENT_STACK",
+          "attention": "NOW",
+          "summary": "Biblioteca open source de iconos consistente y extensible.",
+          "application": "Ya encaja con Vida y puede seguir siendo estándar transversal para iconografía.",
+          "benefit": "Reduce inconsistencia visual y evita mantener SVGs dispersos.",
+          "caution": "No usar iconos sin labels cuando el significado no sea obvio.",
+          "repository": "lucide-icons/lucide",
+          "sourceUrl": "https://github.com/lucide-icons/lucide",
+          "tags": [
+            "icons",
+            "design-system"
+          ]
+        },
+        {
+          "id": "TL-094",
+          "name": "Storybook",
+          "kind": "COMPONENT_WORKBENCH",
+          "status": "ASSESS_NOW",
+          "attention": "WHEN_NEEDED",
+          "summary": "Entorno para desarrollar, documentar y probar componentes aislados.",
+          "application": "Puede ser valioso si Vida o un producto crece hasta necesitar un sistema de componentes más formal.",
+          "benefit": "Permite revisar estados, regresiones visuales y documentación fuera de la app completa.",
+          "caution": "Tiene costo de mantenimiento; no hace falta en proyectos pequeños con pocos componentes.",
+          "repository": "storybookjs/storybook",
+          "sourceUrl": "https://github.com/storybookjs/storybook",
+          "tags": [
+            "components",
+            "design-system",
+            "testing"
+          ]
+        },
+        {
+          "id": "TL-095",
+          "name": "TanStack Query",
+          "kind": "DATA_FETCHING_LIBRARY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Librería para server state, caching, sincronización y mutations en frontend.",
+          "application": "Útil en clientes React con mucha data remota y estados de loading/refetch complejos.",
+          "benefit": "Reduce código manual de cache, retry e invalidación.",
+          "caution": "Con Next.js server components puede ser innecesaria en muchas rutas; usar sólo donde aporte.",
+          "repository": "TanStack/query",
+          "sourceUrl": "https://github.com/TanStack/query",
+          "tags": [
+            "react",
+            "data-fetching",
+            "cache"
+          ]
+        },
+        {
+          "id": "TL-096",
+          "name": "TanStack Form",
+          "kind": "FORM_LIBRARY",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Librería tipada para formularios complejos.",
+          "application": "Candidata si un producto necesita formularios muy dinámicos o tipos end-to-end.",
+          "benefit": "Puede mejorar consistencia en validación/estado de forms.",
+          "caution": "Comparar con React Hook Form antes de incorporar otro estándar.",
+          "repository": "TanStack/form",
+          "sourceUrl": "https://github.com/TanStack/form",
+          "tags": [
+            "forms",
+            "typescript",
+            "react"
+          ]
+        },
+        {
+          "id": "TL-097",
+          "name": "React Hook Form",
+          "kind": "FORM_LIBRARY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Librería liviana y muy usada para manejar formularios React.",
+          "application": "Útil para formularios complejos de clientes, tiendas o admin panels.",
+          "benefit": "Reduce renders y boilerplate de estado/validación.",
+          "caution": "Coordinarla con Zod u otro schema en vez de duplicar validaciones.",
+          "repository": "react-hook-form/react-hook-form",
+          "sourceUrl": "https://github.com/react-hook-form/react-hook-form",
+          "tags": [
+            "forms",
+            "react"
+          ]
+        },
+        {
+          "id": "TL-098",
+          "name": "Zod",
+          "kind": "VALIDATION_LIBRARY",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Validación y schemas TypeScript-first para datos en runtime.",
+          "application": "Muy aplicable a APIs, forms, env vars y contratos entre capas de proyectos TS.",
+          "benefit": "Ayuda a fallar temprano y compartir contratos verificables.",
+          "caution": "No convertir cada objeto interno en schema sin necesidad; mantener una sola fuente de tipos cuando sea posible.",
+          "repository": "colinhacks/zod",
+          "sourceUrl": "https://github.com/colinhacks/zod",
+          "tags": [
+            "validation",
+            "typescript"
+          ]
+        },
+        {
+          "id": "TL-099",
+          "name": "Floating UI",
+          "kind": "UI_PRIMITIVES",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Motor de posicionamiento para tooltips, popovers, menus y elementos flotantes.",
+          "application": "Referencia si necesitamos overlays propios sin una librería de componentes completa.",
+          "benefit": "Resuelve edge cases de viewport, collision y positioning.",
+          "caution": "Usar una primitive existente si ya resuelve el caso; no duplicar.",
+          "repository": "floating-ui/floating-ui",
+          "sourceUrl": "https://github.com/floating-ui/floating-ui",
+          "tags": [
+            "ui",
+            "positioning"
+          ]
+        },
+        {
+          "id": "TL-100",
+          "name": "Zustand",
+          "kind": "STATE_MANAGEMENT",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Estado global minimalista para React.",
+          "application": "Candidato si aparece estado cliente compartido que Context/local state ya no maneje bien.",
+          "benefit": "Evita arquitecturas de estado más pesadas para casos simples.",
+          "caution": "No crear store global por comodidad; server state y URL state tienen dueños distintos.",
+          "repository": "pmndrs/zustand",
+          "sourceUrl": "https://github.com/pmndrs/zustand",
+          "tags": [
+            "react",
+            "state"
+          ]
+        },
+        {
+          "id": "TL-101",
+          "name": "React Three Fiber",
+          "kind": "3D_UI",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Renderer React para Three.js.",
+          "application": "Puede servir en experiencias 3D/portfolio/marketing muy específicas.",
+          "benefit": "Permite integrar 3D con el modelo mental de React.",
+          "caution": "Costo fuerte de performance y complejidad; sólo si 3D aporta valor real.",
+          "repository": "pmndrs/react-three-fiber",
+          "sourceUrl": "https://github.com/pmndrs/react-three-fiber",
+          "tags": [
+            "3d",
+            "react",
+            "creative"
+          ]
+        },
+        {
+          "id": "TL-102",
+          "name": "Drei",
+          "kind": "3D_UI",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Helpers y abstracciones para React Three Fiber.",
+          "application": "Acelera escenas 3D si alguna experiencia realmente las necesita.",
+          "benefit": "Evita reimplementar controles, loaders y utilidades comunes.",
+          "caution": "Hereda el costo/performance de 3D; no es una mejora automática de UX.",
+          "repository": "pmndrs/drei",
+          "sourceUrl": "https://github.com/pmndrs/drei",
+          "tags": [
+            "3d",
+            "react"
+          ]
+        },
+        {
+          "id": "TL-103",
+          "name": "Recharts",
+          "kind": "DATA_VISUALIZATION",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Librería de charts declarativos para React.",
+          "application": "Puede servir en dashboards de Vida, finanzas, Football Intelligence o reportes.",
+          "benefit": "Acelera visualizaciones comunes con integración React sencilla.",
+          "caution": "Elegir gráficos por la pregunta que responden, no por estética.",
+          "repository": "recharts/recharts",
+          "sourceUrl": "https://github.com/recharts/recharts",
+          "tags": [
+            "charts",
+            "react",
+            "data-viz"
+          ]
+        },
+        {
+          "id": "TL-104",
+          "name": "Playwright",
+          "kind": "E2E_TESTING",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Framework de automatización de navegadores para pruebas end-to-end.",
+          "application": "Muy útil para verificar flujos críticos de Vida, tiendas, login y formularios después de cambios grandes.",
+          "benefit": "Da evidencia real de comportamiento desde el navegador y reduce regresiones.",
+          "caution": "Los tests E2E son más lentos/frágiles; reservarlos para flujos de alto valor.",
+          "repository": "microsoft/playwright",
+          "sourceUrl": "https://github.com/microsoft/playwright",
+          "tags": [
+            "testing",
+            "browser",
+            "e2e"
+          ]
+        },
+        {
+          "id": "TL-105",
+          "name": "Vitest",
+          "kind": "TEST_FRAMEWORK",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Runner de tests rápido y compatible con el ecosistema Vite/TypeScript.",
+          "application": "Referencia para nuevos proyectos TS donde Node test/Jest no sean la mejor opción.",
+          "benefit": "Buena DX, mocks y integración con tooling moderno.",
+          "caution": "No migrar suites sanas sólo por uniformidad.",
+          "repository": "vitest-dev/vitest",
+          "sourceUrl": "https://github.com/vitest-dev/vitest",
+          "tags": [
+            "testing",
+            "typescript"
+          ]
+        },
+        {
+          "id": "TL-106",
+          "name": "React Testing Library",
+          "kind": "TESTING_LIBRARY",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Utilidades para probar interfaces desde el comportamiento visible al usuario.",
+          "application": "Aplicable a componentes React donde importa interacción y accesibilidad más que detalles internos.",
+          "benefit": "Favorece tests menos acoplados a implementación.",
+          "caution": "No intentar cubrir lógica pura a través del DOM si puede probarse más barato en unidad.",
+          "repository": "testing-library/react-testing-library",
+          "sourceUrl": "https://github.com/testing-library/react-testing-library",
+          "tags": [
+            "testing",
+            "react",
+            "ui"
+          ]
+        },
+        {
+          "id": "TL-107",
+          "name": "Mock Service Worker",
+          "kind": "TESTING_TOOL",
+          "status": "ASSESS_NOW",
+          "attention": "WHEN_NEEDED",
+          "summary": "Intercepción de requests a nivel de red para mocks consistentes en tests/browser.",
+          "application": "Puede estabilizar tests de frontend que dependen de APIs sin llenar componentes de mocks ad hoc.",
+          "benefit": "Un mismo mock puede servir en tests y desarrollo.",
+          "caution": "Los mocks pueden divergir del backend real; mantener contratos/verificación.",
+          "repository": "mswjs/msw",
+          "sourceUrl": "https://github.com/mswjs/msw",
+          "tags": [
+            "testing",
+            "api",
+            "mocks"
+          ]
+        },
+        {
+          "id": "TL-108",
+          "name": "axe-core",
+          "kind": "ACCESSIBILITY_TESTING",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Motor automatizado para detectar problemas de accesibilidad.",
+          "application": "Puede agregarse a tests/auditorías de Vida y sitios de clientes para encontrar fallos repetibles.",
+          "benefit": "Da una red de seguridad accesible barata y automatizable.",
+          "caution": "Sólo detecta parte de los problemas; siempre hace falta revisión manual de UX/teclado/lectores.",
+          "repository": "dequelabs/axe-core",
+          "sourceUrl": "https://github.com/dequelabs/axe-core",
+          "tags": [
+            "accessibility",
+            "testing"
+          ]
+        },
+        {
+          "id": "TL-109",
+          "name": "Pa11y",
+          "kind": "ACCESSIBILITY_TESTING",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Herramientas CLI/CI para pruebas automatizadas de accesibilidad.",
+          "application": "Útil para auditar varias páginas o integrar checks sencillos en pipelines.",
+          "benefit": "Puede cubrir rutas de forma repetible sin abrir manualmente cada página.",
+          "caution": "Misma limitación que otros scanners: no reemplaza evaluación humana.",
+          "repository": "pa11y/pa11y",
+          "sourceUrl": "https://github.com/pa11y/pa11y",
+          "tags": [
+            "accessibility",
+            "ci"
+          ]
+        },
+        {
+          "id": "TL-110",
+          "name": "Lighthouse",
+          "kind": "WEB_QUALITY",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Auditoría automatizada de performance, accesibilidad y buenas prácticas web.",
+          "application": "Puede ser baseline periódico para webs de Genova, tiendas y Vida.",
+          "benefit": "Da métricas reproducibles y detecta regresiones visibles.",
+          "caution": "Un score no es el objetivo final; validar experiencia real y métricas de usuario.",
+          "repository": "GoogleChrome/lighthouse",
+          "sourceUrl": "https://github.com/GoogleChrome/lighthouse",
+          "tags": [
+            "performance",
+            "accessibility",
+            "web"
+          ]
+        },
+        {
+          "id": "TL-111",
+          "name": "k6",
+          "kind": "LOAD_TESTING",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Herramienta de load/performance testing scriptable.",
+          "application": "Útil antes de campañas, lanzamientos o features con riesgo de concurrencia/carga.",
+          "benefit": "Permite probar capacidad y detectar cuellos de botella antes de usuarios reales.",
+          "caution": "No generar carga contra producción sin ventana y autorización; modelar escenarios realistas.",
+          "repository": "grafana/k6",
+          "sourceUrl": "https://github.com/grafana/k6",
+          "tags": [
+            "performance",
+            "load-testing"
+          ]
+        },
+        {
+          "id": "TL-112",
+          "name": "Knip",
+          "kind": "CODE_QUALITY",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Detector de archivos, exports y dependencias no usados en proyectos JS/TS.",
+          "application": "Puede mantener Vida y proyectos Next.js más limpios a medida que crecen.",
+          "benefit": "Reduce código muerto y dependencias olvidadas con poco esfuerzo.",
+          "caution": "Revisar falsos positivos por entrypoints dinámicos/frameworks antes de borrar.",
+          "repository": "webpro-nl/knip",
+          "sourceUrl": "https://github.com/webpro-nl/knip",
+          "tags": [
+            "typescript",
+            "dead-code",
+            "maintenance"
+          ]
+        },
+        {
+          "id": "TL-113",
+          "name": "Biome",
+          "kind": "CODE_QUALITY",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Toolchain rápido para formatting y linting de JavaScript/TypeScript.",
+          "application": "Referencia para proyectos nuevos que quieran consolidar tooling.",
+          "benefit": "Puede reducir tiempo y configuración frente a varias herramientas separadas.",
+          "caution": "No migrar repos estables de ESLint/Prettier sin beneficio medido.",
+          "repository": "biomejs/biome",
+          "sourceUrl": "https://github.com/biomejs/biome",
+          "tags": [
+            "lint",
+            "format",
+            "typescript"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "OBSERVABILITY_INFRA_DEVEX",
+      "label": "Observabilidad, infraestructura, self-hosting y DevEx",
+      "entries": [
+        {
+          "id": "TL-114",
+          "name": "OpenTelemetry Collector",
+          "kind": "OBSERVABILITY_INFRA",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Componente vendor-neutral para recibir, procesar y exportar telemetría.",
+          "application": "Es la pieza operacional natural si OpenTelemetry se prueba en Vida o Football Intelligence.",
+          "benefit": "Permite desacoplar instrumentación de un backend concreto y aplicar filtros/routing.",
+          "caution": "La telemetría puede contener datos sensibles; minimizar atributos y controlar exporters.",
+          "repository": "open-telemetry/opentelemetry-collector",
+          "sourceUrl": "https://github.com/open-telemetry/opentelemetry-collector",
+          "tags": [
+            "otel",
+            "observability",
+            "collector"
+          ]
+        },
+        {
+          "id": "TL-115",
+          "name": "Grafana",
+          "kind": "OBSERVABILITY_UI",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma open source para dashboards y exploración de métricas, logs y traces.",
+          "application": "Puede ser capa visual si un proyecto necesita observabilidad propia o self-hosted.",
+          "benefit": "Centraliza señales distintas y facilita diagnóstico operativo.",
+          "caution": "Un dashboard sin alertas/SLIs útiles sólo agrega ruido; diseñar desde preguntas reales.",
+          "repository": "grafana/grafana",
+          "sourceUrl": "https://github.com/grafana/grafana",
+          "tags": [
+            "observability",
+            "dashboards"
+          ]
+        },
+        {
+          "id": "TL-116",
+          "name": "Prometheus",
+          "kind": "METRICS",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Sistema open source de métricas y alertas basado en series temporales.",
+          "application": "Referencia/candidato si operamos servicios propios con métricas persistentes.",
+          "benefit": "Es un estándar práctico para instrumentar y consultar métricas operativas.",
+          "caution": "Operarlo bien requiere retención, cardinalidad y alertas cuidadas.",
+          "repository": "prometheus/prometheus",
+          "sourceUrl": "https://github.com/prometheus/prometheus",
+          "tags": [
+            "metrics",
+            "observability"
+          ]
+        },
+        {
+          "id": "TL-117",
+          "name": "Grafana Loki",
+          "kind": "LOGGING",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Sistema de logs diseñado para integrarse con el ecosistema Grafana.",
+          "application": "Candidato si se necesita centralizar logs sin depender sólo del proveedor de hosting.",
+          "benefit": "Permite correlacionar logs con otras señales operativas.",
+          "caution": "Controlar volumen, retención y datos sensibles; logs infinitos cuestan.",
+          "repository": "grafana/loki",
+          "sourceUrl": "https://github.com/grafana/loki",
+          "tags": [
+            "logs",
+            "observability"
+          ]
+        },
+        {
+          "id": "TL-118",
+          "name": "Grafana Tempo",
+          "kind": "TRACING",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Backend distribuido para almacenar traces.",
+          "application": "Puede completar una stack OTel + Grafana si el tracing propio se vuelve necesario.",
+          "benefit": "Aporta trazabilidad distribuida sin lock-in fuerte de proveedor.",
+          "caution": "No desplegar un backend de traces sólo por aprender; primero validar necesidad.",
+          "repository": "grafana/tempo",
+          "sourceUrl": "https://github.com/grafana/tempo",
+          "tags": [
+            "tracing",
+            "otel",
+            "observability"
+          ]
+        },
+        {
+          "id": "TL-119",
+          "name": "SigNoz",
+          "kind": "OBSERVABILITY_PLATFORM",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Plataforma open source de observabilidad basada en OpenTelemetry.",
+          "application": "Candidato para un lab porque ofrece traces, metrics y logs en una sola experiencia.",
+          "benefit": "Puede reducir piezas frente a montar Grafana/Prometheus/Loki/Tempo por separado.",
+          "caution": "Comparar costo operativo y experiencia con Sentry/proveedor actual antes de elegir.",
+          "repository": "SigNoz/signoz",
+          "sourceUrl": "https://github.com/SigNoz/signoz",
+          "tags": [
+            "otel",
+            "observability",
+            "apm"
+          ]
+        },
+        {
+          "id": "TL-120",
+          "name": "Uptime Kuma",
+          "kind": "UPTIME_MONITORING",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Monitor self-hosted simple para disponibilidad y checks HTTP/TCP.",
+          "application": "Puede vigilar webs/clientes/proyectos con una interfaz muy sencilla.",
+          "benefit": "Da detección básica de caídas con poca complejidad.",
+          "caution": "No sustituye observabilidad interna ni SLA real; self-hosting también debe mantenerse.",
+          "repository": "louislam/uptime-kuma",
+          "sourceUrl": "https://github.com/louislam/uptime-kuma",
+          "tags": [
+            "uptime",
+            "monitoring"
+          ]
+        },
+        {
+          "id": "TL-121",
+          "name": "OpenStatus",
+          "kind": "UPTIME_MONITORING",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Proyecto open source de synthetic monitoring y status pages.",
+          "application": "Alternativa moderna para checks externos y páginas de estado.",
+          "benefit": "Puede aportar monitoreo desde varias regiones y comunicación de incidentes.",
+          "caution": "Evaluar costo/infra frente a Uptime Kuma y servicios gestionados.",
+          "repository": "openstatusHQ/openstatus",
+          "sourceUrl": "https://github.com/openstatusHQ/openstatus",
+          "tags": [
+            "uptime",
+            "synthetics",
+            "status-page"
+          ]
+        },
+        {
+          "id": "TL-122",
+          "name": "Sentry",
+          "kind": "ERROR_MONITORING",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Plataforma para error tracking, performance y diagnóstico de aplicaciones.",
+          "application": "Muy aplicable a Vida y proyectos web para capturar errores reales que hoy pueden pasar desapercibidos.",
+          "benefit": "Convierte fallos de usuarios en evidencia concreta con stack traces y contexto.",
+          "caution": "Configurar scrubbing de datos y sampling; no enviar información sensible por defecto.",
+          "repository": "getsentry/sentry",
+          "sourceUrl": "https://github.com/getsentry/sentry",
+          "tags": [
+            "errors",
+            "performance",
+            "observability"
+          ]
+        },
+        {
+          "id": "TL-123",
+          "name": "Jaeger",
+          "kind": "TRACING",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Proyecto CNCF para distributed tracing.",
+          "application": "Referencia histórica/práctica para entender tracing distribuido y backends compatibles con OTel.",
+          "benefit": "Puede servir para labs simples de traces.",
+          "caution": "Para nuevas stacks quizá convenga OTel + otro backend; verificar estado del proyecto al usarlo.",
+          "repository": "jaegertracing/jaeger",
+          "sourceUrl": "https://github.com/jaegertracing/jaeger",
+          "tags": [
+            "tracing",
+            "observability"
+          ]
+        },
+        {
+          "id": "TL-124",
+          "name": "VictoriaMetrics",
+          "kind": "METRICS",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Base de series temporales y monitoring orientada a eficiencia.",
+          "application": "Referencia si Prometheus storage se vuelve un problema de escala/costo.",
+          "benefit": "Puede bajar recursos en cargas grandes de métricas.",
+          "caution": "No hay necesidad actual de ese nivel de escala.",
+          "repository": "VictoriaMetrics/VictoriaMetrics",
+          "sourceUrl": "https://github.com/VictoriaMetrics/VictoriaMetrics",
+          "tags": [
+            "metrics",
+            "timeseries"
+          ]
+        },
+        {
+          "id": "TL-125",
+          "name": "Uptrace",
+          "kind": "OBSERVABILITY_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "APM/observabilidad open source compatible con OpenTelemetry.",
+          "application": "Otra referencia OTel-first para traces, metrics y logs.",
+          "benefit": "Útil para comparar experiencias de backend sin cambiar instrumentación.",
+          "caution": "Evitar multiplicar backends; sólo comparar con un caso concreto.",
+          "repository": "uptrace/uptrace",
+          "sourceUrl": "https://github.com/uptrace/uptrace",
+          "tags": [
+            "otel",
+            "apm"
+          ]
+        },
+        {
+          "id": "TL-126",
+          "name": "Chaos Mesh",
+          "kind": "CHAOS_ENGINEERING",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Plataforma de chaos engineering para Kubernetes.",
+          "application": "Referencia para aprender pruebas de resiliencia y fallos controlados.",
+          "benefit": "Muestra cómo convertir reliability en experimentos, no sólo teoría.",
+          "caution": "No aplica al stack actual sin Kubernetes y puede causar daño si se usa sin aislamiento.",
+          "repository": "chaos-mesh/chaos-mesh",
+          "sourceUrl": "https://github.com/chaos-mesh/chaos-mesh",
+          "tags": [
+            "chaos",
+            "kubernetes",
+            "reliability"
+          ]
+        },
+        {
+          "id": "TL-127",
+          "name": "LitmusChaos",
+          "kind": "CHAOS_ENGINEERING",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Framework open source para experimentos de resiliencia y chaos engineering.",
+          "application": "Referencia alternativa para futuros entornos distribuidos.",
+          "benefit": "Puede ayudar a diseñar drills de fallo/recovery.",
+          "caution": "Sólo ejecutar en entornos autorizados y con rollback claro.",
+          "repository": "litmuschaos/litmus",
+          "sourceUrl": "https://github.com/litmuschaos/litmus",
+          "tags": [
+            "chaos",
+            "reliability"
+          ]
+        },
+        {
+          "id": "TL-128",
+          "name": "OpenTofu",
+          "kind": "INFRASTRUCTURE_AS_CODE",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Infraestructura como código declarativa, fork abierto compatible con el ecosistema Terraform.",
+          "application": "Candidato cuando un proyecto tenga cambios de infraestructura repetidos que hoy sean manuales/riesgosos.",
+          "benefit": "Aporta reproducibilidad, revisión por diff y rollback conceptual de configuración.",
+          "caution": "El state puede contener datos sensibles; backend y locking requieren diseño.",
+          "repository": "opentofu/opentofu",
+          "sourceUrl": "https://github.com/opentofu/opentofu",
+          "tags": [
+            "iac",
+            "cloud",
+            "devops"
+          ]
+        },
+        {
+          "id": "TL-129",
+          "name": "Pulumi",
+          "kind": "INFRASTRUCTURE_AS_CODE",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Infraestructura como código usando lenguajes de programación generales.",
+          "application": "Podría encajar mejor que HCL si preferimos TypeScript/Python y abstraemos infraestructura compleja.",
+          "benefit": "Reutiliza tipos, testing y lenguaje conocido.",
+          "caution": "Comparar claridad/state/costo con OpenTofu antes de adoptar.",
+          "repository": "pulumi/pulumi",
+          "sourceUrl": "https://github.com/pulumi/pulumi",
+          "tags": [
+            "iac",
+            "typescript",
+            "python"
+          ]
+        },
+        {
+          "id": "TL-130",
+          "name": "Ansible",
+          "kind": "CONFIGURATION_MANAGEMENT",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Automatización declarativa de configuración y administración de máquinas.",
+          "application": "Útil si algún proyecto pasa de PaaS a servidores/VPS que deban configurarse repetidamente.",
+          "benefit": "Reduce pasos manuales y documenta configuración operativa.",
+          "caution": "No hace falta en infraestructura totalmente gestionada.",
+          "repository": "ansible/ansible",
+          "sourceUrl": "https://github.com/ansible/ansible",
+          "tags": [
+            "automation",
+            "servers",
+            "devops"
+          ]
+        },
+        {
+          "id": "TL-131",
+          "name": "Podman",
+          "kind": "CONTAINERS",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Motor de contenedores daemonless compatible con muchos workflows OCI/Docker.",
+          "application": "Referencia/alternativa si buscamos ejecución de contenedores con modelo de seguridad distinto.",
+          "benefit": "Puede reducir dependencia de un daemon privilegiado en ciertos entornos.",
+          "caution": "No migrar Docker workflows sanos sin beneficio concreto.",
+          "repository": "podman-container-tools/podman",
+          "sourceUrl": "https://github.com/podman-container-tools/podman",
+          "tags": [
+            "containers",
+            "oci"
+          ]
+        },
+        {
+          "id": "TL-132",
+          "name": "k3s",
+          "kind": "CONTAINER_ORCHESTRATION",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Distribución Kubernetes liviana.",
+          "application": "Referencia si alguna vez se necesita cluster pequeño/local/edge sin Kubernetes completo pesado.",
+          "benefit": "Permite experimentar con conceptos K8s con menor footprint.",
+          "caution": "Sigue heredando complejidad de Kubernetes; no es necesidad actual.",
+          "repository": "k3s-io/k3s",
+          "sourceUrl": "https://github.com/k3s-io/k3s",
+          "tags": [
+            "kubernetes",
+            "containers"
+          ]
+        },
+        {
+          "id": "TL-133",
+          "name": "Caddy",
+          "kind": "WEB_SERVER",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Web server/reverse proxy con HTTPS automático y configuración simple.",
+          "application": "Puede servir en self-hosting/VPS de proyectos pequeños.",
+          "benefit": "Reduce configuración TLS/reverse proxy frente a setups manuales.",
+          "caution": "Revisar topología, headers y exposición antes de ponerlo frente a servicios sensibles.",
+          "repository": "caddyserver/caddy",
+          "sourceUrl": "https://github.com/caddyserver/caddy",
+          "tags": [
+            "reverse-proxy",
+            "https",
+            "self-host"
+          ]
+        },
+        {
+          "id": "TL-134",
+          "name": "Traefik",
+          "kind": "REVERSE_PROXY",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Reverse proxy y gateway dinámico orientado a contenedores y servicios.",
+          "application": "Candidato si self-hosting crece a varios servicios con routing dinámico.",
+          "benefit": "Integra descubrimiento de servicios y TLS de forma declarativa.",
+          "caution": "Más complejo que Caddy para setups pequeños.",
+          "repository": "traefik/traefik",
+          "sourceUrl": "https://github.com/traefik/traefik",
+          "tags": [
+            "reverse-proxy",
+            "containers"
+          ]
+        },
+        {
+          "id": "TL-135",
+          "name": "Tailscale",
+          "kind": "PRIVATE_NETWORKING",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Red privada basada en WireGuard para conectar dispositivos y servicios.",
+          "application": "Puede dar acceso privado a herramientas/self-hosted sin exponer puertos públicos.",
+          "benefit": "Simplifica networking seguro entre PC, servidores y servicios internos.",
+          "caution": "Revisar identidad, ACLs y dependencia del control plane antes de usar en datos sensibles.",
+          "repository": "tailscale/tailscale",
+          "sourceUrl": "https://github.com/tailscale/tailscale",
+          "tags": [
+            "networking",
+            "wireguard",
+            "security"
+          ]
+        },
+        {
+          "id": "TL-136",
+          "name": "Coolify",
+          "kind": "SELF_HOSTING_PLATFORM",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "PaaS open source/self-hosted para desplegar apps, bases y servicios.",
+          "application": "Candidato si queremos reducir dependencia/costo de servicios gestionados en proyectos no críticos.",
+          "benefit": "Puede acercar experiencia tipo Vercel a infraestructura propia.",
+          "caution": "Self-hosting traslada a vos backups, upgrades, seguridad y disponibilidad.",
+          "repository": "coollabsio/coolify",
+          "sourceUrl": "https://github.com/coollabsio/coolify",
+          "tags": [
+            "self-host",
+            "paas",
+            "deploy"
+          ]
+        },
+        {
+          "id": "TL-137",
+          "name": "Dokku",
+          "kind": "SELF_HOSTING_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "PaaS liviano basado en Docker con experiencia parecida a Heroku.",
+          "application": "Referencia para despliegues simples en un VPS.",
+          "benefit": "Permite deploy por Git con menos plataforma que Kubernetes.",
+          "caution": "Más responsabilidad operacional que Vercel/managed services.",
+          "repository": "dokku/dokku",
+          "sourceUrl": "https://github.com/dokku/dokku",
+          "tags": [
+            "self-host",
+            "paas"
+          ]
+        },
+        {
+          "id": "TL-138",
+          "name": "Kamal",
+          "kind": "DEPLOYMENT_TOOL",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Herramienta de deploy de contenedores a servidores sin necesitar Kubernetes.",
+          "application": "Puede servir si alguna app necesita VPS propio con despliegues repetibles.",
+          "benefit": "Ofrece una ruta intermedia entre PaaS y orquestación pesada.",
+          "caution": "Requiere operar servidores, networking y backups.",
+          "repository": "basecamp/kamal",
+          "sourceUrl": "https://github.com/basecamp/kamal",
+          "tags": [
+            "deploy",
+            "containers",
+            "servers"
+          ]
+        },
+        {
+          "id": "TL-139",
+          "name": "CapRover",
+          "kind": "SELF_HOSTING_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Plataforma self-hosted para desplegar aplicaciones Docker con UI.",
+          "application": "Alternativa de referencia a Coolify/Dokku.",
+          "benefit": "Puede simplificar deploys pequeños sobre VPS.",
+          "caution": "Evaluar mantenimiento y seguridad del panel expuesto.",
+          "repository": "caprover/caprover",
+          "sourceUrl": "https://github.com/caprover/caprover",
+          "tags": [
+            "self-host",
+            "paas"
+          ]
+        },
+        {
+          "id": "TL-140",
+          "name": "Cloudflare Tunnel",
+          "kind": "PRIVATE_NETWORKING",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Túneles salientes para publicar servicios sin abrir puertos entrantes directos.",
+          "application": "Puede servir para exponer una herramienta interna o webhook de forma controlada.",
+          "benefit": "Reduce superficie de red y simplifica NAT/HTTPS.",
+          "caution": "La identidad/acceso debe configurarse; un túnel no vuelve segura una app insegura.",
+          "repository": "cloudflare/cloudflared",
+          "sourceUrl": "https://github.com/cloudflare/cloudflared",
+          "tags": [
+            "tunnel",
+            "networking",
+            "cloudflare"
+          ]
+        },
+        {
+          "id": "TL-141",
+          "name": "Dev Containers",
+          "kind": "DEV_ENVIRONMENT",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Especificación y CLI para describir entornos de desarrollo reproducibles en contenedores.",
+          "application": "Puede estandarizar repos complejos para Codex/Claude/humanos cuando el setup local empiece a ser fuente de errores.",
+          "benefit": "Reduce 'funciona en mi máquina' y documenta toolchain/dependencias de desarrollo.",
+          "caution": "Añade costo de contenedores y archivos de configuración; no hace falta para repos simples.",
+          "repository": "devcontainers/spec",
+          "sourceUrl": "https://github.com/devcontainers/spec",
+          "tags": [
+            "dev-environment",
+            "containers"
+          ]
+        },
+        {
+          "id": "TL-142",
+          "name": "Dagger",
+          "kind": "CI_CD_TOOL",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Toolkit para pipelines CI/CD portables definidos como código.",
+          "application": "Puede servir si workflows de GitHub Actions crecen y necesitamos lógica reutilizable/localmente testeable.",
+          "benefit": "Reduce YAML específico y permite ejecutar pipelines en distintos entornos.",
+          "caution": "No sustituir workflows simples por una capa adicional sin dolor real.",
+          "repository": "dagger/dagger",
+          "sourceUrl": "https://github.com/dagger/dagger",
+          "tags": [
+            "ci",
+            "pipelines",
+            "containers"
+          ]
+        },
+        {
+          "id": "TL-143",
+          "name": "mise",
+          "kind": "DEV_TOOLCHAIN",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Gestor de versiones, herramientas y tareas para entornos de desarrollo.",
+          "application": "Podría unificar Node/Python/tool versions en repos y máquinas sin scripts separados.",
+          "benefit": "Hace setups más reproducibles y reduce fricción al cambiar de proyecto.",
+          "caution": "Introducir sólo si realmente reemplaza gestores actuales y no añade otra capa paralela.",
+          "repository": "jdx/mise",
+          "sourceUrl": "https://github.com/jdx/mise",
+          "tags": [
+            "toolchain",
+            "versions",
+            "devex"
+          ]
+        },
+        {
+          "id": "TL-144",
+          "name": "direnv",
+          "kind": "DEV_TOOLCHAIN",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Carga variables de entorno por directorio al entrar/salir de un proyecto.",
+          "application": "Puede simplificar contextos locales con varios repos y entornos.",
+          "benefit": "Reduce errores de usar variables del proyecto equivocado.",
+          "caution": "Nunca guardar secretos en archivos versionados; revisar `.envrc` antes de permitir ejecución.",
+          "repository": "direnv/direnv",
+          "sourceUrl": "https://github.com/direnv/direnv",
+          "tags": [
+            "env",
+            "devex"
+          ]
+        },
+        {
+          "id": "TL-145",
+          "name": "dotenvx",
+          "kind": "SECRETS_TOOLING",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Tooling para variables de entorno con cifrado y ejecución multi-entorno.",
+          "application": "Referencia si `.env` empieza a ser difícil de gestionar entre entornos.",
+          "benefit": "Puede mejorar portabilidad y reducir secretos planos.",
+          "caution": "No duplicar un gestor de secretos central; revisar modelo criptográfico antes de confiar datos reales.",
+          "repository": "dotenvx/dotenvx",
+          "sourceUrl": "https://github.com/dotenvx/dotenvx",
+          "tags": [
+            "env",
+            "secrets"
+          ]
+        },
+        {
+          "id": "TL-146",
+          "name": "just",
+          "kind": "TASK_RUNNER",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Task runner simple basado en archivos `justfile`.",
+          "application": "Puede reemplazar scripts/documentación repetitiva en repos poliglota.",
+          "benefit": "Da comandos memorables y documentados sin construir tooling propio.",
+          "caution": "No hace falta si npm scripts/Make ya cubren bien el repo.",
+          "repository": "casey/just",
+          "sourceUrl": "https://github.com/casey/just",
+          "tags": [
+            "task-runner",
+            "devex"
+          ]
+        },
+        {
+          "id": "TL-147",
+          "name": "Task",
+          "kind": "TASK_RUNNER",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Task runner multiplataforma basado en YAML.",
+          "application": "Alternativa a Make/just para automatizar comandos repetibles.",
+          "benefit": "Puede estandarizar tareas en Windows/Linux/macOS.",
+          "caution": "No sumar otro runner si los comandos actuales son pocos y claros.",
+          "repository": "go-task/task",
+          "sourceUrl": "https://github.com/go-task/task",
+          "tags": [
+            "task-runner",
+            "devex"
+          ]
+        },
+        {
+          "id": "TL-148",
+          "name": "Ruff",
+          "kind": "PYTHON_TOOLING",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Linter y formatter Python de alto rendimiento.",
+          "application": "Muy aplicable a repos Python del PAS/Football Intelligence si hoy hay tooling fragmentado.",
+          "benefit": "Puede consolidar checks y acelerar CI/desarrollo.",
+          "caution": "Migrar reglas conscientemente para no cambiar semántica o cobertura accidentalmente.",
+          "repository": "astral-sh/ruff",
+          "sourceUrl": "https://github.com/astral-sh/ruff",
+          "tags": [
+            "python",
+            "lint",
+            "format"
+          ]
+        },
+        {
+          "id": "TL-149",
+          "name": "uv",
+          "kind": "PYTHON_TOOLING",
+          "status": "ASSESS_NOW",
+          "attention": "NOW",
+          "summary": "Gestor rápido de paquetes, entornos y proyectos Python.",
+          "application": "Puede simplificar setup y dependencias de herramientas/scripts Python del PAS.",
+          "benefit": "Reduce tiempos y dispersión entre pip/venv/requirements en proyectos adecuados.",
+          "caution": "Migrar con lockfile y CI verificados; no tocar entornos estables sólo por velocidad.",
+          "repository": "astral-sh/uv",
+          "sourceUrl": "https://github.com/astral-sh/uv",
+          "tags": [
+            "python",
+            "packages",
+            "devex"
+          ]
+        },
+        {
+          "id": "TL-150",
+          "name": "pnpm",
+          "kind": "JS_TOOLING",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Gestor de paquetes JavaScript eficiente en espacio y monorepos.",
+          "application": "Referencia/candidato para repos JS/TS nuevos o monorepos.",
+          "benefit": "Ahorra disco y ofrece workspaces sólidos.",
+          "caution": "No migrar npm/yarn sin una razón concreta y lockfile controlado.",
+          "repository": "pnpm/pnpm",
+          "sourceUrl": "https://github.com/pnpm/pnpm",
+          "tags": [
+            "javascript",
+            "packages"
+          ]
+        },
+        {
+          "id": "TL-151",
+          "name": "Turborepo",
+          "kind": "MONOREPO_TOOLING",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Build system para monorepos JavaScript/TypeScript.",
+          "application": "Puede servir si varios paquetes/apps comparten código y los builds empiezan a repetirse.",
+          "benefit": "Caching y task graph pueden reducir CI y coordinación.",
+          "caution": "Overkill para repos únicos sin paquetes compartidos.",
+          "repository": "vercel/turborepo",
+          "sourceUrl": "https://github.com/vercel/turborepo",
+          "tags": [
+            "monorepo",
+            "build",
+            "typescript"
+          ]
+        },
+        {
+          "id": "TL-152",
+          "name": "Nx",
+          "kind": "MONOREPO_TOOLING",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Plataforma de tooling y task graph para monorepos grandes.",
+          "application": "Referencia para organizaciones/proyectos con múltiples apps/libs y reglas complejas.",
+          "benefit": "Aporta affected builds, generators y estructura a gran escala.",
+          "caution": "Tiene mayor complejidad; no es necesario para el tamaño actual.",
+          "repository": "nrwl/nx",
+          "sourceUrl": "https://github.com/nrwl/nx",
+          "tags": [
+            "monorepo",
+            "build"
+          ]
+        },
+        {
+          "id": "TL-153",
+          "name": "Lefthook",
+          "kind": "GIT_HOOKS",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Gestor rápido de Git hooks multiplataforma.",
+          "application": "Puede ejecutar checks rápidos antes de commits/pushes en repos donde CI falla por errores triviales.",
+          "benefit": "Reduce feedback tardío y estandariza hooks.",
+          "caution": "No poner suites lentas en hooks que bloqueen el flujo diario.",
+          "repository": "evilmartians/lefthook",
+          "sourceUrl": "https://github.com/evilmartians/lefthook",
+          "tags": [
+            "git",
+            "hooks",
+            "quality"
+          ]
+        },
+        {
+          "id": "TL-154",
+          "name": "lint-staged",
+          "kind": "GIT_HOOKS",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Ejecuta linters/formatters sólo sobre archivos staged.",
+          "application": "Útil junto a hooks en repos JS/TS para evitar commits con formato roto.",
+          "benefit": "Da feedback rápido sin revisar todo el repo.",
+          "caution": "No confiar en hooks locales como único gate; CI sigue siendo autoridad.",
+          "repository": "lint-staged/lint-staged",
+          "sourceUrl": "https://github.com/lint-staged/lint-staged",
+          "tags": [
+            "git",
+            "lint",
+            "quality"
+          ]
+        },
+        {
+          "id": "TL-155",
+          "name": "Autocannon",
+          "kind": "LOAD_TESTING",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Herramienta ligera de benchmark HTTP para Node.js.",
+          "application": "Puede medir endpoints concretos rápidamente durante optimización.",
+          "benefit": "Es más simple que montar una suite de load testing completa.",
+          "caution": "Benchmarks sintéticos no equivalen a experiencia real de producción.",
+          "repository": "mcollina/autocannon",
+          "sourceUrl": "https://github.com/mcollina/autocannon",
+          "tags": [
+            "performance",
+            "http",
+            "nodejs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DATA_PRODUCT_REFERENCE_MEDIA",
+      "label": "Datos, producto, analytics, referencias y media",
+      "entries": [
+        {
+          "id": "TL-156",
+          "name": "Supabase",
+          "kind": "BACKEND_PLATFORM",
+          "status": "CURRENT_STACK",
+          "attention": "NOW",
+          "summary": "Plataforma open source alrededor de PostgreSQL con auth, storage, realtime y APIs.",
+          "application": "Ya forma parte de proyectos tuyos y sigue siendo primera referencia para backends web pequeños/medios.",
+          "benefit": "Acelera producto usando PostgreSQL real sin construir auth/storage/API base desde cero.",
+          "caution": "Revisar RLS, políticas, backups y dependencia de servicios antes de asumir que el backend está seguro.",
+          "repository": "supabase/supabase",
+          "sourceUrl": "https://github.com/supabase/supabase",
+          "tags": [
+            "postgres",
+            "backend",
+            "auth"
+          ]
+        },
+        {
+          "id": "TL-157",
+          "name": "Neon",
+          "kind": "DATABASE_PLATFORM",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "PostgreSQL serverless con branching y separación compute/storage.",
+          "application": "Alternativa para proyectos donde branching de DB, escala a cero o entornos efímeros tengan valor.",
+          "benefit": "Puede mejorar previews y costos en cargas variables.",
+          "caution": "Comparar con Supabase/managed Postgres actual antes de fragmentar infraestructura.",
+          "repository": "neondatabase/neon",
+          "sourceUrl": "https://github.com/neondatabase/neon",
+          "tags": [
+            "postgres",
+            "serverless",
+            "database"
+          ]
+        },
+        {
+          "id": "TL-158",
+          "name": "libSQL / Turso",
+          "kind": "DATABASE_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Fork de SQLite y ecosistema orientado a bases distribuidas/edge.",
+          "application": "Referencia para apps pequeñas, offline-first o edge donde PostgreSQL sea demasiado.",
+          "benefit": "Ofrece modelo SQLite conocido con despliegues ligeros.",
+          "caution": "No reemplazar PostgreSQL cuando relaciones, concurrencia o tooling actual ya encajan.",
+          "repository": "tursodatabase/libsql",
+          "sourceUrl": "https://github.com/tursodatabase/libsql",
+          "tags": [
+            "sqlite",
+            "edge",
+            "database"
+          ]
+        },
+        {
+          "id": "TL-159",
+          "name": "Valkey",
+          "kind": "CACHE_DATABASE",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Data store key-value open source compatible con la clase de usos Redis.",
+          "application": "Candidato para caches, colas o rate limits si necesitamos una opción open source portable.",
+          "benefit": "Evita reimplementar almacenamiento temporal y primitivas de coordinación.",
+          "caution": "Persistencia/configuración y semántica de eviction deben diseñarse según el caso.",
+          "repository": "valkey-io/valkey",
+          "sourceUrl": "https://github.com/valkey-io/valkey",
+          "tags": [
+            "cache",
+            "key-value",
+            "redis"
+          ]
+        },
+        {
+          "id": "TL-160",
+          "name": "MinIO",
+          "kind": "OBJECT_STORAGE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Object storage compatible con APIs S3 para infraestructura propia.",
+          "application": "Referencia si alguna vez necesitamos storage self-hosted de objetos/media.",
+          "benefit": "Permite evitar acoplar código al proveedor de storage en ciertos casos.",
+          "caution": "Self-hosting de datos exige backups, upgrades y disponibilidad; no es automáticamente más barato.",
+          "repository": "minio/minio",
+          "sourceUrl": "https://github.com/minio/minio",
+          "tags": [
+            "storage",
+            "s3",
+            "self-host"
+          ]
+        },
+        {
+          "id": "TL-161",
+          "name": "Airbyte",
+          "kind": "DATA_INTEGRATION",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma open source de conectores ELT para mover datos entre servicios.",
+          "application": "Puede servir si Genova/finanzas/analytics necesitan consolidar muchas fuentes de datos.",
+          "benefit": "Ahorra construir y mantener conectores uno por uno.",
+          "caution": "Los conectores y esquemas cambian; revisar costos y calidad antes de depender de ellos.",
+          "repository": "airbytehq/airbyte",
+          "sourceUrl": "https://github.com/airbytehq/airbyte",
+          "tags": [
+            "etl",
+            "connectors",
+            "data"
+          ]
+        },
+        {
+          "id": "TL-162",
+          "name": "dbt",
+          "kind": "DATA_TRANSFORMATION",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Framework para transformar y testear datos con SQL y modelos versionados.",
+          "application": "Útil si un futuro warehouse/analytics crece y necesita transformaciones reproducibles.",
+          "benefit": "Convierte lógica analítica en código revisable, testeable y documentable.",
+          "caution": "No aporta valor si los datos caben en consultas simples dentro del producto.",
+          "repository": "dbt-labs/dbt",
+          "sourceUrl": "https://github.com/dbt-labs/dbt",
+          "tags": [
+            "analytics",
+            "sql",
+            "data"
+          ]
+        },
+        {
+          "id": "TL-163",
+          "name": "Meltano",
+          "kind": "DATA_INTEGRATION",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Plataforma open source para pipelines y herramientas de datos composables.",
+          "application": "Referencia para ELT/data ops cuando prefiramos componentes versionados en repo.",
+          "benefit": "Puede dar más control que plataformas cerradas.",
+          "caution": "Mayor mantenimiento que soluciones gestionadas; sólo si la flexibilidad importa.",
+          "repository": "meltano/meltano",
+          "sourceUrl": "https://github.com/meltano/meltano",
+          "tags": [
+            "etl",
+            "dataops"
+          ]
+        },
+        {
+          "id": "TL-164",
+          "name": "Metabase",
+          "kind": "BI_ANALYTICS",
+          "status": "ASSESS_NOW",
+          "attention": "WHEN_NEEDED",
+          "summary": "Herramienta open source de BI y dashboards sobre bases de datos.",
+          "application": "Puede dar dashboards internos a Genova/finanzas/clientes sin construir cada gráfico en Next.js.",
+          "benefit": "Acelera análisis ad hoc y autoservicio sobre SQL.",
+          "caution": "Controlar permisos y exposición de datos; no usar dashboards como fuente de verdad transaccional.",
+          "repository": "metabase/metabase",
+          "sourceUrl": "https://github.com/metabase/metabase",
+          "tags": [
+            "bi",
+            "analytics",
+            "sql"
+          ]
+        },
+        {
+          "id": "TL-165",
+          "name": "PostHog",
+          "kind": "PRODUCT_ANALYTICS",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Plataforma de product analytics con eventos, funnels, feature flags y session replay.",
+          "application": "Muy útil si Vida o productos propios necesitan saber qué features realmente se usan y dónde hay fricción.",
+          "benefit": "Puede convertir decisiones de producto en evidencia de comportamiento real.",
+          "caution": "Session replay/events pueden capturar datos sensibles; definir redacción y consentimiento.",
+          "repository": "PostHog/posthog",
+          "sourceUrl": "https://github.com/PostHog/posthog",
+          "tags": [
+            "analytics",
+            "product",
+            "feature-flags"
+          ]
+        },
+        {
+          "id": "TL-166",
+          "name": "Plausible Analytics",
+          "kind": "WEB_ANALYTICS",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Analytics web open source enfocado en simplicidad y privacidad.",
+          "application": "Alternativa para webs de clientes cuando sólo importan métricas claras sin tracking pesado.",
+          "benefit": "Menor complejidad y mejor narrativa de privacidad que suites grandes.",
+          "caution": "Menos profundidad de producto que PostHog/GA; elegir según necesidad.",
+          "repository": "plausible/analytics",
+          "sourceUrl": "https://github.com/plausible/analytics",
+          "tags": [
+            "analytics",
+            "privacy",
+            "web"
+          ]
+        },
+        {
+          "id": "TL-167",
+          "name": "Umami",
+          "kind": "WEB_ANALYTICS",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Analytics web open source simple y self-hostable.",
+          "application": "Referencia para métricas básicas de sitios sin una plataforma grande.",
+          "benefit": "Puede cubrir visitas/referrers/eventos con poca interfaz.",
+          "caution": "Self-hosting añade mantenimiento; comparar con Plausible/GA existente.",
+          "repository": "umami-software/umami",
+          "sourceUrl": "https://github.com/umami-software/umami",
+          "tags": [
+            "analytics",
+            "web",
+            "self-host"
+          ]
+        },
+        {
+          "id": "TL-168",
+          "name": "Matomo",
+          "kind": "WEB_ANALYTICS",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Plataforma de analytics open source con amplio conjunto de funciones.",
+          "application": "Candidato cuando privacidad/self-hosting y analytics web profundo sean requisitos.",
+          "benefit": "Ofrece una alternativa madura a analytics propietarios.",
+          "caution": "Más complejo de operar que soluciones simples.",
+          "repository": "matomo-org/matomo",
+          "sourceUrl": "https://github.com/matomo-org/matomo",
+          "tags": [
+            "analytics",
+            "privacy",
+            "web"
+          ]
+        },
+        {
+          "id": "TL-169",
+          "name": "Formbricks",
+          "kind": "USER_RESEARCH",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma open source para encuestas y feedback de usuarios.",
+          "application": "Puede servir en Vida o productos de clientes para feedback contextual dentro de la app.",
+          "benefit": "Permite recoger señal cualitativa sin construir formularios/segmentación desde cero.",
+          "caution": "Evitar molestar usuarios o convertir feedback en vanity metrics; recolectar sólo lo necesario.",
+          "repository": "formbricks/formbricks",
+          "sourceUrl": "https://github.com/formbricks/formbricks",
+          "tags": [
+            "feedback",
+            "product",
+            "surveys"
+          ]
+        },
+        {
+          "id": "TL-170",
+          "name": "Twenty",
+          "kind": "BUSINESS_APP_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "CRM open source moderno.",
+          "application": "Referencia para UX/arquitectura de CRM y posible herramienta interna futura de Genova.",
+          "benefit": "Puede ahorrar construir gestión básica de leads/clientes desde cero si encaja.",
+          "caution": "Migrar datos/clientes a una plataforma propia exige backups y control de permisos.",
+          "repository": "twentyhq/twenty",
+          "sourceUrl": "https://github.com/twentyhq/twenty",
+          "tags": [
+            "crm",
+            "business",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-171",
+          "name": "Documenso",
+          "kind": "BUSINESS_APP_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Plataforma open source de firma y gestión de documentos.",
+          "application": "Referencia si Genova o un producto necesita flujos de firma electrónica.",
+          "benefit": "Evita construir UX/document workflow complejo desde cero.",
+          "caution": "Validez legal, identidad y jurisdicción deben verificarse antes de uso contractual real.",
+          "repository": "documenso/documenso",
+          "sourceUrl": "https://github.com/documenso/documenso",
+          "tags": [
+            "documents",
+            "signatures",
+            "business"
+          ]
+        },
+        {
+          "id": "TL-172",
+          "name": "Cal.com",
+          "kind": "BUSINESS_APP_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Plataforma open source de scheduling y reservas.",
+          "application": "Puede servir como herramienta o referencia si un cliente necesita turnos/reservas.",
+          "benefit": "Ahorra construir disponibilidad, timezone y booking desde cero.",
+          "caution": "Integraciones de calendario y datos personales requieren permisos claros.",
+          "repository": "calcom/cal.diy",
+          "sourceUrl": "https://github.com/calcom/cal.diy",
+          "tags": [
+            "scheduling",
+            "calendar",
+            "business"
+          ]
+        },
+        {
+          "id": "TL-173",
+          "name": "Dub",
+          "kind": "MARKETING_INFRA",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Infraestructura open source para links, atribución y funcionalidades de marketing.",
+          "application": "Puede servir en campañas de Genova, links medibles o productos con referrals.",
+          "benefit": "Centraliza tracking de enlaces y puede mejorar atribución.",
+          "caution": "Tracking debe respetar privacidad y no duplicar analytics sin motivo.",
+          "repository": "dubinc/dub",
+          "sourceUrl": "https://github.com/dubinc/dub",
+          "tags": [
+            "marketing",
+            "links",
+            "analytics"
+          ]
+        },
+        {
+          "id": "TL-174",
+          "name": "Payload CMS",
+          "kind": "CMS",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "CMS TypeScript code-first que vive cerca de la aplicación.",
+          "application": "Candidato para sitios/clientes que necesitan edición de contenido sin separar demasiado stack.",
+          "benefit": "Encaja con TypeScript y permite modelos/customización dentro del repo.",
+          "caution": "Un CMS añade superficie de auth, migraciones y mantenimiento; no usar para contenido casi estático.",
+          "repository": "payloadcms/payload",
+          "sourceUrl": "https://github.com/payloadcms/payload",
+          "tags": [
+            "cms",
+            "typescript",
+            "nextjs"
+          ]
+        },
+        {
+          "id": "TL-175",
+          "name": "Directus",
+          "kind": "CMS",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Data platform/headless CMS sobre bases SQL existentes.",
+          "application": "Puede exponer administración y APIs sobre datos cuando un cliente necesita backoffice rápido.",
+          "benefit": "Evita construir paneles CRUD comunes desde cero.",
+          "caution": "Revisar permisos y modelo de extensiones; no exponer DB sin políticas estrictas.",
+          "repository": "directus/directus",
+          "sourceUrl": "https://github.com/directus/directus",
+          "tags": [
+            "cms",
+            "admin",
+            "sql"
+          ]
+        },
+        {
+          "id": "TL-176",
+          "name": "Strapi",
+          "kind": "CMS",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Headless CMS open source basado en JavaScript/TypeScript.",
+          "application": "Referencia/candidato para contenido estructurado con panel editorial.",
+          "benefit": "Acelera APIs y administración de contenido.",
+          "caution": "Solapa con Payload/Directus; elegir uno sólo si aparece caso real.",
+          "repository": "strapi/strapi",
+          "sourceUrl": "https://github.com/strapi/strapi",
+          "tags": [
+            "cms",
+            "javascript"
+          ]
+        },
+        {
+          "id": "TL-177",
+          "name": "Medusa",
+          "kind": "COMMERCE_PLATFORM",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Plataforma open source modular para commerce/backends de tiendas.",
+          "application": "Referencia fuerte para la tienda Next.js + pagos si los requisitos crecen más allá de un CRUD simple.",
+          "benefit": "Puede evitar construir inventario, carts y workflows de commerce desde cero.",
+          "caution": "Puede ser mucho más sistema del necesario; Mercado Pago/localización requieren verificación específica.",
+          "repository": "medusajs/medusa",
+          "sourceUrl": "https://github.com/medusajs/medusa",
+          "tags": [
+            "commerce",
+            "ecommerce",
+            "backend"
+          ]
+        },
+        {
+          "id": "TL-178",
+          "name": "Saleor",
+          "kind": "COMMERCE_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Plataforma de commerce headless orientada a APIs/GraphQL.",
+          "application": "Referencia para arquitecturas de ecommerce más complejas.",
+          "benefit": "Muestra patrones maduros de catálogo, checkout y promociones.",
+          "caution": "Infraestructura y modelo operativo probablemente excesivos para tiendas pequeñas.",
+          "repository": "saleor/saleor",
+          "sourceUrl": "https://github.com/saleor/saleor",
+          "tags": [
+            "commerce",
+            "graphql"
+          ]
+        },
+        {
+          "id": "TL-179",
+          "name": "Vendure",
+          "kind": "COMMERCE_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Framework headless de commerce TypeScript extensible.",
+          "application": "Especialmente interesante como referencia por alineación con TypeScript.",
+          "benefit": "Puede reutilizar conceptos/plugins si un ecommerce requiere mucha lógica custom.",
+          "caution": "No adoptar sin comparar costo de integrar pagos/localización con solución propia.",
+          "repository": "vendurehq/vendure",
+          "sourceUrl": "https://github.com/vendurehq/vendure",
+          "tags": [
+            "commerce",
+            "typescript"
+          ]
+        },
+        {
+          "id": "TL-180",
+          "name": "Appwrite",
+          "kind": "BACKEND_PLATFORM",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Backend open source con auth, databases, storage y functions.",
+          "application": "Referencia/alternativa a Supabase para entender trade-offs de BaaS.",
+          "benefit": "Da otro diseño de backend integrado y opción self-hosted.",
+          "caution": "No fragmentar stack actual sin un requisito que Supabase no cubra.",
+          "repository": "appwrite/appwrite",
+          "sourceUrl": "https://github.com/appwrite/appwrite",
+          "tags": [
+            "backend",
+            "auth",
+            "storage"
+          ]
+        },
+        {
+          "id": "TL-181",
+          "name": "Bulletproof React",
+          "kind": "ARCHITECTURE_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Repositorio de referencia con estructura y buenas prácticas para aplicaciones React.",
+          "application": "Útil al iniciar/refactorizar proyectos para comparar organización, boundaries y convenciones.",
+          "benefit": "Evita inventar estructura desde cero y aporta checklist arquitectónica.",
+          "caution": "Es una opinión de arquitectura, no una norma; adaptar al tamaño y framework real.",
+          "repository": "alan2207/bulletproof-react",
+          "sourceUrl": "https://github.com/alan2207/bulletproof-react",
+          "tags": [
+            "react",
+            "architecture",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-182",
+          "name": "Next.js",
+          "kind": "FRAMEWORK_REFERENCE",
+          "status": "CURRENT_STACK",
+          "attention": "NOW",
+          "summary": "Framework React que ya forma parte de tu stack de producto.",
+          "application": "Además de usarlo, su propio repo/docs sirven como referencia para routing, rendering, caching y performance.",
+          "benefit": "Mantenerse cerca de patrones oficiales reduce soluciones caseras frágiles.",
+          "caution": "Cambios de versión pueden alterar comportamiento; verificar docs de la versión real.",
+          "repository": "vercel/next.js",
+          "sourceUrl": "https://github.com/vercel/next.js",
+          "tags": [
+            "nextjs",
+            "react",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-183",
+          "name": "Vercel Commerce",
+          "kind": "ARCHITECTURE_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Implementación de referencia de ecommerce con Next.js mantenida en el ecosistema Vercel.",
+          "application": "Muy útil para estudiar patrones de catálogo, cart, caching y storefront antes de reinventarlos.",
+          "benefit": "Da ejemplos cercanos a tu stack para la futura/reconstruida tienda.",
+          "caution": "Es referencia, no plantilla universal; pagos y backend pueden diferir de tus necesidades.",
+          "repository": "vercel/commerce",
+          "sourceUrl": "https://github.com/vercel/commerce",
+          "tags": [
+            "nextjs",
+            "commerce",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-184",
+          "name": "Create T3 App",
+          "kind": "ARCHITECTURE_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Starter/opiniones para aplicaciones TypeScript full-stack.",
+          "application": "Referencia para ver cómo otros combinan TypeScript, auth, DB y tooling con contratos fuertes.",
+          "benefit": "Puede inspirar setup coherente en proyectos nuevos.",
+          "caution": "No copiar stack completo si la app necesita menos piezas.",
+          "repository": "t3-oss/create-t3-app",
+          "sourceUrl": "https://github.com/t3-oss/create-t3-app",
+          "tags": [
+            "typescript",
+            "fullstack",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-185",
+          "name": "Vercel AI Chatbot",
+          "kind": "ARCHITECTURE_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "NOW",
+          "summary": "Aplicación de referencia para chat/IA construida con Next.js y AI SDK.",
+          "application": "Útil para estudiar streaming, tools, persistencia y UX de productos IA.",
+          "benefit": "Permite reutilizar patrones probados cuando agreguemos IA a una app.",
+          "caution": "Revisar auth/data model/model providers y no copiar secretos/config sin entenderlos.",
+          "repository": "vercel/chatbot",
+          "sourceUrl": "https://github.com/vercel/chatbot",
+          "tags": [
+            "nextjs",
+            "ai",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-186",
+          "name": "Vercel Platforms",
+          "kind": "ARCHITECTURE_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Ejemplo de arquitectura multi-tenant con Next.js.",
+          "application": "Referencia si alguna idea futura necesita tenants/subdominios/clientes aislados.",
+          "benefit": "Aporta patrones concretos de routing, tenancy y deploy.",
+          "caution": "Multi-tenancy aumenta mucho la seguridad/aislamiento; no anticiparlo sin necesidad.",
+          "repository": "vercel/platforms",
+          "sourceUrl": "https://github.com/vercel/platforms",
+          "tags": [
+            "multi-tenant",
+            "nextjs",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-187",
+          "name": "Maybe Finance",
+          "kind": "PRODUCT_REFERENCE",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Aplicación open source de finanzas personales con producto y dominio reales.",
+          "application": "Referencia directa para la idea futura de software financiero/inversiones.",
+          "benefit": "Permite estudiar modelado, UX y features existentes antes de diseñar desde cero.",
+          "caution": "No asumir que su lógica financiera/regulatoria aplica a Argentina; usar como inspiración.",
+          "repository": "maybe-finance/maybe",
+          "sourceUrl": "https://github.com/maybe-finance/maybe",
+          "tags": [
+            "finance",
+            "product",
+            "reference"
+          ]
+        },
+        {
+          "id": "TL-188",
+          "name": "FFmpeg",
+          "kind": "MEDIA_TOOLING",
+          "status": "REFERENCE",
+          "attention": "WHEN_NEEDED",
+          "summary": "Toolkit fundamental para procesar audio y video por línea de comandos/APIs.",
+          "application": "Muy útil para automatizar transcodes, cortes, extracción de audio o pipelines de contenido de Genova.",
+          "benefit": "Puede convertir tareas manuales de edición/conversión en procesos reproducibles.",
+          "caution": "Comandos complejos y codecs/licencias requieren verificación por caso.",
+          "repository": "FFmpeg/FFmpeg",
+          "sourceUrl": "https://github.com/FFmpeg/FFmpeg",
+          "tags": [
+            "video",
+            "audio",
+            "automation"
+          ]
+        },
+        {
+          "id": "TL-189",
+          "name": "Remotion",
+          "kind": "MEDIA_TOOLING",
+          "status": "WATCH",
+          "attention": "NOW",
+          "summary": "Framework para crear videos programáticamente con React.",
+          "application": "Muy alineado con Genova para plantillas, variantes masivas, intros/outros o contenido basado en datos.",
+          "benefit": "Permite reutilizar habilidades React para automatizar parte de producción audiovisual.",
+          "caution": "No reemplaza edición creativa; render y assets pueden tener costo/tiempo.",
+          "repository": "remotion-dev/remotion",
+          "sourceUrl": "https://github.com/remotion-dev/remotion",
+          "tags": [
+            "video",
+            "react",
+            "automation"
+          ]
+        },
+        {
+          "id": "TL-190",
+          "name": "yt-dlp",
+          "kind": "MEDIA_TOOLING",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Herramienta de descarga/metadata para múltiples plataformas de video.",
+          "application": "Puede servir en workflows autorizados de archivo, análisis o ingestión de material propio.",
+          "benefit": "Ahorra integraciones específicas para obtener media/metadata.",
+          "caution": "Usar sólo cuando derechos, términos de servicio y autorización permitan la descarga.",
+          "repository": "yt-dlp/yt-dlp",
+          "sourceUrl": "https://github.com/yt-dlp/yt-dlp",
+          "tags": [
+            "video",
+            "metadata",
+            "tooling"
+          ]
+        },
+        {
+          "id": "TL-191",
+          "name": "faster-whisper",
+          "kind": "MEDIA_AI",
+          "status": "WATCH",
+          "attention": "WHEN_NEEDED",
+          "summary": "Implementación eficiente de Whisper para transcripción.",
+          "application": "Puede automatizar transcripción de entrevistas, reels, clases o audios propios.",
+          "benefit": "Reduce tiempo de transcripción y habilita búsqueda/resumen posterior.",
+          "caution": "Revisar precisión, idioma, hardware y privacidad del audio.",
+          "repository": "SYSTRAN/faster-whisper",
+          "sourceUrl": "https://github.com/SYSTRAN/faster-whisper",
+          "tags": [
+            "speech",
+            "transcription",
+            "ai"
+          ]
+        },
+        {
+          "id": "TL-192",
+          "name": "OpenCV",
+          "kind": "COMPUTER_VISION",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Biblioteca madura de visión por computadora y procesamiento de imágenes.",
+          "application": "Referencia para futuros proyectos de robótica/TPA, media o análisis visual clásico.",
+          "benefit": "Ofrece algoritmos deterministas sin usar un modelo generativo para todo.",
+          "caution": "Tiene curva de aprendizaje y APIs amplias; recuperar sólo módulos relevantes.",
+          "repository": "opencv/opencv",
+          "sourceUrl": "https://github.com/opencv/opencv",
+          "tags": [
+            "computer-vision",
+            "images",
+            "robotics"
+          ]
+        },
+        {
+          "id": "TL-193",
+          "name": "ComfyUI",
+          "kind": "GENERATIVE_MEDIA",
+          "status": "REFERENCE",
+          "attention": "LIBRARY",
+          "summary": "Interfaz/node graph open source para workflows de generación de imágenes.",
+          "application": "Puede inspirar o soportar pipelines visuales experimentales de Genova cuando se necesite control fino.",
+          "benefit": "Hace reproducibles pipelines de modelos/edición visual complejos.",
+          "caution": "Modelos, licencias, VRAM y provenance de assets requieren revisión antes de uso comercial.",
+          "repository": "Comfy-Org/ComfyUI",
+          "sourceUrl": "https://github.com/Comfy-Org/ComfyUI",
+          "tags": [
+            "images",
+            "generative-ai",
+            "creative"
+          ]
+        }
+      ]
+    }
+  ]
+}
