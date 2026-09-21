@@ -26,7 +26,7 @@ function isConfidence(value: unknown): value is ProfessionalConfidence {
   return typeof value === 'string' && CONFIDENCE.has(value as ProfessionalConfidence);
 }
 
-function everyArray<T>(value: unknown, predicate: (item: unknown) => item is T): value is T[] {
+function everyArray(value: unknown, predicate: (item: unknown) => boolean): boolean {
   return Array.isArray(value) && value.every(predicate);
 }
 
