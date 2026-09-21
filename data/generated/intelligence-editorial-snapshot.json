@@ -38,9 +38,7 @@
       "publishedAt": "2026-09-21",
       "readingMinutes": 5,
       "articleRef": "AI/editorial/articles/carrera/por-que-tu-siguiente-salto-no-parece-ser-otro-framework.json",
-      "professionalRefs": [
-        "priority:Producción / reliability / observabilidad"
-      ]
+      "professionalRefs": ["priority:Producción / reliability / observabilidad"]
     },
     {
       "id": "INT-TEC-2026-09-21-01",
@@ -51,9 +49,7 @@
       "publishedAt": "2026-09-21",
       "readingMinutes": 5,
       "articleRef": "AI/editorial/articles/tecnologia/opentelemetry-explicado-sin-humo.json",
-      "professionalRefs": [
-        "technology:AIT-006"
-      ]
+      "professionalRefs": ["technology:AIT-006"]
     },
     {
       "id": "INT-PAS-2026-09-21-01",
@@ -79,7 +75,5 @@
     }
   ],
   "editorialNote": "Intelligence explains what is happening, what it means and why. Professional owns current decisions. Source Radar V1 may add up to three current specials without creating reading debt.",
-  "specials": [
-    "INT-TEC-2026-09-21-02"
-  ]
+  "specials": ["INT-TEC-2026-09-21-02"]
 }
