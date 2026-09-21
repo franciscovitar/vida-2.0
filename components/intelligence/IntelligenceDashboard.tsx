@@ -153,20 +153,20 @@ export function IntelligenceDashboard({
           }
         />
 
-        <div className={styles.heroBrief}>
-          <div className={styles.readingMeta}>
+        <div className={styles['hero-brief']}>
+          <div className={styles['reading-meta']}>
             <Badge domain="neutral" variant="outline">
               ~30 seg
             </Badge>
             <span>{e.aiBrief.readingMinutes} min si querés contexto</span>
           </div>
           <h3>{e.aiBrief.title}</h3>
-          <p className={styles.bigThing}>{e.aiBrief.oneBigThing}</p>
-          <div className={styles.quickDecision}>
+          <p className={styles['big-thing']}>{e.aiBrief.oneBigThing}</p>
+          <div className={styles['quick-decision']}>
             <strong>Por qué te importa</strong>
             <p>{e.aiBrief.whyItMatters}</p>
           </div>
-          <div className={styles.quickDecision}>
+          <div className={styles['quick-decision']}>
             <strong>Qué hacés</strong>
             <p>{e.aiBrief.actionText}</p>
           </div>
@@ -174,8 +174,8 @@ export function IntelligenceDashboard({
 
         <details className={styles.details}>
           <summary>Leer el brief completo (~{e.aiBrief.readingMinutes} min)</summary>
-          <div className={styles.detailsBody}>
-            <div className={styles.pointGrid}>
+          <div className={styles['details-body']}>
+            <div className={styles['point-grid']}>
               {e.aiBrief.quickPoints.map((point) => (
                 <article key={point.title}>
                   <strong>{point.title}</strong>
@@ -230,13 +230,13 @@ export function IntelligenceDashboard({
             icon={BookOpen}
             domain="learning"
             action={
-              <Link href="/professional" className={styles.inlineLink}>
+              <Link href="/professional" className={styles['inline-link']}>
                 Ver detalle
               </Link>
             }
           />
           <p className={styles.direction}>{p.forecast.direction}</p>
-          <ol className={styles.priorityList}>
+          <ol className={styles['priority-list']}>
             {p.priorities.slice(0, 3).map((item) => (
               <li key={item.rank}>
                 <span>{item.rank}</span>
@@ -247,7 +247,7 @@ export function IntelligenceDashboard({
               </li>
             ))}
           </ol>
-          <div className={styles.noStudy}>
+          <div className={styles['no-study']}>
             <strong>La regla actual</strong>
             <p>
               No sumar cursos por reflejo: primero construir o verificar evidencia real cuando eso
@@ -265,10 +265,10 @@ export function IntelligenceDashboard({
             domain="productivity"
           />
           {radarTech.length ? (
-            <ul className={styles.techList}>
+            <ul className={styles['tech-list']}>
               {radarTech.map((item) => (
                 <li key={item.id}>
-                  <div className={styles.itemHead}>
+                  <div className={styles['item-head']}>
                     <strong>{item.name}</strong>
                     <Badge
                       domain={item.disposition === 'HOLD' ? 'neutral' : 'productivity'}
@@ -300,10 +300,10 @@ export function IntelligenceDashboard({
           icon={LineChart}
           domain="projects"
         />
-        <div className={styles.pasGrid}>
+        <div className={styles['pas-grid']}>
           {e.pasUpdates.map((item) => (
             <article key={item.id}>
-              <div className={styles.itemHead}>
+              <div className={styles['item-head']}>
                 <strong>{item.title}</strong>
                 <Badge domain="projects" variant="outline">
                   {humanize(item.status)}
