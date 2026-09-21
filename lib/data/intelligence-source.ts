@@ -5,10 +5,7 @@ import {
   loadIntelligenceArticle,
   loadIntelligenceEditorialSnapshot,
 } from '@/lib/intelligence/snapshot';
-import type {
-  IntelligenceArticleData,
-  IntelligenceFront,
-} from '@/types/intelligence-editorial';
+import type { IntelligenceArticleData, IntelligenceFront } from '@/types/intelligence-editorial';
 
 export async function getIntelligenceHubData() {
   await requireAuthorizedSession();

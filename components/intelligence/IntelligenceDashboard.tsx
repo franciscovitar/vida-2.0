@@ -3,10 +3,7 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import {
-  FRONTS,
-  intelligenceArticleHref,
-} from '@/lib/intelligence/contract';
+import { FRONTS, intelligenceArticleHref } from '@/lib/intelligence/contract';
 import type {
   IntelligenceArticleSummary,
   IntelligenceEditorialData,
@@ -21,7 +18,11 @@ const FRONT_META: Record<
 > = {
   ia: { label: 'IA esta semana', eyebrow: 'Qué está cambiando', icon: Brain },
   carrera: { label: 'Carrera & futuro', eyebrow: 'Por qué aparece en tu radar', icon: BookOpen },
-  tecnologia: { label: 'Tecnología explicada', eyebrow: 'Entender antes de adoptar', icon: Workflow },
+  tecnologia: {
+    label: 'Tecnología explicada',
+    eyebrow: 'Entender antes de adoptar',
+    icon: Workflow,
+  },
   pas: { label: 'Tu PAS', eyebrow: 'Qué mejoró y qué vas a notar', icon: LineChart },
 };
 
@@ -59,7 +60,11 @@ export function IntelligenceDashboard({ editorial }: { editorial: IntelligenceEd
   return (
     <div className={styles.stack}>
       {editorial.notice ? (
-        <div className={styles.notice} data-tone={editorial.stale ? 'warning' : 'info'} role="status">
+        <div
+          className={styles.notice}
+          data-tone={editorial.stale ? 'warning' : 'info'}
+          role="status"
+        >
           {editorial.stale ? (
             <CircleAlert size={16} aria-hidden="true" />
           ) : (
@@ -72,8 +77,7 @@ export function IntelligenceDashboard({ editorial }: { editorial: IntelligenceEd
       <div className={styles['cover-intro']}>
         <p>Acá entendés qué está cambiando.</p>
         <span>
-          Para decidir qué hacer ahora, está{' '}
-          <Link href="/professional">Profesional</Link>.
+          Para decidir qué hacer ahora, está <Link href="/professional">Profesional</Link>.
         </span>
       </div>
 
@@ -105,7 +109,9 @@ export function IntelligenceDashboard({ editorial }: { editorial: IntelligenceEd
       <div className={styles['archive-row']}>
         <div>
           <strong>Archivo editorial</strong>
-          <p>Lo anterior queda disponible como biblioteca. No hay pendientes ni deuda de lectura.</p>
+          <p>
+            Lo anterior queda disponible como biblioteca. No hay pendientes ni deuda de lectura.
+          </p>
         </div>
         <Link className={styles['archive-link']} href="/inteligencia/archivo">
           Abrir archivo →

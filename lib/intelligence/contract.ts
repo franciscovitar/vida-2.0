@@ -161,7 +161,10 @@ export function isIntelligenceEditorialSnapshotStale(
   return ageMs > snapshot.source.staleAfterDays * 24 * 60 * 60 * 1000;
 }
 
-export function isIntelligenceArticleStale(article: IntelligenceArticle, now = new Date()): boolean {
+export function isIntelligenceArticleStale(
+  article: IntelligenceArticle,
+  now = new Date(),
+): boolean {
   const reverify = new Date(`${article.freshness.reverifyAfter}T23:59:59Z`);
   return Number.isNaN(reverify.getTime()) || now.getTime() > reverify.getTime();
 }

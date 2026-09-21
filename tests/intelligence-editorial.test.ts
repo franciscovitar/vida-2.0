@@ -172,13 +172,7 @@ test('INT-10. artículo vencido sigue disponible con advertencia', () => {
   assert.ok(summary);
 
   const raw = readFileSync(
-    join(
-      generatedRoot,
-      'intelligence',
-      'articles',
-      summary.front,
-      `${summary.slug}.json`,
-    ),
+    join(generatedRoot, 'intelligence', 'articles', summary.front, `${summary.slug}.json`),
     'utf8',
   );
 

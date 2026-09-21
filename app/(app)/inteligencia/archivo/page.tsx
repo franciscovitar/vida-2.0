@@ -69,7 +69,9 @@ export default async function InteligenciaArchivoPage() {
       <div className={styles.stack}>
         <div className={styles['cover-intro']}>
           <p>Lo anterior queda; no se convierte en una tarea.</p>
-          <span>La portada muestra lo actual. Acá simplemente podés volver a una explicación anterior.</span>
+          <span>
+            La portada muestra lo actual. Acá simplemente podés volver a una explicación anterior.
+          </span>
         </div>
 
         <ul className={styles['archive-list']}>

@@ -3,10 +3,7 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import type {
-  IntelligenceArticleData,
-  IntelligenceFront,
-} from '@/types/intelligence-editorial';
+import type { IntelligenceArticleData, IntelligenceFront } from '@/types/intelligence-editorial';
 
 import styles from './IntelligenceDashboard.module.scss';
 
@@ -86,8 +83,8 @@ export function IntelligenceArticleView({ data }: { data: IntelligenceArticleDat
         <aside className={styles['decision-card']}>
           <strong>La decisión actual vive en Profesional</strong>
           <p>
-            Este artículo explica el contexto. Prioridad, estado y acción vigente se actualizan en la
-            superficie ejecutiva.
+            Este artículo explica el contexto. Prioridad, estado y acción vigente se actualizan en
+            la superficie ejecutiva.
           </p>
           <Link className={styles['article-link']} href="/professional">
             Ver Profesional →
