@@ -86,6 +86,8 @@ const OUTLOOK_LABELS: Record<string, string> = {
 const TECHNOLOGY_LABELS: Record<string, string> = {
   CURRENT_STACK: 'Ya lo usás',
   ASSESS: 'Vale la pena evaluar',
+  ASSESS_CONDITIONALLY: 'Evaluar si aparece el caso',
+  ASSESS_ONLY_IF_IT_REDUCES_FRICTION_OR_COST: 'Evaluar sólo si mejora tiempo o costo',
   HOLD: 'Esperar por ahora',
 };
 
