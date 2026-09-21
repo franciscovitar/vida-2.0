@@ -70,8 +70,10 @@ export function IntelligenceDashboard({
   const p = professional.snapshot;
   const now = p.nowMoves[0] ?? null;
   const learn = p.priorities[0] ?? null;
-  const trial = p.technologies.find((item) => item.disposition.includes('TRIAL')) ?? null;
-  const assess = p.technologies.find((item) => item.disposition.includes('ASSESS')) ?? null;
+  const trial =
+    p.technologies.find((item) => item.disposition.includes('TRIAL')) ?? null;
+  const assess =
+    p.technologies.find((item) => item.disposition.includes('ASSESS')) ?? null;
   const hold = p.technologies.find((item) => item.disposition === 'HOLD') ?? null;
   const radarTech = p.technologies
     .filter((item) => item.disposition !== 'CURRENT_STACK')
@@ -212,7 +214,12 @@ export function IntelligenceDashboard({
             <div className={styles.sources}>
               <strong>Fuentes</strong>
               {e.aiBrief.sources.map((source) => (
-                <a key={source.url} href={source.url} target="_blank" rel="noreferrer">
+                <a
+                  key={source.url}
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {source.title}
                 </a>
               ))}
@@ -331,7 +338,8 @@ export function IntelligenceDashboard({
           PAS <code>{e.source.commit.slice(0, 8)}</code> · editorial {e.source.observedAt}
         </span>
         <span>
-          Sin unread · sin backlog · {editorial.stale || professional.stale ? 'necesita refresh' : 'vigente'}
+          Sin pendientes de lectura ·{' '}
+          {editorial.stale || professional.stale ? 'necesita refresh' : 'vigente'}
         </span>
       </footer>
     </div>

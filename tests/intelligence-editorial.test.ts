@@ -91,7 +91,10 @@ test('INT-05. UI conserva cuatro frentes y evita mecánicas de deuda', () => {
 });
 
 test('INT-06. Carrera/Tech siguen viniendo del snapshot profesional', () => {
-  const route = readFileSync(join(process.cwd(), 'lib/data/intelligence-source.ts'), 'utf8');
+  const route = readFileSync(
+    join(process.cwd(), 'lib/data/intelligence-source.ts'),
+    'utf8',
+  );
   const dashboard = readFileSync(
     join(process.cwd(), 'components/intelligence/IntelligenceDashboard.tsx'),
     'utf8',
@@ -103,8 +106,14 @@ test('INT-06. Carrera/Tech siguen viniendo del snapshot profesional', () => {
 });
 
 test('INT-07. ruta es autenticada, dinámica y visible en navegación', () => {
-  const route = readFileSync(join(process.cwd(), 'app/(app)/inteligencia/page.tsx'), 'utf8');
-  const source = readFileSync(join(process.cwd(), 'lib/data/intelligence-source.ts'), 'utf8');
+  const route = readFileSync(
+    join(process.cwd(), 'app/(app)/inteligencia/page.tsx'),
+    'utf8',
+  );
+  const source = readFileSync(
+    join(process.cwd(), 'lib/data/intelligence-source.ts'),
+    'utf8',
+  );
   const nav = readFileSync(join(process.cwd(), 'lib/constants/navigation.ts'), 'utf8');
 
   assert.match(route, /export const dynamic = 'force-dynamic'/);
