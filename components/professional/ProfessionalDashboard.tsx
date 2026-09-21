@@ -143,7 +143,7 @@ function ExplainerLink({ article }: { article: IntelligenceArticleSummary | null
 
   return (
     <Link className={styles['explainer-link']} href={intelligenceArticleHref(article)}>
-      Entender el contexto →
+      Entender por qué →
     </Link>
   );
 }
