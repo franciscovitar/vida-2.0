@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "source": {
     "repository": "franciscovitar/personal-ai-system",
-    "ref": "feat/technology-library-v1",
-    "commit": "005d119e41f22365225c56b9f272ef3676a0f28c",
+    "ref": "main",
+    "commit": "9ac22c22059c6cc93ade7506f3a257ade0ddaa14",
     "generatedAt": "2026-09-21",
     "observedAt": "2026-09-21",
     "staleAfterDays": 45,
