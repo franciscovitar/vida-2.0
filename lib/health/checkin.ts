@@ -65,7 +65,7 @@ export const HEALTH_CHECKIN_WRITE_MESSAGES: Readonly<Record<HealthCheckinWriteCo
   'invalid-value': 'Revisá los valores del check-in e intentá de nuevo.',
   'invalid-schema': 'Health Check-ins no coincide con el esquema esperado.',
   'duplicate-date': 'Hay más de una fila para hoy. No se guardó ningún cambio.',
-  'unauthorized-spreadsheet': 'Health Check-in V1 sólo puede escribir en DEV/Preview.',
+  'unauthorized-spreadsheet': 'Health Check-in V1 no está habilitado para este destino.',
   'permission-error': 'La integración no tiene permiso para guardar el check-in.',
   'write-error': 'No se pudo guardar el check-in.',
   'verification-failed': 'El guardado no pudo verificarse. No se asumió éxito.',
@@ -381,8 +381,9 @@ export async function upsertHealthCheckinWithPort(
   const target = resolveWriteTarget(options, operationId);
   if (!('target' in target)) return target;
 
-  // Health Check-in V1 is deliberately DEV/Preview-only. Production remains a separate gate.
-  if (target.target !== 'dev' || !target.writesAllowed) {
+  // Production is enabled only through the existing resolved target gate:
+  // VERCEL_ENV=production, target=prod and GOOGLE_SHEETS_ALLOW_PROD_WRITES=true.
+  if (!target.writesAllowed) {
     return fail('unauthorized-spreadsheet', operationId);
   }
 

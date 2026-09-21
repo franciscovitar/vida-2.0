@@ -22,12 +22,12 @@ function mapStatus(
   return status >= 400 && status < 500 ? 'write-error' : 'read-error';
 }
 
-async function withDevSheetAuth(): Promise<
+async function withSheetAuth(): Promise<
   | { ok: true; token: string; spreadsheetId: string }
   | { ok: false; code: 'not-configured' | 'auth-error' | 'permission-error' | 'write-error' }
 > {
   const config = getGoogleConfig();
-  if (!config.ok || config.config.target !== 'dev' || !config.config.writesAllowed) {
+  if (!config.ok || !config.config.writesAllowed) {
     return { ok: false, code: 'not-configured' };
   }
 
@@ -52,7 +52,7 @@ async function withDevSheetAuth(): Promise<
 
 export const googleHealthCheckinSheetPort: HealthCheckinSheetPort = {
   async readAll() {
-    const auth = await withDevSheetAuth();
+    const auth = await withSheetAuth();
     if (!auth.ok) {
       const code = auth.code === 'write-error' ? 'read-error' : auth.code;
       return { ok: false, code };
@@ -91,7 +91,7 @@ export const googleHealthCheckinSheetPort: HealthCheckinSheetPort = {
       return { ok: false, code: 'write-error' };
     }
 
-    const auth = await withDevSheetAuth();
+    const auth = await withSheetAuth();
     if (!auth.ok) return auth;
 
     const url =
@@ -139,12 +139,12 @@ export async function loadHealthCheckinSnapshot(
   targetDate: string = todayInBuenosAires(),
 ): Promise<HealthCheckinSnapshot> {
   const config = getGoogleConfig();
-  if (!config.ok || config.config.target !== 'dev') {
+  if (!config.ok) {
     return {
       targetDate,
       writable: false,
       state: 'unavailable',
-      notice: 'Health Check-in V1 está habilitado sólo en DEV/Preview durante este gate.',
+      notice: 'Health Check-in V1 no está disponible para este destino.',
       today: null,
     };
   }
@@ -157,8 +157,8 @@ export async function loadHealthCheckinSnapshot(
       state: read.code === 'read-error' || read.code === 'auth-error' ? 'error' : 'unavailable',
       notice:
         read.code === 'missing-tab'
-          ? 'Falta la pestaña DEV Health Check-ins.'
-          : 'No se pudo leer Health Check-ins en DEV.',
+          ? 'Falta la pestaña Health Check-ins.'
+          : 'No se pudo leer Health Check-ins.',
       today: null,
     };
   }
@@ -179,7 +179,7 @@ export async function loadHealthCheckinSnapshot(
 
   return {
     targetDate,
-    writable: true,
+    writable: config.config.writesAllowed,
     state: parsed.today ? 'ready' : 'empty',
     notice: null,
     today: parsed.today,

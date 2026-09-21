@@ -91,7 +91,7 @@ function input(overrides: Record<string, unknown> = {}) {
   } as Parameters<typeof upsertHealthCheckinWithPort>[0];
 }
 
-test('HC1. el contrato DEV tiene exactamente las 11 columnas canónicas', () => {
+test('HC1. el contrato tiene exactamente las 11 columnas canónicas', () => {
   assert.equal(HEALTH_CHECKIN_TAB, 'Health Check-ins');
   assert.deepEqual(HEALTH_CHECKIN_HEADERS, [
     'Date',
@@ -233,7 +233,7 @@ test('HC8. schema incorrecto falla cerrado sin escribir', async () => {
   assert.equal(port.writes.length, 0);
 });
 
-test('HC9. Production queda hard-blocked incluso si el flag general permite writes', async () => {
+test('HC9. Production permite escribir sólo con target y flag de producción resueltos', async () => {
   const prod = resolveSpreadsheetTarget({
     GOOGLE_SHEETS_TARGET: 'prod',
     GOOGLE_SHEETS_DEV_ID: DEV_ID,
@@ -250,9 +250,11 @@ test('HC9. Production queda hard-blocked incluso si el flag general permite writ
     resolved: prod,
   });
 
-  assert.equal(result.ok, false);
-  if (!result.ok) assert.equal(result.code, 'unauthorized-spreadsheet');
-  assert.equal(port.writes.length, 0);
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  assert.equal(result.corrected, false);
+  assert.equal(result.replay, false);
+  assert.equal(port.writes.length, 1);
 });
 
 test('HC10. Action exige sesión y el puerto no usa append ni operaciones estructurales', () => {
