@@ -56,19 +56,20 @@ test('INT-03. frescura del índice se hace visible sin borrar el archivo', () =>
   assert.equal(stale.status, 'ready');
   assert.equal(stale.stale, true);
   assert.match(stale.notice ?? '', /refresh/i);
-  assert.equal(stale.snapshot?.archive.length, 4);
+  assert.equal(stale.snapshot?.archive.length, 5);
 });
 
 test('INT-04. current resuelve al archivo y cada artículo coincide con provenance', () => {
   const snapshot = parseIntelligenceEditorialSnapshot(JSON.parse(snapshotText()));
   assert.ok(snapshot);
 
-  for (const [front, articleId] of Object.entries(snapshot.current)) {
+  const requiredIds = [...Object.values(snapshot.current), ...snapshot.specials];
+
+  for (const articleId of requiredIds) {
     const summary: IntelligenceArticleSummary | undefined = snapshot.archive.find(
       (item) => item.id === articleId,
     );
     assert.ok(summary);
-    assert.equal(summary.front, front);
 
     const path = join(
       generatedRoot,
@@ -104,6 +105,7 @@ test('INT-05. portada es editorial y no repite el dashboard Profesional', () => 
   assert.match(source, /Carrera & futuro/);
   assert.match(source, /Tecnología explicada/);
   assert.match(source, /Tu PAS/);
+  assert.match(source, /Especiales recientes/);
   assert.match(source, /Archivo editorial/);
   assert.doesNotMatch(source, /Tu radar ahora|Carrera & Skills|Tech & Open Source Radar/);
   assert.doesNotMatch(source, /\.priorities|\.technologies|nowMoves/);
@@ -186,4 +188,20 @@ test('INT-10. artículo vencido sigue disponible con advertencia', () => {
   assert.equal(stale.stale, true);
   assert.ok(stale.article);
   assert.match(stale.notice ?? '', /revalidación/i);
+});
+
+test('INT-11. especiales están acotados y resuelven sólo a artículos archivados', () => {
+  const parsed = parseIntelligenceEditorialSnapshot(JSON.parse(snapshotText()));
+  assert.ok(parsed);
+  assert.ok(parsed.specials.length <= 3);
+  assert.deepEqual(parsed.specials, ['INT-TEC-2026-09-21-02']);
+
+  for (const id of parsed.specials) {
+    assert.ok(parsed.archive.some((item) => item.id === id));
+  }
+
+  const jev = parsed.archive.find((item) => item.id === 'INT-TEC-2026-09-21-02');
+  assert.ok(jev);
+  assert.equal(jev.front, 'tecnologia');
+  assert.equal(jev.slug, 'jev-una-ia-que-decide-en-vez-de-escribir');
 });

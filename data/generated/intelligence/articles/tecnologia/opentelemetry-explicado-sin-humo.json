@@ -107,11 +107,13 @@
       "observedAt": "2026-09-18"
     }
   ],
-  "professionalRefs": ["technology:AIT-006"],
+  "professionalRefs": [
+    "technology:AIT-006"
+  ],
   "source": {
     "repository": "franciscovitar/personal-ai-system",
-    "ref": "main",
-    "commit": "8b572b4e327f3cc13713e88226e532534aaf7d02",
+    "ref": "feat/intelligence-source-radar-v1",
+    "commit": "4f7d3e780a5c5e9d1f8bfcd531aee55707c94492",
     "canonicalRef": "AI/editorial/articles/tecnologia/opentelemetry-explicado-sin-humo.json"
   }
 }

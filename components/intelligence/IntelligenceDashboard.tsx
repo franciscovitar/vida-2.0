@@ -36,6 +36,15 @@ function currentArticles(data: IntelligenceEditorialData): IntelligenceArticleSu
   });
 }
 
+function specialArticles(data: IntelligenceEditorialData): IntelligenceArticleSummary[] {
+  if (data.status !== 'ready' || !data.snapshot) return [];
+
+  return data.snapshot.specials.flatMap((id) => {
+    const article = data.snapshot?.archive.find((item) => item.id === id);
+    return article ? [article] : [];
+  });
+}
+
 export function IntelligenceDashboard({ editorial }: { editorial: IntelligenceEditorialData }) {
   if (editorial.status !== 'ready' || !editorial.snapshot) {
     return (
@@ -56,6 +65,7 @@ export function IntelligenceDashboard({ editorial }: { editorial: IntelligenceEd
   }
 
   const articles = currentArticles(editorial);
+  const specials = specialArticles(editorial);
 
   return (
     <div className={styles.stack}>
@@ -105,6 +115,44 @@ export function IntelligenceDashboard({ editorial }: { editorial: IntelligenceEd
           );
         })}
       </div>
+
+      {specials.length > 0 ? (
+        <section className={styles['specials-section']} aria-labelledby="intelligence-specials-title">
+          <div className={styles['specials-heading']}>
+            <div>
+              <strong id="intelligence-specials-title">Especiales recientes</strong>
+              <p>
+                Sólo aparecen cuando una señal merece explicación propia. No reemplazan las cuatro
+                tapas ni crean pendientes.
+              </p>
+            </div>
+          </div>
+
+          <div className={styles['specials-grid']}>
+            {specials.map((article) => {
+              const meta = FRONT_META[article.front];
+              const Icon = meta.icon;
+
+              return (
+                <Card as="article" className={styles['special-card']} key={article.id}>
+                  <div className={styles['front-meta']}>
+                    <span className={styles['front-label']}>
+                      <Icon size={15} aria-hidden="true" />
+                      Especial · {meta.label}
+                    </span>
+                    <span>{article.readingMinutes} min</span>
+                  </div>
+                  <h2>{article.title}</h2>
+                  <p className={styles.dek}>{article.dek}</p>
+                  <Link className={styles['read-link']} href={intelligenceArticleHref(article)}>
+                    Leer especial →
+                  </Link>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <div className={styles['archive-row']}>
         <div>

@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "source": {
     "repository": "franciscovitar/personal-ai-system",
-    "ref": "main",
-    "commit": "8b572b4e327f3cc13713e88226e532534aaf7d02",
+    "ref": "feat/intelligence-source-radar-v1",
+    "commit": "4f7d3e780a5c5e9d1f8bfcd531aee55707c94492",
     "canonicalCurrentRef": "AI/editorial/INTELLIGENCE_EDITORIAL_CURRENT.json",
     "canonicalArchiveRef": "AI/editorial/INTELLIGENCE_EDITORIAL_ARCHIVE.json",
     "generatedAt": "2026-09-21",
@@ -38,7 +38,9 @@
       "publishedAt": "2026-09-21",
       "readingMinutes": 5,
       "articleRef": "AI/editorial/articles/carrera/por-que-tu-siguiente-salto-no-parece-ser-otro-framework.json",
-      "professionalRefs": ["priority:Producción / reliability / observabilidad"]
+      "professionalRefs": [
+        "priority:Producción / reliability / observabilidad"
+      ]
     },
     {
       "id": "INT-TEC-2026-09-21-01",
@@ -49,7 +51,9 @@
       "publishedAt": "2026-09-21",
       "readingMinutes": 5,
       "articleRef": "AI/editorial/articles/tecnologia/opentelemetry-explicado-sin-humo.json",
-      "professionalRefs": ["technology:AIT-006"]
+      "professionalRefs": [
+        "technology:AIT-006"
+      ]
     },
     {
       "id": "INT-PAS-2026-09-21-01",
@@ -61,7 +65,21 @@
       "readingMinutes": 4,
       "articleRef": "AI/editorial/articles/pas/que-significa-que-tu-pas-pueda-mejorar-solo.json",
       "professionalRefs": []
+    },
+    {
+      "id": "INT-TEC-2026-09-21-02",
+      "front": "tecnologia",
+      "slug": "jev-una-ia-que-decide-en-vez-de-escribir",
+      "title": "Jev: por qué apareció una IA que decide en vez de escribir",
+      "dek": "No intenta ser otro chatbot. Su propuesta es mucho más acotada: recibir contexto y devolver decisiones estructuradas, rápidas y baratas para que otro software actúe.",
+      "publishedAt": "2026-09-21",
+      "readingMinutes": 6,
+      "articleRef": "AI/editorial/articles/tecnologia/jev-una-ia-que-decide-en-vez-de-escribir.json",
+      "professionalRefs": []
     }
   ],
-  "editorialNote": "Intelligence explains what is happening, what it means and why. Professional owns current decisions."
+  "editorialNote": "Intelligence explains what is happening, what it means and why. Professional owns current decisions. Source Radar V1 may add up to three current specials without creating reading debt.",
+  "specials": [
+    "INT-TEC-2026-09-21-02"
+  ]
 }

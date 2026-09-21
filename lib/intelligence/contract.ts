@@ -91,6 +91,8 @@ export function parseIntelligenceEditorialSnapshot(
   if (
     !sourceValid ||
     !FRONTS.every((front) => isString(current[front])) ||
+    !everyArray(value.specials, isString) ||
+    value.specials.length > 3 ||
     !everyArray(archive, validSummary) ||
     !isString(value.editorialNote)
   ) {
@@ -108,6 +110,12 @@ export function parseIntelligenceEditorialSnapshot(
     if (!isString(id)) return null;
     const summary = archive.find((item) => item.id === id);
     if (!summary || summary.front !== front) return null;
+  }
+
+  const specialIds = new Set<string>();
+  for (const id of value.specials) {
+    if (specialIds.has(id) || !ids.has(id)) return null;
+    specialIds.add(id);
   }
 
   return value as unknown as IntelligenceEditorialSnapshot;
