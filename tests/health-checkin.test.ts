@@ -268,7 +268,10 @@ test('HC10. Action exige sesión y el puerto no usa append ni operaciones estruc
 
   assert.match(action, /verifySession/);
   assert.match(action, /upsertHealthCheckinWithPort/);
-  assert.doesNotMatch(port, /values:append|batchUpdate|insertDimension|deleteDimension|batchClear/i);
+  assert.doesNotMatch(
+    port,
+    /values:append|batchUpdate|insertDimension|deleteDimension|batchClear/i,
+  );
   assert.match(port, /method: 'PUT'/);
   assert.doesNotMatch(component, /streak|racha/i);
   assert.doesNotMatch(component, /autoSubmit|onBlur=.*save|onFocus=.*save/i);

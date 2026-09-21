@@ -117,10 +117,7 @@ export type UpsertHealthCheckinOptions = {
   env?: SpreadsheetTargetEnv;
 };
 
-function fail(
-  code: HealthCheckinWriteCode,
-  operationId: string,
-): HealthCheckinWriteFailure {
+function fail(code: HealthCheckinWriteCode, operationId: string): HealthCheckinWriteFailure {
   return {
     ok: false,
     code,
@@ -130,7 +127,11 @@ function fail(
 }
 
 function isBlank(value: HealthCheckinCell | undefined): boolean {
-  return value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
+  return (
+    value === null ||
+    value === undefined ||
+    (typeof value === 'string' && value.trim() === '')
+  );
 }
 
 function text(value: HealthCheckinCell | undefined): string | null {
@@ -196,9 +197,7 @@ function headersMatch(row: readonly HealthCheckinCell[] | undefined): boolean {
   return HEALTH_CHECKIN_HEADERS.every((header, index) => text(row[index]) === header);
 }
 
-export function parseHealthCheckinRow(
-  row: readonly HealthCheckinCell[],
-): HealthCheckin | null {
+export function parseHealthCheckinRow(row: readonly HealthCheckinCell[]): HealthCheckin | null {
   const date = text(row[0]);
   const energy = integerCell(row[1], 1, 5, false);
   const rested = integerCell(row[2], 1, 5, false);
@@ -269,7 +268,9 @@ function inspectGrid(values: readonly (readonly HealthCheckinCell[])[]): GridIns
   return { ok: true, rows, firstBlankRow: Math.max(2, firstBlankRow) };
 }
 
-function validateInput(input: HealthCheckinInput): Omit<HealthCheckin, 'updatedAt' | 'version'> | null {
+function validateInput(
+  input: HealthCheckinInput,
+): Omit<HealthCheckin, 'updatedAt' | 'version'> | null {
   if (
     typeof input.operationId !== 'string' ||
     input.operationId.trim() === '' ||
@@ -421,7 +422,10 @@ export async function upsertHealthCheckinWithPort(
   const rangeA1 = `'${HEALTH_CHECKIN_TAB}'!A${rowNumber}:K${rowNumber}`;
   const written = await port.writeRow(rangeA1, healthCheckinToRow(candidate));
   if (!written.ok) {
-    return fail(written.code === 'permission-error' ? 'permission-error' : 'write-error', operationId);
+    return fail(
+      written.code === 'permission-error' ? 'permission-error' : 'write-error',
+      operationId,
+    );
   }
 
   const after = await port.readAll();

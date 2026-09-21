@@ -5,10 +5,7 @@ import { useState, useTransition } from 'react';
 import { saveHealthCheckinAction } from '@/app/actions/health-checkin';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import {
-  HEALTH_CHECKIN_NOTE_MAX,
-  type HealthCheckin,
-} from '@/lib/health/checkin';
+import { HEALTH_CHECKIN_NOTE_MAX, type HealthCheckin } from '@/lib/health/checkin';
 
 import styles from './HealthCheckinCard.module.scss';
 
@@ -263,7 +260,9 @@ export function HealthCheckinCard({ targetDate, initial, writable, notice }: Pro
               ) : (
                 <p className={styles.hint}>No se guarda nada hasta que presiones Guardar.</p>
               )}
-              {savedOnce ? <small>Una corrección posterior reemplaza el registro de hoy.</small> : null}
+              {savedOnce ? (
+                <small>Una corrección posterior reemplaza el registro de hoy.</small>
+              ) : null}
             </div>
             <button
               type="submit"
