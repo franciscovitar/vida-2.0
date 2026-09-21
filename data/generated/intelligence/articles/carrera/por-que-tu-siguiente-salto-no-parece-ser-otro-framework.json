@@ -82,8 +82,8 @@
   "professionalRefs": ["priority:Producción / reliability / observabilidad"],
   "source": {
     "repository": "franciscovitar/personal-ai-system",
-    "ref": "feat/intelligence-editorial-v2",
-    "commit": "00df7ad2edc5758e1b52369b10cd6b329831fc12",
+    "ref": "main",
+    "commit": "8b572b4e327f3cc13713e88226e532534aaf7d02",
     "canonicalRef": "AI/editorial/articles/carrera/por-que-tu-siguiente-salto-no-parece-ser-otro-framework.json"
   }
 }
