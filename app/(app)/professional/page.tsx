@@ -19,7 +19,7 @@ export default async function ProfessionalPage() {
     <div className={pageStyles.page}>
       <PageHeader
         title="Profesional"
-        description="Evidencia, prioridades, mercado, IA y tecnología para decidir qué desarrollar o demostrar."
+        description="Qué conviene desarrollar, qué ya podés demostrar, cómo se mueve el mercado y qué hacer vos vs. qué delegar a la IA."
         icon={Brain}
         domain="projects"
       />

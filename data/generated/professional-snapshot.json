@@ -1,149 +1,372 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "aa80792553e0c7b124bef25b2cdd46cffd17d0c9",
-    "generatedAt": "2026-09-18",
+    "commit": "305900bb410aa82cc3f8ef08702818fd961c8a18",
+    "generatedAt": "2026-09-21",
     "observedAt": "2026-09-18",
     "staleAfterDays": 45
   },
-  "profileSummary": "Constructor de productos/sistemas AI-native con evidencia demostrada en entrega web, calidad de software, cambios seguros, producto/UX y orquestación con IA. Producción, bases de datos, seguridad y runtime de IA todavía tienen profundidad personal parcialmente no verificada.",
+  "profileSummary": "Hoy tu base más fuerte es construir productos web y sistemas apoyados por IA. El siguiente salto no parece ser aprender otro framework: es demostrar que podés operar software real, razonar mejor sobre datos y seguridad, y usar IA sin depender ciegamente de ella.",
   "nowMoves": [
     {
       "id": "NM-001",
-      "title": "Construir evidencia real de operación en producción",
-      "why": "Observabilidad, incidentes y recovery siguen siendo gaps explícitos y tienen valor transversal.",
+      "title": "Ganar experiencia real operando software en producción",
+      "why": "Ya sabés construir y desplegar. Ahora conviene demostrar que también podés detectar problemas, entender qué pasó y recuperar el sistema cuando algo falla.",
       "route": "PROJECT_EXPERIENCE",
       "confidence": "HIGH"
     },
     {
       "id": "NM-002",
-      "title": "Hacer una batería corta de verificación personal",
-      "why": "Arquitectura, testing, SQL y seguridad tienen artefactos fuertes pero juicio personal todavía no verificado en tareas frescas.",
+      "title": "Comprobar tu criterio técnico con ejercicios cortos",
+      "why": "Tus proyectos muestran arquitectura, testing, SQL y seguridad. Falta separar qué entendés vos de verdad de lo que el sistema pudo resolver con ayuda de IA.",
       "route": "DIRECT_VERIFICATION_PLUS_BOUNDED_LAB",
       "confidence": "HIGH"
     }
   ],
   "strongestEvidence": [
     {
-      "capability": "Trabajo AI-native y orquestación de agentes",
+      "capability": "Trabajo con IA y orquestación de agentes",
       "state": "DEMONSTRATED",
       "confidence": "HIGH",
-      "note": "Routing, governance, seguridad, herramientas y evals del PAS."
+      "note": "El PAS muestra routing, permisos, seguridad, herramientas, verificación y uso de agentes sobre problemas reales."
     },
     {
-      "capability": "Full-stack / product web engineering",
+      "capability": "Desarrollo full-stack y producto web",
       "state": "DEMONSTRATED",
       "confidence": "HIGH",
-      "note": "Entregas reales y sistemas actuales con Next.js/TypeScript."
+      "note": "Hay entregas reales y sistemas actuales con Next.js y TypeScript, no solamente ejercicios."
     },
     {
       "capability": "Testing, verificación y cambios seguros",
       "state": "DEMONSTRATED",
       "confidence": "HIGH",
-      "note": "QA, fail-closed, migraciones, rollback e idempotencia."
+      "note": "Tus repos muestran QA, fallos controlados, migraciones, rollback e idempotencia."
     },
     {
-      "capability": "Producto/UX y entrega a clientes",
+      "capability": "Producto, UX y entrega a clientes",
       "state": "DEMONSTRATED",
       "confidence": "MEDIUM_HIGH",
-      "note": "Entregas y decisiones reales; faltan outcomes externos normalizados."
+      "note": "Hay decisiones y entregas reales; todavía faltan más resultados externos medidos para afirmar impacto con precisión."
     }
   ],
   "priorities": [
     {
       "rank": 1,
-      "capability": "Producción / reliability / observabilidad",
+      "capability": "Producción, confiabilidad y observabilidad",
       "actionType": "BUILD_REAL_EVIDENCE",
-      "action": "Agregar observabilidad accionable y un ejercicio seguro de fallo/recovery en un proyecto real.",
+      "action": "Agregar señales útiles de observabilidad y hacer un ejercicio seguro de fallo y recuperación en un proyecto real.",
       "confidence": "HIGH"
     },
     {
       "rank": 2,
-      "capability": "SQL + razonamiento relacional/database",
+      "capability": "SQL y razonamiento de bases de datos",
       "actionType": "PRACTICE_AND_VERIFY",
-      "action": "Resolver un lab fresco de SQL, índices y transacciones.",
+      "action": "Resolver una práctica corta con consultas, índices y transacciones sobre un problema nuevo.",
       "confidence": "HIGH"
     },
     {
       "rank": 3,
-      "capability": "Seguridad / threat modeling / least privilege",
+      "capability": "Seguridad y modelado de amenazas",
       "actionType": "VERIFY_AND_DEEPEN",
-      "action": "Modelar amenazas de un trust boundary real.",
+      "action": "Elegir una frontera real de un sistema y pensar qué podría salir mal, quién podría abusarla y cómo reducir el riesgo.",
       "confidence": "MEDIUM_HIGH"
     },
     {
       "rank": 4,
-      "capability": "Applied LLM runtime engineering",
+      "capability": "Ingeniería de sistemas con LLM",
       "actionType": "LEARN_AND_BUILD_CONDITIONALLY",
-      "action": "Construir un experimento con grounding, evals y costo/latencia cuando sea relevante.",
+      "action": "Construir un experimento pequeño con grounding, evaluaciones y medición de costo o latencia cuando un proyecto real lo justifique.",
       "confidence": "MEDIUM_HIGH"
     },
     {
       "rank": 5,
-      "capability": "Arquitectura + juicio de test/debug",
+      "capability": "Arquitectura y criterio para probar o depurar",
       "actionType": "DIRECT_VERIFICATION",
-      "action": "Hacer design review y debugging/test-strategy sobre tareas frescas.",
+      "action": "Revisar un diseño nuevo y diagnosticar un fallo fresco explicando por qué elegirías una estrategia y no otra.",
       "confidence": "HIGH"
     }
   ],
+  "workSplit": {
+    "principle": "No necesitás ganarle a la IA escribiendo código más rápido. Tu valor está en saber qué pedir, qué aceptar, qué rechazar y cómo verificar que el resultado sea correcto.",
+    "basis": "Derivado del ownership canónico del PAS: INTERNALIZAR, VOS_PLUS_IA y DELEGATED_WITH_VERIFICATION.",
+    "own": [
+      {
+        "title": "Entender el problema y tomar decisiones",
+        "explanation": "Requisitos, arquitectura, trade-offs y prioridades. La IA puede ayudarte a pensar, pero vos tenés que poder explicar por qué una decisión tiene sentido."
+      },
+      {
+        "title": "Detectar cuándo algo está mal",
+        "explanation": "Testing, debugging, SQL, transacciones, seguridad y producción. No hace falta memorizar todo, pero sí reconocer riesgos y validar resultados."
+      },
+      {
+        "title": "Defender y comunicar lo importante",
+        "explanation": "Poder explicar una decisión técnica, sus límites y sus riesgos sin depender de que la IA hable por vos."
+      }
+    ],
+    "withAi": [
+      {
+        "title": "Implementar software real",
+        "explanation": "TypeScript, React/Next.js, Python, PostgreSQL y similares. Conviene construir con IA porque acelera mucho, mientras vos controlás estructura y calidad."
+      },
+      {
+        "title": "Investigar y comparar alternativas",
+        "explanation": "Usá IA para leer documentación, proponer opciones, preparar pruebas y encontrar huecos. Vos decidís cuál alternativa encaja mejor."
+      },
+      {
+        "title": "Hacer cambios complejos con verificación",
+        "explanation": "Migraciones, refactors, pipelines y automatizaciones son buenos candidatos para IA cuando hay tests, revisión y posibilidad de rollback."
+      }
+    ],
+    "delegateToAi": [
+      {
+        "title": "Trabajo mecánico y repetitivo",
+        "explanation": "Boilerplate, renombrados, formateo, scaffolding y transformaciones repetitivas. No vale la pena memorizar ni hacer a mano lo que se puede verificar rápido."
+      },
+      {
+        "title": "Primer borrador de artefactos",
+        "explanation": "Tests, documentación, scripts y variantes iniciales. La IA puede producir el primer intento; vos revisás si realmente cubre el objetivo."
+      },
+      {
+        "title": "Operaciones rutinarias de Git y herramientas",
+        "explanation": "Muchos comandos y pasos mecánicos pueden delegarse. Lo importante es que entiendas el efecto, revises el diff y sepas cómo recuperar si algo sale mal."
+      }
+    ]
+  },
   "market": {
     "observedAt": "2026-09-18",
     "status": "CURRENT_MULTI_GEOGRAPHY_BASELINE_WITH_SAMPLE_LIMITS",
-    "signals": [
-      "Software/product mantiene señal positiva pero se transforma con IA.",
-      "Seguridad tiene señal estructural fuerte.",
-      "Data/AI y producción/reliability mantienen señal positiva."
+    "headline": "Las señales actuales favorecen una base de software fuerte combinada con seguridad, datos, producción y uso serio de IA. No mezclamos mercados: cada número muestra su geografía y período.",
+    "globalSignals": [
+      {
+        "id": "GLOBAL-CYBER",
+        "title": "Ciberseguridad gana importancia",
+        "value": "Top 3",
+        "explanation": "El World Economic Forum ubica redes y ciberseguridad entre las tres familias de habilidades tecnológicas con mayor crecimiento esperado hacia 2030.",
+        "geography": "Global",
+        "period": "2025–2030",
+        "sourceLabel": "World Economic Forum — Future of Jobs Report 2025",
+        "sourceUrl": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/digest/"
+      },
+      {
+        "id": "GLOBAL-SKILL-CHANGE",
+        "title": "El trabajo técnico sigue cambiando rápido",
+        "value": "39%",
+        "explanation": "Los empleadores encuestados por WEF esperan que cerca del 39% de las habilidades clave requeridas cambien hacia 2030.",
+        "geography": "Global",
+        "period": "2025–2030",
+        "sourceLabel": "World Economic Forum — Future of Jobs Report 2025",
+        "sourceUrl": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/digest/"
+      }
+    ],
+    "internationalBenchmarks": [
+      {
+        "id": "US-CYBER",
+        "role": "Analista de seguridad informática",
+        "geography": "EE.UU. — referencia internacional",
+        "period": "2025–2035",
+        "employmentGrowthPercent": 21,
+        "annualOpenings": 14100,
+        "medianAnnualUsd": 129180,
+        "sourceLabel": "U.S. Bureau of Labor Statistics",
+        "sourceUrl": "https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm"
+      },
+      {
+        "id": "US-SOFTWARE",
+        "role": "Desarrollador de software",
+        "geography": "EE.UU. — referencia internacional",
+        "period": "2025–2035",
+        "employmentGrowthPercent": 10.2,
+        "annualOpenings": 95300,
+        "medianAnnualUsd": 135980,
+        "sourceLabel": "U.S. Bureau of Labor Statistics",
+        "sourceUrl": "https://www.bls.gov/emp/tables/occupational-projections-and-characteristics.htm"
+      },
+      {
+        "id": "US-DATA",
+        "role": "Científico de datos",
+        "geography": "EE.UU. — referencia internacional",
+        "period": "2025–2035",
+        "employmentGrowthPercent": 34.6,
+        "annualOpenings": 24800,
+        "medianAnnualUsd": 120230,
+        "sourceLabel": "U.S. Bureau of Labor Statistics",
+        "sourceUrl": "https://www.bls.gov/emp/tables/occupational-projections-and-characteristics.htm"
+      }
+    ],
+    "argentinaSalaryRoles": [
+      {
+        "id": "AR-DEVELOPER",
+        "role": "Desarrollo",
+        "period": "dic. 2025 – feb. 2026",
+        "sourceLabel": "OpenQube / Sysarmy — Encuesta de Sueldos 2026.01",
+        "sourceUrl": "https://sueldos.openqube.io/encuesta-sueldos-2026.01/",
+        "points": [
+          {
+            "label": "Junior",
+            "medianArsGrossMonthly": 1538500,
+            "sampleSize": 148,
+            "dollarized": false
+          },
+          {
+            "label": "Semi-senior",
+            "medianArsGrossMonthly": 2501629,
+            "sampleSize": 439,
+            "dollarized": false
+          },
+          {
+            "label": "Senior",
+            "medianArsGrossMonthly": 3500000,
+            "sampleSize": 474,
+            "dollarized": false
+          },
+          {
+            "label": "Senior con sueldo al menos parcialmente dolarizado",
+            "medianArsGrossMonthly": 5332500,
+            "sampleSize": 358,
+            "dollarized": true
+          }
+        ]
+      },
+      {
+        "id": "AR-DEVOPS",
+        "role": "DevOps / SRE",
+        "period": "dic. 2025 – feb. 2026",
+        "sourceLabel": "OpenQube / Sysarmy — Encuesta de Sueldos 2026.01",
+        "sourceUrl": "https://sueldos.openqube.io/encuesta-sueldos-2026.01/",
+        "points": [
+          {
+            "label": "Junior",
+            "medianArsGrossMonthly": 2000000,
+            "sampleSize": 29,
+            "dollarized": false
+          },
+          {
+            "label": "Semi-senior",
+            "medianArsGrossMonthly": 2423360,
+            "sampleSize": 104,
+            "dollarized": false
+          },
+          {
+            "label": "Senior",
+            "medianArsGrossMonthly": 3200000,
+            "sampleSize": 272,
+            "dollarized": false
+          },
+          {
+            "label": "Senior con sueldo al menos parcialmente dolarizado",
+            "medianArsGrossMonthly": 5450000,
+            "sampleSize": 102,
+            "dollarized": true
+          }
+        ]
+      },
+      {
+        "id": "AR-INFOSEC",
+        "role": "Seguridad informática",
+        "period": "dic. 2025 – feb. 2026",
+        "sourceLabel": "OpenQube / Sysarmy — Encuesta de Sueldos 2026.01",
+        "sourceUrl": "https://sueldos.openqube.io/encuesta-sueldos-2026.01/",
+        "points": [
+          {
+            "label": "Semi-senior",
+            "medianArsGrossMonthly": 2759000,
+            "sampleSize": 25,
+            "dollarized": false
+          },
+          {
+            "label": "Senior",
+            "medianArsGrossMonthly": 4300000,
+            "sampleSize": 48,
+            "dollarized": false
+          },
+          {
+            "label": "Senior con sueldo al menos parcialmente dolarizado",
+            "medianArsGrossMonthly": 6043197.5,
+            "sampleSize": 22,
+            "dollarized": true
+          }
+        ]
+      },
+      {
+        "id": "AR-DATA-ENGINEER",
+        "role": "Data Engineer",
+        "period": "dic. 2025 – feb. 2026",
+        "sourceLabel": "OpenQube / Sysarmy — Encuesta de Sueldos 2026.01",
+        "sourceUrl": "https://sueldos.openqube.io/encuesta-sueldos-2026.01/",
+        "points": [
+          {
+            "label": "Semi-senior",
+            "medianArsGrossMonthly": 2997062,
+            "sampleSize": 39,
+            "dollarized": false
+          },
+          {
+            "label": "Senior",
+            "medianArsGrossMonthly": 3990000,
+            "sampleSize": 39,
+            "dollarized": false
+          },
+          {
+            "label": "Senior con sueldo al menos parcialmente dolarizado",
+            "medianArsGrossMonthly": 6300000,
+            "sampleSize": 23,
+            "dollarized": true
+          }
+        ]
+      }
     ],
     "limitations": [
-      "Job boards son muestras, no un censo.",
-      "La encuesta salarial argentina 2026.01 envejece para decisiones precisas.",
-      "Exposición a IA no equivale a reemplazo o caída de empleo."
+      "No existe un sueldo promedio mundial comparable que mezcle países, seniority y monedas sin deformar el dato. Por eso usamos EE.UU. sólo como referencia internacional y Argentina por separado.",
+      "Los salarios argentinos son medianas brutas de una encuesta de la comunidad, no ofertas actuales ni un censo de todo el mercado.",
+      "La encuesta argentina corresponde a diciembre de 2025–febrero de 2026; sirve como referencia estructural, no como cotización salarial exacta de septiembre.",
+      "Los job boards son muestras y no permiten afirmar cuántas vacantes totales existen en Argentina o LATAM.",
+      "Que una tarea tenga exposición a IA no significa que el puesto vaya a desaparecer."
     ]
   },
   "technologies": [
     {
       "id": "AIT-000",
       "name": "ChatGPT",
-      "capability": "Control Tower, research y Work",
+      "capability": "Control Tower, investigación y Work",
       "disposition": "CURRENT_STACK",
-      "priceLabel": "Freemium; precio se revalida antes de decidir gasto.",
+      "priceLabel": "Ya forma parte de tu stack; el precio se revisa sólo si cambia una decisión de gasto.",
       "freeTier": true,
-      "application": "Control Tower, research, artefactos y refresh.",
+      "application": "Control Tower, investigación, artefactos y actualización de información.",
       "personalEvalStatus": "OBSERVED_USE_ONLY",
       "decisionOwner": "system-maintenance"
     },
     {
       "id": "AIT-001",
       "name": "Codex",
-      "capability": "Agente repo-aware",
+      "capability": "Agente con contexto real del repositorio",
       "disposition": "CURRENT_STACK",
-      "priceLabel": "Incluido según plan; costo incremental todavía no calibrado.",
+      "priceLabel": "Incluido según plan; el costo incremental todavía no está calibrado.",
       "freeTier": true,
-      "application": "Runtime/build/test/debug cuando el estado real del repo importa.",
+      "application": "Runtime, build, tests y debugging cuando importa inspeccionar el estado real del repositorio.",
       "personalEvalStatus": "OBSERVED_USE_ONLY",
       "decisionOwner": "system-maintenance"
     },
     {
       "id": "AIT-002",
       "name": "Claude Code / Claude",
-      "capability": "Especialista de repos y trabajo agente largo",
+      "capability": "Especialista para repositorios y trabajo agente largo",
       "disposition": "CURRENT_STACK",
-      "priceLabel": "Freemium; costo se revalida antes de cambiar plan.",
+      "priceLabel": "El costo se revisa antes de cambiar de plan.",
       "freeTier": true,
-      "application": "Alternativa especialista para implementación/análisis largo.",
+      "application": "Alternativa especialista para implementación o análisis largo.",
       "personalEvalStatus": "OBSERVED_USE_ONLY",
       "decisionOwner": "system-maintenance"
     },
     {
       "id": "AIT-006",
       "name": "OpenTelemetry",
-      "capability": "Observabilidad vendor-neutral",
+      "capability": "Observabilidad independiente del proveedor",
       "disposition": "ASSESS",
-      "priceLabel": "Open source; backend/hosting puede costar.",
+      "priceLabel": "Open source; almacenar y visualizar datos puede tener costo.",
       "freeTier": true,
-      "application": "Construir evidencia real de observabilidad.",
+      "application": "Puede servir para construir evidencia real de observabilidad en un proyecto.",
       "personalEvalStatus": "NOT_PERSONALLY_EVALUATED",
       "decisionOwner": "system-maintenance"
     },
@@ -152,9 +375,9 @@
       "name": "Kubernetes",
       "capability": "Orquestación de contenedores",
       "disposition": "HOLD",
-      "priceLabel": "Open source con costo operacional.",
+      "priceLabel": "Open source, pero operar clusters tiene costo y complejidad.",
       "freeTier": true,
-      "application": "Solo ante una necesidad real de cluster o un target profesional material.",
+      "application": "Sólo tiene sentido si aparece una necesidad real de cluster o un objetivo profesional donde sea material.",
       "personalEvalStatus": "NOT_PERSONALLY_EVALUATED",
       "decisionOwner": "system-maintenance"
     }
@@ -164,31 +387,31 @@
       "id": "LD-001",
       "capability": "Arquitectura de software",
       "mode": "DIRECT_VERIFICATION",
-      "rationale": "Verificar trade-offs personales antes de otro curso.",
+      "rationale": "Ya hay proyectos fuertes. Primero conviene comprobar que podés explicar y adaptar decisiones de arquitectura antes de hacer otro curso.",
       "courseNeededNow": false,
       "credentialNeededNow": false
     },
     {
       "id": "LD-003",
-      "capability": "SQL / modelado relacional",
+      "capability": "SQL y modelado relacional",
       "mode": "LAB",
-      "rationale": "Verificar queries, índices y transacciones en tareas frescas.",
+      "rationale": "La mejor señal ahora es resolver consultas, índices y transacciones sobre tareas nuevas, no acumular teoría.",
       "courseNeededNow": false,
       "credentialNeededNow": false
     },
     {
       "id": "LD-004",
-      "capability": "Producción / cloud",
+      "capability": "Producción y cloud",
       "mode": "PROJECT_EXPERIENCE",
-      "rationale": "La evidencia que falta es operacional.",
+      "rationale": "Lo que falta no es otro curso: es haber observado, diagnosticado y recuperado un sistema real.",
       "courseNeededNow": false,
       "credentialNeededNow": false
     },
     {
       "id": "LD-006",
-      "capability": "Applied LLM systems",
+      "capability": "Sistemas con LLM",
       "mode": "LAB",
-      "rationale": "El gap es runtime engineering, no conocimiento general de IA.",
+      "rationale": "El hueco está en ingeniería de runtime, retrieval, evaluaciones y costo/latencia, no en conocimiento general de IA.",
       "courseNeededNow": false,
       "credentialNeededNow": false
     }
@@ -196,60 +419,60 @@
   "profileFindings": [
     {
       "id": "PC-001",
-      "claim": "Full Stack / Web Developer",
+      "claim": "Desarrollador full-stack / web",
       "status": "SUPPORTED_BUT_UNDERSTATED",
-      "note": "Es cierto, pero quedó chico frente a la evidencia actual."
+      "note": "Es correcto, pero se queda corto: tus proyectos actuales muestran producto, calidad, seguridad y uso de IA además de implementación web."
     },
     {
       "id": "PC-012",
-      "claim": "AI-native workflow/orchestration",
+      "claim": "Trabajo con IA y orquestación",
       "status": "MISSING_FROM_PROFILE",
-      "note": "Evidencia fuerte que casi no aparece en el perfil histórico."
+      "note": "Es una de tus evidencias más fuertes y casi no aparece en el perfil histórico."
     },
     {
       "id": "PC-016",
-      "claim": "SRE / CloudOps expert",
+      "claim": "Especialista SRE / CloudOps",
       "status": "TOO_BROAD",
-      "note": "Faltan observabilidad sostenida, incidentes y recovery."
+      "note": "Todavía sería exagerado: faltan observabilidad sostenida, respuesta a incidentes y recuperación."
     },
     {
       "id": "PC-017",
-      "claim": "Applied AI / LLM Engineer",
+      "claim": "Ingeniero de IA aplicada / LLM",
       "status": "TOO_BROAD",
-      "note": "Falta evidencia runtime suficiente para un claim sin matices."
+      "note": "Hay una base real, pero falta más evidencia de runtime, retrieval, evaluaciones, latencia y costos."
     }
   ],
   "forecast": {
-    "direction": "No abandonar software/web. Mover el diferencial marginal hacia producción/reliability, datos/DB, seguridad y runtime de IA, manteniendo orquestación AI-native.",
+    "direction": "No conviene abandonar software/web. Conviene sumar profundidad en producción, datos, seguridad y sistemas con IA para que tu perfil sea menos reemplazable por implementación rutinaria.",
     "confidence": "MEDIUM_HIGH",
     "items": [
       {
         "subject": "ai-native-product-software-engineering",
-        "label": "AI-native product/software",
+        "label": "Producto y software apoyado por IA",
         "nearOutlook": "POSITIVE_BUT_TRANSFORMING",
         "nearConfidence": "MEDIUM_HIGH",
-        "aiInteraction": "Sube el valor de especificación, arquitectura, integración y verificación."
+        "aiInteraction": "Vale más saber especificar, diseñar, integrar y verificar; escribir código rutinario pierde peso relativo."
       },
       {
         "subject": "security-privacy-engineering",
-        "label": "Seguridad / privacidad",
+        "label": "Seguridad y privacidad",
         "nearOutlook": "STRONG_POSITIVE",
         "nearConfidence": "HIGH",
-        "aiInteraction": "Threat modeling e integración segura siguen siendo críticos."
+        "aiInteraction": "Modelar amenazas, permisos y límites seguros sigue necesitando criterio humano fuerte."
       },
       {
         "subject": "data-ai-engineering",
-        "label": "Data / AI engineering",
+        "label": "Datos e IA",
         "nearOutlook": "STRONG_POSITIVE",
         "nearConfidence": "MEDIUM_HIGH",
-        "aiInteraction": "Data quality, grounding, evals e integración ganan peso."
+        "aiInteraction": "Calidad de datos, grounding, evaluaciones e integración ganan importancia."
       },
       {
         "subject": "web-implementation-only",
-        "label": "Implementación web aislada",
+        "label": "Implementación web rutinaria",
         "nearOutlook": "PRESSURE_ON_ROUTINE_TASKS",
         "nearConfidence": "MEDIUM_HIGH",
-        "aiInteraction": "La implementación rutinaria se abarata; systems breadth diferencia más."
+        "aiInteraction": "La IA abarata parte de la implementación; diferencian más el criterio de sistema, producto y operación."
       }
     ]
   },
@@ -259,24 +482,24 @@
     "taskFamilies": [
       {
         "id": "RESEARCH_SYNTHESIS",
-        "route": "ChatGPT / research route",
+        "route": "ChatGPT / research",
         "evalStatus": "OBSERVED_USE_ONLY",
         "outcomeEvidenceCount": 0,
-        "nextMeasurement": "Capturar una investigación material con calidad de fuentes y retrabajo."
+        "nextMeasurement": "Medir una investigación real: calidad de fuentes, tiempo ahorrado y cuánto hubo que corregir."
       },
       {
         "id": "REPO_INSPECTION_DEBUG",
-        "route": "Codex o especialista repo-aware",
+        "route": "Codex o especialista con acceso al repositorio",
         "evalStatus": "OBSERVED_USE_ONLY",
         "outcomeEvidenceCount": 0,
-        "nextMeasurement": "Comparar sobre un debugging fresco cuando haya dos rutas elegibles."
+        "nextMeasurement": "Comparar sobre un debugging real cuando haya dos herramientas razonables para elegir."
       },
       {
         "id": "UNIVERSITY_LEARNING",
-        "route": "ChatGPT Project + adaptive-learning",
+        "route": "Proyecto de ChatGPT + adaptive-learning",
         "evalStatus": "OBSERVED_USE_ONLY",
         "outcomeEvidenceCount": 0,
-        "nextMeasurement": "Medir transferencia en tareas frescas."
+        "nextMeasurement": "Medir si lo aprendido se transfiere a ejercicios nuevos y no sólo a material repetido."
       }
     ]
   }
