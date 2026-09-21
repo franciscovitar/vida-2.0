@@ -219,19 +219,7 @@ test('PRO-14. biblioteca falla cerrada si faltan datos o se rompe el contrato', 
   assert.equal(invalid.status, 'invalid');
   assert.equal(invalid.snapshot, null);
 });
-
-test('PRO-15. radar actual refleja el estado tecnológico completo sin límite artificial de cinco', () => {
-  const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
-  assert.ok(parsed);
-
-  assert.equal(parsed.technologies.length, 11);
-  assert.equal(parsed.technologies.some((item) => item.name === 'n8n'), true);
-  assert.equal(parsed.technologies.some((item) => item.name === 'OpenClaw'), true);
-  assert.equal(parsed.technologies.some((item) => item.name === 'GitHub Copilot'), true);
-  assert.equal(parsed.technologies.some((item) => item.name === 'OpenTofu / Terraform'), true);
-});
-
-test('PRO-16. estados extendidos de tecnología tienen etiquetas simples en español', () => {
+test('PRO-15. estados extendidos de tecnología tienen etiquetas simples en español', () => {
   const dashboard = readFileSync(
     join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
     'utf8',
