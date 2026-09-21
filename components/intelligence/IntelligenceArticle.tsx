@@ -1,9 +1,11 @@
 import { CircleAlert, Info } from 'lucide-react';
 import Link from 'next/link';
 
+import { IntelligenceFeedback } from '@/components/intelligence/IntelligenceFeedback';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import type { IntelligenceArticleData, IntelligenceFront } from '@/types/intelligence-editorial';
+import type { IntelligenceFeedbackSnapshot } from '@/lib/intelligence/feedback-sheet';
 
 import styles from './IntelligenceDashboard.module.scss';
 
@@ -23,7 +25,13 @@ function formatDate(value: string): string {
   }).format(date);
 }
 
-export function IntelligenceArticleView({ data }: { data: IntelligenceArticleData }) {
+export function IntelligenceArticleView({
+  data,
+  feedback,
+}: {
+  data: IntelligenceArticleData;
+  feedback: IntelligenceFeedbackSnapshot;
+}) {
   if (data.status !== 'ready' || !data.article || !data.summary) {
     return (
       <Card aria-labelledby="intelligence-article-unavailable-title">
@@ -91,6 +99,12 @@ export function IntelligenceArticleView({ data }: { data: IntelligenceArticleDat
           </Link>
         </aside>
       ) : null}
+
+      <IntelligenceFeedback
+        articleId={article.articleId}
+        initialValue={feedback.feedback?.feedback ?? null}
+        writable={feedback.writable && feedback.state !== 'error'}
+      />
 
       <section className={styles['article-sources']} aria-labelledby="article-sources-title">
         <h2 id="article-sources-title">Fuentes y provenance</h2>
