@@ -107,9 +107,7 @@
       "observedAt": "2026-09-18"
     }
   ],
-  "professionalRefs": [
-    "technology:AIT-006"
-  ],
+  "professionalRefs": ["technology:AIT-006"],
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "feat/intelligence-source-radar-v1",

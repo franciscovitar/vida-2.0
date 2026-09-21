@@ -117,7 +117,10 @@ export function IntelligenceDashboard({ editorial }: { editorial: IntelligenceEd
       </div>
 
       {specials.length > 0 ? (
-        <section className={styles['specials-section']} aria-labelledby="intelligence-specials-title">
+        <section
+          className={styles['specials-section']}
+          aria-labelledby="intelligence-specials-title"
+        >
           <div className={styles['specials-heading']}>
             <div>
               <strong id="intelligence-specials-title">Especiales recientes</strong>

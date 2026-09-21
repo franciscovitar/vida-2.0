@@ -22,7 +22,7 @@
     "stylelint:fix": "stylelint \"**/*.{css,scss}\" --fix",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --write \"components/intelligence/IntelligenceDashboard.tsx\" \"data/generated/intelligence-editorial-snapshot.json\" \"data/generated/intelligence/articles/carrera/por-que-tu-siguiente-salto-no-parece-ser-otro-framework.json\" \"data/generated/intelligence/articles/tecnologia/opentelemetry-explicado-sin-humo.json\" && git diff -- \"components/intelligence/IntelligenceDashboard.tsx\" \"data/generated/intelligence-editorial-snapshot.json\" \"data/generated/intelligence/articles/carrera/por-que-tu-siguiente-salto-no-parece-ser-otro-framework.json\" \"data/generated/intelligence/articles/tecnologia/opentelemetry-explicado-sin-humo.json\" && exit 1",
+    "format:check": "prettier --check .",
     "test": "node --import tsx --test \"tests/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
     "verify": "npm run check && npm run build",
