@@ -13,6 +13,7 @@ import type { ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { TechnologyLibrary } from '@/components/professional/TechnologyLibrary';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import {
   findIntelligenceArticleForProfessionalRef,
@@ -26,6 +27,7 @@ import type {
   ProfessionalConfidence,
   ProfessionalIntelligenceData,
 } from '@/types/professional-intelligence';
+import type { TechnologyLibraryData } from '@/types/technology-library';
 
 import styles from './ProfessionalDashboard.module.scss';
 
@@ -84,6 +86,8 @@ const OUTLOOK_LABELS: Record<string, string> = {
 const TECHNOLOGY_LABELS: Record<string, string> = {
   CURRENT_STACK: 'Ya lo usás',
   ASSESS: 'Vale la pena evaluar',
+  ASSESS_CONDITIONALLY: 'Evaluar si aparece el caso',
+  ASSESS_ONLY_IF_IT_REDUCES_FRICTION_OR_COST: 'Evaluar sólo si mejora tiempo o costo',
   HOLD: 'Esperar por ahora',
 };
 
@@ -164,9 +168,11 @@ function formatInteger(value: number): string {
 export function ProfessionalDashboard({
   data,
   editorial,
+  technologyLibrary,
 }: {
   data: ProfessionalIntelligenceData;
   editorial?: IntelligenceEditorialData;
+  technologyLibrary?: TechnologyLibraryData;
 }) {
   if (data.status !== 'ready' || !data.snapshot) {
     return (
@@ -542,8 +548,8 @@ export function ProfessionalDashboard({
         <Card aria-labelledby="professional-tech-title">
           <SectionHeader
             id="professional-tech-title"
-            title="Herramientas y tecnologías"
-            description="Qué ya usás, qué vale la pena evaluar y qué conviene ignorar por ahora."
+            title="Radar actual de herramientas"
+            description="Pocas cosas que hoy están en uso, evaluación o espera. La biblioteca completa vive aparte."
             icon={Workflow}
             domain="productivity"
           />
@@ -616,6 +622,8 @@ export function ProfessionalDashboard({
           </ul>
         </Card>
       </div>
+
+      {technologyLibrary ? <TechnologyLibrary data={technologyLibrary} /> : null}
 
       <div className={styles.columns}>
         <Card aria-labelledby="professional-profile-title">

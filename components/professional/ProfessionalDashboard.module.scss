@@ -473,3 +473,158 @@
 .explainer-link:hover {
   text-decoration: underline;
 }
+
+.library-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.85rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.library-summary strong {
+  color: var(--text);
+  font-size: 0.86rem;
+}
+
+.library-summary span,
+.library-footnote,
+.library-notice,
+.library-unavailable,
+.library-provenance {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.library-section {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.library-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.65rem;
+}
+
+@media (width >= 760px) {
+  .library-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 1180px) {
+  .library-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.library-entry {
+  display: grid;
+  align-content: start;
+  gap: 0.48rem;
+  min-width: 0;
+  padding: 0.78rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.library-entry > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.48;
+}
+
+.library-entry .more-body a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.library-all {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.8rem;
+}
+
+.library-all > summary,
+.library-category > summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.library-all > summary::-webkit-details-marker,
+.library-category > summary::-webkit-details-marker {
+  display: none;
+}
+
+.library-all > summary {
+  width: fit-content;
+  min-height: 2.2rem;
+  color: var(--c-learning);
+  font-size: 0.78rem;
+}
+
+.library-all > summary::after {
+  content: ' +';
+}
+
+.library-all[open] > summary::after {
+  content: ' −';
+}
+
+.library-all-body {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.library-category {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+
+.library-category > summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.85rem;
+  font-size: 0.76rem;
+}
+
+.library-category > summary span:last-child {
+  color: var(--text-subtle);
+  font-weight: 700;
+}
+
+.library-category[open] > summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.library-category > .library-grid {
+  padding: 0.75rem;
+}
+
+.library-footnote {
+  margin: 0.9rem 0 0;
+}
+
+.library-provenance {
+  margin-top: 0.6rem;
+  color: var(--text-subtle);
+}
+
+.library-provenance code {
+  font-size: inherit;
+}

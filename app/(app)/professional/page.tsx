@@ -24,7 +24,11 @@ export default async function ProfessionalPage() {
         domain="projects"
       />
 
-      <ProfessionalDashboard data={data.professional} editorial={data.editorial} />
+      <ProfessionalDashboard
+        data={data.professional}
+        editorial={data.editorial}
+        technologyLibrary={data.technologyLibrary}
+      />
     </div>
   );
 }

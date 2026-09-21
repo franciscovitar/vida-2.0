@@ -4,3 +4,4 @@ dist
 build
 node_modules
 package-lock.json
+data/generated/technology-library.json
