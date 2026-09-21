@@ -1,12 +1,4 @@
-import {
-  BookOpen,
-  Brain,
-  CircleAlert,
-  Info,
-  LineChart,
-  Target,
-  Workflow,
-} from 'lucide-react';
+import { BookOpen, Brain, CircleAlert, Info, LineChart, Target, Workflow } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/Badge';
@@ -70,10 +62,8 @@ export function IntelligenceDashboard({
   const p = professional.snapshot;
   const now = p.nowMoves[0] ?? null;
   const learn = p.priorities[0] ?? null;
-  const trial =
-    p.technologies.find((item) => item.disposition.includes('TRIAL')) ?? null;
-  const assess =
-    p.technologies.find((item) => item.disposition.includes('ASSESS')) ?? null;
+  const trial = p.technologies.find((item) => item.disposition.includes('TRIAL')) ?? null;
+  const assess = p.technologies.find((item) => item.disposition.includes('ASSESS')) ?? null;
   const hold = p.technologies.find((item) => item.disposition === 'HOLD') ?? null;
   const radarTech = p.technologies
     .filter((item) => item.disposition !== 'CURRENT_STACK')
@@ -214,12 +204,7 @@ export function IntelligenceDashboard({
             <div className={styles.sources}>
               <strong>Fuentes</strong>
               {e.aiBrief.sources.map((source) => (
-                <a
-                  key={source.url}
-                  href={source.url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a key={source.url} href={source.url} target="_blank" rel="noreferrer">
                   {source.title}
                 </a>
               ))}
