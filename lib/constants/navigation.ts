@@ -38,6 +38,7 @@ export type NavIconKey =
   | 'planificacion'
   | 'proyectos'
   | 'professional'
+  | 'inteligencia'
   | 'tareas'
   | 'aprendizaje'
   | 'compras'
@@ -80,6 +81,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   planificacion: CalendarRange,
   proyectos: Boxes,
   professional: Brain,
+  inteligencia: LineChart,
   tareas: ListTodo,
   aprendizaje: BookOpen,
   compras: ShoppingCart,
@@ -113,6 +115,7 @@ export const primaryNav: NavItemData[] = [
     domain: 'productivity',
   },
   { label: 'Proyectos', href: '/proyectos', icon: 'proyectos', domain: 'projects' },
+  { label: 'Inteligencia', href: '/inteligencia', icon: 'inteligencia', domain: 'productivity' },
   { label: 'Profesional', href: '/professional', icon: 'professional', domain: 'projects' },
   { label: 'Áreas', href: '/areas', icon: 'areas', domain: 'projects' },
   { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },
