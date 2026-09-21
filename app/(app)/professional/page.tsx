@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ProfessionalDashboard } from '@/components/professional/ProfessionalDashboard';
-import { getProfessionalIntelligence } from '@/lib/data/professional-intelligence-source';
+import { getProfessionalIntelligencePageData } from '@/lib/data/professional-intelligence-source';
 
 import pageStyles from '../page.module.scss';
 
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function ProfessionalPage() {
-  const data = await getProfessionalIntelligence();
+  const data = await getProfessionalIntelligencePageData();
 
   return (
     <div className={pageStyles.page}>
@@ -24,7 +24,7 @@ export default async function ProfessionalPage() {
         domain="projects"
       />
 
-      <ProfessionalDashboard data={data} />
+      <ProfessionalDashboard data={data.professional} editorial={data.editorial} />
     </div>
   );
 }

@@ -215,3 +215,15 @@
 .provenance code {
   font-size: inherit;
 }
+
+.explainer-link {
+  width: fit-content;
+  color: var(--c-learning);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.explainer-link:hover {
+  text-decoration: underline;
+}

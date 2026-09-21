@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "articleId": "INT-PAS-2026-09-21-01",
+  "front": "pas",
+  "slug": "que-significa-que-tu-pas-pueda-mejorar-solo",
+  "title": "Qué significa realmente que tu Personal AI System pueda mejorar solo",
+  "dek": "No significa que cambie reglas por su cuenta. Significa que ahora puede convertir señales y errores reales en candidatos de mejora, probarlos y conservar sólo lo que demuestra valor.",
+  "publishedAt": "2026-09-21",
+  "readingMinutes": 4,
+  "format": "ARTICLE",
+  "status": "PUBLISHED",
+  "audienceAssumption": "START_FROM_ZERO",
+  "freshness": {
+    "evidenceObservedAt": "2026-09-21",
+    "reverifyAfter": "2026-12-21",
+    "rule": "El artículo histórico sigue disponible; la gobernanza PAS vigente conserva la autoridad sobre el comportamiento actual."
+  },
+  "sections": [
+    {
+      "heading": "Mejorar solo suena más autónomo de lo que realmente es",
+      "body": [
+        "La frase puede hacer pensar en un sistema que descubre algo en internet, reescribe sus reglas y sigue adelante sin control. Eso sería precisamente lo que el PAS intenta evitar.",
+        "Lo nuevo es un circuito gobernado de mejora continua. Cuando aparece una señal —una función nueva, un paper, un error repetido, una corrección tuya o un resultado real— el sistema ya tiene una forma explícita de preguntar si merece atención, qué parte causal podría mejorar y cómo comprobarlo."
+      ]
+    },
+    {
+      "heading": "La analogía del taller",
+      "body": [
+        "Pensalo como un taller que antes tenía buenas herramientas, manuales y mecánicos especializados, pero no un proceso común para aprender de cada falla. Una persona podía notar que una reparación se repetía, pero cada mejora dependía de acordarse y decidirla a mano.",
+        "Ahora el taller tiene un circuito: registrar la señal, comprobar que el problema es real, comparar la solución propuesta contra la forma actual de trabajar, probarla sin romper el resto y recién entonces incorporarla."
+      ]
+    },
+    {
+      "heading": "Qué pasa cuando aparece una idea nueva",
+      "body": [
+        "El runtime primero normaliza la señal en una hipótesis comprobable. Después revisa si ya existe algo equivalente y si el problema importa para una tarea real. Si no importa, puede descartarlo.",
+        "Si sí importa, mira la calidad y frescura de la evidencia. Luego aplica Value of Information: investigar también cuesta, así que sólo vale profundizar cuando reducir la incertidumbre puede cambiar una decisión relevante.",
+        "Después compara contra el baseline actual. Una técnica nueva no gana por ser nueva; tiene que mejorar algo útil sin empeorar capacidades importantes como seguridad, privacidad, aislamiento de materias o eficiencia de contexto."
+      ]
+    },
+    {
+      "heading": "NO_CHANGE también es aprendizaje",
+      "body": [
+        "Mantener un sistema inteligente no significa agregar cosas todo el tiempo. Una semana en la que se revisan novedades y ninguna supera lo actual puede terminar correctamente en NO_CHANGE.",
+        "Eso protege al PAS de dos problemas opuestos: quedarse viejo por no revisar nada y volverse inestable por perseguir cada novedad."
+      ]
+    },
+    {
+      "heading": "Qué significa que fue probado end-to-end",
+      "body": [
+        "La primera ejecución real del circuito no se quedó en un diagrama. Al correr sus validaciones en un checkout real apareció deuda previa: estructuras vacías que faltaban y algunas pruebas históricas que ya no representaban bien el sistema actual.",
+        "La reparación quedó documentada en el PR #249. Después de corregir esa deuda, improvement_review, system_review y self_test pasaron en un entorno real. Eso no prueba que el PAS jamás vaya a fallar; prueba algo más concreto: que el circuito pudo detectar una inconsistencia, obligar a repararla y volver a pasar los controles."
+      ]
+    },
+    {
+      "heading": "Qué vas a notar vos",
+      "body": [
+        "Idealmente, menos ceremonia. Si una recomendación falla varias veces, el objetivo no es agregar otro párrafo gigante a un prompt, sino identificar si el problema está en routing, una Skill, un eval, conocimiento, una herramienta o una política.",
+        "También deberías ver menos entusiasmo automático por herramientas nuevas. Una novedad puede quedar en ASSESS, TRIAL, HOLD o NO_CHANGE según la evidencia y el caso."
+      ]
+    },
+    {
+      "heading": "Qué NO hace",
+      "body": [
+        "No autoriza por sí mismo merges protegidos, compras, despliegues a producción, cambios de permisos ni movimientos destructivos. Esas fronteras siguen bajo Execution Policy y permisos explícitos.",
+        "Tampoco convierte cada conversación en datos permanentes. El objetivo es guardar resultados durables: una decisión, una mejora de Skill, un eval, estado o conocimiento reusable con provenance."
+      ]
+    },
+    {
+      "heading": "Costo y acción requerida",
+      "body": [
+        "El runtime canónico no agrega por sí mismo una suscripción paga. El costo principal es el tiempo de investigación y evaluación, por eso existe el gate de Value of Information.",
+        "No tenés que hacer nada para mantenerlo. Cuando haya feedback real —un workflow que falla, una recomendación mala o una mejora que funcionó— eso sí puede convertirse en señal para el circuito."
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "role": "CANONICAL_RUNTIME",
+      "title": "Continuous Improvement Runtime V1",
+      "ref": "AI/core/CONTINUOUS_IMPROVEMENT_RUNTIME.md",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "VALIDATION_EVIDENCE",
+      "title": "PR #249 — PAS: repair runtime validation debt",
+      "url": "https://github.com/franciscovitar/personal-ai-system/pull/249",
+      "ref": "commit 41ee756dadfceed37c7e1079eb39b4846e37dcee",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "EXECUTION_GOVERNANCE",
+      "title": "Execution Policy",
+      "ref": "AI/core/EXECUTION_POLICY.md",
+      "observedAt": "2026-09-21"
+    }
+  ],
+  "professionalRefs": [],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "feat/intelligence-editorial-v2",
+    "commit": "00df7ad2edc5758e1b52369b10cd6b329831fc12",
+    "canonicalRef": "AI/editorial/articles/pas/que-significa-que-tu-pas-pueda-mejorar-solo.json"
+  }
+}
