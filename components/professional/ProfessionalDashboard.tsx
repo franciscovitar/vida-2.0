@@ -123,13 +123,7 @@ function confidenceLabel(value: ProfessionalConfidence): string {
   return CONFIDENCE_LABELS[value];
 }
 
-function More({
-  children,
-  label = 'Ver más',
-}: {
-  children: ReactNode;
-  label?: string;
-}) {
+function More({ children, label = 'Ver más' }: { children: ReactNode; label?: string }) {
   return (
     <details className={styles.more}>
       <summary>{label}</summary>
@@ -220,8 +214,8 @@ export function ProfessionalDashboard({
         <div className={styles['plain-note']}>
           <strong>Cómo leer esta pantalla:</strong>
           <span>
-            primero qué conviene hacer, después qué tenés que saber vos vs. qué conviene delegar,
-            y recién después mercado, herramientas y credenciales.
+            primero qué conviene hacer, después qué tenés que saber vos vs. qué conviene delegar, y
+            recién después mercado, herramientas y credenciales.
           </span>
         </div>
       </Card>
@@ -241,7 +235,9 @@ export function ProfessionalDashboard({
                 <Badge domain="projects" variant="outline">
                   {ROUTE_LABELS[move.route] ?? fallbackLabel(move.route)}
                 </Badge>
-                <span className={styles.confidence}>Confianza {confidenceLabel(move.confidence)}</span>
+                <span className={styles.confidence}>
+                  Confianza {confidenceLabel(move.confidence)}
+                </span>
               </div>
               <h3>{move.title}</h3>
               <p>{move.why}</p>
@@ -268,7 +264,9 @@ export function ProfessionalDashboard({
         <div className={styles['work-split-grid']}>
           <section className={styles['work-lane']}>
             <h3>Lo tenés que saber vos sí o sí</h3>
-            <p>Decisiones que no conviene tercerizar porque necesitás poder juzgarlas y defenderlas.</p>
+            <p>
+              Decisiones que no conviene tercerizar porque necesitás poder juzgarlas y defenderlas.
+            </p>
             <ul>
               {snapshot.workSplit.own.map((item) => (
                 <li key={item.title}>
@@ -283,7 +281,9 @@ export function ProfessionalDashboard({
 
           <section className={styles['work-lane']}>
             <h3>Conviene hacerlo con IA</h3>
-            <p>Vos marcás dirección y criterios; la IA acelera implementación, análisis y variantes.</p>
+            <p>
+              Vos marcás dirección y criterios; la IA acelera implementación, análisis y variantes.
+            </p>
             <ul>
               {snapshot.workSplit.withAi.map((item) => (
                 <li key={item.title}>
@@ -529,8 +529,8 @@ export function ProfessionalDashboard({
               <More>
                 <p>{item.aiInteraction}</p>
                 <p>
-                  <strong>Horizonte:</strong> 12–24 meses ·{' '}
-                  <strong>confianza:</strong> {confidenceLabel(item.nearConfidence)}.
+                  <strong>Horizonte:</strong> 12–24 meses · <strong>confianza:</strong>{' '}
+                  {confidenceLabel(item.nearConfidence)}.
                 </p>
               </More>
             </article>
@@ -569,9 +569,12 @@ export function ProfessionalDashboard({
                   </p>
                   <p>
                     <strong>Qué tan probado está para vos:</strong>{' '}
-                    {EVAL_LABELS[item.personalEvalStatus] ?? fallbackLabel(item.personalEvalStatus)}.
+                    {EVAL_LABELS[item.personalEvalStatus] ?? fallbackLabel(item.personalEvalStatus)}
+                    .
                   </p>
-                  <p>La decisión de adoptarlo o no la toma el PAS; esta pantalla sólo te orienta.</p>
+                  <p>
+                    La decisión de adoptarlo o no la toma el PAS; esta pantalla sólo te orienta.
+                  </p>
                   <ExplainerLink
                     article={findIntelligenceArticleForProfessionalRef(
                       editorialSnapshot,
