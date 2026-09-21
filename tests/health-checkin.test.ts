@@ -273,26 +273,3 @@ test('HC10. Action exige sesión y el puerto no usa append ni operaciones estruc
   assert.doesNotMatch(component, /streak|racha/i);
   assert.doesNotMatch(component, /autoSubmit|onBlur=.*save|onFocus=.*save/i);
 });
-
-
-test('HC-DIAG2. emite Prettier exacto en base64', async () => {
-  const prettier = await import('prettier');
-  for (const relativePath of [
-    'components/health/HealthCheckinCard.tsx',
-    'lib/health/checkin.ts',
-  ]) {
-    const source = readFileSync(join(process.cwd(), relativePath), 'utf8');
-    const formatted = await prettier.format(source, {
-      filepath: relativePath,
-      printWidth: 100,
-      tabWidth: 2,
-      useTabs: false,
-      semi: true,
-      singleQuote: true,
-      trailingComma: 'all',
-      endOfLine: 'lf',
-    });
-    console.log(`PRETTIER_B64:${relativePath}:${Buffer.from(formatted, 'utf8').toString('base64')}`);
-  }
-  assert.ok(true);
-});
