@@ -9,6 +9,7 @@ import {
   resolveIntelligenceArticleText,
   resolveIntelligenceEditorialSnapshotText,
 } from '@/lib/intelligence/contract';
+import type { IntelligenceArticleSummary } from '@/types/intelligence-editorial';
 
 const generatedRoot = join(process.cwd(), 'data', 'generated');
 const snapshotPath = join(generatedRoot, 'intelligence-editorial-snapshot.json');
@@ -63,7 +64,9 @@ test('INT-04. current resuelve al archivo y cada artículo coincide con provenan
   assert.ok(snapshot);
 
   for (const [front, articleId] of Object.entries(snapshot.current)) {
-    const summary = snapshot.archive.find((item) => item.id === articleId);
+    const summary: IntelligenceArticleSummary | undefined = snapshot.archive.find(
+      (item) => item.id === articleId,
+    );
     assert.ok(summary);
     assert.equal(summary.front, front);
 
