@@ -1,0 +1,163 @@
+.form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.defaults,
+.optional {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field legend,
+.note > span {
+  margin-bottom: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.segment,
+.save {
+  min-height: 2.15rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.segment {
+  min-width: 2.15rem;
+  padding: 0.35rem 0.55rem;
+}
+
+.segment[data-selected='true'] {
+  border-color: var(--c-health-border);
+  background: var(--surface-1);
+  color: var(--c-health);
+}
+
+.segment:disabled,
+.save:disabled,
+.note textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.more {
+  border-top: 1px solid var(--border);
+  padding-top: 0.65rem;
+}
+
+.more summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--c-health);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.optional {
+  margin-top: 0.7rem;
+}
+
+.note {
+  display: grid;
+}
+
+.note textarea {
+  min-width: 0;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 0.65rem;
+  font: inherit;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.footer {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding-top: 0.7rem;
+}
+
+.footer > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.feedback,
+.hint,
+.notice,
+.footer small {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.feedback[data-state='saved'] {
+  color: var(--c-health);
+}
+
+.feedback[data-state='error'] {
+  color: var(--c-projects);
+}
+
+.save {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.9rem;
+  border-color: var(--c-health-border);
+  color: var(--c-health);
+}
+
+@media (width >= 760px) {
+  .defaults {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .optional {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .note {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (width <= 600px) {
+  .footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .save {
+    width: 100%;
+  }
+}

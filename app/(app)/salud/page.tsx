@@ -8,6 +8,7 @@ import styles from '@/components/domain/DomainPage.module.scss';
 import { PeriodSelector } from '@/components/domain/PeriodSelector';
 import { SparkBars } from '@/components/domain/SparkBars';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
+import { HealthCheckinCard } from '@/components/health/HealthCheckinCard';
 import {
   HealthContextSection,
   HealthDeviationRadarSection,
@@ -23,6 +24,7 @@ import { getDomainPages } from '@/lib/data/domain-pages';
 import { getHealthContextInputs } from '@/lib/health/context-sources';
 import { buildPersonalDeviationRadar } from '@/lib/health/deviation-radar';
 import { buildHealthIntelligence } from '@/lib/health/intelligence';
+import { loadHealthCheckinSnapshot } from '@/lib/health/checkin-sheet';
 import {
   buildRhythmFeaturesViewModel,
   loadRhythmFeaturesSnapshot,
@@ -91,10 +93,11 @@ export default async function SaludPage({
 }) {
   const params = await searchParams;
   const periodDays = parsePeriodParam(params.period);
-  const [data, context, rhythmSnapshot] = await Promise.all([
+  const [data, context, rhythmSnapshot, checkinSnapshot] = await Promise.all([
     getDomainPages(periodDays),
     getHealthContextInputs(),
     loadRhythmFeaturesSnapshot(),
+    loadHealthCheckinSnapshot(),
   ]);
   const health = data.health;
   const rhythm = buildRhythmFeaturesViewModel(rhythmSnapshot);
@@ -120,6 +123,13 @@ export default async function SaludPage({
       />
 
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
+
+      <HealthCheckinCard
+        targetDate={checkinSnapshot.targetDate}
+        initial={checkinSnapshot.today}
+        writable={checkinSnapshot.writable}
+        notice={checkinSnapshot.notice}
+      />
 
       <HealthScoreboardSection scoreboard={intelligence.scores} rhythm={rhythm} />
 
