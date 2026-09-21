@@ -128,9 +128,7 @@ function fail(code: HealthCheckinWriteCode, operationId: string): HealthCheckinW
 
 function isBlank(value: HealthCheckinCell | undefined): boolean {
   return (
-    value === null ||
-    value === undefined ||
-    (typeof value === 'string' && value.trim() === '')
+    value === null || value === undefined || (typeof value === 'string' && value.trim() === '')
   );
 }
 

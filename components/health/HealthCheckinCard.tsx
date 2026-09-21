@@ -264,11 +264,7 @@ export function HealthCheckinCard({ targetDate, initial, writable, notice }: Pro
                 <small>Una corrección posterior reemplaza el registro de hoy.</small>
               ) : null}
             </div>
-            <button
-              type="submit"
-              className={styles.save}
-              disabled={disabled || !defaultComplete}
-            >
+            <button type="submit" className={styles.save} disabled={disabled || !defaultComplete}>
               {saveState === 'saving' ? 'Guardando…' : 'Guardar'}
             </button>
           </div>

@@ -148,10 +148,7 @@ test('HC3. missing permanece blank/null y nunca se convierte en cero', () => {
 
 test('HC4. same-day retry idéntico es idempotente y no vuelve a escribir', async () => {
   const existing = syntheticCheckin();
-  const port = createMemoryPort([
-    [...HEALTH_CHECKIN_HEADERS],
-    healthCheckinToRow(existing),
-  ]);
+  const port = createMemoryPort([[...HEALTH_CHECKIN_HEADERS], healthCheckinToRow(existing)]);
 
   const result = await upsertHealthCheckinWithPort(input(), port, {
     today: TODAY,
@@ -275,28 +272,4 @@ test('HC10. Action exige sesión y el puerto no usa append ni operaciones estruc
   assert.match(port, /method: 'PUT'/);
   assert.doesNotMatch(component, /streak|racha/i);
   assert.doesNotMatch(component, /autoSubmit|onBlur=.*save|onFocus=.*save/i);
-});
-
-
-test('HC-DIAG. imprime formato exacto de Prettier para el gate', async () => {
-  const prettier = await import('prettier');
-  for (const relativePath of [
-    'components/health/HealthCheckinCard.tsx',
-    'lib/health/checkin.ts',
-    'tests/health-checkin.test.ts',
-  ]) {
-    const source = readFileSync(join(process.cwd(), relativePath), 'utf8');
-    const formatted = await prettier.format(source, {
-      filepath: relativePath,
-      printWidth: 100,
-      tabWidth: 2,
-      useTabs: false,
-      semi: true,
-      singleQuote: true,
-      trailingComma: 'all',
-      endOfLine: 'lf',
-    });
-    console.log(`===PRETTIER_START:${relativePath}===\n${formatted}===PRETTIER_END:${relativePath}===`);
-  }
-  assert.ok(true);
 });
