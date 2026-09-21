@@ -14,12 +14,12 @@ function isString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0;
 }
 
-function isBoolean(value: unknown): value is boolean {
-  return typeof value === 'boolean';
-}
-
 function isNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isBoolean(value: unknown): value is boolean {
+  return typeof value === 'boolean';
 }
 
 function isConfidence(value: unknown): value is ProfessionalConfidence {
@@ -59,6 +59,59 @@ function validPriority(value: unknown): boolean {
     isString(value.actionType) &&
     isString(value.action) &&
     isConfidence(value.confidence)
+  );
+}
+
+function validMarketSignal(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    isString(value.id) &&
+    isString(value.title) &&
+    isString(value.value) &&
+    isString(value.explanation) &&
+    isString(value.geography) &&
+    isString(value.period) &&
+    isString(value.sourceLabel) &&
+    isString(value.sourceUrl)
+  );
+}
+
+function validMarketBenchmark(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    isString(value.id) &&
+    isString(value.role) &&
+    isString(value.geography) &&
+    isString(value.period) &&
+    isNumber(value.employmentGrowthPercent) &&
+    isNumber(value.annualOpenings) &&
+    isNumber(value.medianAnnualUsd) &&
+    isString(value.sourceLabel) &&
+    isString(value.sourceUrl)
+  );
+}
+
+function validSalaryPoint(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    isString(value.label) &&
+    isNumber(value.medianArsGrossMonthly) &&
+    value.medianArsGrossMonthly > 0 &&
+    isNumber(value.sampleSize) &&
+    value.sampleSize > 0 &&
+    isBoolean(value.dollarized)
+  );
+}
+
+function validSalaryRole(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    isString(value.id) &&
+    isString(value.role) &&
+    isString(value.period) &&
+    isString(value.sourceLabel) &&
+    isString(value.sourceUrl) &&
+    everyArray(value.points, validSalaryPoint)
   );
 }
 
@@ -118,15 +171,27 @@ function validFluencyFamily(value: unknown): boolean {
   );
 }
 
+function validWorkSplitItem(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return isString(value.title) && isString(value.explanation);
+}
+
 export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot | null {
-  if (!isRecord(value) || value.schemaVersion !== 1) return null;
+  if (!isRecord(value) || value.schemaVersion !== 2) return null;
 
   const source = value.source;
   const market = value.market;
   const forecast = value.forecast;
   const aiFluency = value.aiFluency;
+  const workSplit = value.workSplit;
 
-  if (!isRecord(source) || !isRecord(market) || !isRecord(forecast) || !isRecord(aiFluency)) {
+  if (
+    !isRecord(source) ||
+    !isRecord(market) ||
+    !isRecord(forecast) ||
+    !isRecord(aiFluency) ||
+    !isRecord(workSplit)
+  ) {
     return null;
   }
 
@@ -134,6 +199,7 @@ export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot 
     source.repository === 'franciscovitar/personal-ai-system' &&
     source.ref === 'main' &&
     isString(source.commit) &&
+    /^[a-f0-9]{40}$/.test(source.commit) &&
     isString(source.generatedAt) &&
     isString(source.observedAt) &&
     isNumber(source.staleAfterDays) &&
@@ -142,8 +208,18 @@ export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot 
   const marketValid =
     isString(market.observedAt) &&
     isString(market.status) &&
-    everyArray(market.signals, isString) &&
+    isString(market.headline) &&
+    everyArray(market.globalSignals, validMarketSignal) &&
+    everyArray(market.internationalBenchmarks, validMarketBenchmark) &&
+    everyArray(market.argentinaSalaryRoles, validSalaryRole) &&
     everyArray(market.limitations, isString);
+
+  const workSplitValid =
+    isString(workSplit.principle) &&
+    isString(workSplit.basis) &&
+    everyArray(workSplit.own, validWorkSplitItem) &&
+    everyArray(workSplit.withAi, validWorkSplitItem) &&
+    everyArray(workSplit.delegateToAi, validWorkSplitItem);
 
   const forecastValid =
     isString(forecast.direction) &&
@@ -158,6 +234,7 @@ export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot 
   if (
     !sourceValid ||
     !marketValid ||
+    !workSplitValid ||
     !forecastValid ||
     !fluencyValid ||
     !isString(value.profileSummary) ||

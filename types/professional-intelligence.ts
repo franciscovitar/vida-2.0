@@ -25,10 +25,52 @@ export interface ProfessionalPriorityItem {
   confidence: ProfessionalConfidence;
 }
 
+export interface ProfessionalMarketSignal {
+  id: string;
+  title: string;
+  value: string;
+  explanation: string;
+  geography: string;
+  period: string;
+  sourceLabel: string;
+  sourceUrl: string;
+}
+
+export interface ProfessionalMarketBenchmark {
+  id: string;
+  role: string;
+  geography: string;
+  period: string;
+  employmentGrowthPercent: number;
+  annualOpenings: number;
+  medianAnnualUsd: number;
+  sourceLabel: string;
+  sourceUrl: string;
+}
+
+export interface ProfessionalArgentinaSalaryPoint {
+  label: string;
+  medianArsGrossMonthly: number;
+  sampleSize: number;
+  dollarized: boolean;
+}
+
+export interface ProfessionalArgentinaSalaryRole {
+  id: string;
+  role: string;
+  period: string;
+  sourceLabel: string;
+  sourceUrl: string;
+  points: readonly ProfessionalArgentinaSalaryPoint[];
+}
+
 export interface ProfessionalMarketView {
   observedAt: string;
   status: string;
-  signals: readonly string[];
+  headline: string;
+  globalSignals: readonly ProfessionalMarketSignal[];
+  internationalBenchmarks: readonly ProfessionalMarketBenchmark[];
+  argentinaSalaryRoles: readonly ProfessionalArgentinaSalaryRole[];
   limitations: readonly string[];
 }
 
@@ -76,8 +118,21 @@ export interface ProfessionalFluencyFamily {
   nextMeasurement: string;
 }
 
+export interface ProfessionalWorkSplitItem {
+  title: string;
+  explanation: string;
+}
+
+export interface ProfessionalWorkSplit {
+  principle: string;
+  basis: string;
+  own: readonly ProfessionalWorkSplitItem[];
+  withAi: readonly ProfessionalWorkSplitItem[];
+  delegateToAi: readonly ProfessionalWorkSplitItem[];
+}
+
 export interface ProfessionalSnapshot {
-  schemaVersion: 1;
+  schemaVersion: 2;
   source: {
     repository: 'franciscovitar/personal-ai-system';
     ref: 'main';
@@ -90,6 +145,7 @@ export interface ProfessionalSnapshot {
   nowMoves: readonly ProfessionalNowMove[];
   strongestEvidence: readonly ProfessionalEvidenceItem[];
   priorities: readonly ProfessionalPriorityItem[];
+  workSplit: ProfessionalWorkSplit;
   market: ProfessionalMarketView;
   technologies: readonly ProfessionalTechnologyItem[];
   learning: readonly ProfessionalLearningItem[];
