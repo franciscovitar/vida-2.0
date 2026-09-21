@@ -8,10 +8,19 @@ import {
   Target,
   Workflow,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import {
+  findIntelligenceArticleForProfessionalRef,
+  intelligenceArticleHref,
+} from '@/lib/intelligence/contract';
+import type {
+  IntelligenceArticleSummary,
+  IntelligenceEditorialData,
+} from '@/types/intelligence-editorial';
 import type { ProfessionalIntelligenceData } from '@/types/professional-intelligence';
 
 import styles from './ProfessionalDashboard.module.scss';
@@ -20,7 +29,23 @@ function humanizeToken(value: string): string {
   return value.replaceAll('_', ' ').toLowerCase();
 }
 
-export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligenceData }) {
+function ExplainerLink({ article }: { article: IntelligenceArticleSummary | null }) {
+  if (!article) return null;
+
+  return (
+    <Link className={styles['explainer-link']} href={intelligenceArticleHref(article)}>
+      Entender por qué →
+    </Link>
+  );
+}
+
+export function ProfessionalDashboard({
+  data,
+  editorial,
+}: {
+  data: ProfessionalIntelligenceData;
+  editorial?: IntelligenceEditorialData;
+}) {
   if (data.status !== 'ready' || !data.snapshot) {
     return (
       <Card aria-labelledby="professional-unavailable-title">
@@ -40,6 +65,7 @@ export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligence
   }
 
   const snapshot = data.snapshot;
+  const editorialSnapshot = editorial?.status === 'ready' ? editorial.snapshot : null;
 
   return (
     <div className={styles.stack}>
@@ -99,6 +125,12 @@ export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligence
                   <small>
                     {humanizeToken(item.actionType)} · confianza {item.confidence}
                   </small>
+                  <ExplainerLink
+                    article={findIntelligenceArticleForProfessionalRef(
+                      editorialSnapshot,
+                      `priority:${item.capability}`,
+                    )}
+                  />
                 </div>
               </li>
             ))}
@@ -181,6 +213,12 @@ export function ProfessionalDashboard({ data }: { data: ProfessionalIntelligence
                 <small>
                   {item.priceLabel} · {item.personalEvalStatus} · system-maintenance decide
                 </small>
+                <ExplainerLink
+                  article={findIntelligenceArticleForProfessionalRef(
+                    editorialSnapshot,
+                    `technology:${item.id}`,
+                  )}
+                />
               </li>
             ))}
           </ul>

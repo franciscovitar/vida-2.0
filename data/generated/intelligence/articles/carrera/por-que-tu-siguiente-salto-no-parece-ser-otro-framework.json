@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "articleId": "INT-CAR-2026-09-21-01",
+  "front": "carrera",
+  "slug": "por-que-tu-siguiente-salto-no-parece-ser-otro-framework",
+  "title": "Por qué tu siguiente salto no parece ser aprender otro framework",
+  "dek": "Ya hay evidencia de que podés construir software. El hueco más valioso ahora aparece después del deploy: operar, observar, recuperar y explicar sistemas reales.",
+  "publishedAt": "2026-09-21",
+  "readingMinutes": 5,
+  "format": "ARTICLE",
+  "status": "PUBLISHED",
+  "audienceAssumption": "START_FROM_ZERO",
+  "freshness": {
+    "evidenceObservedAt": "2026-09-18",
+    "reverifyAfter": "2026-11-01",
+    "rule": "El artículo histórico sigue disponible; Profesional conserva la decisión vigente."
+  },
+  "sections": [
+    {
+      "heading": "El problema no está en saber programar un poco más",
+      "body": [
+        "Tu evidencia profesional actual ya muestra entregas web reales, sistemas con Next.js y TypeScript, testing, cambios seguros, producto y orquestación con IA. Eso no significa que ya esté todo resuelto. Significa algo más útil: el próximo hueco no parece estar en aprender otro framework por reflejo.",
+        "La prioridad que hoy aparece arriba en Profesional es Producción / reliability / observabilidad. Leído así suena a tres palabras técnicas juntas. En realidad describen una misma pregunta: ¿qué pasa con tu software después de que deja de ser código en tu computadora y empieza a depender de usuarios, datos, servicios, errores y tiempo?"
+      ]
+    },
+    {
+      "heading": "La analogía del restaurante",
+      "body": [
+        "Saber programar una aplicación se parece a saber cocinar un plato. Podés tener una receta excelente y ejecutarla bien. Pero operar un restaurante exige otra capa: servir cien platos durante la noche, notar que una heladera está fallando antes de perder la mercadería, entender por qué una mesa esperó demasiado y tener una alternativa cuando algo crítico se rompe.",
+        "En software, producción es el restaurante abierto. Reliability —confiabilidad— es la capacidad de que el servicio siga cumpliendo lo importante aun cuando aparecen fallos. Observabilidad es tener suficientes señales para entender qué está ocurriendo sin adivinar."
+      ]
+    },
+    {
+      "heading": "Por qué aparece ahora en tu radar",
+      "body": [
+        "No aparece porque SRE esté de moda ni porque haga falta cambiar tu identidad profesional. Aparece porque ya construiste bastante del lado de producto y entrega, mientras que la evidencia operacional sigue siendo más fina.",
+        "El estado canónico identifica huecos concretos: observabilidad accionable, respuesta a incidentes, recovery, backup/restore, SLI/SLO y diagnóstico de capacidad o performance. También indica cómo cerrarlos: con experiencia acotada en un proyecto real, no con otro curso general."
+      ]
+    },
+    {
+      "heading": "Qué sería una evidencia convincente",
+      "body": [
+        "No hace falta transformarte en especialista de infraestructura de un día para el otro. Un ejercicio pequeño puede ser más informativo: elegir un servicio real, definir qué señal avisaría que algo está mal, provocar de forma segura un fallo conocido, observarlo, recuperar el sistema y documentar qué decisión tomarías la próxima vez.",
+        "Otro ejemplo es verificar un camino real de backup y restore. Tener un backup configurado no demuestra que recuperar datos funcione. La evidencia aparece cuando el proceso de recuperación se prueba y deja un resultado observable."
+      ]
+    },
+    {
+      "heading": "Dónde entran SRE, SLI y SLO",
+      "body": [
+        "Recién después de entender el problema vale ponerle nombres. SRE —Site Reliability Engineering— es una disciplina para operar servicios con objetivos explícitos de confiabilidad y con ingeniería, no sólo reacción manual.",
+        "Un SLI es una medida de cómo se comporta algo importante, por ejemplo la proporción de requests correctos. Un SLO es el objetivo que fijás sobre esa medida. No necesitás memorizar estas siglas primero; necesitás entender qué comportamiento importa y cómo sabrías que dejó de cumplirse."
+      ]
+    },
+    {
+      "heading": "Qué cambia para vos y qué no",
+      "body": [
+        "Cambia el tipo de evidencia que conviene construir. En vez de sumar una tecnología más a una lista, tiene más valor demostrar que podés mantener una aplicación entendible cuando algo sale mal.",
+        "No cambia que software/web siga siendo una base válida. Profesional no está diciendo que dejes de desarrollar para hacerte SRE. Está diciendo que tu diferencial marginal puede crecer más mostrando operación, datos, seguridad y runtime de IA que agregando otra capa de implementación rutinaria."
+      ]
+    },
+    {
+      "heading": "La decisión actual sigue en Profesional",
+      "body": [
+        "Inteligencia explica por qué esta capacidad aparece. Profesional conserva el estado ejecutivo: prioridad, acción, confianza y cuándo cambia. Si la evidencia futura mueve esa prioridad, este artículo seguirá existiendo como contexto histórico, pero la decisión vigente será la de Profesional."
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "role": "CANONICAL_PROFESSIONAL",
+      "title": "Learning Decisions V1",
+      "ref": "AI/projects/professional-intelligence/LEARNING_DECISIONS_V1.json",
+      "observedAt": "2026-09-18"
+    },
+    {
+      "role": "CANONICAL_PROFESSIONAL",
+      "title": "Professional evidence audit",
+      "ref": "AI/projects/professional-intelligence/PROFESSIONAL_EVIDENCE_AUDIT_2026-09-18.md",
+      "observedAt": "2026-09-18"
+    }
+  ],
+  "professionalRefs": ["priority:Producción / reliability / observabilidad"],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "8b572b4e327f3cc13713e88226e532534aaf7d02",
+    "canonicalRef": "AI/editorial/articles/carrera/por-que-tu-siguiente-salto-no-parece-ser-otro-framework.json"
+  }
+}

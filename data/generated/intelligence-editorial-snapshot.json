@@ -1,90 +1,67 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "4ff38addb2ab5f6a6a05c2e84d97502065a477d0",
-    "canonicalRef": "AI/editorial/INTELLIGENCE_EDITORIAL_CURRENT.json",
+    "commit": "8b572b4e327f3cc13713e88226e532534aaf7d02",
+    "canonicalCurrentRef": "AI/editorial/INTELLIGENCE_EDITORIAL_CURRENT.json",
+    "canonicalArchiveRef": "AI/editorial/INTELLIGENCE_EDITORIAL_ARCHIVE.json",
     "generatedAt": "2026-09-21",
     "observedAt": "2026-09-21",
-    "staleAfterDays": 8
+    "staleAfterDays": 45
   },
   "readingDebt": false,
-  "aiBrief": {
-    "status": "MATERIAL",
-    "periodLabel": "Semana del 14 al 21 de septiembre de 2026",
-    "readingMinutes": 2,
-    "title": "La IA se está metiendo en el trabajo, no sólo en el chat",
-    "oneBigThing": "La señal más útil de la semana no es un modelo aislado: varias plataformas están acercando la IA a documentos, cuentas, voz y revisión de código. El cambio importante es la integración al flujo real.",
-    "quickPoints": [
-      {
-        "title": "ChatGPT se acerca al trabajo cotidiano",
-        "detail": "OpenAI lanzó ChatGPT dentro de Word y amplió las conexiones multi-cuenta para plugins: menos copiar/pegar entre apps y más contexto conectado."
-      },
-      {
-        "title": "La voz gana razonamiento en tiempo real",
-        "detail": "Google presentó Gemini 3.8 Live y Extended Thinking para conversaciones de voz con razonamiento y tareas más complejas."
-      },
-      {
-        "title": "Los coding agents se vuelven más sistema",
-        "detail": "GitHub mejoró Copilot code review, sumó validación con shell tools y opciones automáticas para balancear costo, calidad y velocidad."
-      }
-    ],
-    "explainedSimply": "Pensalo como la electricidad: al principio la IA era un aparato al que ibas; cada vez más se convierte en una capa que aparece dentro de las herramientas y procesos que ya usás. El cambio importante es la integración, no coleccionar otra app.",
-    "whyItMatters": "Cuanto más se integra la IA al flujo real, más valen la orquestación, el contexto correcto, los permisos y la verificación. Saber “usar un chatbot” por sí solo se vuelve menos diferenciador.",
-    "appliedToUser": "Esto refuerza la dirección actual del PAS: Control Tower + especialistas + conectores + evals. No aparece evidencia esta semana que justifique sumar otra suscripción o migrar el stack.",
-    "action": "NO_ACTION",
-    "actionText": "No cambiar nada por ahora. Observar integración multi-cuenta, voz/agents y code review; probar sólo si una capacidad concreta reduce fricción en un proyecto real.",
-    "noiseFilter": "Que Copilot o Gemini agreguen funciones no demuestra que hoy sean mejores que Codex/Claude/ChatGPT para tus tareas. Se mantienen como discovery hasta una necesidad o comparación real.",
-    "unknowns": [
-      "Todavía faltan outcomes personales suficientes para comparar rutas de IA por familia de tarea.",
-      "Las ventajas anunciadas por proveedores no sustituyen una prueba en tu workflow."
-    ],
-    "sources": [
-      {
-        "role": "PRIMARY_PROVIDER",
-        "title": "OpenAI Release Notes — Sep 17, 2026",
-        "url": "https://openai.com/products/release-notes/",
-        "observedAt": "2026-09-21"
-      },
-      {
-        "role": "PRIMARY_PROVIDER",
-        "title": "Google — Gemini 3.8 Live",
-        "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-8-live-gemini-3-8-live-extended-thinking/",
-        "observedAt": "2026-09-21"
-      },
-      {
-        "role": "PRIMARY_PROVIDER",
-        "title": "GitHub Copilot weekly releases — September 14",
-        "url": "https://github.blog/changelog/2026-09-18-github-copilot-weekly-releases-september-14/",
-        "observedAt": "2026-09-21"
-      }
-    ]
+  "current": {
+    "ia": "INT-IA-2026-09-21-01",
+    "carrera": "INT-CAR-2026-09-21-01",
+    "tecnologia": "INT-TEC-2026-09-21-01",
+    "pas": "INT-PAS-2026-09-21-01"
   },
-  "pasUpdates": [
+  "archive": [
     {
-      "id": "PAS-ED-001",
-      "title": "Tu PAS ahora tiene un loop global de mejora continua",
-      "before": "Research, evals, routing y outcomes existían, pero no había un runtime global que conectara una señal nueva con una mejora gobernada.",
-      "now": "Toda señal material puede pasar por relevancia, evidencia, Value of Information, eval contra baseline, regresión y outcome. NO_CHANGE es un resultado válido.",
-      "whatYouNotice": "Menos cambios por hype y más mejoras que tienen que demostrar valor antes de entrar al sistema.",
-      "actionRequired": "Nada.",
-      "costLabel": "$0",
-      "status": "ADOPTED",
-      "sourceRef": "AI/core/CONTINUOUS_IMPROVEMENT_RUNTIME.md"
+      "id": "INT-IA-2026-09-21-01",
+      "front": "ia",
+      "slug": "la-ia-se-esta-metiendo-en-el-trabajo",
+      "title": "La IA se está metiendo en el trabajo, no sólo en el chat",
+      "dek": "El cambio importante no es otro modelo aislado: la IA se está acercando a los documentos, herramientas y decisiones donde el trabajo ya ocurre.",
+      "publishedAt": "2026-09-21",
+      "readingMinutes": 3,
+      "articleRef": "AI/editorial/articles/ia/la-ia-se-esta-metiendo-en-el-trabajo.json",
+      "professionalRefs": []
     },
     {
-      "id": "PAS-ED-002",
-      "title": "El runtime quedó probado end-to-end y reparó deuda real",
-      "before": "La integración estructural estaba validada, pero faltaba ejecutar los gates completos en un checkout limpio.",
-      "now": "La validación real detectó deuda preexistente, se reparó y después improvement_review, system_review y self_test pasaron completos.",
-      "whatYouNotice": "Más confianza en que routing, retrieval, aislamiento de materias, provenance, secretos y permisos siguen funcionando juntos.",
-      "actionRequired": "Nada.",
-      "costLabel": "$0",
-      "status": "ADOPTED",
-      "sourceRef": "PR #249 / commit 41ee756dadfceed37c7e1079eb39b4846e37dcee"
+      "id": "INT-CAR-2026-09-21-01",
+      "front": "carrera",
+      "slug": "por-que-tu-siguiente-salto-no-parece-ser-otro-framework",
+      "title": "Por qué tu siguiente salto no parece ser aprender otro framework",
+      "dek": "Ya hay evidencia de que podés construir software. El hueco más valioso ahora aparece después del deploy: operar, observar, recuperar y explicar sistemas reales.",
+      "publishedAt": "2026-09-21",
+      "readingMinutes": 5,
+      "articleRef": "AI/editorial/articles/carrera/por-que-tu-siguiente-salto-no-parece-ser-otro-framework.json",
+      "professionalRefs": ["priority:Producción / reliability / observabilidad"]
+    },
+    {
+      "id": "INT-TEC-2026-09-21-01",
+      "front": "tecnologia",
+      "slug": "opentelemetry-explicado-sin-humo",
+      "title": "OpenTelemetry explicado sin humo: qué es y por qué apareció en tu radar",
+      "dek": "No es otro dashboard ni una plataforma mágica. Es una forma estándar de hacer que un sistema cuente qué le está pasando sin quedar atado a un proveedor.",
+      "publishedAt": "2026-09-21",
+      "readingMinutes": 5,
+      "articleRef": "AI/editorial/articles/tecnologia/opentelemetry-explicado-sin-humo.json",
+      "professionalRefs": ["technology:AIT-006"]
+    },
+    {
+      "id": "INT-PAS-2026-09-21-01",
+      "front": "pas",
+      "slug": "que-significa-que-tu-pas-pueda-mejorar-solo",
+      "title": "Qué significa realmente que tu Personal AI System pueda mejorar solo",
+      "dek": "No significa que cambie reglas por su cuenta. Significa que ahora puede convertir señales y errores reales en candidatos de mejora, probarlos y conservar sólo lo que demuestra valor.",
+      "publishedAt": "2026-09-21",
+      "readingMinutes": 4,
+      "articleRef": "AI/editorial/articles/pas/que-significa-que-tu-pas-pueda-mejorar-solo.json",
+      "professionalRefs": []
     }
   ],
-  "mustKnowItems": [],
-  "editorialNote": "Primera baseline editorial. Este estado se reemplaza sólo cuando hay cambios materiales; no acumula ediciones pendientes."
+  "editorialNote": "Intelligence explains what is happening, what it means and why. Professional owns current decisions."
 }

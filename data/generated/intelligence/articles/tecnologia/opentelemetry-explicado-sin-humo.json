@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "articleId": "INT-TEC-2026-09-21-01",
+  "front": "tecnologia",
+  "slug": "opentelemetry-explicado-sin-humo",
+  "title": "OpenTelemetry explicado sin humo: qué es y por qué apareció en tu radar",
+  "dek": "No es otro dashboard ni una plataforma mágica. Es una forma estándar de hacer que un sistema cuente qué le está pasando sin quedar atado a un proveedor.",
+  "publishedAt": "2026-09-21",
+  "readingMinutes": 5,
+  "format": "ARTICLE",
+  "status": "PUBLISHED",
+  "audienceAssumption": "START_FROM_ZERO",
+  "freshness": {
+    "evidenceObservedAt": "2026-09-21",
+    "reverifyAfter": "2026-10-21",
+    "rule": "El artículo histórico sigue disponible; los datos rápidos de OpenTelemetry deben revalidarse antes de una decisión vigente."
+  },
+  "sections": [
+    {
+      "heading": "Empecemos por el problema, no por el nombre",
+      "body": [
+        "Imaginá que una aplicación empieza a responder lento sólo para algunos usuarios. El código compila. La página abre. No hay un error obvio. ¿Dónde mirás?",
+        "Podrías revisar logs de un servicio, métricas de otro, el panel del proveedor y quizá reconstruir manualmente qué recorrido hizo una request. Cuando cada parte habla un idioma distinto, investigar un problema se vuelve parecido a reconstruir un choque mirando cuatro cámaras con horarios diferentes."
+      ]
+    },
+    {
+      "heading": "Ahí entra OpenTelemetry",
+      "body": [
+        "OpenTelemetry —o OTel— es un conjunto abierto de estándares y herramientas para generar y mover telemetría de una forma común. Telemetría es simplemente la información que un sistema produce sobre su propio comportamiento.",
+        "Las tres señales más conocidas son trazas, métricas y logs. Una traza permite seguir el recorrido de una operación entre componentes. Una métrica resume cantidades a lo largo del tiempo, como latencia o tasa de errores. Un log registra eventos concretos con contexto."
+      ]
+    },
+    {
+      "heading": "Una analogía útil",
+      "body": [
+        "Pensalo como poner un formato estándar a los sensores de una fábrica. OpenTelemetry no es necesariamente la sala donde mirás los tableros. Es más parecido al acuerdo sobre qué miden los sensores, cómo identifican cada máquina y cómo transportan esos datos hasta el lugar que los va a analizar.",
+        "La analogía tiene un límite: en software hay librerías, convenciones, propagación de contexto y componentes con madurez distinta. Pero ayuda a separar OpenTelemetry de un dashboard o backend específico."
+      ]
+    },
+    {
+      "heading": "¿Y el Collector qué hace?",
+      "body": [
+        "El OpenTelemetry Collector puede recibir telemetría, procesarla y exportarla hacia uno o más destinos. Eso permite filtrar datos, agrupar envíos o cambiar de backend sin acoplar cada aplicación del mismo modo.",
+        "El PAS conserva una afirmación importante: el Collector ofrece pipelines vendor-neutral, pero sus componentes no tienen todos la misma madurez. Que OpenTelemetry haya alcanzado el nivel Graduated de CNCF en mayo de 2026 tampoco significa que cada componente o señal sea automáticamente estable para cualquier uso."
+      ]
+    },
+    {
+      "heading": "Por qué apareció en tu radar",
+      "body": [
+        "No apareció porque falte una herramienta moderna en tu stack. Apareció porque Profesional detectó un hueco de evidencia: observabilidad y operación real. Además, tu radar canónico ya contiene tracing, así que OTel se trata como una posible implementación o ampliación de una capacidad existente, no como una adopción duplicada.",
+        "Por eso su estado actual es ASSESS. Significa que vale entenderlo y tenerlo preparado como opción, pero todavía no hay suficiente necesidad ni evidencia personal para convertirlo en una prueba obligatoria."
+      ]
+    },
+    {
+      "heading": "Dónde lo usaríamos nosotros",
+      "body": [
+        "El caso más lógico sería un proyecto real como Vida 2.0 o una app de Football Intelligence cuando exista una pregunta operacional concreta: seguir una request entre servicios, entender latencia, correlacionar errores o construir evidencia real de observabilidad.",
+        "Si una aplicación pequeña ya se entiende bien con las señales actuales, meter OTel sólo para decir que usamos OTel sería complejidad sin beneficio. La herramienta tiene que ganarse el derecho de entrar por un problema real."
+      ]
+    },
+    {
+      "heading": "Costo, reemplazo y riesgo",
+      "body": [
+        "OpenTelemetry es open source. Eso no vuelve gratis todo el sistema de observabilidad: almacenar, consultar y visualizar grandes volúmenes de telemetría puede tener costo de infraestructura o de un backend administrado.",
+        "OTel suele complementar o estandarizar instrumentación y transporte; no obliga a reemplazar todos los backends. El costo relevante es instrumentación, volumen de datos, operación y la disciplina de no capturar información sensible accidentalmente."
+      ]
+    },
+    {
+      "heading": "Lo que necesitás hoy",
+      "body": [
+        "Hoy necesitás entender qué problema resuelve y reconocer cuándo un proyecto justificaría probarlo. No necesitás desplegarlo por obligación.",
+        "La decisión operativa sigue en Profesional y system-maintenance. Si aparece un caso real con suficiente valor, ASSESS puede convertirse en TRIAL. Hasta entonces, entenderlo es suficiente."
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "role": "PRIMARY_OFFICIAL",
+      "title": "OpenTelemetry — What is OpenTelemetry?",
+      "url": "https://opentelemetry.io/docs/what-is-opentelemetry/",
+      "ref": "OBS-SRC-017",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "PRIMARY_OFFICIAL",
+      "title": "OpenTelemetry Collector",
+      "url": "https://opentelemetry.io/docs/collector/",
+      "ref": "OBS-SRC-025",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "DISTILLED_CLAIM",
+      "title": "Collector vendor-neutral pipeline / component maturity",
+      "ref": "AI/knowledge/global/observability-sre/claims/OBS-CLM-019/CLAIM.md",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "DISTILLED_CLAIM",
+      "title": "OpenTelemetry became a CNCF graduated project in May 2026",
+      "ref": "AI/knowledge/global/observability-sre/claims/OBS-CLM-024/CLAIM.md",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "CANONICAL_PROFESSIONAL",
+      "title": "Technology Radar Bridge V1",
+      "ref": "AI/projects/professional-intelligence/TECHNOLOGY_RADAR_BRIDGE_V1.md",
+      "observedAt": "2026-09-18"
+    }
+  ],
+  "professionalRefs": ["technology:AIT-006"],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "8b572b4e327f3cc13713e88226e532534aaf7d02",
+    "canonicalRef": "AI/editorial/articles/tecnologia/opentelemetry-explicado-sin-humo.json"
+  }
+}

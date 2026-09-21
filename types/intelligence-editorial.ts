@@ -1,64 +1,75 @@
 export type IntelligenceSourceStatus = 'ready' | 'missing' | 'invalid';
-
-export type IntelligenceAction = 'DO_NOW' | 'TRY' | 'WATCH' | 'NO_ACTION';
+export type IntelligenceFront = 'ia' | 'carrera' | 'tecnologia' | 'pas';
 
 export interface IntelligenceSourceRef {
   role: string;
   title: string;
-  url: string;
+  url?: string;
+  ref?: string;
   observedAt: string;
 }
 
-export interface IntelligenceQuickPoint {
-  title: string;
-  detail: string;
-}
-
-export interface IntelligenceAiBrief {
-  status: 'MATERIAL' | 'NO_MATERIAL_UPDATE';
-  periodLabel: string;
-  readingMinutes: number;
-  title: string;
-  oneBigThing: string;
-  quickPoints: readonly IntelligenceQuickPoint[];
-  explainedSimply: string;
-  whyItMatters: string;
-  appliedToUser: string;
-  action: IntelligenceAction;
-  actionText: string;
-  noiseFilter: string;
-  unknowns: readonly string[];
-  sources: readonly IntelligenceSourceRef[];
-}
-
-export interface IntelligencePasUpdate {
+export interface IntelligenceArticleSummary {
   id: string;
+  front: IntelligenceFront;
+  slug: string;
   title: string;
-  before: string;
-  now: string;
-  whatYouNotice: string;
-  actionRequired: string;
-  costLabel: string;
-  status: string;
-  sourceRef: string;
+  dek: string;
+  publishedAt: string;
+  readingMinutes: number;
+  articleRef: string;
+  professionalRefs: readonly string[];
 }
 
 export interface IntelligenceEditorialSnapshot {
-  schemaVersion: 1;
+  schemaVersion: 2;
   source: {
     repository: 'franciscovitar/personal-ai-system';
-    ref: 'main';
+    ref: string;
     commit: string;
-    canonicalRef: 'AI/editorial/INTELLIGENCE_EDITORIAL_CURRENT.json';
+    canonicalCurrentRef: 'AI/editorial/INTELLIGENCE_EDITORIAL_CURRENT.json';
+    canonicalArchiveRef: 'AI/editorial/INTELLIGENCE_EDITORIAL_ARCHIVE.json';
     generatedAt: string;
     observedAt: string;
     staleAfterDays: number;
   };
   readingDebt: false;
-  aiBrief: IntelligenceAiBrief;
-  pasUpdates: readonly IntelligencePasUpdate[];
-  mustKnowItems: readonly string[];
+  current: Record<IntelligenceFront, string>;
+  archive: readonly IntelligenceArticleSummary[];
   editorialNote: string;
+}
+
+export interface IntelligenceArticleSection {
+  heading: string;
+  body: readonly string[];
+}
+
+export interface IntelligenceArticle {
+  schemaVersion: 1;
+  articleId: string;
+  front: IntelligenceFront;
+  slug: string;
+  title: string;
+  dek: string;
+  publishedAt: string;
+  readingMinutes: number;
+  format: 'ARTICLE';
+  status: 'PUBLISHED';
+  audienceAssumption: 'START_FROM_ZERO';
+  freshness: {
+    evidenceObservedAt: string;
+    reverifyAfter: string;
+    rule: string;
+  };
+  sections: readonly IntelligenceArticleSection[];
+  sources: readonly IntelligenceSourceRef[];
+  professionalRefs: readonly string[];
+  source: {
+    repository: 'franciscovitar/personal-ai-system';
+    ref: string;
+    commit: string;
+    canonicalRef: string;
+  };
 }
 
 export interface IntelligenceEditorialData {
@@ -66,4 +77,12 @@ export interface IntelligenceEditorialData {
   notice: string | null;
   stale: boolean;
   snapshot: IntelligenceEditorialSnapshot | null;
+}
+
+export interface IntelligenceArticleData {
+  status: IntelligenceSourceStatus;
+  notice: string | null;
+  stale: boolean;
+  summary: IntelligenceArticleSummary | null;
+  article: IntelligenceArticle | null;
 }

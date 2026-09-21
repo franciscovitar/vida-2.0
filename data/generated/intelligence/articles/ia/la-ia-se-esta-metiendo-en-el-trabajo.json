@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "articleId": "INT-IA-2026-09-21-01",
+  "front": "ia",
+  "slug": "la-ia-se-esta-metiendo-en-el-trabajo",
+  "title": "La IA se está metiendo en el trabajo, no sólo en el chat",
+  "dek": "El cambio importante no es otro modelo aislado: la IA se está acercando a los documentos, herramientas y decisiones donde el trabajo ya ocurre.",
+  "publishedAt": "2026-09-21",
+  "readingMinutes": 3,
+  "format": "ARTICLE",
+  "status": "PUBLISHED",
+  "audienceAssumption": "START_FROM_ZERO",
+  "freshness": {
+    "evidenceObservedAt": "2026-09-21",
+    "reverifyAfter": "2026-09-29",
+    "rule": "El artículo histórico sigue disponible; las afirmaciones actuales deben revalidarse antes de reutilizarse en una decisión vigente."
+  },
+  "sections": [
+    {
+      "heading": "La idea principal",
+      "body": [
+        "Durante mucho tiempo usar IA significaba abrir un chat, explicar el problema, copiar información hacia adentro y después volver a llevar la respuesta a la herramienta donde realmente trabajabas. Ese patrón sigue existiendo, pero la señal más útil de esta semana es que empieza a perder centralidad.",
+        "OpenAI acercó ChatGPT a Word y amplió conexiones multi-cuenta; Google presentó nuevas capacidades de voz con razonamiento; GitHub siguió empujando la revisión de código asistida hacia un flujo más integrado. Los tres movimientos apuntan a la misma dirección: la IA se está moviendo desde un destino al que vas hacia una capa que aparece dentro del trabajo."
+      ]
+    },
+    {
+      "heading": "Pensalo como la electricidad",
+      "body": [
+        "Al principio de la electrificación, la electricidad era algo visible y excepcional: una máquina nueva, un cable nuevo, una instalación especial. Después dejó de ser el centro de atención y se volvió infraestructura para cientos de tareas distintas.",
+        "La analogía no significa que la IA ya sea tan estable o universal como la electricidad. Sirve para entender el patrón: el valor empieza a estar menos en abrir una app llamada IA y más en que el documento, el repositorio, la voz o el sistema que ya usás incorporen IA con el contexto y los permisos correctos."
+      ]
+    },
+    {
+      "heading": "Qué cambia de verdad",
+      "body": [
+        "Cuando la IA entra en el flujo real, cambia qué habilidades importan. Saber escribir una pregunta decente sigue ayudando, pero pesa más saber darle el contexto correcto, decidir qué herramienta debe intervenir, limitar permisos, comprobar el resultado y dejar evidencia de lo que pasó.",
+        "Ese es el tipo de trabajo que ya aparece en tu PAS: una capa que decide la ruta, especialistas cuando el entorno real importa, conectores para evitar copiar y pegar, y verificaciones antes de considerar un resultado terminado."
+      ]
+    },
+    {
+      "heading": "Qué NO cambia",
+      "body": [
+        "Una integración nueva no demuestra que una herramienta sea mejor para vos. Que Copilot, Gemini o ChatGPT sumen capacidades tampoco obliga a cambiar de stack, pagar otra suscripción o migrar un workflow que ya funciona.",
+        "La regla sigue siendo la misma: una novedad entra como señal. Sólo merece una prueba si resuelve una fricción concreta de un proyecto real, y sólo merece convertirse en preferencia si esa prueba muestra un resultado mejor que la alternativa actual."
+      ]
+    },
+    {
+      "heading": "El ruido que podés ignorar",
+      "body": [
+        "Podés ignorar el reflejo de perseguir cada modelo, ranking o función nueva como si fuera una ventaja que se vence mañana. La parte durable de esta tendencia no es el nombre del producto ganador; es que el trabajo con IA se vuelve más contextual, conectado y verificable.",
+        "Para vos, la conclusión actual es simple: no hay que cambiar nada esta semana. Sí conviene seguir observando qué integraciones reducen coordinación o retrabajo en tareas que ya hacés."
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "role": "PRIMARY_PROVIDER",
+      "title": "OpenAI Release Notes — Sep 17, 2026",
+      "url": "https://openai.com/products/release-notes/",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "PRIMARY_PROVIDER",
+      "title": "Google — Gemini 3.8 Live",
+      "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-8-live-gemini-3-8-live-extended-thinking/",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "PRIMARY_PROVIDER",
+      "title": "GitHub Copilot weekly releases — September 14",
+      "url": "https://github.blog/changelog/2026-09-18-github-copilot-weekly-releases-september-14/",
+      "observedAt": "2026-09-21"
+    }
+  ],
+  "professionalRefs": [],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "8b572b4e327f3cc13713e88226e532534aaf7d02",
+    "canonicalRef": "AI/editorial/articles/ia/la-ia-se-esta-metiendo-en-el-trabajo.json"
+  }
+}

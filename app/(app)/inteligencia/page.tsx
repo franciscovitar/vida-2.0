@@ -13,18 +13,18 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function InteligenciaPage() {
-  const data = await getIntelligenceHubData();
+  const editorial = await getIntelligenceHubData();
 
   return (
     <div className={pageStyles.page}>
       <PageHeader
         title="Inteligencia"
-        description="Qué cambió, qué significa para vos y qué merece tu atención — sin convertir informarte en otra tarea."
+        description="Acá entendés qué está cambiando, qué significa y por qué. Para decidir qué hacer ahora, está Profesional."
         icon={Brain}
         domain="productivity"
       />
 
-      <IntelligenceDashboard editorial={data.editorial} professional={data.professional} />
+      <IntelligenceDashboard editorial={editorial} />
     </div>
   );
 }

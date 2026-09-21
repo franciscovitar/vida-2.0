@@ -1,92 +1,48 @@
-# Intelligence Editorial surface
+# Intelligence Editorial V2
 
-`/inteligencia` is the low-friction reading layer for existing PAS intelligence.
+`/inteligencia` is Vida 2.0's authenticated presentation of canonical PAS editorial intelligence.
 
-It does **not** become a new research backend or source of truth.
+## Boundary
 
-## Ownership
+- Professional = what to do.
+- Intelligence = what is happening, what it means and why.
 
-- Career / skills / forecasts / technology candidates: Professional Intelligence.
-- Current-event/evidence discipline: World Intelligence.
-- PAS improvements/tool adoption: system-maintenance + Continuous Improvement Runtime.
-- Personal workflow outcomes: AI Fluency.
-- Vida 2.0: authenticated read-only presentation.
+PAS owns the runtime, current pointers, persistent archive and article bodies. Vida stores sanitized generated derivatives only. Professional/system-maintenance still own current priorities and technology dispositions.
 
-## Generated inputs
+## Surface
 
-Vida combines:
+Routes:
 
-- `data/generated/professional-snapshot.json`
-- `data/generated/intelligence-editorial-snapshot.json`
+- `/inteligencia` — current magazine cover;
+- `/inteligencia/archivo` — voluntary library;
+- `/inteligencia/ia/<slug>`;
+- `/inteligencia/carrera/<slug>`;
+- `/inteligencia/tecnologia/<slug>`;
+- `/inteligencia/pas/<slug>`.
 
-The editorial snapshot is a sanitized derivative of:
+The four permanent fronts are IA esta semana, Carrera & futuro, Tecnología explicada and Tu PAS. Deep dives are a format, not a fifth front.
 
-`AI/editorial/INTELLIGENCE_EDITORIAL_CURRENT.json`
+The home never reproduces `Tu radar ahora`, Professional top lists or technology status lists.
 
-It intentionally does not duplicate Professional top lists.
+## Archive
 
-## Product contract
+CURRENT replaces only current article pointers. Published articles stay in ARCHIVE.
 
-The screen has four permanent fronts:
+Archive is not a backlog: no unread counts, streaks, catch-up pressure or reading debt.
 
-1. AI in ~2 minutes.
-2. Career & Skills.
-3. Tech & Open Source Radar.
-4. Your PAS is improving.
+## Cross-links
 
-A compact “Your radar now” is a view over those sources, not a separate ranking.
+Canonical article metadata may contain:
 
-Deep dives are a format, not a fifth feed.
+- `priority:<exact capability label>`
+- `technology:<Professional technology id>`
 
-## Zero reading debt
+Professional derives `Entender por qué →` from those refs only when matching material editorial content exists. Intelligence links back to `/professional` for the current decision.
 
-The surface must not introduce:
+## Validation
 
-- unread counters;
-- missed-edition debt;
-- streaks;
-- infinite feed;
-- mandatory feedback;
-- engagement notifications.
+The generated index and each article fail closed when schema, id/front/slug/title, PAS commit/ref or canonical article ref do not match.
 
-If the user returns after several weeks, current state replaces old state. Historical Git state remains the audit trail.
+Each article has its own re-verification date. Historical content stays readable after that date, with a warning before it is treated as current evidence.
 
-## Progressive reading
-
-Above the fold should answer in ~30 seconds:
-
-- one big thing;
-- why it matters;
-- what to do.
-
-A `details` section exposes the ~2 minute explanation and sources.
-
-## Fail-closed
-
-If either the editorial snapshot or Professional snapshot is missing/invalid, the page renders an unavailable state rather than inventing recommendations.
-
-Stale data remains visible with a warning.
-
-## Refresh
-
-Editorial:
-
-- weekly only when material;
-- event-driven for major changes;
-- `NO_MATERIAL_UPDATE` is valid.
-
-Professional:
-
-- existing monthly/quarterly/event-driven policy remains unchanged.
-
-## Future additions
-
-Only after prospective use supports them:
-
-- one-tap feedback;
-- bounded archive;
-- audio;
-- richer repository/security metadata;
-- outcome handoff from “want to try”.
-
-Do not add these merely because they are technically possible.
+Before merge observe dedicated tests, full tests, TypeScript, ESLint, Stylelint, Prettier, build and Preview route/navigation checks.
