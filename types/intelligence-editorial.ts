@@ -35,6 +35,7 @@ export interface IntelligenceEditorialSnapshot {
   };
   readingDebt: false;
   current: Record<IntelligenceFront, string>;
+  specials: readonly string[];
   archive: readonly IntelligenceArticleSummary[];
   editorialNote: string;
 }

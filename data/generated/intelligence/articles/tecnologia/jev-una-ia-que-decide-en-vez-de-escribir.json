@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "articleId": "INT-TEC-2026-09-21-02",
+  "front": "tecnologia",
+  "slug": "jev-una-ia-que-decide-en-vez-de-escribir",
+  "title": "Jev: por qué apareció una IA que decide en vez de escribir",
+  "dek": "No intenta ser otro chatbot. Su propuesta es mucho más acotada: recibir contexto y devolver decisiones estructuradas, rápidas y baratas para que otro software actúe.",
+  "publishedAt": "2026-09-21",
+  "readingMinutes": 6,
+  "format": "ARTICLE",
+  "status": "PUBLISHED",
+  "audienceAssumption": "START_FROM_ZERO",
+  "freshness": {
+    "evidenceObservedAt": "2026-09-21",
+    "reverifyAfter": "2026-10-05",
+    "rule": "Jev is an early fast-moving product. Price, access, model version, integrations and comparative performance must be re-verified before a current tool decision."
+  },
+  "sections": [
+    {
+      "heading": "Primero: ¿qué problema intenta resolver?",
+      "body": [
+        "Muchos sistemas usan un modelo de lenguaje para decisiones muy pequeñas: ¿este mensaje es urgente?, ¿qué herramienta debería usar un agente?, ¿este resultado parece correcto?, ¿a qué categoría pertenece este caso? Un LLM puede hacerlo, pero genera una respuesta de forma secuencial y suele ser más flexible de lo necesario para una decisión acotada.",
+        "La idea detrás de Jev es separar ese tipo de decisión de la generación de texto. En vez de pedir una explicación abierta, el programa define de antemano las opciones posibles y el modelo devuelve una decisión estructurada con probabilidades."
+      ]
+    },
+    {
+      "heading": "Qué es Jev, sin marketing",
+      "body": [
+        "TypeSafe AI presentó Jev el 15 de septiembre de 2026 como su primer “System One Model”. La empresa lo describe como un modelo pensado para decisiones dentro de software: entra estado no estructurado y salen valores tipados que el código puede usar directamente.",
+        "Eso lo vuelve más parecido a una pieza de juicio dentro de un programa que a un chatbot. Puede servir para clasificar, puntuar, elegir entre opciones o decidir por qué rama continuar. No está pensado para redactar un informe, escribir código largo o mantener una conversación."
+      ]
+    },
+    {
+      "heading": "Por qué llamó tanto la atención",
+      "body": [
+        "La propuesta de valor no es que la clasificación sea una idea nueva. Lo novedoso es empaquetar una capacidad general de decisión en una interfaz diseñada específicamente para software, con una estructura de salida limitada y un precio anunciado muy bajo.",
+        "TypeSafe publica un precio de USD 0,042 por millón de tokens de entrada y output sin cargo medido. También comunica latencias de decenas a cientos de milisegundos para sus consultas. Esos datos de precio y producto son hechos de primera parte; sus comparaciones de superioridad frente a otros modelos siguen siendo, por ahora, principalmente evidencia del proveedor."
+      ]
+    },
+    {
+      "heading": "Dónde podría importar de verdad",
+      "body": [
+        "Pensá en un agente que tiene que tomar cientos de decisiones pequeñas: elegir una herramienta, filtrar resultados, detectar si una respuesta requiere revisión o decidir qué elemento de una interfaz debería tocar. Si cada microdecisión exige una llamada cara y lenta a un modelo generativo grande, el costo y la latencia se acumulan.",
+        "Un modelo como Jev podría funcionar como una capa rápida de clasificación o routing alrededor de modelos más potentes. Eso no reemplaza al modelo que razona o genera contenido: intenta evitar usar una herramienta pesada cuando la tarea sólo necesita una decisión acotada."
+      ]
+    },
+    {
+      "heading": "Qué evidencia tenemos y qué todavía no",
+      "body": [
+        "La existencia, interfaz, precio publicado y forma general del producto están bien respaldados por TypeSafe y cobertura independiente. También ya aparecieron pruebas comunitarias reproducibles que muestran el modelo funcionando en tareas diferentes.",
+        "Pero todavía no tenemos evidencia independiente suficiente para aceptar sin más afirmaciones como “dos órdenes de magnitud mejor” en inteligencia por costo. Incluso el benchmark comunitario que usamos como corroboración advierte que sus muestras son pequeñas. Por eso el radar lo clasifica como importante para entender, no como una tecnología que haya que adoptar."
+      ]
+    },
+    {
+      "heading": "La limitación más importante",
+      "body": [
+        "Ser rápido, barato y general no significa ser el mejor decisor para cada dominio. Una tarea especializada con reglas claras, un clasificador entrenado específicamente o incluso código tradicional puede ser mejor, más barato y más verificable.",
+        "Tampoco conviene delegar decisiones de alto impacto sólo porque el modelo devuelve una probabilidad. La calibración ayuda, pero sigue haciendo falta diseñar umbrales, rutas de revisión, métricas y consecuencias seguras."
+      ]
+    },
+    {
+      "heading": "¿Esto cambia algo en tu PAS hoy?",
+      "body": [
+        "Sí cambia una idea: para algunos flujos agentes, “usar IA” no necesariamente significa llamar siempre a un LLM generativo. Puede existir una arquitectura con piezas diferentes: un modelo fuerte para razonar o producir, y un modelo de decisión rápido para gates, filtros y routing.",
+        "No cambia tu stack hoy. Jev queda en ASSESS como candidato del PAS. Sólo tendría sentido probarlo si aparece una tarea real y repetitiva donde podamos compararlo contra el baseline actual en calidad, errores, latencia, costo y trabajo humano."
+      ]
+    },
+    {
+      "heading": "Por qué esto mereció un artículo aparte",
+      "body": [
+        "No porque Jev sea automáticamente revolucionario, sino porque introduce una forma útil de pensar la arquitectura de sistemas con IA: separar generación abierta de decisiones acotadas.",
+        "Ese modelo mental puede seguir siendo valioso aunque Jev concreto no termine siendo la herramienta ganadora. Esa es justamente la función del radar: detectar una señal, separar el concepto del hype y darte la parte que merece quedar."
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "role": "PRIMARY_OFFICIAL",
+      "title": "TypeSafe AI — Introducing System One Models & Jev",
+      "url": "https://typesafe.ai/blog/introducing-system-one-models-and-jev",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "INDEPENDENT_REPORTING",
+      "title": "The Indian Express — Meet Jev, the new AI model built to make decisions instead of generating text",
+      "url": "https://indianexpress.com/article/technology/artificial-intelligence/meet-jev-new-ai-model-from-chatgpt-inventor-10887591/",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "COMMUNITY_REPRODUCIBLE_BENCHMARK",
+      "title": "wondertwins/jev-benchmark",
+      "url": "https://github.com/wondertwins/jev-benchmark",
+      "observedAt": "2026-09-21"
+    },
+    {
+      "role": "USER_DISCOVERY",
+      "title": "User-provided Jev explainer transcript",
+      "observedAt": "2026-09-21"
+    }
+  ],
+  "professionalRefs": [],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "9999247f9b1135133b8292bf4ad2d7bb1df2a9d6",
+    "canonicalRef": "AI/editorial/articles/tecnologia/jev-una-ia-que-decide-en-vez-de-escribir.json"
+  }
+}
