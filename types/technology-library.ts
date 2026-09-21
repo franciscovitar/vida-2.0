@@ -1,10 +1,5 @@
 export type TechnologyLibraryStatus =
-  | 'CURRENT_STACK'
-  | 'ASSESS_NOW'
-  | 'WATCH'
-  | 'REFERENCE'
-  | 'HOLD'
-  | 'ARCHIVED';
+  'CURRENT_STACK' | 'ASSESS_NOW' | 'WATCH' | 'REFERENCE' | 'HOLD' | 'ARCHIVED';
 
 export type TechnologyLibraryAttention = 'NOW' | 'WHEN_NEEDED' | 'LIBRARY';
 

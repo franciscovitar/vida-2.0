@@ -48,7 +48,9 @@ function TechnologyEntryCard({ entry }: { entry: TechnologyLibraryEntry }) {
       <div className={styles['item-head']}>
         <strong>{entry.name}</strong>
         <Badge
-          domain={entry.status === 'HOLD' || entry.status === 'REFERENCE' ? 'neutral' : 'productivity'}
+          domain={
+            entry.status === 'HOLD' || entry.status === 'REFERENCE' ? 'neutral' : 'productivity'
+          }
           variant="outline"
         >
           {STATUS_LABELS[entry.status]}
@@ -100,7 +102,9 @@ export function TechnologyLibrary({ data }: { data: TechnologyLibraryData }) {
 
       <div className={styles['library-summary']}>
         <strong>{snapshot.totalEntries} recursos curados</strong>
-        <span>{snapshot.categories.length} categorías · {spotlights.length} destacadas ahora</span>
+        <span>
+          {snapshot.categories.length} categorías · {spotlights.length} destacadas ahora
+        </span>
       </div>
 
       <section className={styles['library-section']} aria-labelledby="technology-spotlight-title">

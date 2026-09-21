@@ -177,8 +177,14 @@ test('PRO-12. biblioteca tecnológica expone las 193 referencias sin confundirla
   assert.equal(library.totalEntries, 193);
   assert.equal(entries.length, 193);
   assert.equal(library.spotlightIds.length, 20);
-  assert.equal(entries.some((item) => item.name === 'n8n'), true);
-  assert.equal(entries.some((item) => item.name === 'OpenClaw'), true);
+  assert.equal(
+    entries.some((item) => item.name === 'n8n'),
+    true,
+  );
+  assert.equal(
+    entries.some((item) => item.name === 'OpenClaw'),
+    true,
+  );
 });
 
 test('PRO-13. UI separa radar actual de biblioteca y usa progressive disclosure', () => {
@@ -202,9 +208,8 @@ test('PRO-13. UI separa radar actual de biblioteca y usa progressive disclosure'
 });
 
 test('PRO-14. biblioteca falla cerrada si faltan datos o se rompe el contrato', async () => {
-  const { resolveTechnologyLibraryText } = await import(
-    '@/lib/professional/technology-library-contract'
-  );
+  const { resolveTechnologyLibraryText } =
+    await import('@/lib/professional/technology-library-contract');
 
   const missing = resolveTechnologyLibraryText(null);
   assert.equal(missing.status, 'missing');

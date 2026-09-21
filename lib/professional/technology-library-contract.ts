@@ -127,8 +127,10 @@ export function isTechnologyLibraryStale(
 ): boolean {
   const observed = new Date(`${snapshot.source.observedAt}T00:00:00Z`);
   if (Number.isNaN(observed.getTime())) return true;
-  return Math.max(0, now.getTime() - observed.getTime()) >
-    snapshot.source.staleAfterDays * 24 * 60 * 60 * 1000;
+  return (
+    Math.max(0, now.getTime() - observed.getTime()) >
+    snapshot.source.staleAfterDays * 24 * 60 * 60 * 1000
+  );
 }
 
 export function resolveTechnologyLibraryText(
@@ -169,7 +171,9 @@ export function resolveTechnologyLibraryText(
   const stale = isTechnologyLibraryStale(snapshot, now);
   return {
     status: 'ready',
-    notice: stale ? 'La biblioteca está disponible, pero conviene revalidar antes de usar algo.' : null,
+    notice: stale
+      ? 'La biblioteca está disponible, pero conviene revalidar antes de usar algo.'
+      : null,
     stale,
     snapshot,
   };
