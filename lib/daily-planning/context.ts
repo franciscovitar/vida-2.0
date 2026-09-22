@@ -247,9 +247,7 @@ async function loadNotionFacts(
   const closedProjectIds = projectState.available
     ? new Set(
         projectBases
-          .filter(
-            (project) => project.status === 'Completado' || project.status === 'Cancelado',
-          )
+          .filter((project) => project.status === 'Completado' || project.status === 'Cancelado')
           .map((project) => project.id),
       )
     : new Set<string>();
