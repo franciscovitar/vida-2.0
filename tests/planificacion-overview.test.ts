@@ -8,7 +8,7 @@ import {
   selectWeekTasks,
 } from '@/lib/planning/overview';
 import type { AssessmentProgressSnapshot } from '@/types/assessment-progress';
-import type { NotionTask } from '@/types/notion';
+import type { NotionProject, NotionTask } from '@/types/notion';
 import type { ProjectsIntelligenceProject } from '@/types/projects-intelligence';
 
 function task(input: Partial<NotionTask> & Pick<NotionTask, 'id' | 'title'>): NotionTask {
@@ -21,7 +21,7 @@ function task(input: Partial<NotionTask> & Pick<NotionTask, 'id' | 'title'>): No
     priority: input.priority ?? null,
     duration: input.duration ?? null,
     energy: input.energy ?? null,
-    project: null,
+    project: input.project ?? null,
     area: null,
     projectArea: null,
     blocker: input.blocker ?? null,
@@ -87,7 +87,7 @@ test('task pressure is explainable: blocked, overdue, today, in progress, priori
   ];
 
   assert.deepEqual(
-    selectAttentionTasks(tasks).map((item) => item.id),
+    selectAttentionTasks(tasks, []).map((item) => item.id),
     ['blocked', 'overdue', 'today', 'progress', 'high'],
   );
 });
@@ -99,8 +99,75 @@ test('week task selector treats Fecha as relevant date and uses a seven-day wind
     task({ id: 'd7', title: 'Día siete', date: '2026-09-24' }),
   ];
   assert.deepEqual(
-    selectWeekTasks(tasks, '2026-09-17').map((item) => item.id),
+    selectWeekTasks(tasks, [], '2026-09-17').map((item) => item.id),
     ['d0', 'd6'],
+  );
+});
+
+test('completed/cancelled project tasks do not enter planning pressure or week focus', () => {
+  const project = (id: string, status: NotionProject['status']): NotionProject => ({
+    id,
+    name: id,
+    status,
+    area: null,
+    expectedResult: null,
+    nextAction: null,
+    dueDate: null,
+    dateKind: 'none',
+    reviewDate: null,
+    blocker: null,
+    relatedTaskCount: 0,
+    domain: 'projects',
+  });
+
+  const projects = [
+    project('done-project', 'Completado'),
+    project('cancelled-project', 'Cancelado'),
+    project('active-project', 'Activo'),
+  ];
+  const relation = (id: string) => ({ id, name: id, available: true });
+
+  const tasks = [
+    task({
+      id: 'done-task',
+      title: 'Sombra completada',
+      priority: 'Alta',
+      date: '2026-09-17',
+      dateKind: 'today',
+      project: relation('done-project'),
+    }),
+    task({
+      id: 'cancelled-task',
+      title: 'Sombra cancelada',
+      priority: 'Alta',
+      date: '2026-09-18',
+      dateKind: 'future',
+      project: relation('cancelled-project'),
+    }),
+    task({
+      id: 'active-task',
+      title: 'Activa',
+      priority: 'Alta',
+      date: '2026-09-19',
+      dateKind: 'future',
+      project: relation('active-project'),
+    }),
+    task({
+      id: 'standalone-task',
+      title: 'Directa',
+      priority: 'Alta',
+      date: '2026-09-20',
+      dateKind: 'future',
+    }),
+  ];
+
+  assert.deepEqual(
+    selectAttentionTasks(tasks, projects).map((item) => item.id),
+    ['active-task', 'standalone-task'],
+  );
+  assert.deepEqual(
+    selectWeekTasks(tasks, projects, '2026-09-17').map((item) => item.id),
+    ['active-task', 'standalone-task'],
   );
 });
 

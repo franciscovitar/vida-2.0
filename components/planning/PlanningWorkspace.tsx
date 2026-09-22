@@ -91,7 +91,7 @@ function AssessmentCards({ assessments }: { assessments: AssessmentProgressRead 
 }
 
 function TaskPressure({ notion }: { notion: NotionDashboardData }) {
-  const tasks = selectAttentionTasks(notion.tasks);
+  const tasks = selectAttentionTasks(notion.tasks, notion.projects);
   if (tasks.length === 0)
     return <p className={styles.empty}>No hay presión operativa destacable.</p>;
   return (
@@ -186,7 +186,7 @@ function WeekView({
   assessments: AssessmentProgressRead;
   projects: ProjectsIntelligenceData;
 }) {
-  const weekTasks = selectWeekTasks(notion.tasks, dailyPlan.targetDate);
+  const weekTasks = selectWeekTasks(notion.tasks, notion.projects, dailyPlan.targetDate);
   const activeProjects =
     projects.status === 'ready' ? selectPlanningProjects(projects.projects) : [];
 
