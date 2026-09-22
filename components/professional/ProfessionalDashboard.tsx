@@ -13,6 +13,7 @@ import type { ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { CareerResilience } from '@/components/professional/CareerResilience';
 import { TechnologyLibrary } from '@/components/professional/TechnologyLibrary';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import {
@@ -27,6 +28,7 @@ import type {
   ProfessionalConfidence,
   ProfessionalIntelligenceData,
 } from '@/types/professional-intelligence';
+import type { CareerResilienceData } from '@/types/career-resilience';
 import type { TechnologyLibraryData } from '@/types/technology-library';
 
 import styles from './ProfessionalDashboard.module.scss';
@@ -169,10 +171,12 @@ export function ProfessionalDashboard({
   data,
   editorial,
   technologyLibrary,
+  careerResilience,
 }: {
   data: ProfessionalIntelligenceData;
   editorial?: IntelligenceEditorialData;
   technologyLibrary?: TechnologyLibraryData;
+  careerResilience?: CareerResilienceData;
 }) {
   if (data.status !== 'ready' || !data.snapshot) {
     return (
@@ -513,6 +517,8 @@ export function ProfessionalDashboard({
           </ul>
         </More>
       </Card>
+
+      {careerResilience ? <CareerResilience data={careerResilience} /> : null}
 
       <Card aria-labelledby="professional-forecast-title">
         <SectionHeader
