@@ -335,7 +335,6 @@ test('DP-R8. Salud no disponible no degrada el plan ni fabrica contexto de capac
   assert.equal(data.calendarEvents.length, 1);
 });
 
-
 test('DP-R9. tarea abierta de proyecto completado no compite en el contexto diario', async () => {
   const port = fakePort({
     'ds-projects': { ok: true, pages: [PROJECT, COMPLETED_PROJECT] },
