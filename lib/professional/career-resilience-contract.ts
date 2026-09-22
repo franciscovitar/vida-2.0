@@ -160,9 +160,7 @@ export function parseCareerResilienceSnapshot(value: unknown): CareerResilienceS
     !String(value.numericSemantics.ai_alone_substitution_pressure_pct_range).includes(
       'UNCALIBRATED',
     ) ||
-    !String(value.numericSemantics.ai_native_resilience_index_range).includes(
-      'NOT_PROBABILITY',
-    ) ||
+    !String(value.numericSemantics.ai_native_resilience_index_range).includes('NOT_PROBABILITY') ||
     !String(value.numericSemantics.headcount_compression_index_range).includes(
       'NOT_PERCENT_JOBS_LOST',
     )
@@ -220,7 +218,9 @@ export function resolveCareerResilienceText(raw: string | null, now?: Date): Car
   const stale = isCareerResilienceStale(snapshot, now);
   return {
     status: 'ready',
-    notice: stale ? 'Este análisis necesita refresh antes de usarlo para una decisión sensible.' : null,
+    notice: stale
+      ? 'Este análisis necesita refresh antes de usarlo para una decisión sensible.'
+      : null,
     stale,
     snapshot,
   };

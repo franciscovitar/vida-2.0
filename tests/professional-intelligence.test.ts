@@ -232,7 +232,6 @@ test('PRO-15. estados extendidos de tecnología tienen etiquetas simples en espa
   );
 });
 
-
 test('PRO-16. Career Resilience V1 conserva provenance, 11 perfiles y Data separado', async () => {
   const { parseCareerResilienceSnapshot } =
     await import('@/lib/professional/career-resilience-contract');
@@ -247,9 +246,18 @@ test('PRO-16. Career Resilience V1 conserva provenance, 11 perfiles y Data separ
   assert.equal(parsed.source.ref, 'main');
   assert.equal(parsed.source.commit, 'aa5d930c43c39401a5cfed1a30556e8c72780f4f');
   assert.equal(parsed.roles.length, 11);
-  assert.equal(parsed.roles.some((item) => item.id === 'data-engineer'), true);
-  assert.equal(parsed.roles.some((item) => item.id === 'data-scientist'), true);
-  assert.equal(parsed.roles.some((item) => item.id === 'data-analyst-bi'), true);
+  assert.equal(
+    parsed.roles.some((item) => item.id === 'data-engineer'),
+    true,
+  );
+  assert.equal(
+    parsed.roles.some((item) => item.id === 'data-scientist'),
+    true,
+  );
+  assert.equal(
+    parsed.roles.some((item) => item.id === 'data-analyst-bi'),
+    true,
+  );
 });
 
 test('PRO-17. Career Resilience separa presión IA, resiliencia AI-native y compresión en 1/5/10/20 años', async () => {
@@ -257,10 +265,7 @@ test('PRO-17. Career Resilience separa presión IA, resiliencia AI-native y comp
     await import('@/lib/professional/career-resilience-contract');
   const parsed = parseCareerResilienceSnapshot(
     JSON.parse(
-      readFileSync(
-        join(process.cwd(), 'data', 'generated', 'ai-career-resilience.json'),
-        'utf8',
-      ),
+      readFileSync(join(process.cwd(), 'data', 'generated', 'ai-career-resilience.json'), 'utf8'),
     ),
   );
 

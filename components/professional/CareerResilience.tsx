@@ -97,7 +97,8 @@ export function CareerResilience({ data }: { data: CareerResilienceData }) {
         </div>
         <p className={styles['resilience-warning']}>
           Los porcentajes de “IA sola” son <strong>escenarios no calibrados</strong>: no son la
-          probabilidad de que vos pierdas tu trabajo. A 10 y 20 años la incertidumbre es mucho mayor.
+          probabilidad de que vos pierdas tu trabajo. A 10 y 20 años la incertidumbre es mucho
+          mayor.
         </p>
       </div>
 
