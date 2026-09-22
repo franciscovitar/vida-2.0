@@ -104,8 +104,6 @@ test('week task selector treats Fecha as relevant date and uses a seven-day wind
   );
 });
 
-
-
 test('completed/cancelled project tasks do not enter planning pressure or week focus', () => {
   const project = (id: string, status: NotionProject['status']): NotionProject => ({
     id,
