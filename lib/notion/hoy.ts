@@ -290,9 +290,7 @@ export function buildHoyNotionView(
 ): HoyNotionView {
   const today = data.targetDate;
   const closedProjects = closedProjectIds(data.projects);
-  const planningTasks = data.tasks.filter((task) =>
-    taskCompetesForPlanning(task, closedProjects),
-  );
+  const planningTasks = data.tasks.filter((task) => taskCompetesForPlanning(task, closedProjects));
   const dueTodayTasks = planningTasks.filter((task) => task.dateKind === 'today');
   const dueTodayIds = new Set(dueTodayTasks.map((t) => t.id));
 
