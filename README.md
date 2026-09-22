@@ -148,6 +148,22 @@ Nunca se resuelve Production de forma implícita.
 El rollback técnico conserva la referencia DEV y deshabilita escrituras productivas. No toca los
 productores externos ni modifica las hojas.
 
+## Mejora continua del producto
+
+Vida 2.0 participa del runtime de mejora continua definido en el repositorio canónico `franciscovitar/personal-ai-system`.
+
+La especificación local está en `docs/continuous-improvement.md`. Una revisión profunda de Vida debe combinar:
+
+- baseline real de `vida-2.0/main` + Production;
+- errores, fricción, uso y feedback real;
+- ideas actuales del usuario y contexto relevante de conversaciones previas;
+- Intelligence + Professional + Technology Library del PAS;
+- investigación externa actual;
+- costo monetario y operativo;
+- evals, regresiones y rollback.
+
+La mejora continua no autoriza cambios automáticos a Production ni convierte a Vida en una fuente de verdad paralela.
+
 ## Requisitos
 
 - Node.js 24.
