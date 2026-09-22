@@ -1,0 +1,49 @@
+name: Temporary AI Career Resilience formatter
+
+on:
+  push:
+    branches:
+      - tmp/format-ai-career-resilience-v1
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out target branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/ai-career-resilience-v1
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Format bounded resilience files
+        run: >-
+          npx prettier --write
+          components/professional/CareerResilience.tsx
+          components/professional/ProfessionalDashboard.module.scss
+          data/generated/ai-career-resilience.json
+          lib/professional/career-resilience-contract.ts
+          tests/professional-intelligence.test.ts
+      - name: Commit formatting delta
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/professional/CareerResilience.tsx \
+            components/professional/ProfessionalDashboard.module.scss \
+            data/generated/ai-career-resilience.json \
+            lib/professional/career-resilience-contract.ts \
+            tests/professional-intelligence.test.ts
+          if git diff --cached --quiet; then
+            echo "No formatting changes required"
+          else
+            git commit -m "format(professional): normalize AI career resilience"
+            git push origin HEAD:feat/ai-career-resilience-v1
+          fi
