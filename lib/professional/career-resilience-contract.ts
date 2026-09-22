@@ -129,9 +129,10 @@ export function parseCareerResilienceSnapshot(value: unknown): CareerResilienceS
       return null;
     }
 
+    const horizons = role.horizons as Record<string, unknown>;
     if (
-      Object.keys(role.horizons).length !== HORIZONS.length ||
-      !HORIZONS.every((key) => validHorizon(role.horizons[key]))
+      Object.keys(horizons).length !== HORIZONS.length ||
+      !HORIZONS.every((key) => validHorizon(horizons[key]))
     ) {
       return null;
     }
