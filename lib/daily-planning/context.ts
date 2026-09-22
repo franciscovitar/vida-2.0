@@ -244,13 +244,26 @@ async function loadNotionFacts(
         )
     : [];
 
+  const closedProjectIds = projectState.available
+    ? new Set(
+        projectBases
+          .filter(
+            (project) => project.status === 'Completado' || project.status === 'Cancelado',
+          )
+          .map((project) => project.id),
+      )
+    : new Set<string>();
+
   const tasks = taskState.available
-    ? allTasks.filter(
-        (task) =>
+    ? allTasks.filter((task) => {
+        const operational =
           task.status === 'Pendiente' ||
           task.status === 'En progreso' ||
-          task.status === 'Bloqueada',
-      )
+          task.status === 'Bloqueada';
+        if (!operational) return false;
+        if (task.project?.available && closedProjectIds.has(task.project.id)) return false;
+        return true;
+      })
     : [];
 
   return {

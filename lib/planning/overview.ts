@@ -1,11 +1,25 @@
 import type { AssessmentProgressSnapshot } from '@/types/assessment-progress';
-import type { NotionTask } from '@/types/notion';
+import type { NotionProject, NotionTask } from '@/types/notion';
 import type { ProjectsIntelligenceProject } from '@/types/projects-intelligence';
 
 function dateValue(value: string | null): number {
   if (!value) return Number.POSITIVE_INFINITY;
   const parsed = Date.parse(`${value}T12:00:00Z`);
   return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+}
+
+function closedProjectIds(projects: readonly NotionProject[]): Set<string> {
+  return new Set(
+    projects
+      .filter((project) => project.status === 'Completado' || project.status === 'Cancelado')
+      .map((project) => project.id),
+  );
+}
+
+function taskCompetesForPlanning(task: NotionTask, closedProjects: ReadonlySet<string>): boolean {
+  if (task.status === 'Hecha' || task.status === 'Algún día') return false;
+  if (task.project?.available && closedProjects.has(task.project.id)) return false;
+  return true;
 }
 
 export function selectPlanningAssessments(
@@ -20,7 +34,11 @@ export function selectPlanningAssessments(
     });
 }
 
-export function selectAttentionTasks(tasks: readonly NotionTask[], limit = 8): NotionTask[] {
+export function selectAttentionTasks(
+  tasks: readonly NotionTask[],
+  projects: readonly NotionProject[],
+  limit = 8,
+): NotionTask[] {
   const rankStatus = (task: NotionTask): number => {
     if (task.status === 'Bloqueada') return 0;
     if (task.dateKind === 'overdue') return 1;
@@ -30,8 +48,10 @@ export function selectAttentionTasks(tasks: readonly NotionTask[], limit = 8): N
     return 5;
   };
 
+  const closedProjects = closedProjectIds(projects);
+
   return tasks
-    .filter((task) => task.status !== 'Hecha' && task.status !== 'Algún día')
+    .filter((task) => taskCompetesForPlanning(task, closedProjects))
     .sort((a, b) => {
       const byStatus = rankStatus(a) - rankStatus(b);
       if (byStatus !== 0) return byStatus;
@@ -57,15 +77,17 @@ export function selectPlanningProjects(
 
 export function selectWeekTasks(
   tasks: readonly NotionTask[],
+  projects: readonly NotionProject[],
   targetDate: string,
   horizonDays = 7,
 ): NotionTask[] {
   const start = Date.parse(`${targetDate}T12:00:00Z`);
   const end = start + horizonDays * 86_400_000;
+  const closedProjects = closedProjectIds(projects);
 
   return tasks
     .filter((task) => {
-      if (task.status === 'Hecha' || task.status === 'Algún día' || !task.date) return false;
+      if (!taskCompetesForPlanning(task, closedProjects) || !task.date) return false;
       const date = Date.parse(`${task.date}T12:00:00Z`);
       return Number.isFinite(date) && date >= start && date < end;
     })

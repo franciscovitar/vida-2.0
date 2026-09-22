@@ -38,6 +38,20 @@ function priorityRank(priority: NotionTaskPriority | null): number {
   return priority ? PRIORITY_RANK[priority] : 9;
 }
 
+function closedProjectIds(projects: readonly NotionProject[]): Set<string> {
+  return new Set(
+    projects
+      .filter((project) => project.status === 'Completado' || project.status === 'Cancelado')
+      .map((project) => project.id),
+  );
+}
+
+function taskCompetesForPlanning(task: NotionTask, closedProjects: ReadonlySet<string>): boolean {
+  if (task.status === 'Hecha' || task.status === 'Algún día') return false;
+  if (task.project?.available && closedProjects.has(task.project.id)) return false;
+  return true;
+}
+
 function toHoyTask(task: NotionTask): HoyTaskView {
   const projectUnavailable = task.project !== null && !task.project.available;
   const areaUnavailable = task.area !== null && !task.area.available;
@@ -167,17 +181,8 @@ export function suggestNextActions(
   calendar?: CalendarTodayPreview | null,
   limit = 3,
 ): HoySuggestedAction[] {
-  const completedProjectIds = new Set(
-    data.projects
-      .filter((p) => p.status === 'Completado' || p.status === 'Cancelado')
-      .map((p) => p.id),
-  );
-
-  const usable = data.tasks.filter((task) => {
-    if (task.status === 'Hecha') return false;
-    if (task.project?.id && completedProjectIds.has(task.project.id)) return false;
-    return true;
-  });
+  const closedProjects = closedProjectIds(data.projects);
+  const usable = data.tasks.filter((task) => taskCompetesForPlanning(task, closedProjects));
 
   const availableMinutes = availableMinutesForSuggestions(calendar);
   const seen = new Set<string>();
@@ -284,21 +289,23 @@ export function buildHoyNotionView(
   calendar?: CalendarTodayPreview | null,
 ): HoyNotionView {
   const today = data.targetDate;
-  const dueTodayTasks = data.tasks.filter(
-    (task) => task.dateKind === 'today' && task.status !== 'Hecha',
+  const closedProjects = closedProjectIds(data.projects);
+  const planningTasks = data.tasks.filter((task) =>
+    taskCompetesForPlanning(task, closedProjects),
   );
+  const dueTodayTasks = planningTasks.filter((task) => task.dateKind === 'today');
   const dueTodayIds = new Set(dueTodayTasks.map((t) => t.id));
 
   const overdueTasks = sortOverdueTasks(
-    data.tasks.filter((task) => isHoyOverdueTask(task) && !dueTodayIds.has(task.id)),
+    planningTasks.filter((task) => isHoyOverdueTask(task) && !dueTodayIds.has(task.id)),
   );
   const overdueIds = new Set(overdueTasks.map((t) => t.id));
   const claimed = new Set([...dueTodayIds, ...overdueIds]);
 
-  const inProgressTasks = data.tasks.filter(
+  const inProgressTasks = planningTasks.filter(
     (task) => task.status === 'En progreso' && !claimed.has(task.id),
   );
-  const blockedTasks = data.tasks.filter(
+  const blockedTasks = planningTasks.filter(
     (task) => task.status === 'Bloqueada' && !claimed.has(task.id),
   );
 
@@ -323,8 +330,8 @@ export function buildHoyNotionView(
     summary: {
       dueToday: dueTodayTasks.length,
       overdue: overdueTasks.length,
-      inProgress: data.tasks.filter((t) => t.status === 'En progreso').length,
-      blocked: data.tasks.filter((t) => t.status === 'Bloqueada').length,
+      inProgress: planningTasks.filter((t) => t.status === 'En progreso').length,
+      blocked: planningTasks.filter((t) => t.status === 'Bloqueada').length,
       activeProjects: activeProjects.length,
       withoutNextAction,
     },

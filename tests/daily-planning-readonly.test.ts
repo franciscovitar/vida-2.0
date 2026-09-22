@@ -50,6 +50,15 @@ const PROJECT: NotionRawPage = {
   },
 };
 
+const COMPLETED_PROJECT: NotionRawPage = {
+  id: 'proj-done',
+  properties: {
+    Proyecto: titleProp('Proyecto cerrado'),
+    Estado: selectProp('Completado'),
+    'Próxima acción': relationProp([]),
+  },
+};
+
 const TASK: NotionRawPage = {
   id: 'task-a',
   properties: {
@@ -60,6 +69,17 @@ const TASK: NotionRawPage = {
     'Energía requerida': selectProp('Alta'),
     Fecha: dateProp('2026-09-06'),
     Proyecto: relationProp(['proj-a']),
+  },
+};
+
+const STALE_COMPLETED_PROJECT_TASK: NotionRawPage = {
+  id: 'task-stale',
+  properties: {
+    Tarea: titleProp('Tarea sombra de proyecto cerrado'),
+    Estado: statusProp('Pendiente'),
+    Prioridad: selectProp('Alta'),
+    Fecha: dateProp('2026-09-05'),
+    Proyecto: relationProp(['proj-done']),
   },
 };
 
@@ -313,4 +333,26 @@ test('DP-R8. Salud no disponible no degrada el plan ni fabrica contexto de capac
   assert.equal(data.health, null);
   assert.equal(data.tasks.length, 1);
   assert.equal(data.calendarEvents.length, 1);
+});
+
+
+test('DP-R9. tarea abierta de proyecto completado no compite en el contexto diario', async () => {
+  const port = fakePort({
+    'ds-projects': { ok: true, pages: [PROJECT, COMPLETED_PROJECT] },
+    'ds-tasks': { ok: true, pages: [TASK, STALE_COMPLETED_PROJECT_TASK] },
+    'ds-milestones': { ok: true, pages: MILESTONES },
+  });
+
+  const data = await loadDailyPlanningContextUncached(
+    baseDeps(port, { ok: true, events: [CALENDAR_EVENT] }),
+  );
+
+  assert.deepEqual(
+    data.tasks.map((task) => task.id),
+    ['task-a'],
+  );
+  assert.deepEqual(
+    data.projects.map((project) => project.id),
+    ['proj-a'],
+  );
 });
