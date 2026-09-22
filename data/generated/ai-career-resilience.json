@@ -1,0 +1,1031 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "aa5d930c43c39401a5cfed1a30556e8c72780f4f",
+    "generatedAt": "2026-09-22",
+    "observedAt": "2026-09-22",
+    "staleAfterDays": 45,
+    "canonicalRef": "AI/projects/professional-intelligence/AI_CAREER_RESILIENCE_CURRENT_V1.json"
+  },
+  "statement": "This state estimates career resilience for a worker who actively uses frontier AI, keeps skills current, and deliberately moves toward high-context/high-accountability work. It is not a forecast for a worker who ignores AI.",
+  "status": "CURRENT_UNCALIBRATED_SCENARIO_BASELINE",
+  "numericSemantics": {
+    "ai_alone_substitution_pressure_pct_range": "UNCALIBRATED_SCENARIO_ESTIMATE_NOT_EMPLOYMENT_PROBABILITY",
+    "ai_native_resilience_index_range": "HEURISTIC_0_100_NOT_PROBABILITY",
+    "headcount_compression_index_range": "HEURISTIC_0_100_NOT_PERCENT_JOBS_LOST"
+  },
+  "crossRoleFindings": [
+    {
+      "id": "CR-F-001",
+      "finding": "Current evidence supports transformation and task/headcount compression more strongly than near-term wholesale occupation disappearance.",
+      "sourceRefs": ["CR-SRC-002", "CR-SRC-003", "CR-SRC-006"]
+    },
+    {
+      "id": "CR-F-002",
+      "finding": "Entry-level and routine digital work is an early pressure point; current labor data does not establish broad software-engineering displacement.",
+      "sourceRefs": ["CR-SRC-006", "CR-SRC-007"]
+    },
+    {
+      "id": "CR-F-003",
+      "finding": "AI capability on well-specified technical tasks is advancing rapidly, but benchmark task horizons are not equivalent to autonomous performance in messy real jobs.",
+      "sourceRefs": ["CR-SRC-005"]
+    },
+    {
+      "id": "CR-F-004",
+      "finding": "AI-native workers can remain highly valuable even in exposed roles if they own verification, context, architecture, security, production and decisions that organizations are unwilling or unable to delegate fully.",
+      "sourceRefs": ["CR-SRC-003", "CR-SRC-005", "CR-SRC-008"]
+    }
+  ],
+  "globalProtectionStrategy": [
+    "Use AI at the frontier; do not compete with it on raw mechanical output.",
+    "Shift toward problem framing, architecture, verification, security, production reliability, domain context and accountable decisions.",
+    "Build real evidence that you can operate and recover systems, not only generate artifacts.",
+    "Maintain fundamentals deeply enough to detect when an AI answer is wrong.",
+    "Track junior/routine-task compression separately from total role demand.",
+    "Keep optionality across adjacent roles instead of betting on one title for 20 years."
+  ],
+  "sources": [
+    {
+      "id": "CR-SRC-001",
+      "name": "U.S. Bureau of Labor Statistics — 2025–35 occupational projections",
+      "kind": "OFFICIAL_STATISTICS",
+      "url": "https://www.bls.gov/emp/tables/occupational-projections-and-characteristics.htm",
+      "publishedAt": null,
+      "observedAt": "2026-09-22",
+      "confidence": "HIGH",
+      "note": "Official U.S. structural employment projection; not a global forecast."
+    },
+    {
+      "id": "CR-SRC-002",
+      "name": "U.S. Bureau of Labor Statistics — AI exposure categories",
+      "kind": "OFFICIAL_AI_EXPOSURE",
+      "url": "https://www.bls.gov/emp/publications/ai-exposure-categories.htm",
+      "publishedAt": "2026-08-27",
+      "observedAt": "2026-09-22",
+      "confidence": "HIGH",
+      "note": "Relative theoretical/observed AI exposure. BLS explicitly says exposure is not employment growth, adoption, productivity or replacement probability."
+    },
+    {
+      "id": "CR-SRC-003",
+      "name": "ILO/NASK — Generative AI and Jobs: A Refined Global Index",
+      "kind": "INDEPENDENT_LABOR_RESEARCH",
+      "url": "https://www.ilo.org/publications/generative-ai-and-jobs-refined-global-index-occupational-exposure",
+      "publishedAt": "2025-05-20",
+      "observedAt": "2026-09-22",
+      "confidence": "HIGH",
+      "note": "Task-level global exposure research; transformation is judged more likely than wholesale replacement for most occupations."
+    },
+    {
+      "id": "CR-SRC-004",
+      "name": "World Economic Forum — Future of Jobs Report 2025",
+      "kind": "EMPLOYER_SURVEY",
+      "url": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/digest/",
+      "publishedAt": "2025-01-07",
+      "observedAt": "2026-09-22",
+      "confidence": "MEDIUM_HIGH",
+      "note": "Directional employer expectations through 2030; AI/big data and networks/cybersecurity are among fastest-growing skill groups."
+    },
+    {
+      "id": "CR-SRC-005",
+      "name": "METR — Task-Completion Time Horizons of Frontier AI Models",
+      "kind": "INDEPENDENT_CAPABILITY_EVAL",
+      "url": "https://metr.org/time-horizons/",
+      "publishedAt": null,
+      "observedAt": "2026-09-22",
+      "confidence": "HIGH_FOR_MEASURED_TASKS",
+      "note": "Measures frontier-agent reliability on well-specified software/ML/cyber tasks; not equivalent to autonomous real-world jobs."
+    },
+    {
+      "id": "CR-SRC-006",
+      "name": "LinkedIn Economic Graph — AI Labor Market Update, August 2026",
+      "kind": "LABOR_MARKET_DATA",
+      "url": "https://economicgraph.linkedin.com/workforce-data/publications",
+      "publishedAt": "2026-08",
+      "observedAt": "2026-09-22",
+      "confidence": "MEDIUM_HIGH",
+      "note": "Cross-market hiring analysis. Entry-level hiring in AI-augmented roles such as software engineering showed additional weakness versus the role total, while AI Engineer remained fast-growing."
+    },
+    {
+      "id": "CR-SRC-007",
+      "name": "LinkedIn Economic Graph — U.S. Software Engineer Talent Landscape 2026",
+      "kind": "LABOR_MARKET_DATA",
+      "url": "https://economicgraph.linkedin.com/content/dam/me/economicgraph/en-us/PDF/us-software-engineer-talent-landscape-2026.pdf",
+      "publishedAt": "2026",
+      "observedAt": "2026-09-22",
+      "confidence": "MEDIUM_HIGH",
+      "note": "Finds tightening SWE entry pathways and growing AI/cloud skill emphasis while evidence of broad AI displacement of SWE remains scarce."
+    },
+    {
+      "id": "CR-SRC-008",
+      "name": "Anthropic Economic Index — Cadences",
+      "kind": "PROVIDER_REAL_USAGE_AND_SURVEY",
+      "url": "https://www.anthropic.com/research/economic-index-june-2026-report",
+      "publishedAt": "2026-06-26",
+      "observedAt": "2026-09-22",
+      "confidence": "MEDIUM",
+      "note": "Real Claude usage plus linked survey. Useful for adoption/worker-expectation evidence; provider-user population is not the labor market as a whole."
+    }
+  ],
+  "roles": [
+    {
+      "id": "ai-native-product-engineer",
+      "name": "AI-Native Product Engineer",
+      "baseRoleRefs": ["ai-native-product-engineer"],
+      "demand": {
+        "direction": "POSITIVE_BUT_TRANSFORMING",
+        "facts": [
+          "Software Developers: +10.2% projected U.S. employment 2025–35.",
+          "AI-related roles and skills remain among the strongest growth signals, but there is no one-to-one official occupation for this composite role."
+        ],
+        "sourceRefs": ["CR-SRC-001", "CR-SRC-004", "CR-SRC-006"]
+      },
+      "aiTransformation": "Implementation, research, prototyping and routine integration are rapidly cheaper. The defensible center shifts toward product judgment, architecture, evaluation, security, business context and end-to-end ownership.",
+      "loadBearingHumanWork": [
+        "Problem framing and requirements under ambiguity",
+        "Architecture and cross-system integration",
+        "Evaluation, verification and failure handling",
+        "Business/product judgment and prioritization",
+        "Security/privacy/accountability",
+        "End-to-end ownership across agents and humans"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [2, 8],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [88, 96],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [20, 35],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Near-term risk is mostly task compression, not AI-only role replacement."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [15, 35],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [75, 90],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [40, 65],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Agents can absorb more implementation; value concentrates in ownership and system judgment."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [30, 60],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [60, 82],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [55, 80],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "High automation is plausible, but product/accountability boundaries remain meaningful."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [45, 85],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [35, 70],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [70, 95],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "20-year range is a stress test; conclusions depend on autonomy, liability and organization redesign."
+        }
+      },
+      "riskUpSignposts": [
+        "Agents reliably own multi-week product work with low supervision",
+        "Organizations measurably remove product-engineering layers rather than redeploying them",
+        "Evaluation/security/accountability become largely machine-owned"
+      ],
+      "riskDownSignposts": [
+        "High-value systems continue to require accountable human owners",
+        "Integration/reliability/security remain bottlenecks",
+        "AI increases number of viable products and demand for builders"
+      ],
+      "protectionPlaybook": [
+        "Become excellent at agent orchestration plus verification, not prompting alone",
+        "Own requirements, architecture, data, security and production trade-offs",
+        "Build evidence of operating systems after launch",
+        "Learn to measure AI quality/cost/latency/failure modes",
+        "Keep direct product/business communication ability"
+      ],
+      "sourceRefs": [
+        "CR-SRC-001",
+        "CR-SRC-002",
+        "CR-SRC-003",
+        "CR-SRC-005",
+        "CR-SRC-006",
+        "CR-SRC-008"
+      ]
+    },
+    {
+      "id": "full-stack-product-engineer",
+      "name": "Full-Stack / Product Engineer",
+      "baseRoleRefs": ["full-stack-product-engineer"],
+      "demand": {
+        "direction": "POSITIVE_BUT_TRANSFORMING",
+        "facts": [
+          "Software Developers: +10.2% projected U.S. employment 2025–35.",
+          "Web Developers: +3.8% projected U.S. employment 2025–35.",
+          "Entry pathways are tightening and AI/cloud capabilities are gaining weight."
+        ],
+        "sourceRefs": ["CR-SRC-001", "CR-SRC-006", "CR-SRC-007"]
+      },
+      "aiTransformation": "Routine CRUD, UI implementation, tests and code translation are increasingly automatable; product context, architecture, integration and responsibility become more important.",
+      "loadBearingHumanWork": [
+        "Product discovery and ambiguity resolution",
+        "Architecture across frontend/backend/data",
+        "Production debugging and recovery",
+        "Security and access decisions",
+        "Stakeholder communication",
+        "Acceptance criteria and outcome validation"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [5, 12],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [85, 94],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [25, 40],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Strong augmentation already; AI-only replacement remains limited by context and ownership."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [20, 45],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [68, 85],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [45, 70],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Routine implementation compresses significantly; stronger builders cover more surface area."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [40, 70],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [50, 75],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [60, 85],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "Generalist coding becomes much cheaper; durable value shifts toward product/system ownership."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [55, 90],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [25, 60],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [75, 98],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "Long-run survival depends on whether accountable product ownership remains human."
+        }
+      },
+      "riskUpSignposts": [
+        "AI agents handle full-stack changes across mature repos with minimal review",
+        "Companies consistently reduce engineer counts per product without offsetting product expansion"
+      ],
+      "riskDownSignposts": [
+        "Product scope expands as building gets cheaper",
+        "Production/security/accountability continue to require experienced humans"
+      ],
+      "protectionPlaybook": [
+        "Move from ticket execution to product/system ownership",
+        "Strengthen architecture, databases, production and security",
+        "Use AI to increase scope per person while keeping verification skill",
+        "Maintain strong user/client communication"
+      ],
+      "sourceRefs": ["CR-SRC-001", "CR-SRC-003", "CR-SRC-005", "CR-SRC-006", "CR-SRC-007"]
+    },
+    {
+      "id": "software-engineer",
+      "name": "Software Engineer",
+      "baseRoleRefs": ["software-engineer"],
+      "demand": {
+        "direction": "POSITIVE_BUT_TRANSFORMING",
+        "facts": [
+          "Software Developers: +10.2% projected U.S. employment 2025–35 with ~95.3k annual openings in the PAS labor baseline.",
+          "LinkedIn 2026 data shows weaker entry pathways but scarce evidence of broad SWE displacement so far."
+        ],
+        "sourceRefs": ["CR-SRC-001", "CR-SRC-006", "CR-SRC-007"]
+      },
+      "aiTransformation": "Code generation is becoming a commodity faster than engineering judgment. Junior/routine work is the first pressure point; complex systems, verification and ownership are more resilient.",
+      "loadBearingHumanWork": [
+        "Understanding underspecified systems",
+        "Architecture and trade-offs",
+        "Debugging non-local failures",
+        "Testing strategy and verification",
+        "Security/reliability",
+        "Technical coordination and accountability"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [5, 15],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [84, 94],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [25, 42],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "The current pressure is strongest on routine and entry-level work."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [25, 50],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [65, 84],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [50, 72],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Fewer engineers may produce the same software; stronger AI-native engineers remain valuable."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [45, 75],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [45, 72],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [65, 88],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "AI-only engineering becomes plausible for more bounded systems; high-context work remains harder."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [60, 95],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [20, 55],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [80, 100],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "The 20-year outcome hinges on general agent autonomy and organizational willingness to remove human accountability."
+        }
+      },
+      "riskUpSignposts": [
+        "Long-horizon agents reliably change large real repos without human decomposition",
+        "Senior review/architecture becomes machine-dominant",
+        "SWE hiring decouples downward from overall tech demand for several years"
+      ],
+      "riskDownSignposts": [
+        "Software demand expands faster than productivity reduces headcount",
+        "Human verification remains necessary for consequential systems"
+      ],
+      "protectionPlaybook": [
+        "Do not compete on raw code output",
+        "Deepen architecture, debugging, testing, data and production",
+        "Be able to verify AI output independently",
+        "Build domain context and ownership evidence",
+        "Use AI to work across a wider system, not only faster inside one ticket"
+      ],
+      "sourceRefs": [
+        "CR-SRC-001",
+        "CR-SRC-002",
+        "CR-SRC-003",
+        "CR-SRC-005",
+        "CR-SRC-006",
+        "CR-SRC-007"
+      ]
+    },
+    {
+      "id": "systems-analyst-architect",
+      "name": "Systems Analyst / Software Architect",
+      "baseRoleRefs": ["systems-analyst-architect"],
+      "demand": {
+        "direction": "POSITIVE_BUT_TRANSFORMING",
+        "facts": [
+          "Computer Systems Analysts: +7.9% projected U.S. employment 2025–35.",
+          "Database Architects: +9.4% projected U.S. employment 2025–35."
+        ],
+        "sourceRefs": ["CR-SRC-001"]
+      },
+      "aiTransformation": "AI accelerates modeling, documentation and option generation, but ambiguous requirements, cross-system trade-offs, governance and accountability remain load-bearing.",
+      "loadBearingHumanWork": [
+        "Requirements discovery under conflicting goals",
+        "Architecture trade-offs across systems",
+        "Risk/governance decisions",
+        "Stakeholder negotiation",
+        "Migration and failure planning",
+        "Accountability for system-wide consequences"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [2, 7],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [90, 97],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [15, 30],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Architecture is augmented heavily but still context/accountability bound."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [10, 30],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [80, 92],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [30, 55],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "AI can propose designs; trusted ownership and cross-organizational context remain defensible."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [25, 55],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [65, 85],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [45, 70],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "More architecture synthesis may automate, but responsibility and tacit constraints matter."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [40, 80],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [40, 75],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [60, 90],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "A very autonomous future could compress architects, but governance/liability may preserve humans."
+        }
+      },
+      "riskUpSignposts": [
+        "AI reliably elicits requirements and negotiates constraints with stakeholders",
+        "Organizations delegate architecture liability and change approval to AI"
+      ],
+      "riskDownSignposts": [
+        "Regulation/accountability keeps named human owners",
+        "Legacy integration and organizational constraints remain dominant"
+      ],
+      "protectionPlaybook": [
+        "Develop requirements/decision quality, not diagram production",
+        "Own migrations, trade-offs and failure modes",
+        "Build security/privacy/governance depth",
+        "Practice explaining and defending decisions to nontechnical stakeholders"
+      ],
+      "sourceRefs": ["CR-SRC-001", "CR-SRC-002", "CR-SRC-003", "CR-SRC-005"]
+    },
+    {
+      "id": "applied-ai-engineer",
+      "name": "Applied AI Engineer",
+      "baseRoleRefs": ["applied-ai-engineer"],
+      "demand": {
+        "direction": "STRONG_POSITIVE_BUT_SELF_AUTOMATING",
+        "facts": [
+          "WEF places AI/ML specialists and AI/big-data skills among the strongest growth signals through 2030.",
+          "LinkedIn 2026 reports AI Engineer among fast-growing occupations in multiple markets.",
+          "There is no clean one-to-one BLS occupation for Applied AI Engineer."
+        ],
+        "sourceRefs": ["CR-SRC-004", "CR-SRC-006"]
+      },
+      "aiTransformation": "Demand is strong because firms are adopting AI, but the tools used by AI engineers are themselves increasingly agentic. Durable value shifts to evaluation, integration, data, reliability, cost, security and domain outcomes.",
+      "loadBearingHumanWork": [
+        "Choosing what should be automated",
+        "Evaluation design and failure analysis",
+        "Data/grounding architecture",
+        "Security and model-risk controls",
+        "Production integration and observability",
+        "Cost/latency/reliability trade-offs"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [2, 8],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [90, 97],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [15, 30],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Current demand is strong; self-automation mostly increases leverage."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [12, 35],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [78, 92],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [35, 60],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Commodity AI integration compresses; deeper runtime/eval work remains defensible."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [30, 65],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [60, 83],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [50, 80],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "If agents build and operate AI systems themselves, general integration roles narrow."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [50, 90],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [30, 70],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [70, 95],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "Long-run risk is high precisely because this role works closest to the automation frontier."
+        }
+      },
+      "riskUpSignposts": [
+        "Model providers absorb most retrieval/evals/agent infrastructure into managed products",
+        "Agents autonomously run experiments, deploy and monitor AI systems with low supervision"
+      ],
+      "riskDownSignposts": [
+        "Model heterogeneity, regulation, security and domain integration keep system engineering complex",
+        "AI deployment expands into many more organizations and use cases"
+      ],
+      "protectionPlaybook": [
+        "Go beyond API integration into evals, observability, grounding and safety",
+        "Own production economics: latency, cost, reliability",
+        "Build domain-specific AI systems with measurable outcomes",
+        "Maintain strong software/data/security foundations"
+      ],
+      "sourceRefs": ["CR-SRC-003", "CR-SRC-004", "CR-SRC-005", "CR-SRC-006", "CR-SRC-008"]
+    },
+    {
+      "id": "data-engineer",
+      "name": "Data Engineer",
+      "baseRoleRefs": ["data-analytics-engineer"],
+      "demand": {
+        "direction": "POSITIVE_BUT_TRANSFORMING",
+        "facts": [
+          "Database Architects: +9.4% projected U.S. employment 2025–35.",
+          "WEF identifies big data among the strongest growth areas."
+        ],
+        "sourceRefs": ["CR-SRC-001", "CR-SRC-004"]
+      },
+      "aiTransformation": "SQL generation, pipeline scaffolding and routine transformations automate quickly; data contracts, lineage, quality, governance, distributed reliability and business semantics remain harder.",
+      "loadBearingHumanWork": [
+        "Data modeling and semantics",
+        "Quality/lineage/governance",
+        "Distributed reliability and cost",
+        "Access/security/privacy",
+        "Integration across messy source systems",
+        "Incident and migration ownership"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [4, 10],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [87, 95],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [20, 35],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Routine pipeline work is increasingly automated but production data ownership remains important."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [18, 40],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [72, 88],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [40, 65],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Smaller teams can operate more pipelines; robust platform/data ownership differentiates."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [35, 65],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [55, 78],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [55, 80],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "AI may automate substantial implementation while governance and semantics persist."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [50, 88],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [30, 65],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [70, 95],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "Autonomous data platforms could compress heavily; consequential data ownership may remain human."
+        }
+      },
+      "riskUpSignposts": [
+        "Autonomous data platforms handle schema evolution, incidents and governance reliably",
+        "Organizations standardize data layers enough to remove integration complexity"
+      ],
+      "riskDownSignposts": [
+        "Data quality, access, lineage and domain semantics remain chronic bottlenecks",
+        "Regulation increases accountable data ownership"
+      ],
+      "protectionPlaybook": [
+        "Master modeling, transactions, quality and governance",
+        "Own platform reliability/cost/security",
+        "Learn semantic/domain modeling, not only pipeline syntax",
+        "Use AI for SQL/scaffolding but verify data correctness"
+      ],
+      "sourceRefs": ["CR-SRC-001", "CR-SRC-002", "CR-SRC-003", "CR-SRC-004"]
+    },
+    {
+      "id": "data-scientist",
+      "name": "Data Scientist",
+      "baseRoleRefs": ["data-analytics-engineer"],
+      "demand": {
+        "direction": "STRONG_POSITIVE_BUT_TRANSFORMING",
+        "facts": [
+          "Data Scientists: +34.6% projected U.S. employment 2025–35 with ~24.8k annual openings in the PAS labor baseline.",
+          "WEF identifies big-data roles/skills among strong growth areas."
+        ],
+        "sourceRefs": ["CR-SRC-001", "CR-SRC-004"]
+      },
+      "aiTransformation": "Exploratory coding, model selection, feature ideation and reporting automate rapidly. Problem formulation, causal/statistical judgment, experiment design, data validity and business decisions remain more defensible.",
+      "loadBearingHumanWork": [
+        "Problem formulation and metric choice",
+        "Causal/statistical reasoning",
+        "Experiment design",
+        "Data validity and leakage detection",
+        "Decision communication",
+        "Accountability for model use"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [6, 15],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [82, 92],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [25, 40],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Demand is strong, but routine analysis/modeling is already highly AI-augmentable."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [25, 50],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [62, 82],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [50, 75],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "General modeling work compresses; rigorous decision science and domain depth matter more."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [45, 75],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [42, 70],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [65, 90],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "Automated research/modeling can absorb much of routine data science."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [65, 95],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [20, 55],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [80, 100],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "Long-run role survives mainly if human decision ownership/causal judgment stays valuable."
+        }
+      },
+      "riskUpSignposts": [
+        "AI autonomously performs trustworthy end-to-end analysis with robust causal/statistical validation",
+        "AutoML/agents make bespoke modeling commodity across firms"
+      ],
+      "riskDownSignposts": [
+        "Real-world experimentation, causality, regulation and domain stakes retain human accountability",
+        "Demand for data-driven decisions expands faster than automation"
+      ],
+      "protectionPlaybook": [
+        "Prioritize statistics, causality and experiment design over notebook mechanics",
+        "Own data quality and business decision framing",
+        "Build production/evaluation literacy",
+        "Communicate uncertainty and consequences clearly"
+      ],
+      "sourceRefs": ["CR-SRC-001", "CR-SRC-002", "CR-SRC-003", "CR-SRC-004", "CR-SRC-008"]
+    },
+    {
+      "id": "data-analyst-bi",
+      "name": "Data Analyst / BI",
+      "baseRoleRefs": ["data-analytics-engineer"],
+      "demand": {
+        "direction": "PRESSURE_ON_ROUTINE_TASKS",
+        "facts": [
+          "This profile has no direct BLS row in the current PAS baseline.",
+          "Digitized analytical/clerical task families are among those most exposed to GenAI transformation; routine querying/reporting is especially automatable."
+        ],
+        "sourceRefs": ["CR-SRC-002", "CR-SRC-003", "CR-SRC-008"]
+      },
+      "aiTransformation": "Natural-language querying, dashboard generation, recurring reports and descriptive analysis are directly exposed. Resilience comes from domain semantics, metric governance, decision support and ownership of ambiguous business questions.",
+      "loadBearingHumanWork": [
+        "Metric/semantic governance",
+        "Business-context interpretation",
+        "Data-quality skepticism",
+        "Ambiguous question framing",
+        "Decision facilitation with stakeholders",
+        "Accountability for consequential reporting"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [10, 25],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [70, 85],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [35, 55],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Routine reporting and querying are already highly exposed."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [40, 70],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [45, 68],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [65, 85],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Large compression is plausible for dashboard/report-centric roles."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [65, 90],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [25, 52],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [80, 95],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "A smaller number of domain-heavy analysts may cover much more work."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [80, 98],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [10, 35],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [90, 100],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "Pure reporting/BI execution is a high-risk long-run shape; domain decision roles are more resilient."
+        }
+      },
+      "riskUpSignposts": [
+        "Semantic layers plus agents reliably answer business questions without analyst mediation",
+        "Self-service AI analytics becomes trusted for consequential decisions"
+      ],
+      "riskDownSignposts": [
+        "Organizations continue to struggle with metric definitions/data quality",
+        "Analysts own domain decisions, experimentation or operational change rather than reports"
+      ],
+      "protectionPlaybook": [
+        "Move away from dashboard production as the core identity",
+        "Own metrics, semantics and business decisions",
+        "Deepen SQL/data modeling enough to audit AI answers",
+        "Add experimentation/causal reasoning or data engineering adjacency"
+      ],
+      "sourceRefs": ["CR-SRC-002", "CR-SRC-003", "CR-SRC-008"]
+    },
+    {
+      "id": "platform-production-engineer",
+      "name": "Platform / Production Engineer (DevOps/SRE)",
+      "baseRoleRefs": ["platform-production-engineer"],
+      "demand": {
+        "direction": "POSITIVE_BUT_TRANSFORMING",
+        "facts": [
+          "Computer Network Architects: +7.7% projected U.S. employment 2025–35.",
+          "Networks/cybersecurity remain among WEF fastest-growing skill groups."
+        ],
+        "sourceRefs": ["CR-SRC-001", "CR-SRC-004"]
+      },
+      "aiTransformation": "Runbooks, config, diagnostics and remediation can automate deeply. Resilience comes from reliability ownership, failure judgment, security, cost, distributed-systems reasoning and incident accountability.",
+      "loadBearingHumanWork": [
+        "Incident command under uncertainty",
+        "Reliability architecture",
+        "Security/privilege boundaries",
+        "Capacity/cost trade-offs",
+        "Recovery and disaster planning",
+        "Cross-team operational accountability"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [2, 8],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [90, 97],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [15, 30],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Automation reduces toil; accountability for production remains strongly human."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [12, 32],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [78, 92],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [35, 60],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Autonomous remediation can reduce headcount, but high-stakes ownership persists."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [28, 58],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [62, 84],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [50, 75],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "Many operational loops may become autonomous; system design/failure ownership differentiates."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [45, 85],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [35, 72],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [65, 92],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "Long-term resilience depends on whether organizations allow AI to own consequential production decisions."
+        }
+      },
+      "riskUpSignposts": [
+        "Autonomous operations proves reliable through major incidents",
+        "Cloud platforms absorb most SRE/platform engineering decisions"
+      ],
+      "riskDownSignposts": [
+        "Complex distributed failures and security remain hard",
+        "Regulation/business risk requires accountable human operators"
+      ],
+      "protectionPlaybook": [
+        "Own observability, incident response, backup/restore and failure drills",
+        "Deepen distributed systems and security",
+        "Automate toil aggressively while retaining diagnostic skill",
+        "Learn cost/capacity architecture"
+      ],
+      "sourceRefs": ["CR-SRC-001", "CR-SRC-002", "CR-SRC-004", "CR-SRC-005"]
+    },
+    {
+      "id": "security-engineer",
+      "name": "Security Engineer / AppSec",
+      "baseRoleRefs": ["security-engineer"],
+      "demand": {
+        "direction": "STRONG_POSITIVE_BUT_TRANSFORMING",
+        "facts": [
+          "Information Security Analysts: +21% projected U.S. employment 2025–35 with ~14.1k annual openings in the PAS labor baseline.",
+          "Networks and cybersecurity are among WEF fastest-growing skill groups."
+        ],
+        "sourceRefs": ["CR-SRC-001", "CR-SRC-004"]
+      },
+      "aiTransformation": "Scanning, triage, rule generation, code review and parts of offensive/defensive work automate. The attack surface also grows. Threat modeling, adversarial judgment, incident ownership, architecture and risk accountability remain stronger.",
+      "loadBearingHumanWork": [
+        "Threat modeling and adversarial reasoning",
+        "Risk acceptance and business trade-offs",
+        "Incident command",
+        "Security architecture",
+        "Identity/privilege design",
+        "Accountability, governance and communication"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [2, 7],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [92, 98],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [10, 25],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "Automation increases leverage while demand/security surface remains strong."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [10, 25],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [82, 94],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [25, 50],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Routine SOC/AppSec tasks compress, but adversarial/security ownership is durable."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [20, 50],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [68, 88],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [40, 68],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "AI may automate much detection/response; accountable architecture and adversarial adaptation remain."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [35, 80],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [45, 78],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [55, 88],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "Long-run risk is substantial but security is also recursively generated by more automation."
+        }
+      },
+      "riskUpSignposts": [
+        "Autonomous defenders outperform human teams across live adversarial environments",
+        "Liability/regulation permits AI-owned risk acceptance"
+      ],
+      "riskDownSignposts": [
+        "Attackers and defenders co-evolve, preserving adversarial human oversight",
+        "Security regulation increases named accountability"
+      ],
+      "protectionPlaybook": [
+        "Move from tool operation to threat modeling/AppSec/security architecture",
+        "Build incident and production experience",
+        "Understand identity, least privilege and trust boundaries deeply",
+        "Use AI for scanning/triage but independently validate security conclusions"
+      ],
+      "sourceRefs": ["CR-SRC-001", "CR-SRC-002", "CR-SRC-003", "CR-SRC-004", "CR-SRC-005"]
+    },
+    {
+      "id": "technical-founder-product-builder",
+      "name": "Technical Founder / Product Builder",
+      "baseRoleRefs": ["technical-founder-product-builder"],
+      "demand": {
+        "direction": "NOT_STANDARD_EMPLOYMENT_ROLE",
+        "facts": [
+          "No single occupational projection represents founder/product-builder work.",
+          "Cheaper software/AI production may reduce build cost while increasing competition and the number of viable products."
+        ],
+        "sourceRefs": ["CR-SRC-004", "CR-SRC-005", "CR-SRC-008"]
+      },
+      "aiTransformation": "Execution becomes cheaper, so differentiation shifts toward problem selection, customer insight, distribution, capital allocation, trust and strategic ownership. AI may eliminate many implementation constraints without eliminating entrepreneurship.",
+      "loadBearingHumanWork": [
+        "Choosing worthwhile problems",
+        "Customer relationships and trust",
+        "Distribution/sales",
+        "Capital/resource allocation",
+        "Strategic trade-offs and accountability",
+        "Combining market, product and technical context"
+      ],
+      "horizons": {
+        "Y1": {
+          "aiAloneSubstitutionPressurePctRange": [1, 5],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [92, 98],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [10, 25],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "HIGH",
+          "summary": "AI mainly increases founder leverage in the near term."
+        },
+        "Y5": {
+          "aiAloneSubstitutionPressurePctRange": [8, 25],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [82, 95],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [25, 50],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM_HIGH",
+          "summary": "Building gets cheaper; competition rises, but ownership/market selection stays human-heavy."
+        },
+        "Y10": {
+          "aiAloneSubstitutionPressurePctRange": [20, 50],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [68, 88],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [40, 70],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "MEDIUM",
+          "summary": "AI may run more companies operationally; human trust, risk and capital decisions still matter."
+        },
+        "Y20": {
+          "aiAloneSubstitutionPressurePctRange": [35, 80],
+          "pressureSemantics": "UNCALIBRATED_SCENARIO_ESTIMATE",
+          "aiNativeResilienceIndexRange": [45, 78],
+          "resilienceSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "headcountCompressionIndexRange": [55, 90],
+          "compressionSemantics": "HEURISTIC_INDEX_NOT_PROBABILITY",
+          "confidence": "LOW",
+          "summary": "A highly autonomous economy could change firm formation itself; this is a strategic stress test."
+        }
+      },
+      "riskUpSignposts": [
+        "AI agents autonomously discover markets, sell, negotiate and allocate capital better than human founders",
+        "Trust/ownership/legal systems accept machine-run firms broadly"
+      ],
+      "riskDownSignposts": [
+        "Human relationships, ownership and legal accountability remain central",
+        "Cheaper building expands entrepreneurship and niche markets"
+      ],
+      "protectionPlaybook": [
+        "Develop customer/distribution skill alongside technical leverage",
+        "Use AI to multiply execution, not outsource problem selection",
+        "Build decision quality and capital allocation discipline",
+        "Own trust, brand, relationships and strategy"
+      ],
+      "sourceRefs": ["CR-SRC-004", "CR-SRC-005", "CR-SRC-008"]
+    }
+  ],
+  "limitations": [
+    "The scenario percentage ranges are not calibrated probabilities of unemployment or role extinction.",
+    "The 10-year and especially 20-year bands are intentionally broad and should be treated as stress tests.",
+    "U.S. BLS projections are structural benchmarks, not Argentina or global forecasts.",
+    "LinkedIn and Anthropic datasets have platform/population selection effects.",
+    "Provider usage evidence is useful for adoption patterns but is not independent proof of provider capability claims.",
+    "Personal resilience depends on actual skill/evidence development, not merely identifying as AI-native."
+  ]
+}

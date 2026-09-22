@@ -28,6 +28,7 @@ export default async function ProfessionalPage() {
         data={data.professional}
         editorial={data.editorial}
         technologyLibrary={data.technologyLibrary}
+        careerResilience={data.careerResilience}
       />
     </div>
   );

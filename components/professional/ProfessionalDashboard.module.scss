@@ -628,3 +628,271 @@
 .library-provenance code {
   font-size: inherit;
 }
+
+.resilience-notice {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.resilience-intro {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.resilience-intro > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.resilience-definition-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.65rem;
+}
+
+@media (width >= 860px) {
+  .resilience-definition-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.resilience-definition-grid > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.5rem;
+  align-items: start;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.resilience-definition-grid svg {
+  grid-row: 1 / span 2;
+  margin-top: 0.05rem;
+}
+
+.resilience-definition-grid strong {
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.resilience-definition-grid span {
+  color: var(--text-muted);
+  font-size: 0.71rem;
+  line-height: 1.45;
+}
+
+.resilience-warning {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+
+.resilience-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.resilience-role {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.resilience-role > summary {
+  display: flex;
+  min-height: 3.8rem;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.8rem;
+}
+
+.resilience-role > summary::-webkit-details-marker {
+  display: none;
+}
+
+.resilience-role > summary > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.resilience-role > summary strong {
+  color: var(--text);
+  font-size: 0.84rem;
+}
+
+.resilience-role > summary span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.resilience-role[open] > summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.resilience-role-body {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.8rem;
+}
+
+.resilience-horizons {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.55rem;
+}
+
+@media (width >= 760px) {
+  .resilience-horizons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 1180px) {
+  .resilience-horizons {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.resilience-horizon {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+
+.resilience-horizon-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.resilience-horizon-head strong {
+  font-size: 0.78rem;
+}
+
+.resilience-horizon-head span {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+}
+
+.resilience-horizon dl {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.resilience-horizon dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.resilience-horizon dt {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.resilience-horizon dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.resilience-horizon p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  line-height: 1.45;
+}
+
+.resilience-detail-grid,
+.resilience-evidence {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8rem;
+}
+
+@media (width >= 860px) {
+  .resilience-detail-grid,
+  .resilience-evidence {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.resilience-detail-grid h4,
+.resilience-evidence h4,
+.resilience-sources h4 {
+  margin: 0 0 0.4rem;
+  color: var(--text);
+  font-size: 0.74rem;
+}
+
+.resilience-detail-grid ul,
+.resilience-evidence ul {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.resilience-detail-grid li,
+.resilience-evidence li {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.resilience-more {
+  border-top: 1px solid var(--border);
+  padding-top: 0.65rem;
+}
+
+.resilience-more > summary {
+  width: fit-content;
+  cursor: pointer;
+  list-style: none;
+  color: var(--c-learning);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.resilience-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.resilience-evidence {
+  margin-top: 0.7rem;
+}
+
+.resilience-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.resilience-sources a {
+  width: fit-content;
+  color: var(--c-learning);
+  font-size: 0.69rem;
+  text-decoration: none;
+}
+
+.resilience-sources a:hover {
+  text-decoration: underline;
+}

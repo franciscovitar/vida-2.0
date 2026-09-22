@@ -231,3 +231,70 @@ test('PRO-15. estados extendidos de tecnología tienen etiquetas simples en espa
     /ASSESS_ONLY_IF_IT_REDUCES_FRICTION_OR_COST: 'Evaluar sólo si mejora tiempo o costo'/,
   );
 });
+
+test('PRO-16. Career Resilience V1 conserva provenance, 11 perfiles y Data separado', async () => {
+  const { parseCareerResilienceSnapshot } =
+    await import('@/lib/professional/career-resilience-contract');
+  const raw = readFileSync(
+    join(process.cwd(), 'data', 'generated', 'ai-career-resilience.json'),
+    'utf8',
+  );
+  const parsed = parseCareerResilienceSnapshot(JSON.parse(raw));
+
+  assert.ok(parsed);
+  assert.equal(parsed.source.repository, 'franciscovitar/personal-ai-system');
+  assert.equal(parsed.source.ref, 'main');
+  assert.equal(parsed.source.commit, 'aa5d930c43c39401a5cfed1a30556e8c72780f4f');
+  assert.equal(parsed.roles.length, 11);
+  assert.equal(
+    parsed.roles.some((item) => item.id === 'data-engineer'),
+    true,
+  );
+  assert.equal(
+    parsed.roles.some((item) => item.id === 'data-scientist'),
+    true,
+  );
+  assert.equal(
+    parsed.roles.some((item) => item.id === 'data-analyst-bi'),
+    true,
+  );
+});
+
+test('PRO-17. Career Resilience separa presión IA, resiliencia AI-native y compresión en 1/5/10/20 años', async () => {
+  const { parseCareerResilienceSnapshot } =
+    await import('@/lib/professional/career-resilience-contract');
+  const parsed = parseCareerResilienceSnapshot(
+    JSON.parse(
+      readFileSync(join(process.cwd(), 'data', 'generated', 'ai-career-resilience.json'), 'utf8'),
+    ),
+  );
+
+  assert.ok(parsed);
+  for (const role of parsed.roles) {
+    assert.deepEqual(Object.keys(role.horizons), ['Y1', 'Y5', 'Y10', 'Y20']);
+    for (const horizon of Object.values(role.horizons)) {
+      assert.equal(horizon.pressureSemantics, 'UNCALIBRATED_SCENARIO_ESTIMATE');
+      assert.equal(horizon.resilienceSemantics, 'HEURISTIC_INDEX_NOT_PROBABILITY');
+      assert.equal(horizon.compressionSemantics, 'HEURISTIC_INDEX_NOT_PROBABILITY');
+    }
+    assert.ok(role.protectionPlaybook.length > 0);
+    assert.ok(role.loadBearingHumanWork.length > 0);
+  }
+});
+
+test('PRO-18. UI explica que los porcentajes no son probabilidad personal de desempleo', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components/professional/CareerResilience.tsx'),
+    'utf8',
+  );
+
+  assert.match(source, /Resiliencia profesional ante IA/);
+  assert.match(source, /1 año/);
+  assert.match(source, /5 años/);
+  assert.match(source, /10 años/);
+  assert.match(source, /20 años/);
+  assert.match(source, /escenarios no calibrados/);
+  assert.match(source, /no son la\s+probabilidad de que vos pierdas tu trabajo/);
+  assert.match(source, /Cómo protegerte/);
+  assert.match(source, /Compresión de equipo/);
+});
