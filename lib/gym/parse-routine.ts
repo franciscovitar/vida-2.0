@@ -149,11 +149,16 @@ export function parseExercisePrescriptionText(raw: string): ParsedPrescription {
     .replace(new RegExp(`(?:\\s*[—–-]\\s*)?\\d+\\s+series?\\s+(?:de\\s+)?${repToken}`, 'gi'), ' ')
     .replace(/(?:\s*[—–-]\s*)?\d+\s+caminatas?\s+de\s+\d+(?:\s*[-–/]\s*\d+)?\s*s/gi, ' ')
     .replace(/(?:\s*[—–-]\s*)?\d+\s+series?\b/gi, ' ')
+    // Quitar el bloque de descanso antes de la duración genérica para no dejar
+    // un “— descanso” huérfano en prescripciones como “3x8/12 — descanso 20/30 s”.
+    .replace(
+      /(?:\s*[—–-]\s*)?descanso\s*:?\s*\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg|segs|min|mins|m)?/gi,
+      ' ',
+    )
     .replace(
       /(?:\s*[—–-]\s*)?\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg(?:undos?)?|min(?:utos?)?)(?:\s+(?:por lado|por pierna))?/gi,
       ' ',
     )
-    .replace(/(?:\s*[—–-]\s*)?descanso\s*:?\s*\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg|segs|min|mins|m)?/gi, ' ')
     .replace(/rir\s*:?\s*\d+(?:\s*[-–/]\s*\d+)?/gi, ' ')
     .replace(/rpe\s*:?\s*\d+(?:\.\d+)?/gi, ' ')
     .replace(/\s*[—–-]\s*\.?\s*$/g, ' ')
