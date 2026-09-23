@@ -153,7 +153,7 @@ export function parseExercisePrescriptionText(raw: string): ParsedPrescription {
       /(?:\s*[—–-]\s*)?\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg(?:undos?)?|min(?:utos?)?)(?:\s+(?:por lado|por pierna))?/gi,
       ' ',
     )
-    .replace(/descanso\s*:?\s*\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg|segs|min|mins|m)?/gi, ' ')
+    .replace(/(?:\s*[—–-]\s*)?descanso\s*:?\s*\d+(?:\s*[-–/]\s*\d+)?\s*(?:s|seg|segs|min|mins|m)?/gi, ' ')
     .replace(/rir\s*:?\s*\d+(?:\s*[-–/]\s*\d+)?/gi, ' ')
     .replace(/rpe\s*:?\s*\d+(?:\.\d+)?/gi, ' ')
     .replace(/\s*[—–-]\s*\.?\s*$/g, ' ')
