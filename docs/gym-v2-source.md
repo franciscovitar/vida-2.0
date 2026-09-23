@@ -4,6 +4,8 @@
 
 El historial cuantitativo de Gimnasio vive en un spreadsheet dedicado, separado del Sheet de hábitos. Vida Web solo lo lee para construir vistas derivadas.
 
+La **rutina planificada** sigue siendo canónica en Notion `🏋️ Rutina Gimnasio`. La Program V2 efectiva desde **2026-09-23** reemplaza las decisiones anteriores de volumen/ejercicios (entre ellas hip thrust 6→4 series, 6 series de gemelo parado sin sóleo obligatorio y face pull→reverse pec deck/vuelos posteriores). Vida debe renderizar esa fuente documental y no mantener una copia paralela de la rutina en código.
+
 Configuración server-side requerida:
 
 - `GOOGLE_GYM_SPREADSHEET_ID`: referencia al spreadsheet canónico de Gimnasio.

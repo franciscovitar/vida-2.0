@@ -151,6 +151,24 @@ test('8D2-6. ejercicio con series/repeticiones', () => {
   assert.equal(parsed.structured, true);
 });
 
+test('8D2-6b. Program V2 parsea rear delts y descansos compactos', () => {
+  const rearDelt = parseExercisePrescriptionText(
+    'Reverse pec deck / vuelos posteriores — 3x8/12 — descanso 20/30 s.',
+  );
+  assert.equal(rearDelt.name, 'Reverse pec deck / vuelos posteriores');
+  assert.equal(rearDelt.sets, 3);
+  assert.equal(rearDelt.reps, '8-12');
+  assert.equal(rearDelt.rest, '20-30 s');
+
+  const abs = parseExercisePrescriptionText(
+    'Abdominal cargado en máquina o polea — 2x6/12 — descanso 30/45 s.',
+  );
+  assert.equal(abs.name, 'Abdominal cargado en máquina o polea');
+  assert.equal(abs.sets, 2);
+  assert.equal(abs.reps, '6-12');
+  assert.equal(abs.rest, '30-45 s');
+});
+
 test('8D2-7. ejercicio con datos incompletos', () => {
   const parsed = parseExercisePrescriptionText('Face pull suave');
   assert.equal(parsed.sets, null);

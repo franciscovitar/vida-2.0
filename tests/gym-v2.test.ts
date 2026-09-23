@@ -241,6 +241,35 @@ test('Gym V2 agrupa series recientes por zona sin llamarlas volumen ideal', () =
   assert.equal(result.muscleCoveragePercent, 100);
 });
 
+test('Gym V2 agrupa reverse pec deck y vuelos posteriores como hombros', () => {
+  const sessions = [
+    session({
+      key: 'rear-delts',
+      date: '2026-09-23',
+      exercises: [
+        {
+          name: 'Reverse pec deck / vuelos posteriores',
+          sets: [
+            { load: 30, reps: 10 },
+            { load: 30, reps: 9 },
+            { load: 30, reps: 8 },
+          ],
+        },
+      ],
+    }),
+  ];
+
+  const result = computeGymV2Analytics({
+    sessions,
+    summaries: summaries(sessions),
+    weeklyTarget: null,
+    today: '2026-09-23',
+  });
+
+  assert.equal(result.muscleGroups.find((item) => item.id === 'shoulders')?.completedSets, 3);
+  assert.equal(result.muscleCoveragePercent, 100);
+});
+
 test('Gym V2 no inventa nivel externo para cargas sin benchmark compatible', () => {
   const sessions = [
     session({
