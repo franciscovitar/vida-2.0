@@ -269,7 +269,11 @@ function muscleGroup(exerciseName: string): GymV2MuscleGroupId {
   }
   if (/dead bug|plancha|pallof|abdominal|copenhagen/.test(name)) return 'core';
   if (/jal[oó]n|dominada|remo|pulldown/.test(name)) return 'back';
-  if (/press militar|elevaci[oó]n lateral|elevaciones laterales|face pull|reverse pec deck|vuelos posteriores|rear[ -]?delt|delto/.test(name)) {
+  if (
+    /press militar|elevaci[oó]n lateral|elevaciones laterales|face pull|reverse pec deck|vuelos posteriores|rear[ -]?delt|delto/.test(
+      name,
+    )
+  ) {
     return 'shoulders';
   }
   if (/press de banca|press banca|pecho|apertura/.test(name)) return 'chest';
