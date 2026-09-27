@@ -22,12 +22,16 @@ function requestResult<T>(request: IDBRequest<T>): Promise<T> {
 function transactionDone(transaction: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     transaction.addEventListener('complete', () => resolve(), { once: true });
-    transaction.addEventListener('abort', () => reject(transaction.error ?? new Error('IndexedDB transaction aborted')), {
-      once: true,
-    });
-    transaction.addEventListener('error', () => reject(transaction.error ?? new Error('IndexedDB transaction failed')), {
-      once: true,
-    });
+    transaction.addEventListener(
+      'abort',
+      () => reject(transaction.error ?? new Error('IndexedDB transaction aborted')),
+      { once: true },
+    );
+    transaction.addEventListener(
+      'error',
+      () => reject(transaction.error ?? new Error('IndexedDB transaction failed')),
+      { once: true },
+    );
   });
 }
 
@@ -73,7 +77,10 @@ export function getOrCreateStudyDeviceId(): string {
 export class IndexedDbAttemptOutboxStore implements AttemptOutboxStore {
   async persistAttempt(attempt: StudyAttemptEvent): Promise<void> {
     const database = await openStudyEngineDatabase();
-    const transaction = database.transaction([ATTEMPTS_STORE, OUTBOX_STORE], 'readwrite');
+    const transaction = database.transaction(
+      [ATTEMPTS_STORE, OUTBOX_STORE],
+      'readwrite',
+    );
     const attempts = transaction.objectStore(ATTEMPTS_STORE);
     const outbox = transaction.objectStore(OUTBOX_STORE);
 
@@ -127,7 +134,10 @@ export class IndexedDbAttemptOutboxStore implements AttemptOutboxStore {
 
   async listPendingAttempts(): Promise<StudyAttemptEvent[]> {
     const database = await openStudyEngineDatabase();
-    const transaction = database.transaction([ATTEMPTS_STORE, OUTBOX_STORE], 'readonly');
+    const transaction = database.transaction(
+      [ATTEMPTS_STORE, OUTBOX_STORE],
+      'readonly',
+    );
 
     try {
       const [attempts, pending] = await Promise.all([
