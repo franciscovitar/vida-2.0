@@ -52,7 +52,8 @@ export const STUDY_ENGINE_DEMO_ITEMS: readonly StudyItem[] = [
     operation: 'explain',
     itemType: 'recall',
     prompt: '¿Qué decide FSRS y qué decide Learning OS?',
-    answer: 'FSRS decide cuándo vuelve una memoria; Learning OS decide qué actividad conviene practicar.',
+    answer:
+      'FSRS decide cuándo vuelve una memoria; Learning OS decide qué actividad conviene practicar.',
     explanation:
       'Separar scheduling de mastery evita que recordar una tarjeta familiar se confunda con estar listo para transferir el concepto.',
   },
@@ -67,7 +68,8 @@ export const STUDY_ENGINE_DEMO_ITEMS: readonly StudyItem[] = [
     acceptedAnswers: ['Learning OS', 'learning os'],
     placeholder: 'Escribí el sistema...',
     answer: 'Learning OS',
-    explanation: 'Study Engine ejecuta práctica y registra evidencia, pero no crea un segundo mastery model.',
+    explanation:
+      'Study Engine ejecuta práctica y registra evidencia, pero no crea un segundo mastery model.',
   },
   {
     id: 'demo-response-time',
@@ -123,7 +125,8 @@ export const STUDY_ENGINE_DEMO_ITEMS: readonly StudyItem[] = [
     operation: 'explain',
     itemType: 'recall',
     prompt: '¿Por qué una Study Item no puede ser “fresh” para siempre?',
-    answer: 'Porque freshness depende de la exposición del alumno en cada intento, no de la pregunta como objeto.',
+    answer:
+      'Porque freshness depende de la exposición del alumno en cada intento, no de la pregunta como objeto.',
     explanation:
       'La misma pregunta puede ser nueva hoy y familiar mañana. Por eso se registra seen_before/freshness en el intento.',
   },
@@ -155,7 +158,8 @@ export const STUDY_ENGINE_DEMO_ITEMS: readonly StudyItem[] = [
     ],
     correctOptionId: 'c',
     answer: 'ANKI',
-    explanation: 'La coexistencia gradual evita doble scheduling y permite migrar solo cuando convenga.',
+    explanation:
+      'La coexistencia gradual evita doble scheduling y permite migrar solo cuando convenga.',
   },
   {
     id: 'demo-attempt-event',
@@ -164,7 +168,8 @@ export const STUDY_ENGINE_DEMO_ITEMS: readonly StudyItem[] = [
     conceptId: 'study-engine.attempt-event',
     operation: 'recall',
     itemType: 'typed',
-    prompt: '¿Qué característica debe tener el historial de intentos para no reescribir lo que pasó?',
+    prompt:
+      '¿Qué característica debe tener el historial de intentos para no reescribir lo que pasó?',
     acceptedAnswers: ['append-only', 'append only', 'inmutable', 'inmutable append-only'],
     placeholder: 'Propiedad...',
     answer: 'append-only',
@@ -178,7 +183,8 @@ export const STUDY_ENGINE_DEMO_ITEMS: readonly StudyItem[] = [
     conceptId: 'study-engine.evidence-strength',
     operation: 'discriminate',
     itemType: 'image',
-    prompt: 'Según el diagrama, ¿qué evidencia muestra mayor transferencia que una tarjeta familiar?',
+    prompt:
+      'Según el diagrama, ¿qué evidencia muestra mayor transferencia que una tarjeta familiar?',
     visual: 'evidence',
     acceptedAnswers: ['transfer', 'transferencia'],
     placeholder: 'Nivel...',
