@@ -201,8 +201,7 @@ export function StudySession() {
     if (!item) return;
 
     const now = new Date();
-    const currentState =
-      schedulerStates.current.get(item.id) ?? scheduler.createInitialState(now);
+    const currentState = schedulerStates.current.get(item.id) ?? scheduler.createInitialState(now);
     const transition = scheduler.review(currentState, now, rating);
     schedulerStates.current.set(item.id, transition.state);
 
@@ -243,7 +242,9 @@ export function StudySession() {
         </div>
         <div>
           <p className={styles.eyebrow}>Sesión terminada</p>
-          <h2>{successCount} de {attempts.length} recuperaciones salieron</h2>
+          <h2>
+            {successCount} de {attempts.length} recuperaciones salieron
+          </h2>
           <p className={styles.muted}>
             El scheduler ya calculó el próximo estado de cada review unit. En esta demo todavía no
             se persiste al cerrar la página.
@@ -320,13 +321,7 @@ export function StudySession() {
         {revealed ? (
           <div
             className={styles.feedback}
-            data-result={
-              correctness === null
-                ? 'manual'
-                : correctness
-                  ? 'correct'
-                  : 'wrong'
-            }
+            data-result={correctness === null ? 'manual' : correctness ? 'correct' : 'wrong'}
           >
             <div className={styles['feedback-title']}>
               {correctness === true ? <Check size={18} aria-hidden="true" /> : null}
