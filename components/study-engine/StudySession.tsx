@@ -287,7 +287,8 @@ export function StudySession() {
           label={'Progreso de sesión: ' + (index + 1) + ' de ' + items.length}
         />
         <p className={styles['persistence-note']}>
-          Esta etapa prueba el flujo real y FSRS. La persistencia/offline llega en un hito posterior.
+          Esta etapa prueba el flujo real y FSRS. La persistencia/offline llega en un hito
+          posterior.
         </p>
       </div>
 
@@ -317,7 +318,12 @@ export function StudySession() {
         ) : null}
 
         {revealed ? (
-          <div className={styles.feedback} data-result={correctness === null ? 'manual' : correctness ? 'correct' : 'wrong'}>
+          <div
+            className={styles.feedback}
+            data-result={
+              correctness === null ? 'manual' : correctness ? 'correct' : 'wrong'
+            }
+          >
             <div className={styles['feedback-title']}>
               {correctness === true ? <Check size={18} aria-hidden="true" /> : null}
               {correctness === false ? <X size={18} aria-hidden="true" /> : null}
