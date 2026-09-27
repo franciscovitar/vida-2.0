@@ -1,3 +1,5 @@
+import type { RichContentBlock } from './rich-content';
+
 export type StudyItemType = 'recall' | 'cloze' | 'mcq' | 'typed' | 'image';
 export type StudyOperation = 'recall' | 'explain' | 'discriminate';
 
@@ -11,6 +13,7 @@ interface BaseStudyItem {
   prompt: string;
   answer: string;
   explanation: string;
+  richContent?: readonly RichContentBlock[];
 }
 
 export interface RecallStudyItem extends BaseStudyItem {
@@ -56,6 +59,26 @@ export const STUDY_ENGINE_DEMO_ITEMS: readonly StudyItem[] = [
       'FSRS decide cuándo vuelve una memoria; Learning OS decide qué actividad conviene practicar.',
     explanation:
       'Separar scheduling de mastery evita que recordar una tarjeta familiar se confunda con estar listo para transferir el concepto.',
+    richContent: [
+      {
+        kind: 'markdown',
+        markdown:
+          '**Regla de arquitectura:** FSRS programa memoria; Learning OS interpreta evidencia.',
+      },
+      {
+        kind: 'html',
+        html: '<p style="font-weight: 600; color: currentColor">Contenido HTML allowlisted</p><svg viewBox="0 0 120 24" aria-label="Línea segura"><line x1="4" y1="12" x2="116" y2="12" stroke="currentColor" stroke-width="2"></line></svg>',
+      },
+      {
+        kind: 'code',
+        language: 'text',
+        code: 'scheduling_owner = ANKI | STUDY_ENGINE',
+      },
+      {
+        kind: 'math',
+        tex: 'priority ∝ weakness × forgetting risk',
+      },
+    ],
   },
   {
     id: 'demo-mastery-owner',

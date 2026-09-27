@@ -1,0 +1,94 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.root :where(p, ul, ol, pre, blockquote, figure) {
+  margin: 0;
+}
+
+.root :where(ul, ol) {
+  padding-left: 1.25rem;
+}
+
+.root a {
+  color: var(--c-learning);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.root img,
+.root video {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.root audio {
+  width: 100%;
+}
+
+.root svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.code {
+  padding: 0.75rem;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  white-space: pre;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.math,
+.math-display {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.math-display {
+  display: block;
+  padding: 0.625rem;
+  overflow-x: auto;
+  text-align: center;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.figure figcaption {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.blocked {
+  padding: 0.5rem 0.625rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+}
