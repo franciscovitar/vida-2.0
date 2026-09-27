@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
+
+import prettier from 'prettier';
 
 import {
   FsrsScheduler,
@@ -102,4 +105,19 @@ test('Again is failed recall while Hard remains successful recall', () => {
   assert.equal(ratingRepresentsSuccessfulRecall('hard'), true);
   assert.equal(ratingRepresentsSuccessfulRecall('good'), true);
   assert.equal(ratingRepresentsSuccessfulRecall('easy'), true);
+});
+
+test('diagnostic scheduler source matches repository Prettier config', async () => {
+  const [source, configText] = await Promise.all([
+    readFile(new URL('../lib/study-engine/scheduler.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../.prettierrc.json', import.meta.url), 'utf8'),
+  ]);
+  const config = JSON.parse(configText) as Record<string, unknown>;
+  const formatted = await prettier.format(source, { ...config, parser: 'typescript' });
+
+  if (source !== formatted) {
+    console.error('\n--- BEGIN PRETTIER OUTPUT ---\n' + formatted + '--- END PRETTIER OUTPUT ---\n');
+  }
+
+  assert.equal(source, formatted);
 });
