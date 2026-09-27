@@ -109,19 +109,22 @@ test('calling flush twice does not create remote duplicates', async () => {
   });
 });
 
-test('duplicate server acknowledgement repairs crash-after-accept without duplicating', async () => {
-  const store = new MemoryAttemptOutboxStore();
-  const transport = new FakeExactlyOnceTransport();
-  const value = attempt('a', '2026-09-27T18:00:01.000Z');
-  await store.persistAttempt(value);
-  transport.accepted.set(value.idempotencyKey, structuredClone(value));
+test(
+  'duplicate server acknowledgement repairs crash-after-accept without duplicating',
+  async () => {
+    const store = new MemoryAttemptOutboxStore();
+    const transport = new FakeExactlyOnceTransport();
+    const value = attempt('a', '2026-09-27T18:00:01.000Z');
+    await store.persistAttempt(value);
+    transport.accepted.set(value.idempotencyKey, structuredClone(value));
 
-  const result = await new StudyAttemptSyncEngine(store, transport).flush();
+    const result = await new StudyAttemptSyncEngine(store, transport).flush();
 
-  assert.equal(transport.accepted.size, 1);
-  assert.equal(result.acknowledged, 1);
-  assert.equal(result.remaining, 0);
-});
+    assert.equal(transport.accepted.size, 1);
+    assert.equal(result.acknowledged, 1);
+    assert.equal(result.remaining, 0);
+  },
+);
 
 test('transient transport failure preserves failed and later attempts for retry', async () => {
   const store = new MemoryAttemptOutboxStore();
@@ -152,10 +155,7 @@ test('conflicting idempotency payload never clears the local pending event', asy
   const transport = new FakeExactlyOnceTransport();
   const local = attempt('a', '2026-09-27T18:00:01.000Z');
   await store.persistAttempt(local);
-  transport.accepted.set(
-    local.idempotencyKey,
-    { ...structuredClone(local), rating: 'again' },
-  );
+  transport.accepted.set(local.idempotencyKey, { ...structuredClone(local), rating: 'again' });
 
   const result = await new StudyAttemptSyncEngine(store, transport).flush();
 
