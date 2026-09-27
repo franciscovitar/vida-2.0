@@ -1,4 +1,4 @@
-import { BookOpen, MessageCircle } from 'lucide-react';
+import { BookOpen, Brain, MessageCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { Button } from '@/components/ui/Button';
@@ -18,9 +18,14 @@ export default async function AprendizajePage() {
       presentation="learning"
       stableKey={WEB_CATALOG_FIXED_ROUTES.aprendizaje.stableKey}
       action={
-        <Button href="/aprendizaje/ingles" variant="primary" size="sm" iconLeft={MessageCircle}>
-          English Speaking
-        </Button>
+        <>
+          <Button href="/aprendizaje/estudio" variant="primary" size="sm" iconLeft={Brain}>
+            Estudiar
+          </Button>
+          <Button href="/aprendizaje/ingles" variant="secondary" size="sm" iconLeft={MessageCircle}>
+            English Speaking
+          </Button>
+        </>
       }
       placeholder={{
         title: 'Aprendizaje',
