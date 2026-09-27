@@ -1,10 +1,6 @@
 'use client';
 
-import type {
-  AttemptOutboxStore,
-  PendingStudyAttempt,
-  StudyAttemptEvent,
-} from './attempt-store';
+import type { AttemptOutboxStore, PendingStudyAttempt, StudyAttemptEvent } from './attempt-store';
 
 const DATABASE_NAME = 'vida-2-study-engine';
 const DATABASE_VERSION = 1;
@@ -77,17 +73,16 @@ export function getOrCreateStudyDeviceId(): string {
 export class IndexedDbAttemptOutboxStore implements AttemptOutboxStore {
   async persistAttempt(attempt: StudyAttemptEvent): Promise<void> {
     const database = await openStudyEngineDatabase();
-    const transaction = database.transaction(
-      [ATTEMPTS_STORE, OUTBOX_STORE],
-      'readwrite',
-    );
+    const transaction = database.transaction([ATTEMPTS_STORE, OUTBOX_STORE], 'readwrite');
     const attempts = transaction.objectStore(ATTEMPTS_STORE);
     const outbox = transaction.objectStore(OUTBOX_STORE);
 
     try {
       const [existingAttempt, existingPending] = await Promise.all([
         requestResult(attempts.get(attempt.id)) as Promise<StudyAttemptEvent | undefined>,
-        requestResult(outbox.get(attempt.idempotencyKey)) as Promise<PendingStudyAttempt | undefined>,
+        requestResult(outbox.get(attempt.idempotencyKey)) as Promise<
+          PendingStudyAttempt | undefined
+        >,
       ]);
 
       if (existingAttempt || existingPending) {
@@ -134,10 +129,7 @@ export class IndexedDbAttemptOutboxStore implements AttemptOutboxStore {
 
   async listPendingAttempts(): Promise<StudyAttemptEvent[]> {
     const database = await openStudyEngineDatabase();
-    const transaction = database.transaction(
-      [ATTEMPTS_STORE, OUTBOX_STORE],
-      'readonly',
-    );
+    const transaction = database.transaction([ATTEMPTS_STORE, OUTBOX_STORE], 'readonly');
 
     try {
       const [attempts, pending] = await Promise.all([
