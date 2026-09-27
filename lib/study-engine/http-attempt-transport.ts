@@ -25,10 +25,22 @@ function parseAck(value: unknown, expectedKey: string): StudyAttemptSyncAck | nu
   };
 }
 
+function browserFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
+  return globalThis.fetch(input, init);
+}
+
+function resolveAttemptEndpoint(): string {
+  if (typeof globalThis.location?.origin === 'string' && globalThis.location.origin) {
+    return new URL('/api/study-engine/v1/attempts', globalThis.location.origin).toString();
+  }
+
+  return '/api/study-engine/v1/attempts';
+}
+
 export class HttpStudyAttemptTransport implements StudyAttemptTransport {
   private lastFailure: StudyTransportFailure | null = null;
 
-  constructor(private readonly fetchImpl: StudyHttpFetch = fetch) {}
+  constructor(private readonly fetchImpl: StudyHttpFetch = browserFetch) {}
 
   getLastFailure(): StudyTransportFailure | null {
     return this.lastFailure;
@@ -39,7 +51,7 @@ export class HttpStudyAttemptTransport implements StudyAttemptTransport {
 
     let response: Response;
     try {
-      response = await this.fetchImpl('/api/study-engine/v1/attempts', {
+      response = await this.fetchImpl(resolveAttemptEndpoint(), {
         method: 'POST',
         credentials: 'same-origin',
         cache: 'no-store',
