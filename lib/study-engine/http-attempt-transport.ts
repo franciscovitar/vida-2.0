@@ -22,11 +22,28 @@ function parseAck(value: unknown, expectedKey: string): StudyAttemptSyncAck | nu
   };
 }
 
+export type StudyTransportFailure =
+  | 'red'
+  | 'sesión'
+  | 'servidor'
+  | 'respuesta inválida'
+  | 'http';
+
 export class HttpStudyAttemptTransport implements StudyAttemptTransport {
+  private lastFailure: StudyTransportFailure | null = null;
+
   constructor(private readonly fetchImpl: StudyHttpFetch = fetch) {}
 
+  getLastFailure(): StudyTransportFailure | null {
+    return this.lastFailure;
+  }
+
   async sendAttempt(attempt: StudyAttemptEvent): Promise<StudyAttemptSyncAck> {
-    const response = await this.fetchImpl('/api/study-engine/v1/attempts', {
+    this.lastFailure = null;
+
+    let response: Response;
+    try {
+      response = await this.fetchImpl('/api/study-engine/v1/attempts', {
       method: 'POST',
       credentials: 'same-origin',
       cache: 'no-store',
@@ -34,10 +51,22 @@ export class HttpStudyAttemptTransport implements StudyAttemptTransport {
         'Content-Type': 'application/json',
         'Idempotency-Key': attempt.idempotencyKey,
       },
-      body: JSON.stringify({ attempt }),
-    });
+        body: JSON.stringify({ attempt }),
+      });
+    } catch {
+      this.lastFailure = 'red';
+      this.lastFailure = 'respuesta inválida';
+      this.lastFailure = 'respuesta inválida';
+      throw new Error('study-attempt-sync-unavailable');
+    }
 
     if (response.status !== 200 && response.status !== 409) {
+      this.lastFailure =
+        response.status === 401
+          ? 'sesión'
+          : response.status === 503
+            ? 'servidor'
+            : 'http';
       throw new Error('study-attempt-sync-unavailable');
     }
 
@@ -45,11 +74,15 @@ export class HttpStudyAttemptTransport implements StudyAttemptTransport {
     try {
       body = await response.json();
     } catch {
+      this.lastFailure = 'respuesta inválida';
       throw new Error('study-attempt-sync-unavailable');
     }
 
     const ack = parseAck(body, attempt.idempotencyKey);
-    if (!ack) throw new Error('study-attempt-sync-unavailable');
+    if (!ack) {
+      this.lastFailure = 'respuesta inválida';
+      throw new Error('study-attempt-sync-unavailable');
+    }
     if (response.status === 409 && ack.status !== 'conflict') {
       throw new Error('study-attempt-sync-unavailable');
     }
