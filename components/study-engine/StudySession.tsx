@@ -160,8 +160,7 @@ function RatingButtons({
   return (
     <div className={styles.ratings} aria-label="Calificá tu recuperación">
       {RATINGS.map((rating) => {
-        const ratingDisabled =
-          disabled || (correctness === false && rating.value !== 'again');
+        const ratingDisabled = disabled || (correctness === false && rating.value !== 'again');
         return (
           <button
             key={rating.value}
