@@ -412,9 +412,7 @@ export function StudySession() {
             </div>
             <RatingButtons correctness={correctness} onRate={rate} disabled={saving} />
             {saving ? (
-              <p className={styles['persistence-note']}>
-                Guardando intento en este dispositivo…
-              </p>
+              <p className={styles['persistence-note']}>Guardando intento en este dispositivo…</p>
             ) : null}
             {saveError ? (
               <p className={styles['save-error']} role="alert">
