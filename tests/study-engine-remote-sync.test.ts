@@ -192,7 +192,6 @@ test('HTTP transport exposes a bounded failure category without leaking response
   assert.equal(transport.getLastFailure(), 'servidor');
 });
 
-
 test('browser transport accepts an absolute same-origin endpoint and does not require fetch receiver binding', async () => {
   const calls: string[] = [];
   const receiverSensitiveFetch: StudyHttpFetch = async function (input) {
