@@ -60,15 +60,8 @@ export interface SchedulerTransition {
 export interface SchedulerInterface {
   metadata(): SchedulerMetadata;
   createInitialState(now: Date): StudySchedulerState;
-  preview(
-    state: StudySchedulerState,
-    now: Date,
-  ): Record<StudyRating, SchedulerTransition>;
-  review(
-    state: StudySchedulerState,
-    now: Date,
-    rating: StudyRating,
-  ): SchedulerTransition;
+  preview(state: StudySchedulerState, now: Date): Record<StudyRating, SchedulerTransition>;
+  review(state: StudySchedulerState, now: Date, rating: StudyRating): SchedulerTransition;
   retrievability(state: StudySchedulerState, now: Date): number;
 }
 
@@ -145,9 +138,7 @@ function transition(rating: StudyRating, card: Card): SchedulerTransition {
   return { rating, state: fromCard(card) };
 }
 
-export function ratingRepresentsSuccessfulRecall(
-  rating: StudyRating,
-): boolean {
+export function ratingRepresentsSuccessfulRecall(rating: StudyRating): boolean {
   return rating !== 'again';
 }
 
@@ -168,10 +159,7 @@ export class FsrsScheduler implements SchedulerInterface {
     return fromCard(createEmptyCard(now));
   }
 
-  preview(
-    state: StudySchedulerState,
-    now: Date,
-  ): Record<StudyRating, SchedulerTransition> {
+  preview(state: StudySchedulerState, now: Date): Record<StudyRating, SchedulerTransition> {
     const preview = this.engine.repeat(toCard(state), now);
     return {
       again: transition('again', preview[Rating.Again].card),
@@ -181,11 +169,7 @@ export class FsrsScheduler implements SchedulerInterface {
     };
   }
 
-  review(
-    state: StudySchedulerState,
-    now: Date,
-    rating: StudyRating,
-  ): SchedulerTransition {
+  review(state: StudySchedulerState, now: Date, rating: StudyRating): SchedulerTransition {
     const result = this.engine.next(toCard(state), now, gradeFor(rating));
     return transition(rating, result.card);
   }
