@@ -321,7 +321,11 @@ export function StudySession() {
           <div
             className={styles.feedback}
             data-result={
-              correctness === null ? 'manual' : correctness ? 'correct' : 'wrong'
+              correctness === null
+                ? 'manual'
+                : correctness
+                  ? 'correct'
+                  : 'wrong'
             }
           >
             <div className={styles['feedback-title']}>
