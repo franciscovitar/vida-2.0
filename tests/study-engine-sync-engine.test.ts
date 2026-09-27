@@ -126,7 +126,9 @@ test(
   },
 );
 
-test('transient transport failure preserves failed and later attempts for retry', async () => {
+test(
+  'transient transport failure preserves failed and later attempts for retry',
+  async () => {
   const store = new MemoryAttemptOutboxStore();
   const transport = new FakeExactlyOnceTransport();
   transport.failOnceFor = 'b';
@@ -147,10 +149,13 @@ test('transient transport failure preserves failed and later attempts for retry'
 
   const retry = await engine.flush();
   assert.equal(retry.remaining, 0);
-  assert.equal(transport.accepted.size, 3);
-});
+    assert.equal(transport.accepted.size, 3);
+  },
+);
 
-test('conflicting idempotency payload never clears the local pending event', async () => {
+test(
+  'conflicting idempotency payload never clears the local pending event',
+  async () => {
   const store = new MemoryAttemptOutboxStore();
   const transport = new FakeExactlyOnceTransport();
   const local = attempt('a', '2026-09-27T18:00:01.000Z');
@@ -164,8 +169,9 @@ test('conflicting idempotency payload never clears the local pending event', asy
 
   assert.equal(result.stoppedOn, 'conflict');
   assert.equal(result.remaining, 1);
-  assert.equal((await store.listAttempts()).length, 1);
-});
+    assert.equal((await store.listAttempts()).length, 1);
+  },
+);
 
 test('concurrent flush calls coalesce into one transport pass', async () => {
   const store = new MemoryAttemptOutboxStore();
