@@ -1,0 +1,36 @@
+name: Temporary Study Remote Format
+
+on:
+  push:
+    branches:
+      - study-engine/offline-remote-store-v1-20260927
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: study-engine/offline-remote-store-v1-20260927
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format Study Engine remote files
+        run: npx prettier --write lib/study-engine/attempt-api.ts lib/study-engine/http-attempt-transport.ts lib/study-engine/remote-attempt-store.ts tests/study-engine-remote-sync.test.ts
+      - name: Commit formatter output
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/study-engine/attempt-api.ts lib/study-engine/http-attempt-transport.ts lib/study-engine/remote-attempt-store.ts tests/study-engine-remote-sync.test.ts
+          git commit -m "style: format Study Engine remote sync"
+          git push
