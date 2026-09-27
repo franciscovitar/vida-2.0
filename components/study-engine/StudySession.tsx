@@ -193,10 +193,14 @@ export function StudySession() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   useEffect(() => {
-    shownAtMs.current = Date.now();
+    shownAtMs.current = null;
   }, [index]);
 
   const completed = index >= items.length;
+
+  useEffect(() => {
+    shownAtMs.current = Date.now();
+  }, [index]);
   const item = completed ? null : items[index];
 
   const successCount = useMemo(
@@ -275,7 +279,7 @@ export function StudySession() {
       setResponse('');
       setRevealed(false);
       setCorrectness(null);
-      shownAtMs.current = Date.now();
+      shownAtMs.current = null;
     } catch {
       setSaveError(
         'No pudimos guardar este intento en el dispositivo. La pregunta no avanzó; podés reintentar.',
