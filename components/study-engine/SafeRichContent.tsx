@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  createElement,
-  Fragment,
-  useMemo,
-  useSyncExternalStore,
-  type ReactNode,
-} from 'react';
+import { createElement, Fragment, useMemo, useSyncExternalStore, type ReactNode } from 'react';
 
 import {
   buildSafeElementSpec,
@@ -23,11 +17,7 @@ function attrsFor(element: Element): Record<string, string> {
   );
 }
 
-function renderSafeDomNode(
-  node: Node,
-  key: string,
-  policy: RichRenderPolicy,
-): ReactNode {
+function renderSafeDomNode(node: Node, key: string, policy: RichRenderPolicy): ReactNode {
   if (node.nodeType === Node.TEXT_NODE) return node.textContent;
   if (node.nodeType !== Node.ELEMENT_NODE) return null;
 
@@ -48,13 +38,7 @@ function subscribeToClientReady() {
   return () => {};
 }
 
-function SafeHtmlFragment({
-  html,
-  policy,
-}: {
-  html: string;
-  policy: RichRenderPolicy;
-}) {
+function SafeHtmlFragment({ html, policy }: { html: string; policy: RichRenderPolicy }) {
   const clientReady = useSyncExternalStore(
     subscribeToClientReady,
     () => true,
@@ -133,7 +117,11 @@ function renderInlineMarkdown(value: string, keyPrefix: string): ReactNode[] {
 
 function MarkdownBlock({ markdown }: { markdown: string }) {
   const groups = useMemo(
-    () => markdown.trim().split(/\n{2,}/).filter(Boolean),
+    () =>
+      markdown
+        .trim()
+        .split(/\n{2,}/)
+        .filter(Boolean),
     [markdown],
   );
 
@@ -255,7 +243,7 @@ export function SafeRichContent({
 
         const src = sanitizeRichUrl(block.src, 'video', policy);
         const poster = block.poster
-          ? sanitizeRichUrl(block.poster, 'image', policy) ?? undefined
+          ? (sanitizeRichUrl(block.poster, 'image', policy) ?? undefined)
           : undefined;
 
         return src ? (
