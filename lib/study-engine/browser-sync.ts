@@ -1,10 +1,7 @@
 'use client';
 
 import type { AttemptOutboxStore } from './attempt-store';
-import {
-  StudyAttemptSyncEngine,
-  type StudyAttemptTransport,
-} from './sync-engine';
+import { StudyAttemptSyncEngine, type StudyAttemptTransport } from './sync-engine';
 
 export interface BrowserOnlineSource {
   addEventListener(type: 'online', listener: () => void): void;
