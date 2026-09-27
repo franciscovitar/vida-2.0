@@ -155,7 +155,10 @@ test('conflicting idempotency payload never clears the local pending event', asy
   const transport = new FakeExactlyOnceTransport();
   const local = attempt('a', '2026-09-27T18:00:01.000Z');
   await store.persistAttempt(local);
-  transport.accepted.set(local.idempotencyKey, { ...structuredClone(local), rating: 'again' });
+  transport.accepted.set(local.idempotencyKey, {
+    ...structuredClone(local),
+    rating: 'again',
+  });
 
   const result = await new StudyAttemptSyncEngine(store, transport).flush();
 
