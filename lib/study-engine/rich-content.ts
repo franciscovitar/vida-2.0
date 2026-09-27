@@ -150,9 +150,8 @@ export function sanitizeRichUrl(
 function safeColor(value: string): boolean {
   const normalized = value.trim();
   return (
-    /^(?:#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%deg]+\))$/i.test(
-      normalized,
-    ) || /^(?:transparent|currentcolor|black|white|red|green|blue|gray|grey)$/i.test(normalized)
+    /^(?:#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%deg]+\))$/i.test(normalized) ||
+    /^(?:transparent|currentcolor|black|white|red|green|blue|gray|grey)$/i.test(normalized)
   );
 }
 
@@ -171,13 +170,19 @@ export function sanitizeInlineStyle(raw: string): Record<string, string> {
     if (/url\s*\(|expression\s*\(|@import|javascript:|\\/i.test(value)) continue;
 
     const allowed =
-      (property === 'color' || property === 'background-color') ? safeColor(value) :
-      property === 'font-weight' ? /^(?:normal|bold|[1-9]00)$/i.test(value) :
-      property === 'font-style' ? /^(?:normal|italic|oblique)$/i.test(value) :
-      property === 'text-decoration' ? /^(?:none|underline|line-through)$/i.test(value) :
-      property === 'text-align' ? /^(?:left|right|center|justify)$/i.test(value) :
-      property === 'white-space' ? /^(?:normal|pre|pre-wrap|nowrap)$/i.test(value) :
-      false;
+      property === 'color' || property === 'background-color'
+        ? safeColor(value)
+        : property === 'font-weight'
+          ? /^(?:normal|bold|[1-9]00)$/i.test(value)
+          : property === 'font-style'
+            ? /^(?:normal|italic|oblique)$/i.test(value)
+            : property === 'text-decoration'
+              ? /^(?:none|underline|line-through)$/i.test(value)
+              : property === 'text-align'
+                ? /^(?:left|right|center|justify)$/i.test(value)
+                : property === 'white-space'
+                  ? /^(?:normal|pre|pre-wrap|nowrap)$/i.test(value)
+                  : false;
 
     if (allowed) result[target] = value;
   }
