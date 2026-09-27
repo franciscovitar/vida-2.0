@@ -108,7 +108,6 @@ test('reconnect controller can explicitly flush when already online', async () =
   controller.dispose();
 });
 
-
 test('explicit flush attempts transport even if navigator-style online signal is false', async () => {
   const store = new MemoryAttemptOutboxStore();
   const transport = new RecordingTransport();

@@ -40,7 +40,6 @@ and prove `N pending -> N remote` plus exact retry -> `duplicate` without increa
 
 A live-provider write still requires a deployed, authenticated Vida session. Repository tests do not pretend to possess the user's Auth.js cookie.
 
-
 ## Client retry robustness
 
 Manual/background flush after a newly persisted attempt does not trust `navigator.onLine` as a hard
