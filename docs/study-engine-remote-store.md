@@ -39,3 +39,14 @@ Tests cover:
 and prove `N pending -> N remote` plus exact retry -> `duplicate` without increasing the remote count.
 
 A live-provider write still requires a deployed, authenticated Vida session. Repository tests do not pretend to possess the user's Auth.js cookie.
+
+
+## Client retry robustness
+
+Manual/background flush after a newly persisted attempt does not trust `navigator.onLine` as a hard
+gate. Browser connectivity signals can be false-negative. The explicit flush always attempts the
+transport; an actual network failure leaves the outbox intact. The `online` event remains an
+additional retry trigger.
+
+The study UI surfaces bounded sync state (`syncing/synced/pending/conflict`) without exposing
+provider details or secrets.

@@ -199,6 +199,10 @@ export function StudySession() {
   const reconnectSync = useRef<StudyReconnectController | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<
+    'idle' | 'syncing' | 'synced' | 'pending' | 'conflict'
+  >('idle');
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
   useEffect(() => {
     shownAtMs.current = Date.now();
   }, [index]);
@@ -211,6 +215,27 @@ export function StudySession() {
       reconnectSync.current = null;
     };
   }, []);
+
+  async function flushRemoteOutbox() {
+    const controller = reconnectSync.current;
+    if (!controller) return;
+
+    setSyncStatus('syncing');
+    const result = await controller.flushNow();
+    setPendingSyncCount(result.remaining);
+
+    if (result.stoppedOn === 'conflict') {
+      setSyncStatus('conflict');
+      return;
+    }
+
+    if (result.remaining > 0) {
+      setSyncStatus('pending');
+      return;
+    }
+
+    setSyncStatus('synced');
+  }
 
   const completed = index >= items.length;
   const item = completed ? null : items[index];
@@ -237,6 +262,8 @@ export function StudySession() {
     savingRef.current = true;
     setSaving(true);
     setSaveError(null);
+    setSyncStatus('idle');
+    setPendingSyncCount(0);
 
     try {
       const now = new Date();
@@ -276,7 +303,7 @@ export function StudySession() {
       });
 
       await attemptStore.persistAttempt(attempt);
-      void reconnectSync.current?.flushNow();
+      void flushRemoteOutbox();
 
       schedulerStates.current.set(item.id, transition.state);
       setAttempts((current) => [
@@ -374,8 +401,19 @@ export function StudySession() {
           label={'Progreso de sesión: ' + (index + 1) + ' de ' + items.length}
         />
         <p className={styles['persistence-note']}>
-          Cada respuesta se guarda primero en este dispositivo. Si hay conexión, el outbox se
-          sincroniza en segundo plano sin bloquear la siguiente pregunta.
+          Cada respuesta se guarda primero en este dispositivo. El sync remoto se intenta en segundo
+          plano y vuelve a intentarse al recuperar conexión.
+        </p>
+        <p className={styles['sync-status']} data-status={syncStatus}>
+          {syncStatus === 'idle' ? 'Sync remoto: esperando el primer intento.' : null}
+          {syncStatus === 'syncing' ? 'Sync remoto: enviando…' : null}
+          {syncStatus === 'synced' ? 'Sync remoto: al día.' : null}
+          {syncStatus === 'pending'
+            ? 'Sync remoto: ' + pendingSyncCount + ' intento(s) pendiente(s).'
+            : null}
+          {syncStatus === 'conflict'
+            ? 'Sync remoto: conflicto detectado; el intento local se conserva.'
+            : null}
         </p>
       </div>
 

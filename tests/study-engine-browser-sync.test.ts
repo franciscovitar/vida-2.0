@@ -107,3 +107,22 @@ test('reconnect controller can explicitly flush when already online', async () =
 
   controller.dispose();
 });
+
+
+test('explicit flush attempts transport even if navigator-style online signal is false', async () => {
+  const store = new MemoryAttemptOutboxStore();
+  const transport = new RecordingTransport();
+  const source = new FakeOnlineSource();
+  await store.persistAttempt(fixture());
+
+  const controller = attachStudyReconnectSync(store, transport, source, () => false);
+  assert.deepEqual(transport.calls, []);
+
+  const result = await controller.flushNow();
+
+  assert.deepEqual(transport.calls, ['attempt-1']);
+  assert.equal(result.acknowledged, 1);
+  assert.equal(result.remaining, 0);
+
+  controller.dispose();
+});

@@ -375,3 +375,18 @@
   border: 1px solid var(--c-danger-border);
   border-radius: var(--radius);
 }
+
+
+.sync-status {
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+}
+
+.sync-status[data-status='synced'] {
+  color: var(--c-habits);
+}
+
+.sync-status[data-status='pending'],
+.sync-status[data-status='conflict'] {
+  color: var(--c-danger);
+}
