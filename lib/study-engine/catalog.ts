@@ -255,7 +255,7 @@ export function buildStudyCatalogSubject(input: StudyCatalogSubjectInput): Study
 
   const concepts = Array.isArray(inventory.concepts) ? inventory.concepts : [];
   const families = record(inventory.families);
-  const familyConceptCount = Object.values(families).reduce(
+  const familyConceptCount = Object.values(families).reduce<number>(
     (sum, value) => sum + (Array.isArray(value) ? value.length : 0),
     0,
   );
