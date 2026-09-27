@@ -89,7 +89,6 @@
 }
 
 .prompt {
-  max-width: 34ch;
   max-width: 46ch;
   font-size: clamp(1.25rem, 2.8vw, 1.65rem);
   line-height: 1.2;
@@ -412,7 +411,6 @@
 .sync-status[data-status='conflict'] {
   color: var(--c-danger);
 }
-
 
 .rich-details {
   border-top: 1px solid var(--border);
