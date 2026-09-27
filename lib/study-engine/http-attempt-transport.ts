@@ -11,9 +11,7 @@ function parseAck(value: unknown, expectedKey: string): StudyAttemptSyncAck | nu
   const record = value as Record<string, unknown>;
   if (
     record.idempotencyKey !== expectedKey ||
-    (record.status !== 'accepted' &&
-      record.status !== 'duplicate' &&
-      record.status !== 'conflict')
+    (record.status !== 'accepted' && record.status !== 'duplicate' && record.status !== 'conflict')
   ) {
     return null;
   }

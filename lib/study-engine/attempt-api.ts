@@ -79,10 +79,12 @@ export function parseStudyAttemptEvent(value: unknown): StudyAttemptEvent | null
     !(value.correctness === null || typeof value.correctness === 'boolean') ||
     typeof value.rating !== 'string' ||
     !RATINGS.has(value.rating as StudyRating) ||
-    !(value.learnerConfidence === null ||
+    !(
+      value.learnerConfidence === null ||
       (finiteNumber(value.learnerConfidence) &&
         value.learnerConfidence >= 0 &&
-        value.learnerConfidence <= 1)) ||
+        value.learnerConfidence <= 1)
+    ) ||
     typeof value.helpLevel !== 'string' ||
     !HELP_LEVELS.has(value.helpLevel) ||
     typeof value.seenBefore !== 'boolean' ||

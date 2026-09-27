@@ -14,9 +14,7 @@ import {
   HttpStudyAttemptTransport,
   type StudyHttpFetch,
 } from '@/lib/study-engine/http-attempt-transport';
-import {
-  createUpstashStudyAttemptStore,
-} from '@/lib/study-engine/remote-attempt-store';
+import { createUpstashStudyAttemptStore } from '@/lib/study-engine/remote-attempt-store';
 import { StudyAttemptSyncEngine } from '@/lib/study-engine/sync-engine';
 
 const CONFIG: UpstashRestConfig = {

@@ -60,10 +60,7 @@ function userIndexKey(config: UpstashRestConfig, userId: string): string {
 }
 
 function attemptKey(config: UpstashRestConfig, userId: string, idempotencyKey: string): string {
-  return `${config.namespace}:attempt:${digest(
-    'study-attempt',
-    `${userId}|${idempotencyKey}`,
-  )}`;
+  return `${config.namespace}:attempt:${digest('study-attempt', `${userId}|${idempotencyKey}`)}`;
 }
 
 function statusFromRedis(result: unknown): RemoteAttemptStatus {
