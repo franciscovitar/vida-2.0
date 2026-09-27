@@ -1,7 +1,4 @@
-import type {
-  AttemptOutboxStore,
-  StudyAttemptEvent,
-} from './attempt-store';
+import type { AttemptOutboxStore, StudyAttemptEvent } from './attempt-store';
 
 export type StudyAttemptSyncStatus = 'accepted' | 'duplicate' | 'conflict';
 
