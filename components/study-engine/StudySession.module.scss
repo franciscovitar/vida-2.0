@@ -366,3 +366,12 @@
     transform: none;
   }
 }
+
+.save-error {
+  padding: 0.625rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--c-danger);
+  background: var(--surface-2);
+  border: 1px solid var(--c-danger-border);
+  border-radius: var(--radius);
+}

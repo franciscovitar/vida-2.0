@@ -1,9 +1,14 @@
 'use client';
 
 import { Check, ChevronRight, RefreshCw, X } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { createStudyAttemptEvent } from '@/lib/study-engine/attempt-store';
+import {
+  getOrCreateStudyDeviceId,
+  IndexedDbAttemptOutboxStore,
+} from '@/lib/study-engine/browser-attempt-store';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SafeRichContent } from '@/components/study-engine/SafeRichContent';
@@ -30,6 +35,7 @@ interface SessionAttempt {
 }
 
 const scheduler = new FsrsScheduler();
+const attemptStore = new IndexedDbAttemptOutboxStore();
 
 const TYPE_LABELS: Record<StudyItem['itemType'], string> = {
   recall: 'Recuperación',
@@ -145,21 +151,23 @@ function ObjectiveInput({
 function RatingButtons({
   correctness,
   onRate,
+  disabled = false,
 }: {
   correctness: boolean | null;
   onRate: (rating: StudyRating) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className={styles.ratings} aria-label="Calificá tu recuperación">
       {RATINGS.map((rating) => {
-        const disabled = correctness === false && rating.value !== 'again';
+        const ratingDisabled = disabled || (correctness === false && rating.value !== 'again');
         return (
           <button
             key={rating.value}
             type="button"
             className={styles.rating}
             data-rating={rating.value}
-            disabled={disabled}
+            disabled={ratingDisabled}
             onClick={() => onRate(rating.value)}
           >
             <strong>{rating.label}</strong>
@@ -179,6 +187,15 @@ export function StudySession() {
   const [correctness, setCorrectness] = useState<boolean | null>(null);
   const [attempts, setAttempts] = useState<SessionAttempt[]>([]);
   const schedulerStates = useRef(new Map<string, StudySchedulerState>());
+  const sessionId = useRef<string | null>(null);
+  const shownAtMs = useRef<number | null>(null);
+  const savingRef = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  useEffect(() => {
+    shownAtMs.current = Date.now();
+  }, [index]);
+
   const completed = index >= items.length;
   const item = completed ? null : items[index];
 
@@ -198,27 +215,75 @@ export function StudySession() {
     setRevealed(true);
   }
 
-  function rate(rating: StudyRating) {
-    if (!item) return;
+  async function rate(rating: StudyRating) {
+    if (!item || savingRef.current) return;
 
-    const now = new Date();
-    const currentState = schedulerStates.current.get(item.id) ?? scheduler.createInitialState(now);
-    const transition = scheduler.review(currentState, now, rating);
-    schedulerStates.current.set(item.id, transition.state);
+    savingRef.current = true;
+    setSaving(true);
+    setSaveError(null);
 
-    setAttempts((current) => [
-      ...current,
-      {
-        itemId: item.id,
+    try {
+      const now = new Date();
+      const seenBefore = schedulerStates.current.has(item.id);
+      const currentState =
+        schedulerStates.current.get(item.id) ?? scheduler.createInitialState(now);
+      const transition = scheduler.review(currentState, now, rating);
+      const successful = correctness ?? ratingRepresentsSuccessfulRecall(rating);
+      const attemptId = crypto.randomUUID();
+
+      sessionId.current ??= crypto.randomUUID();
+
+      const attempt = createStudyAttemptEvent({
+        id: attemptId,
+        idempotencyKey: attemptId,
+        sessionId: sessionId.current,
+        studyItemId: item.id,
+        itemVersion: item.version,
+        reviewUnitId: 'study-engine-demo:' + item.id,
+        subjectId: item.subjectId,
+        conceptId: item.conceptId,
+        facetId: null,
+        operation: item.operation,
+        channel: 'theoretical',
+        shownAt: new Date(shownAtMs.current ?? now.getTime()).toISOString(),
+        answeredAt: now.toISOString(),
+        response: item.itemType === 'recall' ? null : response,
+        correctness: successful,
         rating,
-        successful: correctness ?? ratingRepresentsSuccessfulRecall(rating),
-        scheduledDays: transition.state.scheduledDays,
-      },
-    ]);
-    setIndex((current) => current + 1);
-    setResponse('');
-    setRevealed(false);
-    setCorrectness(null);
+        learnerConfidence: null,
+        helpLevel: 'independent',
+        seenBefore,
+        contextFreshness: seenBefore ? 'familiar' : 'fresh',
+        schedulerStateBefore: currentState,
+        schedulerStateAfter: transition.state,
+        deviceId: getOrCreateStudyDeviceId(),
+      });
+
+      await attemptStore.persistAttempt(attempt);
+
+      schedulerStates.current.set(item.id, transition.state);
+      setAttempts((current) => [
+        ...current,
+        {
+          itemId: item.id,
+          rating,
+          successful,
+          scheduledDays: transition.state.scheduledDays,
+        },
+      ]);
+      setIndex((current) => current + 1);
+      setResponse('');
+      setRevealed(false);
+      setCorrectness(null);
+      shownAtMs.current = Date.now();
+    } catch {
+      setSaveError(
+        'No pudimos guardar este intento en el dispositivo. La pregunta no avanzó; podés reintentar.',
+      );
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
+    }
   }
 
   function reset() {
@@ -228,6 +293,9 @@ export function StudySession() {
     setCorrectness(null);
     setAttempts([]);
     schedulerStates.current = new Map();
+    sessionId.current = null;
+    shownAtMs.current = Date.now();
+    setSaveError(null);
   }
 
   if (completed) {
@@ -342,7 +410,15 @@ export function StudySession() {
               <span>¿Cómo fue la recuperación?</span>
               <ChevronRight size={16} aria-hidden="true" />
             </div>
-            <RatingButtons correctness={correctness} onRate={rate} />
+            <RatingButtons correctness={correctness} onRate={rate} disabled={saving} />
+            {saving ? (
+              <p className={styles['persistence-note']}>Guardando intento en este dispositivo…</p>
+            ) : null}
+            {saveError ? (
+              <p className={styles['save-error']} role="alert">
+                {saveError}
+              </p>
+            ) : null}
           </div>
         ) : null}
       </Card>
