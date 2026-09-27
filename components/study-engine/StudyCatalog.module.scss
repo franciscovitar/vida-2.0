@@ -81,7 +81,7 @@
   display: none;
 }
 
-.subjectIcon {
+.subject-icon {
   display: grid;
   place-items: center;
   width: 2.25rem;
@@ -92,26 +92,26 @@
   background: var(--surface-2);
 }
 
-.subjectMain {
+.subject-main {
   min-width: 0;
 }
 
-.subjectTitleRow,
+.subject-title-row,
 .meta,
-.progressRow,
+.progress-row,
 .stats,
-.topicHead,
+.topic-head,
 .sets {
   display: flex;
   align-items: center;
 }
 
-.subjectTitleRow {
+.subject-title-row {
   justify-content: space-between;
   gap: 0.6rem;
 }
 
-.subjectTitleRow h3 {
+.subject-title-row h3 {
   margin: 0;
   font-size: 1rem;
 }
@@ -129,7 +129,7 @@
   font-size: 0.75rem;
 }
 
-.progressRow {
+.progress-row {
   justify-content: space-between;
   gap: 0.75rem;
   margin-top: 0.65rem;
@@ -137,12 +137,12 @@
   font-size: 0.74rem;
 }
 
-.progressPrimary {
+.progress-primary {
   color: var(--text);
   font-weight: 600;
 }
 
-.progressTrack {
+.progress-track {
   height: 4px;
   margin-top: 0.35rem;
   overflow: hidden;
@@ -150,7 +150,7 @@
   background: var(--surface-3);
 }
 
-.progressTrack span {
+.progress-track span {
   display: block;
   height: 100%;
   border-radius: inherit;
@@ -174,7 +174,7 @@
   border-top: 1px solid var(--border);
 }
 
-.currentUnit,
+.current-unit,
 .next,
 .empty {
   margin: 0;
@@ -207,13 +207,13 @@
   background: var(--surface-2);
 }
 
-.topicHead {
+.topic-head {
   justify-content: space-between;
   gap: 0.75rem;
   font-size: 0.78rem;
 }
 
-.topicHead span {
+.topic-head span {
   flex: none;
   color: var(--text-subtle);
   font-size: 0.68rem;
@@ -234,7 +234,7 @@
   font-size: 0.66rem;
 }
 
-@media (max-width: 760px) {
+@media (width <= 760px) {
   .grid {
     grid-template-columns: 1fr;
   }
