@@ -82,11 +82,11 @@ export function StudyCatalog({
           return (
             <details key={subject.id} className={styles.card}>
               <summary>
-                <div className={styles.subjectIcon}>
+                <div className={styles['subject-icon']}>
                   <BookOpen size={18} aria-hidden="true" />
                 </div>
-                <div className={styles.subjectMain}>
-                  <div className={styles.subjectTitleRow}>
+                <div className={styles['subject-main']}>
+                  <div className={styles['subject-title-row']}>
                     <h3>{subject.name}</h3>
                     <span className={styles.term}>{subject.term ?? 'Actual'}</span>
                   </div>
@@ -95,8 +95,8 @@ export function StudyCatalog({
                     <span>·</span>
                     <span>{structureLabel(subject)}</span>
                   </div>
-                  <div className={styles.progressRow}>
-                    <span className={styles.progressPrimary}>
+                  <div className={styles['progress-row']}>
+                    <span className={styles['progress-primary']}>
                       {progressPercent === null
                         ? 'Preparación sin medir'
                         : `Preparación ${progressPercent}%`}
@@ -104,7 +104,7 @@ export function StudyCatalog({
                     <span>{readinessLabel(readiness)}</span>
                   </div>
                   {progressPercent !== null ? (
-                    <div className={styles.progressTrack} aria-hidden="true">
+                    <div className={styles['progress-track']} aria-hidden="true">
                       <span style={{ width: `${progressPercent}%` }} />
                     </div>
                   ) : null}
@@ -114,7 +114,7 @@ export function StudyCatalog({
 
               <div className={styles.details}>
                 {subject.currentUnit ? (
-                  <p className={styles.currentUnit}>
+                  <p className={styles['current-unit']}>
                     <strong>Foco actual:</strong> {subject.currentUnit}
                   </p>
                 ) : null}
@@ -137,7 +137,7 @@ export function StudyCatalog({
                   <div className={styles.topics}>
                     {subject.topics.map((topic) => (
                       <div key={topic.id} className={styles.topic}>
-                        <div className={styles.topicHead}>
+                        <div className={styles['topic-head']}>
                           <strong>{topic.label}</strong>
                           {topic.conceptCount !== null ? (
                             <span>{topic.conceptCount} conceptos</span>
