@@ -38,10 +38,7 @@ function fixture(overrides: Partial<StudyAttemptEvent> = {}): StudyAttemptEvent 
 
 test('attempt builder records non-negative response time', () => {
   assert.equal(fixture().responseTimeMs, 4250);
-  assert.equal(
-    fixture({ answeredAt: '2026-09-27T16:59:59.000Z' }).responseTimeMs,
-    0,
-  );
+  assert.equal(fixture({ answeredAt: '2026-09-27T16:59:59.000Z' }).responseTimeMs, 0);
 });
 
 test('local store atomically preserves attempt history and pending outbox entry', async () => {
