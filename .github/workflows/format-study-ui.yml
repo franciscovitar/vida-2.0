@@ -1,0 +1,35 @@
+name: Temporary Study UI Format
+
+on:
+  push:
+    branches:
+      - study-engine/ui-polish-sync-diagnostics-v1-20260927
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: study-engine/ui-polish-sync-diagnostics-v1-20260927
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write components/study-engine/StudySession.tsx lib/study-engine/http-attempt-transport.ts tests/study-engine-remote-sync.test.ts
+      - name: Commit formatter output
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/study-engine/StudySession.tsx lib/study-engine/http-attempt-transport.ts tests/study-engine-remote-sync.test.ts
+          git commit -m "style: format Study Engine polish"
+          git push
