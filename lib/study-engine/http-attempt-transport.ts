@@ -6,12 +6,7 @@ export type StudyHttpFetch = (
   init?: RequestInit,
 ) => Promise<Response>;
 
-export type StudyTransportFailure =
-  | 'red'
-  | 'sesión'
-  | 'servidor'
-  | 'respuesta inválida'
-  | 'http';
+export type StudyTransportFailure = 'red' | 'sesión' | 'servidor' | 'respuesta inválida' | 'http';
 
 function parseAck(value: unknown, expectedKey: string): StudyAttemptSyncAck | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -19,9 +14,7 @@ function parseAck(value: unknown, expectedKey: string): StudyAttemptSyncAck | nu
 
   if (
     record.idempotencyKey !== expectedKey ||
-    (record.status !== 'accepted' &&
-      record.status !== 'duplicate' &&
-      record.status !== 'conflict')
+    (record.status !== 'accepted' && record.status !== 'duplicate' && record.status !== 'conflict')
   ) {
     return null;
   }
@@ -63,11 +56,7 @@ export class HttpStudyAttemptTransport implements StudyAttemptTransport {
 
     if (response.status !== 200 && response.status !== 409) {
       this.lastFailure =
-        response.status === 401
-          ? 'sesión'
-          : response.status === 503
-            ? 'servidor'
-            : 'http';
+        response.status === 401 ? 'sesión' : response.status === 503 ? 'servidor' : 'http';
       throw new Error('study-attempt-sync-unavailable');
     }
 

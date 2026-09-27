@@ -177,7 +177,6 @@ test('route authenticates before creating the remote store', () => {
   assert.match(source, /status:\s*401/);
 });
 
-
 test('HTTP transport exposes a bounded failure category without leaking response bodies', async () => {
   const transport = new HttpStudyAttemptTransport(async () => {
     return new Response(JSON.stringify({ error: 'private-provider-detail' }), {

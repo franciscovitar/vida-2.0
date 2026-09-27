@@ -422,8 +422,7 @@ export function StudySession() {
               {syncStatus === 'syncing' ? 'Sincronizando…' : null}
               {syncStatus === 'synced' ? 'Sincronizado' : null}
               {syncStatus === 'pending'
-                ? pendingSyncCount + ' pendiente(s)' +
-                  (syncFailure ? ' · ' + syncFailure : '')
+                ? pendingSyncCount + ' pendiente(s)' + (syncFailure ? ' · ' + syncFailure : '')
                 : null}
               {syncStatus === 'conflict' ? 'Conflicto de sync' : null}
             </span>
