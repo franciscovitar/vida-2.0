@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "eb5d9f3ac059907aa5536849b68f4c289a9ff074",
+    "generatedAt": "2026-09-27",
+    "canonicalRoot": "AI/projects/university/subjects"
+  },
+  "subjects": [
+    {
+      "id": "cdd",
+      "name": "Ciencia de Datos",
+      "term": "2026",
+      "currentUnit": null,
+      "assessment": {
+        "id": "cdd-2026-entrega2",
+        "status": null,
+        "date": null,
+        "format": null,
+        "scopeComplete": false
+      },
+      "structureStatus": "unresolved",
+      "sourceScopeStatus": "incomplete",
+      "conceptCount": 0,
+      "topics": [],
+      "readinessBand": "not-ready",
+      "updated": "2026-09-17"
+    },
+    {
+      "id": "dao",
+      "name": "DAO",
+      "term": "2026",
+      "currentUnit": null,
+      "assessment": {
+        "id": "dao-2026-parcial",
+        "status": null,
+        "date": null,
+        "format": null,
+        "scopeComplete": false
+      },
+      "structureStatus": "unresolved",
+      "sourceScopeStatus": "incomplete",
+      "conceptCount": 0,
+      "topics": [],
+      "readinessBand": "not-ready",
+      "updated": "2026-09-17"
+    },
+    {
+      "id": "dsi",
+      "name": "Diseño de Sistemas de Información",
+      "term": "2026",
+      "currentUnit": "P2 arquitectura / microservicios",
+      "assessment": {
+        "id": "dsi-2026-p2",
+        "status": "draft",
+        "date": "2026-11-07",
+        "format": "other",
+        "scopeComplete": false
+      },
+      "structureStatus": "partial",
+      "sourceScopeStatus": "incomplete",
+      "conceptCount": 0,
+      "topics": [
+        {
+          "id": "dsi:dsi-2026-p2:practice",
+          "label": "Práctica",
+          "conceptCount": null,
+          "studySets": [
+            {
+              "id": "p2:practice:01",
+              "label": "Preenunciado",
+              "channel": "practice",
+              "sequence": "01"
+            },
+            {
+              "id": "p2:practice:02",
+              "label": "Subdominios",
+              "channel": "practice",
+              "sequence": "02"
+            },
+            {
+              "id": "p2:practice:03",
+              "label": "Vista funcional",
+              "channel": "practice",
+              "sequence": "03"
+            },
+            {
+              "id": "p2:practice:04",
+              "label": "Justificación de CU / Justificación de RNF",
+              "channel": "practice",
+              "sequence": "04"
+            },
+            {
+              "id": "p2:practice:05",
+              "label": "Micro · diseño global",
+              "channel": "practice",
+              "sequence": "05"
+            },
+            {
+              "id": "p2:practice:06",
+              "label": "Micro · diseño detallado",
+              "channel": "practice",
+              "sequence": "06"
+            },
+            {
+              "id": "p2:practice:07",
+              "label": "Micro · despliegue",
+              "channel": "practice",
+              "sequence": "07"
+            },
+            {
+              "id": "p2:practice:08",
+              "label": "Monolito · diseño",
+              "channel": "practice",
+              "sequence": "08"
+            },
+            {
+              "id": "p2:practice:09",
+              "label": "Monolito · despliegue",
+              "channel": "practice",
+              "sequence": "09"
+            }
+          ]
+        }
+      ],
+      "readinessBand": "not-ready",
+      "updated": "2026-09-17"
+    },
+    {
+      "id": "green",
+      "name": "Green Software",
+      "term": "2026",
+      "currentUnit": null,
+      "assessment": null,
+      "structureStatus": "unresolved",
+      "sourceScopeStatus": "incomplete",
+      "conceptCount": 0,
+      "topics": [],
+      "readinessBand": "not-ready",
+      "updated": "2026-09-17"
+    },
+    {
+      "id": "iop",
+      "name": "IOP",
+      "term": "2026",
+      "currentUnit": null,
+      "assessment": {
+        "id": "iop-2026-p2",
+        "status": "active",
+        "date": null,
+        "format": "mixed-quantitative-theory-practical",
+        "scopeComplete": true
+      },
+      "structureStatus": "resolved",
+      "sourceScopeStatus": "complete-for-declared-u5-u7",
+      "conceptCount": 52,
+      "topics": [
+        {
+          "id": "iop:iop-2026-p2:u5",
+          "label": "U5 Modelos de Redes",
+          "conceptCount": 12,
+          "studySets": []
+        },
+        {
+          "id": "iop:iop-2026-p2:u6",
+          "label": "U6 Modelos de Pronósticos",
+          "conceptCount": 19,
+          "studySets": []
+        },
+        {
+          "id": "iop:iop-2026-p2:u7",
+          "label": "U7 Modelos de Administración de Inventarios",
+          "conceptCount": 21,
+          "studySets": []
+        }
+      ],
+      "readinessBand": "baseline-unmeasured",
+      "updated": "2026-09-27"
+    },
+    {
+      "id": "redes",
+      "name": "Redes",
+      "term": "2026",
+      "currentUnit": "P3 — Transporte, Aplicación y Seguridad",
+      "assessment": {
+        "id": "redes-2026-p3",
+        "status": "active",
+        "date": null,
+        "format": "mcq-dominant",
+        "scopeComplete": true
+      },
+      "structureStatus": "resolved",
+      "sourceScopeStatus": "resolved",
+      "conceptCount": 62,
+      "topics": [
+        {
+          "id": "redes:redes-2026-p3:block:01",
+          "label": "Transporte UDP NAT/PAT",
+          "conceptCount": 9,
+          "studySets": [
+            {
+              "id": "p3:content:01",
+              "label": "Transporte udp nat",
+              "channel": "content",
+              "sequence": "01"
+            }
+          ]
+        },
+        {
+          "id": "redes:redes-2026-p3:block:02",
+          "label": "TCP",
+          "conceptCount": 10,
+          "studySets": [
+            {
+              "id": "p3:content:02",
+              "label": "Tcp",
+              "channel": "content",
+              "sequence": "02"
+            }
+          ]
+        },
+        {
+          "id": "redes:redes-2026-p3:block:03",
+          "label": "DNS",
+          "conceptCount": 7,
+          "studySets": [
+            {
+              "id": "p3:content:03",
+              "label": "Dns",
+              "channel": "content",
+              "sequence": "03"
+            }
+          ]
+        },
+        {
+          "id": "redes:redes-2026-p3:block:04",
+          "label": "Correo FTP TFTP MIME",
+          "conceptCount": 10,
+          "studySets": [
+            {
+              "id": "p3:content:04",
+              "label": "Correo ftp tftp mime",
+              "channel": "content",
+              "sequence": "04"
+            }
+          ]
+        },
+        {
+          "id": "redes:redes-2026-p3:block:05",
+          "label": "HTTP HTTPS SNMP Gestión",
+          "conceptCount": 9,
+          "studySets": [
+            {
+              "id": "p3:content:05",
+              "label": "Http https snmp gestion",
+              "channel": "content",
+              "sequence": "05"
+            }
+          ]
+        },
+        {
+          "id": "redes:redes-2026-p3:block:06",
+          "label": "Seguridad VPN IPsec",
+          "conceptCount": 17,
+          "studySets": [
+            {
+              "id": "p3:content:06",
+              "label": "Seguridad vpn ipsec",
+              "channel": "content",
+              "sequence": "06"
+            }
+          ]
+        }
+      ],
+      "readinessBand": "unmeasured",
+      "updated": "2026-09-27"
+    },
+    {
+      "id": "tpa",
+      "name": "TPA",
+      "term": "2026",
+      "currentUnit": null,
+      "assessment": null,
+      "structureStatus": "unresolved",
+      "sourceScopeStatus": "incomplete",
+      "conceptCount": 0,
+      "topics": [],
+      "readinessBand": "not-ready",
+      "updated": "2026-09-17"
+    }
+  ]
+}
