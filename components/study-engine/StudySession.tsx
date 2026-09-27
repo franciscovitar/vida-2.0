@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, ChevronRight, RefreshCw, X } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { createStudyAttemptEvent } from '@/lib/study-engine/attempt-store';
@@ -188,10 +188,14 @@ export function StudySession() {
   const [attempts, setAttempts] = useState<SessionAttempt[]>([]);
   const schedulerStates = useRef(new Map<string, StudySchedulerState>());
   const sessionId = useRef<string | null>(null);
-  const shownAtMs = useRef(Date.now());
+  const shownAtMs = useRef<number | null>(null);
   const savingRef = useRef(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  useEffect(() => {
+    shownAtMs.current = Date.now();
+  }, [index]);
+
   const completed = index >= items.length;
   const item = completed ? null : items[index];
 
@@ -241,7 +245,7 @@ export function StudySession() {
         facetId: null,
         operation: item.operation,
         channel: 'theoretical',
-        shownAt: new Date(shownAtMs.current).toISOString(),
+        shownAt: new Date(shownAtMs.current ?? now.getTime()).toISOString(),
         answeredAt: now.toISOString(),
         response: item.itemType === 'recall' ? null : response,
         correctness: successful,
