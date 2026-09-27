@@ -3,9 +3,8 @@
 import {
   createElement,
   Fragment,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 
@@ -45,6 +44,10 @@ function renderSafeDomNode(
   return createElement(spec.tag, { key, ...spec.props }, ...children);
 }
 
+function subscribeToClientReady() {
+  return () => {};
+}
+
 function SafeHtmlFragment({
   html,
   policy,
@@ -52,11 +55,17 @@ function SafeHtmlFragment({
   html: string;
   policy: RichRenderPolicy;
 }) {
-  const [nodes, setNodes] = useState<ReactNode[]>([]);
+  const clientReady = useSyncExternalStore(
+    subscribeToClientReady,
+    () => true,
+    () => false,
+  );
   const remoteHostKey = (policy.allowedRemoteHosts ?? []).join('|');
   const localPrefixKey = (policy.allowedLocalPrefixes ?? []).join('|');
 
-  useEffect(() => {
+  const nodes = useMemo(() => {
+    if (!clientReady) return [];
+
     const template = document.createElement('template');
 
     // Template contents are inert and never attached. We then rebuild only
@@ -67,12 +76,11 @@ function SafeHtmlFragment({
       allowedRemoteHosts: remoteHostKey ? remoteHostKey.split('|') : [],
       allowedLocalPrefixes: localPrefixKey ? localPrefixKey.split('|') : undefined,
     };
-    const rendered = Array.from(template.content.childNodes).map((node, index) =>
+
+    return Array.from(template.content.childNodes).map((node, index) =>
       renderSafeDomNode(node, 'html-' + index, effectivePolicy),
     );
-
-    setNodes(rendered);
-  }, [html, remoteHostKey, localPrefixKey]);
+  }, [clientReady, html, remoteHostKey, localPrefixKey]);
 
   return <>{nodes}</>;
 }
