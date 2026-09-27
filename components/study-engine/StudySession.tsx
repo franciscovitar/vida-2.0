@@ -57,22 +57,22 @@ function StudyVisual({ visual }: { visual: StudyVisualKey }) {
         role="img"
         aria-label="Tarjeta existente en Anki, evidencia hacia Learning OS y práctica complementaria en Study Engine"
       >
-        <span className={styles.visualNode}>ANKI</span>
-        <span className={styles.visualArrow} aria-hidden="true">
+        <span className={styles['visual-node']}>ANKI</span>
+        <span className={styles['visual-arrow']} aria-hidden="true">
           →
         </span>
-        <span className={styles.visualNode}>Learning OS</span>
-        <span className={styles.visualArrow} aria-hidden="true">
+        <span className={styles['visual-node']}>Learning OS</span>
+        <span className={styles['visual-arrow']} aria-hidden="true">
           ←
         </span>
-        <span className={styles.visualNode}>Study Engine</span>
+        <span className={styles['visual-node']}>Study Engine</span>
       </div>
     );
   }
 
   return (
     <div
-      className={styles.evidenceVisual}
+      className={styles['evidence-visual']}
       role="img"
       aria-label="Escalera de evidencia desde familiar hacia fresh y transfer"
     >
@@ -122,7 +122,7 @@ function ObjectiveInput({
   }
 
   return (
-    <div className={styles.textAnswer}>
+    <div className={styles['text-answer']}>
       <label htmlFor={'study-response-' + item.id}>Tu respuesta</label>
       <input
         id={'study-response-' + item.id}
@@ -238,7 +238,7 @@ export function StudySession() {
 
     return (
       <Card className={styles.complete}>
-        <div className={styles.completeIcon} aria-hidden="true">
+        <div className={styles['complete-icon']} aria-hidden="true">
           <Check size={24} />
         </div>
         <div>
@@ -249,7 +249,7 @@ export function StudySession() {
             se persiste al cerrar la página.
           </p>
         </div>
-        <div className={styles.summaryGrid}>
+        <div className={styles['summary-grid']}>
           <div>
             <strong>{attempts.length}</strong>
             <span>intentos</span>
@@ -272,9 +272,9 @@ export function StudySession() {
 
   return (
     <div className={styles.session}>
-      <div className={styles.sessionHeader}>
-        <div className={styles.statusRow}>
-          <span className={styles.demoBadge}>Demo funcional</span>
+      <div className={styles['session-header']}>
+        <div className={styles['status-row']}>
+          <span className={styles['demo-badge']}>Demo funcional</span>
           <span>{TYPE_LABELS[item.itemType]}</span>
           <span>
             {index + 1}/{items.length}
@@ -286,13 +286,13 @@ export function StudySession() {
           domain="learning"
           label={'Progreso de sesión: ' + (index + 1) + ' de ' + items.length}
         />
-        <p className={styles.persistenceNote}>
+        <p className={styles['persistence-note']}>
           Esta etapa prueba el flujo real y FSRS. La persistencia/offline llega en un hito posterior.
         </p>
       </div>
 
-      <Card className={styles.questionCard}>
-        <div className={styles.questionMeta}>
+      <Card className={styles['question-card']}>
+        <div className={styles['question-meta']}>
           <span>{item.operation}</span>
           <span>{item.conceptId}</span>
         </div>
@@ -318,7 +318,7 @@ export function StudySession() {
 
         {revealed ? (
           <div className={styles.feedback} data-result={correctness === null ? 'manual' : correctness ? 'correct' : 'wrong'}>
-            <div className={styles.feedbackTitle}>
+            <div className={styles['feedback-title']}>
               {correctness === true ? <Check size={18} aria-hidden="true" /> : null}
               {correctness === false ? <X size={18} aria-hidden="true" /> : null}
               <strong>
@@ -331,7 +331,7 @@ export function StudySession() {
             </div>
             <p className={styles.answer}>{item.answer}</p>
             <p className={styles.explanation}>{item.explanation}</p>
-            <div className={styles.ratingHeader}>
+            <div className={styles['rating-header']}>
               <span>¿Cómo fue la recuperación?</span>
               <ChevronRight size={16} aria-hidden="true" />
             </div>
