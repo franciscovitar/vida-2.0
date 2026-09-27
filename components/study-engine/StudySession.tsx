@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronRight, RefreshCw, X } from 'lucide-react';
+import { Check, RefreshCw, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -42,6 +42,12 @@ interface SessionAttempt {
 const scheduler = new FsrsScheduler();
 const attemptStore = new IndexedDbAttemptOutboxStore();
 const attemptTransport = new HttpStudyAttemptTransport();
+
+const OPERATION_LABELS: Record<StudyItem['operation'], string> = {
+  recall: 'Recordar',
+  explain: 'Explicar',
+  discriminate: 'Distinguir',
+};
 
 const TYPE_LABELS: Record<StudyItem['itemType'], string> = {
   recall: 'Recuperación',
@@ -203,6 +209,7 @@ export function StudySession() {
     'idle' | 'syncing' | 'synced' | 'pending' | 'conflict'
   >('idle');
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
+  const [syncFailure, setSyncFailure] = useState<string | null>(null);
   useEffect(() => {
     shownAtMs.current = Date.now();
   }, [index]);
@@ -221,6 +228,7 @@ export function StudySession() {
     if (!controller) return;
 
     setSyncStatus('syncing');
+    setSyncFailure(null);
     const result = await controller.flushNow();
     setPendingSyncCount(result.remaining);
 
@@ -231,10 +239,12 @@ export function StudySession() {
 
     if (result.remaining > 0) {
       setSyncStatus('pending');
+      setSyncFailure(attemptTransport.getLastFailure());
       return;
     }
 
     setSyncStatus('synced');
+    setSyncFailure(null);
   }
 
   const completed = index >= items.length;
@@ -264,6 +274,7 @@ export function StudySession() {
     setSaveError(null);
     setSyncStatus('idle');
     setPendingSyncCount(0);
+    setSyncFailure(null);
 
     try {
       const now = new Date();
@@ -400,27 +411,40 @@ export function StudySession() {
           domain="learning"
           label={'Progreso de sesión: ' + (index + 1) + ' de ' + items.length}
         />
-        <p className={styles['persistence-note']}>
-          Cada respuesta se guarda primero en este dispositivo. El sync remoto se intenta en segundo
-          plano y vuelve a intentarse al recuperar conexión.
-        </p>
-        <p className={styles['sync-status']} data-status={syncStatus}>
-          {syncStatus === 'idle' ? 'Sync remoto: esperando el primer intento.' : null}
-          {syncStatus === 'syncing' ? 'Sync remoto: enviando…' : null}
-          {syncStatus === 'synced' ? 'Sync remoto: al día.' : null}
-          {syncStatus === 'pending'
-            ? 'Sync remoto: ' + pendingSyncCount + ' intento(s) pendiente(s).'
-            : null}
-          {syncStatus === 'conflict'
-            ? 'Sync remoto: conflicto detectado; el intento local se conserva.'
-            : null}
-        </p>
+        <div className={styles['session-info']}>
+          <span className={styles['local-status']}>
+            <Check size={14} aria-hidden="true" />
+            Guardado local
+          </span>
+          <div className={styles['sync-cluster']}>
+            <span className={styles['sync-status']} data-status={syncStatus}>
+              {syncStatus === 'idle' ? 'Sync listo' : null}
+              {syncStatus === 'syncing' ? 'Sincronizando…' : null}
+              {syncStatus === 'synced' ? 'Sincronizado' : null}
+              {syncStatus === 'pending'
+                ? pendingSyncCount + ' pendiente(s)' +
+                  (syncFailure ? ' · ' + syncFailure : '')
+                : null}
+              {syncStatus === 'conflict' ? 'Conflicto de sync' : null}
+            </span>
+            {syncStatus === 'pending' || syncStatus === 'conflict' ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                iconLeft={RefreshCw}
+                onClick={() => void flushRemoteOutbox()}
+              >
+                Reintentar
+              </Button>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       <Card className={styles['question-card']}>
         <div className={styles['question-meta']}>
-          <span>{item.operation}</span>
-          <span>{item.conceptId}</span>
+          <span>{OPERATION_LABELS[item.operation]}</span>
         </div>
 
         {item.itemType === 'image' ? <StudyVisual visual={item.visual} /> : null}
@@ -460,10 +484,14 @@ export function StudySession() {
             </div>
             <p className={styles.answer}>{item.answer}</p>
             <p className={styles.explanation}>{item.explanation}</p>
-            {item.richContent?.length ? <SafeRichContent blocks={item.richContent} /> : null}
+            {item.richContent?.length ? (
+              <details className={styles['rich-details']}>
+                <summary>Ver contenido enriquecido</summary>
+                <SafeRichContent blocks={item.richContent} />
+              </details>
+            ) : null}
             <div className={styles['rating-header']}>
-              <span>¿Cómo fue la recuperación?</span>
-              <ChevronRight size={16} aria-hidden="true" />
+              <span>¿Cómo te fue?</span>
             </div>
             <RatingButtons correctness={correctness} onRate={rate} disabled={saving} />
             {saving ? (
