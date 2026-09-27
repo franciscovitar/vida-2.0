@@ -55,10 +55,7 @@ test('data URLs are limited to raster images and SVG data is rejected', () => {
     'data:image/png;base64,aGVsbG8=',
   );
   assert.equal(
-    sanitizeRichUrl(
-      'data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+PC9zdmc+',
-      'image',
-    ),
+    sanitizeRichUrl('data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+PC9zdmc+', 'image'),
     null,
   );
 });
