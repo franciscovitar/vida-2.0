@@ -191,3 +191,28 @@ test('HTTP transport exposes a bounded failure category without leaking response
   );
   assert.equal(transport.getLastFailure(), 'servidor');
 });
+
+test('browser transport accepts an absolute same-origin endpoint and does not require fetch receiver binding', async () => {
+  const calls: string[] = [];
+  const receiverSensitiveFetch: StudyHttpFetch = async function (input) {
+    calls.push(String(input));
+    return new Response(
+      JSON.stringify({
+        idempotencyKey: 'absolute',
+        status: 'accepted',
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  };
+
+  const transport = new HttpStudyAttemptTransport(receiverSensitiveFetch);
+  const value = fixture('absolute', '2026-09-27T20:20:00.000Z');
+  const ack = await transport.sendAttempt(value);
+
+  assert.equal(ack.status, 'accepted');
+  assert.equal(calls.length, 1);
+  assert.match(calls[0]!, /\/api\/study-engine\/v1\/attempts$/);
+});
