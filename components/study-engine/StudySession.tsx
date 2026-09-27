@@ -160,7 +160,8 @@ function RatingButtons({
   return (
     <div className={styles.ratings} aria-label="Calificá tu recuperación">
       {RATINGS.map((rating) => {
-        const ratingDisabled = disabled || (correctness === false && rating.value !== 'again');
+        const ratingDisabled =
+          disabled || (correctness === false && rating.value !== 'again');
         return (
           <button
             key={rating.value}
@@ -411,7 +412,9 @@ export function StudySession() {
               <ChevronRight size={16} aria-hidden="true" />
             </div>
             <RatingButtons correctness={correctness} onRate={rate} disabled={saving} />
-            {saving ? <p className={styles['persistence-note']}>Guardando intento en este dispositivo…</p> : null}
+            {saving ? (
+              <p className={styles['persistence-note']}>Guardando intento en este dispositivo…</p>
+            ) : null}
             {saveError ? (
               <p className={styles['save-error']} role="alert">
                 {saveError}
