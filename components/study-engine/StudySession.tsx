@@ -6,9 +6,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { createStudyAttemptEvent } from '@/lib/study-engine/attempt-store';
 import {
+  attachStudyReconnectSync,
+  type StudyReconnectController,
+} from '@/lib/study-engine/browser-sync';
+import {
   getOrCreateStudyDeviceId,
   IndexedDbAttemptOutboxStore,
 } from '@/lib/study-engine/browser-attempt-store';
+import { HttpStudyAttemptTransport } from '@/lib/study-engine/http-attempt-transport';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SafeRichContent } from '@/components/study-engine/SafeRichContent';
@@ -36,6 +41,7 @@ interface SessionAttempt {
 
 const scheduler = new FsrsScheduler();
 const attemptStore = new IndexedDbAttemptOutboxStore();
+const attemptTransport = new HttpStudyAttemptTransport();
 
 const TYPE_LABELS: Record<StudyItem['itemType'], string> = {
   recall: 'Recuperación',
@@ -190,11 +196,21 @@ export function StudySession() {
   const sessionId = useRef<string | null>(null);
   const shownAtMs = useRef<number | null>(null);
   const savingRef = useRef(false);
+  const reconnectSync = useRef<StudyReconnectController | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   useEffect(() => {
     shownAtMs.current = Date.now();
   }, [index]);
+
+  useEffect(() => {
+    const controller = attachStudyReconnectSync(attemptStore, attemptTransport);
+    reconnectSync.current = controller;
+    return () => {
+      controller.dispose();
+      reconnectSync.current = null;
+    };
+  }, []);
 
   const completed = index >= items.length;
   const item = completed ? null : items[index];
@@ -260,6 +276,7 @@ export function StudySession() {
       });
 
       await attemptStore.persistAttempt(attempt);
+      void reconnectSync.current?.flushNow();
 
       schedulerStates.current.set(item.id, transition.state);
       setAttempts((current) => [
@@ -315,8 +332,8 @@ export function StudySession() {
             {successCount} de {attempts.length} recuperaciones salieron
           </h2>
           <p className={styles.muted}>
-            El scheduler ya calculó el próximo estado de cada review unit. En esta demo todavía no
-            se persiste al cerrar la página.
+            El intento se guarda primero en este dispositivo y se sincroniza con el backend cuando
+            hay conexión. El scheduler conserva su estado dentro del evento del intento.
           </p>
         </div>
         <div className={styles['summary-grid']}>
@@ -357,8 +374,8 @@ export function StudySession() {
           label={'Progreso de sesión: ' + (index + 1) + ' de ' + items.length}
         />
         <p className={styles['persistence-note']}>
-          Esta etapa prueba el flujo real y FSRS. La persistencia/offline llega en un hito
-          posterior.
+          Cada respuesta se guarda primero en este dispositivo. Si hay conexión, el outbox se
+          sincroniza en segundo plano sin bloquear la siguiente pregunta.
         </p>
       </div>
 
