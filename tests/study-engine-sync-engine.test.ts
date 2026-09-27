@@ -129,26 +129,26 @@ test(
 test(
   'transient transport failure preserves failed and later attempts for retry',
   async () => {
-  const store = new MemoryAttemptOutboxStore();
-  const transport = new FakeExactlyOnceTransport();
-  transport.failOnceFor = 'b';
-  await seed(store);
-  const engine = new StudyAttemptSyncEngine(store, transport);
+    const store = new MemoryAttemptOutboxStore();
+    const transport = new FakeExactlyOnceTransport();
+    transport.failOnceFor = 'b';
+    await seed(store);
+    const engine = new StudyAttemptSyncEngine(store, transport);
 
-  const first = await engine.flush();
-  assert.deepEqual(first, {
-    attempted: 2,
-    acknowledged: 1,
-    remaining: 2,
-    stoppedOn: 'transport-error',
-  });
-  assert.deepEqual(
-    (await store.listPendingAttempts()).map((value) => value.id),
-    ['b', 'c'],
-  );
+    const first = await engine.flush();
+    assert.deepEqual(first, {
+      attempted: 2,
+      acknowledged: 1,
+      remaining: 2,
+      stoppedOn: 'transport-error',
+    });
+    assert.deepEqual(
+      (await store.listPendingAttempts()).map((value) => value.id),
+      ['b', 'c'],
+    );
 
-  const retry = await engine.flush();
-  assert.equal(retry.remaining, 0);
+    const retry = await engine.flush();
+    assert.equal(retry.remaining, 0);
     assert.equal(transport.accepted.size, 3);
   },
 );
@@ -156,19 +156,19 @@ test(
 test(
   'conflicting idempotency payload never clears the local pending event',
   async () => {
-  const store = new MemoryAttemptOutboxStore();
-  const transport = new FakeExactlyOnceTransport();
-  const local = attempt('a', '2026-09-27T18:00:01.000Z');
-  await store.persistAttempt(local);
-  transport.accepted.set(local.idempotencyKey, {
-    ...structuredClone(local),
-    rating: 'again',
-  });
+    const store = new MemoryAttemptOutboxStore();
+    const transport = new FakeExactlyOnceTransport();
+    const local = attempt('a', '2026-09-27T18:00:01.000Z');
+    await store.persistAttempt(local);
+    transport.accepted.set(local.idempotencyKey, {
+      ...structuredClone(local),
+      rating: 'again',
+    });
 
-  const result = await new StudyAttemptSyncEngine(store, transport).flush();
+    const result = await new StudyAttemptSyncEngine(store, transport).flush();
 
-  assert.equal(result.stoppedOn, 'conflict');
-  assert.equal(result.remaining, 1);
+    assert.equal(result.stoppedOn, 'conflict');
+    assert.equal(result.remaining, 1);
     assert.equal((await store.listAttempts()).length, 1);
   },
 );
