@@ -45,7 +45,9 @@ export interface AttemptOutboxStore {
   markAttemptSynced(idempotencyKey: string): Promise<void>;
 }
 
-export function createStudyAttemptEvent(input: Omit<StudyAttemptEvent, 'responseTimeMs'>): StudyAttemptEvent {
+export function createStudyAttemptEvent(
+  input: Omit<StudyAttemptEvent, 'responseTimeMs'>,
+): StudyAttemptEvent {
   const shownAtMs = Date.parse(input.shownAt);
   const answeredAtMs = Date.parse(input.answeredAt);
   const responseTimeMs =
