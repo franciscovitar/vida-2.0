@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { SafeRichContent } from '@/components/study-engine/SafeRichContent';
 import {
   evaluateStudyResponse,
   STUDY_ENGINE_DEMO_ITEMS,
@@ -336,6 +337,7 @@ export function StudySession() {
             </div>
             <p className={styles.answer}>{item.answer}</p>
             <p className={styles.explanation}>{item.explanation}</p>
+            {item.richContent?.length ? <SafeRichContent blocks={item.richContent} /> : null}
             <div className={styles['rating-header']}>
               <span>¿Cómo fue la recuperación?</span>
               <ChevronRight size={16} aria-hidden="true" />
