@@ -176,3 +176,19 @@ test('route authenticates before creating the remote store', () => {
   assert.ok(storeIndex > authIndex);
   assert.match(source, /status:\s*401/);
 });
+
+
+test('HTTP transport exposes a bounded failure category without leaking response bodies', async () => {
+  const transport = new HttpStudyAttemptTransport(async () => {
+    return new Response(JSON.stringify({ error: 'private-provider-detail' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  });
+
+  await assert.rejects(
+    () => transport.sendAttempt(fixture('x', '2026-09-27T20:10:00.000Z')),
+    /study-attempt-sync-unavailable/,
+  );
+  assert.equal(transport.getLastFailure(), 'servidor');
+});
