@@ -10,10 +10,7 @@ import {
   attachStudyReconnectSync,
   type BrowserOnlineSource,
 } from '@/lib/study-engine/browser-sync';
-import type {
-  StudyAttemptSyncAck,
-  StudyAttemptTransport,
-} from '@/lib/study-engine/sync-engine';
+import type { StudyAttemptSyncAck, StudyAttemptTransport } from '@/lib/study-engine/sync-engine';
 
 class FakeOnlineSource implements BrowserOnlineSource {
   private listener: (() => void) | null = null;
