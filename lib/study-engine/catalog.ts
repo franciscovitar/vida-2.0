@@ -20,9 +20,7 @@ export interface StudyCatalogSubjectInput {
 }
 
 function record(value: unknown): JsonObject {
-  return value && typeof value === 'object' && !Array.isArray(value)
-    ? (value as JsonObject)
-    : {};
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as JsonObject) : {};
 }
 
 function stringValue(value: unknown): string | null {
@@ -292,10 +290,9 @@ export function matchSubjectProgress(
 ): StudySubjectWithProgress {
   const assessmentId = subject.assessment?.id;
   const progress = assessmentId
-    ? snapshots.find(
-        (snapshot) =>
-          snapshot.subjectId === subject.id && snapshot.assessmentId === assessmentId,
-      ) ?? null
+    ? (snapshots.find(
+        (snapshot) => snapshot.subjectId === subject.id && snapshot.assessmentId === assessmentId,
+      ) ?? null)
     : null;
 
   return { ...subject, progress };

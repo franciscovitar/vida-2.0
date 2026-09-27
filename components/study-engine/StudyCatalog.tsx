@@ -37,7 +37,7 @@ function readinessLabel(value: string | null): string {
     unmeasured: 'Sin medir',
     'baseline-unmeasured': 'Baseline sin medir',
   };
-  return value ? labels[value] ?? value : 'Sin medir';
+  return value ? (labels[value] ?? value) : 'Sin medir';
 }
 
 export function StudyCatalog({
@@ -76,8 +76,7 @@ export function StudyCatalog({
         {subjects.map((subject) => {
           const progress = subject.progress;
           const progressPercent = progress?.payload.progressPercent ?? null;
-          const readiness =
-            progress?.payload.readinessBand ?? subject.readinessBand ?? 'unknown';
+          const readiness = progress?.payload.readinessBand ?? subject.readinessBand ?? 'unknown';
 
           return (
             <details key={subject.id} className={styles.card}>

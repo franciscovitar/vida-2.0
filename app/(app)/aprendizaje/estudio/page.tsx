@@ -31,7 +31,12 @@ export default async function StudyEnginePage() {
         domain="learning"
         action={
           <>
-            <Button href="/aprendizaje/estudio/demo" variant="secondary" size="sm" iconLeft={FlaskConical}>
+            <Button
+              href="/aprendizaje/estudio/demo"
+              variant="secondary"
+              size="sm"
+              iconLeft={FlaskConical}
+            >
               Demo
             </Button>
             <Button href="/aprendizaje" variant="ghost" size="sm" iconLeft={ChevronLeft}>

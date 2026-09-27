@@ -1,11 +1,7 @@
 import type { AssessmentProgressSnapshot } from '@/types/assessment-progress';
 
 export type StudyCatalogLoadState =
-  | 'ready'
-  | 'degraded'
-  | 'unconfigured'
-  | 'unavailable'
-  | 'invalid';
+  'ready' | 'degraded' | 'unconfigured' | 'unavailable' | 'invalid';
 
 export type StudySubjectStructureStatus = 'resolved' | 'partial' | 'unresolved';
 

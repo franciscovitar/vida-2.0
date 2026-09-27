@@ -97,8 +97,7 @@ async function loadLiveCatalog(): Promise<StudyCatalogRead> {
     );
   }
 
-  const repository =
-    process.env.UNIVERSITY_CATALOG_GITHUB_REPOSITORY?.trim() || DEFAULT_REPOSITORY;
+  const repository = process.env.UNIVERSITY_CATALOG_GITHUB_REPOSITORY?.trim() || DEFAULT_REPOSITORY;
   const ref = process.env.UNIVERSITY_CATALOG_GITHUB_REF?.trim() || DEFAULT_REF;
 
   try {
@@ -114,7 +113,9 @@ async function loadLiveCatalog(): Promise<StudyCatalogRead> {
       .slice(0, MAX_SUBJECTS);
 
     if (subjectIds.length === 0) {
-      return fallbackRead('El catálogo canónico no devolvió materias; se mantiene el snapshot derivado.');
+      return fallbackRead(
+        'El catálogo canónico no devolvió materias; se mantiene el snapshot derivado.',
+      );
     }
 
     const subjects = await Promise.all(
@@ -153,7 +154,9 @@ async function loadLiveCatalog(): Promise<StudyCatalogRead> {
       .sort((left, right) => left.name.localeCompare(right.name, 'es'));
 
     if (active.length === 0) {
-      return fallbackRead('No se pudieron resolver materias activas; se mantiene el snapshot derivado.');
+      return fallbackRead(
+        'No se pudieron resolver materias activas; se mantiene el snapshot derivado.',
+      );
     }
 
     return {
