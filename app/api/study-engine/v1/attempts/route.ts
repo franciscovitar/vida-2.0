@@ -1,6 +1,7 @@
 import { verifySession } from '@/lib/auth/dal';
 import { handleStudyAttemptPost } from '@/lib/study-engine/attempt-api';
 import { createStudyRemoteAttemptStoreFromEnv } from '@/lib/study-engine/remote-attempt-store';
+import { createLearningEvidenceBridgeFromEnv } from '@/lib/study-engine/learning-evidence-sheet';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -27,5 +28,6 @@ export async function POST(request: Request) {
     });
   }
 
-  return handleStudyAttemptPost(request, session.userId, store);
+  const evidenceBridge = createLearningEvidenceBridgeFromEnv();
+  return handleStudyAttemptPost(request, session.userId, store, evidenceBridge);
 }
