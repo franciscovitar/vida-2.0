@@ -5,6 +5,7 @@ import type { HouseholdReplenishmentSheetsConfig } from './sheets-config';
 import type {
   CorrectionEvent,
   Household,
+  ProductVariant,
   PurchaseEvent,
   ReplenishmentNeed,
   ShoppingListItem,
@@ -47,6 +48,12 @@ const TABS = {
       'created_at',
     ],
   },
+  variants: {
+    title: 'Variants',
+    sheetId: 1002,
+    range: 'A:H',
+    headers: ['id', 'need_id', 'name', 'brand', 'gtin', 'pack_size', 'unit', 'preferred'],
+  },
   shoppingItems: {
     title: 'ShoppingItems',
     sheetId: 1003,
@@ -56,7 +63,7 @@ const TABS = {
   purchaseEvents: {
     title: 'PurchaseEvents',
     sheetId: 1004,
-    range: 'A:G',
+    range: 'A:H',
     headers: [
       'id',
       'household_id',
@@ -65,6 +72,7 @@ const TABS = {
       'source',
       'created_by',
       'operation_id',
+      'variant_id',
     ],
   },
   correctionEvents: {
@@ -277,6 +285,24 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
     });
   }
 
+  private parseVariants(values: unknown[][]): RowRecord<ProductVariant>[] {
+    return this.rows(values, (row) => {
+      const id = asString(row[0]).trim();
+      const needId = asString(row[1]).trim();
+      if (!id || !needId) return null;
+      return {
+        id,
+        needId,
+        name: asString(row[2]).trim(),
+        brand: asString(row[3]).trim() || null,
+        gtin: asString(row[4]).trim() || null,
+        packSize: asNullableNumber(row[5]),
+        unit: asString(row[6]).trim() || null,
+        preferred: asBoolean(row[7]),
+      };
+    });
+  }
+
   private parseShoppingItems(values: unknown[][]): RowRecord<ShoppingListItem>[] {
     return this.rows(values, (row) => {
       const id = asString(row[0]).trim();
@@ -311,6 +337,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
         id,
         householdId,
         needId,
+        variantId: asString(row[7]).trim() || null,
         purchasedAt: asString(row[3]).trim(),
         source: source as PurchaseEvent['source'],
         createdBy: asString(row[5]).trim(),
@@ -397,6 +424,50 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
     else this.stageAppend('needs', values);
   }
 
+  async listVariants(householdId: string, needId?: string): Promise<ProductVariant[]> {
+    const ownedNeedIds = new Set((await this.listNeeds(householdId)).map((need) => need.id));
+    return this.parseVariants(await this.readTab('variants'))
+      .map((row) => row.value)
+      .filter(
+        (variant) =>
+          ownedNeedIds.has(variant.needId) && (needId == null || variant.needId === needId),
+      );
+  }
+
+  async findVariantByName(
+    householdId: string,
+    needId: string,
+    normalizedName: string,
+  ): Promise<ProductVariant | null> {
+    return (
+      (await this.listVariants(householdId, needId)).find(
+        (variant) => normalizeName(variant.name) === normalizedName,
+      ) ?? null
+    );
+  }
+
+  async putVariant(householdId: string, variant: ProductVariant): Promise<void> {
+    const need = await this.getNeed(householdId, variant.needId);
+    if (!need) {
+      throw new Error('Product variant does not belong to the requested household');
+    }
+
+    const rows = this.parseVariants(await this.readTab('variants'));
+    const existing = rows.find((row) => row.value.id === variant.id);
+    const values = [
+      variant.id,
+      variant.needId,
+      variant.name,
+      variant.brand,
+      variant.gtin,
+      variant.packSize,
+      variant.unit,
+      variant.preferred,
+    ] as const;
+    if (existing) this.stageUpdate('variants', existing.rowNumber, values);
+    else this.stageAppend('variants', values);
+  }
+
   async listShoppingItems(householdId: string): Promise<ShoppingListItem[]> {
     return this.parseShoppingItems(await this.readTab('shoppingItems'))
       .map((row) => row.value)
@@ -436,6 +507,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
       event.source,
       event.createdBy,
       event.operationId,
+      event.variantId,
     ]);
   }
 

@@ -115,6 +115,7 @@ export async function POST(request: Request) {
       result = await householdRuntime.service.markBought({
         householdId: access.householdId,
         needId: typeof body.needId === 'string' ? body.needId : '',
+        variantName: typeof body.variantName === 'string' ? body.variantName : null,
         operationId,
         principalId: access.principalId,
       });

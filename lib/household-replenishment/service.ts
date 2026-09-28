@@ -4,6 +4,8 @@ import { estimateCadence } from './engine';
 import type { ReplenishmentRepository } from './repository';
 import type {
   CorrectionEvent,
+  ProductVariant,
+  PurchaseEvent,
   ReplenishmentListEntry,
   ReplenishmentMutationResult,
   ReplenishmentSnapshot,
@@ -26,10 +28,12 @@ function normalizeNeedName(value: string): string {
     .replace(/\s+/g, ' ');
 }
 
-function latestPurchasedAt(events: { purchasedAt: string }[]): string | null {
-  return (
-    [...events].sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt))[0]?.purchasedAt ?? null
-  );
+function normalizeVariantName(value: string): string {
+  return normalizeNeedName(value);
+}
+
+function latestPurchase(events: PurchaseEvent[]): PurchaseEvent | null {
+  return [...events].sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt))[0] ?? null;
 }
 
 function sortEntries(entries: ReplenishmentListEntry[]): ReplenishmentListEntry[] {
@@ -143,6 +147,7 @@ export class ReplenishmentService {
   async markBought(input: {
     householdId: string;
     needId: string;
+    variantName?: string | null;
     operationId: string;
     principalId: string;
   }): Promise<ReplenishmentMutationResult> {
@@ -165,6 +170,37 @@ export class ReplenishmentService {
       return { ok: true, code: 'existing', snapshot: currentSnapshot };
     }
 
+    const trimmedVariantName = input.variantName?.trim() ?? '';
+    if (trimmedVariantName.length > 100) {
+      return { ok: false, code: 'invalid-input', message: 'La variante es demasiado larga.' };
+    }
+
+    let variantId: string | null = null;
+    if (trimmedVariantName) {
+      let variant = await this.repository.findVariantByName(
+        input.householdId,
+        need.id,
+        normalizeVariantName(trimmedVariantName),
+      );
+
+      if (!variant) {
+        const existingVariants = await this.repository.listVariants(input.householdId, need.id);
+        variant = {
+          id: this.id(),
+          needId: need.id,
+          name: trimmedVariantName,
+          brand: null,
+          gtin: null,
+          packSize: null,
+          unit: null,
+          preferred: existingVariants.length === 0,
+        } satisfies ProductVariant;
+        await this.repository.putVariant(input.householdId, variant);
+      }
+
+      variantId = variant.id;
+    }
+
     const items = await this.repository.listShoppingItems(input.householdId);
     const activeItems = items.filter((item) => item.needId === need.id && item.state === 'ACTIVE');
     const source: ShoppingListOrigin = activeItems[0]?.origin ?? 'AUTO';
@@ -178,6 +214,7 @@ export class ReplenishmentService {
       id: this.id(),
       householdId: input.householdId,
       needId: need.id,
+      variantId,
       purchasedAt: timestamp,
       source,
       createdBy: input.principalId,
@@ -238,8 +275,9 @@ export class ReplenishmentService {
       return { householdName: 'Lista de casa', buy: [], watch: [] };
     }
 
-    const [needs, items, purchases, corrections] = await Promise.all([
+    const [needs, variants, items, purchases, corrections] = await Promise.all([
       this.repository.listNeeds(householdId),
+      this.repository.listVariants(householdId),
       this.repository.listShoppingItems(householdId),
       this.repository.listPurchaseEvents(householdId),
       this.repository.listCorrectionEvents(householdId),
@@ -258,7 +296,27 @@ export class ReplenishmentService {
         now,
       });
       const activeItem = items.find((item) => item.needId === need.id && item.state === 'ACTIVE');
-      const lastPurchase = latestPurchasedAt(needPurchases);
+      const needVariants = variants
+        .filter((variant) => variant.needId === need.id)
+        .sort(
+          (a, b) =>
+            Number(b.preferred) - Number(a.preferred) || a.name.localeCompare(b.name, 'es'),
+        );
+      const lastPurchase = latestPurchase(needPurchases);
+      const lastVariant =
+        lastPurchase?.variantId == null
+          ? null
+          : needVariants.find((variant) => variant.id === lastPurchase.variantId) ?? null;
+      const variantFields = {
+        lastPurchasedAt: lastPurchase?.purchasedAt ?? null,
+        lastPurchasedVariantId: lastVariant?.id ?? null,
+        lastPurchasedVariantName: lastVariant?.name ?? null,
+        variants: needVariants.map((variant) => ({
+          id: variant.id,
+          name: variant.name,
+          preferred: variant.preferred,
+        })),
+      };
 
       if (activeItem) {
         buy.push({
@@ -270,7 +328,7 @@ export class ReplenishmentService {
           reason: activeItem.origin === 'MANUAL' ? 'Agregado manualmente' : 'Marcado para comprar',
           expectedIntervalDays: estimate.expectedIntervalDays,
           nextExpectedAt: estimate.nextExpectedAt,
-          lastPurchasedAt: lastPurchase,
+          ...variantFields,
         });
         continue;
       }
@@ -293,7 +351,7 @@ export class ReplenishmentService {
                   : 'Reposición estimada',
           expectedIntervalDays: estimate.expectedIntervalDays,
           nextExpectedAt: estimate.nextExpectedAt,
-          lastPurchasedAt: lastPurchase,
+          ...variantFields,
         });
       } else if (estimate.state === 'WATCH') {
         watch.push({
@@ -307,7 +365,7 @@ export class ReplenishmentService {
             : 'Podría tocar pronto',
           expectedIntervalDays: estimate.expectedIntervalDays,
           nextExpectedAt: estimate.nextExpectedAt,
-          lastPurchasedAt: lastPurchase,
+          ...variantFields,
         });
       }
     }
