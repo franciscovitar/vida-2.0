@@ -22,8 +22,15 @@ export type VerifyHouseholdAccessResult =
   | VerifiedHouseholdAccess
   | { ok: false; reason: 'unauthenticated' | 'email-not-allowed' };
 
+type HouseholdSession = {
+  user?: {
+    id?: string | null;
+    email?: string | null;
+  } | null;
+} | null;
+
 export async function verifyHouseholdAccess(): Promise<VerifyHouseholdAccessResult> {
-  let session: Awaited<ReturnType<typeof auth>> = null;
+  let session: HouseholdSession = null;
   try {
     session = await auth();
   } catch {
