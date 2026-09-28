@@ -10,6 +10,29 @@ export const metadata: Metadata = { title: 'Lista del hogar' };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function HouseholdReplenishmentContent({
+  householdId,
+  service,
+}: {
+  householdId: string;
+  service: ReturnType<typeof getHouseholdReplenishmentRuntime> extends infer Runtime
+    ? Runtime extends { state: 'ready'; service: infer Service }
+      ? Service
+      : never
+    : never;
+}) {
+  try {
+    return <ShoppingList initialSnapshot={await service.snapshot(householdId)} />;
+  } catch {
+    return (
+      <section className={styles.unavailable}>
+        <strong>No pudimos leer la lista compartida.</strong>
+        <p>La planilla operativa no respondió correctamente. Probá de nuevo en unos minutos.</p>
+      </section>
+    );
+  }
+}
+
 export default async function HouseholdReplenishmentPage() {
   const access = await requireHouseholdAccess();
   const householdRuntime = getHouseholdReplenishmentRuntime();
@@ -26,8 +49,9 @@ export default async function HouseholdReplenishmentPage() {
       </header>
 
       {householdRuntime.state === 'ready' ? (
-        <ShoppingList
-          initialSnapshot={await householdRuntime.service.snapshot(access.householdId)}
+        <HouseholdReplenishmentContent
+          householdId={access.householdId}
+          service={householdRuntime.service}
         />
       ) : (
         <section className={styles.unavailable}>

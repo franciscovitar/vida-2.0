@@ -48,10 +48,21 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json({
-    ok: true,
-    snapshot: await householdRuntime.service.snapshot(access.householdId),
-  });
+  try {
+    return NextResponse.json({
+      ok: true,
+      snapshot: await householdRuntime.service.snapshot(access.householdId),
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: 'storage-error',
+        message: 'No se pudo leer la lista compartida.',
+      },
+      { status: 503 },
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -87,8 +98,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'invalid-operation-id' }, { status: 400 });
   }
 
-  let result: ReplenishmentMutationResult;
-  if (body.action === 'add') {
+  try {
+    let result: ReplenishmentMutationResult;
+    if (body.action === 'add') {
     const seedIntervalDays =
       typeof body.seedIntervalDays === 'number' ? body.seedIntervalDays : null;
     result = await householdRuntime.service.addManualNeed({
@@ -117,16 +129,26 @@ export async function POST(request: Request) {
       operationId,
       principalId: access.principalId,
     });
-  } else {
-    return NextResponse.json({ ok: false, error: 'invalid-action' }, { status: 400 });
-  }
+    } else {
+      return NextResponse.json({ ok: false, error: 'invalid-action' }, { status: 400 });
+    }
 
-  if (!result.ok) {
+    if (!result.ok) {
+      return NextResponse.json(
+        { ok: false, error: result.code, message: result.message },
+        { status: failureStatus(result.code) },
+      );
+    }
+
+    return NextResponse.json(result);
+  } catch {
     return NextResponse.json(
-      { ok: false, error: result.code, message: result.message },
-      { status: failureStatus(result.code) },
+      {
+        ok: false,
+        error: 'storage-error',
+        message: 'No se pudo guardar el cambio en la lista compartida.',
+      },
+      { status: 503 },
     );
   }
-
-  return NextResponse.json(result);
 }

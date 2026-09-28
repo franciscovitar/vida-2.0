@@ -1,7 +1,9 @@
 import 'server-only';
 
+import { GoogleSheetsReplenishmentRepository } from './google-sheets-store';
 import { MemoryReplenishmentRepository } from './memory-store';
 import { ReplenishmentService } from './service';
+import { getHouseholdReplenishmentSheetsConfig } from './sheets-config';
 
 export const PRIMARY_HOUSEHOLD_ID = 'primary-household';
 
@@ -47,6 +49,23 @@ export function getHouseholdReplenishmentRuntime(
   }
 
   const source = env.HOUSEHOLD_REPLENISHMENT_DATA_SOURCE?.trim().toLowerCase();
+
+  if (source === 'google-sheets') {
+    const config = getHouseholdReplenishmentSheetsConfig(env);
+    if (!config) {
+      return {
+        state: 'not-configured',
+        notice: 'Falta configurar la planilla operativa de reposición del hogar.',
+      };
+    }
+
+    return {
+      state: 'ready',
+      householdId: PRIMARY_HOUSEHOLD_ID,
+      service: new ReplenishmentService(new GoogleSheetsReplenishmentRepository(config)),
+    };
+  }
+
   if (source !== 'memory') {
     return {
       state: 'not-configured',
