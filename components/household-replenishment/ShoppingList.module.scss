@@ -1,0 +1,246 @@
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.add-card,
+.section {
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.add-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.eyebrow {
+  margin-bottom: 0.15rem;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.add-card h2,
+.section h2 {
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.add-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.65rem 0.75rem;
+  color: var(--text);
+  font: inherit;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.primary-button,
+.actions button,
+.watch-list button {
+  min-height: 42px;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.primary-button,
+.actions .bought-button {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.primary-button:disabled,
+.actions button:disabled,
+.watch-list button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.notice {
+  padding: 0.7rem 0.85rem;
+  color: var(--c-danger);
+  font-size: 0.82rem;
+  background: var(--c-danger-soft);
+  border: 1px solid var(--c-danger-border);
+  border-radius: var(--radius);
+}
+
+.section {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.section-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.count {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+}
+
+.empty {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.empty strong {
+  color: var(--text);
+}
+
+.empty span,
+.watch-empty {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.item {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.item-main {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.item-main p {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.item-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.category {
+  padding: 0.15rem 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.watch-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.watch-list li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.watch-list li:first-child {
+  border-top: 0;
+}
+
+.watch-list p {
+  margin-top: 0.15rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+@media (width >= 720px) {
+  .add-card {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
+    align-items: end;
+  }
+
+  .add-form {
+    grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.8fr) auto;
+    align-items: end;
+  }
+
+  .item {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+    align-items: center;
+  }
+
+  .actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

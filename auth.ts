@@ -6,7 +6,7 @@ import {
   isEmailAuthorized,
   LOGIN_GOOGLE_SCOPES,
   normalizeEmail,
-  resolveAllowedEmails,
+  resolveIdentityAllowedEmails,
 } from '@/lib/auth/authorize';
 
 /**
@@ -52,7 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      const allowedEmails = resolveAllowedEmails(process.env);
+      const allowedEmails = resolveIdentityAllowedEmails(process.env);
       const emailVerified =
         typeof profile === 'object' && profile !== null && 'email_verified' in profile
           ? Boolean((profile as { email_verified?: boolean }).email_verified)
@@ -79,7 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       delete (token as { access_token?: unknown }).access_token;
       delete (token as { refresh_token?: unknown }).refresh_token;
 
-      const allowed = resolveAllowedEmails(process.env);
+      const allowed = resolveIdentityAllowedEmails(process.env);
       if (token.email && !isEmailAuthorized(String(token.email), allowed)) {
         return { ...token, email: undefined, sub: undefined };
       }

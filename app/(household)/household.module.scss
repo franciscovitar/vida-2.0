@@ -1,0 +1,37 @@
+.shell {
+  min-height: 100svh;
+  background: var(--bg);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.header-inner {
+  display: flex;
+  width: min(100% - 2rem, 820px);
+  min-height: 56px;
+  margin: 0 auto;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.brand {
+  font-weight: 800;
+}
+
+.context {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.main {
+  width: min(100% - 1.25rem, 820px);
+  margin: 0 auto;
+  padding: 1rem 0 3rem;
+}

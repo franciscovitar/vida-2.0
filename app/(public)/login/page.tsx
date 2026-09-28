@@ -2,7 +2,12 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { auth, signIn } from '@/auth';
-import { isAuthConfigured, isEmailAuthorized, resolveAllowedEmails } from '@/lib/auth/authorize';
+import {
+  isAuthConfigured,
+  isEmailAuthorized,
+  resolveAllowedEmails,
+  resolveHouseholdMemberEmails,
+} from '@/lib/auth/authorize';
 
 import styles from './login.module.scss';
 
@@ -29,8 +34,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const session = await auth();
   const allowed = resolveAllowedEmails(process.env);
+  const householdMembers = resolveHouseholdMemberEmails(process.env);
   if (session?.user?.email && isEmailAuthorized(session.user.email, allowed)) {
     redirect('/');
+  }
+  if (session?.user?.email && isEmailAuthorized(session.user.email, householdMembers)) {
+    redirect('/hogar/reposicion');
   }
 
   const configured = isAuthConfigured(process.env);
