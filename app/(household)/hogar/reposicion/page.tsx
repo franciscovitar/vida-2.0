@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { ShoppingList } from '@/components/household-replenishment/ShoppingList';
 import { requireHouseholdAccess } from '@/lib/household-replenishment/access';
 import { getHouseholdReplenishmentRuntime } from '@/lib/household-replenishment/runtime';
+import type { ReplenishmentService } from '@/lib/household-replenishment/service';
 
 import styles from './page.module.scss';
 
@@ -15,11 +16,7 @@ async function HouseholdReplenishmentContent({
   service,
 }: {
   householdId: string;
-  service: ReturnType<typeof getHouseholdReplenishmentRuntime> extends infer Runtime
-    ? Runtime extends { state: 'ready'; service: infer Service }
-      ? Service
-      : never
-    : never;
+  service: ReplenishmentService;
 }) {
   try {
     return <ShoppingList initialSnapshot={await service.snapshot(householdId)} />;
