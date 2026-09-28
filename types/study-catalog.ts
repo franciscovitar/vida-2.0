@@ -39,6 +39,7 @@ export interface StudyCatalogSubject {
   topics: readonly StudyCatalogTopic[];
   readinessBand: string | null;
   updated: string | null;
+  studyRuntimeAvailable: boolean;
 }
 
 export interface StudyCatalogSnapshot {

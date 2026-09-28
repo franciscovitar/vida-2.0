@@ -4,7 +4,10 @@ import { Check, RefreshCw, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
-import { createStudyAttemptEvent } from '@/lib/study-engine/attempt-store';
+import {
+  createStudyAttemptEvent,
+  latestAttemptForStudyItem,
+} from '@/lib/study-engine/attempt-store';
 import {
   attachStudyReconnectSync,
   type StudyReconnectController,
@@ -191,8 +194,13 @@ function RatingButtons({
   );
 }
 
-export function StudySession() {
-  const items = STUDY_ENGINE_DEMO_ITEMS;
+export function StudySession({
+  items = STUDY_ENGINE_DEMO_ITEMS,
+  modeLabel = 'Demo funcional',
+}: {
+  items?: readonly StudyItem[];
+  modeLabel?: string;
+}) {
   const [index, setIndex] = useState(0);
   const [response, setResponse] = useState('');
   const [revealed, setRevealed] = useState(false);
@@ -278,9 +286,13 @@ export function StudySession() {
 
     try {
       const now = new Date();
-      const seenBefore = schedulerStates.current.has(item.id);
+      const persistedAttempts = await attemptStore.listAttempts();
+      const latestPersisted = latestAttemptForStudyItem(persistedAttempts, item.id);
+      const seenBefore = Boolean(latestPersisted);
       const currentState =
-        schedulerStates.current.get(item.id) ?? scheduler.createInitialState(now);
+        schedulerStates.current.get(item.id) ??
+        latestPersisted?.schedulerStateAfter ??
+        scheduler.createInitialState(now);
       const transition = scheduler.review(currentState, now, rating);
       const successful = correctness ?? ratingRepresentsSuccessfulRecall(rating);
       const attemptId = crypto.randomUUID();
@@ -293,12 +305,12 @@ export function StudySession() {
         sessionId: sessionId.current,
         studyItemId: item.id,
         itemVersion: item.version,
-        reviewUnitId: 'study-engine-demo:' + item.id,
+        reviewUnitId: item.subjectId + ':' + item.id,
         subjectId: item.subjectId,
         conceptId: item.conceptId,
         facetId: null,
         operation: item.operation,
-        channel: 'theoretical',
+        channel: item.channel ?? 'theoretical',
         shownAt: new Date(shownAtMs.current ?? now.getTime()).toISOString(),
         answeredAt: now.toISOString(),
         response: item.itemType === 'recall' ? null : response,
@@ -399,7 +411,7 @@ export function StudySession() {
     <div className={styles.session}>
       <div className={styles['session-header']}>
         <div className={styles['status-row']}>
-          <span className={styles['demo-badge']}>Demo funcional</span>
+          <span className={styles['demo-badge']}>{modeLabel}</span>
           <span>{TYPE_LABELS[item.itemType]}</span>
           <span>
             {index + 1}/{items.length}

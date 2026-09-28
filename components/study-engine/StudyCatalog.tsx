@@ -1,5 +1,6 @@
-import { BookOpen, ChevronDown, CircleAlert, Layers3 } from 'lucide-react';
+import { BookOpen, ChevronDown, CircleAlert, Layers3, Play } from 'lucide-react';
 
+import { Button } from '@/components/ui/Button';
 import { matchSubjectProgress } from '@/lib/study-engine/catalog';
 import type { AssessmentProgressRead } from '@/types/assessment-progress';
 import type { StudyCatalogRead, StudyCatalogSubject } from '@/types/study-catalog';
@@ -163,6 +164,17 @@ export function StudyCatalog({
                   <p className={styles.next}>
                     <strong>Próximo recomendado:</strong> {progress.payload.nextBestActivity}
                   </p>
+                ) : null}
+
+                {subject.studyRuntimeAvailable ? (
+                  <Button
+                    href={`/aprendizaje/estudio/${subject.id}`}
+                    variant="primary"
+                    size="sm"
+                    iconLeft={Play}
+                  >
+                    Empezar sesión
+                  </Button>
                 ) : null}
               </div>
             </details>

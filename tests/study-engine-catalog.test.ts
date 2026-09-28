@@ -148,3 +148,17 @@ test('assessment progress only attaches to the exact subject + assessment pair',
     null,
   );
 });
+
+test('canonical runtime file marks a subject as Study Engine ready', () => {
+  const subject = buildStudyCatalogSubject({
+    subjectId: 'dsi',
+    subject: { name: 'DSI', status: 'active' },
+    current: { current_unit: 'P2' },
+    blueprint: { assessment_id: 'dsi-2026-p2' },
+    conceptInventory: { source_scope_status: 'incomplete' },
+    readiness: {},
+    learningFiles: ['study_engine_items_v1.json'],
+  });
+
+  assert.equal(subject.studyRuntimeAvailable, true);
+});

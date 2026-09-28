@@ -3,8 +3,8 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "eb5d9f3ac059907aa5536849b68f4c289a9ff074",
-    "generatedAt": "2026-09-27",
+    "commit": "ca3f3221edec3f679845398820d2c77a027edec5",
+    "generatedAt": "2026-09-28",
     "canonicalRoot": "AI/projects/university/subjects"
   },
   "subjects": [
@@ -25,7 +25,8 @@
       "conceptCount": 0,
       "topics": [],
       "readinessBand": "not-ready",
-      "updated": "2026-09-17"
+      "updated": "2026-09-17",
+      "studyRuntimeAvailable": false
     },
     {
       "id": "dao",
@@ -44,7 +45,8 @@
       "conceptCount": 0,
       "topics": [],
       "readinessBand": "not-ready",
-      "updated": "2026-09-17"
+      "updated": "2026-09-17",
+      "studyRuntimeAvailable": false
     },
     {
       "id": "dsi",
@@ -125,7 +127,8 @@
         }
       ],
       "readinessBand": "not-ready",
-      "updated": "2026-09-17"
+      "updated": "2026-09-17",
+      "studyRuntimeAvailable": true
     },
     {
       "id": "green",
@@ -138,7 +141,8 @@
       "conceptCount": 0,
       "topics": [],
       "readinessBand": "not-ready",
-      "updated": "2026-09-17"
+      "updated": "2026-09-17",
+      "studyRuntimeAvailable": false
     },
     {
       "id": "iop",
@@ -176,7 +180,8 @@
         }
       ],
       "readinessBand": "baseline-unmeasured",
-      "updated": "2026-09-27"
+      "updated": "2026-09-27",
+      "studyRuntimeAvailable": false
     },
     {
       "id": "redes",
@@ -274,7 +279,8 @@
         }
       ],
       "readinessBand": "unmeasured",
-      "updated": "2026-09-27"
+      "updated": "2026-09-27",
+      "studyRuntimeAvailable": false
     },
     {
       "id": "tpa",
@@ -287,7 +293,8 @@
       "conceptCount": 0,
       "topics": [],
       "readinessBand": "not-ready",
-      "updated": "2026-09-17"
+      "updated": "2026-09-17",
+      "studyRuntimeAvailable": false
     }
   ]
 }

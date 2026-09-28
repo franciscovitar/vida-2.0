@@ -281,6 +281,7 @@ export function buildStudyCatalogSubject(input: StudyCatalogSubjectInput): Study
       stringValue(readiness.updated) ??
       stringValue(current.updated) ??
       stringValue(subject.last_reviewed),
+    studyRuntimeAvailable: input.learningFiles.includes('study_engine_items_v1.json'),
   };
 }
 
