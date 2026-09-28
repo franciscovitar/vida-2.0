@@ -100,35 +100,37 @@ export async function POST(request: Request) {
 
   try {
     let result: ReplenishmentMutationResult;
+
     if (body.action === 'add') {
-    const seedIntervalDays =
-      typeof body.seedIntervalDays === 'number' ? body.seedIntervalDays : null;
-    result = await householdRuntime.service.addManualNeed({
-      householdId: access.householdId,
-      name: typeof body.name === 'string' ? body.name : '',
-      seedIntervalDays,
-      operationId,
-      principalId: access.principalId,
-    });
-  } else if (body.action === 'bought') {
-    result = await householdRuntime.service.markBought({
-      householdId: access.householdId,
-      needId: typeof body.needId === 'string' ? body.needId : '',
-      operationId,
-      principalId: access.principalId,
-    });
-  } else if (body.action === 'correct') {
-    const type = correctionTypeFrom(body.type);
-    if (!type) {
-      return NextResponse.json({ ok: false, error: 'invalid-correction' }, { status: 400 });
-    }
-    result = await householdRuntime.service.correctNeed({
-      householdId: access.householdId,
-      needId: typeof body.needId === 'string' ? body.needId : '',
-      type,
-      operationId,
-      principalId: access.principalId,
-    });
+      const seedIntervalDays =
+        typeof body.seedIntervalDays === 'number' ? body.seedIntervalDays : null;
+      result = await householdRuntime.service.addManualNeed({
+        householdId: access.householdId,
+        name: typeof body.name === 'string' ? body.name : '',
+        seedIntervalDays,
+        operationId,
+        principalId: access.principalId,
+      });
+    } else if (body.action === 'bought') {
+      result = await householdRuntime.service.markBought({
+        householdId: access.householdId,
+        needId: typeof body.needId === 'string' ? body.needId : '',
+        operationId,
+        principalId: access.principalId,
+      });
+    } else if (body.action === 'correct') {
+      const type = correctionTypeFrom(body.type);
+      if (!type) {
+        return NextResponse.json({ ok: false, error: 'invalid-correction' }, { status: 400 });
+      }
+
+      result = await householdRuntime.service.correctNeed({
+        householdId: access.householdId,
+        needId: typeof body.needId === 'string' ? body.needId : '',
+        type,
+        operationId,
+        principalId: access.principalId,
+      });
     } else {
       return NextResponse.json({ ok: false, error: 'invalid-action' }, { status: 400 });
     }
