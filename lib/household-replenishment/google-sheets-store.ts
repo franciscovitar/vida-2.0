@@ -71,15 +71,7 @@ const TABS = {
     title: 'CorrectionEvents',
     sheetId: 1005,
     range: 'A:G',
-    headers: [
-      'id',
-      'household_id',
-      'need_id',
-      'type',
-      'occurred_at',
-      'created_by',
-      'operation_id',
-    ],
+    headers: ['id', 'household_id', 'need_id', 'type', 'occurred_at', 'created_by', 'operation_id'],
   },
   operations: {
     title: 'Operations',
@@ -153,12 +145,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
     this.fetchImpl = deps.fetchImpl ?? fetch;
     this.tokenProvider =
       deps.tokenProvider ??
-      (() =>
-        fetchAccessToken(
-          this.config.clientEmail,
-          this.config.privateKey,
-          SPREADSHEETS_SCOPE,
-        ));
+      (() => fetchAccessToken(this.config.clientEmail, this.config.privateKey, SPREADSHEETS_SCOPE));
     this.now = deps.now ?? (() => new Date());
   }
 
@@ -199,10 +186,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
     return values;
   }
 
-  private rows<T>(
-    values: unknown[][],
-    parser: (row: unknown[]) => T | null,
-  ): RowRecord<T>[] {
+  private rows<T>(values: unknown[][], parser: (row: unknown[]) => T | null): RowRecord<T>[] {
     const result: RowRecord<T>[] = [];
     for (let index = 1; index < values.length; index += 1) {
       const value = parser(values[index] ?? []);
@@ -342,9 +326,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
       const needId = asString(row[2]).trim();
       const type = asString(row[3]).trim();
       if (!id || !householdId || !needId) return null;
-      if (
-        !['STILL_HAVE', 'LOW', 'OUT', 'SNOOZE', 'MANUAL_ADD', 'ALREADY_BOUGHT'].includes(type)
-      ) {
+      if (!['STILL_HAVE', 'LOW', 'OUT', 'SNOOZE', 'MANUAL_ADD', 'ALREADY_BOUGHT'].includes(type)) {
         return null;
       }
       return {
@@ -394,8 +376,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
       this.parseNeeds(await this.readTab('needs'))
         .map((row) => row.value)
         .find(
-          (need) =>
-            need.householdId === householdId && normalizeName(need.name) === normalizedName,
+          (need) => need.householdId === householdId && normalizeName(need.name) === normalizedName,
         ) ?? null
     );
   }
@@ -442,8 +423,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
     return this.parsePurchaseEvents(await this.readTab('purchaseEvents'))
       .map((row) => row.value)
       .filter(
-        (event) =>
-          event.householdId === householdId && (needId == null || event.needId === needId),
+        (event) => event.householdId === householdId && (needId == null || event.needId === needId),
       );
   }
 
@@ -459,10 +439,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
     ]);
   }
 
-  async listCorrectionEvents(
-    householdId: string,
-    needId?: string,
-  ): Promise<CorrectionEvent[]> {
+  async listCorrectionEvents(householdId: string, needId?: string): Promise<CorrectionEvent[]> {
     return this.parseCorrectionEvents(await this.readTab('correctionEvents'))
       .map((row) => row.value)
       .filter(

@@ -19,15 +19,7 @@ const HEADERS = {
     'active',
     'created_at',
   ],
-  ShoppingItems: [
-    'id',
-    'household_id',
-    'need_id',
-    'origin',
-    'state',
-    'added_at',
-    'operation_id',
-  ],
+  ShoppingItems: ['id', 'household_id', 'need_id', 'origin', 'state', 'added_at', 'operation_id'],
   Operations: ['household_id', 'operation_id', 'recorded_at'],
 } as const;
 
@@ -40,11 +32,7 @@ function jsonResponse(body: unknown, status = 200) {
 
 function tabFromUrl(input: string | URL | Request): string | null {
   const url =
-    typeof input === 'string'
-      ? input
-      : input instanceof URL
-        ? input.toString()
-        : input.url;
+    typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
   const marker = '/values/';
   const index = url.indexOf(marker);
   if (index < 0) return null;
