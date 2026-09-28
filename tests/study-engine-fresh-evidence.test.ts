@@ -206,3 +206,78 @@ test('Learning evidence writes require dedicated spreadsheet id and explicit gat
     'learning_sheet_example_1234567890',
   );
 });
+
+
+test('real subject API sync fails closed when Learning OS evidence bridge is unavailable', async () => {
+  const { handleStudyAttemptPost } = await import('@/lib/study-engine/attempt-api');
+  const store = {
+    async acceptAttempt(attemptUserId: string, attempt: StudyAttemptEvent) {
+      void attemptUserId;
+      return { idempotencyKey: attempt.idempotencyKey, status: 'accepted' as const };
+    },
+    async countAttempts() {
+      return 1;
+    },
+  };
+
+  const attempt = fixture();
+  const response = await handleStudyAttemptPost(
+    new Request('https://vida.test/api/study-engine/v1/attempts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': attempt.idempotencyKey,
+      },
+      body: JSON.stringify({ attempt }),
+    }),
+    'user-1',
+    store,
+    null,
+  );
+
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), {
+    ok: false,
+    error: 'learning-evidence-unavailable',
+  });
+});
+
+test('real subject API sync acknowledges only after FreshEvidence write succeeds', async () => {
+  const { handleStudyAttemptPost } = await import('@/lib/study-engine/attempt-api');
+  const store = {
+    async acceptAttempt(attemptUserId: string, attempt: StudyAttemptEvent) {
+      void attemptUserId;
+      return { idempotencyKey: attempt.idempotencyKey, status: 'accepted' as const };
+    },
+    async countAttempts() {
+      return 1;
+    },
+  };
+  const bridge = {
+    async recordAttempt() {
+      return { status: 'written' as const, evidenceId: 'study-engine:attempt-1' };
+    },
+  };
+
+  const attempt = fixture();
+  const response = await handleStudyAttemptPost(
+    new Request('https://vida.test/api/study-engine/v1/attempts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': attempt.idempotencyKey,
+      },
+      body: JSON.stringify({ attempt }),
+    }),
+    'user-1',
+    store,
+    bridge,
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    ok: true,
+    idempotencyKey: attempt.idempotencyKey,
+    status: 'accepted',
+  });
+});
