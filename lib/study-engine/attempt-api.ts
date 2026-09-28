@@ -1,5 +1,6 @@
 import type { StudyAttemptEvent } from '@/lib/study-engine/attempt-store';
 import type { StudyOperation } from '@/lib/study-engine/items';
+import type { StudyLearningEvidenceBridge } from '@/lib/study-engine/learning-evidence-sheet';
 import type { StudyRating, StudySchedulerState } from '@/lib/study-engine/scheduler';
 import {
   STUDY_ATTEMPT_MAX_WIRE_CHARS,
@@ -115,6 +116,7 @@ export async function handleStudyAttemptPost(
   request: Request,
   userId: string,
   store: StudyRemoteAttemptStore,
+  evidenceBridge: StudyLearningEvidenceBridge | null = null,
 ): Promise<Response> {
   const origin = request.headers.get('origin');
   if (origin && origin !== new URL(request.url).origin) {
