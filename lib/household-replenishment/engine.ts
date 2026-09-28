@@ -61,9 +61,7 @@ export function estimateCadence(input: {
   corrections: CorrectionEvent[];
   now: Date;
 }): CadenceEstimate {
-  const purchases = [...input.purchases].sort((a, b) =>
-    a.purchasedAt.localeCompare(b.purchasedAt),
-  );
+  const purchases = [...input.purchases].sort((a, b) => a.purchasedAt.localeCompare(b.purchasedAt));
   const intervals = purchases.slice(1).map((event, index) => {
     const previous = purchases[index];
     return previous ? daysBetween(previous.purchasedAt, event.purchasedAt) : 0;
@@ -112,10 +110,7 @@ export function estimateCadence(input: {
     latestCorrection?.type === 'STILL_HAVE' &&
     addDays(nextExpectedAt, -leadDays) <= latestCorrection.occurredAt
   ) {
-    nextExpectedAt = addDays(
-      latestCorrection.occurredAt,
-      leadDays + Math.max(3, leadDays),
-    );
+    nextExpectedAt = addDays(latestCorrection.occurredAt, leadDays + Math.max(3, leadDays));
   }
 
   const suggestAt = addDays(nextExpectedAt, -leadDays);

@@ -44,9 +44,7 @@ export class MemoryReplenishmentRepository implements ReplenishmentRepository {
   }
 
   async listNeeds(householdId: string): Promise<ReplenishmentNeed[]> {
-    return [...this.needs.values()]
-      .filter((need) => need.householdId === householdId)
-      .map(clone);
+    return [...this.needs.values()].filter((need) => need.householdId === householdId).map(clone);
   }
 
   async getNeed(householdId: string, needId: string): Promise<ReplenishmentNeed | null> {
@@ -60,8 +58,7 @@ export class MemoryReplenishmentRepository implements ReplenishmentRepository {
   ): Promise<ReplenishmentNeed | null> {
     const need = [...this.needs.values()].find(
       (candidate) =>
-        candidate.householdId === householdId &&
-        normalizeName(candidate.name) === normalizedName,
+        candidate.householdId === householdId && normalizeName(candidate.name) === normalizedName,
     );
     return need ? clone(need) : null;
   }
@@ -83,8 +80,7 @@ export class MemoryReplenishmentRepository implements ReplenishmentRepository {
   async listPurchaseEvents(householdId: string, needId?: string): Promise<PurchaseEvent[]> {
     return [...this.purchases.values()]
       .filter(
-        (event) =>
-          event.householdId === householdId && (needId == null || event.needId === needId),
+        (event) => event.householdId === householdId && (needId == null || event.needId === needId),
       )
       .map(clone);
   }
@@ -93,14 +89,10 @@ export class MemoryReplenishmentRepository implements ReplenishmentRepository {
     this.purchases.set(event.id, clone(event));
   }
 
-  async listCorrectionEvents(
-    householdId: string,
-    needId?: string,
-  ): Promise<CorrectionEvent[]> {
+  async listCorrectionEvents(householdId: string, needId?: string): Promise<CorrectionEvent[]> {
     return [...this.corrections.values()]
       .filter(
-        (event) =>
-          event.householdId === householdId && (needId == null || event.needId === needId),
+        (event) => event.householdId === householdId && (needId == null || event.needId === needId),
       )
       .map(clone);
   }

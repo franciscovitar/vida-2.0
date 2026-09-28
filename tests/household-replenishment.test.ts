@@ -190,8 +190,14 @@ test('repository and snapshots remain isolated by household', async () => {
   const h1 = await fixture.service.snapshot('h1');
   const h2 = await fixture.service.snapshot('h2');
 
-  assert.deepEqual(h1.buy.map((entry) => entry.name), ['Shampoo']);
-  assert.deepEqual(h2.buy.map((entry) => entry.name), ['Café']);
+  assert.deepEqual(
+    h1.buy.map((entry) => entry.name),
+    ['Shampoo'],
+  );
+  assert.deepEqual(
+    h2.buy.map((entry) => entry.name),
+    ['Café'],
+  );
 });
 
 test('LOW correction forces an item back into Comprar even with little history', async () => {
@@ -226,7 +232,10 @@ test('LOW correction forces an item back into Comprar even with little history',
   });
 
   const snapshot = await fixture.service.snapshot('h1');
-  assert.equal(snapshot.buy.some((entry) => entry.needId === needId), true);
+  assert.equal(
+    snapshot.buy.some((entry) => entry.needId === needId),
+    true,
+  );
 });
 
 test('STILL_HAVE moves a regular prediction forward instead of immediately reappearing', () => {

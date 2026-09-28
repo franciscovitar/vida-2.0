@@ -197,7 +197,9 @@ export function resolveAuthProxyDecision(input: {
   allowedEmails: readonly string[] | null | undefined;
   householdMemberEmails?: readonly string[] | null;
 }): AuthProxyDecision {
-  const vidaAuthorized = Boolean(input.email && isEmailAuthorized(input.email, input.allowedEmails));
+  const vidaAuthorized = Boolean(
+    input.email && isEmailAuthorized(input.email, input.allowedEmails),
+  );
   const householdAuthorized = Boolean(
     input.email && isEmailAuthorized(input.email, input.householdMemberEmails),
   );

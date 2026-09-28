@@ -27,7 +27,9 @@ function normalizeNeedName(value: string): string {
 }
 
 function latestPurchasedAt(events: { purchasedAt: string }[]): string | null {
-  return [...events].sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt))[0]?.purchasedAt ?? null;
+  return (
+    [...events].sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt))[0]?.purchasedAt ?? null
+  );
 }
 
 function sortEntries(entries: ReplenishmentListEntry[]): ReplenishmentListEntry[] {
@@ -102,9 +104,7 @@ export class ReplenishmentService {
     }
 
     const items = await this.repository.listShoppingItems(input.householdId);
-    const activeItem = items.find(
-      (item) => item.needId === need.id && item.state === 'ACTIVE',
-    );
+    const activeItem = items.find((item) => item.needId === need.id && item.state === 'ACTIVE');
     if (activeItem) {
       await this.repository.recordOperation(input.householdId, input.operationId);
       return {
@@ -166,9 +166,7 @@ export class ReplenishmentService {
     }
 
     const items = await this.repository.listShoppingItems(input.householdId);
-    const activeItems = items.filter(
-      (item) => item.needId === need.id && item.state === 'ACTIVE',
-    );
+    const activeItems = items.filter((item) => item.needId === need.id && item.state === 'ACTIVE');
     const source: ShoppingListOrigin = activeItems[0]?.origin ?? 'AUTO';
 
     for (const item of activeItems) {
@@ -259,9 +257,7 @@ export class ReplenishmentService {
         corrections: needCorrections,
         now,
       });
-      const activeItem = items.find(
-        (item) => item.needId === need.id && item.state === 'ACTIVE',
-      );
+      const activeItem = items.find((item) => item.needId === need.id && item.state === 'ACTIVE');
       const lastPurchase = latestPurchasedAt(needPurchases);
 
       if (activeItem) {

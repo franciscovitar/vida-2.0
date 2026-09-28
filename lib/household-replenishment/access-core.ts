@@ -1,8 +1,4 @@
-import {
-  isEmailAuthorized,
-  normalizeEmail,
-  type AuthDenyReason,
-} from '@/lib/auth/authorize';
+import { isEmailAuthorized, normalizeEmail, type AuthDenyReason } from '@/lib/auth/authorize';
 
 import type { HouseholdRole } from './types';
 

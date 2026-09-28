@@ -9,12 +9,7 @@ export type ShoppingListOrigin = 'AUTO' | 'MANUAL' | 'CORRECTION';
 export type ShoppingListState = 'ACTIVE' | 'BOUGHT' | 'SKIPPED' | 'SNOOZED';
 
 export type CorrectionEventType =
-  | 'STILL_HAVE'
-  | 'LOW'
-  | 'OUT'
-  | 'SNOOZE'
-  | 'MANUAL_ADD'
-  | 'ALREADY_BOUGHT';
+  'STILL_HAVE' | 'LOW' | 'OUT' | 'SNOOZE' | 'MANUAL_ADD' | 'ALREADY_BOUGHT';
 
 export type UserCorrectionType = Extract<CorrectionEventType, 'STILL_HAVE' | 'LOW' | 'OUT'>;
 
@@ -108,5 +103,4 @@ export interface ReplenishmentMutationFailure {
 }
 
 export type ReplenishmentMutationResult =
-  | ReplenishmentMutationSuccess
-  | ReplenishmentMutationFailure;
+  ReplenishmentMutationSuccess | ReplenishmentMutationFailure;

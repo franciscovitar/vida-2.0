@@ -67,7 +67,9 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
       };
 
       if (!response.ok || data.ok !== true || !data.snapshot) {
-        setNotice(typeof data.message === 'string' ? data.message : 'No se pudo guardar el cambio.');
+        setNotice(
+          typeof data.message === 'string' ? data.message : 'No se pudo guardar el cambio.',
+        );
         return;
       }
 
@@ -135,7 +137,11 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
               <option value="75">Cada 2–3 meses</option>
             </select>
           </label>
-          <button className={styles['primary-button']} type="submit" disabled={saving || !name.trim()}>
+          <button
+            className={styles['primary-button']}
+            type="submit"
+            disabled={saving || !name.trim()}
+          >
             {saving ? 'Guardando…' : 'Agregar'}
           </button>
         </form>

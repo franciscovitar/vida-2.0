@@ -3,10 +3,7 @@ import 'server-only';
 import { redirect } from 'next/navigation';
 
 import { auth } from '@/auth';
-import {
-  resolveAllowedEmails,
-  resolveHouseholdMemberEmails,
-} from '@/lib/auth/authorize';
+import { resolveAllowedEmails, resolveHouseholdMemberEmails } from '@/lib/auth/authorize';
 
 import { evaluateHouseholdAccess } from './access-core';
 import { PRIMARY_HOUSEHOLD_ID } from './runtime';
@@ -19,8 +16,7 @@ export type VerifiedHouseholdAccess = {
 };
 
 export type VerifyHouseholdAccessResult =
-  | VerifiedHouseholdAccess
-  | { ok: false; reason: 'unauthenticated' | 'email-not-allowed' };
+  VerifiedHouseholdAccess | { ok: false; reason: 'unauthenticated' | 'email-not-allowed' };
 
 type HouseholdSession = {
   user?: {
