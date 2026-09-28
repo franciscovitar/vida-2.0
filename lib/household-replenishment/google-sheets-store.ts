@@ -1,5 +1,3 @@
-import 'server-only';
-
 import { fetchAccessToken, SHEETS_BASE, SPREADSHEETS_SCOPE } from '@/lib/google/auth';
 
 import type { ReplenishmentRepository } from './repository';
