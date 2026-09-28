@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 
 import { auth } from '@/auth';
-import { resolveAllowedEmails, resolveAuthProxyDecision } from '@/lib/auth/authorize';
+import {
+  resolveAllowedEmails,
+  resolveAuthProxyDecision,
+  resolveHouseholdMemberEmails,
+} from '@/lib/auth/authorize';
 
 /**
  * Proxy Next.js 16 — protección optimista de rutas.
@@ -14,6 +18,7 @@ export const proxy = auth((req) => {
     hasUser: Boolean(req.auth?.user),
     email: req.auth?.user?.email ?? null,
     allowedEmails: resolveAllowedEmails(process.env),
+    householdMemberEmails: resolveHouseholdMemberEmails(process.env),
   });
 
   if (decision.action === 'next') {

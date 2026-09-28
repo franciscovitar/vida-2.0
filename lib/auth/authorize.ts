@@ -38,6 +38,23 @@ export function resolveAllowedEmails(env: EnvLike): string[] {
   return parseAllowedEmails(env.AUTH_ALLOWED_EMAILS);
 }
 
+export function resolveHouseholdMemberEmails(env: EnvLike): string[] {
+  return parseAllowedEmails(env.HOUSEHOLD_MEMBER_EMAILS);
+}
+
+export function resolveIdentityAllowedEmails(env: EnvLike): string[] {
+  return [...new Set([...resolveAllowedEmails(env), ...resolveHouseholdMemberEmails(env)])];
+}
+
+export function isHouseholdReplenishmentPath(pathname: string): boolean {
+  return (
+    pathname === '/hogar/reposicion' ||
+    pathname.startsWith('/hogar/reposicion/') ||
+    pathname === '/api/household-replenishment' ||
+    pathname.startsWith('/api/household-replenishment/')
+  );
+}
+
 export function isAuthConfigured(env: EnvLike): boolean {
   return Boolean(
     env.AUTH_SECRET?.trim() &&
@@ -154,6 +171,7 @@ export const PROTECTED_APP_PATHS = [
   '/tareas',
   '/planificacion',
   '/proyectos',
+  '/hogar/reposicion',
   '/habitos',
   '/salud',
   '/productividad',
@@ -163,7 +181,11 @@ export const PROTECTED_APP_PATHS = [
 ] as const;
 
 export type AuthProxyDecision =
-  { action: 'next' } | { action: 'redirect'; pathname: '/login' | '/unauthorized' | '/' };
+  | { action: 'next' }
+  | {
+      action: 'redirect';
+      pathname: '/login' | '/unauthorized' | '/' | '/hogar/reposicion';
+    };
 
 /**
  * Decisión pura del Proxy (sin bucles: /login y /unauthorized son públicas).
@@ -173,12 +195,19 @@ export function resolveAuthProxyDecision(input: {
   hasUser: boolean;
   email: string | null | undefined;
   allowedEmails: readonly string[] | null | undefined;
+  householdMemberEmails?: readonly string[] | null;
 }): AuthProxyDecision {
-  const authorized = Boolean(input.email && isEmailAuthorized(input.email, input.allowedEmails));
+  const vidaAuthorized = Boolean(input.email && isEmailAuthorized(input.email, input.allowedEmails));
+  const householdAuthorized = Boolean(
+    input.email && isEmailAuthorized(input.email, input.householdMemberEmails),
+  );
 
   if (isPublicAuthPath(input.pathname)) {
-    if (authorized && (input.pathname === '/login' || input.pathname.startsWith('/login/'))) {
-      return { action: 'redirect', pathname: '/' };
+    if (input.pathname === '/login' || input.pathname.startsWith('/login/')) {
+      if (vidaAuthorized) return { action: 'redirect', pathname: '/' };
+      if (householdAuthorized) {
+        return { action: 'redirect', pathname: '/hogar/reposicion' };
+      }
     }
     return { action: 'next' };
   }
@@ -187,11 +216,15 @@ export function resolveAuthProxyDecision(input: {
     return { action: 'redirect', pathname: '/login' };
   }
 
-  if (!authorized) {
-    return { action: 'redirect', pathname: '/unauthorized' };
+  if (vidaAuthorized) {
+    return { action: 'next' };
   }
 
-  return { action: 'next' };
+  if (householdAuthorized && isHouseholdReplenishmentPath(input.pathname)) {
+    return { action: 'next' };
+  }
+
+  return { action: 'redirect', pathname: '/unauthorized' };
 }
 
 /** Payload mínimo de sesión JWT (sin tokens ni perfil). */
