@@ -160,6 +160,12 @@ export class ReplenishmentService {
       return { ok: false, code: 'not-found', message: 'Ese producto ya no está disponible.' };
     }
 
+    const currentSnapshot = await this.snapshot(input.householdId);
+    if (!currentSnapshot.buy.some((entry) => entry.needId === need.id)) {
+      await this.repository.recordOperation(input.householdId, input.operationId);
+      return { ok: true, code: 'existing', snapshot: currentSnapshot };
+    }
+
     const items = await this.repository.listShoppingItems(input.householdId);
     const activeItems = items.filter(
       (item) => item.needId === need.id && item.state === 'ACTIVE',

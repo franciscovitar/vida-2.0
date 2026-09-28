@@ -154,10 +154,18 @@ test('mark bought is idempotent and creates exactly one purchase event', async (
     operationId: 'operation-buy-detergent',
     principalId: 'owner-id',
   });
+  const secondDistinctClick = await fixture.service.markBought({
+    householdId: 'h1',
+    needId,
+    operationId: 'operation-buy-detergent-second-click',
+    principalId: 'owner-id',
+  });
 
   assert.equal(first.ok, true);
   assert.equal(replay.ok, true);
+  assert.equal(secondDistinctClick.ok, true);
   if (replay.ok) assert.equal(replay.code, 'idempotent');
+  if (secondDistinctClick.ok) assert.equal(secondDistinctClick.code, 'existing');
 
   const purchases = await fixture.repository.listPurchaseEvents('h1', needId);
   assert.equal(purchases.length, 1);

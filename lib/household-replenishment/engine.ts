@@ -48,7 +48,7 @@ function latestUserCorrection(
     corrections
       .filter(
         (event) =>
-          event.occurredAt >= after &&
+          event.occurredAt > after &&
           (event.type === 'STILL_HAVE' || event.type === 'LOW' || event.type === 'OUT'),
       )
       .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))[0] ?? null
@@ -91,7 +91,7 @@ export function estimateCadence(input: {
   }
 
   const relevantCorrections = input.corrections.filter(
-    (event) => event.occurredAt >= latestPurchase.purchasedAt,
+    (event) => event.occurredAt > latestPurchase.purchasedAt,
   );
   const stillHaveCount = relevantCorrections.filter((event) => event.type === 'STILL_HAVE').length;
   const outCount = relevantCorrections.filter((event) => event.type === 'OUT').length;
@@ -100,6 +100,7 @@ export function estimateCadence(input: {
   const deviations = intervals.map((value) => Math.abs(value - (observedCenter ?? value)));
   const variabilityDays = median(deviations);
 
+  const leadDays = Math.max(2, Math.min(7, expectedIntervalDays * 0.15));
   let nextExpectedAt = addDays(latestPurchase.purchasedAt, expectedIntervalDays);
   const latestCorrection = latestUserCorrection(relevantCorrections, latestPurchase.purchasedAt);
   const forcedByCorrection =
@@ -107,14 +108,16 @@ export function estimateCadence(input: {
       ? (latestCorrection.type as UserCorrectionType)
       : null;
 
-  if (latestCorrection?.type === 'STILL_HAVE' && nextExpectedAt <= latestCorrection.occurredAt) {
+  if (
+    latestCorrection?.type === 'STILL_HAVE' &&
+    addDays(nextExpectedAt, -leadDays) <= latestCorrection.occurredAt
+  ) {
     nextExpectedAt = addDays(
       latestCorrection.occurredAt,
-      Math.max(3, expectedIntervalDays * 0.15),
+      leadDays + Math.max(3, leadDays),
     );
   }
 
-  const leadDays = Math.max(2, Math.min(7, expectedIntervalDays * 0.15));
   const suggestAt = addDays(nextExpectedAt, -leadDays);
   const nowIso = input.now.toISOString();
 
