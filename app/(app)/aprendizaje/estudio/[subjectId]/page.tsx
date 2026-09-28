@@ -54,12 +54,7 @@ export default async function SubjectStudyPage({
           icon={BookOpen}
           domain="learning"
           action={
-            <Button
-              href="/aprendizaje/estudio"
-              variant="ghost"
-              size="sm"
-              iconLeft={ChevronLeft}
-            >
+            <Button href="/aprendizaje/estudio" variant="ghost" size="sm" iconLeft={ChevronLeft}>
               Materias
             </Button>
           }

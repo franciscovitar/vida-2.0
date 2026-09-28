@@ -65,7 +65,8 @@ async function loadSubjectItems(subjectId: string): Promise<StudySubjectItemsRea
     if (!response.ok) throw new Error('github-read-failed');
 
     const payload = (await response.json()) as { content?: string; encoding?: string };
-    if (payload.encoding !== 'base64' || !payload.content) throw new Error('invalid-github-content');
+    if (payload.encoding !== 'base64' || !payload.content)
+      throw new Error('invalid-github-content');
 
     const decoded = Buffer.from(payload.content.replace(/\n/g, ''), 'base64').toString('utf8');
     return parseStudySubjectItems(JSON.parse(decoded) as unknown, subjectId);

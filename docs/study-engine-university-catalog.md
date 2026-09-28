@@ -61,7 +61,6 @@ PAS currently exposes seven active subject modules:
 
 IOP and Redes already have rich machine-readable scope. DSI has useful practice-set structure but incomplete canonical Concept Inventory. CDD, DAO, Green and TPA remain visible while their assessment structure is unresolved.
 
-
 ## Real subject Study Engine sessions
 
 A subject may expose a real Study Engine session only when PAS contains:

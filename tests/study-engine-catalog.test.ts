@@ -149,7 +149,6 @@ test('assessment progress only attaches to the exact subject + assessment pair',
   );
 });
 
-
 test('canonical runtime file marks a subject as Study Engine ready', () => {
   const subject = buildStudyCatalogSubject({
     subjectId: 'dsi',

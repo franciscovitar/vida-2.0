@@ -91,7 +91,6 @@ test('marking an attempt synced clears only the outbox, never history', async ()
   assert.deepEqual(await store.listAttempts(), [attempt]);
 });
 
-
 test('latestAttemptForStudyItem preserves seen-before history across sessions', () => {
   const first = fixture({
     id: 'attempt-1',
