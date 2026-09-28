@@ -443,8 +443,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
     return this.parseCorrectionEvents(await this.readTab('correctionEvents'))
       .map((row) => row.value)
       .filter(
-        (event) =>
-          event.householdId === householdId && (needId == null || event.needId === needId),
+        (event) => event.householdId === householdId && (needId == null || event.needId === needId),
       );
   }
 
