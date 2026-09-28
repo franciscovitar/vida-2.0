@@ -1,10 +1,6 @@
 import { normalizePrivateKey } from '@/lib/data/config';
 
-export interface HouseholdReplenishmentSheetsEnv {
-  GOOGLE_SERVICE_ACCOUNT_EMAIL?: string;
-  GOOGLE_PRIVATE_KEY?: string;
-  HOUSEHOLD_REPLENISHMENT_SHEET_ID?: string;
-}
+export type HouseholdReplenishmentSheetsEnv = Readonly<Record<string, string | undefined>>;
 
 export interface HouseholdReplenishmentSheetsConfig {
   clientEmail: string;
