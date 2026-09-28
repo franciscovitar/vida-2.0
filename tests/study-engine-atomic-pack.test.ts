@@ -139,7 +139,13 @@ test('Atomic Study Pack maps semantic interactions to existing Study Engine rend
 test('Atomic Study Pack fails closed on assessment mismatch or invalid binary item', () => {
   assert.equal(parseAtomicStudyPack(pack, 'dsi', 'dsi-2026-p2').state, 'invalid');
 
-  const invalidBinary = structuredClone(pack) as any;
+  const invalidBinary = structuredClone(pack) as unknown as {
+    review_units: Array<{
+      items: Array<{
+        options?: Array<{ id: string; label: string }>;
+      }>;
+    }>;
+  };
   invalidBinary.review_units[3].items[0].options = [
     { id: 'true', label: 'Verdadero' },
     { id: 'false', label: 'Falso' },
