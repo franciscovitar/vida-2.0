@@ -127,8 +127,8 @@ export function mapStudyAttemptToFreshEvidence(
   attempt: StudyAttemptEvent,
   mappings: readonly LearningConceptMapping[],
 ): StudyEvidenceMappingResult {
-  const candidateIds = [attempt.facetId, attempt.conceptId].filter(
-    (value): value is string => Boolean(value),
+  const candidateIds = [attempt.facetId, attempt.conceptId].filter((value): value is string =>
+    Boolean(value),
   );
   const mapping = candidateIds
     .map((candidate) => mappings.find((entry) => entry.conceptId === candidate))

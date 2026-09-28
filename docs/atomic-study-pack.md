@@ -32,6 +32,7 @@ A first appearance in Vida is **not automatically fresh**. The pack supplies int
 ## Evidence
 
 Attempts preserve:
+
 - review unit;
 - concept/facet;
 - variant family;

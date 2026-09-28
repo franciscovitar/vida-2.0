@@ -145,8 +145,7 @@ async function loadLiveCatalog(): Promise<StudyCatalogRead> {
           learningFiles: learningEntries
             .filter(
               (entry) =>
-                (entry.type === 'file' || entry.type === 'dir') &&
-                typeof entry.name === 'string',
+                (entry.type === 'file' || entry.type === 'dir') && typeof entry.name === 'string',
             )
             .map((entry) => entry.name as string),
         });

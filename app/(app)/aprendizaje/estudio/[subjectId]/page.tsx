@@ -83,7 +83,9 @@ export default async function SubjectStudyPage({
       />
       <StudySession
         items={runtime.items}
-        modeLabel={runtime.runtimeKind === 'atomic' ? `Modo Ligero · ${subject.name}` : subject.name}
+        modeLabel={
+          runtime.runtimeKind === 'atomic' ? `Modo Ligero · ${subject.name}` : subject.name
+        }
       />
     </div>
   );

@@ -110,7 +110,11 @@ async function loadSubjectItems(
         : 'Esta materia todavía no tiene una sesión Study Engine canónica.',
     );
   } catch {
-    return failure('unavailable', subjectId, 'No se pudo leer el contenido canónico de Study Engine.');
+    return failure(
+      'unavailable',
+      subjectId,
+      'No se pudo leer el contenido canónico de Study Engine.',
+    );
   }
 }
 

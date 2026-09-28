@@ -2,13 +2,7 @@ import type { RichContentBlock } from './rich-content';
 
 export type StudyItemType = 'recall' | 'cloze' | 'mcq' | 'typed' | 'image';
 export type StudyOperation =
-  | 'recall'
-  | 'explain'
-  | 'discriminate'
-  | 'apply'
-  | 'select'
-  | 'calculate'
-  | 'interpret';
+  'recall' | 'explain' | 'discriminate' | 'apply' | 'select' | 'calculate' | 'interpret';
 export type StudyItemInteraction =
   | 'recall_reveal'
   | 'short_typed'

@@ -126,7 +126,10 @@ function parsePromptContent(value: unknown): RichContentBlock[] | null {
   return blocks;
 }
 
-function invalid(subjectId: string, notice = 'El Atomic Study Pack contiene datos inválidos.'): StudySubjectItemsRead {
+function invalid(
+  subjectId: string,
+  notice = 'El Atomic Study Pack contiene datos inválidos.',
+): StudySubjectItemsRead {
   return { state: 'invalid', subjectId, assessmentId: null, items: [], notice, runtimeKind: null };
 }
 
@@ -274,7 +277,10 @@ export function parseAtomicStudyPack(
           !options.some((option) => option.id === correctOptionId) ||
           (interaction === 'true_false_correct' && options.length !== 2)
         ) {
-          return invalid(expectedSubjectId, 'El Atomic Study Pack contiene un MCQ/binario inválido.');
+          return invalid(
+            expectedSubjectId,
+            'El Atomic Study Pack contiene un MCQ/binario inválido.',
+          );
         }
         items.push({ ...base, itemType: 'mcq', options, correctOptionId });
         continue;

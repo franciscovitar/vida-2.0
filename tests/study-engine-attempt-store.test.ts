@@ -109,7 +109,6 @@ test('latestAttemptForStudyItem preserves seen-before history across sessions', 
   assert.equal(latestAttemptForStudyItem([later, first], 'other-item'), null);
 });
 
-
 test('latestAttemptForReviewUnit shares history across cue variants', () => {
   const first = fixture({
     id: 'attempt-1',

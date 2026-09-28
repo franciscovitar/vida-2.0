@@ -45,7 +45,8 @@ const pack = {
         {
           id: 'state-strategy-mcq-b',
           interaction: 'mcq_discriminate',
-          prompt: 'Si el objeto cambia comportamiento al cambiar de estado interno, ¿qué patrón pesa más?',
+          prompt:
+            'Si el objeto cambia comportamiento al cambiar de estado interno, ¿qué patrón pesa más?',
           answer: 'State',
           feedback: 'El comportamiento depende del estado interno.',
           options: [
@@ -85,7 +86,8 @@ const pack = {
         {
           id: 'bff-bridge',
           interaction: 'bridge_microcase',
-          prompt: 'Web y mobile necesitan APIs adaptadas a necesidades distintas. ¿Qué patrón considerarías?',
+          prompt:
+            'Web y mobile necesitan APIs adaptadas a necesidades distintas. ¿Qué patrón considerarías?',
           answer: 'BFF',
           accepted_answers: ['BFF', 'Backend for Frontend'],
           feedback: 'BFF crea un backend específico por tipo de frontend.',
