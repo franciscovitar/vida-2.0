@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import {
   createStudyAttemptEvent,
-  latestAttemptForStudyItem,
+  latestAttemptForReviewUnit,
 } from '@/lib/study-engine/attempt-store';
 import {
   attachStudyReconnectSync,
@@ -22,6 +22,8 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SafeRichContent } from '@/components/study-engine/SafeRichContent';
 import {
   evaluateStudyResponse,
+  selectStudySessionItems,
+  studyReviewUnitId,
   STUDY_ENGINE_DEMO_ITEMS,
   type StudyItem,
   type StudyVisualKey,
@@ -50,6 +52,10 @@ const OPERATION_LABELS: Record<StudyItem['operation'], string> = {
   recall: 'Recordar',
   explain: 'Explicar',
   discriminate: 'Distinguir',
+  apply: 'Aplicar',
+  select: 'Elegir',
+  calculate: 'Calcular',
+  interpret: 'Interpretar',
 };
 
 const TYPE_LABELS: Record<StudyItem['itemType'], string> = {
@@ -70,6 +76,23 @@ const RATINGS: readonly {
   { value: 'good', label: 'Bien', hint: 'Recuerdo normal' },
   { value: 'easy', label: 'Fácil', hint: 'Muy fluido' },
 ];
+
+function deriveAttemptFreshness(
+  item: StudyItem,
+  seenBefore: boolean,
+  schedulerState: StudySchedulerState,
+  now: Date,
+) {
+  if (item.intendedFreshness === 'delayed') {
+    if (schedulerState.lastReview) {
+      const elapsed = now.getTime() - Date.parse(schedulerState.lastReview);
+      if (Number.isFinite(elapsed) && elapsed >= 86_400_000) return 'delayed' as const;
+    }
+    return 'familiar' as const;
+  }
+  if (seenBefore) return 'familiar' as const;
+  return item.intendedFreshness ?? 'fresh';
+}
 
 function StudyVisual({ visual }: { visual: StudyVisualKey }) {
   if (visual === 'ownership') {
@@ -202,6 +225,11 @@ export function StudySession({
   modeLabel?: string;
 }) {
   const [index, setIndex] = useState(0);
+  const [sessionDateKey] = useState(() => new Date().toISOString().slice(0, 10));
+  const sessionItems = useMemo(
+    () => selectStudySessionItems(items, sessionDateKey),
+    [items, sessionDateKey],
+  );
   const [response, setResponse] = useState('');
   const [revealed, setRevealed] = useState(false);
   const [correctness, setCorrectness] = useState<boolean | null>(null);
@@ -255,8 +283,8 @@ export function StudySession({
     setSyncFailure(null);
   }
 
-  const completed = index >= items.length;
-  const item = completed ? null : items[index];
+  const completed = index >= sessionItems.length;
+  const item = completed ? null : sessionItems[index];
 
   const successCount = useMemo(
     () => attempts.filter((attempt) => attempt.successful).length,
@@ -287,10 +315,11 @@ export function StudySession({
     try {
       const now = new Date();
       const persistedAttempts = await attemptStore.listAttempts();
-      const latestPersisted = latestAttemptForStudyItem(persistedAttempts, item.id);
+      const reviewUnitId = studyReviewUnitId(item);
+      const latestPersisted = latestAttemptForReviewUnit(persistedAttempts, reviewUnitId);
       const seenBefore = Boolean(latestPersisted);
       const currentState =
-        schedulerStates.current.get(item.id) ??
+        schedulerStates.current.get(reviewUnitId) ??
         latestPersisted?.schedulerStateAfter ??
         scheduler.createInitialState(now);
       const transition = scheduler.review(currentState, now, rating);
@@ -305,10 +334,14 @@ export function StudySession({
         sessionId: sessionId.current,
         studyItemId: item.id,
         itemVersion: item.version,
-        reviewUnitId: item.subjectId + ':' + item.id,
+        reviewUnitId,
         subjectId: item.subjectId,
         conceptId: item.conceptId,
-        facetId: null,
+        facetId: item.facetId ?? null,
+        variantFamily: item.variantFamily ?? null,
+        modeRole: item.modeRole ?? null,
+        interaction: item.interaction ?? null,
+        evidenceCeiling: item.evidenceCeiling ?? null,
         operation: item.operation,
         channel: item.channel ?? 'theoretical',
         shownAt: new Date(shownAtMs.current ?? now.getTime()).toISOString(),
@@ -319,7 +352,7 @@ export function StudySession({
         learnerConfidence: null,
         helpLevel: 'independent',
         seenBefore,
-        contextFreshness: seenBefore ? 'familiar' : 'fresh',
+        contextFreshness: deriveAttemptFreshness(item, seenBefore, currentState, now),
         schedulerStateBefore: currentState,
         schedulerStateAfter: transition.state,
         deviceId: getOrCreateStudyDeviceId(),
@@ -328,7 +361,7 @@ export function StudySession({
       await attemptStore.persistAttempt(attempt);
       void flushRemoteOutbox();
 
-      schedulerStates.current.set(item.id, transition.state);
+      schedulerStates.current.set(reviewUnitId, transition.state);
       setAttempts((current) => [
         ...current,
         {
@@ -397,7 +430,7 @@ export function StudySession({
           </div>
         </div>
         <Button type="button" variant="primary" iconLeft={RefreshCw} onClick={reset}>
-          Repetir demo
+          Repetir sesión
         </Button>
       </Card>
     );
@@ -414,14 +447,14 @@ export function StudySession({
           <span className={styles['demo-badge']}>{modeLabel}</span>
           <span>{TYPE_LABELS[item.itemType]}</span>
           <span>
-            {index + 1}/{items.length}
+            {index + 1}/{sessionItems.length}
           </span>
         </div>
         <ProgressBar
           value={progress}
-          max={items.length}
+          max={sessionItems.length}
           domain="learning"
-          label={'Progreso de sesión: ' + (index + 1) + ' de ' + items.length}
+          label={'Progreso de sesión: ' + (index + 1) + ' de ' + sessionItems.length}
         />
         <div className={styles['session-info']}>
           <span className={styles['local-status']}>
@@ -459,6 +492,8 @@ export function StudySession({
         </div>
 
         {item.itemType === 'image' ? <StudyVisual visual={item.visual} /> : null}
+
+        {item.promptContent?.length ? <SafeRichContent blocks={item.promptContent} /> : null}
 
         <h2 className={styles.prompt}>{item.prompt}</h2>
 

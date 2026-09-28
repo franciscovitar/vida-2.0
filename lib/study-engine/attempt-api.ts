@@ -7,7 +7,27 @@ import {
   type StudyRemoteAttemptStore,
 } from '@/lib/study-engine/remote-attempt-store';
 
-const OPERATIONS = new Set<StudyOperation>(['recall', 'explain', 'discriminate']);
+const OPERATIONS = new Set<StudyOperation>([
+  'recall',
+  'explain',
+  'discriminate',
+  'apply',
+  'select',
+  'calculate',
+  'interpret',
+]);
+const MODE_ROLES = new Set(['light', 'bridge']);
+const INTERACTIONS = new Set([
+  'recall_reveal',
+  'short_typed',
+  'mcq_discriminate',
+  'true_false_correct',
+  'cloze_context',
+  'bridge_microcase',
+  'next_step',
+  'microcalc',
+  'visual_probe',
+]);
 const RATINGS = new Set<StudyRating>(['again', 'hard', 'good', 'easy']);
 const CHANNELS = new Set(['theoretical', 'practical', 'integrative']);
 const HELP_LEVELS = new Set(['independent', 'guided', 'assisted']);
@@ -24,6 +44,10 @@ function boundedString(value: unknown, max = 512): value is string {
 
 function nullableString(value: unknown, max = 512): value is string | null {
   return value === null || boundedString(value, max);
+}
+
+function optionalNullableString(value: unknown, max = 512): boolean {
+  return value === undefined || nullableString(value, max);
 }
 
 function finiteNumber(value: unknown): value is number {
@@ -69,6 +93,18 @@ export function parseStudyAttemptEvent(value: unknown): StudyAttemptEvent | null
     !boundedString(value.subjectId, 256) ||
     !nullableString(value.conceptId, 256) ||
     !nullableString(value.facetId, 256) ||
+    !optionalNullableString(value.variantFamily, 256) ||
+    !optionalNullableString(value.evidenceCeiling, 256) ||
+    !(
+      value.modeRole === undefined ||
+      value.modeRole === null ||
+      (typeof value.modeRole === 'string' && MODE_ROLES.has(value.modeRole))
+    ) ||
+    !(
+      value.interaction === undefined ||
+      value.interaction === null ||
+      (typeof value.interaction === 'string' && INTERACTIONS.has(value.interaction))
+    ) ||
     typeof value.operation !== 'string' ||
     !OPERATIONS.has(value.operation as StudyOperation) ||
     typeof value.channel !== 'string' ||

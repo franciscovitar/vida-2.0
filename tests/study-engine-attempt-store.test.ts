@@ -3,6 +3,7 @@ import { test } from 'node:test';
 
 import {
   createStudyAttemptEvent,
+  latestAttemptForReviewUnit,
   latestAttemptForStudyItem,
   MemoryAttemptOutboxStore,
   type StudyAttemptEvent,
@@ -106,4 +107,23 @@ test('latestAttemptForStudyItem preserves seen-before history across sessions', 
 
   assert.equal(latestAttemptForStudyItem([later, first], 'item-1')?.id, 'attempt-2');
   assert.equal(latestAttemptForStudyItem([later, first], 'other-item'), null);
+});
+
+test('latestAttemptForReviewUnit shares history across cue variants', () => {
+  const first = fixture({
+    id: 'attempt-1',
+    studyItemId: 'cue-a',
+    reviewUnitId: 'review-shared',
+    answeredAt: '2026-09-27T17:00:04.250Z',
+  });
+  const later = fixture({
+    id: 'attempt-2',
+    idempotencyKey: 'attempt-2',
+    studyItemId: 'cue-b',
+    reviewUnitId: 'review-shared',
+    answeredAt: '2026-09-28T17:00:04.250Z',
+  });
+
+  assert.equal(latestAttemptForReviewUnit([first, later], 'review-shared')?.id, 'attempt-2');
+  assert.equal(latestAttemptForReviewUnit([first, later], 'other-review'), null);
 });

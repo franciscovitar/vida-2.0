@@ -29,6 +29,7 @@ test('canonical subject runtime maps to real StudyItem without changing concept 
   if (parsed.state !== 'ready') return;
 
   assert.equal(parsed.assessmentId, 'dsi-2026-p2');
+  assert.equal(parsed.runtimeKind, 'legacy');
   assert.equal(parsed.items[0]?.subjectId, 'dsi');
   assert.equal(parsed.items[0]?.conceptId, 'DSI.P2.MICRO.SYNC_ASYNC');
   assert.equal(parsed.items[0]?.channel, 'theoretical');
