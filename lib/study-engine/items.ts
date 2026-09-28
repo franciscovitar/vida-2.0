@@ -6,9 +6,10 @@ export type StudyOperation = 'recall' | 'explain' | 'discriminate';
 interface BaseStudyItem {
   id: string;
   version: number;
-  subjectId: 'study-engine-demo';
+  subjectId: string;
   conceptId: string;
   operation: StudyOperation;
+  channel?: 'theoretical' | 'practical' | 'integrative';
   itemType: StudyItemType;
   prompt: string;
   answer: string;

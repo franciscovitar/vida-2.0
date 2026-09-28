@@ -60,3 +60,18 @@ PAS currently exposes seven active subject modules:
 - TPA.
 
 IOP and Redes already have rich machine-readable scope. DSI has useful practice-set structure but incomplete canonical Concept Inventory. CDD, DAO, Green and TPA remain visible while their assessment structure is unresolved.
+
+
+## Real subject Study Engine sessions
+
+A subject may expose a real Study Engine session only when PAS contains:
+
+```text
+AI/projects/university/subjects/<subject-id>/learning/study_engine_items_v1.json
+```
+
+That file is canonical intelligence in PAS. Vida loads and validates it server-side; it does not become a second question-bank authority. The catalog shows **Empezar sesión** only when that canonical runtime file exists.
+
+The first bounded rollout is DSI P2 with three ACTIVE_U3 items mapped to existing ConceptInventory IDs. It is intentionally a seed for end-to-end evidence validation, not a comprehensive exam bank.
+
+Real subject attempts reuse the same offline-first outbox and FSRS event contract as the demo. Persistent browser history is consulted before each attempt so an item already answered on the same device is not silently relabeled as fresh after a page reload.

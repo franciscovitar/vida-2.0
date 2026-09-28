@@ -3,6 +3,7 @@ import { test } from 'node:test';
 
 import {
   createStudyAttemptEvent,
+  latestAttemptForStudyItem,
   MemoryAttemptOutboxStore,
   type StudyAttemptEvent,
 } from '@/lib/study-engine/attempt-store';
@@ -88,4 +89,22 @@ test('marking an attempt synced clears only the outbox, never history', async ()
 
   assert.deepEqual(await store.listPendingAttempts(), []);
   assert.deepEqual(await store.listAttempts(), [attempt]);
+});
+
+
+test('latestAttemptForStudyItem preserves seen-before history across sessions', () => {
+  const first = fixture({
+    id: 'attempt-1',
+    answeredAt: '2026-09-27T17:00:04.250Z',
+    schedulerStateAfter: null,
+  });
+  const later = fixture({
+    id: 'attempt-2',
+    idempotencyKey: 'attempt-2',
+    answeredAt: '2026-09-28T17:00:04.250Z',
+    schedulerStateAfter: null,
+  });
+
+  assert.equal(latestAttemptForStudyItem([later, first], 'item-1')?.id, 'attempt-2');
+  assert.equal(latestAttemptForStudyItem([later, first], 'other-item'), null);
 });

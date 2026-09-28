@@ -45,6 +45,20 @@ export interface AttemptOutboxStore {
   markAttemptSynced(idempotencyKey: string): Promise<void>;
 }
 
+export function latestAttemptForStudyItem(
+  attempts: readonly StudyAttemptEvent[],
+  studyItemId: string,
+): StudyAttemptEvent | null {
+  let latest: StudyAttemptEvent | null = null;
+  for (const attempt of attempts) {
+    if (attempt.studyItemId !== studyItemId) continue;
+    if (!latest || attempt.answeredAt.localeCompare(latest.answeredAt) > 0) {
+      latest = attempt;
+    }
+  }
+  return latest ? structuredClone(latest) : null;
+}
+
 export function createStudyAttemptEvent(
   input: Omit<StudyAttemptEvent, 'responseTimeMs'>,
 ): StudyAttemptEvent {
