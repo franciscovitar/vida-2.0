@@ -193,7 +193,6 @@ test('Google Sheets operation ledger makes retries observable', async () => {
   assert.equal(await repository.hasOperation('primary-household', 'operation-other'), false);
 });
 
-
 test('Google Sheets repository persists variants and purchase variant_id atomically', async () => {
   const postedBodies: unknown[] = [];
   const fetchImpl: typeof fetch = async (input, init) => {

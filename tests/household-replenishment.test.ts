@@ -288,8 +288,9 @@ test('STILL_HAVE moves a regular prediction forward instead of immediately reapp
   assert.ok(Date.parse(estimate.nextExpectedAt) > Date.parse('2026-05-10T12:00:00.000Z'));
 });
 
-
-test('changing product variant keeps one need history and dedupes normalized variants', async () => {
+test(
+  'changing product variant keeps one need history and dedupes normalized variants',
+  async () => {
   const fixture = createServiceFixture();
 
   const added = await fixture.service.addManualNeed({
@@ -349,10 +350,7 @@ test('changing product variant keeps one need history and dedupes normalized var
     variants.map((variant) => variant.name).sort(),
     ['Ala 3L', 'Skip 3L'],
   );
-  assert.equal(
-    variants.filter((variant) => variant.preferred).length,
-    1,
-  );
+  assert.equal(variants.filter((variant) => variant.preferred).length, 1);
 
   const purchases = await fixture.repository.listPurchaseEvents('h1', needId);
   assert.equal(purchases.length, 3);
@@ -370,6 +368,7 @@ test('changing product variant keeps one need history and dedupes normalized var
     corrections: [],
     now: new Date('2026-03-02T12:00:00.000Z'),
   });
-  assert.equal(cadence.expectedIntervalDays, 30);
-  assert.equal(cadence.observations, 3);
-});
+    assert.equal(cadence.expectedIntervalDays, 30);
+    assert.equal(cadence.observations, 3);
+  },
+);

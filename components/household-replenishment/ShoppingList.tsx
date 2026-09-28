@@ -222,28 +222,28 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
                   </label>
 
                   <div className={styles.actions}>
-                  <button
-                    type="button"
-                    className={styles['bought-button']}
-                    disabled={saving}
-                    onClick={() => void markBought(entry.needId)}
-                  >
-                    ✓ Compré
-                  </button>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void correct(entry.needId, 'STILL_HAVE')}
-                  >
-                    Todavía tengo
-                  </button>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void correct(entry.needId, 'LOW')}
-                  >
-                    Queda poco
-                  </button>
+                    <button
+                      type="button"
+                      className={styles['bought-button']}
+                      disabled={saving}
+                      onClick={() => void markBought(entry.needId)}
+                    >
+                      ✓ Compré
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void correct(entry.needId, 'STILL_HAVE')}
+                    >
+                      Todavía tengo
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void correct(entry.needId, 'LOW')}
+                    >
+                      Queda poco
+                    </button>
                     <button
                       type="button"
                       disabled={saving}
