@@ -11,6 +11,14 @@ export const metadata: Metadata = { title: 'Lista del hogar' };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function readHouseholdSnapshot(service: ReplenishmentService, householdId: string) {
+  try {
+    return await service.snapshot(householdId);
+  } catch {
+    return null;
+  }
+}
+
 async function HouseholdReplenishmentContent({
   householdId,
   service,
@@ -18,9 +26,8 @@ async function HouseholdReplenishmentContent({
   householdId: string;
   service: ReplenishmentService;
 }) {
-  try {
-    return <ShoppingList initialSnapshot={await service.snapshot(householdId)} />;
-  } catch {
+  const snapshot = await readHouseholdSnapshot(service, householdId);
+  if (!snapshot) {
     return (
       <section className={styles.unavailable}>
         <strong>No pudimos leer la lista compartida.</strong>
@@ -28,6 +35,8 @@ async function HouseholdReplenishmentContent({
       </section>
     );
   }
+
+  return <ShoppingList initialSnapshot={snapshot} />;
 }
 
 export default async function HouseholdReplenishmentPage() {

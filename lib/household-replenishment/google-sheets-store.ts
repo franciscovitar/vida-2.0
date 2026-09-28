@@ -255,7 +255,7 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
       body: JSON.stringify({ requests }),
       cache: 'no-store',
     });
-    const bodyText = await response.text();
+    await response.text();
     if (!response.ok) {
       throw new Error(`Household Replenishment sheet write failed: ${response.status}`);
     }
