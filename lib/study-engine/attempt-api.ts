@@ -163,11 +163,50 @@ export async function handleStudyAttemptPost(
     return json({ ok: false, error: 'idempotency-mismatch' }, 400);
   }
 
+  let ack;
   try {
-    const ack = await store.acceptAttempt(userId, attempt);
-    if (ack.status === 'conflict') return json({ ok: false, ...ack }, 409);
-    return json({ ok: true, ...ack }, 200);
+    ack = await store.acceptAttempt(userId, attempt);
   } catch {
     return json({ ok: false, error: 'remote-store-unavailable' }, 503);
   }
+
+  if (ack.status === 'conflict') {
+    return json({ ok: false, ...ack }, 409);
+  }
+
+  if (attempt.subjectId === 'study-engine-demo') {
+    return json({ ok: true, ...ack }, 200);
+  }
+
+  if (!evidenceBridge) {
+    return json({ ok: false, error: 'learning-evidence-unavailable' }, 503);
+  }
+
+  let evidence;
+  try {
+    evidence = await evidenceBridge.recordAttempt(attempt);
+  } catch {
+    return json({ ok: false, error: 'learning-evidence-unavailable' }, 503);
+  }
+
+  if (evidence.status === 'conflict') {
+    return json(
+      {
+        ok: false,
+        idempotencyKey: attempt.idempotencyKey,
+        status: 'conflict',
+      },
+      409,
+    );
+  }
+
+  if (evidence.status === 'unmapped') {
+    return json({ ok: false, error: 'learning-evidence-unmapped' }, 422);
+  }
+
+  if (evidence.status === 'unavailable') {
+    return json({ ok: false, error: 'learning-evidence-unavailable' }, 503);
+  }
+
+  return json({ ok: true, ...ack }, 200);
 }
