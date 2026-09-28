@@ -12,11 +12,7 @@ import {
 } from '@/lib/study-engine/fresh-evidence';
 
 export type LearningEvidenceWriteStatus =
-  | 'written'
-  | 'duplicate'
-  | 'unmapped'
-  | 'conflict'
-  | 'unavailable';
+  'written' | 'duplicate' | 'unmapped' | 'conflict' | 'unavailable';
 
 export interface LearningEvidenceWriteResult {
   status: LearningEvidenceWriteStatus;
@@ -97,10 +93,7 @@ export function createLearningEvidenceBridge(input: {
         return { status: 'unavailable', evidenceId: null };
       }
 
-      const mapped = mapStudyAttemptToFreshEvidence(
-        attempt,
-        parseConceptMappings(concepts.values),
-      );
+      const mapped = mapStudyAttemptToFreshEvidence(attempt, parseConceptMappings(concepts.values));
       if (mapped.status === 'unmapped') {
         return { status: 'unmapped', evidenceId: null };
       }
@@ -145,11 +138,7 @@ export function createGoogleLearningSheetsClient(
   config: LearningEvidenceConfig,
 ): LearningSheetsValuesClient {
   async function withToken(): Promise<string | null> {
-    const token = await fetchAccessToken(
-      config.clientEmail,
-      config.privateKey,
-      SPREADSHEETS_SCOPE,
-    );
+    const token = await fetchAccessToken(config.clientEmail, config.privateKey, SPREADSHEETS_SCOPE);
     return token.ok ? token.token : null;
   }
 

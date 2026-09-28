@@ -60,7 +60,9 @@ export function headersMatch(
   return expected.every((name, index) => comparable(actual[index]) === name);
 }
 
-export function parseConceptMappings(values: readonly (readonly unknown[])[]): LearningConceptMapping[] {
+export function parseConceptMappings(
+  values: readonly (readonly unknown[])[],
+): LearningConceptMapping[] {
   if (!headersMatch(values[0], CONCEPT_INVENTORY_HEADERS)) return [];
 
   const rows: LearningConceptMapping[] = [];
@@ -83,10 +85,7 @@ function evidenceConfidence(attempt: StudyAttemptEvent): number {
 }
 
 function delayedDays(attempt: StudyAttemptEvent): number | '' {
-  if (
-    attempt.contextFreshness !== 'delayed' ||
-    !attempt.schedulerStateBefore?.lastReview
-  ) {
+  if (attempt.contextFreshness !== 'delayed' || !attempt.schedulerStateBefore?.lastReview) {
     return '';
   }
 
@@ -159,10 +158,7 @@ export function mapStudyAttemptToFreshEvidence(
   return { status: 'mapped', row, evidenceId };
 }
 
-export function sameFreshEvidenceRow(
-  left: readonly unknown[],
-  right: readonly unknown[],
-): boolean {
+export function sameFreshEvidenceRow(left: readonly unknown[], right: readonly unknown[]): boolean {
   if (left.length < FRESH_EVIDENCE_HEADERS.length || right.length < FRESH_EVIDENCE_HEADERS.length) {
     return false;
   }

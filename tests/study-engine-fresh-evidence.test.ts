@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  createStudyAttemptEvent,
-  type StudyAttemptEvent,
-} from '@/lib/study-engine/attempt-store';
+import { createStudyAttemptEvent, type StudyAttemptEvent } from '@/lib/study-engine/attempt-store';
 import {
   FRESH_EVIDENCE_HEADERS,
   mapStudyAttemptToFreshEvidence,
@@ -110,10 +107,10 @@ test('unmapped concept and subject mismatch fail closed', () => {
     mapStudyAttemptToFreshEvidence(fixture({ conceptId: 'DSI.P2.UNKNOWN' }), [DSI_MAPPING]),
     { status: 'unmapped', reason: 'missing-concept' },
   );
-  assert.deepEqual(
-    mapStudyAttemptToFreshEvidence(fixture({ subjectId: 'redes' }), [DSI_MAPPING]),
-    { status: 'unmapped', reason: 'subject-mismatch' },
-  );
+  assert.deepEqual(mapStudyAttemptToFreshEvidence(fixture({ subjectId: 'redes' }), [DSI_MAPPING]), {
+    status: 'unmapped',
+    reason: 'subject-mismatch',
+  });
 });
 
 function memorySheets(): {
@@ -206,7 +203,6 @@ test('Learning evidence writes require dedicated spreadsheet id and explicit gat
     'learning_sheet_example_1234567890',
   );
 });
-
 
 test('real subject API sync fails closed when Learning OS evidence bridge is unavailable', async () => {
   const { handleStudyAttemptPost } = await import('@/lib/study-engine/attempt-api');
