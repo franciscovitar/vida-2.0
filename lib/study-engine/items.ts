@@ -1,7 +1,26 @@
 import type { RichContentBlock } from './rich-content';
 
 export type StudyItemType = 'recall' | 'cloze' | 'mcq' | 'typed' | 'image';
-export type StudyOperation = 'recall' | 'explain' | 'discriminate';
+export type StudyOperation =
+  | 'recall'
+  | 'explain'
+  | 'discriminate'
+  | 'apply'
+  | 'select'
+  | 'calculate'
+  | 'interpret';
+export type StudyItemInteraction =
+  | 'recall_reveal'
+  | 'short_typed'
+  | 'mcq_discriminate'
+  | 'true_false_correct'
+  | 'cloze_context'
+  | 'bridge_microcase'
+  | 'next_step'
+  | 'microcalc'
+  | 'visual_probe';
+export type StudyItemModeRole = 'light' | 'bridge';
+export type StudyItemFreshness = 'familiar' | 'fresh' | 'transfer' | 'delayed';
 
 interface BaseStudyItem {
   id: string;
@@ -10,10 +29,20 @@ interface BaseStudyItem {
   conceptId: string;
   operation: StudyOperation;
   channel?: 'theoretical' | 'practical' | 'integrative';
+  reviewUnitId?: string;
+  facetId?: string | null;
+  variantFamily?: string | null;
+  evidenceCeiling?: string | null;
+  modeRole?: StudyItemModeRole;
+  interaction?: StudyItemInteraction;
+  intendedFreshness?: StudyItemFreshness;
+  parentItemIds?: readonly string[];
+  sourceRefs?: readonly string[];
   itemType: StudyItemType;
   prompt: string;
   answer: string;
   explanation: string;
+  promptContent?: readonly RichContentBlock[];
   richContent?: readonly RichContentBlock[];
 }
 
@@ -217,6 +246,39 @@ export const STUDY_ENGINE_DEMO_ITEMS: readonly StudyItem[] = [
       'La recuperación familiar sigue siendo útil, pero una tarea de transferencia independiente aporta evidencia más fuerte sobre aplicación.',
   },
 ];
+
+export function studyReviewUnitId(item: StudyItem): string {
+  return item.reviewUnitId ?? item.subjectId + ':' + item.id;
+}
+
+function stableStudyHash(value: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+export function selectStudySessionItems(
+  items: readonly StudyItem[],
+  dateKey: string,
+): readonly StudyItem[] {
+  const groups = new Map<string, StudyItem[]>();
+
+  for (const item of items) {
+    const key = studyReviewUnitId(item);
+    const group = groups.get(key);
+    if (group) group.push(item);
+    else groups.set(key, [item]);
+  }
+
+  return [...groups.entries()].map(([reviewUnitId, variants]) => {
+    if (variants.length === 1) return variants[0] as StudyItem;
+    const index = stableStudyHash(reviewUnitId + ':' + dateKey) % variants.length;
+    return variants[index] as StudyItem;
+  });
+}
 
 export function normalizeStudyAnswer(value: string): string {
   return value

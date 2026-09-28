@@ -12,6 +12,7 @@ export type StudySubjectItemsRead =
       assessmentId: string;
       items: readonly StudyItem[];
       notice: null;
+      runtimeKind: 'legacy' | 'atomic';
     }
   | {
       state: 'missing' | 'unavailable' | 'invalid';
@@ -19,6 +20,7 @@ export type StudySubjectItemsRead =
       assessmentId: null;
       items: readonly StudyItem[];
       notice: string;
+      runtimeKind: null;
     };
 
 function record(value: unknown): JsonObject {
@@ -59,6 +61,7 @@ export function parseStudySubjectItems(
       assessmentId: null,
       items: [],
       notice: 'El set canónico de esta materia no cumple el contrato de Study Engine.',
+      runtimeKind: null,
     };
   }
 
@@ -100,6 +103,7 @@ export function parseStudySubjectItems(
         assessmentId: null,
         items: [],
         notice: 'El set canónico de esta materia contiene un ítem inválido.',
+        runtimeKind: null,
       };
     }
 
@@ -124,5 +128,6 @@ export function parseStudySubjectItems(
     assessmentId,
     items,
     notice: null,
+    runtimeKind: 'legacy',
   };
 }

@@ -1,4 +1,4 @@
-import type { StudyOperation } from './items';
+import type { StudyItemInteraction, StudyItemModeRole, StudyOperation } from './items';
 import type { StudyRating, StudySchedulerState } from './scheduler';
 
 export type StudyEvidenceChannel = 'theoretical' | 'practical' | 'integrative';
@@ -15,6 +15,10 @@ export interface StudyAttemptEvent {
   subjectId: string;
   conceptId: string | null;
   facetId: string | null;
+  variantFamily?: string | null;
+  modeRole?: StudyItemModeRole | null;
+  interaction?: StudyItemInteraction | null;
+  evidenceCeiling?: string | null;
   operation: StudyOperation;
   channel: StudyEvidenceChannel;
   shownAt: string;
@@ -52,6 +56,20 @@ export function latestAttemptForStudyItem(
   let latest: StudyAttemptEvent | null = null;
   for (const attempt of attempts) {
     if (attempt.studyItemId !== studyItemId) continue;
+    if (!latest || attempt.answeredAt.localeCompare(latest.answeredAt) > 0) {
+      latest = attempt;
+    }
+  }
+  return latest ? structuredClone(latest) : null;
+}
+
+export function latestAttemptForReviewUnit(
+  attempts: readonly StudyAttemptEvent[],
+  reviewUnitId: string,
+): StudyAttemptEvent | null {
+  let latest: StudyAttemptEvent | null = null;
+  for (const attempt of attempts) {
+    if (attempt.reviewUnitId !== reviewUnitId) continue;
     if (!latest || attempt.answeredAt.localeCompare(latest.answeredAt) > 0) {
       latest = attempt;
     }

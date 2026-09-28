@@ -37,13 +37,11 @@ export default async function SubjectStudyPage({
   const { subjectId } = await params;
   if (!/^[a-z0-9-]{1,64}$/.test(subjectId)) notFound();
 
-  const [catalog, runtime] = await Promise.all([
-    getUniversityStudyCatalog(),
-    getStudySubjectItems(subjectId),
-  ]);
-
+  const catalog = await getUniversityStudyCatalog();
   const subject = catalog.subjects.find((candidate) => candidate.id === subjectId);
   if (!subject) notFound();
+
+  const runtime = await getStudySubjectItems(subjectId, subject.assessment?.id ?? null);
 
   if (runtime.state !== 'ready') {
     return (
@@ -70,7 +68,11 @@ export default async function SubjectStudyPage({
     <div className={pageStyles.page}>
       <PageHeader
         title={subject.name}
-        description="Preguntas canónicas del Learning OS con evidencia offline-first."
+        description={
+          runtime.runtimeKind === 'atomic'
+            ? 'Modo Ligero: práctica atómica canónica conectada al Learning OS.'
+            : 'Preguntas canónicas del Learning OS con evidencia offline-first.'
+        }
         icon={BookOpen}
         domain="learning"
         action={
@@ -79,7 +81,10 @@ export default async function SubjectStudyPage({
           </Button>
         }
       />
-      <StudySession items={runtime.items} modeLabel={subject.name} />
+      <StudySession
+        items={runtime.items}
+        modeLabel={runtime.runtimeKind === 'atomic' ? `Modo Ligero · ${subject.name}` : subject.name}
+      />
     </div>
   );
 }

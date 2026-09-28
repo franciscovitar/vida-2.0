@@ -143,7 +143,11 @@ async function loadLiveCatalog(): Promise<StudyCatalogRead> {
           conceptInventory: inventory,
           readiness,
           learningFiles: learningEntries
-            .filter((entry) => entry.type === 'file' && typeof entry.name === 'string')
+            .filter(
+              (entry) =>
+                (entry.type === 'file' || entry.type === 'dir') &&
+                typeof entry.name === 'string',
+            )
             .map((entry) => entry.name as string),
         });
       }),

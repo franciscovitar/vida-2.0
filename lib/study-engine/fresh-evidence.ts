@@ -106,7 +106,7 @@ function correctFor(attempt: StudyAttemptEvent): boolean {
 }
 
 function notesFor(attempt: StudyAttemptEvent): string {
-  return [
+  const notes = [
     `channel=${attempt.channel}`,
     `result=${resultFor(attempt)}`,
     `help=${attempt.helpLevel}`,
@@ -114,18 +114,27 @@ function notesFor(attempt: StudyAttemptEvent): string {
     `attempt_id=${attempt.id}`,
     `session=${attempt.sessionId}`,
     `response_ms=${attempt.responseTimeMs}`,
-  ].join(';');
+  ];
+  if (attempt.reviewUnitId) notes.push(`review_unit=${attempt.reviewUnitId}`);
+  if (attempt.facetId) notes.push(`facet_id=${attempt.facetId}`);
+  if (attempt.modeRole) notes.push(`mode_role=${attempt.modeRole}`);
+  if (attempt.interaction) notes.push(`interaction=${attempt.interaction}`);
+  if (attempt.evidenceCeiling) notes.push(`evidence_ceiling=${attempt.evidenceCeiling}`);
+  return notes.join(';');
 }
 
 export function mapStudyAttemptToFreshEvidence(
   attempt: StudyAttemptEvent,
   mappings: readonly LearningConceptMapping[],
 ): StudyEvidenceMappingResult {
-  const mappedConceptId = attempt.facetId ?? attempt.conceptId;
-  if (!mappedConceptId) return { status: 'unmapped', reason: 'missing-concept' };
-
-  const mapping = mappings.find((entry) => entry.conceptId === mappedConceptId);
+  const candidateIds = [attempt.facetId, attempt.conceptId].filter(
+    (value): value is string => Boolean(value),
+  );
+  const mapping = candidateIds
+    .map((candidate) => mappings.find((entry) => entry.conceptId === candidate))
+    .find((entry): entry is LearningConceptMapping => Boolean(entry));
   if (!mapping) return { status: 'unmapped', reason: 'missing-concept' };
+  const mappedConceptId = mapping.conceptId;
 
   if (mapping.subjectId.toLocaleLowerCase('es') !== attempt.subjectId.toLocaleLowerCase('es')) {
     return { status: 'unmapped', reason: 'subject-mismatch' };
@@ -150,7 +159,7 @@ export function mapStudyAttemptToFreshEvidence(
     evidenceConfidence(attempt),
     '',
     '',
-    '',
+    attempt.variantFamily ?? '',
     notesFor(attempt),
     evidenceId,
   ];

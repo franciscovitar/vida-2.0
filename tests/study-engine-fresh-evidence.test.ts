@@ -29,7 +29,11 @@ function fixture(overrides: Partial<StudyAttemptEvent> = {}): StudyAttemptEvent 
     reviewUnitId: 'dsi:p2:sync-async',
     subjectId: 'dsi',
     conceptId: 'DSI.P2.MICRO.SYNC_ASYNC',
-    facetId: null,
+    facetId: 'DSI.P2.MICRO.SYNC_ASYNC.FACET',
+    variantFamily: 'sync-async-family',
+    modeRole: 'bridge',
+    interaction: 'bridge_microcase',
+    evidenceCeiling: 'micro-application',
     operation: 'discriminate',
     channel: 'theoretical',
     shownAt: '2026-09-28T12:00:00.000Z',
@@ -67,7 +71,13 @@ test('StudyAttempt maps to the exact 18-column FreshEvidence contract', () => {
   assert.equal(mapped.row[9], false);
   assert.equal(mapped.row[10], true);
   assert.equal(mapped.row[17], 'study-engine:attempt-1');
+  assert.equal(mapped.row[15], 'sync-async-family');
   assert.match(String(mapped.row[16]), /freshness=fresh/);
+  assert.match(String(mapped.row[16]), /review_unit=dsi:p2:sync-async/);
+  assert.match(String(mapped.row[16]), /facet_id=DSI.P2.MICRO.SYNC_ASYNC.FACET/);
+  assert.match(String(mapped.row[16]), /mode_role=bridge/);
+  assert.match(String(mapped.row[16]), /interaction=bridge_microcase/);
+  assert.match(String(mapped.row[16]), /evidence_ceiling=micro-application/);
   assert.doesNotMatch(String(mapped.row[16]), /Tu respuesta|response=/);
 });
 
@@ -100,6 +110,14 @@ test('failed recall weakens evidence and assisted work is not independent', () =
   assert.equal(mapped.row[10], false);
   assert.match(String(mapped.row[16]), /result=weakens/);
   assert.match(String(mapped.row[16]), /help=assisted/);
+});
+
+test('unmapped facet falls back to its mapped parent concept while preserving facet metadata', () => {
+  const mapped = mapStudyAttemptToFreshEvidence(fixture(), [DSI_MAPPING]);
+  assert.equal(mapped.status, 'mapped');
+  if (mapped.status !== 'mapped') return;
+  assert.equal(mapped.row[3], DSI_MAPPING.conceptId);
+  assert.match(String(mapped.row[16]), /facet_id=DSI.P2.MICRO.SYNC_ASYNC.FACET/);
 });
 
 test('unmapped concept and subject mismatch fail closed', () => {
