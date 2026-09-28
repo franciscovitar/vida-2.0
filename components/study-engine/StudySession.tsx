@@ -83,12 +83,15 @@ function deriveAttemptFreshness(
   schedulerState: StudySchedulerState,
   now: Date,
 ) {
-  if (item.intendedFreshness === 'delayed' && schedulerState.lastReview) {
-    const elapsed = now.getTime() - Date.parse(schedulerState.lastReview);
-    if (Number.isFinite(elapsed) && elapsed >= 86_400_000) return 'delayed' as const;
+  if (item.intendedFreshness === 'delayed') {
+    if (schedulerState.lastReview) {
+      const elapsed = now.getTime() - Date.parse(schedulerState.lastReview);
+      if (Number.isFinite(elapsed) && elapsed >= 86_400_000) return 'delayed' as const;
+    }
+    return 'familiar' as const;
   }
   if (seenBefore) return 'familiar' as const;
-  return item.intendedFreshness ?? 'familiar';
+  return item.intendedFreshness ?? 'fresh';
 }
 
 function StudyVisual({ visual }: { visual: StudyVisualKey }) {
