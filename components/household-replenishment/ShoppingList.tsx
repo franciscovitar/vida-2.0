@@ -105,12 +105,12 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
 
   return (
     <div className={styles.workspace}>
-      <section className={styles.addCard} aria-labelledby="agregar-producto">
+      <section className={styles['add-card']} aria-labelledby="agregar-producto">
         <div>
           <p className={styles.eyebrow}>Agregar rápido</p>
           <h2 id="agregar-producto">¿Falta algo?</h2>
         </div>
-        <form className={styles.addForm} onSubmit={(event) => void addItem(event)}>
+        <form className={styles['add-form']} onSubmit={(event) => void addItem(event)}>
           <label className={styles.field}>
             <span>Producto</span>
             <input
@@ -135,7 +135,7 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
               <option value="75">Cada 2–3 meses</option>
             </select>
           </label>
-          <button className={styles.primaryButton} type="submit" disabled={saving || !name.trim()}>
+          <button className={styles['primary-button']} type="submit" disabled={saving || !name.trim()}>
             {saving ? 'Guardando…' : 'Agregar'}
           </button>
         </form>
@@ -148,7 +148,7 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
       ) : null}
 
       <section className={styles.section} aria-labelledby="comprar">
-        <div className={styles.sectionHeader}>
+        <div className={styles['section-header']}>
           <div>
             <p className={styles.eyebrow}>Lista activa</p>
             <h2 id="comprar">Comprar</h2>
@@ -165,8 +165,8 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
           <ul className={styles.list}>
             {snapshot.buy.map((entry) => (
               <li className={styles.item} key={entry.needId}>
-                <div className={styles.itemMain}>
-                  <div className={styles.itemTitleRow}>
+                <div className={styles['item-main']}>
+                  <div className={styles['item-title-row']}>
                     <strong>{entry.name}</strong>
                     <span className={styles.category}>{entry.category}</span>
                   </div>
@@ -182,7 +182,7 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
                 <div className={styles.actions}>
                   <button
                     type="button"
-                    className={styles.boughtButton}
+                    className={styles['bought-button']}
                     disabled={saving}
                     onClick={() => void markBought(entry.needId)}
                   >
@@ -217,7 +217,7 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
       </section>
 
       <section className={styles.section} aria-labelledby="quizas-pronto">
-        <div className={styles.sectionHeader}>
+        <div className={styles['section-header']}>
           <div>
             <p className={styles.eyebrow}>Predicciones con más incertidumbre</p>
             <h2 id="quizas-pronto">Quizás pronto</h2>
@@ -226,9 +226,9 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
         </div>
 
         {snapshot.watch.length === 0 ? (
-          <p className={styles.watchEmpty}>Todavía no hay productos para vigilar.</p>
+          <p className={styles['watch-empty']}>Todavía no hay productos para vigilar.</p>
         ) : (
-          <ul className={styles.watchList}>
+          <ul className={styles['watch-list']}>
             {snapshot.watch.map((entry) => (
               <li key={entry.needId}>
                 <div>

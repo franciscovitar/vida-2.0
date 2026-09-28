@@ -4,7 +4,7 @@
   gap: 1rem;
 }
 
-.addCard,
+.add-card,
 .section {
   padding: 1rem;
   background: var(--surface);
@@ -13,7 +13,7 @@
   box-shadow: var(--shadow-sm);
 }
 
-.addCard {
+.add-card {
   display: grid;
   gap: 1rem;
 }
@@ -27,13 +27,13 @@
   text-transform: uppercase;
 }
 
-.addCard h2,
+.add-card h2,
 .section h2 {
   font-size: 1.1rem;
   line-height: 1.25;
 }
 
-.addForm {
+.add-form {
   display: grid;
   gap: 0.75rem;
 }
@@ -62,9 +62,9 @@
   border-radius: var(--radius);
 }
 
-.primaryButton,
+.primary-button,
 .actions button,
-.watchList button {
+.watch-list button {
   min-height: 42px;
   padding: 0.55rem 0.8rem;
   font: inherit;
@@ -76,16 +76,16 @@
   border-radius: var(--radius);
 }
 
-.primaryButton,
-.actions .boughtButton {
+.primary-button,
+.actions .bought-button {
   color: var(--accent-contrast);
   background: var(--accent);
   border-color: var(--accent);
 }
 
-.primaryButton:disabled,
+.primary-button:disabled,
 .actions button:disabled,
-.watchList button:disabled {
+.watch-list button:disabled {
   cursor: wait;
   opacity: 0.6;
 }
@@ -104,7 +104,7 @@
   gap: 0.8rem;
 }
 
-.sectionHeader {
+.section-header {
   display: flex;
   gap: 1rem;
   align-items: center;
@@ -138,7 +138,7 @@
 }
 
 .empty span,
-.watchEmpty {
+.watch-empty {
   color: var(--text-muted);
   font-size: 0.82rem;
 }
@@ -157,18 +157,18 @@
   border-radius: var(--radius);
 }
 
-.itemMain {
+.item-main {
   display: grid;
   gap: 0.3rem;
   min-width: 0;
 }
 
-.itemMain p {
+.item-main p {
   color: var(--text-muted);
   font-size: 0.82rem;
 }
 
-.itemTitleRow {
+.item-title-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
@@ -200,12 +200,12 @@
   gap: 0.45rem;
 }
 
-.watchList {
+.watch-list {
   display: grid;
   gap: 0.6rem;
 }
 
-.watchList li {
+.watch-list li {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -214,23 +214,23 @@
   border-top: 1px solid var(--border);
 }
 
-.watchList li:first-child {
+.watch-list li:first-child {
   border-top: 0;
 }
 
-.watchList p {
+.watch-list p {
   margin-top: 0.15rem;
   color: var(--text-muted);
   font-size: 0.78rem;
 }
 
 @media (width >= 720px) {
-  .addCard {
+  .add-card {
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
     align-items: end;
   }
 
-  .addForm {
+  .add-form {
     grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.8fr) auto;
     align-items: end;
   }

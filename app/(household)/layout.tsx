@@ -6,7 +6,7 @@ export default function HouseholdLayout({ children }: { children: ReactNode }) {
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <div className={styles.headerInner}>
+        <div className={styles['header-inner']}>
           <span className={styles.brand}>Vida 2.0</span>
           <span className={styles.context}>Hogar</span>
         </div>

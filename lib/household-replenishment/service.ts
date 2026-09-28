@@ -6,7 +6,6 @@ import type {
   CorrectionEvent,
   ReplenishmentListEntry,
   ReplenishmentMutationResult,
-  ReplenishmentNeed,
   ReplenishmentSnapshot,
   ShoppingListItem,
   ShoppingListOrigin,
