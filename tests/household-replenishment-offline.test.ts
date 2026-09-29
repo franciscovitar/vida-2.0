@@ -35,6 +35,25 @@ class RecordingTransport implements HouseholdMutationTransport {
 
 const snapshot: ReplenishmentSnapshot = {
   householdName: 'Casa',
+  shoppingPreferences: {
+    defaultStore: null,
+    categoryOrder: ['Limpieza', 'Almacén', 'Otros'],
+  },
+  quality: {
+    status: 'COLLECTING',
+    activeNeeds: 2,
+    needsWithPurchases: 1,
+    needsWithThreePurchases: 0,
+    evaluatedPredictions: 0,
+    meanAbsoluteErrorDays: null,
+    medianAbsoluteErrorDays: null,
+    withinToleranceRate: null,
+    earlyCount: 0,
+    lateCount: 0,
+    withinToleranceCount: 0,
+    stillHaveCorrections: 0,
+    outCorrections: 0,
+  },
   buy: [
     {
       needId: 'need-1',
@@ -181,4 +200,27 @@ test('optimistic bought and STILL_HAVE remove item while LOW promotes watch to b
     true,
   );
   assert.equal(afterLow.buy.find((entry) => entry.needId === 'need-2')?.origin, 'CORRECTION');
+});
+
+test('optimistic preferences and categorization update the local shopping view', () => {
+  const withPreferences = applyOptimisticHouseholdMutation(snapshot, {
+    action: 'preferences',
+    defaultStore: 'Supermercado Centro',
+    categoryOrder: ['Almacén', 'Limpieza', 'Otros'],
+    operationId: 'operation-preferences',
+  });
+  assert.equal(withPreferences.shoppingPreferences.defaultStore, 'Supermercado Centro');
+  assert.deepEqual(withPreferences.shoppingPreferences.categoryOrder, [
+    'Almacén',
+    'Limpieza',
+    'Otros',
+  ]);
+
+  const categorized = applyOptimisticHouseholdMutation(snapshot, {
+    action: 'categorize',
+    needId: 'need-1',
+    category: 'Limpieza',
+    operationId: 'operation-category',
+  });
+  assert.equal(categorized.buy[0]?.category, 'Limpieza');
 });

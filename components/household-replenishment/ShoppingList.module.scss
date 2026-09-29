@@ -372,3 +372,139 @@
     padding: 0.7rem;
   }
 }
+
+.settings-card,
+.quality-card {
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.settings-card summary {
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.settings-body {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.settings-label {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.category-order {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.category-order ol {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.category-order li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 42px;
+  padding: 0.5rem 0.65rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.category-order li > span {
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.category-order li div {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.category-order button {
+  min-width: 38px;
+  min-height: 38px;
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.category-order button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.category-select {
+  max-width: 11rem;
+  min-height: 34px;
+  padding: 0.35rem 0.5rem;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.quality-card {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.quality-status {
+  max-width: 11rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  text-align: right;
+}
+
+.quality-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.quality-grid div {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.quality-grid strong {
+  font-size: 1rem;
+}
+
+.quality-grid span,
+.quality-card > p {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+@media (width >= 680px) {
+  .quality-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

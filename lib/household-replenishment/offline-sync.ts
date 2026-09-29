@@ -4,7 +4,20 @@ export type HouseholdMutation =
   | {
       action: 'add';
       name: string;
+      category: string;
       seedIntervalDays: number | null;
+      operationId: string;
+    }
+  | {
+      action: 'categorize';
+      needId: string;
+      category: string;
+      operationId: string;
+    }
+  | {
+      action: 'preferences';
+      defaultStore: string | null;
+      categoryOrder: string[];
       operationId: string;
     }
   | {
@@ -171,6 +184,28 @@ export function applyOptimisticHouseholdMutation(
 ): ReplenishmentSnapshot {
   if (mutation.action === 'add') {
     return structuredClone(snapshot);
+  }
+
+  if (mutation.action === 'preferences') {
+    return {
+      ...structuredClone(snapshot),
+      shoppingPreferences: {
+        defaultStore: mutation.defaultStore,
+        categoryOrder: [...mutation.categoryOrder],
+      },
+    };
+  }
+
+  if (mutation.action === 'categorize') {
+    const update = (entries: ReplenishmentSnapshot['buy']) =>
+      entries.map((entry) =>
+        entry.needId === mutation.needId ? { ...entry, category: mutation.category } : entry,
+      );
+    return {
+      ...structuredClone(snapshot),
+      buy: update(snapshot.buy),
+      watch: update(snapshot.watch),
+    };
   }
 
   if (

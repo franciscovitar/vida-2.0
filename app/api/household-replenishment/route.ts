@@ -107,9 +107,26 @@ export async function POST(request: Request) {
       result = await householdRuntime.service.addManualNeed({
         householdId: access.householdId,
         name: typeof body.name === 'string' ? body.name : '',
+        category: typeof body.category === 'string' ? body.category : undefined,
         seedIntervalDays,
         operationId,
         principalId: access.principalId,
+      });
+    } else if (body.action === 'categorize') {
+      result = await householdRuntime.service.updateNeedCategory({
+        householdId: access.householdId,
+        needId: typeof body.needId === 'string' ? body.needId : '',
+        category: typeof body.category === 'string' ? body.category : '',
+        operationId,
+      });
+    } else if (body.action === 'preferences') {
+      result = await householdRuntime.service.updateShoppingPreferences({
+        householdId: access.householdId,
+        defaultStore: typeof body.defaultStore === 'string' ? body.defaultStore : null,
+        categoryOrder: Array.isArray(body.categoryOrder)
+          ? body.categoryOrder.filter((item): item is string => typeof item === 'string')
+          : [],
+        operationId,
       });
     } else if (body.action === 'bought') {
       result = await householdRuntime.service.markBought({
