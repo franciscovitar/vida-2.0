@@ -184,10 +184,7 @@ export class ReplenishmentService {
       );
 
       if (!variant) {
-        const existingVariants = await this.repository.listVariants(
-          input.householdId,
-          need.id,
-        );
+        const existingVariants = await this.repository.listVariants(input.householdId, need.id);
         variant = {
           id: this.id(),
           needId: need.id,
@@ -303,8 +300,7 @@ export class ReplenishmentService {
         .filter((variant) => variant.needId === need.id)
         .sort(
           (a, b) =>
-            Number(b.preferred) - Number(a.preferred) ||
-            a.name.localeCompare(b.name, 'es'),
+            Number(b.preferred) - Number(a.preferred) || a.name.localeCompare(b.name, 'es'),
         );
       const lastPurchase = latestPurchase(needPurchases);
       const lastVariant =
