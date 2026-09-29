@@ -298,7 +298,6 @@ test('snapshot exposes active need catalog and add-existing promotes one need id
   );
 });
 
-
 test('removing a manual item changes list state without faking stock feedback', async () => {
   const fixture = createProjectionFixture('2026-02-01T12:00:00.000Z');
   await seedNeedWithPurchases({
@@ -344,7 +343,10 @@ test('removing a manual item changes list state without faking stock feedback', 
     corrections.map((event) => event.type),
     ['MANUAL_ADD'],
   );
-  assert.equal(snapshot.buy.some((entry) => entry.needId === 'yerba-remove'), false);
+  assert.equal(
+    snapshot.buy.some((entry) => entry.needId === 'yerba-remove'),
+    false,
+  );
 });
 
 test('adding a Quizás pronto item manually does not claim that stock is LOW', async () => {
@@ -361,7 +363,10 @@ test('adding a Quizás pronto item manually does not claim that stock is LOW', a
   });
 
   const before = await fixture.service.snapshot('h1');
-  assert.equal(before.watch.some((entry) => entry.needId === 'watch-manual'), true);
+  assert.equal(
+    before.watch.some((entry) => entry.needId === 'watch-manual'),
+    true,
+  );
 
   const result = await fixture.service.addExistingNeedToList({
     householdId: 'h1',
@@ -373,11 +378,20 @@ test('adding a Quizás pronto item manually does not claim that stock is LOW', a
   if (!result.ok) return;
 
   const corrections = await fixture.repository.listCorrectionEvents('h1', 'watch-manual');
-  assert.equal(result.snapshot.watch.some((entry) => entry.needId === 'watch-manual'), false);
-  assert.equal(result.snapshot.buy.find((entry) => entry.needId === 'watch-manual')?.origin, 'MANUAL');
+  assert.equal(
+    result.snapshot.watch.some((entry) => entry.needId === 'watch-manual'),
+    false,
+  );
+  assert.equal(
+    result.snapshot.buy.find((entry) => entry.needId === 'watch-manual')?.origin,
+    'MANUAL',
+  );
   assert.deepEqual(
     corrections.map((event) => event.type),
     ['MANUAL_ADD'],
   );
-  assert.equal(corrections.some((event) => event.type === 'LOW'), false);
+  assert.equal(
+    corrections.some((event) => event.type === 'LOW'),
+    false,
+  );
 });
