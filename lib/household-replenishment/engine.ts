@@ -95,7 +95,7 @@ function confidenceFor(input: {
   if (cycles >= 3 && relativeVariability <= 0.2 && anomalyRatio <= 0.25) {
     return 'HIGH';
   }
-  if (relativeVariability <= 0.5 && anomalyRatio <= 0.4) {
+  if (relativeVariability <= 0.4 && anomalyRatio <= 0.4) {
     return 'MEDIUM';
   }
   return 'LOW';
