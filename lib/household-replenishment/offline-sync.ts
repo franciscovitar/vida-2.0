@@ -206,6 +206,7 @@ export function applyOptimisticHouseholdMutation(
       category: catalogEntry.category,
       origin: 'MANUAL' as const,
       confidence: catalogEntry.confidence,
+      predictedStock: null,
       reason: 'Lo agregaste vos · pendiente de sincronizar',
       expectedIntervalDays: catalogEntry.expectedIntervalDays,
       nextExpectedAt: catalogEntry.nextExpectedAt,
@@ -283,6 +284,7 @@ export function applyOptimisticHouseholdMutation(
   const promoted = {
     ...structuredClone(entry),
     origin: 'CORRECTION' as const,
+    predictedStock: null,
     reason:
       mutation.type === 'LOW'
         ? 'Queda poco · pendiente de sincronizar'

@@ -87,9 +87,31 @@ test('high-confidence due need appears in Comprar without persisting an AUTO row
   assert.equal(first.buy[0]?.needId, 'paper');
   assert.equal(first.buy[0]?.origin, 'AUTO');
   assert.equal(first.buy[0]?.confidence, 'HIGH');
+  assert.equal(first.buy[0]?.predictedStock, 'LOW');
   assert.equal(first.watch.length, 0);
   assert.deepEqual(second, first);
   assert.deepEqual(await fixture.repository.listShoppingItems('h1'), []);
+});
+
+test('overdue high-confidence suggestion predicts Sin stock', async () => {
+  const fixture = createProjectionFixture('2026-05-03T12:00:00.000Z');
+  await seedNeedWithPurchases({
+    repository: fixture.repository,
+    needId: 'overdue-paper',
+    name: 'Papel cocina',
+    purchaseDates: [
+      '2026-01-01T12:00:00.000Z',
+      '2026-01-31T12:00:00.000Z',
+      '2026-03-02T12:00:00.000Z',
+      '2026-04-01T12:00:00.000Z',
+    ],
+  });
+
+  const snapshot = await fixture.service.snapshot('h1');
+
+  assert.equal(snapshot.buy.length, 1);
+  assert.equal(snapshot.buy[0]?.origin, 'AUTO');
+  assert.equal(snapshot.buy[0]?.predictedStock, 'OUT');
 });
 
 test('medium-confidence due need appears only in Quizás pronto', async () => {
@@ -112,6 +134,7 @@ test('medium-confidence due need appears only in Quizás pronto', async () => {
   assert.equal(snapshot.watch[0]?.needId, 'soap');
   assert.equal(snapshot.watch[0]?.origin, 'AUTO');
   assert.equal(snapshot.watch[0]?.confidence, 'MEDIUM');
+  assert.equal(snapshot.watch[0]?.predictedStock, 'LOW');
 });
 
 test('manual active item overrides an automatic suggestion without duplication', async () => {
@@ -142,6 +165,7 @@ test('manual active item overrides an automatic suggestion without duplication',
   assert.equal(snapshot.buy.length, 1);
   assert.equal(snapshot.buy[0]?.needId, 'bags');
   assert.equal(snapshot.buy[0]?.origin, 'MANUAL');
+  assert.equal(snapshot.buy[0]?.predictedStock, null);
   assert.equal(snapshot.watch.length, 0);
   assert.equal(items.filter((item) => item.state === 'ACTIVE').length, 1);
 });

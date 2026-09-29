@@ -41,6 +41,58 @@ function confidenceLabel(entry: Pick<ReplenishmentListEntry, 'confidence'>): str
   return 'Aprendiendo';
 }
 
+const STOCK_FEEDBACK_OPTIONS: ReadonlyArray<{
+  type: UserCorrectionType;
+  label: string;
+}> = [
+  { type: 'STILL_HAVE', label: 'Tengo bastante' },
+  { type: 'LOW', label: 'Queda poco' },
+  { type: 'OUT', label: 'Sin stock' },
+];
+
+function predictionLabel(entry: ReplenishmentListEntry): string | null {
+  if (entry.predictedStock === 'OUT') return 'Sin stock';
+  if (entry.predictedStock === 'LOW') {
+    return entry.confidence === 'MEDIUM' ? 'Puede quedar poco' : 'Queda poco';
+  }
+  return null;
+}
+
+function PredictionFeedback({
+  entry,
+  saving,
+  onCorrect,
+}: {
+  entry: ReplenishmentListEntry;
+  saving: boolean;
+  onCorrect: (type: UserCorrectionType) => void;
+}) {
+  const prediction = predictionLabel(entry);
+  if (!prediction) return null;
+
+  return (
+    <div className={styles['prediction-feedback']}>
+      <div className={styles['prediction-heading']}>
+        <span>Predicción</span>
+        <strong>{prediction}</strong>
+      </div>
+      <span className={styles['prediction-question']}>¿Cómo está realmente?</span>
+      <div className={styles['prediction-options']}>
+        {STOCK_FEEDBACK_OPTIONS.map((option) => (
+          <button
+            key={option.type}
+            type="button"
+            disabled={saving}
+            onClick={() => onCorrect(option.type)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ShoppingList({ initialSnapshot }: { initialSnapshot: ReplenishmentSnapshot }) {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const snapshotRef = useRef(initialSnapshot);
@@ -642,36 +694,24 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
                       </button>
                     ) : null}
 
-                    {entry.origin === 'AUTO' ? (
-                      <>
-                        <button
-                          type="button"
-                          disabled={saving}
-                          onClick={() => void correct(entry.needId, 'STILL_HAVE')}
-                        >
-                          Todavía tengo
-                        </button>
-                        {!supermarketMode ? (
-                          <>
-                            <button
-                              type="button"
-                              disabled={saving}
-                              onClick={() => void correct(entry.needId, 'LOW')}
-                            >
-                              Queda poco
-                            </button>
-                            <button
-                              type="button"
-                              disabled={saving}
-                              onClick={() => void correct(entry.needId, 'OUT')}
-                            >
-                              Sin stock
-                            </button>
-                          </>
-                        ) : null}
-                      </>
+                    {entry.origin === 'AUTO' && supermarketMode ? (
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => void correct(entry.needId, 'STILL_HAVE')}
+                      >
+                        Tengo bastante
+                      </button>
                     ) : null}
                   </div>
+
+                  {entry.origin === 'AUTO' && !supermarketMode ? (
+                    <PredictionFeedback
+                      entry={entry}
+                      saving={saving}
+                      onCorrect={(type) => void correct(entry.needId, type)}
+                    />
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -743,17 +783,30 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
             <ul className={styles['watch-list']}>
               {snapshot.watch.map((entry) => (
                 <li key={entry.needId}>
-                  <div>
+                  <div className={styles['watch-main']}>
                     <strong>{entry.name}</strong>
                     <p>{entry.reason}</p>
+                    <div className={styles.meta}>
+                      <span>{confidenceLabel(entry)}</span>
+                      {formatDate(entry.nextExpectedAt) ? (
+                        <span>Estimado: {formatDate(entry.nextExpectedAt)}</span>
+                      ) : null}
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void addExistingNeed(entry.needId)}
-                  >
-                    Agregar a Comprar
-                  </button>
+                  <div className={styles['watch-actions']}>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void addExistingNeed(entry.needId)}
+                    >
+                      Agregar a Comprar
+                    </button>
+                    <PredictionFeedback
+                      entry={entry}
+                      saving={saving}
+                      onCorrect={(type) => void correct(entry.needId, type)}
+                    />
+                  </div>
                 </li>
               ))}
             </ul>

@@ -538,6 +538,8 @@ export class ReplenishmentService {
         activeItem: activeItem ?? null,
         estimate,
       });
+      const predictedStock =
+        decision.origin === 'AUTO' ? (estimate.state === 'OVERDUE' ? 'OUT' : 'LOW') : null;
 
       catalog.push({
         needId: need.id,
@@ -557,6 +559,7 @@ export class ReplenishmentService {
           category: need.category,
           origin: decision.origin,
           confidence: estimate.confidence,
+          predictedStock,
           reason:
             decision.reason === 'ACTIVE_ITEM' && activeItem?.origin === 'MANUAL'
               ? 'Lo agregaste vos'
@@ -572,6 +575,7 @@ export class ReplenishmentService {
           category: need.category,
           origin: decision.origin,
           confidence: estimate.confidence,
+          predictedStock,
           reason: reasonForDecision(decision.reason, estimate.expectedIntervalDays),
           expectedIntervalDays: estimate.expectedIntervalDays,
           nextExpectedAt: estimate.nextExpectedAt,

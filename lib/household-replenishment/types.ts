@@ -13,6 +13,8 @@ export type CorrectionEventType =
 
 export type UserCorrectionType = Extract<CorrectionEventType, 'STILL_HAVE' | 'LOW' | 'OUT'>;
 
+export type PredictedStockState = Extract<UserCorrectionType, 'LOW' | 'OUT'>;
+
 export interface Household {
   id: string;
   name: string;
@@ -96,6 +98,7 @@ export interface ReplenishmentListEntry {
   category: string;
   origin: ShoppingListOrigin;
   confidence: ReplenishmentConfidence;
+  predictedStock: PredictedStockState | null;
   reason: string;
   expectedIntervalDays: number | null;
   nextExpectedAt: string | null;
