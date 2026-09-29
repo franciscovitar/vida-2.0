@@ -504,7 +504,7 @@
   line-height: 1.45;
 }
 
-@media (min-width: 680px) {
+@media (width >= 680px) {
   .quality-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
