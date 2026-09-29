@@ -14,6 +14,11 @@ export type HouseholdMutation =
       operationId: string;
     }
   | {
+      action: 'remove-from-list';
+      needId: string;
+      operationId: string;
+    }
+  | {
       action: 'categorize';
       needId: string;
       category: string;
@@ -201,7 +206,7 @@ export function applyOptimisticHouseholdMutation(
       category: catalogEntry.category,
       origin: 'MANUAL' as const,
       confidence: catalogEntry.confidence,
-      reason: 'Agregado manualmente · pendiente de sincronizar',
+      reason: 'Lo agregaste vos · pendiente de sincronizar',
       expectedIntervalDays: catalogEntry.expectedIntervalDays,
       nextExpectedAt: catalogEntry.nextExpectedAt,
       lastPurchasedAt: catalogEntry.lastPurchasedAt,
@@ -218,6 +223,17 @@ export function applyOptimisticHouseholdMutation(
       buy: snapshot.buy.some((entry) => entry.needId === mutation.needId)
         ? structuredClone(snapshot.buy)
         : [...structuredClone(snapshot.buy), buyEntry],
+      watch: snapshot.watch.filter((entry) => entry.needId !== mutation.needId),
+    };
+  }
+
+  if (mutation.action === 'remove-from-list') {
+    return {
+      ...structuredClone(snapshot),
+      catalog: snapshot.catalog.map((entry) =>
+        entry.needId === mutation.needId ? { ...entry, status: 'IDLE' as const } : entry,
+      ),
+      buy: snapshot.buy.filter((entry) => entry.needId !== mutation.needId),
       watch: snapshot.watch.filter((entry) => entry.needId !== mutation.needId),
     };
   }

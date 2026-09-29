@@ -102,7 +102,7 @@ const snapshot: ReplenishmentSnapshot = {
       category: 'Otros',
       origin: 'MANUAL',
       confidence: 'LOW',
-      reason: 'Agregado manualmente',
+      reason: 'Lo agregaste vos',
       expectedIntervalDays: 30,
       nextExpectedAt: null,
       lastPurchasedAt: null,
@@ -288,4 +288,22 @@ test('optimistic add-existing moves an idle catalog need into Comprar without du
   });
 
   assert.equal(replayed.buy.filter((entry) => entry.needId === 'need-3').length, 1);
+});
+
+test('optimistic remove-from-list removes manual intent without creating stock feedback', () => {
+  const removed = applyOptimisticHouseholdMutation(snapshot, {
+    action: 'remove-from-list',
+    needId: 'need-1',
+    operationId: 'operation-remove-manual',
+  });
+
+  assert.equal(
+    removed.buy.some((entry) => entry.needId === 'need-1'),
+    false,
+  );
+  assert.equal(
+    removed.watch.some((entry) => entry.needId === 'need-1'),
+    false,
+  );
+  assert.equal(removed.catalog.find((entry) => entry.needId === 'need-1')?.status, 'IDLE');
 });

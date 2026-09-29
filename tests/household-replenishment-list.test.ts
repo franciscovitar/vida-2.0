@@ -297,3 +297,101 @@ test('snapshot exposes active need catalog and add-existing promotes one need id
     1,
   );
 });
+
+test('removing a manual item changes list state without faking stock feedback', async () => {
+  const fixture = createProjectionFixture('2026-02-01T12:00:00.000Z');
+  await seedNeedWithPurchases({
+    repository: fixture.repository,
+    needId: 'yerba-remove',
+    name: 'Yerba',
+    purchaseDates: [],
+  });
+
+  const added = await fixture.service.addExistingNeedToList({
+    householdId: 'h1',
+    needId: 'yerba-remove',
+    operationId: 'manual-add-yerba-remove',
+    principalId: 'owner-id',
+  });
+  assert.equal(added.ok, true);
+  if (!added.ok) return;
+  assert.equal(added.snapshot.buy[0]?.origin, 'MANUAL');
+  assert.equal(added.snapshot.buy[0]?.reason, 'Lo agregaste vos');
+
+  const removed = await fixture.service.removeNeedFromList({
+    householdId: 'h1',
+    needId: 'yerba-remove',
+    operationId: 'remove-yerba-from-list',
+  });
+  const replay = await fixture.service.removeNeedFromList({
+    householdId: 'h1',
+    needId: 'yerba-remove',
+    operationId: 'remove-yerba-from-list',
+  });
+
+  assert.equal(removed.ok, true);
+  assert.equal(replay.ok, true);
+  if (replay.ok) assert.equal(replay.code, 'idempotent');
+
+  const items = await fixture.repository.listShoppingItems('h1');
+  const corrections = await fixture.repository.listCorrectionEvents('h1', 'yerba-remove');
+  const snapshot = await fixture.service.snapshot('h1');
+
+  assert.equal(items.filter((item) => item.state === 'ACTIVE').length, 0);
+  assert.equal(items.filter((item) => item.state === 'SKIPPED').length, 1);
+  assert.deepEqual(
+    corrections.map((event) => event.type),
+    ['MANUAL_ADD'],
+  );
+  assert.equal(
+    snapshot.buy.some((entry) => entry.needId === 'yerba-remove'),
+    false,
+  );
+});
+
+test('adding a Quizás pronto item manually does not claim that stock is LOW', async () => {
+  const fixture = createProjectionFixture('2026-03-19T12:00:00.000Z');
+  await seedNeedWithPurchases({
+    repository: fixture.repository,
+    needId: 'watch-manual',
+    name: 'Papel higiénico',
+    purchaseDates: [
+      '2026-01-01T12:00:00.000Z',
+      '2026-01-21T12:00:00.000Z',
+      '2026-02-20T12:00:00.000Z',
+    ],
+  });
+
+  const before = await fixture.service.snapshot('h1');
+  assert.equal(
+    before.watch.some((entry) => entry.needId === 'watch-manual'),
+    true,
+  );
+
+  const result = await fixture.service.addExistingNeedToList({
+    householdId: 'h1',
+    needId: 'watch-manual',
+    operationId: 'watch-add-manually',
+    principalId: 'owner-id',
+  });
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+
+  const corrections = await fixture.repository.listCorrectionEvents('h1', 'watch-manual');
+  assert.equal(
+    result.snapshot.watch.some((entry) => entry.needId === 'watch-manual'),
+    false,
+  );
+  assert.equal(
+    result.snapshot.buy.find((entry) => entry.needId === 'watch-manual')?.origin,
+    'MANUAL',
+  );
+  assert.deepEqual(
+    corrections.map((event) => event.type),
+    ['MANUAL_ADD'],
+  );
+  assert.equal(
+    corrections.some((event) => event.type === 'LOW'),
+    false,
+  );
+});

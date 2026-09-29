@@ -119,6 +119,12 @@ export async function POST(request: Request) {
         operationId,
         principalId: access.principalId,
       });
+    } else if (body.action === 'remove-from-list') {
+      result = await householdRuntime.service.removeNeedFromList({
+        householdId: access.householdId,
+        needId: typeof body.needId === 'string' ? body.needId : '',
+        operationId,
+      });
     } else if (body.action === 'categorize') {
       result = await householdRuntime.service.updateNeedCategory({
         householdId: access.householdId,
