@@ -4,6 +4,7 @@
   gap: 1rem;
 }
 
+.mode-toolbar,
 .add-card,
 .section {
   padding: 1rem;
@@ -11,6 +12,52 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+}
+
+.mode-toolbar {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 4;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.mode-toolbar div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.mode-toolbar strong {
+  font-size: 0.88rem;
+}
+
+.mode-toolbar span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.mode-toolbar button {
+  min-height: 42px;
+  padding: 0.55rem 0.75rem;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 750;
+  cursor: pointer;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.mode-toolbar button[aria-pressed='true'] {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .add-card {
@@ -275,5 +322,54 @@
 
   .actions {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+
+.supermarket-mode {
+  gap: 0.65rem;
+}
+
+.supermarket-mode .section {
+  padding: 0.75rem;
+}
+
+.supermarket-mode .list {
+  gap: 0.55rem;
+}
+
+.supermarket-mode .item {
+  gap: 0.65rem;
+  padding: 0.8rem;
+}
+
+.supermarket-mode .item-title-row strong {
+  font-size: 1rem;
+}
+
+.supermarket-mode .variant-field input {
+  min-height: 44px;
+}
+
+.supermarket-mode .actions {
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+}
+
+.supermarket-mode .actions button {
+  min-height: 50px;
+  font-size: 0.88rem;
+}
+
+@media (width <= 480px) {
+  .mode-toolbar {
+    align-items: stretch;
+  }
+
+  .mode-toolbar button {
+    max-width: 9.5rem;
+  }
+
+  .supermarket-mode .item {
+    padding: 0.7rem;
   }
 }
