@@ -112,6 +112,13 @@ export async function POST(request: Request) {
         operationId,
         principalId: access.principalId,
       });
+    } else if (body.action === 'add-existing') {
+      result = await householdRuntime.service.addExistingNeedToList({
+        householdId: access.householdId,
+        needId: typeof body.needId === 'string' ? body.needId : '',
+        operationId,
+        principalId: access.principalId,
+      });
     } else if (body.action === 'categorize') {
       result = await householdRuntime.service.updateNeedCategory({
         householdId: access.householdId,

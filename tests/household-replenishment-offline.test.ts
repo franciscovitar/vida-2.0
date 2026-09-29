@@ -41,7 +41,7 @@ const snapshot: ReplenishmentSnapshot = {
   },
   quality: {
     status: 'COLLECTING',
-    activeNeeds: 2,
+    activeNeeds: 3,
     needsWithPurchases: 1,
     needsWithThreePurchases: 0,
     evaluatedPredictions: 0,
@@ -54,6 +54,47 @@ const snapshot: ReplenishmentSnapshot = {
     stillHaveCorrections: 0,
     outCorrections: 0,
   },
+  catalog: [
+    {
+      needId: 'need-1',
+      name: 'Detergente',
+      category: 'Otros',
+      status: 'BUY',
+      confidence: 'LOW',
+      expectedIntervalDays: 30,
+      nextExpectedAt: null,
+      lastPurchasedAt: null,
+      lastPurchasedVariantId: null,
+      lastPurchasedVariantName: null,
+      variants: [],
+    },
+    {
+      needId: 'need-2',
+      name: 'Papel',
+      category: 'Otros',
+      status: 'WATCH',
+      confidence: 'MEDIUM',
+      expectedIntervalDays: 30,
+      nextExpectedAt: null,
+      lastPurchasedAt: null,
+      lastPurchasedVariantId: null,
+      lastPurchasedVariantName: null,
+      variants: [],
+    },
+    {
+      needId: 'need-3',
+      name: 'Yerba',
+      category: 'Almacén',
+      status: 'IDLE',
+      confidence: 'LOW',
+      expectedIntervalDays: null,
+      nextExpectedAt: null,
+      lastPurchasedAt: null,
+      lastPurchasedVariantId: null,
+      lastPurchasedVariantName: null,
+      variants: [],
+    },
+  ],
   buy: [
     {
       needId: 'need-1',
@@ -223,4 +264,26 @@ test('optimistic preferences and categorization update the local shopping view',
     operationId: 'operation-category',
   });
   assert.equal(categorized.buy[0]?.category, 'Limpieza');
+});
+
+
+test('optimistic add-existing moves an idle catalog need into Comprar without duplication', () => {
+  const first = applyOptimisticHouseholdMutation(snapshot, {
+    action: 'add-existing',
+    needId: 'need-3',
+    operationId: 'operation-add-existing',
+  });
+
+  assert.equal(first.catalog.find((entry) => entry.needId === 'need-3')?.status, 'BUY');
+  assert.equal(first.buy.filter((entry) => entry.needId === 'need-3').length, 1);
+  assert.equal(first.buy.find((entry) => entry.needId === 'need-3')?.origin, 'MANUAL');
+  assert.equal(first.watch.some((entry) => entry.needId === 'need-3'), false);
+
+  const replayed = applyOptimisticHouseholdMutation(first, {
+    action: 'add-existing',
+    needId: 'need-3',
+    operationId: 'operation-add-existing-2',
+  });
+
+  assert.equal(replayed.buy.filter((entry) => entry.needId === 'need-3').length, 1);
 });

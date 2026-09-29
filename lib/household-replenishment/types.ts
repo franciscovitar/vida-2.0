@@ -105,6 +105,22 @@ export interface ReplenishmentListEntry {
   variants: ReplenishmentVariantOption[];
 }
 
+export type ReplenishmentCatalogStatus = 'BUY' | 'WATCH' | 'IDLE';
+
+export interface ReplenishmentCatalogEntry {
+  needId: string;
+  name: string;
+  category: string;
+  status: ReplenishmentCatalogStatus;
+  confidence: ReplenishmentConfidence;
+  expectedIntervalDays: number | null;
+  nextExpectedAt: string | null;
+  lastPurchasedAt: string | null;
+  lastPurchasedVariantId: string | null;
+  lastPurchasedVariantName: string | null;
+  variants: ReplenishmentVariantOption[];
+}
+
 export type PredictionQualityStatus = 'NO_DATA' | 'COLLECTING' | 'CALIBRATION_READY';
 
 export interface PredictionQualitySummary {
@@ -132,6 +148,7 @@ export interface ReplenishmentSnapshot {
   householdName: string;
   shoppingPreferences: HouseholdShoppingPreferences;
   quality: PredictionQualitySummary;
+  catalog: ReplenishmentCatalogEntry[];
   buy: ReplenishmentListEntry[];
   watch: ReplenishmentListEntry[];
 }

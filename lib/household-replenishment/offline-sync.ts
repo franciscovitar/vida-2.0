@@ -9,6 +9,11 @@ export type HouseholdMutation =
       operationId: string;
     }
   | {
+      action: 'add-existing';
+      needId: string;
+      operationId: string;
+    }
+  | {
       action: 'categorize';
       needId: string;
       category: string;
@@ -186,6 +191,37 @@ export function applyOptimisticHouseholdMutation(
     return structuredClone(snapshot);
   }
 
+  if (mutation.action === 'add-existing') {
+    const catalogEntry = snapshot.catalog.find((entry) => entry.needId === mutation.needId);
+    if (!catalogEntry) return structuredClone(snapshot);
+
+    const buyEntry = {
+      needId: catalogEntry.needId,
+      name: catalogEntry.name,
+      category: catalogEntry.category,
+      origin: 'MANUAL' as const,
+      confidence: catalogEntry.confidence,
+      reason: 'Agregado manualmente · pendiente de sincronizar',
+      expectedIntervalDays: catalogEntry.expectedIntervalDays,
+      nextExpectedAt: catalogEntry.nextExpectedAt,
+      lastPurchasedAt: catalogEntry.lastPurchasedAt,
+      lastPurchasedVariantId: catalogEntry.lastPurchasedVariantId,
+      lastPurchasedVariantName: catalogEntry.lastPurchasedVariantName,
+      variants: structuredClone(catalogEntry.variants),
+    };
+
+    return {
+      ...structuredClone(snapshot),
+      catalog: snapshot.catalog.map((entry) =>
+        entry.needId === mutation.needId ? { ...entry, status: 'BUY' as const } : entry,
+      ),
+      buy: snapshot.buy.some((entry) => entry.needId === mutation.needId)
+        ? structuredClone(snapshot.buy)
+        : [...structuredClone(snapshot.buy), buyEntry],
+      watch: snapshot.watch.filter((entry) => entry.needId !== mutation.needId),
+    };
+  }
+
   if (mutation.action === 'preferences') {
     return {
       ...structuredClone(snapshot),
@@ -203,6 +239,9 @@ export function applyOptimisticHouseholdMutation(
       );
     return {
       ...structuredClone(snapshot),
+      catalog: snapshot.catalog.map((entry) =>
+        entry.needId === mutation.needId ? { ...entry, category: mutation.category } : entry,
+      ),
       buy: update(snapshot.buy),
       watch: update(snapshot.watch),
     };
@@ -214,6 +253,9 @@ export function applyOptimisticHouseholdMutation(
   ) {
     return {
       ...structuredClone(snapshot),
+      catalog: snapshot.catalog.map((entry) =>
+        entry.needId === mutation.needId ? { ...entry, status: 'IDLE' as const } : entry,
+      ),
       buy: snapshot.buy.filter((entry) => entry.needId !== mutation.needId),
       watch: snapshot.watch.filter((entry) => entry.needId !== mutation.needId),
     };
@@ -233,6 +275,9 @@ export function applyOptimisticHouseholdMutation(
 
   return {
     ...structuredClone(snapshot),
+    catalog: snapshot.catalog.map((candidate) =>
+      candidate.needId === mutation.needId ? { ...candidate, status: 'BUY' as const } : candidate,
+    ),
     buy: [...snapshot.buy.filter((candidate) => candidate.needId !== mutation.needId), promoted],
     watch: snapshot.watch.filter((candidate) => candidate.needId !== mutation.needId),
   };
