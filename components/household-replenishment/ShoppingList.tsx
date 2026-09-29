@@ -228,6 +228,14 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
     });
   }
 
+  async function removeFromList(needId: string) {
+    await mutate({
+      action: 'remove-from-list',
+      needId,
+      operationId: crypto.randomUUID(),
+    });
+  }
+
   async function markBought(needId: string) {
     const variantName = variantDrafts[needId]?.trim() || null;
     await mutate({
@@ -623,29 +631,44 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
                     >
                       ✓ Compré
                     </button>
-                    <button
-                      type="button"
-                      disabled={saving}
-                      onClick={() => void correct(entry.needId, 'STILL_HAVE')}
-                    >
-                      Todavía tengo
-                    </button>
-                    {!supermarketMode ? (
+
+                    {entry.origin === 'MANUAL' ? (
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => void removeFromList(entry.needId)}
+                      >
+                        Quitar de Comprar
+                      </button>
+                    ) : null}
+
+                    {entry.origin === 'AUTO' ? (
                       <>
                         <button
                           type="button"
                           disabled={saving}
-                          onClick={() => void correct(entry.needId, 'LOW')}
+                          onClick={() => void correct(entry.needId, 'STILL_HAVE')}
                         >
-                          Queda poco
+                          Todavía tengo
                         </button>
-                        <button
-                          type="button"
-                          disabled={saving}
-                          onClick={() => void correct(entry.needId, 'OUT')}
-                        >
-                          Sin stock
-                        </button>
+                        {!supermarketMode ? (
+                          <>
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => void correct(entry.needId, 'LOW')}
+                            >
+                              Queda poco
+                            </button>
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => void correct(entry.needId, 'OUT')}
+                            >
+                              Sin stock
+                            </button>
+                          </>
+                        ) : null}
                       </>
                     ) : null}
                   </div>
@@ -727,9 +750,9 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
                   <button
                     type="button"
                     disabled={saving}
-                    onClick={() => void correct(entry.needId, 'LOW')}
+                    onClick={() => void addExistingNeed(entry.needId)}
                   >
-                    Agregar ahora
+                    Agregar a Comprar
                   </button>
                 </li>
               ))}

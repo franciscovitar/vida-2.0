@@ -228,6 +228,43 @@ export class ReplenishmentService {
     return { ok: true, code: 'applied', snapshot: await this.snapshot(input.householdId) };
   }
 
+  async removeNeedFromList(input: {
+    householdId: string;
+    needId: string;
+    operationId: string;
+  }): Promise<ReplenishmentMutationResult> {
+    if (await this.repository.hasOperation(input.householdId, input.operationId)) {
+      return {
+        ok: true,
+        code: 'idempotent',
+        snapshot: await this.snapshot(input.householdId),
+      };
+    }
+
+    const need = await this.repository.getNeed(input.householdId, input.needId);
+    if (!need) {
+      return { ok: false, code: 'not-found', message: 'Ese producto ya no está disponible.' };
+    }
+
+    const items = await this.repository.listShoppingItems(input.householdId);
+    const activeItems = items.filter((item) => item.needId === need.id && item.state === 'ACTIVE');
+    if (activeItems.length === 0) {
+      await this.repository.recordOperation(input.householdId, input.operationId);
+      return {
+        ok: true,
+        code: 'existing',
+        snapshot: await this.snapshot(input.householdId),
+      };
+    }
+
+    for (const item of activeItems) {
+      await this.repository.putShoppingItem({ ...item, state: 'SKIPPED' });
+    }
+    await this.repository.recordOperation(input.householdId, input.operationId);
+
+    return { ok: true, code: 'applied', snapshot: await this.snapshot(input.householdId) };
+  }
+
   async updateNeedCategory(input: {
     householdId: string;
     needId: string;
@@ -522,7 +559,7 @@ export class ReplenishmentService {
           confidence: estimate.confidence,
           reason:
             decision.reason === 'ACTIVE_ITEM' && activeItem?.origin === 'MANUAL'
-              ? 'Agregado manualmente'
+              ? 'Lo agregaste vos'
               : reasonForDecision(decision.reason, estimate.expectedIntervalDays),
           expectedIntervalDays: estimate.expectedIntervalDays,
           nextExpectedAt: estimate.nextExpectedAt,
