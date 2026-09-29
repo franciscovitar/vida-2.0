@@ -404,7 +404,7 @@ test('cadence V1 favors recent intervals and ignores one obvious anomaly', () =>
     need,
     purchases,
     corrections: [],
-    now: new Date('2026-05-25T12:00:00.000Z'),
+    now: new Date('2026-05-28T12:00:00.000Z'),
   });
 
   assert.equal(estimate.expectedIntervalDays, 30);
