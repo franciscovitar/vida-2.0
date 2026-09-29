@@ -370,7 +370,6 @@ test('changing product variant keeps one need history and dedupes normalized var
   assert.equal(cadence.observations, 3);
 });
 
-
 test('cadence V1 favors recent intervals and ignores one obvious anomaly', () => {
   const need: ReplenishmentNeed = {
     id: 'need-cadence-1',
