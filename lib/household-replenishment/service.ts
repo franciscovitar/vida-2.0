@@ -9,6 +9,7 @@ import type {
   CorrectionEvent,
   ProductVariant,
   PurchaseEvent,
+  ReplenishmentCatalogEntry,
   ReplenishmentListEntry,
   ReplenishmentMutationResult,
   ReplenishmentSnapshot,
@@ -168,6 +169,60 @@ export class ReplenishmentService {
       operationId: input.operationId,
     };
     await this.repository.appendCorrectionEvent(correction);
+    await this.repository.recordOperation(input.householdId, input.operationId);
+
+    return { ok: true, code: 'applied', snapshot: await this.snapshot(input.householdId) };
+  }
+
+  async addExistingNeedToList(input: {
+    householdId: string;
+    needId: string;
+    operationId: string;
+    principalId: string;
+  }): Promise<ReplenishmentMutationResult> {
+    if (await this.repository.hasOperation(input.householdId, input.operationId)) {
+      return {
+        ok: true,
+        code: 'idempotent',
+        snapshot: await this.snapshot(input.householdId),
+      };
+    }
+
+    const need = await this.repository.getNeed(input.householdId, input.needId);
+    if (!need || !need.active) {
+      return { ok: false, code: 'not-found', message: 'Ese producto ya no está disponible.' };
+    }
+
+    const items = await this.repository.listShoppingItems(input.householdId);
+    const activeItem = items.find((item) => item.needId === need.id && item.state === 'ACTIVE');
+    if (activeItem) {
+      await this.repository.recordOperation(input.householdId, input.operationId);
+      return {
+        ok: true,
+        code: 'existing',
+        snapshot: await this.snapshot(input.householdId),
+      };
+    }
+
+    const timestamp = this.now().toISOString();
+    await this.repository.putShoppingItem({
+      id: this.id(),
+      householdId: input.householdId,
+      needId: need.id,
+      origin: 'MANUAL',
+      state: 'ACTIVE',
+      addedAt: timestamp,
+      operationId: input.operationId,
+    });
+    await this.repository.appendCorrectionEvent({
+      id: this.id(),
+      householdId: input.householdId,
+      needId: need.id,
+      type: 'MANUAL_ADD',
+      occurredAt: timestamp,
+      createdBy: input.principalId,
+      operationId: input.operationId,
+    });
     await this.repository.recordOperation(input.householdId, input.operationId);
 
     return { ok: true, code: 'applied', snapshot: await this.snapshot(input.householdId) };
@@ -384,6 +439,7 @@ export class ReplenishmentService {
           purchases: [],
           corrections: [],
         }),
+        catalog: [],
         buy: [],
         watch: [],
       };
@@ -406,6 +462,7 @@ export class ReplenishmentService {
       purchases,
       corrections,
     });
+    const catalog: ReplenishmentCatalogEntry[] = [];
     const buy: ReplenishmentListEntry[] = [];
     const watch: ReplenishmentListEntry[] = [];
 
@@ -445,6 +502,17 @@ export class ReplenishmentService {
         estimate,
       });
 
+      catalog.push({
+        needId: need.id,
+        name: need.name,
+        category: need.category,
+        status: decision.bucket === 'NONE' ? 'IDLE' : decision.bucket,
+        confidence: estimate.confidence,
+        expectedIntervalDays: estimate.expectedIntervalDays,
+        nextExpectedAt: estimate.nextExpectedAt,
+        ...variantFields,
+      });
+
       if (decision.bucket === 'BUY' && decision.origin) {
         buy.push({
           needId: need.id,
@@ -482,6 +550,7 @@ export class ReplenishmentService {
         categoryOrder,
       },
       quality,
+      catalog: sortReplenishmentEntries(catalog, categoryOrder),
       buy: sortReplenishmentEntries(buy, categoryOrder),
       watch: sortReplenishmentEntries(watch, categoryOrder),
     };
