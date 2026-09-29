@@ -29,6 +29,17 @@ export interface ReplenishmentNeed {
   createdAt: string;
 }
 
+export interface ProductVariant {
+  id: string;
+  needId: string;
+  name: string;
+  brand: string | null;
+  gtin: string | null;
+  packSize: number | null;
+  unit: string | null;
+  preferred: boolean;
+}
+
 export interface ShoppingListItem {
   id: string;
   householdId: string;
@@ -43,6 +54,7 @@ export interface PurchaseEvent {
   id: string;
   householdId: string;
   needId: string;
+  variantId: string | null;
   purchasedAt: string;
   source: ShoppingListOrigin;
   createdBy: string;
@@ -70,6 +82,12 @@ export interface CadenceEstimate {
   observations: number;
 }
 
+export interface ReplenishmentVariantOption {
+  id: string;
+  name: string;
+  preferred: boolean;
+}
+
 export interface ReplenishmentListEntry {
   needId: string;
   name: string;
@@ -80,6 +98,9 @@ export interface ReplenishmentListEntry {
   expectedIntervalDays: number | null;
   nextExpectedAt: string | null;
   lastPurchasedAt: string | null;
+  lastPurchasedVariantId: string | null;
+  lastPurchasedVariantName: string | null;
+  variants: ReplenishmentVariantOption[];
 }
 
 export interface ReplenishmentSnapshot {

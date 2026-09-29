@@ -258,6 +258,7 @@ test('STILL_HAVE moves a regular prediction forward instead of immediately reapp
     id: `purchase-${index}`,
     householdId: 'h1',
     needId: need.id,
+    variantId: null,
     purchasedAt,
     source: 'AUTO',
     createdBy: 'owner-id',
@@ -285,4 +286,86 @@ test('STILL_HAVE moves a regular prediction forward instead of immediately reapp
   assert.equal(estimate.state, 'NOT_DUE');
   assert.ok(estimate.nextExpectedAt);
   assert.ok(Date.parse(estimate.nextExpectedAt) > Date.parse('2026-05-10T12:00:00.000Z'));
+});
+
+test('changing product variant keeps one need history and dedupes normalized variants', async () => {
+  const fixture = createServiceFixture();
+
+  const added = await fixture.service.addManualNeed({
+    householdId: 'h1',
+    name: 'Detergente para ropa',
+    seedIntervalDays: 30,
+    operationId: 'operation-add-laundry-detergent',
+    principalId: 'owner-id',
+  });
+  assert.equal(added.ok, true);
+  if (!added.ok) return;
+
+  const needId = added.snapshot.buy[0]?.needId;
+  assert.ok(needId);
+
+  await fixture.service.markBought({
+    householdId: 'h1',
+    needId,
+    variantName: 'Skip 3L',
+    operationId: 'operation-buy-skip',
+    principalId: 'owner-id',
+  });
+
+  fixture.setNow('2026-01-31T12:00:00.000Z');
+  await fixture.service.addManualNeed({
+    householdId: 'h1',
+    name: 'Detergente para ropa',
+    operationId: 'operation-readd-laundry-detergent-1',
+    principalId: 'owner-id',
+  });
+  await fixture.service.markBought({
+    householdId: 'h1',
+    needId,
+    variantName: 'Ala 3L',
+    operationId: 'operation-buy-ala',
+    principalId: 'owner-id',
+  });
+
+  fixture.setNow('2026-03-02T12:00:00.000Z');
+  await fixture.service.addManualNeed({
+    householdId: 'h1',
+    name: 'Detergente para ropa',
+    operationId: 'operation-readd-laundry-detergent-2',
+    principalId: 'owner-id',
+  });
+  await fixture.service.markBought({
+    householdId: 'h1',
+    needId,
+    variantName: '  skip 3l  ',
+    operationId: 'operation-buy-skip-again',
+    principalId: 'owner-id',
+  });
+
+  const variants = await fixture.repository.listVariants('h1', needId);
+  assert.equal(variants.length, 2);
+  assert.deepEqual(variants.map((variant) => variant.name).sort(), ['Ala 3L', 'Skip 3L']);
+  assert.equal(variants.filter((variant) => variant.preferred).length, 1);
+
+  const purchases = await fixture.repository.listPurchaseEvents('h1', needId);
+  assert.equal(purchases.length, 3);
+  assert.equal(
+    purchases.every((purchase) => purchase.needId === needId),
+    true,
+  );
+  assert.ok(purchases[0]?.variantId);
+  assert.ok(purchases[1]?.variantId);
+  assert.equal(purchases[0]?.variantId, purchases[2]?.variantId);
+  assert.notEqual(purchases[0]?.variantId, purchases[1]?.variantId);
+
+  const need = await fixture.repository.getNeed('h1', needId);
+  assert.ok(need);
+  const cadence = estimateCadence({
+    need,
+    purchases,
+    corrections: [],
+    now: new Date('2026-03-02T12:00:00.000Z'),
+  });
+  assert.equal(cadence.expectedIntervalDays, 30);
+  assert.equal(cadence.observations, 3);
 });

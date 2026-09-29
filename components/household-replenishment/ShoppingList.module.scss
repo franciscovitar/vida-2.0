@@ -194,6 +194,35 @@
   font-size: 0.72rem;
 }
 
+.purchase-panel {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.variant-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.variant-field span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.variant-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0.55rem 0.65rem;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.82rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
 .actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -238,6 +267,10 @@
   .item {
     grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
     align-items: center;
+  }
+
+  .purchase-panel {
+    min-width: 0;
   }
 
   .actions {

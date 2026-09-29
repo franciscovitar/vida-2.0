@@ -19,7 +19,18 @@ const HEADERS = {
     'active',
     'created_at',
   ],
+  Variants: ['id', 'need_id', 'name', 'brand', 'gtin', 'pack_size', 'unit', 'preferred'],
   ShoppingItems: ['id', 'household_id', 'need_id', 'origin', 'state', 'added_at', 'operation_id'],
+  PurchaseEvents: [
+    'id',
+    'household_id',
+    'need_id',
+    'purchased_at',
+    'source',
+    'created_by',
+    'operation_id',
+    'variant_id',
+  ],
   Operations: ['household_id', 'operation_id', 'recorded_at'],
 } as const;
 
@@ -135,6 +146,7 @@ test('Google Sheets repository commits a mutation as one atomic batch', async ()
     id: 'purchase-1',
     householdId: 'primary-household',
     needId: existingShoppingItem.needId,
+    variantId: null,
     purchasedAt: '2026-09-28T21:45:00.000Z',
     source: 'MANUAL',
     createdBy: 'owner-id',
@@ -179,4 +191,90 @@ test('Google Sheets operation ledger makes retries observable', async () => {
 
   assert.equal(await repository.hasOperation('primary-household', 'operation-abc'), true);
   assert.equal(await repository.hasOperation('primary-household', 'operation-other'), false);
+});
+
+test('Google Sheets repository persists variants and purchase variant_id atomically', async () => {
+  const postedBodies: unknown[] = [];
+  const fetchImpl: typeof fetch = async (input, init) => {
+    if (init?.method === 'POST') {
+      postedBodies.push(JSON.parse(String(init.body)));
+      return jsonResponse({});
+    }
+
+    const tab = tabFromUrl(input);
+    if (tab === 'Needs') {
+      return jsonResponse({
+        values: [
+          HEADERS.Needs,
+          [
+            'need-1',
+            'primary-household',
+            'Detergente para ropa',
+            'Limpieza',
+            30,
+            true,
+            '2026-09-28T21:45:00.000Z',
+          ],
+        ],
+      });
+    }
+    if (tab === 'Variants') {
+      return jsonResponse({ values: [HEADERS.Variants] });
+    }
+
+    throw new Error(`unexpected read: ${tab ?? 'unknown'}`);
+  };
+
+  const repository = new GoogleSheetsReplenishmentRepository(
+    {
+      clientEmail: 'vida@example.iam.gserviceaccount.com',
+      privateKey: 'private-key',
+      spreadsheetId: 'sheet-123',
+    },
+    {
+      fetchImpl,
+      tokenProvider: async () => ({ ok: true, token: 'test-token' }),
+      now: () => new Date('2026-09-28T21:45:00.000Z'),
+    },
+  );
+
+  await repository.putVariant('primary-household', {
+    id: 'variant-skip-3l',
+    needId: 'need-1',
+    name: 'Skip 3L',
+    brand: 'Skip',
+    gtin: null,
+    packSize: 3,
+    unit: 'L',
+    preferred: true,
+  });
+  await repository.appendPurchaseEvent({
+    id: 'purchase-with-variant',
+    householdId: 'primary-household',
+    needId: 'need-1',
+    variantId: 'variant-skip-3l',
+    purchasedAt: '2026-09-28T21:45:00.000Z',
+    source: 'MANUAL',
+    createdBy: 'owner-id',
+    operationId: 'operation-buy-with-variant',
+  });
+  await repository.recordOperation('primary-household', 'operation-buy-with-variant');
+
+  assert.equal(postedBodies.length, 1);
+  const body = postedBodies[0] as {
+    requests?: Array<{
+      appendCells?: {
+        sheetId?: number;
+        rows?: Array<{ values?: Array<{ userEnteredValue?: { stringValue?: string } }> }>;
+      };
+    }>;
+  };
+  assert.equal(body.requests?.length, 3);
+  assert.equal(body.requests?.[0]?.appendCells?.sheetId, 1002);
+  assert.equal(body.requests?.[1]?.appendCells?.sheetId, 1004);
+  assert.equal(body.requests?.[2]?.appendCells?.sheetId, 1006);
+  assert.equal(
+    body.requests?.[1]?.appendCells?.rows?.[0]?.values?.[7]?.userEnteredValue?.stringValue,
+    'variant-skip-3l',
+  );
 });

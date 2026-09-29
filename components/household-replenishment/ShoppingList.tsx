@@ -21,6 +21,7 @@ type MutationPayload =
   | {
       action: 'bought';
       needId: string;
+      variantName: string | null;
       operationId: string;
     }
   | {
@@ -50,6 +51,7 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [name, setName] = useState('');
   const [cadence, setCadence] = useState('');
+  const [variantDrafts, setVariantDrafts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -98,7 +100,13 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
   }
 
   async function markBought(needId: string) {
-    await mutate({ action: 'bought', needId, operationId: crypto.randomUUID() });
+    const variantName = variantDrafts[needId]?.trim() || null;
+    await mutate({
+      action: 'bought',
+      needId,
+      variantName,
+      operationId: crypto.randomUUID(),
+    });
   }
 
   async function correct(needId: string, type: UserCorrectionType) {
@@ -182,39 +190,68 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
                     {formatDate(entry.nextExpectedAt) ? (
                       <span>Estimado: {formatDate(entry.nextExpectedAt)}</span>
                     ) : null}
+                    {entry.lastPurchasedVariantName ? (
+                      <span>Última variante: {entry.lastPurchasedVariantName}</span>
+                    ) : null}
                   </div>
                 </div>
 
-                <div className={styles.actions}>
-                  <button
-                    type="button"
-                    className={styles['bought-button']}
-                    disabled={saving}
-                    onClick={() => void markBought(entry.needId)}
-                  >
-                    ✓ Compré
-                  </button>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void correct(entry.needId, 'STILL_HAVE')}
-                  >
-                    Todavía tengo
-                  </button>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void correct(entry.needId, 'LOW')}
-                  >
-                    Queda poco
-                  </button>
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void correct(entry.needId, 'OUT')}
-                  >
-                    Sin stock
-                  </button>
+                <div className={styles['purchase-panel']}>
+                  <label className={styles['variant-field']}>
+                    <span>Marca / tamaño (opcional)</span>
+                    <input
+                      value={variantDrafts[entry.needId] ?? ''}
+                      list={entry.variants.length > 0 ? `variants-${entry.needId}` : undefined}
+                      maxLength={100}
+                      disabled={saving}
+                      placeholder={entry.lastPurchasedVariantName ?? 'Ej. Skip 3L'}
+                      onChange={(event) =>
+                        setVariantDrafts((current) => ({
+                          ...current,
+                          [entry.needId]: event.target.value,
+                        }))
+                      }
+                    />
+                    {entry.variants.length > 0 ? (
+                      <datalist id={`variants-${entry.needId}`}>
+                        {entry.variants.map((variant) => (
+                          <option key={variant.id} value={variant.name} />
+                        ))}
+                      </datalist>
+                    ) : null}
+                  </label>
+
+                  <div className={styles.actions}>
+                    <button
+                      type="button"
+                      className={styles['bought-button']}
+                      disabled={saving}
+                      onClick={() => void markBought(entry.needId)}
+                    >
+                      ✓ Compré
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void correct(entry.needId, 'STILL_HAVE')}
+                    >
+                      Todavía tengo
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void correct(entry.needId, 'LOW')}
+                    >
+                      Queda poco
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void correct(entry.needId, 'OUT')}
+                    >
+                      Sin stock
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}

@@ -2,6 +2,7 @@ import type { ReplenishmentRepository } from './repository';
 import type {
   CorrectionEvent,
   Household,
+  ProductVariant,
   PurchaseEvent,
   ReplenishmentNeed,
   ShoppingListItem,
@@ -23,6 +24,7 @@ function normalizeName(value: string): string {
 export class MemoryReplenishmentRepository implements ReplenishmentRepository {
   private readonly households = new Map<string, Household>();
   private readonly needs = new Map<string, ReplenishmentNeed>();
+  private readonly variants = new Map<string, ProductVariant>();
   private readonly shoppingItems = new Map<string, ShoppingListItem>();
   private readonly purchases = new Map<string, PurchaseEvent>();
   private readonly corrections = new Map<string, CorrectionEvent>();
@@ -65,6 +67,38 @@ export class MemoryReplenishmentRepository implements ReplenishmentRepository {
 
   async putNeed(need: ReplenishmentNeed): Promise<void> {
     this.needs.set(need.id, clone(need));
+  }
+
+  async listVariants(householdId: string, needId?: string): Promise<ProductVariant[]> {
+    const ownedNeedIds = new Set(
+      [...this.needs.values()]
+        .filter((need) => need.householdId === householdId)
+        .map((need) => need.id),
+    );
+    return [...this.variants.values()]
+      .filter(
+        (variant) =>
+          ownedNeedIds.has(variant.needId) && (needId == null || variant.needId === needId),
+      )
+      .map(clone);
+  }
+
+  async findVariantByName(
+    householdId: string,
+    needId: string,
+    normalizedName: string,
+  ): Promise<ProductVariant | null> {
+    const variants = await this.listVariants(householdId, needId);
+    const variant = variants.find((candidate) => normalizeName(candidate.name) === normalizedName);
+    return variant ? clone(variant) : null;
+  }
+
+  async putVariant(householdId: string, variant: ProductVariant): Promise<void> {
+    const need = this.needs.get(variant.needId);
+    if (!need || need.householdId !== householdId) {
+      throw new Error('Product variant does not belong to the requested household');
+    }
+    this.variants.set(variant.id, clone(variant));
   }
 
   async listShoppingItems(householdId: string): Promise<ShoppingListItem[]> {

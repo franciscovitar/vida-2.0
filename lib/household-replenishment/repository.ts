@@ -1,6 +1,7 @@
 import type {
   CorrectionEvent,
   Household,
+  ProductVariant,
   PurchaseEvent,
   ReplenishmentNeed,
   ShoppingListItem,
@@ -14,6 +15,14 @@ export interface ReplenishmentRepository {
   getNeed(householdId: string, needId: string): Promise<ReplenishmentNeed | null>;
   findNeedByName(householdId: string, normalizedName: string): Promise<ReplenishmentNeed | null>;
   putNeed(need: ReplenishmentNeed): Promise<void>;
+
+  listVariants(householdId: string, needId?: string): Promise<ProductVariant[]>;
+  findVariantByName(
+    householdId: string,
+    needId: string,
+    normalizedName: string,
+  ): Promise<ProductVariant | null>;
+  putVariant(householdId: string, variant: ProductVariant): Promise<void>;
 
   listShoppingItems(householdId: string): Promise<ShoppingListItem[]>;
   putShoppingItem(item: ShoppingListItem): Promise<void>;
