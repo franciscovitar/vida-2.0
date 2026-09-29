@@ -92,13 +92,7 @@ test('explicit household flush attempts transport even when online signal is fal
 
   await store.persistMutation(mutation(), '2026-09-29T01:00:00.000Z');
 
-  const controller = attachHouseholdReconnectSync(
-    store,
-    transport,
-    undefined,
-    source,
-    () => false,
-  );
+  const controller = attachHouseholdReconnectSync(store, transport, undefined, source, () => false);
 
   const result = await controller.flushNow();
 

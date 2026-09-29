@@ -1,8 +1,4 @@
-import type {
-  ReplenishmentMutationCode,
-  ReplenishmentSnapshot,
-  UserCorrectionType,
-} from './types';
+import type { ReplenishmentMutationCode, ReplenishmentSnapshot, UserCorrectionType } from './types';
 
 export type HouseholdMutation =
   | {
@@ -161,10 +157,7 @@ export class HouseholdMutationSyncEngine {
   }
 }
 
-function findEntry(
-  snapshot: ReplenishmentSnapshot,
-  needId: string,
-) {
+function findEntry(snapshot: ReplenishmentSnapshot, needId: string) {
   return (
     snapshot.buy.find((entry) => entry.needId === needId) ??
     snapshot.watch.find((entry) => entry.needId === needId) ??
@@ -180,7 +173,10 @@ export function applyOptimisticHouseholdMutation(
     return structuredClone(snapshot);
   }
 
-  if (mutation.action === 'bought' || (mutation.action === 'correct' && mutation.type === 'STILL_HAVE')) {
+  if (
+    mutation.action === 'bought' ||
+    (mutation.action === 'correct' && mutation.type === 'STILL_HAVE')
+  ) {
     return {
       ...structuredClone(snapshot),
       buy: snapshot.buy.filter((entry) => entry.needId !== mutation.needId),
@@ -202,10 +198,7 @@ export function applyOptimisticHouseholdMutation(
 
   return {
     ...structuredClone(snapshot),
-    buy: [
-      ...snapshot.buy.filter((candidate) => candidate.needId !== mutation.needId),
-      promoted,
-    ],
+    buy: [...snapshot.buy.filter((candidate) => candidate.needId !== mutation.needId), promoted],
     watch: snapshot.watch.filter((candidate) => candidate.needId !== mutation.needId),
   };
 }

@@ -24,9 +24,7 @@ class RecordingTransport implements HouseholdMutationTransport {
   readonly calls: string[] = [];
 
   constructor(
-    private readonly responder: (
-      mutation: HouseholdMutation,
-    ) => Promise<HouseholdMutationSyncAck>,
+    private readonly responder: (mutation: HouseholdMutation) => Promise<HouseholdMutationSyncAck>,
   ) {}
 
   async sendMutation(mutation: HouseholdMutation): Promise<HouseholdMutationSyncAck> {
@@ -152,7 +150,10 @@ test('conflict stops flush and keeps pending operation for explicit recovery', a
 
 test('optimistic bought and STILL_HAVE remove item while LOW promotes watch to buy', () => {
   const afterBought = applyOptimisticHouseholdMutation(snapshot, bought());
-  assert.equal(afterBought.buy.some((entry) => entry.needId === 'need-1'), false);
+  assert.equal(
+    afterBought.buy.some((entry) => entry.needId === 'need-1'),
+    false,
+  );
 
   const afterStillHave = applyOptimisticHouseholdMutation(snapshot, {
     action: 'correct',
@@ -160,7 +161,10 @@ test('optimistic bought and STILL_HAVE remove item while LOW promotes watch to b
     type: 'STILL_HAVE',
     operationId: 'operation-still-have',
   });
-  assert.equal(afterStillHave.buy.some((entry) => entry.needId === 'need-1'), false);
+  assert.equal(
+    afterStillHave.buy.some((entry) => entry.needId === 'need-1'),
+    false,
+  );
 
   const afterLow = applyOptimisticHouseholdMutation(snapshot, {
     action: 'correct',
@@ -168,7 +172,13 @@ test('optimistic bought and STILL_HAVE remove item while LOW promotes watch to b
     type: 'LOW',
     operationId: 'operation-low',
   });
-  assert.equal(afterLow.watch.some((entry) => entry.needId === 'need-2'), false);
-  assert.equal(afterLow.buy.some((entry) => entry.needId === 'need-2'), true);
+  assert.equal(
+    afterLow.watch.some((entry) => entry.needId === 'need-2'),
+    false,
+  );
+  assert.equal(
+    afterLow.buy.some((entry) => entry.needId === 'need-2'),
+    true,
+  );
   assert.equal(afterLow.buy.find((entry) => entry.needId === 'need-2')?.origin, 'CORRECTION');
 });

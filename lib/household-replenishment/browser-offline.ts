@@ -86,9 +86,8 @@ export class IndexedDbHouseholdMutationOutboxStore implements HouseholdMutationO
     const outbox = transaction.objectStore(OUTBOX_STORE);
 
     try {
-      const existing = (await requestResult(
-        outbox.get(mutation.operationId),
-      )) as PendingHouseholdMutation | undefined;
+      const existing = (await requestResult(outbox.get(mutation.operationId))) as
+        PendingHouseholdMutation | undefined;
 
       if (existing) {
         if (sameMutation(existing.mutation, mutation)) {
