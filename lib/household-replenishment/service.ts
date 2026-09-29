@@ -299,14 +299,13 @@ export class ReplenishmentService {
       const needVariants = variants
         .filter((variant) => variant.needId === need.id)
         .sort(
-          (a, b) =>
-            Number(b.preferred) - Number(a.preferred) || a.name.localeCompare(b.name, 'es'),
+          (a, b) => Number(b.preferred) - Number(a.preferred) || a.name.localeCompare(b.name, 'es'),
         );
       const lastPurchase = latestPurchase(needPurchases);
       const lastVariant =
         lastPurchase?.variantId == null
           ? null
-          : needVariants.find((variant) => variant.id === lastPurchase.variantId) ?? null;
+          : (needVariants.find((variant) => variant.id === lastPurchase.variantId) ?? null);
       const variantFields = {
         lastPurchasedAt: lastPurchase?.purchasedAt ?? null,
         lastPurchasedVariantId: lastVariant?.id ?? null,
