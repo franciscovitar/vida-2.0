@@ -31,8 +31,8 @@ const TABS = {
   households: {
     title: 'Households',
     sheetId: 990469925,
-    range: 'A:C',
-    headers: ['id', 'name', 'created_at'],
+    range: 'A:E',
+    headers: ['id', 'name', 'created_at', 'default_store', 'category_order_json'],
   },
   needs: {
     title: 'Needs',
@@ -113,6 +113,19 @@ function asNullableNumber(value: unknown): number | null {
 function asBoolean(value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   return String(value).trim().toLowerCase() === 'true';
+}
+
+function asStringArrayJson(value: unknown): string[] {
+  const raw = asString(value).trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === 'string')
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 function cellData(value: SheetScalar) {
@@ -264,6 +277,8 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
         id,
         name: asString(row[1]).trim() || 'Lista de casa',
         createdAt: asString(row[2]).trim(),
+        defaultStore: asString(row[3]).trim() || null,
+        categoryOrder: asStringArrayJson(row[4]),
       };
     });
   }
@@ -376,7 +391,13 @@ export class GoogleSheetsReplenishmentRepository implements ReplenishmentReposit
   async putHousehold(household: Household): Promise<void> {
     const rows = this.parseHouseholds(await this.readTab('households'));
     const existing = rows.find((row) => row.value.id === household.id);
-    const values = [household.id, household.name, household.createdAt] as const;
+    const values = [
+      household.id,
+      household.name,
+      household.createdAt,
+      household.defaultStore ?? null,
+      JSON.stringify(household.categoryOrder ?? []),
+    ] as const;
     if (existing) this.stageUpdate('households', existing.rowNumber, values);
     else this.stageAppend('households', values);
   }

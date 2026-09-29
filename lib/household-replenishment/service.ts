@@ -1,7 +1,13 @@
 import { randomUUID } from 'node:crypto';
 
+import {
+  normalizeCategoryOrder,
+  sanitizeCategory,
+  sortReplenishmentEntries,
+} from './categories';
 import { estimateCadence } from './engine';
 import { projectNeedListState, type AutomaticListReason } from './list-projection';
+import { evaluatePredictionQuality } from './quality';
 import type { ReplenishmentRepository } from './repository';
 import type {
   CorrectionEvent,
@@ -56,12 +62,6 @@ function reasonForDecision(
   return 'Marcado para comprar';
 }
 
-function sortEntries(entries: ReplenishmentListEntry[]): ReplenishmentListEntry[] {
-  return [...entries].sort(
-    (a, b) => a.category.localeCompare(b.category, 'es') || a.name.localeCompare(b.name, 'es'),
-  );
-}
-
 export class ReplenishmentService {
   private readonly now: () => Date;
   private readonly id: () => string;
@@ -96,6 +96,9 @@ export class ReplenishmentService {
       return { ok: false, code: 'invalid-input', message: 'No se pudo agregar ese producto.' };
     }
 
+    const requestedCategory =
+      input.category == null ? null : sanitizeCategory(input.category);
+
     const seed =
       input.seedIntervalDays == null
         ? null
@@ -116,15 +119,26 @@ export class ReplenishmentService {
         id: this.id(),
         householdId: input.householdId,
         name: trimmedName,
-        category: input.category?.trim() || 'Otros',
+        category: requestedCategory ?? 'Otros',
         manualSeedIntervalDays: seed,
         active: true,
         createdAt: timestamp,
       };
       await this.repository.putNeed(need);
-    } else if (need.manualSeedIntervalDays == null && seed != null) {
-      need = { ...need, manualSeedIntervalDays: seed };
-      await this.repository.putNeed(need);
+    } else {
+      const nextNeed = {
+        ...need,
+        category: requestedCategory ?? need.category,
+        manualSeedIntervalDays:
+          need.manualSeedIntervalDays == null && seed != null ? seed : need.manualSeedIntervalDays,
+      };
+      if (
+        nextNeed.category !== need.category ||
+        nextNeed.manualSeedIntervalDays !== need.manualSeedIntervalDays
+      ) {
+        need = nextNeed;
+        await this.repository.putNeed(need);
+      }
     }
 
     const items = await this.repository.listShoppingItems(input.householdId);
@@ -161,6 +175,78 @@ export class ReplenishmentService {
     await this.repository.appendCorrectionEvent(correction);
     await this.repository.recordOperation(input.householdId, input.operationId);
 
+    return { ok: true, code: 'applied', snapshot: await this.snapshot(input.householdId) };
+  }
+
+  async updateNeedCategory(input: {
+    householdId: string;
+    needId: string;
+    category: string;
+    operationId: string;
+  }): Promise<ReplenishmentMutationResult> {
+    if (await this.repository.hasOperation(input.householdId, input.operationId)) {
+      return {
+        ok: true,
+        code: 'idempotent',
+        snapshot: await this.snapshot(input.householdId),
+      };
+    }
+
+    const need = await this.repository.getNeed(input.householdId, input.needId);
+    if (!need) {
+      return { ok: false, code: 'not-found', message: 'Ese producto ya no está disponible.' };
+    }
+
+    const category = sanitizeCategory(input.category);
+    if (!category || category.length > 60) {
+      return { ok: false, code: 'invalid-input', message: 'La categoría no es válida.' };
+    }
+
+    await this.repository.putNeed({ ...need, category });
+    await this.repository.recordOperation(input.householdId, input.operationId);
+    return { ok: true, code: 'applied', snapshot: await this.snapshot(input.householdId) };
+  }
+
+  async updateShoppingPreferences(input: {
+    householdId: string;
+    defaultStore: string | null;
+    categoryOrder: string[];
+    operationId: string;
+  }): Promise<ReplenishmentMutationResult> {
+    if (await this.repository.hasOperation(input.householdId, input.operationId)) {
+      return {
+        ok: true,
+        code: 'idempotent',
+        snapshot: await this.snapshot(input.householdId),
+      };
+    }
+
+    const household = await this.repository.getHousehold(input.householdId);
+    if (!household) {
+      return { ok: false, code: 'not-found', message: 'No se encontró el hogar.' };
+    }
+
+    const defaultStore = input.defaultStore?.trim() || null;
+    if (defaultStore && defaultStore.length > 80) {
+      return { ok: false, code: 'invalid-input', message: 'El supermercado es demasiado largo.' };
+    }
+
+    if (!Array.isArray(input.categoryOrder) || input.categoryOrder.length > 30) {
+      return { ok: false, code: 'invalid-input', message: 'El orden de categorías no es válido.' };
+    }
+
+    const needs = await this.repository.listNeeds(input.householdId);
+    const categoryOrder = normalizeCategoryOrder(
+      input.categoryOrder,
+      needs.map((need) => need.category),
+    );
+
+    await this.repository.putHousehold({
+      ...household,
+      defaultStore,
+      categoryOrder,
+    });
+    await this.repository.recordOperation(input.householdId, input.operationId);
     return { ok: true, code: 'applied', snapshot: await this.snapshot(input.householdId) };
   }
 
@@ -292,7 +378,20 @@ export class ReplenishmentService {
   async snapshot(householdId: string): Promise<ReplenishmentSnapshot> {
     const household = await this.repository.getHousehold(householdId);
     if (!household) {
-      return { householdName: 'Lista de casa', buy: [], watch: [] };
+      return {
+        householdName: 'Lista de casa',
+        shoppingPreferences: {
+          defaultStore: null,
+          categoryOrder: normalizeCategoryOrder([]),
+        },
+        quality: evaluatePredictionQuality({
+          needs: [],
+          purchases: [],
+          corrections: [],
+        }),
+        buy: [],
+        watch: [],
+      };
     }
 
     const [needs, variants, items, purchases, corrections] = await Promise.all([
@@ -303,6 +402,15 @@ export class ReplenishmentService {
       this.repository.listCorrectionEvents(householdId),
     ]);
     const now = this.now();
+    const categoryOrder = normalizeCategoryOrder(
+      household.categoryOrder,
+      needs.map((need) => need.category),
+    );
+    const quality = evaluatePredictionQuality({
+      needs,
+      purchases,
+      corrections,
+    });
     const buy: ReplenishmentListEntry[] = [];
     const watch: ReplenishmentListEntry[] = [];
 
@@ -374,8 +482,13 @@ export class ReplenishmentService {
 
     return {
       householdName: household.name,
-      buy: sortEntries(buy),
-      watch: sortEntries(watch),
+      shoppingPreferences: {
+        defaultStore: household.defaultStore ?? null,
+        categoryOrder,
+      },
+      quality,
+      buy: sortReplenishmentEntries(buy, categoryOrder),
+      watch: sortReplenishmentEntries(watch, categoryOrder),
     };
   }
 }

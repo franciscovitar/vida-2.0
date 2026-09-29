@@ -46,7 +46,14 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
   const snapshotRef = useRef(initialSnapshot);
   const reconnectSync = useRef<HouseholdReconnectController | null>(null);
   const [name, setName] = useState('');
+  const [category, setCategory] = useState('Otros');
   const [cadence, setCadence] = useState('');
+  const [storeDraft, setStoreDraft] = useState(
+    initialSnapshot.shoppingPreferences.defaultStore ?? '',
+  );
+  const [categoryOrderDraft, setCategoryOrderDraft] = useState(
+    initialSnapshot.shoppingPreferences.categoryOrder,
+  );
   const [variantDrafts, setVariantDrafts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -107,7 +114,16 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
         if (!active) return;
 
         setPendingCount(pending.length);
-        let base = !isOnline && cached ? cached : initialSnapshot;
+        const compatibleCached = cached
+          ? {
+              ...initialSnapshot,
+              ...cached,
+              shoppingPreferences:
+                cached.shoppingPreferences ?? initialSnapshot.shoppingPreferences,
+              quality: cached.quality ?? initialSnapshot.quality,
+            }
+          : null;
+        let base = !isOnline && compatibleCached ? compatibleCached : initialSnapshot;
         for (const entry of pending) {
           base = applyOptimisticHouseholdMutation(base, entry.mutation);
         }
@@ -194,6 +210,7 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
     await mutate({
       action: 'add',
       name: trimmed,
+      category,
       seedIntervalDays: Number.isFinite(selectedCadence) ? selectedCadence : null,
       operationId: crypto.randomUUID(),
     });
@@ -215,6 +232,45 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
     await mutate({ action: 'correct', needId, type, operationId: crypto.randomUUID() });
   }
 
+  async function changeCategory(needId: string, nextCategory: string) {
+    await mutate({
+      action: 'categorize',
+      needId,
+      category: nextCategory,
+      operationId: crypto.randomUUID(),
+    });
+  }
+
+  function moveCategory(index: number, direction: -1 | 1) {
+    setCategoryOrderDraft((current) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= current.length) return current;
+      const next = [...current];
+      const currentValue = next[index];
+      const targetValue = next[nextIndex];
+      if (currentValue == null || targetValue == null) return current;
+      next[index] = targetValue;
+      next[nextIndex] = currentValue;
+      return next;
+    });
+  }
+
+  async function saveShoppingPreferences() {
+    await mutate({
+      action: 'preferences',
+      defaultStore: storeDraft.trim() || null,
+      categoryOrder: categoryOrderDraft,
+      operationId: crypto.randomUUID(),
+    });
+  }
+
+  const qualityLabel =
+    snapshot.quality.status === 'CALIBRATION_READY'
+      ? 'Ya hay evidencia para calibrar'
+      : snapshot.quality.status === 'COLLECTING'
+        ? 'Juntando evidencia real'
+        : 'Todavía sin historial suficiente';
+
   const workspaceClassName = supermarketMode
     ? `${styles.workspace} ${styles['supermarket-mode']}`
     : styles.workspace;
@@ -223,7 +279,13 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
     <div className={workspaceClassName}>
       <section className={styles['mode-toolbar']} aria-label="Modo de compra">
         <div>
-          <strong>{supermarketMode ? 'Modo súper activo' : 'Lista compartida'}</strong>
+          <strong>
+            {supermarketMode && snapshot.shoppingPreferences.defaultStore
+              ? `Modo súper · ${snapshot.shoppingPreferences.defaultStore}`
+              : supermarketMode
+                ? 'Modo súper activo'
+                : 'Lista compartida'}
+          </strong>
           <span>
             {online ? 'En línea' : 'Sin conexión'}
             {pendingCount > 0
@@ -258,6 +320,20 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
               />
             </label>
             <label className={styles.field}>
+              <span>Categoría</span>
+              <select
+                value={category}
+                disabled={saving}
+                onChange={(event) => setCategory(event.target.value)}
+              >
+                {snapshot.shoppingPreferences.categoryOrder.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={styles.field}>
               <span>Más o menos, ¿cada cuánto?</span>
               <select
                 value={cadence}
@@ -280,6 +356,62 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
             </button>
           </form>
         </section>
+      ) : null}
+
+      {!supermarketMode ? (
+        <details className={styles['settings-card']}>
+          <summary>Orden del súper y recorrido</summary>
+          <div className={styles['settings-body']}>
+            <label className={styles.field}>
+              <span>Supermercado habitual (opcional)</span>
+              <input
+                value={storeDraft}
+                maxLength={80}
+                disabled={saving}
+                placeholder="Ej. Carrefour, Disco, Mariano Max"
+                onChange={(event) => setStoreDraft(event.target.value)}
+              />
+            </label>
+
+            <div className={styles['category-order']}>
+              <span className={styles['settings-label']}>Orden de categorías</span>
+              <ol>
+                {categoryOrderDraft.map((item, index) => (
+                  <li key={item}>
+                    <span>{item}</span>
+                    <div>
+                      <button
+                        type="button"
+                        disabled={saving || index === 0}
+                        aria-label={`Subir ${item}`}
+                        onClick={() => moveCategory(index, -1)}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        disabled={saving || index === categoryOrderDraft.length - 1}
+                        aria-label={`Bajar ${item}`}
+                        onClick={() => moveCategory(index, 1)}
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <button
+              type="button"
+              className={styles['primary-button']}
+              disabled={saving}
+              onClick={() => void saveShoppingPreferences()}
+            >
+              Guardar recorrido
+            </button>
+          </div>
+        </details>
       ) : null}
 
       {notice ? (
@@ -309,7 +441,23 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
                 <div className={styles['item-main']}>
                   <div className={styles['item-title-row']}>
                     <strong>{entry.name}</strong>
-                    <span className={styles.category}>{entry.category}</span>
+                    {supermarketMode ? (
+                      <span className={styles.category}>{entry.category}</span>
+                    ) : (
+                      <select
+                        className={styles['category-select']}
+                        value={entry.category}
+                        disabled={saving}
+                        aria-label={`Categoría de ${entry.name}`}
+                        onChange={(event) => void changeCategory(entry.needId, event.target.value)}
+                      >
+                        {snapshot.shoppingPreferences.categoryOrder.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                   {!supermarketMode ? <p>{entry.reason}</p> : null}
                   {!supermarketMode ? (
@@ -391,6 +539,54 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
           </ul>
         )}
       </section>
+
+      {!supermarketMode ? (
+        <section className={styles['quality-card']} aria-labelledby="calidad-aprendizaje">
+          <div className={styles['section-header']}>
+            <div>
+              <p className={styles.eyebrow}>Piloto y QA</p>
+              <h2 id="calidad-aprendizaje">Calidad del aprendizaje</h2>
+            </div>
+            <span className={styles['quality-status']}>{qualityLabel}</span>
+          </div>
+
+          <div className={styles['quality-grid']}>
+            <div>
+              <strong>{snapshot.quality.activeNeeds}</strong>
+              <span>necesidades activas</span>
+            </div>
+            <div>
+              <strong>{snapshot.quality.needsWithPurchases}</strong>
+              <span>con compras reales</span>
+            </div>
+            <div>
+              <strong>{snapshot.quality.evaluatedPredictions}</strong>
+              <span>predicciones evaluables</span>
+            </div>
+            <div>
+              <strong>
+                {snapshot.quality.medianAbsoluteErrorDays == null
+                  ? '—'
+                  : `${snapshot.quality.medianAbsoluteErrorDays} d`}
+              </strong>
+              <span>error mediano</span>
+            </div>
+          </div>
+
+          {snapshot.quality.withinToleranceRate == null ? (
+            <p>
+              Para calibrar de verdad necesitamos varias compras por necesidad. El objetivo inicial
+              es tener unas 15–30 necesidades recurrentes y dejar que el historial se forme.
+            </p>
+          ) : (
+            <p>
+              {Math.round(snapshot.quality.withinToleranceRate * 100)}% de las predicciones
+              históricas quedó dentro de la tolerancia. Tempranas: {snapshot.quality.earlyCount} ·
+              tardías: {snapshot.quality.lateCount}.
+            </p>
+          )}
+        </section>
+      ) : null}
 
       {!supermarketMode ? (
         <section className={styles.section} aria-labelledby="quizas-pronto">

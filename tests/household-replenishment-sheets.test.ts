@@ -10,6 +10,7 @@ import type {
 } from '@/lib/household-replenishment/types';
 
 const HEADERS = {
+  Households: ['id', 'name', 'created_at', 'default_store', 'category_order_json'],
   Needs: [
     'id',
     'household_id',
@@ -276,5 +277,76 @@ test('Google Sheets repository persists variants and purchase variant_id atomica
   assert.equal(
     body.requests?.[1]?.appendCells?.rows?.[0]?.values?.[7]?.userEnteredValue?.stringValue,
     'variant-skip-3l',
+  );
+});
+
+
+test('Google Sheets repository persists shared shopping preferences in Households', async () => {
+  const postedBodies: unknown[] = [];
+  const fetchImpl: typeof fetch = async (input, init) => {
+    if (init?.method === 'POST') {
+      postedBodies.push(JSON.parse(String(init.body)));
+      return jsonResponse({});
+    }
+
+    const tab = tabFromUrl(input);
+    if (tab === 'Households') {
+      return jsonResponse({
+        values: [
+          HEADERS.Households,
+          [
+            'primary-household',
+            'Lista de casa',
+            '2026-09-28T21:45:00.000Z',
+            '',
+            '[]',
+          ],
+        ],
+      });
+    }
+    if (tab === 'Operations') {
+      return jsonResponse({ values: [HEADERS.Operations] });
+    }
+
+    throw new Error(`unexpected read: ${tab ?? 'unknown'}`);
+  };
+
+  const repository = new GoogleSheetsReplenishmentRepository(
+    {
+      clientEmail: 'vida@example.iam.gserviceaccount.com',
+      privateKey: 'private-key',
+      spreadsheetId: 'sheet-123',
+    },
+    {
+      fetchImpl,
+      tokenProvider: async () => ({ ok: true, token: 'test-token' }),
+      now: () => new Date('2026-09-29T01:30:00.000Z'),
+    },
+  );
+
+  await repository.putHousehold({
+    id: 'primary-household',
+    name: 'Lista de casa',
+    createdAt: '2026-09-28T21:45:00.000Z',
+    defaultStore: 'Supermercado Centro',
+    categoryOrder: ['Limpieza', 'Almacén', 'Otros'],
+  });
+  await repository.recordOperation('primary-household', 'operation-preferences');
+
+  assert.equal(postedBodies.length, 1);
+  const body = postedBodies[0] as {
+    requests?: Array<{
+      updateCells?: {
+        rows?: Array<{ values?: Array<{ userEnteredValue?: { stringValue?: string } }> }>;
+      };
+    }>;
+  };
+  assert.equal(
+    body.requests?.[0]?.updateCells?.rows?.[0]?.values?.[3]?.userEnteredValue?.stringValue,
+    'Supermercado Centro',
+  );
+  assert.equal(
+    body.requests?.[0]?.updateCells?.rows?.[0]?.values?.[4]?.userEnteredValue?.stringValue,
+    JSON.stringify(['Limpieza', 'Almacén', 'Otros']),
   );
 });

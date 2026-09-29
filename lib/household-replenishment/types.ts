@@ -17,6 +17,8 @@ export interface Household {
   id: string;
   name: string;
   createdAt: string;
+  defaultStore?: string | null;
+  categoryOrder?: string[];
 }
 
 export interface ReplenishmentNeed {
@@ -103,8 +105,33 @@ export interface ReplenishmentListEntry {
   variants: ReplenishmentVariantOption[];
 }
 
+export type PredictionQualityStatus = 'NO_DATA' | 'COLLECTING' | 'CALIBRATION_READY';
+
+export interface PredictionQualitySummary {
+  status: PredictionQualityStatus;
+  activeNeeds: number;
+  needsWithPurchases: number;
+  needsWithThreePurchases: number;
+  evaluatedPredictions: number;
+  meanAbsoluteErrorDays: number | null;
+  medianAbsoluteErrorDays: number | null;
+  withinToleranceRate: number | null;
+  earlyCount: number;
+  lateCount: number;
+  withinToleranceCount: number;
+  stillHaveCorrections: number;
+  outCorrections: number;
+}
+
+export interface HouseholdShoppingPreferences {
+  defaultStore: string | null;
+  categoryOrder: string[];
+}
+
 export interface ReplenishmentSnapshot {
   householdName: string;
+  shoppingPreferences: HouseholdShoppingPreferences;
+  quality: PredictionQualitySummary;
   buy: ReplenishmentListEntry[];
   watch: ReplenishmentListEntry[];
 }
