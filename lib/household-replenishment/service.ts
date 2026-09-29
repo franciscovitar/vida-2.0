@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { estimateCadence } from './engine';
+import { projectNeedListState, type AutomaticListReason } from './list-projection';
 import type { ReplenishmentRepository } from './repository';
 import type {
   CorrectionEvent,
@@ -34,6 +35,25 @@ function normalizeVariantName(value: string): string {
 
 function latestPurchase(events: PurchaseEvent[]): PurchaseEvent | null {
   return [...events].sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt))[0] ?? null;
+}
+
+function reasonForDecision(
+  reason: AutomaticListReason,
+  expectedIntervalDays: number | null,
+): string {
+  if (reason === 'CORRECTION_LOW') return 'Marcaste que queda poco';
+  if (reason === 'CORRECTION_OUT') return 'Marcaste que se terminó';
+  if (reason === 'AUTO_WATCH') {
+    return expectedIntervalDays
+      ? `Podría tocar pronto · ~${Math.round(expectedIntervalDays)} días`
+      : 'Podría tocar pronto';
+  }
+  if (reason === 'AUTO_DUE') {
+    return expectedIntervalDays
+      ? `Cadencia estimada: ~${Math.round(expectedIntervalDays)} días`
+      : 'Reposición estimada';
+  }
+  return 'Marcado para comprar';
 }
 
 function sortEntries(entries: ReplenishmentListEntry[]): ReplenishmentListEntry[] {
@@ -317,51 +337,34 @@ export class ReplenishmentService {
         })),
       };
 
-      if (activeItem) {
-        buy.push({
-          needId: need.id,
-          name: need.name,
-          category: need.category,
-          origin: activeItem.origin,
-          confidence: estimate.confidence,
-          reason: activeItem.origin === 'MANUAL' ? 'Agregado manualmente' : 'Marcado para comprar',
-          expectedIntervalDays: estimate.expectedIntervalDays,
-          nextExpectedAt: estimate.nextExpectedAt,
-          ...variantFields,
-        });
-        continue;
-      }
+      const decision = projectNeedListState({
+        activeItem: activeItem ?? null,
+        estimate,
+      });
 
-      if (estimate.state === 'ADD_TO_LIST' || estimate.state === 'OVERDUE') {
-        const forced = estimate.forcedByCorrection;
+      if (decision.bucket === 'BUY' && decision.origin) {
         buy.push({
           needId: need.id,
           name: need.name,
           category: need.category,
-          origin: forced ? 'CORRECTION' : 'AUTO',
+          origin: decision.origin,
           confidence: estimate.confidence,
           reason:
-            forced === 'LOW'
-              ? 'Marcaste que queda poco'
-              : forced === 'OUT'
-                ? 'Marcaste que se terminó'
-                : estimate.expectedIntervalDays
-                  ? `Cadencia estimada: ~${Math.round(estimate.expectedIntervalDays)} días`
-                  : 'Reposición estimada',
+            decision.reason === 'ACTIVE_ITEM' && activeItem?.origin === 'MANUAL'
+              ? 'Agregado manualmente'
+              : reasonForDecision(decision.reason, estimate.expectedIntervalDays),
           expectedIntervalDays: estimate.expectedIntervalDays,
           nextExpectedAt: estimate.nextExpectedAt,
           ...variantFields,
         });
-      } else if (estimate.state === 'WATCH') {
+      } else if (decision.bucket === 'WATCH' && decision.origin) {
         watch.push({
           needId: need.id,
           name: need.name,
           category: need.category,
-          origin: 'AUTO',
+          origin: decision.origin,
           confidence: estimate.confidence,
-          reason: estimate.expectedIntervalDays
-            ? `Podría tocar pronto · ~${Math.round(estimate.expectedIntervalDays)} días`
-            : 'Podría tocar pronto',
+          reason: reasonForDecision(decision.reason, estimate.expectedIntervalDays),
           expectedIntervalDays: estimate.expectedIntervalDays,
           nextExpectedAt: estimate.nextExpectedAt,
           ...variantFields,
