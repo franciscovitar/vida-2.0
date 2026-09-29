@@ -1,5 +1,3 @@
-import type { ReplenishmentListEntry } from './types';
-
 export const DEFAULT_HOUSEHOLD_CATEGORIES = [
   'Frutas y verduras',
   'Carnes y pescados',
@@ -48,10 +46,10 @@ export function normalizeCategoryOrder(
   return ordered;
 }
 
-export function sortReplenishmentEntries(
-  entries: readonly ReplenishmentListEntry[],
+export function sortReplenishmentEntries<T extends { category: string; name: string }>(
+  entries: readonly T[],
   categoryOrder: readonly string[],
-): ReplenishmentListEntry[] {
+): T[] {
   const rank = new Map(categoryOrder.map((category, index) => [normalized(category), index]));
   const fallbackRank = categoryOrder.length + 100;
 

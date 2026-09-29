@@ -35,7 +35,7 @@ function formatDate(value: string | null): string | null {
   }).format(date);
 }
 
-function confidenceLabel(entry: ReplenishmentListEntry): string {
+function confidenceLabel(entry: Pick<ReplenishmentListEntry, 'confidence'>): string {
   if (entry.confidence === 'HIGH') return 'Confianza alta';
   if (entry.confidence === 'MEDIUM') return 'Confianza media';
   return 'Aprendiendo';
@@ -60,6 +60,8 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
   const [pendingCount, setPendingCount] = useState(0);
   const [online, setOnline] = useState(true);
   const [supermarketMode, setSupermarketMode] = useState(false);
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [catalogCategory, setCatalogCategory] = useState('Todas');
 
   const commitSnapshot = useCallback((next: ReplenishmentSnapshot) => {
     snapshotRef.current = next;
@@ -218,6 +220,14 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
     setCadence('');
   }
 
+  async function addExistingNeed(needId: string) {
+    await mutate({
+      action: 'add-existing',
+      needId,
+      operationId: crypto.randomUUID(),
+    });
+  }
+
   async function markBought(needId: string) {
     const variantName = variantDrafts[needId]?.trim() || null;
     await mutate({
@@ -270,6 +280,18 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
       : snapshot.quality.status === 'COLLECTING'
         ? 'Juntando evidencia real'
         : 'Todavía sin historial suficiente';
+
+  const catalogCategories = snapshot.shoppingPreferences.categoryOrder.filter((candidate) =>
+    snapshot.catalog.some((entry) => entry.category === candidate),
+  );
+  const normalizedCatalogSearch = catalogSearch.trim().toLocaleLowerCase('es');
+  const filteredCatalog = snapshot.catalog.filter((entry) => {
+    const categoryMatches = catalogCategory === 'Todas' || entry.category === catalogCategory;
+    const searchMatches =
+      normalizedCatalogSearch.length === 0 ||
+      entry.name.toLocaleLowerCase('es').includes(normalizedCatalogSearch);
+    return categoryMatches && searchMatches;
+  });
 
   const workspaceClassName = supermarketMode
     ? `${styles.workspace} ${styles['supermarket-mode']}`
@@ -414,6 +436,100 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
         </details>
       ) : null}
 
+      {!supermarketMode ? (
+        <details className={styles['catalog-card']} open>
+          <summary>
+            <span>Mis productos</span>
+            <span className={styles['catalog-count']}>{snapshot.catalog.length}</span>
+          </summary>
+
+          <div className={styles['catalog-body']}>
+            <div className={styles['catalog-filters']}>
+              <label className={styles.field}>
+                <span>Buscar</span>
+                <input
+                  type="search"
+                  value={catalogSearch}
+                  placeholder="Ej. papel higiénico, huevos, yerba…"
+                  onChange={(event) => setCatalogSearch(event.target.value)}
+                />
+              </label>
+              <label className={styles.field}>
+                <span>Categoría</span>
+                <select
+                  value={catalogCategory}
+                  onChange={(event) => setCatalogCategory(event.target.value)}
+                >
+                  <option value="Todas">Todas</option>
+                  {catalogCategories.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <p className={styles['catalog-helper']}>
+              Acá están todas tus necesidades recurrentes. Agregar a Comprar no crea otro producto:
+              usa la misma necesidad y conserva su historial.
+            </p>
+
+            {filteredCatalog.length === 0 ? (
+              <p className={styles['watch-empty']}>
+                No hay productos que coincidan con ese filtro.
+              </p>
+            ) : (
+              <ul className={styles['catalog-list']}>
+                {filteredCatalog.map((entry) => (
+                  <li key={entry.needId}>
+                    <div className={styles['catalog-product']}>
+                      <div>
+                        <strong>{entry.name}</strong>
+                        <span className={styles.category}>{entry.category}</span>
+                      </div>
+                      <div className={styles.meta}>
+                        <span>{confidenceLabel(entry)}</span>
+                        {entry.lastPurchasedAt ? (
+                          <span>Última compra: {formatDate(entry.lastPurchasedAt)}</span>
+                        ) : (
+                          <span>Sin compras registradas todavía</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles['catalog-action']}>
+                      {entry.status === 'BUY' ? (
+                        <span className={styles['catalog-status']}>En Comprar</span>
+                      ) : entry.status === 'WATCH' ? (
+                        <>
+                          <span className={styles['catalog-status']}>Quizás pronto</span>
+                          <button
+                            type="button"
+                            disabled={saving}
+                            onClick={() => void addExistingNeed(entry.needId)}
+                          >
+                            Agregar a Comprar
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() => void addExistingNeed(entry.needId)}
+                        >
+                          Agregar a Comprar
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </details>
+      ) : null}
+
       {notice ? (
         <p className={styles.notice} role="status">
           {notice}
@@ -544,7 +660,7 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
         <section className={styles['quality-card']} aria-labelledby="calidad-aprendizaje">
           <div className={styles['section-header']}>
             <div>
-              <p className={styles.eyebrow}>Piloto y QA</p>
+              <p className={styles.eyebrow}>Uso real y aprendizaje</p>
               <h2 id="calidad-aprendizaje">Calidad del aprendizaje</h2>
             </div>
             <span className={styles['quality-status']}>{qualityLabel}</span>
@@ -575,8 +691,8 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
 
           {snapshot.quality.withinToleranceRate == null ? (
             <p>
-              Para calibrar de verdad necesitamos varias compras por necesidad. El objetivo inicial
-              es tener unas 15–30 necesidades recurrentes y dejar que el historial se forme.
+              El sistema ya está en uso real. Para calibrar las predicciones necesitamos varias
+              compras por necesidad y dejar que el historial se forme con tu uso cotidiano.
             </p>
           ) : (
             <p>
