@@ -117,7 +117,10 @@ test('shopping preferences persist category order and snapshots follow that rout
   if (!updated.ok) return;
 
   assert.equal(updated.snapshot.shoppingPreferences.defaultStore, 'Supermercado Centro');
-  assert.deepEqual(updated.snapshot.buy.map((entry) => entry.name), ['Lavandina', 'Gaseosa']);
+  assert.deepEqual(
+    updated.snapshot.buy.map((entry) => entry.name),
+    ['Lavandina', 'Gaseosa'],
+  );
 });
 
 test('recategorizing a need preserves its identity and purchase history', async () => {

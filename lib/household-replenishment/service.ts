@@ -1,10 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import {
-  normalizeCategoryOrder,
-  sanitizeCategory,
-  sortReplenishmentEntries,
-} from './categories';
+import { normalizeCategoryOrder, sanitizeCategory, sortReplenishmentEntries } from './categories';
 import { estimateCadence } from './engine';
 import { projectNeedListState, type AutomaticListReason } from './list-projection';
 import { evaluatePredictionQuality } from './quality';
@@ -96,8 +92,7 @@ export class ReplenishmentService {
       return { ok: false, code: 'invalid-input', message: 'No se pudo agregar ese producto.' };
     }
 
-    const requestedCategory =
-      input.category == null ? null : sanitizeCategory(input.category);
+    const requestedCategory = input.category == null ? null : sanitizeCategory(input.category);
 
     const seed =
       input.seedIntervalDays == null

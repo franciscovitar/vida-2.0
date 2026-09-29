@@ -280,7 +280,6 @@ test('Google Sheets repository persists variants and purchase variant_id atomica
   );
 });
 
-
 test('Google Sheets repository persists shared shopping preferences in Households', async () => {
   const postedBodies: unknown[] = [];
   const fetchImpl: typeof fetch = async (input, init) => {
@@ -294,13 +293,7 @@ test('Google Sheets repository persists shared shopping preferences in Household
       return jsonResponse({
         values: [
           HEADERS.Households,
-          [
-            'primary-household',
-            'Lista de casa',
-            '2026-09-28T21:45:00.000Z',
-            '',
-            '[]',
-          ],
+          ['primary-household', 'Lista de casa', '2026-09-28T21:45:00.000Z', '', '[]'],
         ],
       });
     }

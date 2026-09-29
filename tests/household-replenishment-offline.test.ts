@@ -202,7 +202,6 @@ test('optimistic bought and STILL_HAVE remove item while LOW promotes watch to b
   assert.equal(afterLow.buy.find((entry) => entry.needId === 'need-2')?.origin, 'CORRECTION');
 });
 
-
 test('optimistic preferences and categorization update the local shopping view', () => {
   const withPreferences = applyOptimisticHouseholdMutation(snapshot, {
     action: 'preferences',
