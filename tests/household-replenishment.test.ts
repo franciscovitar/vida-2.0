@@ -369,3 +369,132 @@ test('changing product variant keeps one need history and dedupes normalized var
   assert.equal(cadence.expectedIntervalDays, 30);
   assert.equal(cadence.observations, 3);
 });
+
+
+test('cadence V1 favors recent intervals and ignores one obvious anomaly', () => {
+  const need: ReplenishmentNeed = {
+    id: 'need-cadence-1',
+    householdId: 'h1',
+    name: 'Papel cocina',
+    category: 'Hogar',
+    manualSeedIntervalDays: null,
+    active: true,
+    createdAt: '2025-12-01T12:00:00.000Z',
+  };
+  const purchaseDates = [
+    '2026-01-01T12:00:00.000Z',
+    '2026-01-31T12:00:00.000Z',
+    '2026-03-02T12:00:00.000Z',
+    '2026-03-03T12:00:00.000Z',
+    '2026-04-02T12:00:00.000Z',
+    '2026-05-02T12:00:00.000Z',
+  ];
+  const purchases: PurchaseEvent[] = purchaseDates.map((purchasedAt, index) => ({
+    id: `cadence-purchase-${index}`,
+    householdId: 'h1',
+    needId: need.id,
+    variantId: null,
+    purchasedAt,
+    source: 'AUTO',
+    createdBy: 'owner-id',
+    operationId: `cadence-operation-${index}`,
+  }));
+
+  const estimate = estimateCadence({
+    need,
+    purchases,
+    corrections: [],
+    now: new Date('2026-05-25T12:00:00.000Z'),
+  });
+
+  assert.equal(estimate.expectedIntervalDays, 30);
+  assert.equal(estimate.variabilityDays, 0);
+  assert.equal(estimate.confidence, 'HIGH');
+  assert.equal(estimate.state, 'ADD_TO_LIST');
+});
+
+test('cadence V1 keeps irregular needs out of automatic Comprar', () => {
+  const need: ReplenishmentNeed = {
+    id: 'need-cadence-2',
+    householdId: 'h1',
+    name: 'Producto irregular',
+    category: 'Otros',
+    manualSeedIntervalDays: null,
+    active: true,
+    createdAt: '2025-12-01T12:00:00.000Z',
+  };
+  const purchaseDates = [
+    '2026-01-01T12:00:00.000Z',
+    '2026-01-11T12:00:00.000Z',
+    '2026-03-02T12:00:00.000Z',
+    '2026-03-17T12:00:00.000Z',
+    '2026-05-01T12:00:00.000Z',
+    '2026-05-21T12:00:00.000Z',
+  ];
+  const purchases: PurchaseEvent[] = purchaseDates.map((purchasedAt, index) => ({
+    id: `irregular-purchase-${index}`,
+    householdId: 'h1',
+    needId: need.id,
+    variantId: null,
+    purchasedAt,
+    source: 'AUTO',
+    createdBy: 'owner-id',
+    operationId: `irregular-operation-${index}`,
+  }));
+
+  const estimate = estimateCadence({
+    need,
+    purchases,
+    corrections: [],
+    now: new Date('2026-07-20T12:00:00.000Z'),
+  });
+
+  assert.equal(estimate.confidence, 'LOW');
+  assert.equal(estimate.state, 'NOT_DUE');
+  assert.ok(estimate.variabilityDays);
+});
+
+test('OUT correction still forces Comprar regardless of cadence confidence', () => {
+  const need: ReplenishmentNeed = {
+    id: 'need-cadence-3',
+    householdId: 'h1',
+    name: 'Bolsas',
+    category: 'Hogar',
+    manualSeedIntervalDays: 30,
+    active: true,
+    createdAt: '2026-01-01T12:00:00.000Z',
+  };
+  const purchases: PurchaseEvent[] = [
+    {
+      id: 'out-purchase-1',
+      householdId: 'h1',
+      needId: need.id,
+      variantId: null,
+      purchasedAt: '2026-06-01T12:00:00.000Z',
+      source: 'MANUAL',
+      createdBy: 'owner-id',
+      operationId: 'out-operation-1',
+    },
+  ];
+
+  const estimate = estimateCadence({
+    need,
+    purchases,
+    corrections: [
+      {
+        id: 'out-correction-1',
+        householdId: 'h1',
+        needId: need.id,
+        type: 'OUT',
+        occurredAt: '2026-06-10T12:00:00.000Z',
+        createdBy: 'owner-id',
+        operationId: 'out-correction-operation-1',
+      },
+    ],
+    now: new Date('2026-06-10T12:00:00.000Z'),
+  });
+
+  assert.equal(estimate.confidence, 'LOW');
+  assert.equal(estimate.forcedByCorrection, 'OUT');
+  assert.equal(estimate.state, 'ADD_TO_LIST');
+});
