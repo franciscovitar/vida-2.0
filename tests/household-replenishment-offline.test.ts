@@ -266,7 +266,6 @@ test('optimistic preferences and categorization update the local shopping view',
   assert.equal(categorized.buy[0]?.category, 'Limpieza');
 });
 
-
 test('optimistic add-existing moves an idle catalog need into Comprar without duplication', () => {
   const first = applyOptimisticHouseholdMutation(snapshot, {
     action: 'add-existing',
@@ -277,7 +276,10 @@ test('optimistic add-existing moves an idle catalog need into Comprar without du
   assert.equal(first.catalog.find((entry) => entry.needId === 'need-3')?.status, 'BUY');
   assert.equal(first.buy.filter((entry) => entry.needId === 'need-3').length, 1);
   assert.equal(first.buy.find((entry) => entry.needId === 'need-3')?.origin, 'MANUAL');
-  assert.equal(first.watch.some((entry) => entry.needId === 'need-3'), false);
+  assert.equal(
+    first.watch.some((entry) => entry.needId === 'need-3'),
+    false,
+  );
 
   const replayed = applyOptimisticHouseholdMutation(first, {
     action: 'add-existing',

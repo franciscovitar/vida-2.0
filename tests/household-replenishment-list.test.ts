@@ -243,7 +243,6 @@ test('buying an automatic suggestion records one AUTO purchase and starts the ne
   assert.deepEqual(await fixture.repository.listShoppingItems('h1'), []);
 });
 
-
 test('snapshot exposes active need catalog and add-existing promotes one need idempotently', async () => {
   const fixture = createProjectionFixture('2026-02-01T12:00:00.000Z');
   await seedNeedWithPurchases({
@@ -280,10 +279,7 @@ test('snapshot exposes active need catalog and add-existing promotes one need id
   if (!first.ok) return;
   assert.equal(first.code, 'applied');
   assert.equal(first.snapshot.buy.filter((entry) => entry.needId === 'yerba').length, 1);
-  assert.equal(
-    first.snapshot.catalog.find((entry) => entry.needId === 'yerba')?.status,
-    'BUY',
-  );
+  assert.equal(first.snapshot.catalog.find((entry) => entry.needId === 'yerba')?.status, 'BUY');
 
   const second = await fixture.service.addExistingNeedToList({
     householdId: 'h1',
@@ -296,5 +292,8 @@ test('snapshot exposes active need catalog and add-existing promotes one need id
   assert.equal(second.code, 'existing');
 
   const items = await fixture.repository.listShoppingItems('h1');
-  assert.equal(items.filter((item) => item.needId === 'yerba' && item.state === 'ACTIVE').length, 1);
+  assert.equal(
+    items.filter((item) => item.needId === 'yerba' && item.state === 'ACTIVE').length,
+    1,
+  );
 });

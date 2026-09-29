@@ -476,7 +476,9 @@ export function ShoppingList({ initialSnapshot }: { initialSnapshot: Replenishme
             </p>
 
             {filteredCatalog.length === 0 ? (
-              <p className={styles['watch-empty']}>No hay productos que coincidan con ese filtro.</p>
+              <p className={styles['watch-empty']}>
+                No hay productos que coincidan con ese filtro.
+              </p>
             ) : (
               <ul className={styles['catalog-list']}>
                 {filteredCatalog.map((entry) => (
