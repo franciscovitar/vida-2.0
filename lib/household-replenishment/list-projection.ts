@@ -1,18 +1,9 @@
-import type {
-  CadenceEstimate,
-  ShoppingListItem,
-  ShoppingListOrigin,
-} from './types';
+import type { CadenceEstimate, ShoppingListItem, ShoppingListOrigin } from './types';
 
 export type AutomaticListBucket = 'BUY' | 'WATCH' | 'NONE';
 
 export type AutomaticListReason =
-  | 'ACTIVE_ITEM'
-  | 'CORRECTION_LOW'
-  | 'CORRECTION_OUT'
-  | 'AUTO_DUE'
-  | 'AUTO_WATCH'
-  | 'NONE';
+  'ACTIVE_ITEM' | 'CORRECTION_LOW' | 'CORRECTION_OUT' | 'AUTO_DUE' | 'AUTO_WATCH' | 'NONE';
 
 export interface AutomaticListDecision {
   bucket: AutomaticListBucket;

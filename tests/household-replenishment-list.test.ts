@@ -3,10 +3,7 @@ import { test } from 'node:test';
 
 import { MemoryReplenishmentRepository } from '@/lib/household-replenishment/memory-store';
 import { ReplenishmentService } from '@/lib/household-replenishment/service';
-import type {
-  PurchaseEvent,
-  ReplenishmentNeed,
-} from '@/lib/household-replenishment/types';
+import type { PurchaseEvent, ReplenishmentNeed } from '@/lib/household-replenishment/types';
 
 function createProjectionFixture(nowIso: string) {
   let current = new Date(nowIso);
