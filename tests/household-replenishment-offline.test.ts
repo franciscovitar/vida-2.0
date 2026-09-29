@@ -102,6 +102,7 @@ const snapshot: ReplenishmentSnapshot = {
       category: 'Otros',
       origin: 'MANUAL',
       confidence: 'LOW',
+      predictedStock: null,
       reason: 'Lo agregaste vos',
       expectedIntervalDays: 30,
       nextExpectedAt: null,
@@ -118,6 +119,7 @@ const snapshot: ReplenishmentSnapshot = {
       category: 'Otros',
       origin: 'AUTO',
       confidence: 'MEDIUM',
+      predictedStock: 'LOW',
       reason: 'Podría tocar pronto',
       expectedIntervalDays: 30,
       nextExpectedAt: null,
@@ -241,6 +243,7 @@ test('optimistic bought and STILL_HAVE remove item while LOW promotes watch to b
     true,
   );
   assert.equal(afterLow.buy.find((entry) => entry.needId === 'need-2')?.origin, 'CORRECTION');
+  assert.equal(afterLow.buy.find((entry) => entry.needId === 'need-2')?.predictedStock, null);
 });
 
 test('optimistic preferences and categorization update the local shopping view', () => {
