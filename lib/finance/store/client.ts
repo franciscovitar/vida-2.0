@@ -25,7 +25,7 @@ export type FinanceStoreResult<T> =
 interface FinanceRequestOptions {
   method?: FinanceHttpMethod;
   query?: URLSearchParams;
-  body?: Record<string, unknown> | readonly Record<string, unknown>[];
+  body?: Record<string, unknown> | Record<string, unknown>[];
   prefer?: string;
 }
 
