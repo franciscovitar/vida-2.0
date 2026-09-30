@@ -76,10 +76,7 @@ test('finance schema validates headers and exact row widths', () => {
     hasFinanceHeaders([FINANCE_SHEETS.accounts.headers], FINANCE_SHEETS.accounts.headers),
     true,
   );
-  assert.equal(
-    hasFinanceHeaders([['wrong']], FINANCE_SHEETS.accounts.headers),
-    false,
-  );
+  assert.equal(hasFinanceHeaders([['wrong']], FINANCE_SHEETS.accounts.headers), false);
 
   assert.doesNotThrow(() =>
     assertFinanceRowWidth(

@@ -86,9 +86,7 @@ async function resolveSheetIds(
   }
 }
 
-export async function readFinanceSheet(
-  sheet: FinanceSheetKey,
-): Promise<FinanceStoreReadResult> {
+export async function readFinanceSheet(sheet: FinanceSheetKey): Promise<FinanceStoreReadResult> {
   await requireFinanceAccess();
 
   const config = getFinanceStoreConfig();
