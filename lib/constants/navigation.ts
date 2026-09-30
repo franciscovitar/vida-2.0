@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   LineChart,
   ListTodo,
+  WalletCards,
   NotebookPen,
   Search,
   Settings,
@@ -32,6 +33,7 @@ export type NavIconKey =
   | 'norte'
   | 'habitos'
   | 'salud'
+  | 'finanzas'
   | 'productividad'
   | 'tendencias'
   | 'agenda'
@@ -75,6 +77,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   norte: Target,
   habitos: CalendarCheck,
   salud: HeartPulse,
+  finanzas: WalletCards,
   productividad: ListTodo,
   tendencias: LineChart,
   agenda: CalendarClock,
@@ -105,6 +108,7 @@ export const primaryNav: NavItemData[] = [
   { label: 'Norte', href: '/norte', icon: 'norte', domain: 'projects' },
   { label: 'Hábitos', href: '/habitos', icon: 'habitos', domain: 'habits' },
   { label: 'Salud', href: '/salud', icon: 'salud', domain: 'health' },
+  { label: 'Finanzas', href: '/finanzas', icon: 'finanzas', domain: 'finance' },
   { label: 'Productividad', href: '/productividad', icon: 'productividad', domain: 'productivity' },
   { label: 'Tendencias', href: '/tendencias', icon: 'tendencias', domain: 'productivity' },
   { label: 'Agenda', href: '/agenda', icon: 'agenda', domain: 'productivity' },

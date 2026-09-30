@@ -16,6 +16,7 @@ export interface DomainMeta {
 export const domainMeta: Record<Domain, DomainMeta> = {
   habits: { label: 'Hábitos', color: 'var(--c-habits)' },
   health: { label: 'Salud', color: 'var(--c-health)' },
+  finance: { label: 'Finanzas', color: 'var(--c-finance)' },
   productivity: { label: 'Productividad', color: 'var(--c-productivity)' },
   projects: { label: 'Proyectos', color: 'var(--c-projects)' },
   tasks: { label: 'Tareas', color: 'var(--c-tasks)' },
