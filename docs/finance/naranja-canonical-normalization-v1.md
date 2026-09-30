@@ -26,6 +26,7 @@ A raw +10,000 ARS account movement becomes:
 The transaction sums to zero and preserves the observed account movement. It does **not** claim the receipt is income.
 
 Later classification can replace/link the contra semantics for:
+
 - earned income;
 - family support;
 - expense;

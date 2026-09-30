@@ -10,10 +10,7 @@ export type CanonicalPreflightResult =
     }
   | {
       ok: false;
-      reason:
-        | 'existing-canonical-data'
-        | 'conflicting-clearing-account'
-        | 'invalid-existing-store';
+      reason: 'existing-canonical-data' | 'conflicting-clearing-account' | 'invalid-existing-store';
       conflictKey?: string;
     };
 

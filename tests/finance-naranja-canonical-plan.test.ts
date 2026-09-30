@@ -89,10 +89,7 @@ test('canonical plan creates native-currency system clearing accounts only once'
 test('canonical plan mutations contain no write execution side effect', () => {
   const plan = buildNaranjaCanonicalPlan(RAW, '2026-09-30T18:00:00.000Z');
   assert.deepEqual(
-    naranjaCanonicalPlanMutations(plan).map((mutation) => [
-      mutation.kind,
-      mutation.sheet,
-    ]),
+    naranjaCanonicalPlanMutations(plan).map((mutation) => [mutation.kind, mutation.sheet]),
     [
       ['append', 'accounts'],
       ['append', 'transactions'],
@@ -107,11 +104,7 @@ test('canonical preflight accepts existing source accounts and empty canonical t
 
   const result = preflightNaranjaCanonicalPlan(
     {
-      accounts: [
-        ['id'],
-        ['finance-account:naranja-x:ars'],
-        ['finance-account:naranja-x:usd'],
-      ],
+      accounts: [['id'], ['finance-account:naranja-x:ars'], ['finance-account:naranja-x:usd']],
       transactions: [['id']],
       transactionSources: [['transaction_id']],
       postings: [['transaction_id']],
@@ -153,7 +146,14 @@ test('canonical plan rejects duplicate raw IDs and zero amounts', () => {
   assert.throws(
     () =>
       buildNaranjaCanonicalPlan(
-        [{ ...RAW[0], id: 'finance-raw:naranja-x:ars:3', sourceTransactionId: '3', amountMinor: 0 }],
+        [
+          {
+            ...RAW[0],
+            id: 'finance-raw:naranja-x:ars:3',
+            sourceTransactionId: '3',
+            amountMinor: 0,
+          },
+        ],
         '2026-09-30T18:00:00.000Z',
       ),
     RangeError,
