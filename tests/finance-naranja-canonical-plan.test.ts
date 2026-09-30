@@ -56,13 +56,13 @@ test('canonical Naranja plan creates one transaction/source and two balanced pos
 
   for (const tx of plan.transactions.rows) {
     const txId = String(tx[0]);
-    const postings = plan.postings.rows.filter((posting) => posting[0] === txId);
-    assert.equal(postings.length, 2);
+    const matchingPostings = plan.postings.rows.filter((posting) => posting[0] === txId);
+    assert.equal(matchingPostings.length, 2);
     assert.equal(
-      postings.reduce((sum, posting) => sum + Number(posting[3]), 0),
+      matchingPostings.reduce((sum: number, posting) => sum + Number(posting[3]), 0),
       0,
     );
-    assert.equal(new Set(postings.map((posting) => posting[4])).size, 1);
+    assert.equal(new Set(matchingPostings.map((posting) => posting[4])).size, 1);
   }
 });
 
