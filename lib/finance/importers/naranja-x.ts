@@ -107,6 +107,7 @@ function extractOpeningBalance(section: string, currency: NaranjaCurrency): numb
   const unit = currency === 'ARS' ? '\\$' : 'USD';
   const patterns = [
     new RegExp(`Dinero total inicial\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
+    new RegExp(`Total disponible inicial\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
     new RegExp(`Dinero inicial\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
   ];
 
@@ -122,10 +123,16 @@ function extractStatementClosingBalance(
   currency: NaranjaCurrency,
 ): number | null {
   const unit = currency === 'ARS' ? '\\$' : 'USD';
-  const match = section.match(
+  const patterns = [
     new RegExp(`Dinero total final\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
-  );
-  return match ? parseMoneyMinor(match[1]) : null;
+    new RegExp(`Total disponible final\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
+  ];
+
+  for (const pattern of patterns) {
+    const match = section.match(pattern);
+    if (match) return parseMoneyMinor(match[1]);
+  }
+  return null;
 }
 
 function parseBlocks(section: string, currency: NaranjaCurrency): ParsedBlock[] {
