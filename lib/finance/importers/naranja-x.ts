@@ -118,10 +118,7 @@ function extractOpeningBalance(section: string, currency: NaranjaCurrency): numb
   throw new Error(`Missing Naranja X ${currency} opening balance`);
 }
 
-function extractStatementClosingBalance(
-  section: string,
-  currency: NaranjaCurrency,
-): number | null {
+function extractStatementClosingBalance(section: string, currency: NaranjaCurrency): number | null {
   const unit = currency === 'ARS' ? '\\$' : 'USD';
   const patterns = [
     new RegExp(`Dinero total final\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
@@ -243,9 +240,7 @@ function parseSection(
         prior.sourceAmountMinor === block.sourceAmountMinor &&
         prior.balanceAfterMinor === block.balanceAfterMinor;
       if (!identical) {
-        throw new Error(
-          `Conflicting duplicate Naranja X operation ${block.sourceTransactionId}`,
-        );
+        throw new Error(`Conflicting duplicate Naranja X operation ${block.sourceTransactionId}`);
       }
       duplicates.push(block.sourceTransactionId);
       continue;
