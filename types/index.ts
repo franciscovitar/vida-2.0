@@ -9,7 +9,15 @@
 
 /** Áreas semánticas que ordenan la información y su color. */
 export type Domain =
-  'habits' | 'health' | 'productivity' | 'projects' | 'tasks' | 'learning' | 'neutral' | 'danger';
+  | 'habits'
+  | 'health'
+  | 'finance'
+  | 'productivity'
+  | 'projects'
+  | 'tasks'
+  | 'learning'
+  | 'neutral'
+  | 'danger';
 
 /** Estado genérico para métricas y comparaciones. */
 export type Trend = 'up' | 'down' | 'steady';
