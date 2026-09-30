@@ -1,10 +1,4 @@
-import {
-  CircleGauge,
-  Landmark,
-  ListChecks,
-  ShieldCheck,
-  WalletCards,
-} from 'lucide-react';
+import { CircleGauge, Landmark, ListChecks, ShieldCheck, WalletCards } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';

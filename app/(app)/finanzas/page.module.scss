@@ -1,9 +1,7 @@
 .hero {
   overflow: hidden;
   border-color: var(--c-finance-border);
-  background:
-    linear-gradient(135deg, var(--c-finance-soft), transparent 68%),
-    var(--surface);
+  background: linear-gradient(135deg, var(--c-finance-soft), transparent 68%), var(--surface);
 }
 
 .hero-top {
