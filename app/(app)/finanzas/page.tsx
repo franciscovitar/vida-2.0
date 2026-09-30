@@ -2,6 +2,7 @@ import { CircleGauge, Landmark, ListChecks, ShieldCheck, WalletCards } from 'luc
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { getFinanceStoreReadinessSnapshot } from '@/lib/finance/store/readiness';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 
@@ -31,7 +32,11 @@ const CAPABILITIES = [
   },
 ] as const;
 
-export default function FinanzasPage() {
+export default async function FinanzasPage() {
+  const store = await getFinanceStoreReadinessSnapshot();
+  const connected = store.status === 'connected';
+  const sourceLabel = connected ? 'Store conectado · solo lectura' : store.label;
+
   return (
     <div className={pageStyles.page}>
       <PageHeader
@@ -47,15 +52,15 @@ export default function FinanzasPage() {
             <span className={local.dot} aria-hidden="true" />
             Configuración inicial
           </span>
-          <span className={local['data-state']}>Fuente financiera todavía no conectada</span>
+          <span className={local['data-state']}>{sourceLabel}</span>
         </div>
         <div className={local['hero-copy']}>
           <p className={local.eyebrow}>Finance OS V1</p>
           <h2 id="finance-status-title">Primero la verdad financiera. Después, las decisiones.</h2>
           <p>
-            Esta pantalla ya forma parte de Vida 2.0, pero todavía no muestra saldos ni métricas
-            personales. El siguiente paso es conectar el store financiero seguro y el primer
-            importador reconciliado. Hasta entonces, no se fabrican datos ni se usan mocks.
+            {connected
+              ? 'Vida 2.0 ya puede leer y validar el store financiero privado. Las escrituras siguen bloqueadas y todavía no se importaron movimientos personales.'
+              : 'Vida 2.0 todavía no pudo validar el store financiero privado. No se fabrican datos ni se usan mocks mientras la fuente no esté disponible.'}
           </p>
         </div>
       </Card>
@@ -68,8 +73,12 @@ export default function FinanzasPage() {
         </Card>
         <Card compact>
           <span className={local['metric-label']}>Reconciliación</span>
-          <strong className={local.pending}>Sin fuente</strong>
-          <small>Cada saldo tendrá estado verificable: reconciliado, parcial o en conflicto.</small>
+          <strong className={local.pending}>{connected ? 'Store validado' : 'Sin fuente'}</strong>
+          <small>
+            {connected
+              ? 'El schema de Finance OS coincide y la conexión está en modo de solo lectura.'
+              : 'Cada saldo tendrá estado verificable: reconciliado, parcial o en conflicto.'}
+          </small>
         </Card>
         <Card compact>
           <span className={local['metric-label']}>Calidad de datos</span>
