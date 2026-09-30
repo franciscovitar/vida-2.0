@@ -42,13 +42,6 @@ test('canonical Naranja plan creates one transaction/source and two balanced pos
   assert.equal(plan.transactions.kind, 'append');
   assert.equal(plan.transactionSources.kind, 'append');
   assert.equal(plan.postings.kind, 'append');
-  if (
-    plan.transactions.kind !== 'append' ||
-    plan.transactionSources.kind !== 'append' ||
-    plan.postings.kind !== 'append'
-  ) {
-    return;
-  }
 
   assert.equal(plan.transactions.rows.length, 2);
   assert.equal(plan.transactionSources.rows.length, 2);
@@ -69,7 +62,6 @@ test('canonical Naranja plan creates one transaction/source and two balanced pos
 test('canonical plan keeps economic classification unresolved instead of guessing', () => {
   const plan = buildNaranjaCanonicalPlan(RAW, '2026-09-30T18:00:00.000Z');
   assert.equal(plan.postings.kind, 'append');
-  if (plan.postings.kind !== 'append') return;
 
   assert.equal(
     plan.postings.rows.every((posting) => posting[6] === 'unknown_review'),
@@ -84,7 +76,6 @@ test('canonical plan keeps economic classification unresolved instead of guessin
 test('canonical plan creates native-currency system clearing accounts only once', () => {
   const plan = buildNaranjaCanonicalPlan(RAW, '2026-09-30T18:00:00.000Z');
   assert.equal(plan.accounts.kind, 'append');
-  if (plan.accounts.kind !== 'append') return;
 
   assert.deepEqual(
     plan.accounts.rows.map((row) => [row[0], row[4]]),

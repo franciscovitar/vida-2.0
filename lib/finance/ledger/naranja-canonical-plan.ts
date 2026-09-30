@@ -13,11 +13,13 @@ export interface CanonicalRawTransaction {
   rawHash: string;
 }
 
+type AppendFinanceMutation = Extract<FinanceMutation, { kind: 'append' }>;
+
 export interface NaranjaCanonicalPlan {
-  accounts: FinanceMutation;
-  transactions: FinanceMutation;
-  transactionSources: FinanceMutation;
-  postings: FinanceMutation;
+  accounts: AppendFinanceMutation;
+  transactions: AppendFinanceMutation;
+  transactionSources: AppendFinanceMutation;
+  postings: AppendFinanceMutation;
   transactionCount: number;
   postingCount: number;
 }
