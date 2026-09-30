@@ -65,7 +65,9 @@ function cleanExtractedText(statementText: string): string {
 }
 
 function parseStatementPeriod(text: string): string {
-  const match = text.match(/Del\s+1\s+al\s+\d{1,2}\s+de\s+([a-záéíóúñ]+)\s+de\s+(\d{4})\s*Periodo:/i);
+  const match = text.match(
+    /Del\s+1\s+al\s+\d{1,2}\s+de\s+([a-záéíóúñ]+)\s+de\s+(\d{4})\s*Periodo:/i,
+  );
   if (!match) throw new Error('Missing Mercado Pago statement period');
 
   const monthName = match[1].toLowerCase();

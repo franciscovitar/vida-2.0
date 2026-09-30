@@ -43,18 +43,12 @@ test('Mercado Pago parser preserves statement order and exact balance deltas', (
     result.transactions.map((item) => item.amountMinor),
     [20_000, 50, -7_525],
   );
-  assert.equal(
-    result.transactions[0].description,
-    'Transferencia recibida Persona Ejemplo',
-  );
+  assert.equal(result.transactions[0].description, 'Transferencia recibida Persona Ejemplo');
   assert.equal(result.transactions[2].description, 'Pago comercio Ejemplo');
 });
 
 test('Mercado Pago parser rejects duplicate operation ids', () => {
-  const duplicate = SAMPLE.replace(
-    '150000000002 $ -75,25',
-    '150000000001 $ -75,25',
-  );
+  const duplicate = SAMPLE.replace('150000000002 $ -75,25', '150000000001 $ -75,25');
 
   assert.throws(
     () => parseMercadoPagoStatementText(duplicate),
@@ -65,17 +59,11 @@ test('Mercado Pago parser rejects duplicate operation ids', () => {
 test('Mercado Pago parser rejects a running-balance mismatch', () => {
   const mismatch = SAMPLE.replace('$ 1.200,50', '$ 1.200,49');
 
-  assert.throws(
-    () => parseMercadoPagoStatementText(mismatch),
-    /balance delta mismatch/,
-  );
+  assert.throws(() => parseMercadoPagoStatementText(mismatch), /balance delta mismatch/);
 });
 
 test('Mercado Pago parser rejects summary-total drift', () => {
   const mismatch = SAMPLE.replace('Entradas: $ 200,50', 'Entradas: $ 200,49');
 
-  assert.throws(
-    () => parseMercadoPagoStatementText(mismatch),
-    /statement inflows mismatch/,
-  );
+  assert.throws(() => parseMercadoPagoStatementText(mismatch), /statement inflows mismatch/);
 });
