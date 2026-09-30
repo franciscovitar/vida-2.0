@@ -85,10 +85,7 @@ test('matcher rejects duplicate candidate IDs and invalid amounts', () => {
 
   assert.throws(
     () =>
-      matchExactOwnedAccountTransfers([
-        duplicate,
-        { ...duplicate, sourceTransactionId: 'other' },
-      ]),
+      matchExactOwnedAccountTransfers([duplicate, { ...duplicate, sourceTransactionId: 'other' }]),
     /Duplicate owned-transfer candidate/,
   );
 

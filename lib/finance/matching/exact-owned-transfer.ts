@@ -96,10 +96,7 @@ export function matchExactOwnedAccountTransfers(
         occurredOn: nx.occurredOn,
         amountMinor: Math.abs(nx.amountMinor),
         currency: nx.currency,
-        direction:
-          nx.amountMinor < 0
-            ? 'NARANJA_X_TO_MERCADO_PAGO'
-            : 'MERCADO_PAGO_TO_NARANJA_X',
+        direction: nx.amountMinor < 0 ? 'NARANJA_X_TO_MERCADO_PAGO' : 'MERCADO_PAGO_TO_NARANJA_X',
         confidence: 1,
       });
       continue;
