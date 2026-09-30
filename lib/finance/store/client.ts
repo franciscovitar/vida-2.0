@@ -95,6 +95,10 @@ export async function financeStoreRequest<T>(
   try {
     return { ok: true, data: JSON.parse(text) as T };
   } catch {
-    return { ok: false, code: 'invalid-response', status: response.status };
+    return {
+      ok: false,
+      code: 'invalid-response',
+      status: response.status,
+    };
   }
 }

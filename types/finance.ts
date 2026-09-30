@@ -28,11 +28,7 @@ export type FinanceAccountType =
   | 'liability'
   | 'clearing';
 
-export type FinanceOwnership =
-  | 'owned'
-  | 'shared'
-  | 'external_liability'
-  | 'clearing';
+export type FinanceOwnership = 'owned' | 'shared' | 'external_liability' | 'clearing';
 
 export type FinanceBeneficialScope =
   | 'personal'

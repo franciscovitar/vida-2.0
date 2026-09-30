@@ -1,7 +1,4 @@
-import type {
-  FinanceStoreConfigIssue,
-  FinanceStoreReadiness,
-} from '@/types/finance';
+import type { FinanceStoreConfigIssue, FinanceStoreReadiness } from '@/types/finance';
 
 export type FinanceEnv = Record<string, string | undefined>;
 

@@ -7,6 +7,7 @@ Status: implementation-ready, provider provisioning pending explicit cost/organi
 The Phase 1 target is a **dedicated Supabase project** for Finance OS, not a shared database from another project.
 
 Why it fits:
+
 - PostgreSQL gives explicit constraints, transactions and reproducible migrations;
 - Supabase provides a managed Data API, RLS primitives, backups by plan and project isolation;
 - Vida 2.0 can keep the credential server-only and avoid exposing finance data to browser code;
@@ -19,11 +20,13 @@ The live project is intentionally **not provisioned by this PR**. Project creati
 Finance data is CONFIDENTIAL.
 
 Browser:
+
 - no Supabase secret;
 - no direct Finance Data API calls;
 - no raw statements in client logs or analytics.
 
 Vida server:
+
 - verifies the existing Auth.js owner allowlist;
 - resolves Finance configuration server-side;
 - scopes every request to FINANCE_OWNER_KEY;
@@ -32,6 +35,7 @@ Vida server:
 - never returns remote error bodies through the generic adapter.
 
 Supabase:
+
 - dedicated project isolates blast radius;
 - all Finance tables have RLS enabled + forced;
 - anon/authenticated grants are revoked;
@@ -43,6 +47,7 @@ Supabase:
 Vida uses its own Google/Auth.js identity rather than Supabase Auth. Introducing a second user-auth system only to satisfy RLS would add complexity without improving the single-user threat model.
 
 The V1 compromise is:
+
 1. dedicated Supabase project;
 2. no browser Data API access;
 3. app-owner session check before every Finance request;
@@ -56,23 +61,27 @@ If Finance later becomes multi-user, shared, or externally integrated, migrate t
 ## Storage boundaries
 
 GitHub:
+
 - schema/migrations;
 - types/contracts;
 - generic adapters/tests;
 - zero statements, balances, account IDs or private counterparty mappings.
 
 Supabase:
+
 - normalized operational state;
 - private rules/mappings;
 - parsed row-level raw payload needed for idempotency/audit;
 - reconciliation state.
 
 Drive/authoritative evidence:
+
 - original PDF/CSV/XLSX statements and heavy evidence when retained.
 
 ## Environment variables
 
 Required only after provisioning:
+
 - FINANCE_STORE_MODE=supabase-rest
 - FINANCE_SUPABASE_URL
 - FINANCE_SUPABASE_SERVICE_ROLE_KEY
@@ -84,6 +93,7 @@ Production starts with FINANCE_WRITES_ENABLED=false. Turning it on is a separate
 ## Backup / export / delete gate
 
 Before importing personal data:
+
 1. verify the selected Supabase plan's backup/restore capability;
 2. prove the initial migration on the dedicated project;
 3. run Supabase security advisors and resolve material findings;
@@ -97,6 +107,7 @@ No real financial import is allowed before this gate is green.
 ## Initial schema
 
 The migration creates:
+
 - finance_accounts;
 - finance_import_batches;
 - finance_transactions;
@@ -111,13 +122,16 @@ The schema preserves native currency and integer minor units. It does not yet cl
 ## Failure behavior
 
 Missing/invalid config:
+
 - explicit disabled/not-configured result;
 - no mock Finance data;
 - no fallback to another Supabase project.
 
 Remote error:
+
 - return only bounded status/code to the caller;
 - never echo private payloads or service credentials.
 
 Write attempt while disabled:
+
 - fail closed before the network request.
