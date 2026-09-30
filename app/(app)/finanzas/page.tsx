@@ -112,7 +112,9 @@ export default function FinanzasPage() {
         <ul className={local.principles}>
           <li>Sin score opaco ni reglas universales como 50/30/20.</li>
           <li>Sin inversiones, portfolio ni ejecución de pagos dentro de Personal Finance V1.</li>
-          <li>Las ayudas de comportamiento son opcionales, reversibles y se evalúan por resultados.</li>
+          <li>
+            Las ayudas de comportamiento son opcionales, reversibles y se evalúan por resultados.
+          </li>
           <li>El Copilot explica trade-offs; la decisión final siempre es humana.</li>
         </ul>
       </Card>
