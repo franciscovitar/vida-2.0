@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { resolveFinanceStoreConfig } from '@/lib/finance/store/config-core';
-import {
-  buildFinanceBatchRequests,
-  type FinanceSheetIds,
-} from '@/lib/finance/store/mutation-core';
+import { buildFinanceBatchRequests, type FinanceSheetIds } from '@/lib/finance/store/mutation-core';
 import {
   assertFinanceRowWidth,
   FINANCE_SHEETS,

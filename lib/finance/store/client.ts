@@ -31,12 +31,9 @@ export type FinanceStoreFailureCode =
   | 'write-error';
 
 export type FinanceStoreReadResult =
-  | { ok: true; values: unknown[][] }
-  | { ok: false; code: FinanceStoreFailureCode };
+  { ok: true; values: unknown[][] } | { ok: false; code: FinanceStoreFailureCode };
 
-export type FinanceStoreWriteResult =
-  | { ok: true }
-  | { ok: false; code: FinanceStoreFailureCode };
+export type FinanceStoreWriteResult = { ok: true } | { ok: false; code: FinanceStoreFailureCode };
 
 function mapStatus(status: number): FinanceStoreFailureCode {
   if (status === 401) return 'auth-error';
@@ -139,11 +136,7 @@ export async function writeFinanceMutations(
   if (!config.writesEnabled) return { ok: false, code: 'writes-disabled' };
   if (mutations.length === 0) return { ok: true };
 
-  const token = await fetchAccessToken(
-    config.clientEmail,
-    config.privateKey,
-    SPREADSHEETS_SCOPE,
-  );
+  const token = await fetchAccessToken(config.clientEmail, config.privateKey, SPREADSHEETS_SCOPE);
   if (!token.ok) return { ok: false, code: token.code };
 
   const sheetIds = await resolveSheetIds(config.spreadsheetId, token.token);

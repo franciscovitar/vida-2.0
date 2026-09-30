@@ -19,20 +19,12 @@ export type FinanceStoreConfigIssue =
   | 'missing-google-credentials';
 
 export type FinanceAccountType =
-  | 'bank'
-  | 'wallet'
-  | 'cash'
-  | 'credit_card'
-  | 'liability'
-  | 'clearing';
+  'bank' | 'wallet' | 'cash' | 'credit_card' | 'liability' | 'clearing';
 
 export type FinanceOwnership = 'owned' | 'shared' | 'external_liability' | 'clearing';
 
 export type FinanceBeneficialScope =
-  | 'personal'
-  | 'business_pass_through'
-  | 'family_pass_through'
-  | 'mixed';
+  'personal' | 'business_pass_through' | 'family_pass_through' | 'mixed';
 
 export type FinanceLiquidityClass = 'immediate' | 'near_term' | 'illiquid' | 'liability';
 
