@@ -1,24 +1,22 @@
-export type FinanceStoreMode = 'disabled' | 'supabase-rest';
+export type FinanceStoreMode = 'disabled' | 'google-sheets';
 
 export type FinanceStoreReadiness =
   | { status: 'disabled' }
   | { status: 'not-configured'; issue: FinanceStoreConfigIssue }
   | {
       status: 'ready';
-      mode: 'supabase-rest';
-      baseUrl: string;
-      serviceRoleKey: string;
-      ownerKey: string;
+      mode: 'google-sheets';
+      spreadsheetId: string;
+      clientEmail: string;
+      privateKey: string;
       writesEnabled: boolean;
     };
 
 export type FinanceStoreConfigIssue =
   | 'invalid-mode'
-  | 'missing-url'
-  | 'invalid-url'
-  | 'missing-service-role-key'
-  | 'missing-owner-key'
-  | 'invalid-owner-key';
+  | 'missing-spreadsheet-id'
+  | 'invalid-spreadsheet-id'
+  | 'missing-google-credentials';
 
 export type FinanceAccountType =
   | 'bank'

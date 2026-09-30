@@ -2,8 +2,7 @@ import type { FinanceStoreConfigIssue, FinanceStoreReadiness } from '@/types/fin
 
 export type FinanceEnv = Record<string, string | undefined>;
 
-const OWNER_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]{0,63}$/;
-const SUPABASE_HOST_PATTERN = /^[a-z0-9]+\.supabase\.co$/;
+const SPREADSHEET_ID_PATTERN = /^[A-Za-z0-9_-]{20,}$/;
 
 function issue(value: FinanceStoreConfigIssue): FinanceStoreReadiness {
   return { status: 'not-configured', issue: value };
@@ -13,51 +12,40 @@ function normalize(value: string | undefined): string {
   return value?.trim() ?? '';
 }
 
-function validateSupabaseUrl(raw: string): string | null {
-  try {
-    const parsed = new URL(raw);
-    if (parsed.protocol !== 'https:') return null;
-    if (parsed.username || parsed.password || parsed.port) return null;
-    if (!SUPABASE_HOST_PATTERN.test(parsed.hostname)) return null;
-    if (parsed.pathname !== '/' || parsed.search || parsed.hash) return null;
-    return parsed.origin;
-  } catch {
-    return null;
-  }
+function normalizePrivateKey(value: string): string {
+  return value.includes('\\n') ? value.replace(/\\n/g, '\n') : value;
 }
 
 /**
  * Pure, fail-closed Finance store configuration.
  *
- * Secrets are returned only to the server-only wrapper. This module never reads
- * process.env by itself, which keeps it deterministic and testable.
+ * Finance reuses Vida's existing Google service account but has its own dedicated
+ * spreadsheet ID and independent write kill switch.
  */
 export function resolveFinanceStoreConfig(env: FinanceEnv): FinanceStoreReadiness {
-  const rawMode = normalize(env.FINANCE_STORE_MODE);
-  const mode = rawMode || 'disabled';
+  const mode = normalize(env.FINANCE_STORE_MODE) || 'disabled';
 
   if (mode === 'disabled') return { status: 'disabled' };
-  if (mode !== 'supabase-rest') return issue('invalid-mode');
+  if (mode !== 'google-sheets') return issue('invalid-mode');
 
-  const rawUrl = normalize(env.FINANCE_SUPABASE_URL);
-  if (!rawUrl) return issue('missing-url');
+  const spreadsheetId = normalize(env.GOOGLE_FINANCE_SPREADSHEET_ID);
+  if (!spreadsheetId) return issue('missing-spreadsheet-id');
+  if (!SPREADSHEET_ID_PATTERN.test(spreadsheetId)) {
+    return issue('invalid-spreadsheet-id');
+  }
 
-  const baseUrl = validateSupabaseUrl(rawUrl);
-  if (!baseUrl) return issue('invalid-url');
-
-  const serviceRoleKey = normalize(env.FINANCE_SUPABASE_SERVICE_ROLE_KEY);
-  if (!serviceRoleKey) return issue('missing-service-role-key');
-
-  const ownerKey = normalize(env.FINANCE_OWNER_KEY);
-  if (!ownerKey) return issue('missing-owner-key');
-  if (!OWNER_KEY_PATTERN.test(ownerKey)) return issue('invalid-owner-key');
+  const clientEmail = normalize(env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
+  const rawPrivateKey = env.GOOGLE_PRIVATE_KEY ?? '';
+  if (!clientEmail || !rawPrivateKey.trim()) {
+    return issue('missing-google-credentials');
+  }
 
   return {
     status: 'ready',
-    mode: 'supabase-rest',
-    baseUrl,
-    serviceRoleKey,
-    ownerKey,
+    mode: 'google-sheets',
+    spreadsheetId,
+    clientEmail,
+    privateKey: normalizePrivateKey(rawPrivateKey),
     writesEnabled: env.FINANCE_WRITES_ENABLED === 'true',
   };
 }

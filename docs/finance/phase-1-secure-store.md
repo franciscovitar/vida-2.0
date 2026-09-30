@@ -1,19 +1,34 @@
-# Finance OS Phase 1 — Secure Store Contract
+# Finance OS Phase 1 — Google Sheets Operational Store
 
-Status: implementation-ready, provider provisioning pending explicit cost/organization approval.
+Status: provisioned empty store; application configuration and real import remain gated.
 
-## Provider fit
+## Provider decision
 
-The Phase 1 target is a **dedicated Supabase project** for Finance OS, not a shared database from another project.
+Finance OS V1 uses a **dedicated Google Sheet** as its operational store.
 
-Why it fits:
+This is intentional, not a spreadsheet-based user interface. Vida 2.0 remains the professional web application and deterministic calculation layer. The Sheet is a private, structured persistence backend for a single-user V1.
 
-- PostgreSQL gives explicit constraints, transactions and reproducible migrations;
-- Supabase provides a managed Data API, RLS primitives, backups by plan and project isolation;
-- Vida 2.0 can keep the credential server-only and avoid exposing finance data to browser code;
-- the current user account already has Supabase available, but the existing projects belong to other domains and must not be reused.
+Why it fits now:
 
-The live project is intentionally **not provisioned by this PR**. Project creation can have a recurring cost and requires a specific organization choice, so that remains a separate approval gate.
+- Vida 2.0 already has a hardened server-side Google service-account path;
+- Finance V1 is single-user and low-volume;
+- Sheets avoids consuming a limited Supabase project slot or adding recurring infrastructure cost;
+- the domain model remains provider-independent so a later PostgreSQL/Supabase migration does not redesign Finance OS.
+
+Supabase is deferred until scale, concurrency, relational-query complexity, or operational evidence justifies it.
+
+## Live store
+
+A dedicated private spreadsheet named **Finance OS — Operational Store** has been created.
+
+It is shared only with:
+
+- the user's Google account as owner;
+- the existing Vida 2.0 Google service account as writer.
+
+The spreadsheet ID is **not** committed to Git. It belongs only in server-side environment configuration.
+
+The store is currently empty of personal transactions.
 
 ## Trust boundary
 
@@ -21,117 +36,105 @@ Finance data is CONFIDENTIAL.
 
 Browser:
 
-- no Supabase secret;
-- no direct Finance Data API calls;
-- no raw statements in client logs or analytics.
+- never receives Google service-account credentials;
+- never calls the Finance spreadsheet directly;
+- never logs raw financial payloads.
 
 Vida server:
 
-- verifies the existing Auth.js owner allowlist;
-- resolves Finance configuration server-side;
-- scopes every request to FINANCE_OWNER_KEY;
-- uses a dedicated Supabase service credential;
+- verifies the existing Auth.js owner allowlist before Finance reads/writes;
+- reuses GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_PRIVATE_KEY server-side;
+- targets only GOOGLE_FINANCE_SPREADSHEET_ID;
 - blocks mutations unless FINANCE_WRITES_ENABLED is exactly true;
-- never returns remote error bodies through the generic adapter.
+- exposes typed Finance mutations, not arbitrary raw Sheets requests.
 
-Supabase:
+Google Sheet:
 
-- dedicated project isolates blast radius;
-- all Finance tables have RLS enabled + forced;
-- anon/authenticated grants are revoked;
-- no public RLS policies exist in the initial migration;
-- the dedicated service role is the only initial data path.
+- dedicated file, not shared with other Vida domains;
+- no public/link sharing;
+- schema headers are validated before reads;
+- structural tab IDs are resolved dynamically by title, so copies/backups remain portable.
 
-## Why service-role server access is acceptable here
+## Store schema
 
-Vida uses its own Google/Auth.js identity rather than Supabase Auth. Introducing a second user-auth system only to satisfy RLS would add complexity without improving the single-user threat model.
+Current tabs:
 
-The V1 compromise is:
+- Meta;
+- Accounts;
+- Import Batches;
+- Raw Transactions;
+- Transactions;
+- Transaction Sources;
+- Postings;
+- Reconciliations;
+- Rules;
+- Obligations;
+- Goals;
+- Commitments;
+- Snapshots;
+- Interventions;
+- Wellbeing.
 
-1. dedicated Supabase project;
-2. no browser Data API access;
-3. app-owner session check before every Finance request;
-4. server-only service role;
-5. explicit owner_key filter/injection;
-6. independent write kill switch;
-7. no delete method in the generic adapter.
-
-If Finance later becomes multi-user, shared, or externally integrated, migrate to end-user JWT/RLS or a narrower database role before expanding access.
-
-## Storage boundaries
-
-GitHub:
-
-- schema/migrations;
-- types/contracts;
-- generic adapters/tests;
-- zero statements, balances, account IDs or private counterparty mappings.
-
-Supabase:
-
-- normalized operational state;
-- private rules/mappings;
-- parsed row-level raw payload needed for idempotency/audit;
-- reconciliation state.
-
-Drive/authoritative evidence:
-
-- original PDF/CSV/XLSX statements and heavy evidence when retained.
+Money remains explicit currency + integer minor units wherever practical. Raw evidence stays separate from canonical transactions/postings.
 
 ## Environment variables
 
-Required only after provisioning:
+Finance reuses the existing Google service-account credentials:
 
-- FINANCE_STORE_MODE=supabase-rest
-- FINANCE_SUPABASE_URL
-- FINANCE_SUPABASE_SERVICE_ROLE_KEY
-- FINANCE_OWNER_KEY
-- FINANCE_WRITES_ENABLED
+- GOOGLE_SERVICE_ACCOUNT_EMAIL;
+- GOOGLE_PRIVATE_KEY.
 
-Production starts with FINANCE_WRITES_ENABLED=false. Turning it on is a separate consequential database-write approval.
+Finance-specific:
+
+- FINANCE_STORE_MODE=google-sheets;
+- GOOGLE_FINANCE_SPREADSHEET_ID;
+- FINANCE_WRITES_ENABLED=false by default.
+
+There is no mock fallback for Finance data.
 
 ## Backup / export / delete gate
 
-Before importing personal data:
+Before importing personal transaction history:
 
-1. verify the selected Supabase plan's backup/restore capability;
-2. prove the initial migration on the dedicated project;
-3. run Supabase security advisors and resolve material findings;
-4. document a tested export procedure for all Finance tables;
-5. document restore steps and one rollback path;
-6. keep originals in the authoritative evidence store;
-7. keep deletion manual and approval-gated.
+1. configure the dedicated spreadsheet ID in the server environment;
+2. verify the service account can read every required tab;
+3. verify schema headers against finance-sheets-v1.0.0;
+4. create and verify a pre-import Drive copy/export;
+5. keep FINANCE_WRITES_ENABLED=false during read-only validation;
+6. enable writes only for a bounded import run;
+7. verify counts/hashes/reconciliation after the write;
+8. keep deletion manual and explicit.
 
-No real financial import is allowed before this gate is green.
-
-## Initial schema
-
-The migration creates:
-
-- finance_accounts;
-- finance_import_batches;
-- finance_transactions;
-- finance_raw_transactions;
-- finance_transaction_sources;
-- finance_postings;
-- finance_reconciliations;
-- finance_rules.
-
-The schema preserves native currency and integer minor units. It does not yet claim strict multi-currency double-entry balancing; FX accounting validation belongs to the ingestion/ledger checkpoint where real examples are available.
+Original PDFs/CSV/XLSX statements remain authoritative evidence in Drive or another approved evidence store.
 
 ## Failure behavior
 
 Missing/invalid config:
 
-- explicit disabled/not-configured result;
-- no mock Finance data;
-- no fallback to another Supabase project.
+- explicit disabled/not-configured state;
+- no fake balances;
+- no fallback to another Sheet.
+
+Schema mismatch:
+
+- fail closed before a Finance write;
+- do not silently create/reorder columns.
 
 Remote error:
 
-- return only bounded status/code to the caller;
-- never echo private payloads or service credentials.
+- return bounded error codes;
+- do not surface response bodies containing private data.
 
-Write attempt while disabled:
+## Migration path
 
-- fail closed before the network request.
+The domain contracts do not treat Sheets as permanent architecture.
+
+If V1 outgrows Sheets, preserve:
+
+- Account / Transaction / Posting contracts;
+- source hashes and stable IDs;
+- reconciliation semantics;
+- Safe-to-Spend / resilience logic;
+- evidence references.
+
+Then replace only the store adapter with PostgreSQL/Supabase or another approved backend.
