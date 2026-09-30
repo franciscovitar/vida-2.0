@@ -64,10 +64,7 @@ test('Mercado Pago import plan is deterministic and preserves mixed-use account 
   assert.equal(first.accounts.rows[0][4], 'ARS');
 
   assert.deepEqual(
-    mercadoPagoImportPlanMutations(first).map((mutation) => [
-      mutation.kind,
-      mutation.sheet,
-    ]),
+    mercadoPagoImportPlanMutations(first).map((mutation) => [mutation.kind, mutation.sheet]),
     [
       ['append', 'accounts'],
       ['append', 'importBatches'],

@@ -78,9 +78,7 @@ function rawId(sourceTransactionId: string): string {
   return `finance-raw:mercado-pago:ars:${sourceTransactionId}`;
 }
 
-function stableRawPayload(
-  transaction: MercadoPagoStatementResult['transactions'][number],
-): string {
+function stableRawPayload(transaction: MercadoPagoStatementResult['transactions'][number]): string {
   return JSON.stringify({
     sourceTransactionId: transaction.sourceTransactionId,
     occurredOn: transaction.occurredOn,
