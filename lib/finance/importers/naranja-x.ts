@@ -8,6 +8,7 @@ const MONTH_BY_CODE: Record<string, number> = {
   JUL: 7,
   AGO: 8,
   SEP: 9,
+  SEPT: 9,
   OCT: 10,
   NOV: 11,
   DIC: 12,
@@ -27,12 +28,13 @@ export interface NaranjaParsedTransaction {
 
 export interface NaranjaSectionResult {
   currency: NaranjaCurrency;
+  statementClosed: boolean;
   openingBalanceMinor: number;
-  statementClosingBalanceMinor: number;
+  statementClosingBalanceMinor: number | null;
   derivedClosingBalanceMinor: number;
   transactions: NaranjaParsedTransaction[];
   duplicateSourceTransactionIds: string[];
-  reconciliationDifferenceMinor: number;
+  reconciliationDifferenceMinor: number | null;
 }
 
 export interface NaranjaStatementResult {
@@ -46,6 +48,15 @@ interface ParsedBlock {
   description: string;
   sourceAmountMinor: number;
   balanceAfterMinor: number;
+}
+
+interface PendingBlock {
+  day: number;
+  month: number;
+  sourceTransactionId: string;
+  description: string;
+  sourceAmountMinor: number | null;
+  balanceAfterMinor: number | null;
 }
 
 function parseMoneyMinor(value: string): number {
@@ -92,67 +103,110 @@ function extractSection(statementText: string, currency: NaranjaCurrency): strin
   return rest.slice(0, end);
 }
 
-function extractBalance(section: string, currency: NaranjaCurrency, kind: 'initial' | 'final'): number {
-  const label = kind === 'initial' ? 'Dinero total inicial' : 'Dinero total final';
-  const currencyPattern = currency === 'ARS' ? '\\$' : 'USD';
-  const regex = new RegExp(
-    `${label}\\s+${currencyPattern}\\s*([\\d.]+,\\d{2})`,
-    'i',
-  );
-  const match = section.match(regex);
-  if (!match) {
-    throw new Error(`Missing Naranja X ${currency} ${kind} balance`);
+function extractOpeningBalance(section: string, currency: NaranjaCurrency): number {
+  const unit = currency === 'ARS' ? '\\$' : 'USD';
+  const patterns = [
+    new RegExp(`Dinero total inicial\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
+    new RegExp(`Dinero inicial\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
+  ];
+
+  for (const pattern of patterns) {
+    const match = section.match(pattern);
+    if (match) return parseMoneyMinor(match[1]);
   }
-  return parseMoneyMinor(match[1]);
+  throw new Error(`Missing Naranja X ${currency} opening balance`);
+}
+
+function extractStatementClosingBalance(
+  section: string,
+  currency: NaranjaCurrency,
+): number | null {
+  const unit = currency === 'ARS' ? '\\$' : 'USD';
+  const match = section.match(
+    new RegExp(`Dinero total final\\s+${unit}\\s*([\\d.]+,\\d{2})`, 'i'),
+  );
+  return match ? parseMoneyMinor(match[1]) : null;
 }
 
 function parseBlocks(section: string, currency: NaranjaCurrency): ParsedBlock[] {
   const unit = currency === 'ARS' ? '\\$' : 'USD';
-  const linePattern = new RegExp(
-    `^(\\d{2})/([A-ZÁÉÍÓÚÑ]{3})\\s+(\\d{10,13})\\s+(.+?)\\s+${unit}\\s*([\\d.]+,\\d{2})\\s+${unit}\\s*([\\d.]+,\\d{2})\\s*$`,
+  const operationPattern = new RegExp(
+    `^(\\d{2})/([A-ZÁÉÍÓÚÑ]{3,4})\\s+(\\d{10,13})\\s+(.+?)(?:\\s+${unit}\\s*([\\d.]+,\\d{2})\\s+${unit}\\s*([\\d.]+,\\d{2}))?\\s*$`,
     'u',
+  );
+  const amountsOnlyPattern = new RegExp(
+    `^${unit}\\s*([\\d.]+,\\d{2})\\s+${unit}\\s*([\\d.]+,\\d{2})\\s*$`,
   );
 
   const blocks: ParsedBlock[] = [];
-  let current: ParsedBlock | null = null;
+  let current: PendingBlock | null = null;
+
+  function finalizeCurrent() {
+    if (!current) return;
+    if (current.sourceAmountMinor == null || current.balanceAfterMinor == null) {
+      throw new Error(`Incomplete Naranja X operation ${current.sourceTransactionId}`);
+    }
+    blocks.push({
+      ...current,
+      sourceAmountMinor: current.sourceAmountMinor,
+      balanceAfterMinor: current.balanceAfterMinor,
+    });
+    current = null;
+  }
 
   for (const rawLine of section.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line) continue;
 
-    const match = line.match(linePattern);
-    if (match) {
-      if (current) blocks.push(current);
+    const operation = line.match(operationPattern);
+    if (operation) {
+      finalizeCurrent();
 
-      const month = MONTH_BY_CODE[match[2]];
-      if (!month) throw new Error(`Unknown Naranja X month code: ${match[2]}`);
+      const month = MONTH_BY_CODE[operation[2]];
+      if (!month) throw new Error(`Unknown Naranja X month code: ${operation[2]}`);
 
       current = {
-        day: Number.parseInt(match[1], 10),
+        day: Number.parseInt(operation[1], 10),
         month,
-        sourceTransactionId: match[3],
-        description: match[4].trim(),
-        sourceAmountMinor: parseMoneyMinor(match[5]),
-        balanceAfterMinor: parseMoneyMinor(match[6]),
+        sourceTransactionId: operation[3],
+        description: operation[4].trim(),
+        sourceAmountMinor: operation[5] ? parseMoneyMinor(operation[5]) : null,
+        balanceAfterMinor: operation[6] ? parseMoneyMinor(operation[6]) : null,
       };
       continue;
     }
 
-    if (
-      current &&
-      !line.startsWith('Dinero final') &&
-      !line.startsWith('Resumen del mes') &&
-      !line.startsWith('Movimientos del mes') &&
-      !line.startsWith('Nº de') &&
-      !line.startsWith('Fecha ') &&
-      !line.startsWith('operación ') &&
-      !line.startsWith('Dinero inicial')
-    ) {
-      current.description = `${current.description} ${line}`.replace(/\s+/g, ' ').trim();
+    if (!current) continue;
+
+    const amountsOnly = line.match(amountsOnlyPattern);
+    if (amountsOnly) {
+      if (current.sourceAmountMinor != null || current.balanceAfterMinor != null) {
+        throw new Error(
+          `Duplicate amount line for Naranja X operation ${current.sourceTransactionId}`,
+        );
+      }
+      current.sourceAmountMinor = parseMoneyMinor(amountsOnly[1]);
+      current.balanceAfterMinor = parseMoneyMinor(amountsOnly[2]);
+      continue;
     }
+
+    if (
+      line.startsWith('Dinero final') ||
+      line.startsWith('Resumen del mes') ||
+      line.startsWith('Movimientos del mes') ||
+      line.startsWith('Nº de') ||
+      line.startsWith('Fecha') ||
+      line.startsWith('operación') ||
+      line.startsWith('Descripción') ||
+      line.startsWith('Dinero a la')
+    ) {
+      continue;
+    }
+
+    current.description = `${current.description} ${line}`.replace(/\s+/g, ' ').trim();
   }
 
-  if (current) blocks.push(current);
+  finalizeCurrent();
   return blocks;
 }
 
@@ -164,8 +218,8 @@ function parseSection(
   const section = extractSection(statementText, currency);
   if (!section) return null;
 
-  const openingBalanceMinor = extractBalance(section, currency, 'initial');
-  const statementClosingBalanceMinor = extractBalance(section, currency, 'final');
+  const openingBalanceMinor = extractOpeningBalance(section, currency);
+  const statementClosingBalanceMinor = extractStatementClosingBalance(section, currency);
   const blocks = parseBlocks(section, currency);
 
   const seen = new Map<string, ParsedBlock>();
@@ -218,12 +272,16 @@ function parseSection(
 
   return {
     currency,
+    statementClosed: statementClosingBalanceMinor != null,
     openingBalanceMinor,
     statementClosingBalanceMinor,
     derivedClosingBalanceMinor: previousBalanceMinor,
     transactions,
     duplicateSourceTransactionIds: [...new Set(duplicates)],
-    reconciliationDifferenceMinor: previousBalanceMinor - statementClosingBalanceMinor,
+    reconciliationDifferenceMinor:
+      statementClosingBalanceMinor == null
+        ? null
+        : previousBalanceMinor - statementClosingBalanceMinor,
   };
 }
 

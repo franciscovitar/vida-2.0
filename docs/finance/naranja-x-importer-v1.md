@@ -6,22 +6,28 @@ Status: parser core implemented; PDF text extraction and store writes are intent
 
 The parser accepts extracted text from a Naranja X monthly statement plus the statement year.
 
-It recognizes separate ARS and USD account sections and preserves native currency.
+It recognizes separate ARS and USD account sections, preserves native currency, and accepts both closed monthly summaries and current-month partial movement files.
+
+The parser explicitly supports the two Naranja X text layouts observed in real 2026 evidence:
+
+- operation, printed amount and running balance on one extracted line;
+- operation/description followed by one or more continuation lines and then a standalone amount/balance line.
 
 ## Deterministic semantics
 
 For each account section:
 
-1. read opening and statement closing balances;
-2. parse operation date, source operation ID, description, printed amount magnitude and balance after;
-3. keep multiline descriptions attached to their operation;
+1. read opening balance;
+2. read statement closing balance when the statement is closed;
+3. parse operation date, source operation ID, multiline description, printed amount magnitude and balance after;
 4. deduplicate identical repeated source operation IDs;
 5. fail closed on conflicting duplicates;
-6. derive the signed economic cash movement from the running-balance delta;
+6. derive the signed movement from the running-balance delta;
 7. require the absolute balance delta to equal the printed operation amount;
-8. expose the derived closing balance and reconciliation difference.
+8. expose derived closing balance and reconciliation difference for closed statements;
+9. keep current-month statements explicitly partial rather than inventing a closing statement balance.
 
-This intentionally catches the July/August duplicate-row defect previously observed in real Naranja X PDFs without counting duplicated operations twice.
+This is designed to catch the July/August duplicate-row defect previously observed in real Naranja X PDFs without counting duplicated operations twice.
 
 ## Current safety boundary
 
