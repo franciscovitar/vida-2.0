@@ -1,6 +1,6 @@
 import { calculateSafeToSpend, type SafeToSpendResult } from '@/lib/finance/safe-to-spend';
 
-export const FINANCE_PLANNING_VERSION = 'finance-planning-v1.0.0';
+export const FINANCE_PLANNING_VERSION = 'finance-planning-v1.1.0';
 
 export type FinancePlanningBucket = 'reserve' | 'obligation' | 'goal' | 'other';
 
@@ -33,6 +33,18 @@ export interface FinancePlanningCommitmentSummary {
   otherCommitmentsMinor: number;
 }
 
+export interface FinancePlanningSubtraction {
+  id: string;
+  label: string;
+  bucket: FinancePlanningBucket;
+  amountMinor: number;
+}
+
+export interface FinancePlanningExplanation {
+  subtractions: FinancePlanningSubtraction[];
+  totalSubtractionsMinor: number;
+}
+
 export interface FinanceResilienceSnapshot {
   eligibleLiquidityMinor: number;
   protectedReserveMinor: number;
@@ -47,6 +59,7 @@ export interface FinancePlanningSnapshot {
   asOf: string;
   currency: string;
   commitments: FinancePlanningCommitmentSummary;
+  explanation: FinancePlanningExplanation;
   safeToSpend: SafeToSpendResult;
   resilience: FinanceResilienceSnapshot;
 }
@@ -111,6 +124,7 @@ export function buildFinancePlanningSnapshot(
 
   const seenIds = new Set<string>();
   const seenOverlapGroups = new Set<string>();
+  const subtractions: FinancePlanningSubtraction[] = [];
   const summary: FinancePlanningCommitmentSummary = {
     count: 0,
     protectedReserveMinor: 0,
@@ -124,6 +138,7 @@ export function buildFinancePlanningSnapshot(
     if (seenIds.has(id)) throw new RangeError(`duplicate commitment id: ${id}`);
     seenIds.add(id);
 
+    const label = requireText('commitment.label', commitment.label);
     const commitmentCurrency = normalizeCurrency(commitment.currency);
     if (commitmentCurrency !== currency) {
       throw new RangeError(`commitment ${id} currency must match planning currency ${currency}`);
@@ -140,6 +155,13 @@ export function buildFinancePlanningSnapshot(
       }
       seenOverlapGroups.add(overlapGroup);
     }
+
+    subtractions.push({
+      id,
+      label,
+      bucket: commitment.bucket,
+      amountMinor: commitment.amountMinor,
+    });
 
     summary.count += 1;
     if (commitment.bucket === 'reserve') {
@@ -166,12 +188,28 @@ export function buildFinancePlanningSnapshot(
     committedGoalFundingMinor: summary.committedGoalFundingMinor,
     otherCommitmentsMinor: summary.otherCommitmentsMinor,
   });
+  const totalSubtractionsMinor =
+    summary.protectedReserveMinor +
+    summary.upcomingObligationsMinor +
+    summary.committedGoalFundingMinor +
+    summary.otherCommitmentsMinor;
+
+  if (
+    !Number.isSafeInteger(totalSubtractionsMinor) ||
+    input.eligibleLiquidityMinor - totalSubtractionsMinor !== safeToSpend.rawSafeToSpendMinor
+  ) {
+    throw new RangeError('planning explanation must reconcile to raw Safe-to-Spend');
+  }
 
   return {
     version: FINANCE_PLANNING_VERSION,
     asOf,
     currency,
     commitments: summary,
+    explanation: {
+      subtractions,
+      totalSubtractionsMinor,
+    },
     safeToSpend,
     resilience: {
       eligibleLiquidityMinor: input.eligibleLiquidityMinor,

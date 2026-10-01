@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PlanningDraftSandbox } from '@/components/finance/PlanningDraftSandbox';
+import { PlanningSubtractionTrace } from '@/components/finance/PlanningSubtractionTrace';
 import { PurchaseScenarioCalculator } from '@/components/finance/PurchaseScenarioCalculator';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -270,13 +271,15 @@ export default async function FinanzasPage() {
               {planningModel.currencies
                 .filter((item) => item.snapshot)
                 .map((item) => (
-                  <PurchaseScenarioCalculator
-                    key={`scenario-${item.currency}`}
-                    source={{
-                      currency: item.currency,
-                      safeToSpend: item.snapshot!.safeToSpend,
-                    }}
-                  />
+                  <div key={`scenario-${item.currency}`}>
+                    <PlanningSubtractionTrace snapshot={item.snapshot!} />
+                    <PurchaseScenarioCalculator
+                      source={{
+                        currency: item.currency,
+                        safeToSpend: item.snapshot!.safeToSpend,
+                      }}
+                    />
+                  </div>
                 ))}
               {planningModel.currencies
                 .filter(

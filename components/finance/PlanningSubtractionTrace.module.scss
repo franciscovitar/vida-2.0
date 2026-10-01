@@ -1,0 +1,71 @@
+.shell {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.heading {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.heading strong {
+  font-size: 0.78rem;
+}
+
+.heading small,
+.row small,
+.total small,
+.result small {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+  line-height: 1.4;
+}
+
+.rows {
+  display: grid;
+}
+
+.row,
+.total,
+.result {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row > div,
+.total > div,
+.result > div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.row strong,
+.total strong,
+.result strong {
+  font-size: 0.75rem;
+}
+
+.row > span,
+.total > span,
+.result > span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.total {
+  color: var(--text-muted);
+}
+
+.result {
+  color: var(--c-finance);
+  border-bottom: 0;
+}
