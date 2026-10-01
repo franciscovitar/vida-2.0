@@ -215,8 +215,8 @@ export function evaluateFinancePurchaseScenario(
     exceedsEligibleLiquidityByMinor > 0
       ? 'exceeds-liquidity'
       : beyondSafeCapacityMinor > 0
-        ? 'uses-protected-capacity'
-        : 'within-safe-capacity';
+      ? 'uses-protected-capacity'
+      : 'within-safe-capacity';
 
   return {
     version: FINANCE_PLANNING_VERSION,
