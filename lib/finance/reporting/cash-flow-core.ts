@@ -27,6 +27,14 @@ export interface FinanceRoleTotal {
   totalMinor: number;
 }
 
+export interface FinanceMonthlyRoleTotal {
+  month: string;
+  role: FinanceEconomicRole;
+  currency: string;
+  count: number;
+  totalMinor: number;
+}
+
 export interface FinanceCoverageWindow {
   accountId: string;
   displayName: string;
@@ -49,6 +57,7 @@ export interface FinanceCashFlowReport {
   currencies: FinanceCashFlowCurrencySummary[];
   monthly: FinanceCashFlowMonth[];
   roleTotals: FinanceRoleTotal[];
+  monthlyRoleTotals: FinanceMonthlyRoleTotal[];
   coverage: FinanceCoverageWindow[];
   transactionCount: number;
   resolvedTransactions: number;
@@ -135,6 +144,7 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
   const unknownRoleTransactions = new Set<string>();
   const monthly = new Map<string, FinanceCashFlowMonth>();
   const roleTotals = new Map<string, FinanceRoleTotal>();
+  const monthlyRoleTotals = new Map<string, FinanceMonthlyRoleTotal>();
 
   for (const row of postings) {
     const transactionId = text(row[0]);
@@ -174,6 +184,18 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
     current.netMinor += postingAmount;
     current.eventCount += 1;
     monthly.set(monthlyKey, current);
+
+    const monthlyRoleKey = `${month}|${role}|${currency}`;
+    const monthlyRoleTotal = monthlyRoleTotals.get(monthlyRoleKey) ?? {
+      month,
+      role,
+      currency,
+      count: 0,
+      totalMinor: 0,
+    };
+    monthlyRoleTotal.count += 1;
+    monthlyRoleTotal.totalMinor += postingAmount;
+    monthlyRoleTotals.set(monthlyRoleKey, monthlyRoleTotal);
 
     const roleKey = `${role}|${currency}`;
     const roleTotal = roleTotals.get(roleKey) ?? {
@@ -291,6 +313,12 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
     roleTotals: [...roleTotals.values()].sort(
       (left, right) =>
         left.currency.localeCompare(right.currency) || left.role.localeCompare(right.role),
+    ),
+    monthlyRoleTotals: [...monthlyRoleTotals.values()].sort(
+      (left, right) =>
+        left.month.localeCompare(right.month) ||
+        left.currency.localeCompare(right.currency) ||
+        left.role.localeCompare(right.role),
     ),
     coverage,
     transactionCount: transactions.length,

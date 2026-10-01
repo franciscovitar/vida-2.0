@@ -155,6 +155,36 @@ test('cash-flow reporting counts only personal economic roles on owned accounts'
       netMinor: -100,
     },
   ]);
+  assert.deepEqual(report.monthlyRoleTotals, [
+    {
+      month: '2026-01',
+      role: 'expense_personal',
+      currency: 'ARS',
+      count: 1,
+      totalMinor: -40000,
+    },
+    {
+      month: '2026-01',
+      role: 'income_work',
+      currency: 'ARS',
+      count: 1,
+      totalMinor: 100000,
+    },
+    {
+      month: '2026-02',
+      role: 'refund_adjustment',
+      currency: 'ARS',
+      count: 1,
+      totalMinor: 2000,
+    },
+    {
+      month: '2026-02',
+      role: 'expense_personal',
+      currency: 'USD',
+      count: 1,
+      totalMinor: -100,
+    },
+  ]);
   assert.equal(report.reviewRequiredTransactions, 1);
   assert.equal(report.unknownRoleTransactions, 1);
   assert.equal(report.unbalancedTransactions, 0);
