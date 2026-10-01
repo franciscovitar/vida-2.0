@@ -1,6 +1,5 @@
-import { Plus, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
 import type { DayHeaderView } from '@/types';
 
 import styles from './DayHeader.module.scss';
@@ -18,11 +17,6 @@ export function DayHeader({ header }: { header: DayHeaderView }) {
         </div>
         <p className={styles.date}>{header.fullDate}</p>
         <p className={styles.greeting}>{header.greeting}, este es tu resumen del día.</p>
-      </div>
-      <div className={styles.actions}>
-        <Button href="/bandeja" variant="primary" iconLeft={Plus}>
-          Captura rápida
-        </Button>
       </div>
     </header>
   );

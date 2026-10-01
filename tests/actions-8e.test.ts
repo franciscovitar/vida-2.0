@@ -26,7 +26,7 @@ import {
 } from '@/lib/actions/policy';
 import { portHasDestructiveMethods } from '@/lib/actions/ports';
 import { requestFromEmail } from '@/lib/actions/request';
-import { primaryNav } from '@/lib/constants/navigation';
+import { secondaryNav } from '@/lib/constants/navigation';
 import type { ActionConfirmation, ActionRequest } from '@/types/actions';
 import { randomBytes } from 'node:crypto';
 
@@ -798,7 +798,7 @@ test('8E1-29. ausencia de métodos destructivos', () => {
   assert.equal(portHasDestructiveMethods(tasks), false);
   const source = readFileSync(path.join(process.cwd(), 'lib/actions/ports.ts'), 'utf8');
   assert.equal(/deleteTask|archivePage|mergePages|createCalendarEvent/.test(source), false);
-  assert.ok(primaryNav.some((item) => item.href === '/aprobaciones'));
+  assert.ok(secondaryNav.some((item) => item.href === '/aprobaciones'));
 });
 
 test('8E1-30. calendar.event.create no es acción permitida', () => {

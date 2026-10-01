@@ -13,7 +13,6 @@ const statusStyles = source('components', 'local-drafts', 'LocalDraftStatus.modu
 const gym = source('components', 'actions', 'GymSessionPanel.tsx');
 const tasks = source('components', 'tasks', 'TaskPlanningWorkspace.tsx');
 const projects = source('components', 'projects', 'ProjectReviewWorkspace.tsx');
-const inbox = source('components', 'inbox', 'InboxPlanningWorkspace.tsx');
 const reviews = source('components', 'reviews', 'ReviewWorkspace.tsx');
 
 test('B1-LOCAL-UI-1. la persistencia usa solo localStorage y no APIs externas', () => {
@@ -44,19 +43,13 @@ test('B1-LOCAL-UI-4. proyectos conserva solo revisiones validadas', () => {
   assert.match(projects, /reviews\.length > 0/);
 });
 
-test('B1-LOCAL-UI-5. bandeja conserva estado pendiente o revisado', () => {
-  assert.match(inbox, /LOCAL_DRAFT_KEYS\.inbox/);
-  assert.match(inbox, /isBoolean\(value\.reviewed\)/);
-  assert.match(inbox, /setCaptures\(value\)/);
-});
-
-test('B1-LOCAL-UI-6. centro de revisión conserva criterios y revisiones manuales', () => {
+test('B1-LOCAL-UI-5. centro de revisión conserva criterios y revisiones manuales', () => {
   assert.match(reviews, /LOCAL_DRAFT_KEYS\.reviews/);
   assert.match(reviews, /proposalDecisions, reviews/);
   assert.match(reviews, /isReviewBackup/);
 });
 
-test('B1-LOCAL-UI-7. el aviso declara plazo, cifrado y ausencia de sincronización', () => {
+test('B1-LOCAL-UI-6. el aviso declara plazo, cifrado y ausencia de sincronización', () => {
   assert.match(status, /30 días/);
   assert.match(status, /No está cifrado/);
   assert.match(status, /no se sincroniza/);

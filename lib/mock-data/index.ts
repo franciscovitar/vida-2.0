@@ -12,4 +12,4 @@ export { tasks } from './tasks';
 export { projects } from './projects';
 export { todayEvents } from './calendar';
 export { weeklyGoals } from './goals';
-export { dailyFocus, inboxSeed, referenceDate, syncState } from './today';
+export { dailyFocus, referenceDate, syncState } from './today';

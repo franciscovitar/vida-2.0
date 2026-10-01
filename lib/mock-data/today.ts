@@ -1,4 +1,4 @@
-import type { DailyFocus, InboxItem, SyncState } from '@/types';
+import type { DailyFocus, SyncState } from '@/types';
 
 /** Fecha de referencia de la vista Hoy con datos simulados. */
 export const referenceDate = new Date('2026-07-20T09:00:00');
@@ -21,19 +21,3 @@ export const syncState: SyncState = {
     { id: 'calendar', label: 'Google Calendar', ok: true },
   ],
 };
-
-/** Ítems iniciales de la bandeja de entrada (captura rápida). */
-export const inboxSeed: InboxItem[] = [
-  {
-    id: 'inbox-1',
-    text: 'Idea: dashboard de gastos mensuales',
-    createdAt: '2026-07-20T08:10:00',
-    pendingSync: true,
-  },
-  {
-    id: 'inbox-2',
-    text: 'Pedir turno con el kinesiólogo',
-    createdAt: '2026-07-19T21:30:00',
-    pendingSync: true,
-  },
-];

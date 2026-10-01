@@ -7,7 +7,6 @@ import { HealthSleep } from '@/components/dashboard/HealthSleep';
 import { HoyNotionPanel } from '@/components/dashboard/HoyNotion';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
 import { ProductivityToday } from '@/components/dashboard/ProductivityToday';
-import { QuickInbox } from '@/components/dashboard/QuickInbox';
 import { TodayAgenda } from '@/components/dashboard/TodayAgenda';
 import { WeeklyProgress } from '@/components/dashboard/WeeklyProgress';
 import { getDailyPlanningView } from '@/lib/data/daily-planning-view-source';
@@ -51,7 +50,6 @@ export default async function TodayPage() {
         <div className={styles.side}>
           <HealthSleep health={today.health} />
           <WeeklyProgress goals={today.weekly} />
-          <QuickInbox />
         </div>
       </div>
     </div>

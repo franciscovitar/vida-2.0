@@ -20,9 +20,10 @@ La experiencia objetivo queda resumida así:
 
 > **Chat para operar. Fuentes canónicas para guardar. Vida Web para ver, entender y decidir.**
 
-Vida Web no será la superficie principal de captura cotidiana. Las rutas de Tareas, Bandeja,
-Gimnasio y Calendar deben priorizar visualización, contexto, métricas, tendencias y revisión; no
-formularios de alta manual.
+Vida Web no será la superficie principal de captura cotidiana. Las rutas de Tareas, Gimnasio y
+Calendar deben priorizar visualización, contexto, métricas y revisión; no formularios de alta
+manual. Bandeja permanece como autoridad/contrato de captura conversacional, pero deja de tener una
+superficie web propia.
 
 La entrada evoluciona por canales conversacionales:
 
@@ -116,9 +117,9 @@ idempotencia, auditoría, ownership y rollback sigue siendo infraestructura vali
 donde Vida deba proveer esas garantías.
 
 La decisión es quitar los **emisores manuales de la experiencia cotidiana** y evitar convertir Safe
-Writes en un proxy obligatorio para toda captura. Los componentes existentes pueden permanecer
-mientras contratos/tests los usen, como fallback seguro para canales externos o hasta que una
-limpieza separada demuestre que son innecesarios.
+Writes en un proxy obligatorio para toda captura. Los adapters, contratos, auditoría e idempotencia
+de Bandeja permanecen porque sostienen la captura conversacional; los componentes web de captura
+que ya no tienen consumidor se eliminan.
 
 `/aprobaciones` permanece como consola excepcional para revisar propuestas, riesgo, conflictos o
 acciones que realmente requieran una decisión humana. No debe ser el paso obligatorio para cada
@@ -141,7 +142,8 @@ una política explícita antes de cambiar su comportamiento actual.
 
 - `/tareas`: no monta alta/cambio de estado ni borradores locales de creación; conserva resumen y
   listado de las tareas canónicas.
-- `/bandeja`: no ofrece captura manual/local; comunica la transición a captura conversacional.
+- `/bandeja`: la ruta web se retira; `inbox.capture` y la autoridad temporal de Bandeja continúan
+  disponibles para canales conversacionales autorizados.
 - `/gimnasio`: no monta carga manual de sesión; conserva dashboard/rutina/contexto/historial.
 - `/aprobaciones`: no origina Calendar Holds; conserva operabilidad, revisión y decisiones sobre
   propuestas ya existentes.

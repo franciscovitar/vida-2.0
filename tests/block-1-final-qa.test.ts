@@ -15,7 +15,6 @@ const workspaces = [
   source('components', 'actions', 'GymSessionPanel.tsx'),
   source('components', 'tasks', 'TaskPlanningWorkspace.tsx'),
   source('components', 'projects', 'ProjectReviewWorkspace.tsx'),
-  source('components', 'inbox', 'InboxPlanningWorkspace.tsx'),
   source('components', 'reviews', 'ReviewWorkspace.tsx'),
 ];
 
@@ -23,7 +22,6 @@ const styles = [
   source('components', 'actions', 'GymSessionPanel.module.scss'),
   source('components', 'tasks', 'TaskPlanningWorkspace.module.scss'),
   source('components', 'projects', 'ProjectReviewWorkspace.module.scss'),
-  source('components', 'inbox', 'InboxPlanningWorkspace.module.scss'),
   source('components', 'reviews', 'ReviewWorkspace.module.scss'),
 ];
 
@@ -40,7 +38,7 @@ test('B1-QA-1. la auditoría integral termina con todos los controles aprobados'
   );
 });
 
-test('B1-QA-2. los cinco módulos usan persistencia local tipada', () => {
+test('B1-QA-2. los cuatro módulos usan persistencia local tipada', () => {
   for (const workspace of workspaces) {
     assert.match(workspace, /useLocalDraftBackup/);
     assert.match(workspace, /LocalDraftStatus/);
@@ -49,7 +47,7 @@ test('B1-QA-2. los cinco módulos usan persistencia local tipada', () => {
 
 test('B1-QA-3. cada módulo usa una clave de almacenamiento distinta', () => {
   const joined = workspaces.join('\n');
-  for (const key of ['gym', 'tasks', 'projects', 'inbox', 'reviews']) {
+  for (const key of ['gym', 'tasks', 'projects', 'reviews']) {
     assert.equal((joined.match(new RegExp(`LOCAL_DRAFT_KEYS\\.${key}`, 'g')) ?? []).length, 1);
   }
 });

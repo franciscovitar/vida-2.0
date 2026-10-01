@@ -175,9 +175,6 @@ export const PROTECTED_APP_PATHS = [
   '/habitos',
   '/salud',
   '/productividad',
-  '/tendencias',
-  '/analisis-ia',
-  '/bandeja',
 ] as const;
 
 export type AuthProxyDecision =

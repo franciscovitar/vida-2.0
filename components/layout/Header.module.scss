@@ -29,24 +29,6 @@
   gap: 0.5rem;
 }
 
-.capture {
-  display: none;
-}
-
-.capture-compact {
-  display: flex;
-}
-
-@media (width >= 480px) {
-  .capture {
-    display: flex;
-  }
-
-  .capture-compact {
-    display: none;
-  }
-}
-
 @media (width >= 1024px) {
   .header {
     padding: 0 1.75rem;

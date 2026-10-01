@@ -31,6 +31,7 @@ const FIXED_STABLE_KEYS: ReadonlySet<string> = new Set(
 );
 
 const DOCUMENTARY_SHADOW_SUFFIXES = new Set(['guia', 'documento', 'manual', 'mapa']);
+const HIDDEN_FUNCTIONAL_ROUTE_SEGMENTS = new Set(['norte', 'productividad', 'agenda', 'areas']);
 
 function sectionRank(section: WebCatalogSection): number {
   const index = SECTION_ORDER.indexOf(section);
@@ -70,6 +71,15 @@ function staticRouteSegment(item: NavItemData): string | null {
 /** Evita dos destinos de menú para el mismo dominio funcional/documental. */
 function isShadowedByStaticModule(entry: WebCatalogEntry, staticItems: readonly NavItemData[]) {
   const normalizedEntryLabel = normalizeNavText(entry.editorialName);
+
+  for (const segment of HIDDEN_FUNCTIONAL_ROUTE_SEGMENTS) {
+    if (normalizedEntryLabel === normalizeNavText(segment)) return true;
+    if (entry.slug === segment) return true;
+    const suffix = entry.slug.startsWith(`${segment}-`)
+      ? entry.slug.slice(segment.length + 1)
+      : null;
+    if (suffix !== null && DOCUMENTARY_SHADOW_SUFFIXES.has(suffix)) return true;
+  }
 
   return staticItems.some((item) => {
     const normalizedStaticLabel = normalizeNavText(item.label);
@@ -179,10 +189,7 @@ export function buildAppNavigation(
     )
     .map(catalogEntryToNavItem);
 
-  const primaryWithCatalog: NavItemData[] = [
-    ...safeStaticPrimary,
-    ...catalogPrimary,
-  ];
+  const primaryWithCatalog: NavItemData[] = [...safeStaticPrimary, ...catalogPrimary];
 
   return {
     primary: dedupeNavItems(primaryWithCatalog),

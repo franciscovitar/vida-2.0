@@ -48,10 +48,12 @@ El código de `lib/web-catalog` define:
 Con la flag apagada: menú actual, placeholders de aprendizaje/compras y `/p` / `/buscar` no
 publican contenido. Journaling permanece fuera de lector, navegación dinámica y búsqueda.
 
-Módulos funcionales (Hoy, Hábitos, Salud, Productividad cuantitativa, Tendencias, Agenda, Tareas,
-Proyectos, Áreas, Gimnasio, Bandeja, Ajustes) siguen en código. El catálogo gobierna páginas
-documentales (`/p/...` y claves fijas). La Productividad documental usa su slug dinámico, no
-`/productividad`.
+La navegación principal queda reservada para superficies de uso frecuente. Productividad, Agenda,
+Áreas y Norte conservan sus rutas de detalle/contexto pero no ocupan el menú principal. Las
+superficies antiguas de Tendencias y Análisis IA se retiraron; la captura cotidiana tampoco tiene
+una pantalla Bandeja en la Web y se resuelve por canales conversacionales. El catálogo gobierna
+páginas documentales (`/p/...` y claves fijas). La Productividad documental usa su slug dinámico,
+no `/productividad`.
 
 ### Áreas (8D.1)
 
@@ -70,8 +72,9 @@ muestra estado controlado.
 
 ### Escrituras seguras (8E.1)
 
-Policy Engine, confirmaciones, Tareas, Bandeja, Gimnasio (sesiones), `/aprobaciones` y propuestas
-de Calendar. **Desactivado por defecto** (`WRITE_ACTIONS_ENABLED` solo acepta `true`).
+Policy Engine, confirmaciones, Tareas, captura conversacional de Bandeja, Gimnasio (sesiones),
+`/aprobaciones` y propuestas de Calendar. **Desactivado por defecto**
+(`WRITE_ACTIONS_ENABLED` solo acepta `true`).
 
 Con la flag activa y configuración completa en Preview, el runtime conecta adaptadores reales:
 

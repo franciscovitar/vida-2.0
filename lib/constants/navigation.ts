@@ -10,13 +10,11 @@ import {
   FileText,
   Film,
   HeartPulse,
-  Inbox,
   LayoutDashboard,
   LineChart,
   ListTodo,
   WalletCards,
   NotebookPen,
-  Search,
   Settings,
   ShieldCheck,
   ShoppingCart,
@@ -35,7 +33,6 @@ export type NavIconKey =
   | 'salud'
   | 'finanzas'
   | 'productividad'
-  | 'tendencias'
   | 'agenda'
   | 'planificacion'
   | 'proyectos'
@@ -44,17 +41,14 @@ export type NavIconKey =
   | 'tareas'
   | 'aprendizaje'
   | 'compras'
-  | 'analisis'
   | 'areas'
   | 'gimnasio'
   | 'dieta'
   | 'media'
   | 'aprobaciones'
-  | 'bandeja'
   | 'journaling'
   | 'ajustes'
   | 'automatizaciones'
-  | 'buscar'
   | 'document';
 
 export interface NavItemData {
@@ -79,7 +73,6 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   salud: HeartPulse,
   finanzas: WalletCards,
   productividad: ListTodo,
-  tendencias: LineChart,
   agenda: CalendarClock,
   planificacion: CalendarRange,
   proyectos: Boxes,
@@ -88,17 +81,14 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   tareas: ListTodo,
   aprendizaje: BookOpen,
   compras: ShoppingCart,
-  analisis: Brain,
   areas: Boxes,
   gimnasio: Dumbbell,
   dieta: UtensilsCrossed,
   media: Film,
   aprobaciones: ShieldCheck,
-  bandeja: Inbox,
   journaling: NotebookPen,
   ajustes: Settings,
   automatizaciones: Workflow,
-  buscar: Search,
   document: FileText,
 };
 

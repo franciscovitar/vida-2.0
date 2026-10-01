@@ -2,7 +2,7 @@
  * Block 3 — emitter contracts: UI/OpenClaw payloads must match validators.
  */
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 
@@ -73,11 +73,11 @@ test('B3-EMIT-03. bandeja-equivalent payload with origin web passes', () => {
   assert.equal(parsed.ok, true);
 });
 
-test('B3-EMIT-04. InboxCapturePanel emits typed origin web, never web-bandeja', () => {
-  const panel = source('components', 'actions', 'InboxCapturePanel.tsx');
-  assert.match(panel, /InboxCapturePayload/);
-  assert.match(panel, /origin:\s*'web'/);
-  assert.equal(panel.includes('web-bandeja'), false);
+test('B3-EMIT-04. no queda emisor web manual de Bandeja', () => {
+  assert.equal(
+    existsSync(path.join(root, 'components', 'actions', 'InboxCapturePanel.tsx')),
+    false,
+  );
 });
 
 test('B3-EMIT-05. other web emitters build typed business payloads', () => {

@@ -215,7 +215,7 @@ test('10A-8. renderers documentales y módulos fijos reutilizan lectura segura',
   assert.equal(usesReadableContentRenderer(entry({ renderMode: 'private' })), false);
 });
 
-test('10A-9. Norte usa una sola ruta fija y desaparece si el catálogo lo oculta', () => {
+test('10A-9. Norte conserva ruta fija sin ocupar la navegación principal', () => {
   const published = buildAppNavigation(true, [
     entry({
       stableKey: 'today.north',
@@ -226,7 +226,10 @@ test('10A-9. Norte usa una sola ruta fija y desaparece si el catálogo lo oculta
       navigationOrder: null,
     }),
   ]);
-  assert.equal(published.primary.filter((item) => item.href === '/norte').length, 1);
+  assert.equal(
+    published.primary.some((item) => item.href === '/norte'),
+    false,
+  );
 
   const hidden = buildAppNavigation(true, [
     entry({
