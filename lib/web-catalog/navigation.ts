@@ -189,10 +189,7 @@ export function buildAppNavigation(
     )
     .map(catalogEntryToNavItem);
 
-  const primaryWithCatalog: NavItemData[] = [
-    ...safeStaticPrimary,
-    ...catalogPrimary,
-  ];
+  const primaryWithCatalog: NavItemData[] = [...safeStaticPrimary, ...catalogPrimary];
 
   return {
     primary: dedupeNavItems(primaryWithCatalog),

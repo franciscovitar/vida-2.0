@@ -1,4 +1,5 @@
 import { RefreshCw } from 'lucide-react';
+
 import type { DayHeaderView } from '@/types';
 
 import styles from './DayHeader.module.scss';

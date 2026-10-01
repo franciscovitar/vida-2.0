@@ -43,14 +43,13 @@ test('B1-LOCAL-UI-4. proyectos conserva solo revisiones validadas', () => {
   assert.match(projects, /reviews\.length > 0/);
 });
 
-
-test('B1-LOCAL-UI-6. centro de revisión conserva criterios y revisiones manuales', () => {
+test('B1-LOCAL-UI-5. centro de revisión conserva criterios y revisiones manuales', () => {
   assert.match(reviews, /LOCAL_DRAFT_KEYS\.reviews/);
   assert.match(reviews, /proposalDecisions, reviews/);
   assert.match(reviews, /isReviewBackup/);
 });
 
-test('B1-LOCAL-UI-7. el aviso declara plazo, cifrado y ausencia de sincronización', () => {
+test('B1-LOCAL-UI-6. el aviso declara plazo, cifrado y ausencia de sincronización', () => {
   assert.match(status, /30 días/);
   assert.match(status, /No está cifrado/);
   assert.match(status, /no se sincroniza/);

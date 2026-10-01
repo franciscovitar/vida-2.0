@@ -46,7 +46,6 @@ test('B1-WEB-4. revisión de proyectos es local y exige próxima acción o bloqu
   assert.match(projects, /Próxima revisión/);
 });
 
-
 test('B1-WEB-6. centro de revisión no aprueba ni rechaza propuestas reales', () => {
   assert.equal(reviews.includes('runWriteAction'), false);
   assert.equal(reviews.includes('proposal.approve'), false);
@@ -84,10 +83,7 @@ test('B1-WEB-8. Planificación es la superficie explícita de tareas y el resto 
   assert.equal(projectPage.includes('AreasSection'), false);
   assert.equal(projectPage.includes('getNotionDashboard'), false);
 
-  assert.equal(
-    existsSync(path.join(root, 'app', '(app)', 'bandeja', 'page.tsx')),
-    false,
-  );
+  assert.equal(existsSync(path.join(root, 'app', '(app)', 'bandeja', 'page.tsx')), false);
 
   assert.match(reviewPage, /ReviewWorkspace/);
   assert.match(reviewPage, /ApprovalsPanel/);
