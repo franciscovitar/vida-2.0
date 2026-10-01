@@ -237,15 +237,15 @@ export function buildFinancePlanningReadModel(
       continue;
     }
 
-    const trusted =
-      reconciliation.currency === currency &&
-      TRUSTED_RECONCILIATION.has(reconciliation.status) &&
-      reconciliation.sourceBalanceMinor !== null &&
-      reconciliation.ledgerBalanceMinor !== null &&
-      reconciliation.differenceMinor === 0 &&
-      reconciliation.sourceBalanceMinor === reconciliation.ledgerBalanceMinor;
-
-    if (!trusted || reconciliation.asOfMs > asOfMs) {
+    if (
+      reconciliation.currency !== currency ||
+      !TRUSTED_RECONCILIATION.has(reconciliation.status) ||
+      reconciliation.sourceBalanceMinor === null ||
+      reconciliation.ledgerBalanceMinor === null ||
+      reconciliation.differenceMinor !== 0 ||
+      reconciliation.sourceBalanceMinor !== reconciliation.ledgerBalanceMinor ||
+      reconciliation.asOfMs > asOfMs
+    ) {
       excludedAccounts.push({
         accountId,
         displayName,
@@ -254,6 +254,8 @@ export function buildFinancePlanningReadModel(
       });
       continue;
     }
+
+    const sourceBalanceMinor = reconciliation.sourceBalanceMinor;
 
     const ageDays = (asOfMs - reconciliation.asOfMs) / DAY_MS;
     if (ageDays > policy.maxBalanceAgeDays) {
@@ -266,7 +268,7 @@ export function buildFinancePlanningReadModel(
       continue;
     }
 
-    if (reconciliation.sourceBalanceMinor < 0) {
+    if (sourceBalanceMinor < 0) {
       excludedAccounts.push({
         accountId,
         displayName,
@@ -280,7 +282,7 @@ export function buildFinancePlanningReadModel(
       accountId,
       displayName,
       currency,
-      balanceMinor: reconciliation.sourceBalanceMinor,
+      balanceMinor: sourceBalanceMinor,
       balanceAsOf: reconciliation.asOf,
       reconciliationStatus: reconciliation.status as 'reconciled' | 'partial',
     });
