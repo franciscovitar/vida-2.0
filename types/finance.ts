@@ -31,6 +31,7 @@ export type FinanceLiquidityClass = 'immediate' | 'near_term' | 'illiquid' | 'li
 export type FinanceEconomicRole =
   | 'income_work'
   | 'income_family_support'
+  | 'income_financial'
   | 'expense_personal'
   | 'expense_professional'
   | 'reimbursement'
