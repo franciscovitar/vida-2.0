@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { getFinancePlanningStoreSnapshot } from '@/lib/finance/planning-store';
 import { getFinanceCashFlowSnapshot } from '@/lib/finance/reporting/cash-flow';
 import type { FinanceCashFlowReport } from '@/lib/finance/reporting/cash-flow-core';
 import { getFinanceStoreReadinessSnapshot } from '@/lib/finance/store/readiness';
@@ -82,8 +83,13 @@ function currencySummary(report: FinanceCashFlowReport, currency: string) {
 export default async function FinanzasPage() {
   const store = await getFinanceStoreReadinessSnapshot();
   const connected = store.status === 'connected';
-  const cashFlow = connected ? await getFinanceCashFlowSnapshot() : null;
+  const financeReads = connected
+    ? await Promise.all([getFinanceCashFlowSnapshot(), getFinancePlanningStoreSnapshot()])
+    : null;
+  const cashFlow = financeReads?.[0] ?? null;
+  const planning = financeReads?.[1] ?? null;
   const report = cashFlow?.ok ? cashFlow.report : null;
+  const planningModel = planning?.ok ? planning.model : null;
   const sourceLabel = connected ? 'Store conectado · solo lectura' : store.label;
   const ars = report ? currencySummary(report, 'ARS') : undefined;
   const usd = report ? currencySummary(report, 'USD') : undefined;
@@ -160,6 +166,85 @@ export default async function FinanzasPage() {
               <small>Se mantiene separado: no se inventa un tipo de cambio universal.</small>
             </Card>
           </div>
+
+          {planningModel ? (
+            <Card aria-labelledby="finance-planning-title">
+              <SectionHeader
+                id="finance-planning-title"
+                title="Planificación y Safe-to-Spend"
+                description="Liquidez elegible con calidad y frescura explícitas. Sin una reserva definida, el sistema no inventa capacidad de gasto."
+                icon={CircleGauge}
+                domain="finance"
+              />
+              {planningModel.currencies.length > 0 ? (
+                <div className={local['role-list']}>
+                  {planningModel.currencies.map((item) => (
+                    <div key={item.currency} className={local['role-row']}>
+                      <div>
+                        <strong>
+                          {item.snapshot
+                            ? `Safe-to-Spend ${item.currency}`
+                            : `Liquidez elegible ${item.currency}`}
+                        </strong>
+                        <small>
+                          {item.snapshot
+                            ? `${item.commitmentCount} compromisos · ${item.liquidityQuality === 'partial' ? 'evidencia parcial' : 'evidencia verificada'}`
+                            : item.status === 'invalid'
+                              ? 'Datos de planificación inválidos: revisión requerida.'
+                              : item.missing.includes('reserve-policy')
+                                ? 'Liquidez trazable; falta una reserva explícita para habilitar Safe-to-Spend.'
+                                : 'Falta liquidez elegible antes de calcular Safe-to-Spend.'}
+                        </small>
+                      </div>
+                      <span
+                        data-tone={
+                          item.snapshot
+                            ? tone(item.snapshot.safeToSpend.rawSafeToSpendMinor)
+                            : 'neutral'
+                        }
+                      >
+                        {formatMinor(
+                          item.snapshot
+                            ? item.snapshot.safeToSpend.safeToSpendMinor
+                            : item.eligibleLiquidityMinor,
+                          item.currency,
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className={local['empty-copy']}>
+                  No hay cuentas personales inmediatas con una conciliación reciente y confiable.
+                </p>
+              )}
+              <ul className={local.principles}>
+                <li>
+                  Solo entran cuentas propias, personales e inmediatas cuyo saldo fuente coincide
+                  con el ledger.
+                </li>
+                <li>
+                  La evidencia de saldo vence a los {planningModel.maxBalanceAgeDays} días y las
+                  obligaciones próximas usan una ventana de {planningModel.obligationHorizonDays}{' '}
+                  días.
+                </li>
+                <li>
+                  Cuentas de alcance mixto o conciliaciones conflictivas/viejas quedan fuera de la
+                  liquidez elegible.
+                </li>
+                <li>
+                  Sin una reserva explícita —incluso si fuese cero— Safe-to-Spend permanece
+                  deshabilitado.
+                </li>
+              </ul>
+              {planningModel.excludedAccounts.length > 0 ? (
+                <small>
+                  {planningModel.excludedAccounts.length} cuenta(s) propia(s) quedaron fuera de la
+                  liquidez elegible por alcance o calidad de evidencia.
+                </small>
+              ) : null}
+            </Card>
+          ) : null}
 
           <Card aria-labelledby="finance-monthly-title">
             <SectionHeader
