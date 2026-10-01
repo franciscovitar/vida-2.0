@@ -21,6 +21,21 @@ export interface FinanceMonthlyTarget {
   updatedAt: string;
 }
 
+export interface FinanceLiquidityCushionSource {
+  key: string;
+  label: string;
+  amountMinor: number;
+}
+
+export interface FinanceLiquidityCushion {
+  snapshotId: string;
+  asOf: string;
+  totalMinor: number;
+  quality: string;
+  openingEstimateMinor: number | null;
+  sources: FinanceLiquidityCushionSource[];
+}
+
 export interface FinanceMonthlyDashboard {
   month: string;
   currency: string;
@@ -28,6 +43,7 @@ export interface FinanceMonthlyDashboard {
   expenseMinor: number;
   balanceMinor: number;
   activeCaptureCount: number;
+  liquidityCushion: FinanceLiquidityCushion | null;
   target: FinanceMonthlyTarget | null;
   remainingTargetMinor: number | null;
   targetUsedRatio: number | null;
@@ -82,9 +98,84 @@ function resolvePace(
   return 'calm';
 }
 
+interface FinanceLiquiditySnapshotGroup {
+  asOf: string;
+  asOfMs: number;
+  rows: SheetRows;
+}
+
+function buildLiquidityCushion(input: {
+  rows: SheetRows;
+  currency: string;
+  month: string;
+  balanceMinor: number;
+}): FinanceLiquidityCushion | null {
+  const groups = new Map<string, FinanceLiquiditySnapshotGroup>();
+
+  for (const row of dataRows(input.rows)) {
+    if (text(row[7]) !== 'active' || text(row[2]).toUpperCase() !== input.currency) continue;
+
+    const snapshotId = text(row[0]);
+    const asOf = text(row[1]);
+    const asOfMs = Date.parse(asOf);
+    if (!snapshotId || !Number.isFinite(asOfMs)) continue;
+
+    const existing = groups.get(snapshotId);
+    groups.set(snapshotId, {
+      asOf: existing && existing.asOfMs >= asOfMs ? existing.asOf : asOf,
+      asOfMs: Math.max(asOfMs, existing?.asOfMs ?? asOfMs),
+      rows: existing ? [...existing.rows, row] : [row],
+    });
+  }
+
+  let latest: { snapshotId: string; group: FinanceLiquiditySnapshotGroup } | null = null;
+
+  for (const [snapshotId, group] of groups) {
+    const isNewer =
+      !latest ||
+      group.asOfMs > latest.group.asOfMs ||
+      (group.asOfMs === latest.group.asOfMs && snapshotId > latest.snapshotId);
+    if (isNewer) latest = { snapshotId, group };
+  }
+
+  if (!latest) return null;
+
+  const sources = latest.group.rows
+    .map((row) => ({
+      key: text(row[3]),
+      label: text(row[4]) || text(row[3]) || 'Liquidez',
+      amountMinor: number(row[5]),
+      quality: text(row[6]) || 'unknown',
+    }))
+    .filter((item) => item.key && item.amountMinor >= 0)
+    .sort(
+      (left, right) =>
+        right.amountMinor - left.amountMinor || left.label.localeCompare(right.label),
+    );
+
+  const totalMinor = sources.reduce((total, item) => total + item.amountMinor, 0);
+  const qualities = [...new Set(sources.map((item) => item.quality))];
+
+  let openingEstimateMinor: number | null = null;
+  if (monthKey(latest.group.asOf) === input.month) {
+    const candidate = totalMinor - input.balanceMinor;
+    if (candidate >= 0) openingEstimateMinor = candidate;
+  }
+
+  return {
+    snapshotId: latest.snapshotId,
+    asOf: latest.group.asOf,
+    totalMinor,
+    quality: qualities.length === 1 ? qualities[0] : 'mixed',
+    openingEstimateMinor,
+    sources: sources.map(({ key, label, amountMinor }) => ({ key, label, amountMinor })),
+  };
+}
+
 export function buildFinanceMonthlyDashboard(input: {
   manualIntake: SheetRows;
   monthlyTargets: SheetRows;
+  liquiditySnapshots?: SheetRows;
   month: string;
   currency: string;
   asOf: string;
@@ -133,6 +224,14 @@ export function buildFinanceMonthlyDashboard(input: {
       }
     : null;
 
+  const balanceMinor = incomeMinor - expenseMinor;
+  const liquidityCushion = buildLiquidityCushion({
+    rows: input.liquiditySnapshots ?? [],
+    currency,
+    month: input.month,
+    balanceMinor,
+  });
+
   const targetUsedRatio =
     target && target.activeTargetMinor > 0 ? expenseMinor / target.activeTargetMinor : null;
   const elapsed = Math.min(1, Math.max(0, dayOfMonth(input.asOf) / daysInMonth(input.month)));
@@ -150,8 +249,9 @@ export function buildFinanceMonthlyDashboard(input: {
     currency,
     incomeMinor,
     expenseMinor,
-    balanceMinor: incomeMinor - expenseMinor,
+    balanceMinor,
     activeCaptureCount: captures.length,
+    liquidityCushion,
     target,
     remainingTargetMinor: target ? Math.max(0, target.activeTargetMinor - expenseMinor) : null,
     targetUsedRatio,

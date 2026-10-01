@@ -94,6 +94,87 @@
   font-size: 0.61rem;
 }
 
+.cushion {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.8rem;
+  border: 1px solid var(--c-finance-border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--c-finance) 7%, var(--surface-2));
+}
+
+.cushion-top {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+}
+
+.cushion-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--c-finance);
+  border: 1px solid var(--c-finance-border);
+  border-radius: var(--radius);
+  background: var(--c-finance-soft);
+}
+
+.cushion-summary {
+  display: grid;
+  gap: 0.16rem;
+}
+
+.cushion-summary > span,
+.cushion-source span,
+.cushion-opening span {
+  color: var(--text-subtle);
+  font-size: 0.64rem;
+}
+
+.cushion-summary > strong {
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.cushion-summary small {
+  color: var(--text-subtle);
+  font-size: 0.61rem;
+}
+
+.cushion-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.cushion-source {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+}
+
+.cushion-source strong,
+.cushion-opening strong {
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cushion-opening {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border);
+}
+
 .goal {
   display: grid;
   gap: 0.55rem;
