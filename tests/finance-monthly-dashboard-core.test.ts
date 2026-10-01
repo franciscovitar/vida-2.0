@@ -150,8 +150,7 @@ test('monthly dashboard never applies a pending suggestion as the active target'
   assert.equal(model.remainingTargetMinor, 35_000_000);
 });
 
-
-test('monthly dashboard keeps reported liquidity separate and estimates the month opening cushion', () => {
+test('monthly dashboard keeps reported liquidity separate and estimates opening cash', () => {
   const model = buildFinanceMonthlyDashboard({
     manualIntake: rows(FINANCE_SHEETS.manualIntake.headers, [
       [

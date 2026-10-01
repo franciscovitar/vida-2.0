@@ -98,6 +98,80 @@ function resolvePace(
   return 'calm';
 }
 
+interface FinanceLiquiditySnapshotGroup {
+  asOf: string;
+  asOfMs: number;
+  rows: SheetRows;
+}
+
+function buildLiquidityCushion(input: {
+  rows: SheetRows;
+  currency: string;
+  month: string;
+  balanceMinor: number;
+}): FinanceLiquidityCushion | null {
+  const groups = new Map<string, FinanceLiquiditySnapshotGroup>();
+
+  for (const row of dataRows(input.rows)) {
+    if (text(row[7]) !== 'active' || text(row[2]).toUpperCase() !== input.currency) continue;
+
+    const snapshotId = text(row[0]);
+    const asOf = text(row[1]);
+    const asOfMs = Date.parse(asOf);
+    if (!snapshotId || !Number.isFinite(asOfMs)) continue;
+
+    const existing = groups.get(snapshotId);
+    groups.set(snapshotId, {
+      asOf: existing && existing.asOfMs >= asOfMs ? existing.asOf : asOf,
+      asOfMs: Math.max(asOfMs, existing?.asOfMs ?? asOfMs),
+      rows: existing ? [...existing.rows, row] : [row],
+    });
+  }
+
+  let latest: { snapshotId: string; group: FinanceLiquiditySnapshotGroup } | null = null;
+
+  for (const [snapshotId, group] of groups) {
+    const isNewer =
+      !latest ||
+      group.asOfMs > latest.group.asOfMs ||
+      (group.asOfMs === latest.group.asOfMs && snapshotId > latest.snapshotId);
+    if (isNewer) latest = { snapshotId, group };
+  }
+
+  if (!latest) return null;
+
+  const sources = latest.group.rows
+    .map((row) => ({
+      key: text(row[3]),
+      label: text(row[4]) || text(row[3]) || 'Liquidez',
+      amountMinor: number(row[5]),
+      quality: text(row[6]) || 'unknown',
+    }))
+    .filter((item) => item.key && item.amountMinor >= 0)
+    .sort(
+      (left, right) =>
+        right.amountMinor - left.amountMinor || left.label.localeCompare(right.label),
+    );
+
+  const totalMinor = sources.reduce((total, item) => total + item.amountMinor, 0);
+  const qualities = [...new Set(sources.map((item) => item.quality))];
+
+  let openingEstimateMinor: number | null = null;
+  if (monthKey(latest.group.asOf) === input.month) {
+    const candidate = totalMinor - input.balanceMinor;
+    if (candidate >= 0) openingEstimateMinor = candidate;
+  }
+
+  return {
+    snapshotId: latest.snapshotId,
+    asOf: latest.group.asOf,
+    totalMinor,
+    quality: qualities.length === 1 ? qualities[0] : 'mixed',
+    openingEstimateMinor,
+    sources: sources.map(({ key, label, amountMinor }) => ({ key, label, amountMinor })),
+  };
+}
+
 export function buildFinanceMonthlyDashboard(input: {
   manualIntake: SheetRows;
   monthlyTargets: SheetRows;
@@ -151,67 +225,12 @@ export function buildFinanceMonthlyDashboard(input: {
     : null;
 
   const balanceMinor = incomeMinor - expenseMinor;
-  const liquidityRows = input.liquiditySnapshots ? dataRows(input.liquiditySnapshots) : [];
-  const liquidityGroups = new Map<
-    string,
-    { asOf: string; asOfMs: number; rows: readonly (readonly unknown[])[] }
-  >();
-
-  for (const row of liquidityRows) {
-    if (text(row[7]) !== 'active' || text(row[2]).toUpperCase() !== currency) continue;
-    const snapshotId = text(row[0]);
-    const asOf = text(row[1]);
-    const asOfMs = Date.parse(asOf);
-    if (!snapshotId || !Number.isFinite(asOfMs)) continue;
-
-    const existing = liquidityGroups.get(snapshotId);
-    if (existing) {
-      liquidityGroups.set(snapshotId, {
-        asOf: asOfMs > existing.asOfMs ? asOf : existing.asOf,
-        asOfMs: Math.max(asOfMs, existing.asOfMs),
-        rows: [...existing.rows, row],
-      });
-    } else {
-      liquidityGroups.set(snapshotId, { asOf, asOfMs, rows: [row] });
-    }
-  }
-
-  const latestLiquidityGroup =
-    [...liquidityGroups.entries()].sort(
-      (left, right) =>
-        right[1].asOfMs - left[1].asOfMs || right[0].localeCompare(left[0]),
-    )[0] ?? null;
-
-  const liquidityCushion: FinanceLiquidityCushion | null = latestLiquidityGroup
-    ? (() => {
-        const [snapshotId, group] = latestLiquidityGroup;
-        const sources = group.rows
-          .map((row) => ({
-            key: text(row[3]),
-            label: text(row[4]) || text(row[3]) || 'Liquidez',
-            amountMinor: number(row[5]),
-            quality: text(row[6]) || 'unknown',
-          }))
-          .filter((item) => item.key && item.amountMinor >= 0)
-          .sort(
-            (left, right) =>
-              right.amountMinor - left.amountMinor || left.label.localeCompare(right.label),
-          );
-        const totalMinor = sources.reduce((total, item) => total + item.amountMinor, 0);
-        const qualities = [...new Set(sources.map((item) => item.quality))];
-        const openingEstimate = totalMinor - balanceMinor;
-
-        return {
-          snapshotId,
-          asOf: group.asOf,
-          totalMinor,
-          quality: qualities.length === 1 ? qualities[0] : 'mixed',
-          openingEstimateMinor:
-            monthKey(group.asOf) === input.month && openingEstimate >= 0 ? openingEstimate : null,
-          sources: sources.map(({ key, label, amountMinor }) => ({ key, label, amountMinor })),
-        };
-      })()
-    : null;
+  const liquidityCushion = buildLiquidityCushion({
+    rows: input.liquiditySnapshots ?? [],
+    currency,
+    month: input.month,
+    balanceMinor,
+  });
 
   const targetUsedRatio =
     target && target.activeTargetMinor > 0 ? expenseMinor / target.activeTargetMinor : null;
