@@ -354,7 +354,10 @@ test('8D1-18. DTO sin IDs o URLs internas', () => {
 });
 
 test('8D1-19. Áreas conserva su módulo sin ocupar la navegación principal', () => {
-  assert.equal(primaryNav.some((item) => item.href === '/areas'), false);
+  assert.equal(
+    primaryNav.some((item) => item.href === '/areas'),
+    false,
+  );
 });
 
 test('8D1-20. ausencia de mocks productivos en DTO cuando no se permiten', () => {

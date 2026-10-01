@@ -21,4 +21,3 @@ export const syncState: SyncState = {
     { id: 'calendar', label: 'Google Calendar', ok: true },
   ],
 };
-

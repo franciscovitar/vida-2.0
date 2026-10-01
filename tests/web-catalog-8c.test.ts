@@ -218,8 +218,14 @@ test('8C-8. navegación dinámica válida', () => {
   const nav = buildAppNavigation(true, docs);
   assert.ok(nav.primary.some((item) => item.href === '/p/norte-actual'));
   assert.ok(nav.secondary.some((item) => item.href === '/p/experimentos'));
-  assert.equal(nav.primary.some((item) => item.href === '/buscar'), false);
-  assert.equal(nav.secondary.some((item) => item.href === '/bandeja'), false);
+  assert.equal(
+    nav.primary.some((item) => item.href === '/buscar'),
+    false,
+  );
+  assert.equal(
+    nav.secondary.some((item) => item.href === '/bandeja'),
+    false,
+  );
   assert.ok(nav.secondary.some((item) => item.href === '/aprobaciones'));
   for (const href of [
     '/norte',
@@ -230,7 +236,10 @@ test('8C-8. navegación dinámica válida', () => {
     '/analisis-ia',
     '/aprobaciones',
   ]) {
-    assert.equal(nav.primary.some((item) => item.href === href), false);
+    assert.equal(
+      nav.primary.some((item) => item.href === href),
+      false,
+    );
   }
 });
 

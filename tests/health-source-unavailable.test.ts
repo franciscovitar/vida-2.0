@@ -181,7 +181,6 @@ test('FC2. Un fallo de lectura real no deja ninguna observación de salud simula
       `el valor simulado ${mockValue} no puede aparecer en Salud`,
     );
   }
-
 });
 
 test('FC3. Ningún código de fallo real produce base personal ni trayectoria simulada', async () => {
