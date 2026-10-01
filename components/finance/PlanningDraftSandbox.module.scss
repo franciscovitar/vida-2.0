@@ -1,0 +1,135 @@
+.shell {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--c-finance-border);
+  border-radius: var(--radius);
+  background: var(--c-finance-soft);
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.heading > div {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.heading strong {
+  font-size: 0.82rem;
+}
+
+.heading small,
+.privacy {
+  color: var(--text-subtle);
+  font-size: 0.67rem;
+  line-height: 1.45;
+}
+
+.heading > span {
+  color: var(--c-finance);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.form > label:not(.confirm) {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.form input[type='number'] {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 0.75rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
+.form input:focus {
+  outline: none;
+  border-color: var(--c-finance);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.confirm {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 0.55rem;
+  align-items: start;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.confirm input {
+  margin-top: 0.15rem;
+}
+
+.actions {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.error {
+  color: var(--c-danger);
+  font-size: 0.72rem;
+}
+
+.output {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.metrics > div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.metrics span {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+}
+
+.metrics strong {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (width < 620px) {
+  .form,
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
