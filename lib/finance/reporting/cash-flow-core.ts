@@ -196,8 +196,7 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
 
   const monthlyRows = [...monthly.values()].sort(
     (left, right) =>
-      left.month.localeCompare(right.month) ||
-      left.currency.localeCompare(right.currency),
+      left.month.localeCompare(right.month) || left.currency.localeCompare(right.currency),
   );
 
   const currencies = new Map<string, FinanceCashFlowCurrencySummary>();
@@ -291,8 +290,7 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
     monthly: monthlyRows,
     roleTotals: [...roleTotals.values()].sort(
       (left, right) =>
-        left.currency.localeCompare(right.currency) ||
-        left.role.localeCompare(right.role),
+        left.currency.localeCompare(right.currency) || left.role.localeCompare(right.role),
     ),
     coverage,
     transactionCount: transactions.length,

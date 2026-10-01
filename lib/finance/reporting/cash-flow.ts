@@ -4,24 +4,19 @@ import {
   buildFinanceCashFlowReport,
   type FinanceCashFlowReport,
 } from '@/lib/finance/reporting/cash-flow-core';
-import {
-  readFinanceSheet,
-  type FinanceStoreFailureCode,
-} from '@/lib/finance/store/client';
+import { readFinanceSheet, type FinanceStoreFailureCode } from '@/lib/finance/store/client';
 
 export type FinanceCashFlowSnapshot =
-  | { ok: true; report: FinanceCashFlowReport }
-  | { ok: false; code: FinanceStoreFailureCode };
+  { ok: true; report: FinanceCashFlowReport } | { ok: false; code: FinanceStoreFailureCode };
 
 export async function getFinanceCashFlowSnapshot(): Promise<FinanceCashFlowSnapshot> {
-  const [accounts, importBatches, transactions, postings, reconciliations] =
-    await Promise.all([
-      readFinanceSheet('accounts'),
-      readFinanceSheet('importBatches'),
-      readFinanceSheet('transactions'),
-      readFinanceSheet('postings'),
-      readFinanceSheet('reconciliations'),
-    ]);
+  const [accounts, importBatches, transactions, postings, reconciliations] = await Promise.all([
+    readFinanceSheet('accounts'),
+    readFinanceSheet('importBatches'),
+    readFinanceSheet('transactions'),
+    readFinanceSheet('postings'),
+    readFinanceSheet('reconciliations'),
+  ]);
 
   const reads = [accounts, importBatches, transactions, postings, reconciliations] as const;
   const failed = reads.find((read) => !read.ok);
