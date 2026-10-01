@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 
+import { PlanningSubtractionTrace } from '@/components/finance/PlanningSubtractionTrace';
 import { PurchaseScenarioCalculator } from '@/components/finance/PurchaseScenarioCalculator';
 import { Button } from '@/components/ui/Button';
 import { buildFinancePlanningDraft } from '@/lib/finance/planning-draft-core';
@@ -253,6 +254,7 @@ export function PlanningDraftSandbox({
             </div>
           </div>
 
+          <PlanningSubtractionTrace snapshot={snapshot} />
           <PurchaseScenarioCalculator
             source={{ currency: snapshot.currency, safeToSpend: snapshot.safeToSpend }}
           />

@@ -58,6 +58,20 @@ test('planning core aggregates non-overlapping commitments into safe-to-spend', 
     committedGoalFundingMinor: 100_000,
     otherCommitmentsMinor: 50_000,
   });
+  assert.equal(snapshot.explanation.totalSubtractionsMinor, 500_000);
+  assert.deepEqual(
+    snapshot.explanation.subtractions.map((item) => ({
+      id: item.id,
+      label: item.label,
+      bucket: item.bucket,
+      amountMinor: item.amountMinor,
+    })),
+    commitments.map(({ id, label, bucket, amountMinor }) => ({ id, label, bucket, amountMinor })),
+  );
+  assert.equal(
+    snapshot.safeToSpend.eligibleLiquidityMinor - snapshot.explanation.totalSubtractionsMinor,
+    snapshot.safeToSpend.rawSafeToSpendMinor,
+  );
   assert.equal(snapshot.safeToSpend.safeToSpendMinor, 500_000);
   assert.equal(snapshot.safeToSpend.status, 'available');
   assert.equal(snapshot.resilience.reserveCoverageMonths, 0.5);
@@ -89,6 +103,33 @@ test('planning core rejects duplicate commitment ids and unresolved overlap grou
       }),
     /resolve overlap before calculation/,
   );
+});
+
+test('planning core requires an explanation label for every subtraction', () => {
+  assert.throws(
+    () =>
+      buildFinancePlanningSnapshot({
+        asOf: '2026-10-01',
+        currency: 'ARS',
+        eligibleLiquidityMinor: 1_000_000,
+        commitments: [{ ...commitments[0], label: '   ' }],
+      }),
+    /commitment.label must not be empty/,
+  );
+});
+
+test('planning core preserves an explicit zero reserve in the explanation trace', () => {
+  const snapshot = buildFinancePlanningSnapshot({
+    asOf: '2026-10-01',
+    currency: 'ARS',
+    eligibleLiquidityMinor: 1_000_000,
+    commitments: [{ ...commitments[0], amountMinor: 0, label: 'Intentional zero reserve' }],
+  });
+
+  assert.equal(snapshot.explanation.subtractions.length, 1);
+  assert.equal(snapshot.explanation.subtractions[0]?.amountMinor, 0);
+  assert.equal(snapshot.explanation.totalSubtractionsMinor, 0);
+  assert.equal(snapshot.safeToSpend.safeToSpendMinor, 1_000_000);
 });
 
 test('planning core refuses cross-currency commitments', () => {
