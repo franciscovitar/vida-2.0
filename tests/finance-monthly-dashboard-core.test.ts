@@ -150,11 +150,11 @@ test('monthly dashboard never applies a pending suggestion as the active target'
   assert.equal(model.remainingTargetMinor, 35_000_000);
 });
 
-test('monthly dashboard keeps reported liquidity separate and estimates opening cash', () => {
+test('monthly dashboard applies post-baseline movements to the correct liquidity source', () => {
   const model = buildFinanceMonthlyDashboard({
     manualIntake: rows(FINANCE_SHEETS.manualIntake.headers, [
       [
-        'income',
+        'income-before-base',
         '2026-10-01T10:00:00-03:00',
         '2026-10-01T10:00:00-03:00',
         '+100 web',
@@ -168,6 +168,124 @@ test('monthly dashboard keeps reported liquidity separate and estimates opening 
         '',
         'chatgpt_finance_logger',
         '',
+        'naranja-x:ars',
+      ],
+      [
+        'expense-default-nx',
+        '2026-10-01T16:40:00-03:00',
+        '2026-10-01T16:40:00-03:00',
+        'gaste 26.522',
+        'expense',
+        2_652_200,
+        'ARS',
+        'compras',
+        'expense_personal',
+        '',
+        'active',
+        '',
+        'chatgpt_finance_logger',
+        '',
+        '',
+      ],
+      [
+        'cash-expense',
+        '2026-10-01T17:00:00-03:00',
+        '2026-10-01T17:00:00-03:00',
+        'gaste 5 en efectivo',
+        'expense',
+        500_000,
+        'ARS',
+        'compras',
+        'expense_personal',
+        '',
+        'active',
+        '',
+        'chatgpt_finance_logger',
+        '',
+        'cash:ars',
+      ],
+      [
+        'cash-income',
+        '2026-10-01T18:00:00-03:00',
+        '2026-10-01T18:00:00-03:00',
+        'me entraron 10 en efectivo',
+        'income',
+        1_000_000,
+        'ARS',
+        'otros ingresos',
+        '',
+        '',
+        'active',
+        '',
+        'chatgpt_finance_logger',
+        '',
+        'cash:ars',
+      ],
+    ]),
+    monthlyTargets: rows(FINANCE_SHEETS.monthlyTargets.headers, []),
+    liquiditySnapshots: rows(FINANCE_SHEETS.liquiditySnapshots.headers, [
+      [
+        'liq-oct',
+        '2026-10-01',
+        'ARS',
+        'naranja-x:ars',
+        'Naranja X',
+        25_000_000,
+        'user_reported',
+        'active',
+        'chatgpt_finance_logger',
+        'Includes the earlier web income.',
+        '2026-10-01T15:16:00-03:00',
+      ],
+      [
+        'liq-oct',
+        '2026-10-01',
+        'ARS',
+        'cash:ars',
+        'Efectivo',
+        16_000_000,
+        'user_reported',
+        'active',
+        'chatgpt_finance_logger',
+        '',
+        '2026-10-01T15:16:00-03:00',
+      ],
+    ]),
+    month: '2026-10',
+    currency: 'ARS',
+    asOf: '2026-10-01',
+  });
+
+  assert.equal(model.incomeMinor, 11_000_000);
+  assert.equal(model.expenseMinor, 3_152_200);
+  assert.equal(model.liquidityCushion?.baseTotalMinor, 41_000_000);
+  assert.equal(model.liquidityCushion?.movementDeltaMinor, -2_152_200);
+  assert.equal(model.liquidityCushion?.totalMinor, 38_847_800);
+  assert.equal(model.liquidityCushion?.sources[0].label, 'Naranja X');
+  assert.equal(model.liquidityCushion?.sources[0].amountMinor, 22_347_800);
+  assert.equal(model.liquidityCushion?.sources[1].label, 'Efectivo');
+  assert.equal(model.liquidityCushion?.sources[1].amountMinor, 16_500_000);
+});
+
+test('liquidity cushion does not replay captures already included in the baseline', () => {
+  const model = buildFinanceMonthlyDashboard({
+    manualIntake: rows(FINANCE_SHEETS.manualIntake.headers, [
+      [
+        'income-included',
+        '2026-10-01T15:16:00-03:00',
+        '2026-10-01T15:16:00-03:00',
+        '+100 web',
+        'income',
+        10_000_000,
+        'ARS',
+        'ingreso web/freelance',
+        'income_work',
+        '',
+        'active',
+        '',
+        'chatgpt_finance_logger',
+        '',
+        'naranja-x:ars',
       ],
     ]),
     monthlyTargets: rows(FINANCE_SHEETS.monthlyTargets.headers, []),
@@ -183,6 +301,7 @@ test('monthly dashboard keeps reported liquidity separate and estimates opening 
         'active',
         'chatgpt_finance_logger',
         '',
+        '2026-10-01T15:16:00-03:00',
       ],
       [
         'liq-oct',
@@ -195,18 +314,7 @@ test('monthly dashboard keeps reported liquidity separate and estimates opening 
         'active',
         'chatgpt_finance_logger',
         '',
-      ],
-      [
-        'liq-sep',
-        '2026-09-30',
-        'ARS',
-        'cash:ars',
-        'Efectivo',
-        99_000_000,
-        'user_reported',
-        'active',
-        'chatgpt_finance_logger',
-        '',
+        '2026-10-01T15:16:00-03:00',
       ],
     ]),
     month: '2026-10',
@@ -214,12 +322,7 @@ test('monthly dashboard keeps reported liquidity separate and estimates opening 
     asOf: '2026-10-01',
   });
 
-  assert.equal(model.incomeMinor, 10_000_000);
-  assert.equal(model.expenseMinor, 0);
-  assert.equal(model.balanceMinor, 10_000_000);
+  assert.equal(model.liquidityCushion?.baseTotalMinor, 41_000_000);
+  assert.equal(model.liquidityCushion?.movementDeltaMinor, 0);
   assert.equal(model.liquidityCushion?.totalMinor, 41_000_000);
-  assert.equal(model.liquidityCushion?.openingEstimateMinor, 31_000_000);
-  assert.equal(model.liquidityCushion?.quality, 'user_reported');
-  assert.equal(model.liquidityCushion?.sources[0].label, 'Naranja X');
-  assert.equal(model.liquidityCushion?.sources[1].label, 'Efectivo');
 });

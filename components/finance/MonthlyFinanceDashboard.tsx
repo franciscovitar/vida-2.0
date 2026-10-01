@@ -122,11 +122,12 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
               <WalletCards size={18} />
             </span>
             <div className={styles['cushion-summary']}>
-              <span>Colchón líquido informado</span>
+              <span>Colchón líquido actual</span>
               <strong>{formatMinor(model.liquidityCushion.totalMinor, model.currency)}</strong>
               <small>
-                Foto al {snapshotDateLabel(model.liquidityCushion.asOf)} · no se suma al balance
-                mensual
+                Base informada el {snapshotDateLabel(model.liquidityCushion.asOf)}:{' '}
+                {formatMinor(model.liquidityCushion.baseTotalMinor, model.currency)} · se actualiza con
+                los movimientos posteriores
               </small>
             </div>
           </div>
@@ -140,14 +141,12 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
             ))}
           </div>
 
-          {model.liquidityCushion.openingEstimateMinor !== null ? (
-            <div className={styles['cushion-opening']}>
-              <span>Inicio de mes estimado según lo registrado</span>
-              <strong>
-                {formatMinor(model.liquidityCushion.openingEstimateMinor, model.currency)}
-              </strong>
-            </div>
-          ) : null}
+          <div className={styles['cushion-opening']}>
+            <span>Movimientos posteriores a la base</span>
+            <strong>
+              {formatMinor(model.liquidityCushion.movementDeltaMinor, model.currency)}
+            </strong>
+          </div>
         </div>
       ) : null}
 

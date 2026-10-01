@@ -220,6 +220,7 @@ export const FINANCE_SHEETS = {
       'supersedes_capture_id',
       'source',
       'reconciled_transaction_id',
+      'liquidity_source',
     ],
   },
   liquiditySnapshots: {
@@ -235,6 +236,7 @@ export const FINANCE_SHEETS = {
       'status',
       'source',
       'notes',
+      'included_through_occurred_at',
     ],
   },
   monthlyTargets: {

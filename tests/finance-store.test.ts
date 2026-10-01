@@ -68,10 +68,15 @@ test('finance schema exposes the accepted V1 operational tabs', () => {
   assert.equal(FINANCE_SHEETS.snapshots.headers.includes('safe_to_spend_minor'), true);
   assert.equal(FINANCE_SHEETS.manualIntake.title, 'Manual Intake');
   assert.equal(FINANCE_SHEETS.manualIntake.headers.includes('supersedes_capture_id'), true);
+  assert.equal(FINANCE_SHEETS.manualIntake.headers.includes('liquidity_source'), true);
   assert.equal(FINANCE_SHEETS.monthlyTargets.title, 'Monthly Targets');
   assert.equal(FINANCE_SHEETS.monthlyTargets.headers.includes('suggested_target_minor'), true);
   assert.equal(FINANCE_SHEETS.liquiditySnapshots.title, 'Liquidity Snapshots');
   assert.equal(FINANCE_SHEETS.liquiditySnapshots.headers.includes('amount_minor'), true);
+  assert.equal(
+    FINANCE_SHEETS.liquiditySnapshots.headers.includes('included_through_occurred_at'),
+    true,
+  );
 });
 
 test('finance schema validates headers and exact row widths', () => {
