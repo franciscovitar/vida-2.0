@@ -196,7 +196,8 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
 
   const monthlyRows = [...monthly.values()].sort(
     (left, right) =>
-      left.month.localeCompare(right.month) || left.currency.localeCompare(right.currency),
+      left.month.localeCompare(right.month) ||
+      left.currency.localeCompare(right.currency),
   );
 
   const currencies = new Map<string, FinanceCashFlowCurrencySummary>();

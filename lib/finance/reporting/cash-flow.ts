@@ -14,13 +14,14 @@ export type FinanceCashFlowSnapshot =
   | { ok: false; code: FinanceStoreFailureCode };
 
 export async function getFinanceCashFlowSnapshot(): Promise<FinanceCashFlowSnapshot> {
-  const [accounts, importBatches, transactions, postings, reconciliations] = await Promise.all([
-    readFinanceSheet('accounts'),
-    readFinanceSheet('importBatches'),
-    readFinanceSheet('transactions'),
-    readFinanceSheet('postings'),
-    readFinanceSheet('reconciliations'),
-  ]);
+  const [accounts, importBatches, transactions, postings, reconciliations] =
+    await Promise.all([
+      readFinanceSheet('accounts'),
+      readFinanceSheet('importBatches'),
+      readFinanceSheet('transactions'),
+      readFinanceSheet('postings'),
+      readFinanceSheet('reconciliations'),
+    ]);
 
   const reads = [accounts, importBatches, transactions, postings, reconciliations] as const;
   const failed = reads.find((read) => !read.ok);
