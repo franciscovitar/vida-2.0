@@ -1,12 +1,14 @@
 import { CircleGauge, Landmark, ListChecks, ShieldCheck, WalletCards } from 'lucide-react';
 import type { Metadata } from 'next';
 
+import { IrregularIncomePlanner } from '@/components/finance/IrregularIncomePlanner';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PlanningDraftSandbox } from '@/components/finance/PlanningDraftSandbox';
 import { PlanningSubtractionTrace } from '@/components/finance/PlanningSubtractionTrace';
 import { PurchaseScenarioCalculator } from '@/components/finance/PurchaseScenarioCalculator';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { buildFinanceIrregularIncomeProfile } from '@/lib/finance/irregular-income-core';
 import { getFinancePlanningStoreSnapshot } from '@/lib/finance/planning-store';
 import { buildFinanceResilienceIndicators } from '@/lib/finance/resilience-core';
 import { getFinanceCashFlowSnapshot } from '@/lib/finance/reporting/cash-flow';
@@ -119,6 +121,7 @@ export default async function FinanzasPage() {
   const arsMonths = report?.monthly.filter((row) => row.currency === 'ARS') ?? [];
   const usdMonths = report?.monthly.filter((row) => row.currency === 'USD') ?? [];
   const arsPlanning = planningModel?.currencies.find((item) => item.currency === 'ARS') ?? null;
+  const arsIrregularIncome = report ? buildFinanceIrregularIncomeProfile(report, 'ARS') : null;
   const arsResilience = report
     ? buildFinanceResilienceIndicators(report, 'ARS', arsPlanning?.snapshot ?? null)
     : null;
@@ -193,6 +196,22 @@ export default async function FinanzasPage() {
               <small>Se mantiene separado: no se inventa un tipo de cambio universal.</small>
             </Card>
           </div>
+
+          {arsIrregularIncome && arsIrregularIncome.completeMonthCount > 0 ? (
+            <Card aria-labelledby="finance-irregular-income-title">
+              <SectionHeader
+                id="finance-irregular-income-title"
+                title="Ingresos variables · modo supervivencia"
+                description="Separá tu gasto normal observado de un mes austero y medí cuánto ingreso irregular necesitás cubrir."
+                icon={CircleGauge}
+                domain="finance"
+              />
+              <IrregularIncomePlanner
+                profile={arsIrregularIncome}
+                eligibleLiquidityMinor={arsPlanning?.eligibleLiquidityMinor ?? 0}
+              />
+            </Card>
+          ) : null}
 
           {planningModel ? (
             <Card aria-labelledby="finance-planning-title">

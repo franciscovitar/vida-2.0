@@ -41,6 +41,7 @@ function report(overrides: Partial<FinanceCashFlowReport> = {}): FinanceCashFlow
       { role: 'income_work', currency: 'ARS', count: 3, totalMinor: 450_000 },
       { role: 'income_family_support', currency: 'ARS', count: 1, totalMinor: 150_000 },
     ],
+    monthlyRoleTotals: [],
     coverage: [],
     transactionCount: 6,
     resolvedTransactions: 6,

@@ -1,0 +1,110 @@
+.shell {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.summary,
+.output {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.summary > div,
+.output > div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.summary span,
+.output span {
+  color: var(--text-subtle);
+  font-size: 0.67rem;
+}
+
+.summary strong,
+.output strong {
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.context {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: end;
+}
+
+.form label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.form label small {
+  color: var(--text-subtle);
+  font-size: 0.62rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.form input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 0.7rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  font: inherit;
+}
+
+.form input:focus {
+  outline: none;
+  border-color: var(--c-finance);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.error {
+  margin: 0;
+  color: var(--c-danger);
+  font-size: 0.72rem;
+}
+
+.footnote {
+  color: var(--text-subtle);
+  font-size: 0.65rem;
+  line-height: 1.45;
+}
+
+@media (width < 900px) {
+  .summary,
+  .output {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width < 560px) {
+  .summary,
+  .output {
+    grid-template-columns: 1fr;
+  }
+}
