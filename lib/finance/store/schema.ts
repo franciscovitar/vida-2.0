@@ -203,6 +203,40 @@ export const FINANCE_SHEETS = {
       'notes',
     ],
   },
+  manualIntake: {
+    title: 'Manual Intake',
+    headers: [
+      'capture_id',
+      'occurred_at',
+      'captured_at',
+      'raw_text',
+      'direction',
+      'amount_minor',
+      'currency',
+      'category',
+      'economic_role',
+      'note',
+      'status',
+      'supersedes_capture_id',
+      'source',
+      'reconciled_transaction_id',
+    ],
+  },
+  monthlyTargets: {
+    title: 'Monthly Targets',
+    headers: [
+      'month',
+      'currency',
+      'base_target_minor',
+      'active_target_minor',
+      'suggested_target_minor',
+      'suggestion_status',
+      'suggestion_reason',
+      'suggestion_source',
+      'suggested_at',
+      'updated_at',
+    ],
+  },
 } as const;
 
 export type FinanceSheetKey = keyof typeof FINANCE_SHEETS;
