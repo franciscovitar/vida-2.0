@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 
@@ -13,8 +13,6 @@ const tasks = source('components', 'tasks', 'TaskPlanningWorkspace.tsx');
 const taskStyles = source('components', 'tasks', 'TaskPlanningWorkspace.module.scss');
 const projects = source('components', 'projects', 'ProjectReviewWorkspace.tsx');
 const projectStyles = source('components', 'projects', 'ProjectReviewWorkspace.module.scss');
-const inbox = source('components', 'inbox', 'InboxPlanningWorkspace.tsx');
-const inboxStyles = source('components', 'inbox', 'InboxPlanningWorkspace.module.scss');
 const reviews = source('components', 'reviews', 'ReviewWorkspace.tsx');
 const reviewStyles = source('components', 'reviews', 'ReviewWorkspace.module.scss');
 
@@ -48,12 +46,6 @@ test('B1-WEB-4. revisión de proyectos es local y exige próxima acción o bloqu
   assert.match(projects, /Próxima revisión/);
 });
 
-test('B1-WEB-5. bandeja valida HTTPS y mantiene cola temporal', () => {
-  assert.equal(inbox.includes('runWriteAction'), false);
-  assert.match(inbox, /new URL\(value\)\.protocol === 'https:'/);
-  assert.match(inbox, /Captura agregada a la cola local/);
-  assert.match(inbox, /reviewed: !item\.reviewed/);
-});
 
 test('B1-WEB-6. centro de revisión no aprueba ni rechaza propuestas reales', () => {
   assert.equal(reviews.includes('runWriteAction'), false);
@@ -75,7 +67,6 @@ test('B1-WEB-8. Planificación es la superficie explícita de tareas y el resto 
   const planningPage = source('app', '(app)', 'planificacion', 'page.tsx');
   const taskManager = source('components', 'planning', 'TaskManager.tsx');
   const projectPage = source('app', '(app)', 'proyectos', 'page.tsx');
-  const inboxPage = source('app', '(app)', 'bandeja', 'page.tsx');
   const reviewPage = source('app', '(app)', 'aprobaciones', 'page.tsx');
   const gymPage = source('app', '(app)', 'gimnasio', 'page.tsx');
 
@@ -93,10 +84,10 @@ test('B1-WEB-8. Planificación es la superficie explícita de tareas y el resto 
   assert.equal(projectPage.includes('AreasSection'), false);
   assert.equal(projectPage.includes('getNotionDashboard'), false);
 
-  assert.match(inboxPage, /Captura conversacional/);
-  assert.equal(inboxPage.includes('InboxPlanningWorkspace'), false);
-  assert.equal(inboxPage.includes('InboxCapturePanel'), false);
-  assert.equal(inboxPage.includes('QuickInbox'), false);
+  assert.equal(
+    existsSync(path.join(root, 'app', '(app)', 'bandeja', 'page.tsx')),
+    false,
+  );
 
   assert.match(reviewPage, /ReviewWorkspace/);
   assert.match(reviewPage, /ApprovalsPanel/);
@@ -107,14 +98,14 @@ test('B1-WEB-8. Planificación es la superficie explícita de tareas y el resto 
 });
 
 test('B1-WEB-9. controles móviles respetan targets táctiles de 44 px', () => {
-  for (const styles of [taskStyles, projectStyles, inboxStyles, reviewStyles]) {
+  for (const styles of [taskStyles, projectStyles, reviewStyles]) {
     assert.match(styles, /min-height: 44px/);
     assert.equal(styles.includes('overflow-x: scroll'), false);
   }
 });
 
 test('B1-WEB-10. todos los workspaces declaran el límite de no persistencia', () => {
-  for (const component of [tasks, projects, inbox, reviews]) {
+  for (const component of [tasks, projects, reviews]) {
     assert.match(component, /No se escribió ningún dato externo/);
   }
 });

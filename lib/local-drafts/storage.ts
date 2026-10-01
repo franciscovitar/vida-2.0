@@ -6,7 +6,6 @@ export const LOCAL_DRAFT_KEYS = {
   gym: 'gym-session',
   tasks: 'tasks-planning',
   projects: 'projects-review',
-  inbox: 'inbox-planning',
   reviews: 'review-workspace',
 } as const;
 

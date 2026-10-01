@@ -182,11 +182,9 @@ test('FC2. Un fallo de lectura real no deja ninguna observación de salud simula
     );
   }
 
-  // Las tendencias tampoco cuentan días de salud inventados.
-  assert.equal(bundle.trends.coverage.healthDays, 0);
 });
 
-test('FC3. Ningún código de fallo real produce base personal ni tendencias simuladas', async () => {
+test('FC3. Ningún código de fallo real produce base personal ni trayectoria simulada', async () => {
   for (const code of REAL_SOURCE_FAILURES) {
     const health = (await failedBundle(code)).health;
     assert.equal(health.sourceAvailable, false, code);

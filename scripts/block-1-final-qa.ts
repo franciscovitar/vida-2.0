@@ -36,12 +36,6 @@ const WORKSPACES: readonly WorkspaceDefinition[] = [
     storageKey: 'LOCAL_DRAFT_KEYS.projects',
   },
   {
-    id: 'inbox',
-    component: 'components/inbox/InboxPlanningWorkspace.tsx',
-    styles: 'components/inbox/InboxPlanningWorkspace.module.scss',
-    storageKey: 'LOCAL_DRAFT_KEYS.inbox',
-  },
-  {
     id: 'reviews',
     component: 'components/reviews/ReviewWorkspace.tsx',
     styles: 'components/reviews/ReviewWorkspace.module.scss',
@@ -69,11 +63,6 @@ const ROUTE_CONTRACTS = [
     route: 'app/(app)/proyectos/page.tsx',
     includes: ['ProjectsIntelligenceDashboard'],
     excludes: ['ProjectReviewWorkspace', 'ProjectsBoard', 'AreasSection', 'getNotionDashboard'],
-  },
-  {
-    route: 'app/(app)/bandeja/page.tsx',
-    includes: ['Captura conversacional'],
-    excludes: ['InboxPlanningWorkspace', 'InboxCapturePanel', 'QuickInbox'],
   },
   {
     route: 'app/(app)/aprobaciones/page.tsx',
@@ -121,7 +110,7 @@ export function runBlock1FinalQa(root = process.cwd()): Block1QaCheck[] {
         everySource(componentSources, () => true) &&
         everySource(styleSources, () => true) &&
         Boolean(storage && hook && status),
-      detail: 'Los cinco workspaces y la infraestructura local pueden leerse.',
+      detail: 'Los cuatro workspaces y la infraestructura local pueden leerse.',
     },
     {
       id: 'no-write-actions',

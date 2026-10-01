@@ -353,8 +353,8 @@ test('8D1-18. DTO sin IDs o URLs internas', () => {
   assert.equal(json.includes('https://'), false);
 });
 
-test('8D1-19. navegación con entrada Áreas', () => {
-  assert.ok(primaryNav.some((item) => item.href === '/areas' && item.label === 'Áreas'));
+test('8D1-19. Áreas conserva su módulo sin ocupar la navegación principal', () => {
+  assert.equal(primaryNav.some((item) => item.href === '/areas'), false);
 });
 
 test('8D1-20. ausencia de mocks productivos en DTO cuando no se permiten', () => {

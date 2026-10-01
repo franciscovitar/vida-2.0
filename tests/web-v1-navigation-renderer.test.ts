@@ -114,7 +114,7 @@ test('9B-3. Journaling queda fuera de la navegación general con catálogo activ
   );
 });
 
-test('9B-4. guía documental no duplica un módulo funcional existente', () => {
+test('9B-4. guía documental no reintroduce un módulo funcional oculto', () => {
   const nav = buildAppNavigation(true, [
     catalogEntry({
       stableKey: 'productividad.guia',
@@ -128,7 +128,7 @@ test('9B-4. guía documental no duplica un módulo funcional existente', () => {
     all.some((item) => item.href === '/p/productividad-guia'),
     false,
   );
-  assert.equal(all.filter((item) => item.href === '/productividad').length, 1);
+  assert.equal(all.filter((item) => item.href === '/productividad').length, 0);
 });
 
 test('9C-1. listas consecutivas se agrupan sin reiniciar numeración', () => {

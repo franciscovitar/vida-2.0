@@ -1,12 +1,10 @@
 /**
- * Carga agregada de páginas de dominio (Hábitos / Salud / Productividad)
- * y análisis Fase 3B (Tendencias / Análisis IA).
+ * Carga agregada de páginas de dominio (Hábitos / Salud / Productividad).
  * Una sola lectura de ambas pestañas por request (React cache).
  */
 import { cache } from 'react';
 import 'server-only';
 
-import { buildAnalysisReport } from '@/lib/adapters/analysis-report';
 import { todayInBuenosAires } from '@/lib/adapters/dates';
 import { buildHabitsPageData } from '@/lib/adapters/habits-period';
 import { buildMockToday } from '@/lib/adapters/mock';
@@ -21,14 +19,12 @@ import {
 import { buildHealthPageData, HEALTH_SOURCE_UNAVAILABLE_NOTICE } from '@/lib/adapters/salud-period';
 import { parseSalud, saludHasData, type SaludRecord } from '@/lib/adapters/salud';
 import { buildSheetToday } from '@/lib/adapters/sheet';
-import { buildTrendsPageData } from '@/lib/adapters/trends';
 import { getDataSource, getGoogleConfig } from '@/lib/data/config';
 import { toPlainTodayData } from '@/lib/data/plain';
 import { REGISTRO_DIARIO_TAB, SALUD_TAB } from '@/lib/google/constants';
 import { isMissingHeaderCode, type ReadTabResult, type SheetReadCode } from '@/lib/google/errors';
 import { periodWindow, type PeriodDays } from '@/lib/periods';
 import type { HabitsPageData, HealthPageData, ProductivityPageData } from '@/types/domain-pages';
-import type { AnalysisReport, TrendsPageData } from '@/types/trends';
 import type { TodayData, TodayStatus } from '@/types';
 
 import { buildMockDomainRecords } from '@/lib/mock-data/domain-history';
@@ -48,8 +44,6 @@ export interface DomainPagesBundle {
   habits: HabitsPageData;
   health: HealthPageData;
   productivity: ProductivityPageData;
-  trends: TrendsPageData;
-  analysis: AnalysisReport;
 }
 
 function composeFromRecords(
@@ -123,24 +117,11 @@ function composeFromRecords(
     status: meta.status,
     notice: meta.notice,
   });
-  const trends = buildTrendsPageData({
-    registro,
-    salud,
-    today,
-    window,
-    source: meta.source,
-    status: meta.status,
-    notice: meta.notice,
-  });
-  const analysis = buildAnalysisReport({ trends, habits, health, productivity });
-
   return {
     today: toPlainTodayData(todayData),
     habits,
     health,
     productivity,
-    trends,
-    analysis,
   };
 }
 

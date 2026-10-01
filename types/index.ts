@@ -156,19 +156,6 @@ export interface WeeklyGoal {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Bandeja de entrada / captura rápida                                       */
-/* -------------------------------------------------------------------------- */
-
-export interface InboxItem {
-  id: string;
-  text: string;
-  /** Fecha ISO de captura. */
-  createdAt: string;
-  /** Marca si todavía no se envió a Notion (siempre true en esta fase). */
-  pendingSync: boolean;
-}
-
-/* -------------------------------------------------------------------------- */
 /* Vista "Hoy"                                                               */
 /* -------------------------------------------------------------------------- */
 

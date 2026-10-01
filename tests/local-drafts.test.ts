@@ -98,13 +98,13 @@ test('B1-LOCAL-7. el límite evita restaurar blobs excesivos', () => {
 
 test('B1-LOCAL-8. escribir, leer y eliminar usa una única clave local', () => {
   const storage = new MemoryStorage();
-  const write = writeLocalDraft(storage, LOCAL_DRAFT_KEYS.inbox, { text: 'captura' });
+  const write = writeLocalDraft(storage, LOCAL_DRAFT_KEYS.tasks, { text: 'captura' });
   assert.equal(write.ok, true);
   assert.equal(storage.values.size, 1);
 
-  const read = readLocalDraft(storage, LOCAL_DRAFT_KEYS.inbox, validPayload);
+  const read = readLocalDraft(storage, LOCAL_DRAFT_KEYS.tasks, validPayload);
   assert.equal(read.ok, true);
-  assert.equal(removeLocalDraft(storage, LOCAL_DRAFT_KEYS.inbox), true);
+  assert.equal(removeLocalDraft(storage, LOCAL_DRAFT_KEYS.tasks), true);
   assert.equal(storage.values.size, 0);
 });
 

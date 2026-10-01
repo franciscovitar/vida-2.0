@@ -226,7 +226,6 @@ test('HC12. Calendar se obtiene una sola vez por carga (React cache + server-onl
 
 test('HC12b. ningún use client importa módulos Calendar sensibles', () => {
   const clients = [
-    'components/dashboard/QuickInbox.tsx',
     'components/habits/HabitsBoard.tsx',
     'components/notion/TasksBoard.tsx',
     'components/notion/ProjectsBoard.tsx',
