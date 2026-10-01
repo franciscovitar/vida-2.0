@@ -105,13 +105,9 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
 /** Navegación principal de la aplicación (módulos funcionales + documentales fijos). */
 export const primaryNav: NavItemData[] = [
   { label: 'Hoy', href: '/', icon: 'hoy', domain: 'neutral' },
-  { label: 'Norte', href: '/norte', icon: 'norte', domain: 'projects' },
   { label: 'Hábitos', href: '/habitos', icon: 'habitos', domain: 'habits' },
   { label: 'Salud', href: '/salud', icon: 'salud', domain: 'health' },
   { label: 'Finanzas', href: '/finanzas', icon: 'finanzas', domain: 'finance' },
-  { label: 'Productividad', href: '/productividad', icon: 'productividad', domain: 'productivity' },
-  { label: 'Tendencias', href: '/tendencias', icon: 'tendencias', domain: 'productivity' },
-  { label: 'Agenda', href: '/agenda', icon: 'agenda', domain: 'productivity' },
   {
     label: 'Planificación',
     href: '/planificacion',
@@ -121,19 +117,16 @@ export const primaryNav: NavItemData[] = [
   { label: 'Proyectos', href: '/proyectos', icon: 'proyectos', domain: 'projects' },
   { label: 'Inteligencia', href: '/inteligencia', icon: 'inteligencia', domain: 'productivity' },
   { label: 'Profesional', href: '/professional', icon: 'professional', domain: 'projects' },
-  { label: 'Áreas', href: '/areas', icon: 'areas', domain: 'projects' },
   { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },
   { label: 'Dieta', href: '/dieta', icon: 'dieta', domain: 'health' },
   { label: 'Media', href: '/media', icon: 'media', domain: 'neutral' },
-  { label: 'Aprobaciones', href: '/aprobaciones', icon: 'aprobaciones', domain: 'neutral' },
   { label: 'Aprendizaje', href: '/aprendizaje', icon: 'aprendizaje', domain: 'learning' },
   { label: 'Compras', href: '/compras', icon: 'compras', domain: 'neutral' },
-  { label: 'Análisis IA', href: '/analisis-ia', icon: 'analisis', domain: 'productivity' },
 ];
 
 /** Navegación secundaria, más discreta. */
 export const secondaryNav: NavItemData[] = [
-  { label: 'Bandeja de entrada', href: '/bandeja', icon: 'bandeja', domain: 'neutral' },
+  { label: 'Aprobaciones', href: '/aprobaciones', icon: 'aprobaciones', domain: 'neutral' },
   { label: 'Journaling', href: '/journaling', icon: 'journaling', domain: 'neutral' },
   {
     label: 'Automatizaciones',
@@ -149,5 +142,4 @@ export const mobileNav: NavItemData[] = [
   primaryNav.find((item) => item.href === '/')!,
   primaryNav.find((item) => item.href === '/habitos')!,
   primaryNav.find((item) => item.href === '/planificacion')!,
-  primaryNav.find((item) => item.href === '/agenda')!,
 ];

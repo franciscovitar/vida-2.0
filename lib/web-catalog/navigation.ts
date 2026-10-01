@@ -179,14 +179,13 @@ export function buildAppNavigation(
     )
     .map(catalogEntryToNavItem);
 
-  const primaryWithSearch: NavItemData[] = [
+  const primaryWithCatalog: NavItemData[] = [
     ...safeStaticPrimary,
-    { label: 'Buscar', href: '/buscar', icon: 'buscar', domain: 'neutral' },
     ...catalogPrimary,
   ];
 
   return {
-    primary: dedupeNavItems(primaryWithSearch),
+    primary: dedupeNavItems(primaryWithCatalog),
     secondary: dedupeNavItems([...safeStaticSecondary, ...catalogSecondary]),
   };
 }
