@@ -247,7 +247,9 @@ export default async function FinanzasPage() {
               <div className={local['quality-grid']}>
                 <div>
                   <span>Pendientes</span>
-                  <strong data-tone={report.reviewRequiredTransactions === 0 ? 'positive' : 'negative'}>
+                  <strong
+                    data-tone={report.reviewRequiredTransactions === 0 ? 'positive' : 'negative'}
+                  >
                     {report.reviewRequiredTransactions}
                   </strong>
                 </div>

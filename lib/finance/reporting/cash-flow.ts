@@ -1,6 +1,9 @@
 import 'server-only';
 
-import { buildFinanceCashFlowReport, type FinanceCashFlowReport } from '@/lib/finance/reporting/cash-flow-core';
+import {
+  buildFinanceCashFlowReport,
+  type FinanceCashFlowReport,
+} from '@/lib/finance/reporting/cash-flow-core';
 import {
   readFinanceSheet,
   type FinanceStoreFailureCode,
