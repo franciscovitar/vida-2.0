@@ -40,6 +40,7 @@ function report(): FinanceCashFlowReport {
       },
     ],
     roleTotals: [],
+    recurringExpenseCandidates: [],
     monthlyRoleTotals: [
       {
         month: '2026-01',
