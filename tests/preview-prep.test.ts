@@ -38,11 +38,18 @@ test('P2. rutas privadas de app marcan force-dynamic', () => {
     'app/(app)/proyectos/page.tsx',
     'app/(app)/professional/page.tsx',
     'app/(app)/habitos/page.tsx',
+    'app/(app)/finanzas/page.tsx',
   ];
   for (const rel of files) {
     const content = readFileSync(join(process.cwd(), rel), 'utf8');
     assert.match(content, /export const dynamic = 'force-dynamic'/);
   }
+});
+
+test('P2-FINANCE. finanzas fuerza runtime dinámico de Node', () => {
+  const content = readFileSync(join(process.cwd(), 'app/(app)/finanzas/page.tsx'), 'utf8');
+  assert.match(content, /export const dynamic = 'force-dynamic'/);
+  assert.match(content, /export const runtime = 'nodejs'/);
 });
 
 test('P3–P4. Proxy protege rutas futuras; pública sigue abierta', () => {

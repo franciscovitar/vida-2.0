@@ -18,6 +18,8 @@ import pageStyles from '../page.module.scss';
 import local from './page.module.scss';
 
 export const metadata: Metadata = { title: 'Finanzas' };
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const ROLE_LABELS: Partial<Record<FinanceEconomicRole, string>> = {
   income_work: 'Ingresos de trabajo',
