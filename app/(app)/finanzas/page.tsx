@@ -2,6 +2,7 @@ import { CircleGauge, Landmark, ListChecks, ShieldCheck, WalletCards } from 'luc
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { PlanningDraftSandbox } from '@/components/finance/PlanningDraftSandbox';
 import { PurchaseScenarioCalculator } from '@/components/finance/PurchaseScenarioCalculator';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -275,6 +276,22 @@ export default async function FinanzasPage() {
                       currency: item.currency,
                       safeToSpend: item.snapshot!.safeToSpend,
                     }}
+                  />
+                ))}
+              {planningModel.currencies
+                .filter(
+                  (item) =>
+                    !item.snapshot &&
+                    item.status === 'configuration-required' &&
+                    item.eligibleLiquidityMinor > 0,
+                )
+                .map((item) => (
+                  <PlanningDraftSandbox
+                    key={`draft-${item.currency}`}
+                    currency={item.currency}
+                    eligibleLiquidityMinor={item.eligibleLiquidityMinor}
+                    obligationHorizonDays={planningModel.obligationHorizonDays}
+                    liquidityQuality={item.liquidityQuality}
                   />
                 ))}
             </Card>
