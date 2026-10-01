@@ -53,11 +53,24 @@ export interface FinanceReconciliationSummary {
   stale: number;
 }
 
+export type FinanceRecurringExpenseState = 'probable-current' | 'needs-review' | 'stale-observed';
+
+export interface FinanceRecurringExpenseCandidate {
+  label: string;
+  currency: string;
+  observedMonths: number;
+  firstSeenMonth: string;
+  lastSeenMonth: string;
+  medianMonthlyMinor: number;
+  state: FinanceRecurringExpenseState;
+}
+
 export interface FinanceCashFlowReport {
   currencies: FinanceCashFlowCurrencySummary[];
   monthly: FinanceCashFlowMonth[];
   roleTotals: FinanceRoleTotal[];
   monthlyRoleTotals: FinanceMonthlyRoleTotal[];
+  recurringExpenseCandidates: FinanceRecurringExpenseCandidate[];
   coverage: FinanceCoverageWindow[];
   transactionCount: number;
   resolvedTransactions: number;
@@ -102,6 +115,47 @@ function monthKey(occurredAt: string): string {
   return occurredAt.slice(0, 7);
 }
 
+function monthEnd(month: string): string {
+  const [year, monthNumber] = month.split('-').map(Number);
+  if (!year || !monthNumber) return '';
+  return new Date(Date.UTC(year, monthNumber, 0)).toISOString().slice(0, 10);
+}
+
+function normalizeRecurringLabel(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isGenericExpenseLabel(value: string): boolean {
+  return (
+    /^PAGO CON (QR|TARJETA)/.test(value) ||
+    /^TRANSFERENCIA/.test(value) ||
+    /^IIBB /.test(value) ||
+    /^IVA SERVICIOS DIGITALES/.test(value)
+  );
+}
+
+function isExplicitSubscription(value: string): boolean {
+  return /SUSCRIPCION|PARAMOUNT|NETFLIX|SPOTIFY|DISNEY|HBO|YOUTUBE PREMIUM/.test(value);
+}
+
+function monthDistance(from: string, to: string): number {
+  const [fromYear, fromMonth] = from.split('-').map(Number);
+  const [toYear, toMonth] = to.split('-').map(Number);
+  if (!fromYear || !fromMonth || !toYear || !toMonth) return Number.POSITIVE_INFINITY;
+  return (toYear - fromYear) * 12 + (toMonth - fromMonth);
+}
+
+function median(values: readonly number[]): number {
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+}
+
 export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCashFlowReport {
   const accounts = dataRows(rows.accounts);
   const importBatches = dataRows(rows.importBatches);
@@ -127,7 +181,10 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
     if (record.ownership === 'owned') ownedAccountIds.add(id);
   }
 
-  const transactionById = new Map<string, { occurredAt: string; reviewState: string }>();
+  const transactionById = new Map<
+    string,
+    { occurredAt: string; reviewState: string; description: string }
+  >();
   let resolvedTransactions = 0;
   let reviewRequiredTransactions = 0;
 
@@ -135,7 +192,11 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
     const id = text(row[0]);
     if (!id) continue;
     const reviewState = text(row[5]);
-    transactionById.set(id, { occurredAt: text(row[1]), reviewState });
+    transactionById.set(id, {
+      occurredAt: text(row[1]),
+      reviewState,
+      description: text(row[2]),
+    });
     if (reviewState === 'resolved') resolvedTransactions += 1;
     if (reviewState === 'review_required') reviewRequiredTransactions += 1;
   }
@@ -145,6 +206,10 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
   const monthly = new Map<string, FinanceCashFlowMonth>();
   const roleTotals = new Map<string, FinanceRoleTotal>();
   const monthlyRoleTotals = new Map<string, FinanceMonthlyRoleTotal>();
+  const recurringByDescription = new Map<
+    string,
+    { label: string; currency: string; monthlyTotals: Map<string, number> }
+  >();
 
   for (const row of postings) {
     const transactionId = text(row[0]);
@@ -196,6 +261,23 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
     monthlyRoleTotal.count += 1;
     monthlyRoleTotal.totalMinor += postingAmount;
     monthlyRoleTotals.set(monthlyRoleKey, monthlyRoleTotal);
+
+    if (role === 'expense_personal' && postingAmount < 0) {
+      const normalizedLabel = normalizeRecurringLabel(transaction.description);
+      if (normalizedLabel && !isGenericExpenseLabel(normalizedLabel)) {
+        const recurringKey = `${normalizedLabel}|${currency}`;
+        const recurring = recurringByDescription.get(recurringKey) ?? {
+          label: transaction.description,
+          currency,
+          monthlyTotals: new Map<string, number>(),
+        };
+        recurring.monthlyTotals.set(
+          month,
+          (recurring.monthlyTotals.get(month) ?? 0) + Math.abs(postingAmount),
+        );
+        recurringByDescription.set(recurringKey, recurring);
+      }
+    }
 
     const roleKey = `${role}|${currency}`;
     const roleTotal = roleTotals.get(roleKey) ?? {
@@ -280,6 +362,70 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
         left.currency.localeCompare(right.currency),
     );
 
+  const commonCoverageByCurrency = new Map<string, { start: string; end: string }>();
+  for (const item of coverage) {
+    if (!item.currency || !item.periodStart || !item.periodEnd) continue;
+    const current = commonCoverageByCurrency.get(item.currency);
+    if (!current) {
+      commonCoverageByCurrency.set(item.currency, {
+        start: item.periodStart.slice(0, 10),
+        end: item.periodEnd.slice(0, 10),
+      });
+      continue;
+    }
+    if (item.periodStart.slice(0, 10) > current.start) {
+      current.start = item.periodStart.slice(0, 10);
+    }
+    if (item.periodEnd.slice(0, 10) < current.end) {
+      current.end = item.periodEnd.slice(0, 10);
+    }
+  }
+
+  const recurringExpenseCandidates: FinanceRecurringExpenseCandidate[] = [];
+  for (const recurring of recurringByDescription.values()) {
+    const commonCoverage = commonCoverageByCurrency.get(recurring.currency);
+    if (!commonCoverage || commonCoverage.start > commonCoverage.end) continue;
+
+    const completeMonths = [...recurring.monthlyTotals.entries()]
+      .filter(([month]) => {
+        const monthStart = `${month}-01`;
+        return monthStart >= commonCoverage.start && monthEnd(month) <= commonCoverage.end;
+      })
+      .sort(([left], [right]) => left.localeCompare(right));
+
+    if (completeMonths.length < 3) continue;
+
+    const firstSeenMonth = completeMonths[0][0];
+    const lastSeenMonth = completeMonths.at(-1)?.[0] ?? firstSeenMonth;
+    const coverageEndMonth = commonCoverage.end.slice(0, 7);
+    const monthsSinceLastSeen = monthDistance(lastSeenMonth, coverageEndMonth);
+    const normalizedLabel = normalizeRecurringLabel(recurring.label);
+
+    let state: FinanceRecurringExpenseState = 'stale-observed';
+    if (monthsSinceLastSeen <= 1 && isExplicitSubscription(normalizedLabel)) {
+      state = 'probable-current';
+    } else if (monthsSinceLastSeen <= 2) {
+      state = 'needs-review';
+    }
+
+    recurringExpenseCandidates.push({
+      label: recurring.label,
+      currency: recurring.currency,
+      observedMonths: completeMonths.length,
+      firstSeenMonth,
+      lastSeenMonth,
+      medianMonthlyMinor: median(completeMonths.map(([, total]) => total)),
+      state,
+    });
+  }
+
+  recurringExpenseCandidates.sort(
+    (left, right) =>
+      right.observedMonths - left.observedMonths ||
+      right.lastSeenMonth.localeCompare(left.lastSeenMonth) ||
+      left.label.localeCompare(right.label),
+  );
+
   const reconciliation: FinanceReconciliationSummary = {
     total: reconciliations.length,
     reconciled: 0,
@@ -320,6 +466,7 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
         left.currency.localeCompare(right.currency) ||
         left.role.localeCompare(right.role),
     ),
+    recurringExpenseCandidates,
     coverage,
     transactionCount: transactions.length,
     resolvedTransactions,

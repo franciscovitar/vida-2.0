@@ -213,6 +213,44 @@ export default async function FinanzasPage() {
             </Card>
           ) : null}
 
+          {report.recurringExpenseCandidates.length > 0 ? (
+            <Card aria-labelledby="finance-recurring-title">
+              <SectionHeader
+                id="finance-recurring-title"
+                title="Gastos recurrentes candidatos"
+                description="Patrones observados en meses con cobertura completa. No se convierten en obligaciones sin tu confirmación."
+                icon={ListChecks}
+                domain="finance"
+              />
+              <div className={local['role-list']}>
+                {report.recurringExpenseCandidates
+                  .filter((item) => item.currency === 'ARS')
+                  .map((item) => (
+                    <div key={`${item.label}-${item.currency}`} className={local['role-row']}>
+                      <div>
+                        <strong>{item.label}</strong>
+                        <small>
+                          {item.observedMonths} meses · última vez {formatMonth(item.lastSeenMonth)}{' '}
+                          ·{' '}
+                          {item.state === 'probable-current'
+                            ? 'probable recurrente'
+                            : item.state === 'needs-review'
+                              ? 'revisar vigencia'
+                              : 'histórico, no asumir activo'}
+                        </small>
+                      </div>
+                      <span>{formatMinor(item.medianMonthlyMinor, item.currency)}</span>
+                    </div>
+                  ))}
+              </div>
+              <p className={local['empty-copy']}>
+                Pagos genéricos, transferencias y montos parecidos no se usan para adivinar una
+                obligación. Si el gimnasio no tiene descriptor identificable, requiere confirmación
+                manual.
+              </p>
+            </Card>
+          ) : null}
+
           {planningModel ? (
             <Card aria-labelledby="finance-planning-title">
               <SectionHeader

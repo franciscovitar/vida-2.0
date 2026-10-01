@@ -264,3 +264,97 @@ test('cash-flow reporting flags an unbalanced canonical transaction', () => {
   assert.equal(report.unbalancedTransactions, 1);
   assert.equal(report.quality, 'attention');
 });
+
+test('cash-flow recurring candidates exclude generic payments and distinguish recent subscriptions', () => {
+  const report = buildFinanceCashFlowReport({
+    accounts: rows(FINANCE_SHEETS.accounts.headers, [
+      [
+        'owned',
+        'Bank',
+        'Wallet',
+        'wallet',
+        'ARS',
+        'owned',
+        'personal',
+        'immediate',
+        'x',
+        true,
+        '',
+        '',
+      ],
+      [
+        'clear',
+        'Finance OS',
+        'Clear',
+        'clearing',
+        'ARS',
+        'clearing',
+        'mixed',
+        'illiquid',
+        'system',
+        true,
+        '',
+        '',
+      ],
+    ]),
+    importBatches: rows(FINANCE_SHEETS.importBatches.headers, [
+      ['b1', 'owned', 'test', '2026-01-01', '2026-08-31', 'hash', 'evidence', '', 'imported', 9],
+    ]),
+    transactions: rows(FINANCE_SHEETS.transactions.headers, [
+      ['p1', '2026-05-02', 'Pago de suscripción Paramount Plus', 'posted', 1, 'resolved', '', ''],
+      ['p2', '2026-06-02', 'Pago de suscripción Paramount Plus', 'posted', 1, 'resolved', '', ''],
+      ['p3', '2026-07-02', 'Pago de suscripción Paramount Plus', 'posted', 1, 'resolved', '', ''],
+      ['p4', '2026-08-02', 'Pago de suscripción Paramount Plus', 'posted', 1, 'resolved', '', ''],
+      ['g1', '2026-01-05', 'Pago Google', 'posted', 1, 'resolved', '', ''],
+      ['g2', '2026-02-05', 'Pago Google', 'posted', 1, 'resolved', '', ''],
+      ['g3', '2026-03-05', 'Pago Google', 'posted', 1, 'resolved', '', ''],
+      ['q1', '2026-05-10', 'Pago con QR', 'posted', 1, 'resolved', '', ''],
+      ['q2', '2026-06-10', 'Pago con QR', 'posted', 1, 'resolved', '', ''],
+      ['q3', '2026-07-10', 'Pago con QR', 'posted', 1, 'resolved', '', ''],
+    ]),
+    postings: rows(FINANCE_SHEETS.postings.headers, [
+      ['p1', 1, 'owned', -5000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['p1', 2, 'clear', 5000, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['p2', 1, 'owned', -5500, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['p2', 2, 'clear', 5500, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['p3', 1, 'owned', -6000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['p3', 2, 'clear', 6000, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['p4', 1, 'owned', -6000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['p4', 2, 'clear', 6000, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['g1', 1, 'owned', -1000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['g1', 2, 'clear', 1000, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['g2', 1, 'owned', -1000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['g2', 2, 'clear', 1000, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['g3', 1, 'owned', -1000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['g3', 2, 'clear', 1000, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['q1', 1, 'owned', -40000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['q1', 2, 'clear', 40000, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['q2', 1, 'owned', -45000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['q2', 2, 'clear', 45000, 'ARS', null, 'expense_personal', 'contra', ''],
+      ['q3', 1, 'owned', -50000, 'ARS', null, 'expense_personal', 'source_account_movement', ''],
+      ['q3', 2, 'clear', 50000, 'ARS', null, 'expense_personal', 'contra', ''],
+    ]),
+    reconciliations: rows(FINANCE_SHEETS.reconciliations.headers, []),
+  });
+
+  assert.deepEqual(report.recurringExpenseCandidates, [
+    {
+      label: 'Pago de suscripción Paramount Plus',
+      currency: 'ARS',
+      observedMonths: 4,
+      firstSeenMonth: '2026-05',
+      lastSeenMonth: '2026-08',
+      medianMonthlyMinor: 5750,
+      state: 'probable-current',
+    },
+    {
+      label: 'Pago Google',
+      currency: 'ARS',
+      observedMonths: 3,
+      firstSeenMonth: '2026-01',
+      lastSeenMonth: '2026-03',
+      medianMonthlyMinor: 1000,
+      state: 'stale-observed',
+    },
+  ]);
+});
