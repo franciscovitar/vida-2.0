@@ -1,4 +1,4 @@
-import { Pencil, Sparkles } from 'lucide-react';
+import { Pencil, Sparkles, WalletCards } from 'lucide-react';
 
 import { Card } from '@/components/ui/Card';
 import type { FinanceMonthlyDashboard } from '@/lib/finance/monthly-dashboard-core';
@@ -38,6 +38,16 @@ function monthLabel(month: string): string {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(Date.UTC(year, monthNumber - 1, 1)));
+}
+
+function snapshotDateLabel(asOf: string): string {
+  const parsed = new Date(asOf);
+  if (!Number.isFinite(parsed.getTime())) return asOf;
+  return new Intl.DateTimeFormat('es-AR', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(parsed);
 }
 
 function paceCopy(model: FinanceMonthlyDashboard): string {
@@ -104,6 +114,42 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
           </small>
         </div>
       </div>
+
+      {model.liquidityCushion ? (
+        <div className={styles.cushion}>
+          <div className={styles['cushion-top']}>
+            <span className={styles['cushion-icon']} aria-hidden="true">
+              <WalletCards size={18} />
+            </span>
+            <div className={styles['cushion-summary']}>
+              <span>Colchón líquido informado</span>
+              <strong>{formatMinor(model.liquidityCushion.totalMinor, model.currency)}</strong>
+              <small>
+                Foto al {snapshotDateLabel(model.liquidityCushion.asOf)} · no se suma al balance
+                mensual
+              </small>
+            </div>
+          </div>
+
+          <div className={styles['cushion-sources']}>
+            {model.liquidityCushion.sources.map((source) => (
+              <div key={source.key} className={styles['cushion-source']}>
+                <span>{source.label}</span>
+                <strong>{formatMinor(source.amountMinor, model.currency)}</strong>
+              </div>
+            ))}
+          </div>
+
+          {model.liquidityCushion.openingEstimateMinor !== null ? (
+            <div className={styles['cushion-opening']}>
+              <span>Inicio de mes estimado según lo registrado</span>
+              <strong>
+                {formatMinor(model.liquidityCushion.openingEstimateMinor, model.currency)}
+              </strong>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {target ? (
         <div className={styles.goal}>

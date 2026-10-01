@@ -70,6 +70,8 @@ test('finance schema exposes the accepted V1 operational tabs', () => {
   assert.equal(FINANCE_SHEETS.manualIntake.headers.includes('supersedes_capture_id'), true);
   assert.equal(FINANCE_SHEETS.monthlyTargets.title, 'Monthly Targets');
   assert.equal(FINANCE_SHEETS.monthlyTargets.headers.includes('suggested_target_minor'), true);
+  assert.equal(FINANCE_SHEETS.liquiditySnapshots.title, 'Liquidity Snapshots');
+  assert.equal(FINANCE_SHEETS.liquiditySnapshots.headers.includes('amount_minor'), true);
 });
 
 test('finance schema validates headers and exact row widths', () => {

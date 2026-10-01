@@ -149,3 +149,78 @@ test('monthly dashboard never applies a pending suggestion as the active target'
   assert.equal(model.target?.suggestedTargetMinor, 45_000_000);
   assert.equal(model.remainingTargetMinor, 35_000_000);
 });
+
+
+test('monthly dashboard keeps reported liquidity separate and estimates the month opening cushion', () => {
+  const model = buildFinanceMonthlyDashboard({
+    manualIntake: rows(FINANCE_SHEETS.manualIntake.headers, [
+      [
+        'income',
+        '2026-10-01T10:00:00-03:00',
+        '2026-10-01T10:00:00-03:00',
+        '+100 web',
+        'income',
+        10_000_000,
+        'ARS',
+        'ingreso web/freelance',
+        'income_work',
+        '',
+        'active',
+        '',
+        'chatgpt_finance_logger',
+        '',
+      ],
+    ]),
+    monthlyTargets: rows(FINANCE_SHEETS.monthlyTargets.headers, []),
+    liquiditySnapshots: rows(FINANCE_SHEETS.liquiditySnapshots.headers, [
+      [
+        'liq-oct',
+        '2026-10-01',
+        'ARS',
+        'naranja-x:ars',
+        'Naranja X',
+        25_000_000,
+        'user_reported',
+        'active',
+        'chatgpt_finance_logger',
+        '',
+      ],
+      [
+        'liq-oct',
+        '2026-10-01',
+        'ARS',
+        'cash:ars',
+        'Efectivo',
+        16_000_000,
+        'user_reported',
+        'active',
+        'chatgpt_finance_logger',
+        '',
+      ],
+      [
+        'liq-sep',
+        '2026-09-30',
+        'ARS',
+        'cash:ars',
+        'Efectivo',
+        99_000_000,
+        'user_reported',
+        'active',
+        'chatgpt_finance_logger',
+        '',
+      ],
+    ]),
+    month: '2026-10',
+    currency: 'ARS',
+    asOf: '2026-10-01',
+  });
+
+  assert.equal(model.incomeMinor, 10_000_000);
+  assert.equal(model.expenseMinor, 0);
+  assert.equal(model.balanceMinor, 10_000_000);
+  assert.equal(model.liquidityCushion?.totalMinor, 41_000_000);
+  assert.equal(model.liquidityCushion?.openingEstimateMinor, 31_000_000);
+  assert.equal(model.liquidityCushion?.quality, 'user_reported');
+  assert.equal(model.liquidityCushion?.sources[0].label, 'Naranja X');
+  assert.equal(model.liquidityCushion?.sources[1].label, 'Efectivo');
+});

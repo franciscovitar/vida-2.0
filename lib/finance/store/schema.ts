@@ -222,6 +222,21 @@ export const FINANCE_SHEETS = {
       'reconciled_transaction_id',
     ],
   },
+  liquiditySnapshots: {
+    title: 'Liquidity Snapshots',
+    headers: [
+      'snapshot_id',
+      'as_of',
+      'currency',
+      'source_key',
+      'source_label',
+      'amount_minor',
+      'quality',
+      'status',
+      'source',
+      'notes',
+    ],
+  },
   monthlyTargets: {
     title: 'Monthly Targets',
     headers: [

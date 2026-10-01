@@ -27,13 +27,15 @@ function currentFinanceDateParts(): { month: string; asOf: string } {
 }
 
 export async function getFinanceMonthlyDashboardSnapshot(): Promise<FinanceMonthlyDashboardSnapshot> {
-  const [manualIntake, monthlyTargets] = await Promise.all([
+  const [manualIntake, monthlyTargets, liquiditySnapshots] = await Promise.all([
     readFinanceSheet('manualIntake'),
     readFinanceSheet('monthlyTargets'),
+    readFinanceSheet('liquiditySnapshots'),
   ]);
 
   if (!manualIntake.ok) return { ok: false, code: manualIntake.code };
   if (!monthlyTargets.ok) return { ok: false, code: monthlyTargets.code };
+  if (!liquiditySnapshots.ok) return { ok: false, code: liquiditySnapshots.code };
 
   const current = currentFinanceDateParts();
   return {
@@ -41,6 +43,7 @@ export async function getFinanceMonthlyDashboardSnapshot(): Promise<FinanceMonth
     model: buildFinanceMonthlyDashboard({
       manualIntake: manualIntake.values,
       monthlyTargets: monthlyTargets.values,
+      liquiditySnapshots: liquiditySnapshots.values,
       month: current.month,
       currency: 'ARS',
       asOf: current.asOf,

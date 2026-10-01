@@ -21,6 +21,21 @@ export interface FinanceMonthlyTarget {
   updatedAt: string;
 }
 
+export interface FinanceLiquidityCushionSource {
+  key: string;
+  label: string;
+  amountMinor: number;
+}
+
+export interface FinanceLiquidityCushion {
+  snapshotId: string;
+  asOf: string;
+  totalMinor: number;
+  quality: string;
+  openingEstimateMinor: number | null;
+  sources: FinanceLiquidityCushionSource[];
+}
+
 export interface FinanceMonthlyDashboard {
   month: string;
   currency: string;
@@ -28,6 +43,7 @@ export interface FinanceMonthlyDashboard {
   expenseMinor: number;
   balanceMinor: number;
   activeCaptureCount: number;
+  liquidityCushion: FinanceLiquidityCushion | null;
   target: FinanceMonthlyTarget | null;
   remainingTargetMinor: number | null;
   targetUsedRatio: number | null;
@@ -85,6 +101,7 @@ function resolvePace(
 export function buildFinanceMonthlyDashboard(input: {
   manualIntake: SheetRows;
   monthlyTargets: SheetRows;
+  liquiditySnapshots?: SheetRows;
   month: string;
   currency: string;
   asOf: string;
@@ -133,6 +150,69 @@ export function buildFinanceMonthlyDashboard(input: {
       }
     : null;
 
+  const balanceMinor = incomeMinor - expenseMinor;
+  const liquidityRows = input.liquiditySnapshots ? dataRows(input.liquiditySnapshots) : [];
+  const liquidityGroups = new Map<
+    string,
+    { asOf: string; asOfMs: number; rows: readonly (readonly unknown[])[] }
+  >();
+
+  for (const row of liquidityRows) {
+    if (text(row[7]) !== 'active' || text(row[2]).toUpperCase() !== currency) continue;
+    const snapshotId = text(row[0]);
+    const asOf = text(row[1]);
+    const asOfMs = Date.parse(asOf);
+    if (!snapshotId || !Number.isFinite(asOfMs)) continue;
+
+    const existing = liquidityGroups.get(snapshotId);
+    if (existing) {
+      liquidityGroups.set(snapshotId, {
+        asOf: asOfMs > existing.asOfMs ? asOf : existing.asOf,
+        asOfMs: Math.max(asOfMs, existing.asOfMs),
+        rows: [...existing.rows, row],
+      });
+    } else {
+      liquidityGroups.set(snapshotId, { asOf, asOfMs, rows: [row] });
+    }
+  }
+
+  const latestLiquidityGroup =
+    [...liquidityGroups.entries()].sort(
+      (left, right) =>
+        right[1].asOfMs - left[1].asOfMs || right[0].localeCompare(left[0]),
+    )[0] ?? null;
+
+  const liquidityCushion: FinanceLiquidityCushion | null = latestLiquidityGroup
+    ? (() => {
+        const [snapshotId, group] = latestLiquidityGroup;
+        const sources = group.rows
+          .map((row) => ({
+            key: text(row[3]),
+            label: text(row[4]) || text(row[3]) || 'Liquidez',
+            amountMinor: number(row[5]),
+            quality: text(row[6]) || 'unknown',
+          }))
+          .filter((item) => item.key && item.amountMinor >= 0)
+          .sort(
+            (left, right) =>
+              right.amountMinor - left.amountMinor || left.label.localeCompare(right.label),
+          );
+        const totalMinor = sources.reduce((total, item) => total + item.amountMinor, 0);
+        const qualities = [...new Set(sources.map((item) => item.quality))];
+        const openingEstimate = totalMinor - balanceMinor;
+
+        return {
+          snapshotId,
+          asOf: group.asOf,
+          totalMinor,
+          quality: qualities.length === 1 ? qualities[0] : 'mixed',
+          openingEstimateMinor:
+            monthKey(group.asOf) === input.month && openingEstimate >= 0 ? openingEstimate : null,
+          sources: sources.map(({ key, label, amountMinor }) => ({ key, label, amountMinor })),
+        };
+      })()
+    : null;
+
   const targetUsedRatio =
     target && target.activeTargetMinor > 0 ? expenseMinor / target.activeTargetMinor : null;
   const elapsed = Math.min(1, Math.max(0, dayOfMonth(input.asOf) / daysInMonth(input.month)));
@@ -150,8 +230,9 @@ export function buildFinanceMonthlyDashboard(input: {
     currency,
     incomeMinor,
     expenseMinor,
-    balanceMinor: incomeMinor - expenseMinor,
+    balanceMinor,
     activeCaptureCount: captures.length,
+    liquidityCushion,
     target,
     remainingTargetMinor: target ? Math.max(0, target.activeTargetMinor - expenseMinor) : null,
     targetUsedRatio,
