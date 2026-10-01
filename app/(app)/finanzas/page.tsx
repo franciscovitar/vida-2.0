@@ -2,9 +2,11 @@ import { CircleGauge, Landmark, ListChecks, ShieldCheck, WalletCards } from 'luc
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { PurchaseScenarioCalculator } from '@/components/finance/PurchaseScenarioCalculator';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { getFinancePlanningStoreSnapshot } from '@/lib/finance/planning-store';
+import { buildFinanceResilienceIndicators } from '@/lib/finance/resilience-core';
 import { getFinanceCashFlowSnapshot } from '@/lib/finance/reporting/cash-flow';
 import type { FinanceCashFlowReport } from '@/lib/finance/reporting/cash-flow-core';
 import { getFinanceStoreReadinessSnapshot } from '@/lib/finance/store/readiness';
@@ -80,6 +82,23 @@ function currencySummary(report: FinanceCashFlowReport, currency: string) {
   return report.currencies.find((item) => item.currency === currency);
 }
 
+function formatRatio(value: number | null): string {
+  if (value === null) return 'Pendiente';
+  return new Intl.NumberFormat('es-AR', {
+    style: 'percent',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+function formatMonths(value: number | null): string {
+  if (value === null) return 'Pendiente';
+  return `${value.toLocaleString('es-AR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })} meses`;
+}
+
 export default async function FinanzasPage() {
   const store = await getFinanceStoreReadinessSnapshot();
   const connected = store.status === 'connected';
@@ -95,6 +114,10 @@ export default async function FinanzasPage() {
   const usd = report ? currencySummary(report, 'USD') : undefined;
   const arsMonths = report?.monthly.filter((row) => row.currency === 'ARS') ?? [];
   const usdMonths = report?.monthly.filter((row) => row.currency === 'USD') ?? [];
+  const arsPlanning = planningModel?.currencies.find((item) => item.currency === 'ARS') ?? null;
+  const arsResilience = report
+    ? buildFinanceResilienceIndicators(report, 'ARS', arsPlanning?.snapshot ?? null)
+    : null;
   const arsRoles =
     report?.roleTotals
       .filter((row) => row.currency === 'ARS' && ROLE_LABELS[row.role])
@@ -243,6 +266,52 @@ export default async function FinanzasPage() {
                   liquidez elegible por alcance o calidad de evidencia.
                 </small>
               ) : null}
+              {planningModel.currencies
+                .filter((item) => item.snapshot)
+                .map((item) => (
+                  <PurchaseScenarioCalculator
+                    key={`scenario-${item.currency}`}
+                    source={{
+                      currency: item.currency,
+                      safeToSpend: item.snapshot!.safeToSpend,
+                    }}
+                  />
+                ))}
+            </Card>
+          ) : null}
+
+          {arsResilience ? (
+            <Card aria-labelledby="finance-resilience-title">
+              <SectionHeader
+                id="finance-resilience-title"
+                title="Resiliencia financiera"
+                description="Indicadores explicables y separados; no se combinan en un score opaco."
+                icon={ShieldCheck}
+                domain="finance"
+              />
+              <div className={local['quality-grid']}>
+                <div>
+                  <span>Ingresos de trabajo / ingresos</span>
+                  <strong>{formatRatio(arsResilience.earnedIncomeShare)}</strong>
+                </div>
+                <div>
+                  <span>Variación mensual de ingresos</span>
+                  <strong>{formatRatio(arsResilience.monthlyIncomeVolatility)}</strong>
+                </div>
+                <div>
+                  <span>Cobertura de reserva</span>
+                  <strong>{formatMonths(arsResilience.reserveCoverageMonths)}</strong>
+                </div>
+                <div>
+                  <span>Cobertura de liquidez</span>
+                  <strong>{formatMonths(arsResilience.liquidityCoverageMonths)}</strong>
+                </div>
+              </div>
+              <p className={local['empty-copy']}>
+                Historial observado: {arsResilience.observedMonths} mes(es). La variación mensual es
+                desvío estándar / ingreso promedio; requiere al menos 3 meses. Las coberturas quedan
+                pendientes hasta que exista gasto esencial mensual explícito.
+              </p>
             </Card>
           ) : null}
 
