@@ -1,0 +1,83 @@
+.shell {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: end;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.field input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 0.75rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--c-finance);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.privacy {
+  color: var(--text-subtle);
+  font-size: 0.67rem;
+  line-height: 1.45;
+}
+
+.error {
+  color: var(--c-danger);
+  font-size: 0.72rem;
+}
+
+.result {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.result > div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.result span {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+}
+
+.result strong {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (width < 560px) {
+  .form,
+  .result {
+    grid-template-columns: 1fr;
+  }
+}

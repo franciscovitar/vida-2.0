@@ -54,6 +54,11 @@ export interface FinancePlanningSnapshot {
 export type PurchaseCapacityState =
   'within-safe-capacity' | 'uses-protected-capacity' | 'exceeds-liquidity';
 
+export interface FinancePurchaseScenarioSource {
+  currency: string;
+  safeToSpend: SafeToSpendResult;
+}
+
 export interface FinancePurchaseScenario {
   version: typeof FINANCE_PLANNING_VERSION;
   currency: string;
@@ -186,7 +191,7 @@ export function buildFinancePlanningSnapshot(
 }
 
 export function evaluateFinancePurchaseScenario(
-  snapshot: Readonly<FinancePlanningSnapshot>,
+  snapshot: Readonly<FinancePurchaseScenarioSource>,
   purchaseAmountMinor: number,
 ): FinancePurchaseScenario {
   assertMinorUnits('purchaseAmountMinor', purchaseAmountMinor);
