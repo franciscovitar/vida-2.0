@@ -147,7 +147,9 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
 
           <div className={styles['cushion-opening']}>
             <span>Movimientos posteriores a la base</span>
-            <strong>{formatMinor(model.liquidityCushion.movementDeltaMinor, model.currency)}</strong>
+            <strong>
+              {formatMinor(model.liquidityCushion.movementDeltaMinor, model.currency)}
+            </strong>
           </div>
         </div>
       ) : null}
