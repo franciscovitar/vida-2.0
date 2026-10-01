@@ -2,6 +2,7 @@ import { CircleGauge, Landmark, ListChecks, ShieldCheck, WalletCards } from 'luc
 import type { Metadata } from 'next';
 
 import { IrregularIncomePlanner } from '@/components/finance/IrregularIncomePlanner';
+import { MonthlyFinanceDashboard } from '@/components/finance/MonthlyFinanceDashboard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PlanningDraftSandbox } from '@/components/finance/PlanningDraftSandbox';
 import { PlanningSubtractionTrace } from '@/components/finance/PlanningSubtractionTrace';
@@ -9,6 +10,7 @@ import { PurchaseScenarioCalculator } from '@/components/finance/PurchaseScenari
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { buildFinanceIrregularIncomeProfile } from '@/lib/finance/irregular-income-core';
+import { getFinanceMonthlyDashboardSnapshot } from '@/lib/finance/monthly-dashboard-store';
 import { getFinancePlanningStoreSnapshot } from '@/lib/finance/planning-store';
 import { buildFinanceResilienceIndicators } from '@/lib/finance/resilience-core';
 import { getFinanceCashFlowSnapshot } from '@/lib/finance/reporting/cash-flow';
@@ -109,12 +111,18 @@ export default async function FinanzasPage() {
   const store = await getFinanceStoreReadinessSnapshot();
   const connected = store.status === 'connected';
   const financeReads = connected
-    ? await Promise.all([getFinanceCashFlowSnapshot(), getFinancePlanningStoreSnapshot()])
+    ? await Promise.all([
+        getFinanceCashFlowSnapshot(),
+        getFinancePlanningStoreSnapshot(),
+        getFinanceMonthlyDashboardSnapshot(),
+      ])
     : null;
   const cashFlow = financeReads?.[0] ?? null;
   const planning = financeReads?.[1] ?? null;
+  const monthlyDashboard = financeReads?.[2] ?? null;
   const report = cashFlow?.ok ? cashFlow.report : null;
   const planningModel = planning?.ok ? planning.model : null;
+  const monthlyDashboardModel = monthlyDashboard?.ok ? monthlyDashboard.model : null;
   const sourceLabel = connected ? 'Store conectado · solo lectura' : store.label;
   const ars = report ? currencySummary(report, 'ARS') : undefined;
   const usd = report ? currencySummary(report, 'USD') : undefined;
@@ -138,6 +146,8 @@ export default async function FinanzasPage() {
         icon={WalletCards}
         domain="finance"
       />
+
+      {monthlyDashboardModel ? <MonthlyFinanceDashboard model={monthlyDashboardModel} /> : null}
 
       <Card className={local.hero} aria-labelledby="finance-status-title">
         <div className={local['hero-top']}>
