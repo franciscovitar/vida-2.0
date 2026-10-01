@@ -62,6 +62,7 @@ export interface FinanceRecurringExpenseCandidate {
   firstSeenMonth: string;
   lastSeenMonth: string;
   medianMonthlyMinor: number;
+  latestMonthlyMinor: number;
   state: FinanceRecurringExpenseState;
 }
 
@@ -415,6 +416,7 @@ export function buildFinanceCashFlowReport(rows: FinanceCashFlowRows): FinanceCa
       firstSeenMonth,
       lastSeenMonth,
       medianMonthlyMinor: median(completeMonths.map(([, total]) => total)),
+      latestMonthlyMinor: completeMonths.at(-1)?.[1] ?? 0,
       state,
     });
   }

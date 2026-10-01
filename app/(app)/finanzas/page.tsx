@@ -239,7 +239,7 @@ export default async function FinanzasPage() {
                               : 'histórico, no asumir activo'}
                         </small>
                       </div>
-                      <span>{formatMinor(item.medianMonthlyMinor, item.currency)}</span>
+                      <span>{formatMinor(item.latestMonthlyMinor, item.currency)}</span>
                     </div>
                   ))}
               </div>

@@ -345,6 +345,7 @@ test('cash-flow recurring candidates exclude generic payments and distinguish re
       firstSeenMonth: '2026-05',
       lastSeenMonth: '2026-08',
       medianMonthlyMinor: 5750,
+      latestMonthlyMinor: 6000,
       state: 'probable-current',
     },
     {
@@ -354,6 +355,7 @@ test('cash-flow recurring candidates exclude generic payments and distinguish re
       firstSeenMonth: '2026-01',
       lastSeenMonth: '2026-03',
       medianMonthlyMinor: 1000,
+      latestMonthlyMinor: 1000,
       state: 'stale-observed',
     },
   ]);
