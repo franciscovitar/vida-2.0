@@ -141,7 +141,6 @@ export interface ProfessionalWorkSplit {
   delegateToAi: readonly ProfessionalWorkSplitItem[];
 }
 
-
 export interface ProfessionalGrowthCycleProgress {
   closed: number;
   total: number;

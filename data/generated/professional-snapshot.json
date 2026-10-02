@@ -570,10 +570,7 @@
     ]
   },
   "growth": {
-    "targetRoleFamily": [
-      "Software Engineer",
-      "Full-Stack Product Engineer"
-    ],
+    "targetRoleFamily": ["Software Engineer", "Full-Stack Product Engineer"],
     "cycleProgress": {
       "closed": 0,
       "total": 5,
@@ -610,10 +607,7 @@
         "rank": 2,
         "id": "GROWTH-002",
         "capability": "SQL, relational modeling and PostgreSQL transaction reasoning",
-        "skillRefs": [
-          "sql-relational-data-modeling",
-          "postgresql-transactional-persistence"
-        ],
+        "skillRefs": ["sql-relational-data-modeling", "postgresql-transactional-persistence"],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
         "whyNow": "PostgreSQL is already part of the portfolio, while personal query/index/isolation depth is not verified. Current full-stack and data-adjacent roles repeatedly ask for complex SQL, schema design, indexes, transaction/locking and performance reasoning.",
@@ -661,9 +655,7 @@
         "rank": 4,
         "id": "GROWTH-004",
         "capability": "Security, authorization and least-privilege reasoning",
-        "skillRefs": [
-          "security-privacy-least-privilege"
-        ],
+        "skillRefs": ["security-privacy-least-privilege"],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
         "whyNow": "Security already appears in current systems, but direct threat-model/authz reasoning is unverified. Market and broader employer signals continue to raise cybersecurity and trustworthy AI/software operation in importance.",
@@ -712,11 +704,7 @@
   "delegationFrontier": {
     "lastReviewed": "2026-10-02",
     "model": "TASK_FACET_ENVIRONMENT_CONSEQUENCE_VERIFICATION",
-    "publicLanes": [
-      "HUMAN_CORE",
-      "HUMAN_PLUS_AI",
-      "AI_DELEGATED"
-    ],
+    "publicLanes": ["HUMAN_CORE", "HUMAN_PLUS_AI", "AI_DELEGATED"],
     "retiredState": "RETIRED_FROM_ACTIVE_LEARNING",
     "queueRule": "Retired facets consume no active study budget; refill the bounded top-5 queue from the next highest-value unresolved gap.",
     "sentinelRule": "Keep only minimal periodic fresh verification for retired facets that remain safety-sensitive or prerequisite to higher-level judgment.",

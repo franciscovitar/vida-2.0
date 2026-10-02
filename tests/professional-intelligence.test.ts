@@ -314,7 +314,6 @@ test('PRO-18. UI explica que los porcentajes no son probabilidad personal de des
   assert.match(source, /Compresión de equipo/);
 });
 
-
 test('PRO-19. growth queue queda acotada y sólo contiene aprendizaje activo humano o humano+IA', () => {
   const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
   assert.ok(parsed);
@@ -346,7 +345,10 @@ test('PRO-20. Delegation Frontier conserva ownership por faceta, frescura y reti
     (item) => item.learningDisposition === 'RETIRED_FROM_ACTIVE_LEARNING',
   );
   assert.ok(retired.length > 0);
-  assert.equal(retired.every((item) => item.currentLane === 'AI_DELEGATED'), true);
+  assert.equal(
+    retired.every((item) => item.currentLane === 'AI_DELEGATED'),
+    true,
+  );
 });
 
 test('PRO-21. contrato rechaza que una faceta delegada consuma un slot del top-5 activo', () => {

@@ -136,7 +136,6 @@ or the current canonical aggregate:
 npm run verify
 ```
 
-
 ## Professional Growth + Delegation Frontier
 
 The generated snapshot now uses schema V3 and carries the sanitized current Professional Growth state from PAS `main`.

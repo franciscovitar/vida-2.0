@@ -186,7 +186,6 @@ function validFluencyFamily(value: unknown): boolean {
   );
 }
 
-
 function validGrowthItem(value: unknown): boolean {
   if (!isRecord(value)) return false;
   return (
@@ -279,7 +278,6 @@ export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot 
     everyArray(workSplit.withAi, validWorkSplitItem) &&
     everyArray(workSplit.delegateToAi, validWorkSplitItem);
 
-
   const growthItems = growth.items;
   const cycleProgress = growth.cycleProgress;
   const growthValid =
@@ -297,7 +295,8 @@ export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot 
     growthItems.length <= 5 &&
     growthItems.every(validGrowthItem) &&
     growthItems.every(
-      (item) => isRecord(item) && item.ownershipLane !== 'AI_DELEGATED' && item.status !== 'DEFERRED',
+      (item) =>
+        isRecord(item) && item.ownershipLane !== 'AI_DELEGATED' && item.status !== 'DEFERRED',
     );
 
   const delegationFrontierValid =
