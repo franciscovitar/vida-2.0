@@ -16,6 +16,9 @@ It contains:
 
 - current 1–2 now-moves;
 - current top development/evidence priorities;
+- bounded top-5 Professional Growth queue;
+- task/facet-level Delegation Frontier (Vos sí o sí / Vos + IA / Delegable);
+- explicit retirement from active learning when a facet becomes safely delegable;
 - bounded strong-evidence summary;
 - current market/forecast summary;
 - bounded AI/technology state;
@@ -75,6 +78,8 @@ A weekly signal that only opens a PAS PR should **not** pre-publish unmerged int
 The screen separates:
 
 - recommendations;
+- Crecimiento / Huecos a llenar;
+- current task/facet ownership and last frontier review;
 - demonstrated evidence;
 - uncertainty/gaps;
 - market/forecast context;
@@ -87,6 +92,7 @@ It must not show:
 
 - universal role winner;
 - universal skill score;
+- universal employability/mastery/automation percentage;
 - universal “best AI”;
 - AI replacement probability;
 - job-board sample as market census;
@@ -109,6 +115,10 @@ They cover:
 - stale detection;
 - system-maintenance ownership;
 - valid no-course/no-credential decision;
+- top-5 growth queue bound;
+- valid ownership lanes;
+- delegated/retired facets excluded from active learning;
+- frontier review metadata preserved;
 - no universal ranking/winner UI;
 - protected dynamic route and navigation.
 
@@ -125,3 +135,23 @@ or the current canonical aggregate:
 ```bash
 npm run verify
 ```
+
+
+## Professional Growth + Delegation Frontier
+
+The generated snapshot now uses schema V3 and carries the sanitized current Professional Growth state from PAS `main`.
+
+The unit of delegation is a **task/facet**, not an entire technology. A broad skill may therefore contain work in different lanes at the same time.
+
+Vida 2.0 does not decide ownership. PAS owns reassignment using current market/frontier evidence plus personal AI Tool Eval / AI Fluency outcomes.
+
+When a facet becomes safely delegable:
+
+1. it is marked `AI_DELEGATED` / `RETIRED_FROM_ACTIVE_LEARNING` in canonical PAS state;
+2. it stops consuming an active study slot;
+3. the bounded top-5 queue can pull in the next unresolved gap;
+4. retirement is never displayed as personal mastery.
+
+If later evidence shows repeated rework, unsafe output, stronger market demand for direct depth or loss of supervisory judgment, the facet can return to `HUMAN_PLUS_AI` or `HUMAN_CORE`.
+
+Adaptive practice remains owned by Learning OS. The snapshot only carries the current target, facets and routing state.

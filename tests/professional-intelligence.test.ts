@@ -14,7 +14,7 @@ function snapshotText(): string {
   return readFileSync(snapshotPath, 'utf8');
 }
 
-test('PRO-01. snapshot V2 válido, sanitizado y con provenance de PAS main', () => {
+test('PRO-01. snapshot V3 válido, sanitizado y con provenance de PAS main', () => {
   const raw = snapshotText();
   const parsed = parseProfessionalSnapshot(JSON.parse(raw));
 
@@ -22,7 +22,7 @@ test('PRO-01. snapshot V2 válido, sanitizado y con provenance de PAS main', () 
   assert.equal(parsed.source.repository, 'franciscovitar/personal-ai-system');
   assert.equal(parsed.source.ref, 'main');
   assert.match(parsed.source.commit, /^[a-f0-9]{40}$/);
-  assert.equal(parsed.schemaVersion, 2);
+  assert.equal(parsed.schemaVersion, 3);
 
   assert.doesNotMatch(raw, /drive\.google\.com/i);
   assert.doesNotMatch(raw, /NOTION_API_TOKEN|GOOGLE_PRIVATE_KEY|AUTH_SECRET/);
@@ -297,4 +297,48 @@ test('PRO-18. UI explica que los porcentajes no son probabilidad personal de des
   assert.match(source, /no son la\s+probabilidad de que vos pierdas tu trabajo/);
   assert.match(source, /Cómo protegerte/);
   assert.match(source, /Compresión de equipo/);
+});
+
+
+test('PRO-19. growth queue queda acotada y sólo contiene aprendizaje activo humano o humano+IA', () => {
+  const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
+  assert.ok(parsed);
+
+  assert.ok(parsed.growth.items.length > 0);
+  assert.ok(parsed.growth.items.length <= 5);
+  assert.equal(parsed.growth.cycleProgress.total, parsed.growth.items.length);
+  assert.equal(
+    parsed.growth.items.every(
+      (item) => item.ownershipLane !== 'AI_DELEGATED' && item.status !== 'DEFERRED',
+    ),
+    true,
+  );
+});
+
+test('PRO-20. Delegation Frontier conserva ownership por faceta, frescura y retiro explícito', () => {
+  const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
+  assert.ok(parsed);
+
+  assert.deepEqual(parsed.delegationFrontier.publicLanes, [
+    'HUMAN_CORE',
+    'HUMAN_PLUS_AI',
+    'AI_DELEGATED',
+  ]);
+  assert.equal(parsed.delegationFrontier.lastReviewed, '2026-10-02');
+  assert.ok(parsed.delegationFrontier.examples.length > 0);
+
+  const retired = parsed.delegationFrontier.examples.filter(
+    (item) => item.learningDisposition === 'RETIRED_FROM_ACTIVE_LEARNING',
+  );
+  assert.ok(retired.length > 0);
+  assert.equal(retired.every((item) => item.currentLane === 'AI_DELEGATED'), true);
+});
+
+test('PRO-21. contrato rechaza que una faceta delegada consuma un slot del top-5 activo', () => {
+  const value = JSON.parse(snapshotText()) as {
+    growth: { items: Array<{ ownershipLane: string }> };
+  };
+  value.growth.items[0].ownershipLane = 'AI_DELEGATED';
+
+  assert.equal(parseProfessionalSnapshot(value), null);
 });

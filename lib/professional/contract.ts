@@ -5,6 +5,21 @@ import type {
 } from '@/types/professional-intelligence';
 
 const CONFIDENCE = new Set<ProfessionalConfidence>(['LOW', 'MEDIUM', 'MEDIUM_HIGH', 'HIGH']);
+const OWNERSHIP_LANES = new Set(['HUMAN_CORE', 'HUMAN_PLUS_AI', 'AI_DELEGATED']);
+const GROWTH_STATUSES = new Set([
+  'QUEUED',
+  'LEARNING',
+  'PRACTICING',
+  'READY_FOR_VERIFICATION',
+  'VERIFIED_FOR_CURRENT_SCOPE',
+  'DEFERRED',
+]);
+const LEARNING_DISPOSITIONS = new Set([
+  'RETIRED_FROM_ACTIVE_LEARNING',
+  'PRACTICE_THROUGH_REAL_WORK',
+  'PRACTICE_WITH_AI_ALLOWED',
+  'ACTIVE',
+]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -171,26 +186,69 @@ function validFluencyFamily(value: unknown): boolean {
   );
 }
 
+
+function validGrowthItem(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    isNumber(value.rank) &&
+    Number.isInteger(value.rank) &&
+    value.rank >= 1 &&
+    value.rank <= 5 &&
+    isString(value.id) &&
+    isString(value.capability) &&
+    everyArray(value.skillRefs, isString) &&
+    typeof value.ownershipLane === 'string' &&
+    OWNERSHIP_LANES.has(value.ownershipLane) &&
+    typeof value.status === 'string' &&
+    GROWTH_STATUSES.has(value.status) &&
+    isString(value.whyNow) &&
+    everyArray(value.targetFacets, isString) &&
+    isString(value.learningRoute) &&
+    isString(value.practiceContract) &&
+    isString(value.evidenceTarget) &&
+    (value.projectCandidate === undefined || isString(value.projectCandidate)) &&
+    isConfidence(value.confidence)
+  );
+}
+
+function validDelegationFacet(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    isString(value.facet) &&
+    typeof value.currentLane === 'string' &&
+    OWNERSHIP_LANES.has(value.currentLane) &&
+    typeof value.learningDisposition === 'string' &&
+    LEARNING_DISPOSITIONS.has(value.learningDisposition) &&
+    isString(value.reason) &&
+    (value.learningDisposition !== 'RETIRED_FROM_ACTIVE_LEARNING' ||
+      value.currentLane === 'AI_DELEGATED')
+  );
+}
+
 function validWorkSplitItem(value: unknown): boolean {
   if (!isRecord(value)) return false;
   return isString(value.title) && isString(value.explanation);
 }
 
 export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot | null {
-  if (!isRecord(value) || value.schemaVersion !== 2) return null;
+  if (!isRecord(value) || value.schemaVersion !== 3) return null;
 
   const source = value.source;
   const market = value.market;
   const forecast = value.forecast;
   const aiFluency = value.aiFluency;
   const workSplit = value.workSplit;
+  const growth = value.growth;
+  const delegationFrontier = value.delegationFrontier;
 
   if (
     !isRecord(source) ||
     !isRecord(market) ||
     !isRecord(forecast) ||
     !isRecord(aiFluency) ||
-    !isRecord(workSplit)
+    !isRecord(workSplit) ||
+    !isRecord(growth) ||
+    !isRecord(delegationFrontier)
   ) {
     return null;
   }
@@ -221,6 +279,41 @@ export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot 
     everyArray(workSplit.withAi, validWorkSplitItem) &&
     everyArray(workSplit.delegateToAi, validWorkSplitItem);
 
+
+  const growthItems = growth.items;
+  const cycleProgress = growth.cycleProgress;
+  const growthValid =
+    everyArray(growth.targetRoleFamily, isString) &&
+    isRecord(cycleProgress) &&
+    isNumber(cycleProgress.closed) &&
+    isNumber(cycleProgress.total) &&
+    cycleProgress.closed >= 0 &&
+    cycleProgress.total >= 1 &&
+    cycleProgress.total <= 5 &&
+    cycleProgress.closed <= cycleProgress.total &&
+    isString(cycleProgress.meaning) &&
+    Array.isArray(growthItems) &&
+    growthItems.length === cycleProgress.total &&
+    growthItems.length <= 5 &&
+    growthItems.every(validGrowthItem) &&
+    growthItems.every(
+      (item) => isRecord(item) && item.ownershipLane !== 'AI_DELEGATED' && item.status !== 'DEFERRED',
+    );
+
+  const delegationFrontierValid =
+    isString(delegationFrontier.lastReviewed) &&
+    isString(delegationFrontier.model) &&
+    everyArray(
+      delegationFrontier.publicLanes,
+      (lane) => typeof lane === 'string' && OWNERSHIP_LANES.has(lane),
+    ) &&
+    Array.isArray(delegationFrontier.publicLanes) &&
+    delegationFrontier.publicLanes.length === 3 &&
+    delegationFrontier.retiredState === 'RETIRED_FROM_ACTIVE_LEARNING' &&
+    isString(delegationFrontier.queueRule) &&
+    isString(delegationFrontier.sentinelRule) &&
+    everyArray(delegationFrontier.examples, validDelegationFacet);
+
   const forecastValid =
     isString(forecast.direction) &&
     isConfidence(forecast.confidence) &&
@@ -235,6 +328,8 @@ export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot 
     !sourceValid ||
     !marketValid ||
     !workSplitValid ||
+    !growthValid ||
+    !delegationFrontierValid ||
     !forecastValid ||
     !fluencyValid ||
     !isString(value.profileSummary) ||

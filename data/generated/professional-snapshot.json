@@ -1,11 +1,11 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "9ac22c22059c6cc93ade7506f3a257ade0ddaa14",
-    "generatedAt": "2026-09-21",
-    "observedAt": "2026-09-21",
+    "commit": "802e9c611234268dee86d5de1beea37ec3957c2b",
+    "generatedAt": "2026-10-02",
+    "observedAt": "2026-10-02",
     "staleAfterDays": 45
   },
   "profileSummary": "Hoy tu base más fuerte es construir productos web y sistemas apoyados por IA. El siguiente salto no parece ser aprender otro framework: es demostrar que podés operar software real, razonar mejor sobre datos y seguridad, y usar IA sin depender ciegamente de ella.",
@@ -566,6 +566,208 @@
         "evalStatus": "OBSERVED_USE_ONLY",
         "outcomeEvidenceCount": 0,
         "nextMeasurement": "Medir si lo aprendido se transfiere a ejercicios nuevos y no sólo a material repetido."
+      }
+    ]
+  },
+  "growth": {
+    "targetRoleFamily": [
+      "Software Engineer",
+      "Full-Stack Product Engineer"
+    ],
+    "cycleProgress": {
+      "closed": 0,
+      "total": 5,
+      "meaning": "Current bounded growth queue only; not an employability or mastery percentage."
+    },
+    "items": [
+      {
+        "rank": 1,
+        "id": "GROWTH-001",
+        "capability": "Production reliability, observability and recovery",
+        "skillRefs": [
+          "production-deployment-cloud",
+          "distributed-systems-reliability",
+          "testing-debugging-verification"
+        ],
+        "ownershipLane": "HUMAN_CORE",
+        "status": "QUEUED",
+        "whyNow": "Current artifact evidence already covers guarded deployments and safe-change patterns, but direct incident diagnosis/recovery remains a high-value gap. Current full-stack/product roles repeatedly ask for CI/CD, logs/metrics/alerts, production ownership and observability.",
+        "targetFacets": [
+          "logs vs metrics vs traces",
+          "latency/error/saturation diagnosis",
+          "safe rollback and recovery",
+          "backup/restore readback",
+          "SLI/SLO basics",
+          "incident reasoning and postmortem"
+        ],
+        "learningRoute": "BOUNDED_LAB_PLUS_PROJECT_EXPERIENCE",
+        "practiceContract": "Diagnose fresh production scenarios and choose the minimum evidence needed before acting.",
+        "evidenceTarget": "One controlled failure/recovery drill with observability evidence, recovery readback and short postmortem.",
+        "projectCandidate": "Use Vida 2.0 or Football Intelligence App; do not create a new project first.",
+        "confidence": "HIGH"
+      },
+      {
+        "rank": 2,
+        "id": "GROWTH-002",
+        "capability": "SQL, relational modeling and PostgreSQL transaction reasoning",
+        "skillRefs": [
+          "sql-relational-data-modeling",
+          "postgresql-transactional-persistence"
+        ],
+        "ownershipLane": "HUMAN_CORE",
+        "status": "QUEUED",
+        "whyNow": "PostgreSQL is already part of the portfolio, while personal query/index/isolation depth is not verified. Current full-stack and data-adjacent roles repeatedly ask for complex SQL, schema design, indexes, transaction/locking and performance reasoning.",
+        "targetFacets": [
+          "joins, aggregation and window functions",
+          "constraints and schema design",
+          "indexes and selectivity",
+          "EXPLAIN/EXPLAIN ANALYZE reasoning",
+          "transactions and isolation",
+          "locking/concurrency",
+          "idempotent writes"
+        ],
+        "learningRoute": "MICRO_LAB_PLUS_DIRECT_VERIFICATION",
+        "practiceContract": "Fresh schemas/problems; write or critique SQL, inspect query evidence, reason through concurrency/failure.",
+        "evidenceTarget": "Fresh SQL/index/transaction lab solved and explained without relying on repeated examples.",
+        "confidence": "HIGH"
+      },
+      {
+        "rank": 3,
+        "id": "GROWTH-003",
+        "capability": "Architecture, APIs and failure-aware backend design",
+        "skillRefs": [
+          "software-design-architecture",
+          "requirements-specification",
+          "distributed-systems-reliability"
+        ],
+        "ownershipLane": "HUMAN_CORE",
+        "status": "QUEUED",
+        "whyNow": "Current projects contain strong boundaries, but direct trade-off reasoning remains unverified. Representative roles emphasize APIs, webhooks, retries/idempotency, background jobs, integration boundaries and clear proposals under ambiguity.",
+        "targetFacets": [
+          "service/module boundaries",
+          "REST/API contracts",
+          "webhooks and idempotency",
+          "timeouts/retries/backoff",
+          "queues/background jobs",
+          "caching and invalidation basics",
+          "failure modes and trade-offs"
+        ],
+        "learningRoute": "DIRECT_VERIFICATION_PLUS_BOUNDED_DESIGN_LAB",
+        "practiceContract": "Given a changed constraint or failure mode, redesign an existing path and explain rejected alternatives.",
+        "evidenceTarget": "Fresh design review plus one bounded backend/integration implementation if an artifact gap remains.",
+        "confidence": "HIGH"
+      },
+      {
+        "rank": 4,
+        "id": "GROWTH-004",
+        "capability": "Security, authorization and least-privilege reasoning",
+        "skillRefs": [
+          "security-privacy-least-privilege"
+        ],
+        "ownershipLane": "HUMAN_CORE",
+        "status": "QUEUED",
+        "whyNow": "Security already appears in current systems, but direct threat-model/authz reasoning is unverified. Market and broader employer signals continue to raise cybersecurity and trustworthy AI/software operation in importance.",
+        "targetFacets": [
+          "authentication vs authorization",
+          "server-side authorization",
+          "least privilege",
+          "secrets and environment boundaries",
+          "RLS/trust boundaries",
+          "common API abuse paths",
+          "basic threat modeling"
+        ],
+        "learningRoute": "DIRECT_VERIFICATION_PLUS_CODE_REVIEW",
+        "practiceContract": "Threat-model a real boundary, identify an exploit path and choose the smallest effective mitigation.",
+        "evidenceTarget": "One fresh threat-model/review artifact and direct explanation.",
+        "confidence": "MEDIUM_HIGH"
+      },
+      {
+        "rank": 5,
+        "id": "GROWTH-005",
+        "capability": "Applied LLM runtime engineering and AI-output verification",
+        "skillRefs": [
+          "applied-llm-systems",
+          "ai-native-orchestration",
+          "testing-debugging-verification"
+        ],
+        "ownershipLane": "HUMAN_PLUS_AI",
+        "status": "QUEUED",
+        "whyNow": "AI-native orchestration is already a differentiator, but retrieval/evals/latency/cost/observability evidence is incomplete. AI tooling is mainstream among developers while accuracy/debugging concerns make human verification increasingly valuable.",
+        "targetFacets": [
+          "grounding/retrieval boundaries",
+          "structured outputs and tool contracts",
+          "eval-set design",
+          "failure taxonomy",
+          "quality vs latency/cost",
+          "AI observability",
+          "permissions and fail-closed/defer behavior"
+        ],
+        "learningRoute": "CONDITIONAL_LAB",
+        "practiceContract": "Design and critique a bounded AI workflow using explicit eval and failure criteria instead of prompt intuition.",
+        "evidenceTarget": "Reproducible applied-LLM experiment with eval evidence and failure analysis if AI-native roles/projects justify it.",
+        "confidence": "MEDIUM_HIGH"
+      }
+    ]
+  },
+  "delegationFrontier": {
+    "lastReviewed": "2026-10-02",
+    "model": "TASK_FACET_ENVIRONMENT_CONSEQUENCE_VERIFICATION",
+    "publicLanes": [
+      "HUMAN_CORE",
+      "HUMAN_PLUS_AI",
+      "AI_DELEGATED"
+    ],
+    "retiredState": "RETIRED_FROM_ACTIVE_LEARNING",
+    "queueRule": "Retired facets consume no active study budget; refill the bounded top-5 queue from the next highest-value unresolved gap.",
+    "sentinelRule": "Keep only minimal periodic fresh verification for retired facets that remain safety-sensitive or prerequisite to higher-level judgment.",
+    "examples": [
+      {
+        "facet": "command, SDK and syntax recall",
+        "currentLane": "AI_DELEGATED",
+        "learningDisposition": "RETIRED_FROM_ACTIVE_LEARNING",
+        "reason": "Low durable value; easy to retrieve/generate and cheap to verify."
+      },
+      {
+        "facet": "boilerplate and repetitive CRUD implementation",
+        "currentLane": "AI_DELEGATED",
+        "learningDisposition": "RETIRED_FROM_ACTIVE_LEARNING",
+        "reason": "Mechanical implementation is a poor use of study time when acceptance criteria and verification exist."
+      },
+      {
+        "facet": "TypeScript/Next.js implementation from a decided design",
+        "currentLane": "HUMAN_PLUS_AI",
+        "learningDisposition": "PRACTICE_THROUGH_REAL_WORK",
+        "reason": "AI can accelerate implementation, but the user must understand behavior, boundaries and regressions."
+      },
+      {
+        "facet": "SQL first-draft query writing",
+        "currentLane": "HUMAN_PLUS_AI",
+        "learningDisposition": "PRACTICE_WITH_AI_ALLOWED",
+        "reason": "Drafting is highly assistable; correctness, schema semantics and performance still require judgment."
+      },
+      {
+        "facet": "SQL query-plan, index and transaction diagnosis",
+        "currentLane": "HUMAN_CORE",
+        "learningDisposition": "ACTIVE",
+        "reason": "Needed to diagnose novel failures and verify AI-generated database changes."
+      },
+      {
+        "facet": "architecture and failure-mode trade-offs",
+        "currentLane": "HUMAN_CORE",
+        "learningDisposition": "ACTIVE",
+        "reason": "Load-bearing judgment across requirements, boundaries, cost, reliability and safety."
+      },
+      {
+        "facet": "test case generation after strategy is chosen",
+        "currentLane": "HUMAN_PLUS_AI",
+        "learningDisposition": "PRACTICE_THROUGH_REAL_WORK",
+        "reason": "Generation is assistable; choosing coverage and interpreting suspicious results remains human."
+      },
+      {
+        "facet": "authz, least-privilege and trust-boundary decisions",
+        "currentLane": "HUMAN_CORE",
+        "learningDisposition": "ACTIVE",
+        "reason": "Consequential security judgment and supervision cannot currently be retired."
       }
     ]
   }
