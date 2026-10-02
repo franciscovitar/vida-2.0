@@ -1,0 +1,49 @@
+name: Format Professional Once
+
+on:
+  push:
+    branches:
+      - feat/professional-growth-frontier-v1
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format exact files
+        run: |
+          npx prettier --write \
+            data/generated/professional-snapshot.json \
+            docs/professional-intelligence.md \
+            lib/professional/contract.ts \
+            README.md \
+            tests/professional-intelligence.test.ts \
+            types/professional-intelligence.ts
+
+      - name: Upload formatted files
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatted-professional
+          path: |
+            data/generated/professional-snapshot.json
+            docs/professional-intelligence.md
+            lib/professional/contract.ts
+            README.md
+            tests/professional-intelligence.test.ts
+            types/professional-intelligence.ts
+          if-no-files-found: error
