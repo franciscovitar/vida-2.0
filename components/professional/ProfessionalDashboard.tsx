@@ -14,19 +14,23 @@ import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { CareerResilience } from '@/components/professional/CareerResilience';
+import { ProfessionalLearningHandoff } from '@/components/professional/ProfessionalLearningHandoff';
 import { TechnologyLibrary } from '@/components/professional/TechnologyLibrary';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import {
   findIntelligenceArticleForProfessionalRef,
   intelligenceArticleHref,
 } from '@/lib/intelligence/contract';
+import { buildProfessionalLearningHandoffPrompt } from '@/lib/professional/learning-handoff';
 import type {
   IntelligenceArticleSummary,
   IntelligenceEditorialData,
 } from '@/types/intelligence-editorial';
 import type {
   ProfessionalConfidence,
+  ProfessionalGrowthStatus,
   ProfessionalIntelligenceData,
+  ProfessionalOwnershipLane,
 } from '@/types/professional-intelligence';
 import type { CareerResilienceData } from '@/types/career-resilience';
 import type { TechnologyLibraryData } from '@/types/technology-library';
@@ -40,6 +44,21 @@ const CONFIDENCE_LABELS: Record<ProfessionalConfidence, string> = {
   HIGH: 'alta',
 };
 
+const OWNERSHIP_LABELS: Record<ProfessionalOwnershipLane, string> = {
+  HUMAN_CORE: 'Vos sí o sí',
+  HUMAN_PLUS_AI: 'Vos + IA',
+  AI_DELEGATED: 'Delegable a IA',
+};
+
+const GROWTH_STATUS_LABELS: Record<ProfessionalGrowthStatus, string> = {
+  QUEUED: 'Por empezar',
+  LEARNING: 'Aprendiendo',
+  PRACTICING: 'Practicando',
+  READY_FOR_VERIFICATION: 'Listo para verificar',
+  VERIFIED_FOR_CURRENT_SCOPE: 'Verificado para este alcance',
+  DEFERRED: 'Diferido',
+};
+
 const ROUTE_LABELS: Record<string, string> = {
   PROJECT_EXPERIENCE: 'Proyecto real',
   DIRECT_VERIFICATION_PLUS_BOUNDED_LAB: 'Práctica corta + verificación',
@@ -50,27 +69,6 @@ const ROUTE_EXPLANATIONS: Record<string, string> = {
     'La mejor forma de aprender esto no es mirar más teoría: es hacerlo en un sistema real y guardar evidencia de lo que pasó.',
   DIRECT_VERIFICATION_PLUS_BOUNDED_LAB:
     'La idea es resolver tareas nuevas, cortas y concretas para comprobar qué podés razonar vos, incluso usando IA como herramienta.',
-};
-
-const ACTION_TYPE_LABELS: Record<string, string> = {
-  BUILD_REAL_EVIDENCE: 'Construir evidencia real',
-  PRACTICE_AND_VERIFY: 'Practicar y comprobar',
-  VERIFY_AND_DEEPEN: 'Comprobar y profundizar',
-  LEARN_AND_BUILD_CONDITIONALLY: 'Aprender si un caso real lo justifica',
-  DIRECT_VERIFICATION: 'Comprobar criterio personal',
-};
-
-const ACTION_TYPE_EXPLANATIONS: Record<string, string> = {
-  BUILD_REAL_EVIDENCE:
-    'No alcanza con saber la teoría. Conviene dejar una prueba concreta en un proyecto que muestre que podés hacerlo.',
-  PRACTICE_AND_VERIFY:
-    'Ya hay una base. Falta resolver problemas nuevos para medir profundidad y detectar huecos.',
-  VERIFY_AND_DEEPEN:
-    'Primero comprobamos cuánto entendés hoy. Sólo después estudiamos lo que realmente falte.',
-  LEARN_AND_BUILD_CONDITIONALLY:
-    'No es urgente por sí mismo. Se activa cuando un proyecto o una oportunidad profesional lo vuelve útil.',
-  DIRECT_VERIFICATION:
-    'La pregunta no es si existe código hecho, sino si podés explicar decisiones y resolver una variante nueva.',
 };
 
 const EVIDENCE_LABELS: Record<string, string> = {
@@ -127,6 +125,14 @@ function fallbackLabel(value: string): string {
 
 function confidenceLabel(value: ProfessionalConfidence): string {
   return CONFIDENCE_LABELS[value];
+}
+
+function ownershipDomain(
+  value: ProfessionalOwnershipLane,
+): 'learning' | 'productivity' | 'neutral' {
+  if (value === 'HUMAN_CORE') return 'learning';
+  if (value === 'HUMAN_PLUS_AI') return 'productivity';
+  return 'neutral';
 }
 
 function More({ children, label = 'Ver más' }: { children: ReactNode; label?: string }) {
@@ -198,6 +204,9 @@ export function ProfessionalDashboard({
 
   const snapshot = data.snapshot;
   const editorialSnapshot = editorial?.status === 'ready' ? editorial.snapshot : null;
+  const retiredFacets = snapshot.delegationFrontier.examples.filter(
+    (item) => item.learningDisposition === 'RETIRED_FROM_ACTIVE_LEARNING',
+  );
 
   return (
     <div className={styles.stack}>
@@ -224,8 +233,8 @@ export function ProfessionalDashboard({
         <div className={styles['plain-note']}>
           <strong>Cómo leer esta pantalla:</strong>
           <span>
-            primero qué conviene hacer, después qué tenés que saber vos vs. qué conviene delegar, y
-            recién después mercado, herramientas y credenciales.
+            primero qué conviene hacer, después qué huecos están activos y qué ya conviene delegar,
+            y recién después mercado, herramientas y credenciales.
           </span>
         </div>
       </Card>
@@ -259,6 +268,134 @@ export function ProfessionalDashboard({
               </More>
             </article>
           ))}
+        </div>
+      </Card>
+
+      <Card aria-labelledby="professional-growth-title">
+        <SectionHeader
+          id="professional-growth-title"
+          title="Crecimiento / Huecos a llenar"
+          description="Las cinco capacidades activas que más vale cerrar ahora. La lista cambia cuando aparece evidencia nueva."
+          icon={Brain}
+          domain="learning"
+        />
+        <div className={styles['growth-summary']}>
+          <strong>
+            {snapshot.growth.cycleProgress.closed} / {snapshot.growth.cycleProgress.total}{' '}
+            prioridades cerradas en este ciclo
+          </strong>
+          <span>No es un porcentaje de empleabilidad ni de dominio profesional total.</span>
+        </div>
+
+        <ol className={styles['growth-list']}>
+          {snapshot.growth.items.map((item) => (
+            <li key={item.id} className={styles['growth-item']}>
+              <span className={styles.rank}>{item.rank}</span>
+              <div className={styles['growth-body']}>
+                <div className={styles['growth-title-row']}>
+                  <h3>{item.capability}</h3>
+                  <div className={styles['growth-badges']}>
+                    <Badge domain={ownershipDomain(item.ownershipLane)} variant="outline">
+                      {OWNERSHIP_LABELS[item.ownershipLane]}
+                    </Badge>
+                    <Badge domain="neutral" variant="outline">
+                      {GROWTH_STATUS_LABELS[item.status]}
+                    </Badge>
+                  </div>
+                </div>
+
+                <p className={styles['growth-copy']}>{item.whyNow}</p>
+
+                <div className={styles['growth-next']}>
+                  <strong>Próximo paso</strong>
+                  <span>{item.practiceContract}</span>
+                </div>
+
+                <ProfessionalLearningHandoff
+                  prompt={buildProfessionalLearningHandoffPrompt(
+                    item,
+                    snapshot.growth.targetRoleFamily,
+                  )}
+                />
+
+                <More label="Ver qué falta y cómo comprobarlo">
+                  <div className={styles['growth-detail-grid']}>
+                    <div>
+                      <strong>Facetas abiertas</strong>
+                      <ul className={styles['facet-list']}>
+                        {item.targetFacets.map((facet) => (
+                          <li key={facet}>{facet}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <strong>Evidencia objetivo</strong>
+                      <p>{item.evidenceTarget}</p>
+                      {item.projectCandidate ? (
+                        <p>
+                          <strong>Dónde conviene hacerlo:</strong> {item.projectCandidate}
+                        </p>
+                      ) : null}
+                      <p>
+                        <strong>Confianza de esta prioridad:</strong>{' '}
+                        {confidenceLabel(item.confidence)}.
+                      </p>
+                      <ExplainerLink
+                        article={
+                          findIntelligenceArticleForProfessionalRef(
+                            editorialSnapshot,
+                            `priority:${item.capability}`,
+                          ) ??
+                          findIntelligenceArticleForProfessionalRef(
+                            editorialSnapshot,
+                            `priority:${
+                              snapshot.priorities.find((priority) => priority.rank === item.rank)
+                                ?.capability ?? ''
+                            }`,
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                </More>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <div className={styles['frontier-review']}>
+          <div className={styles['frontier-head']}>
+            <strong>Lo que ya salió del estudio activo</strong>
+            <span>
+              Última revisión de delegación:{' '}
+              <time dateTime={snapshot.delegationFrontier.lastReviewed}>
+                {snapshot.delegationFrontier.lastReviewed}
+              </time>
+            </span>
+          </div>
+          <p>
+            Estas tareas no cuentan como dominio personal: simplemente ya no justifican gastar
+            tiempo de estudio mientras la IA las resuelva de forma verificable.
+          </p>
+          {retiredFacets.length > 0 ? (
+            <ul className={styles['retired-list']}>
+              {retiredFacets.map((item) => (
+                <li key={item.facet}>
+                  <div className={styles['item-head']}>
+                    <strong>{item.facet}</strong>
+                    <Badge domain="neutral" variant="outline">
+                      Salió del estudio activo
+                    </Badge>
+                  </div>
+                  <span>{item.reason}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span className={styles['frontier-empty']}>
+              Todavía no hay facetas retiradas del estudio activo.
+            </span>
+          )}
         </div>
       </Card>
 
@@ -323,77 +460,33 @@ export function ProfessionalDashboard({
         </div>
       </Card>
 
-      <div className={styles.columns}>
-        <Card aria-labelledby="professional-priority-title">
-          <SectionHeader
-            id="professional-priority-title"
-            title="Tus prioridades profesionales"
-            description="Qué capacidad conviene fortalecer o demostrar primero."
-            icon={Brain}
-            domain="learning"
-          />
-          <ol className={styles['priority-list']}>
-            {snapshot.priorities.map((item) => (
-              <li key={item.rank}>
-                <span className={styles.rank}>{item.rank}</span>
-                <div>
-                  <strong>{item.capability}</strong>
-                  <p>{item.action}</p>
-                  <More>
-                    <p>
-                      <strong>Qué significa:</strong>{' '}
-                      {ACTION_TYPE_EXPLANATIONS[item.actionType] ??
-                        'Es una acción concreta para convertir una duda en evidencia.'}
-                    </p>
-                    <p>
-                      <strong>Tipo de avance:</strong>{' '}
-                      {ACTION_TYPE_LABELS[item.actionType] ?? fallbackLabel(item.actionType)}.
-                    </p>
-                    <p>
-                      <strong>Qué tan segura es esta prioridad:</strong>{' '}
-                      {confidenceLabel(item.confidence)}.
-                    </p>
-                    <ExplainerLink
-                      article={findIntelligenceArticleForProfessionalRef(
-                        editorialSnapshot,
-                        `priority:${item.capability}`,
-                      )}
-                    />
-                  </More>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </Card>
-
-        <Card aria-labelledby="professional-evidence-title">
-          <SectionHeader
-            id="professional-evidence-title"
-            title="Lo que ya podés demostrar"
-            description="Capacidades respaldadas por trabajo real, no sólo por autodescripción."
-            icon={ShieldCheck}
-            domain="projects"
-          />
-          <ul className={styles['simple-list']}>
-            {snapshot.strongestEvidence.map((item) => (
-              <li key={item.capability}>
-                <div className={styles['item-head']}>
-                  <strong>{item.capability}</strong>
-                  <Badge domain="projects" variant="outline">
-                    {EVIDENCE_LABELS[item.state] ?? fallbackLabel(item.state)}
-                  </Badge>
-                </div>
-                <More>
-                  <p>{item.note}</p>
-                  <p>
-                    <strong>Confianza de esta lectura:</strong> {confidenceLabel(item.confidence)}.
-                  </p>
-                </More>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
+      <Card aria-labelledby="professional-evidence-title">
+        <SectionHeader
+          id="professional-evidence-title"
+          title="Lo que ya podés demostrar"
+          description="Capacidades respaldadas por trabajo real, no sólo por autodescripción."
+          icon={ShieldCheck}
+          domain="projects"
+        />
+        <ul className={styles['simple-list']}>
+          {snapshot.strongestEvidence.map((item) => (
+            <li key={item.capability}>
+              <div className={styles['item-head']}>
+                <strong>{item.capability}</strong>
+                <Badge domain="projects" variant="outline">
+                  {EVIDENCE_LABELS[item.state] ?? fallbackLabel(item.state)}
+                </Badge>
+              </div>
+              <More>
+                <p>{item.note}</p>
+                <p>
+                  <strong>Confianza de esta lectura:</strong> {confidenceLabel(item.confidence)}.
+                </p>
+              </More>
+            </li>
+          ))}
+        </ul>
+      </Card>
 
       <Card aria-labelledby="professional-market-title">
         <SectionHeader

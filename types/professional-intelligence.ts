@@ -1,5 +1,20 @@
 export type ProfessionalConfidence = 'LOW' | 'MEDIUM' | 'MEDIUM_HIGH' | 'HIGH';
 
+export type ProfessionalOwnershipLane = 'HUMAN_CORE' | 'HUMAN_PLUS_AI' | 'AI_DELEGATED';
+
+export type ProfessionalGrowthStatus =
+  | 'QUEUED'
+  | 'LEARNING'
+  | 'PRACTICING'
+  | 'READY_FOR_VERIFICATION'
+  | 'VERIFIED_FOR_CURRENT_SCOPE'
+  | 'DEFERRED';
+
+export type ProfessionalLearningSessionMode = 'ONE_PRACTICAL_SCENARIO_AT_A_TIME';
+
+export type ProfessionalAiAssistanceMode =
+  'ATTEMPT_FIRST' | 'AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION';
+
 export type ProfessionalSourceStatus = 'ready' | 'missing' | 'invalid';
 
 export interface ProfessionalNowMove {
@@ -131,8 +146,65 @@ export interface ProfessionalWorkSplit {
   delegateToAi: readonly ProfessionalWorkSplitItem[];
 }
 
+export interface ProfessionalGrowthCycleProgress {
+  closed: number;
+  total: number;
+  meaning: string;
+}
+
+export interface ProfessionalLearningHandoff {
+  sessionMode: ProfessionalLearningSessionMode;
+  aiAssistanceMode: ProfessionalAiAssistanceMode;
+  mustDemonstrate: readonly string[];
+  freshEvidenceRule: string;
+}
+
+export interface ProfessionalGrowthItem {
+  rank: number;
+  id: string;
+  capability: string;
+  skillRefs: readonly string[];
+  ownershipLane: ProfessionalOwnershipLane;
+  status: ProfessionalGrowthStatus;
+  whyNow: string;
+  targetFacets: readonly string[];
+  learningRoute: string;
+  practiceContract: string;
+  learningHandoff: ProfessionalLearningHandoff;
+  evidenceTarget: string;
+  projectCandidate?: string;
+  confidence: ProfessionalConfidence;
+}
+
+export interface ProfessionalGrowthView {
+  targetRoleFamily: readonly string[];
+  cycleProgress: ProfessionalGrowthCycleProgress;
+  items: readonly ProfessionalGrowthItem[];
+}
+
+export interface ProfessionalDelegationFacet {
+  facet: string;
+  currentLane: ProfessionalOwnershipLane;
+  learningDisposition:
+    | 'RETIRED_FROM_ACTIVE_LEARNING'
+    | 'PRACTICE_THROUGH_REAL_WORK'
+    | 'PRACTICE_WITH_AI_ALLOWED'
+    | 'ACTIVE';
+  reason: string;
+}
+
+export interface ProfessionalDelegationFrontier {
+  lastReviewed: string;
+  model: string;
+  publicLanes: readonly ProfessionalOwnershipLane[];
+  retiredState: 'RETIRED_FROM_ACTIVE_LEARNING';
+  queueRule: string;
+  sentinelRule: string;
+  examples: readonly ProfessionalDelegationFacet[];
+}
+
 export interface ProfessionalSnapshot {
-  schemaVersion: 2;
+  schemaVersion: 4;
   source: {
     repository: 'franciscovitar/personal-ai-system';
     ref: 'main';
@@ -146,6 +218,8 @@ export interface ProfessionalSnapshot {
   strongestEvidence: readonly ProfessionalEvidenceItem[];
   priorities: readonly ProfessionalPriorityItem[];
   workSplit: ProfessionalWorkSplit;
+  growth: ProfessionalGrowthView;
+  delegationFrontier: ProfessionalDelegationFrontier;
   market: ProfessionalMarketView;
   technologies: readonly ProfessionalTechnologyItem[];
   learning: readonly ProfessionalLearningItem[];

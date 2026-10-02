@@ -14,7 +14,7 @@ function snapshotText(): string {
   return readFileSync(snapshotPath, 'utf8');
 }
 
-test('PRO-01. snapshot V2 válido, sanitizado y con provenance de PAS main', () => {
+test('PRO-01. snapshot V4 válido, sanitizado y con provenance de PAS main', () => {
   const raw = snapshotText();
   const parsed = parseProfessionalSnapshot(JSON.parse(raw));
 
@@ -22,7 +22,7 @@ test('PRO-01. snapshot V2 válido, sanitizado y con provenance de PAS main', () 
   assert.equal(parsed.source.repository, 'franciscovitar/personal-ai-system');
   assert.equal(parsed.source.ref, 'main');
   assert.match(parsed.source.commit, /^[a-f0-9]{40}$/);
-  assert.equal(parsed.schemaVersion, 2);
+  assert.equal(parsed.schemaVersion, 4);
 
   assert.doesNotMatch(raw, /drive\.google\.com/i);
   assert.doesNotMatch(raw, /NOTION_API_TOKEN|GOOGLE_PRIVATE_KEY|AUTH_SECRET/);
@@ -52,12 +52,27 @@ test('PRO-03. snapshot corrupto o fuera de contrato falla cerrado', () => {
 });
 
 test('PRO-04. frescura se deriva del snapshot y se hace visible', () => {
-  const fresh = resolveProfessionalSnapshotText(snapshotText(), new Date('2026-09-21T12:00:00Z'));
+  const raw = snapshotText();
+  const source = (
+    JSON.parse(raw) as {
+      source: { observedAt: string; staleAfterDays: number };
+    }
+  ).source;
+  const observedAt = new Date(`${source.observedAt}T00:00:00Z`);
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  const fresh = resolveProfessionalSnapshotText(
+    raw,
+    new Date(observedAt.getTime() + source.staleAfterDays * dayMs),
+  );
   assert.equal(fresh.status, 'ready');
   assert.equal(fresh.stale, false);
   assert.equal(fresh.notice, null);
 
-  const stale = resolveProfessionalSnapshotText(snapshotText(), new Date('2026-11-10T12:00:00Z'));
+  const stale = resolveProfessionalSnapshotText(
+    raw,
+    new Date(observedAt.getTime() + (source.staleAfterDays + 1) * dayMs),
+  );
   assert.equal(stale.status, 'ready');
   assert.equal(stale.stale, true);
   assert.match(stale.notice ?? '', /necesita refresh/i);
@@ -297,4 +312,135 @@ test('PRO-18. UI explica que los porcentajes no son probabilidad personal de des
   assert.match(source, /no son la\s+probabilidad de que vos pierdas tu trabajo/);
   assert.match(source, /Cómo protegerte/);
   assert.match(source, /Compresión de equipo/);
+});
+
+test('PRO-19. growth queue queda acotada y sólo contiene aprendizaje activo humano o humano+IA', () => {
+  const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
+  assert.ok(parsed);
+
+  assert.ok(parsed.growth.items.length > 0);
+  assert.ok(parsed.growth.items.length <= 5);
+  assert.equal(parsed.growth.cycleProgress.total, parsed.growth.items.length);
+  assert.equal(
+    parsed.growth.items.every(
+      (item) => item.ownershipLane !== 'AI_DELEGATED' && item.status !== 'DEFERRED',
+    ),
+    true,
+  );
+});
+
+test('PRO-20. Delegation Frontier conserva ownership por faceta, frescura y retiro explícito', () => {
+  const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
+  assert.ok(parsed);
+
+  assert.deepEqual(parsed.delegationFrontier.publicLanes, [
+    'HUMAN_CORE',
+    'HUMAN_PLUS_AI',
+    'AI_DELEGATED',
+  ]);
+  assert.equal(parsed.delegationFrontier.lastReviewed, '2026-10-02');
+  assert.ok(parsed.delegationFrontier.examples.length > 0);
+
+  const retired = parsed.delegationFrontier.examples.filter(
+    (item) => item.learningDisposition === 'RETIRED_FROM_ACTIVE_LEARNING',
+  );
+  assert.ok(retired.length > 0);
+  assert.equal(
+    retired.every((item) => item.currentLane === 'AI_DELEGATED'),
+    true,
+  );
+});
+
+test('PRO-21. contrato rechaza que una faceta delegada consuma un slot del top-5 activo', () => {
+  const value = JSON.parse(snapshotText()) as {
+    growth: { items: Array<{ ownershipLane: string }> };
+  };
+  value.growth.items[0].ownershipLane = 'AI_DELEGATED';
+
+  assert.equal(parseProfessionalSnapshot(value), null);
+});
+
+test('PRO-22. UI muestra el Growth Loop actual con ownership, estado y evidencia objetivo', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+
+  assert.match(source, /Crecimiento \/ Huecos a llenar/);
+  assert.match(source, /prioridades\s+cerradas en este ciclo/);
+  assert.match(source, /Vos sí o sí/);
+  assert.match(source, /Vos \+ IA/);
+  assert.match(source, /Por empezar/);
+  assert.match(source, /Próximo paso/);
+  assert.match(source, /Evidencia objetivo/);
+  assert.match(source, /Última revisión de delegación/);
+});
+
+test('PRO-23. UI retira la lista legacy duplicada y explica qué salió del estudio activo', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+
+  assert.doesNotMatch(source, /snapshot\.priorities\.map/);
+  assert.doesNotMatch(source, /Tus prioridades profesionales/);
+  assert.match(source, /RETIRED_FROM_ACTIVE_LEARNING/);
+  assert.match(source, /Salió del estudio activo/);
+  assert.match(source, /no cuentan como dominio personal/);
+});
+
+test('PRO-24. UI profesional sigue siendo read-only para ownership y evita score universal', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+
+  assert.doesNotMatch(source, /setOwnership|updateOwnership|cambiar ownership/i);
+  assert.match(source, /No es un porcentaje de empleabilidad ni de dominio profesional total/);
+});
+
+test('PRO-25. cada Growth item lleva un Verification Blueprint canónico', () => {
+  const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
+  assert.ok(parsed);
+
+  assert.equal(
+    parsed.growth.items.every(
+      (item) =>
+        item.learningHandoff.sessionMode === 'ONE_PRACTICAL_SCENARIO_AT_A_TIME' &&
+        item.learningHandoff.mustDemonstrate.length > 0 &&
+        item.learningHandoff.freshEvidenceRule.length > 0,
+    ),
+    true,
+  );
+});
+
+test('PRO-26. contrato rechaza un learning handoff incompleto o con modo de IA inválido', () => {
+  const missing = JSON.parse(snapshotText()) as {
+    growth: { items: Array<{ learningHandoff?: unknown }> };
+  };
+  delete missing.growth.items[0].learningHandoff;
+  assert.equal(parseProfessionalSnapshot(missing), null);
+
+  const invalid = JSON.parse(snapshotText()) as {
+    growth: { items: Array<{ learningHandoff: { aiAssistanceMode: string } }> };
+  };
+  invalid.growth.items[0].learningHandoff.aiAssistanceMode = 'BLIND_AI';
+  assert.equal(parseProfessionalSnapshot(invalid), null);
+});
+
+test('PRO-27. UI sólo transporta el handoff y ofrece copiar la práctica adaptativa', () => {
+  const dashboardSource = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+  const handoffSource = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalLearningHandoff.tsx'),
+    'utf8',
+  );
+
+  assert.match(dashboardSource, /buildProfessionalLearningHandoffPrompt/);
+  assert.match(dashboardSource, /ProfessionalLearningHandoff/);
+  assert.match(handoffSource, /Copiar práctica para ChatGPT/);
+  assert.match(handoffSource, /navigator\.clipboard\.writeText/);
+  assert.doesNotMatch(handoffSource, /ownershipLane\s*=|mastery\s*=|fetch\(/i);
 });

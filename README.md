@@ -7,6 +7,7 @@
 **Architecture.** Next.js, React and TypeScript application integrating Notion, Google Sheets and Google Calendar through explicit source boundaries. The web layer composes derived views while each external system keeps its defined authority.
 
 **Engineering decisions.**
+
 - Fail closed when a configured real source is unavailable instead of silently substituting mock data.
 - Keep advanced capabilities behind explicit feature flags and environment checks.
 - Separate read-only integrations from bounded write paths; use idempotency, policy checks and reversible-write patterns where writes exist.
