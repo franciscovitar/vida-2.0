@@ -10,6 +10,12 @@ export type ProfessionalGrowthStatus =
   | 'VERIFIED_FOR_CURRENT_SCOPE'
   | 'DEFERRED';
 
+export type ProfessionalLearningSessionMode = 'ONE_PRACTICAL_SCENARIO_AT_A_TIME';
+
+export type ProfessionalAiAssistanceMode =
+  | 'ATTEMPT_FIRST'
+  | 'AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION';
+
 export type ProfessionalSourceStatus = 'ready' | 'missing' | 'invalid';
 
 export interface ProfessionalNowMove {
@@ -147,6 +153,13 @@ export interface ProfessionalGrowthCycleProgress {
   meaning: string;
 }
 
+export interface ProfessionalLearningHandoff {
+  sessionMode: ProfessionalLearningSessionMode;
+  aiAssistanceMode: ProfessionalAiAssistanceMode;
+  mustDemonstrate: readonly string[];
+  freshEvidenceRule: string;
+}
+
 export interface ProfessionalGrowthItem {
   rank: number;
   id: string;
@@ -158,6 +171,7 @@ export interface ProfessionalGrowthItem {
   targetFacets: readonly string[];
   learningRoute: string;
   practiceContract: string;
+  learningHandoff: ProfessionalLearningHandoff;
   evidenceTarget: string;
   projectCandidate?: string;
   confidence: ProfessionalConfidence;
@@ -191,7 +205,7 @@ export interface ProfessionalDelegationFrontier {
 }
 
 export interface ProfessionalSnapshot {
-  schemaVersion: 3;
+  schemaVersion: 4;
   source: {
     repository: 'franciscovitar/personal-ai-system';
     ref: 'main';

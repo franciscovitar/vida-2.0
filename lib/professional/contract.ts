@@ -6,6 +6,11 @@ import type {
 
 const CONFIDENCE = new Set<ProfessionalConfidence>(['LOW', 'MEDIUM', 'MEDIUM_HIGH', 'HIGH']);
 const OWNERSHIP_LANES = new Set(['HUMAN_CORE', 'HUMAN_PLUS_AI', 'AI_DELEGATED']);
+const LEARNING_SESSION_MODES = new Set(['ONE_PRACTICAL_SCENARIO_AT_A_TIME']);
+const AI_ASSISTANCE_MODES = new Set([
+  'ATTEMPT_FIRST',
+  'AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION',
+]);
 const GROWTH_STATUSES = new Set([
   'QUEUED',
   'LEARNING',
@@ -186,6 +191,19 @@ function validFluencyFamily(value: unknown): boolean {
   );
 }
 
+function validLearningHandoff(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.sessionMode === 'string' &&
+    LEARNING_SESSION_MODES.has(value.sessionMode) &&
+    typeof value.aiAssistanceMode === 'string' &&
+    AI_ASSISTANCE_MODES.has(value.aiAssistanceMode) &&
+    everyArray(value.mustDemonstrate, isString) &&
+    value.mustDemonstrate.length > 0 &&
+    isString(value.freshEvidenceRule)
+  );
+}
+
 function validGrowthItem(value: unknown): boolean {
   if (!isRecord(value)) return false;
   return (
@@ -204,6 +222,7 @@ function validGrowthItem(value: unknown): boolean {
     everyArray(value.targetFacets, isString) &&
     isString(value.learningRoute) &&
     isString(value.practiceContract) &&
+    validLearningHandoff(value.learningHandoff) &&
     isString(value.evidenceTarget) &&
     (value.projectCandidate === undefined || isString(value.projectCandidate)) &&
     isConfidence(value.confidence)
@@ -230,7 +249,7 @@ function validWorkSplitItem(value: unknown): boolean {
 }
 
 export function parseProfessionalSnapshot(value: unknown): ProfessionalSnapshot | null {
-  if (!isRecord(value) || value.schemaVersion !== 3) return null;
+  if (!isRecord(value) || value.schemaVersion !== 4) return null;
 
   const source = value.source;
   const market = value.market;

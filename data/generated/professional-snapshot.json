@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "802e9c611234268dee86d5de1beea37ec3957c2b",
+    "commit": "8017c7863933ff97cfe4af95e965d8a1628b3f07",
     "generatedAt": "2026-10-02",
     "observedAt": "2026-10-02",
     "staleAfterDays": 45
@@ -599,6 +599,16 @@
         ],
         "learningRoute": "BOUNDED_LAB_PLUS_PROJECT_EXPERIENCE",
         "practiceContract": "Diagnosticar escenarios nuevos de producción y elegir la evidencia mínima necesaria antes de actuar.",
+        "learningHandoff": {
+          "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
+          "aiAssistanceMode": "ATTEMPT_FIRST",
+          "mustDemonstrate": [
+            "Elegir las señales mínimas útiles de producción antes de actuar y distinguir logs, métricas y trazas.",
+            "Diagnosticar un cuello de botella o modo de fallo probable a partir de evidencia nueva, no de intuición.",
+            "Elegir un camino seguro de rollback o recuperación y explicar cómo verificar que la recuperación funcionó."
+          ],
+          "freshEvidenceRule": "Usar un escenario de incidente o ejercicio controlado nuevo; primero tenés que comprometerte con un diagnóstico y una acción antes de recibir la corrección."
+        },
         "evidenceTarget": "Un ejercicio controlado de fallo y recuperación con evidencia de observabilidad, verificación de recuperación y un postmortem corto.",
         "projectCandidate": "Usar Vida 2.0 o Football Intelligence App; no crear un proyecto nuevo primero.",
         "confidence": "HIGH"
@@ -622,6 +632,16 @@
         ],
         "learningRoute": "MICRO_LAB_PLUS_DIRECT_VERIFICATION",
         "practiceContract": "Trabajar con esquemas y problemas nuevos: escribir o criticar SQL, inspeccionar evidencia de consultas y razonar sobre concurrencia y fallos.",
+        "learningHandoff": {
+          "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
+          "aiAssistanceMode": "ATTEMPT_FIRST",
+          "mustDemonstrate": [
+            "Escribir o criticar SQL sobre un esquema nuevo preservando la semántica buscada.",
+            "Usar evidencia de la consulta para razonar sobre índices y selectividad, no agregar índices por intuición.",
+            "Razonar correctamente sobre aislamiento, locking, concurrencia y escrituras idempotentes en un caso nuevo."
+          ],
+          "freshEvidenceRule": "Usar un esquema, consulta o caso de concurrencia nuevo; ejemplos familiares o patrones repetidos no alcanzan como verificación."
+        },
         "evidenceTarget": "Un laboratorio nuevo de SQL, índices y transacciones resuelto y explicado sin depender de ejemplos repetidos.",
         "confidence": "HIGH"
       },
@@ -648,6 +668,16 @@
         ],
         "learningRoute": "DIRECT_VERIFICATION_PLUS_BOUNDED_DESIGN_LAB",
         "practiceContract": "Ante una restricción o modo de fallo nuevo, rediseñar un camino existente y explicar por qué descartaste otras alternativas.",
+        "learningHandoff": {
+          "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
+          "aiAssistanceMode": "ATTEMPT_FIRST",
+          "mustDemonstrate": [
+            "Elegir límites entre servicios, módulos y APIs a partir de requisitos y restricciones de fallo.",
+            "Diseñar retries, idempotencia, colas, background jobs y timeouts para un escenario modificado.",
+            "Explicar alternativas descartadas y los trade-offs de confiabilidad, costo y complejidad."
+          ],
+          "freshEvidenceRule": "Usar una restricción o modo de fallo que no hayas practicado antes y exigir una decisión de diseño explícita con explicación de trade-offs."
+        },
         "evidenceTarget": "Una revisión de diseño nueva más una implementación acotada de backend/integración si todavía queda un hueco de evidencia.",
         "confidence": "HIGH"
       },
@@ -670,6 +700,16 @@
         ],
         "learningRoute": "DIRECT_VERIFICATION_PLUS_CODE_REVIEW",
         "practiceContract": "Hacer threat modeling de un límite real, identificar una ruta de explotación y elegir la mitigación efectiva más pequeña.",
+        "learningHandoff": {
+          "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
+          "aiAssistanceMode": "ATTEMPT_FIRST",
+          "mustDemonstrate": [
+            "Identificar autenticación, autorización y límites de confianza en una parte nueva de un sistema.",
+            "Encontrar una ruta plausible de abuso o escalada de privilegios.",
+            "Elegir la mitigación efectiva más pequeña con mínimo privilegio y explicar el riesgo residual."
+          ],
+          "freshEvidenceRule": "Usar un límite o caso de abuso nuevo; primero tenés que identificar la amenaza y la mitigación antes de ver la respuesta del modelo."
+        },
         "evidenceTarget": "Un artefacto nuevo de threat model/revisión y una explicación directa.",
         "confidence": "MEDIUM_HIGH"
       },
@@ -696,6 +736,16 @@
         ],
         "learningRoute": "CONDITIONAL_LAB",
         "practiceContract": "Diseñar y criticar un workflow de IA acotado usando criterios explícitos de evaluación y fallo, no intuición de prompts.",
+        "learningHandoff": {
+          "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
+          "aiAssistanceMode": "AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION",
+          "mustDemonstrate": [
+            "Definir límites de grounding y herramientas, junto con criterios explícitos de éxito y fallo antes de implementar.",
+            "Diseñar un eval set o una taxonomía de fallos capaz de detectar regresiones de calidad.",
+            "Interpretar evidencia de calidad, latencia, costo y observabilidad y decidir si el workflow es aceptable."
+          ],
+          "freshEvidenceRule": "Usar un workflow de IA nuevo o una restricción de fallo modificada; la IA puede ayudar a ejecutar, pero vos definís los criterios e interpretás personalmente la evidencia."
+        },
         "evidenceTarget": "Un experimento reproducible con LLM aplicado, evidencia de evals y análisis de fallos si un rol o proyecto AI-native lo justifica.",
         "confidence": "MEDIUM_HIGH"
       }
