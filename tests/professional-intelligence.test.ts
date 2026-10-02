@@ -399,7 +399,6 @@ test('PRO-24. UI profesional sigue siendo read-only para ownership y evita score
   assert.match(source, /No es un porcentaje de empleabilidad ni de dominio profesional total/);
 });
 
-
 test('PRO-25. cada Growth item lleva un Verification Blueprint canónico', () => {
   const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
   assert.ok(parsed);

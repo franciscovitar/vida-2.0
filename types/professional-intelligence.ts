@@ -13,8 +13,7 @@ export type ProfessionalGrowthStatus =
 export type ProfessionalLearningSessionMode = 'ONE_PRACTICAL_SCENARIO_AT_A_TIME';
 
 export type ProfessionalAiAssistanceMode =
-  | 'ATTEMPT_FIRST'
-  | 'AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION';
+  'ATTEMPT_FIRST' | 'AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION';
 
 export type ProfessionalSourceStatus = 'ready' | 'missing' | 'invalid';
 

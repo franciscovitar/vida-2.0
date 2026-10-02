@@ -155,7 +155,6 @@ If later evidence shows repeated rework, unsafe output, stronger market demand f
 
 Adaptive practice remains owned by Learning OS. The snapshot only carries the current target, facets and routing state.
 
-
 ## Adaptive Learning handoff
 
 Each active Growth item carries a canonical read-only `learningHandoff`:
@@ -170,6 +169,7 @@ Vida 2.0 does not infer those rules from the ownership badge. The server-side pr
 The client CTA only copies that prompt. It does not write mastery, ownership or Professional state.
 
 Current V1 behavior:
+
 - `HUMAN_CORE` -> `ATTEMPT_FIRST`;
 - `HUMAN_PLUS_AI` -> `AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION`;
 - one practical scenario at a time;
