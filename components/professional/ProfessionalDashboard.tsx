@@ -279,8 +279,8 @@ export function ProfessionalDashboard({
         />
         <div className={styles['growth-summary']}>
           <strong>
-            {snapshot.growth.cycleProgress.closed} / {snapshot.growth.cycleProgress.total} prioridades
-            cerradas en este ciclo
+            {snapshot.growth.cycleProgress.closed} / {snapshot.growth.cycleProgress.total}{' '}
+            prioridades cerradas en este ciclo
           </strong>
           <span>No es un porcentaje de empleabilidad ni de dominio profesional total.</span>
         </div>
@@ -365,8 +365,8 @@ export function ProfessionalDashboard({
             </span>
           </div>
           <p>
-            Estas tareas no cuentan como dominio personal: simplemente ya no justifican gastar tiempo
-            de estudio mientras la IA las resuelva de forma verificable.
+            Estas tareas no cuentan como dominio personal: simplemente ya no justifican gastar
+            tiempo de estudio mientras la IA las resuelva de forma verificable.
           </p>
           {retiredFacets.length > 0 ? (
             <ul className={styles['retired-list']}>

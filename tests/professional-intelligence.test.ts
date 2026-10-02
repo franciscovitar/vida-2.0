@@ -360,7 +360,6 @@ test('PRO-21. contrato rechaza que una faceta delegada consuma un slot del top-5
   assert.equal(parseProfessionalSnapshot(value), null);
 });
 
-
 test('PRO-22. UI muestra el Growth Loop actual con ownership, estado y evidencia objetivo', () => {
   const source = readFileSync(
     join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
@@ -397,8 +396,5 @@ test('PRO-24. UI profesional sigue siendo read-only para ownership y evita score
   );
 
   assert.doesNotMatch(source, /setOwnership|updateOwnership|cambiar ownership/i);
-  assert.match(
-    source,
-    /No es un porcentaje de empleabilidad ni de dominio profesional total/,
-  );
+  assert.match(source, /No es un porcentaje de empleabilidad ni de dominio profesional total/);
 });
