@@ -397,5 +397,8 @@ test('PRO-24. UI profesional sigue siendo read-only para ownership y evita score
   );
 
   assert.doesNotMatch(source, /setOwnership|updateOwnership|cambiar ownership/i);
-  assert.match(source, /No es un porcentaje de empleabilidad ni de dominio profesional total/);
+  assert.match(
+    source,
+    /No es un porcentaje de empleabilidad ni de dominio profesional total/,
+  );
 });

@@ -269,7 +269,6 @@ export function ProfessionalDashboard({
         </div>
       </Card>
 
-
       <Card aria-labelledby="professional-growth-title">
         <SectionHeader
           id="professional-growth-title"
@@ -438,32 +437,32 @@ export function ProfessionalDashboard({
       </Card>
 
       <Card aria-labelledby="professional-evidence-title">
-  <SectionHeader
-    id="professional-evidence-title"
-    title="Lo que ya podés demostrar"
-    description="Capacidades respaldadas por trabajo real, no sólo por autodescripción."
-    icon={ShieldCheck}
-    domain="projects"
-  />
-  <ul className={styles['simple-list']}>
-    {snapshot.strongestEvidence.map((item) => (
-      <li key={item.capability}>
-        <div className={styles['item-head']}>
-          <strong>{item.capability}</strong>
-          <Badge domain="projects" variant="outline">
-            {EVIDENCE_LABELS[item.state] ?? fallbackLabel(item.state)}
-          </Badge>
-        </div>
-        <More>
-          <p>{item.note}</p>
-          <p>
-            <strong>Confianza de esta lectura:</strong> {confidenceLabel(item.confidence)}.
-          </p>
-        </More>
-      </li>
-    ))}
-  </ul>
-</Card>
+        <SectionHeader
+          id="professional-evidence-title"
+          title="Lo que ya podés demostrar"
+          description="Capacidades respaldadas por trabajo real, no sólo por autodescripción."
+          icon={ShieldCheck}
+          domain="projects"
+        />
+        <ul className={styles['simple-list']}>
+          {snapshot.strongestEvidence.map((item) => (
+            <li key={item.capability}>
+              <div className={styles['item-head']}>
+                <strong>{item.capability}</strong>
+                <Badge domain="projects" variant="outline">
+                  {EVIDENCE_LABELS[item.state] ?? fallbackLabel(item.state)}
+                </Badge>
+              </div>
+              <More>
+                <p>{item.note}</p>
+                <p>
+                  <strong>Confianza de esta lectura:</strong> {confidenceLabel(item.confidence)}.
+                </p>
+              </More>
+            </li>
+          ))}
+        </ul>
+      </Card>
 
       <Card aria-labelledby="professional-market-title">
         <SectionHeader
