@@ -331,6 +331,21 @@ export function ProfessionalDashboard({
                         <strong>Confianza de esta prioridad:</strong>{' '}
                         {confidenceLabel(item.confidence)}.
                       </p>
+                      <ExplainerLink
+                        article={
+                          findIntelligenceArticleForProfessionalRef(
+                            editorialSnapshot,
+                            `priority:${item.capability}`,
+                          ) ??
+                          findIntelligenceArticleForProfessionalRef(
+                            editorialSnapshot,
+                            `priority:${
+                              snapshot.priorities.find((priority) => priority.rank === item.rank)
+                                ?.capability ?? ''
+                            }`,
+                          )
+                        }
+                      />
                     </div>
                   </div>
                 </More>
