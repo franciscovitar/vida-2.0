@@ -198,8 +198,9 @@ function validLearningHandoff(value: unknown): boolean {
     LEARNING_SESSION_MODES.has(value.sessionMode) &&
     typeof value.aiAssistanceMode === 'string' &&
     AI_ASSISTANCE_MODES.has(value.aiAssistanceMode) &&
-    everyArray(value.mustDemonstrate, isString) &&
+    Array.isArray(value.mustDemonstrate) &&
     value.mustDemonstrate.length > 0 &&
+    value.mustDemonstrate.every(isString) &&
     isString(value.freshEvidenceRule)
   );
 }
