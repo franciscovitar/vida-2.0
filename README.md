@@ -1,5 +1,25 @@
 # Vida 2.0
 
+## Recruiter / Engineering Snapshot
+
+**Problem.** Build one useful personal operating surface without copying authoritative personal data into a second source of truth.
+
+**Architecture.** Next.js, React and TypeScript application integrating Notion, Google Sheets and Google Calendar through explicit source boundaries. The web layer composes derived views while each external system keeps its defined authority.
+
+**Engineering decisions.**
+- Fail closed when a configured real source is unavailable instead of silently substituting mock data.
+- Keep advanced capabilities behind explicit feature flags and environment checks.
+- Separate read-only integrations from bounded write paths; use idempotency, policy checks and reversible-write patterns where writes exist.
+- Keep private data, credentials and source identifiers outside the public repository.
+
+**Verification & safety surface.** The repository exposes static checks, automated tests, production verification and a sanitized Preview preflight through `npm run check`, `npm test`, `npm run verify` and `npm run preview:check`. Those are the project’s verification paths; this snapshot does not claim they were rerun for this README-only change.
+
+**Current status.** Active personal system. The repository documents the product and its engineering boundaries; real personal data and secrets remain outside the public codebase.
+
+**Links:** [Portfolio case study](https://franciscovitar.vercel.app/work/vida-2) · [Repository](https://github.com/franciscovitar/vida-2.0)
+
+---
+
 Aplicación web personal para centralizar Vida 2.0: hábitos, salud, sueño, productividad,
 proyectos, tareas, aprendizaje y otras áreas en una sola interfaz autenticada.
 
