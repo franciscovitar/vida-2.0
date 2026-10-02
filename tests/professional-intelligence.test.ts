@@ -52,12 +52,27 @@ test('PRO-03. snapshot corrupto o fuera de contrato falla cerrado', () => {
 });
 
 test('PRO-04. frescura se deriva del snapshot y se hace visible', () => {
-  const fresh = resolveProfessionalSnapshotText(snapshotText(), new Date('2026-09-21T12:00:00Z'));
+  const raw = snapshotText();
+  const source = (
+    JSON.parse(raw) as {
+      source: { observedAt: string; staleAfterDays: number };
+    }
+  ).source;
+  const observedAt = new Date(`${source.observedAt}T00:00:00Z`);
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  const fresh = resolveProfessionalSnapshotText(
+    raw,
+    new Date(observedAt.getTime() + source.staleAfterDays * dayMs),
+  );
   assert.equal(fresh.status, 'ready');
   assert.equal(fresh.stale, false);
   assert.equal(fresh.notice, null);
 
-  const stale = resolveProfessionalSnapshotText(snapshotText(), new Date('2026-11-10T12:00:00Z'));
+  const stale = resolveProfessionalSnapshotText(
+    raw,
+    new Date(observedAt.getTime() + (source.staleAfterDays + 1) * dayMs),
+  );
   assert.equal(stale.status, 'ready');
   assert.equal(stale.stale, true);
   assert.match(stale.notice ?? '', /necesita refresh/i);
