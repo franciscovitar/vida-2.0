@@ -359,3 +359,43 @@ test('PRO-21. contrato rechaza que una faceta delegada consuma un slot del top-5
 
   assert.equal(parseProfessionalSnapshot(value), null);
 });
+
+
+test('PRO-22. UI muestra el Growth Loop actual con ownership, estado y evidencia objetivo', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+
+  assert.match(source, /Crecimiento \/ Huecos a llenar/);
+  assert.match(source, /prioridades\s+cerradas en este ciclo/);
+  assert.match(source, /Vos sí o sí/);
+  assert.match(source, /Vos \+ IA/);
+  assert.match(source, /Por empezar/);
+  assert.match(source, /Próximo paso/);
+  assert.match(source, /Evidencia objetivo/);
+  assert.match(source, /Última revisión de delegación/);
+});
+
+test('PRO-23. UI retira la lista legacy duplicada y explica qué salió del estudio activo', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+
+  assert.doesNotMatch(source, /snapshot\.priorities\.map/);
+  assert.doesNotMatch(source, /Tus prioridades profesionales/);
+  assert.match(source, /RETIRED_FROM_ACTIVE_LEARNING/);
+  assert.match(source, /Salió del estudio activo/);
+  assert.match(source, /no cuentan como dominio personal/);
+});
+
+test('PRO-24. UI profesional sigue siendo read-only para ownership y evita score universal', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+
+  assert.doesNotMatch(source, /setOwnership|updateOwnership|cambiar ownership/i);
+  assert.match(source, /No es un porcentaje de empleabilidad ni de dominio profesional total/);
+});

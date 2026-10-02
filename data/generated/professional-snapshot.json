@@ -580,7 +580,7 @@
       {
         "rank": 1,
         "id": "GROWTH-001",
-        "capability": "Production reliability, observability and recovery",
+        "capability": "Producción, confiabilidad, observabilidad y recuperación",
         "skillRefs": [
           "production-deployment-cloud",
           "distributed-systems-reliability",
@@ -588,47 +588,47 @@
         ],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
-        "whyNow": "Current artifact evidence already covers guarded deployments and safe-change patterns, but direct incident diagnosis/recovery remains a high-value gap. Current full-stack/product roles repeatedly ask for CI/CD, logs/metrics/alerts, production ownership and observability.",
+        "whyNow": "Tus artefactos ya muestran despliegues protegidos y cambios seguros, pero todavía falta comprobar de forma directa diagnóstico de incidentes y recuperación. Los roles full-stack/producto actuales repiten CI/CD, logs, métricas, alertas, ownership de producción y observabilidad.",
         "targetFacets": [
-          "logs vs metrics vs traces",
-          "latency/error/saturation diagnosis",
-          "safe rollback and recovery",
-          "backup/restore readback",
-          "SLI/SLO basics",
-          "incident reasoning and postmortem"
+          "logs vs. métricas vs. trazas",
+          "diagnóstico de latencia, errores y saturación",
+          "rollback seguro y recuperación",
+          "verificación de backup y restore",
+          "bases de SLI/SLO",
+          "razonamiento de incidentes y postmortem"
         ],
         "learningRoute": "BOUNDED_LAB_PLUS_PROJECT_EXPERIENCE",
-        "practiceContract": "Diagnose fresh production scenarios and choose the minimum evidence needed before acting.",
-        "evidenceTarget": "One controlled failure/recovery drill with observability evidence, recovery readback and short postmortem.",
-        "projectCandidate": "Use Vida 2.0 or Football Intelligence App; do not create a new project first.",
+        "practiceContract": "Diagnosticar escenarios nuevos de producción y elegir la evidencia mínima necesaria antes de actuar.",
+        "evidenceTarget": "Un ejercicio controlado de fallo y recuperación con evidencia de observabilidad, verificación de recuperación y un postmortem corto.",
+        "projectCandidate": "Usar Vida 2.0 o Football Intelligence App; no crear un proyecto nuevo primero.",
         "confidence": "HIGH"
       },
       {
         "rank": 2,
         "id": "GROWTH-002",
-        "capability": "SQL, relational modeling and PostgreSQL transaction reasoning",
+        "capability": "SQL, modelado relacional y razonamiento de transacciones en PostgreSQL",
         "skillRefs": ["sql-relational-data-modeling", "postgresql-transactional-persistence"],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
-        "whyNow": "PostgreSQL is already part of the portfolio, while personal query/index/isolation depth is not verified. Current full-stack and data-adjacent roles repeatedly ask for complex SQL, schema design, indexes, transaction/locking and performance reasoning.",
+        "whyNow": "PostgreSQL ya aparece en tu portfolio, pero todavía no está verificada tu profundidad personal en consultas, índices y aislamiento. Los roles full-stack y cercanos a datos repiten SQL complejo, diseño de esquemas, índices, transacciones, locking y rendimiento.",
         "targetFacets": [
-          "joins, aggregation and window functions",
-          "constraints and schema design",
-          "indexes and selectivity",
-          "EXPLAIN/EXPLAIN ANALYZE reasoning",
-          "transactions and isolation",
-          "locking/concurrency",
-          "idempotent writes"
+          "joins, agregaciones y funciones de ventana",
+          "constraints y diseño de esquema",
+          "índices y selectividad",
+          "razonamiento con EXPLAIN / EXPLAIN ANALYZE",
+          "transacciones y aislamiento",
+          "locking y concurrencia",
+          "escrituras idempotentes"
         ],
         "learningRoute": "MICRO_LAB_PLUS_DIRECT_VERIFICATION",
-        "practiceContract": "Fresh schemas/problems; write or critique SQL, inspect query evidence, reason through concurrency/failure.",
-        "evidenceTarget": "Fresh SQL/index/transaction lab solved and explained without relying on repeated examples.",
+        "practiceContract": "Trabajar con esquemas y problemas nuevos: escribir o criticar SQL, inspeccionar evidencia de consultas y razonar sobre concurrencia y fallos.",
+        "evidenceTarget": "Un laboratorio nuevo de SQL, índices y transacciones resuelto y explicado sin depender de ejemplos repetidos.",
         "confidence": "HIGH"
       },
       {
         "rank": 3,
         "id": "GROWTH-003",
-        "capability": "Architecture, APIs and failure-aware backend design",
+        "capability": "Arquitectura, APIs y diseño backend consciente de fallos",
         "skillRefs": [
           "software-design-architecture",
           "requirements-specification",
@@ -636,47 +636,47 @@
         ],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
-        "whyNow": "Current projects contain strong boundaries, but direct trade-off reasoning remains unverified. Representative roles emphasize APIs, webhooks, retries/idempotency, background jobs, integration boundaries and clear proposals under ambiguity.",
+        "whyNow": "Tus proyectos ya muestran buenos límites, pero falta verificar de forma directa el razonamiento de trade-offs. Los roles representativos enfatizan APIs, webhooks, retries/idempotencia, background jobs, límites de integración y propuestas claras ante ambigüedad.",
         "targetFacets": [
-          "service/module boundaries",
-          "REST/API contracts",
-          "webhooks and idempotency",
-          "timeouts/retries/backoff",
-          "queues/background jobs",
-          "caching and invalidation basics",
-          "failure modes and trade-offs"
+          "límites entre servicios y módulos",
+          "contratos REST/API",
+          "webhooks e idempotencia",
+          "timeouts, retries y backoff",
+          "colas y background jobs",
+          "bases de caché e invalidación",
+          "modos de fallo y trade-offs"
         ],
         "learningRoute": "DIRECT_VERIFICATION_PLUS_BOUNDED_DESIGN_LAB",
-        "practiceContract": "Given a changed constraint or failure mode, redesign an existing path and explain rejected alternatives.",
-        "evidenceTarget": "Fresh design review plus one bounded backend/integration implementation if an artifact gap remains.",
+        "practiceContract": "Ante una restricción o modo de fallo nuevo, rediseñar un camino existente y explicar por qué descartaste otras alternativas.",
+        "evidenceTarget": "Una revisión de diseño nueva más una implementación acotada de backend/integración si todavía queda un hueco de evidencia.",
         "confidence": "HIGH"
       },
       {
         "rank": 4,
         "id": "GROWTH-004",
-        "capability": "Security, authorization and least-privilege reasoning",
+        "capability": "Seguridad, autorización y razonamiento de mínimo privilegio",
         "skillRefs": ["security-privacy-least-privilege"],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
-        "whyNow": "Security already appears in current systems, but direct threat-model/authz reasoning is unverified. Market and broader employer signals continue to raise cybersecurity and trustworthy AI/software operation in importance.",
+        "whyNow": "La seguridad ya aparece en tus sistemas, pero el razonamiento directo de threat modeling y autorización todavía no está verificado. Las señales de mercado siguen elevando la importancia de ciberseguridad y operación confiable de software e IA.",
         "targetFacets": [
-          "authentication vs authorization",
-          "server-side authorization",
-          "least privilege",
-          "secrets and environment boundaries",
-          "RLS/trust boundaries",
-          "common API abuse paths",
-          "basic threat modeling"
+          "autenticación vs. autorización",
+          "autorización del lado servidor",
+          "mínimo privilegio",
+          "secretos y límites de entorno",
+          "RLS y límites de confianza",
+          "rutas comunes de abuso de APIs",
+          "threat modeling básico"
         ],
         "learningRoute": "DIRECT_VERIFICATION_PLUS_CODE_REVIEW",
-        "practiceContract": "Threat-model a real boundary, identify an exploit path and choose the smallest effective mitigation.",
-        "evidenceTarget": "One fresh threat-model/review artifact and direct explanation.",
+        "practiceContract": "Hacer threat modeling de un límite real, identificar una ruta de explotación y elegir la mitigación efectiva más pequeña.",
+        "evidenceTarget": "Un artefacto nuevo de threat model/revisión y una explicación directa.",
         "confidence": "MEDIUM_HIGH"
       },
       {
         "rank": 5,
         "id": "GROWTH-005",
-        "capability": "Applied LLM runtime engineering and AI-output verification",
+        "capability": "Ingeniería de runtimes con LLM y verificación de salidas de IA",
         "skillRefs": [
           "applied-llm-systems",
           "ai-native-orchestration",
@@ -684,19 +684,19 @@
         ],
         "ownershipLane": "HUMAN_PLUS_AI",
         "status": "QUEUED",
-        "whyNow": "AI-native orchestration is already a differentiator, but retrieval/evals/latency/cost/observability evidence is incomplete. AI tooling is mainstream among developers while accuracy/debugging concerns make human verification increasingly valuable.",
+        "whyNow": "La orquestación AI-native ya es un diferencial, pero la evidencia en retrieval, evals, latencia, costo y observabilidad todavía está incompleta. Las herramientas de IA ya son comunes entre desarrolladores y los problemas de precisión/debugging vuelven cada vez más valiosa la verificación humana.",
         "targetFacets": [
-          "grounding/retrieval boundaries",
-          "structured outputs and tool contracts",
-          "eval-set design",
-          "failure taxonomy",
-          "quality vs latency/cost",
-          "AI observability",
-          "permissions and fail-closed/defer behavior"
+          "límites de grounding y retrieval",
+          "salidas estructuradas y contratos de herramientas",
+          "diseño de eval sets",
+          "taxonomía de fallos",
+          "calidad vs. latencia/costo",
+          "observabilidad de IA",
+          "permisos y comportamiento fail-closed/defer"
         ],
         "learningRoute": "CONDITIONAL_LAB",
-        "practiceContract": "Design and critique a bounded AI workflow using explicit eval and failure criteria instead of prompt intuition.",
-        "evidenceTarget": "Reproducible applied-LLM experiment with eval evidence and failure analysis if AI-native roles/projects justify it.",
+        "practiceContract": "Diseñar y criticar un workflow de IA acotado usando criterios explícitos de evaluación y fallo, no intuición de prompts.",
+        "evidenceTarget": "Un experimento reproducible con LLM aplicado, evidencia de evals y análisis de fallos si un rol o proyecto AI-native lo justifica.",
         "confidence": "MEDIUM_HIGH"
       }
     ]
@@ -710,52 +710,52 @@
     "sentinelRule": "Keep only minimal periodic fresh verification for retired facets that remain safety-sensitive or prerequisite to higher-level judgment.",
     "examples": [
       {
-        "facet": "command, SDK and syntax recall",
+        "facet": "memorización de comandos, SDK y sintaxis",
         "currentLane": "AI_DELEGATED",
         "learningDisposition": "RETIRED_FROM_ACTIVE_LEARNING",
-        "reason": "Low durable value; easy to retrieve/generate and cheap to verify."
+        "reason": "Bajo valor durable: es fácil de recuperar o generar y barato de verificar."
       },
       {
-        "facet": "boilerplate and repetitive CRUD implementation",
+        "facet": "boilerplate e implementación CRUD repetitiva",
         "currentLane": "AI_DELEGATED",
         "learningDisposition": "RETIRED_FROM_ACTIVE_LEARNING",
-        "reason": "Mechanical implementation is a poor use of study time when acceptance criteria and verification exist."
+        "reason": "La implementación mecánica usa mal el tiempo de estudio cuando ya existen criterios de aceptación y verificación."
       },
       {
-        "facet": "TypeScript/Next.js implementation from a decided design",
+        "facet": "implementación TypeScript/Next.js a partir de un diseño ya decidido",
         "currentLane": "HUMAN_PLUS_AI",
         "learningDisposition": "PRACTICE_THROUGH_REAL_WORK",
-        "reason": "AI can accelerate implementation, but the user must understand behavior, boundaries and regressions."
+        "reason": "La IA puede acelerar la implementación, pero vos necesitás entender comportamiento, límites y regresiones."
       },
       {
-        "facet": "SQL first-draft query writing",
+        "facet": "primer borrador de consultas SQL",
         "currentLane": "HUMAN_PLUS_AI",
         "learningDisposition": "PRACTICE_WITH_AI_ALLOWED",
-        "reason": "Drafting is highly assistable; correctness, schema semantics and performance still require judgment."
+        "reason": "El borrador es muy asistible; la corrección, la semántica del esquema y el rendimiento todavía requieren criterio."
       },
       {
-        "facet": "SQL query-plan, index and transaction diagnosis",
+        "facet": "diagnóstico de query plans, índices y transacciones SQL",
         "currentLane": "HUMAN_CORE",
         "learningDisposition": "ACTIVE",
-        "reason": "Needed to diagnose novel failures and verify AI-generated database changes."
+        "reason": "Hace falta para diagnosticar fallos nuevos y verificar cambios de base de datos generados por IA."
       },
       {
-        "facet": "architecture and failure-mode trade-offs",
+        "facet": "trade-offs de arquitectura y modos de fallo",
         "currentLane": "HUMAN_CORE",
         "learningDisposition": "ACTIVE",
-        "reason": "Load-bearing judgment across requirements, boundaries, cost, reliability and safety."
+        "reason": "Criterio central para decidir entre requisitos, límites, costo, confiabilidad y seguridad."
       },
       {
-        "facet": "test case generation after strategy is chosen",
+        "facet": "generación de casos de prueba después de elegir la estrategia",
         "currentLane": "HUMAN_PLUS_AI",
         "learningDisposition": "PRACTICE_THROUGH_REAL_WORK",
-        "reason": "Generation is assistable; choosing coverage and interpreting suspicious results remains human."
+        "reason": "La generación es asistible; elegir cobertura e interpretar resultados sospechosos sigue siendo humano."
       },
       {
-        "facet": "authz, least-privilege and trust-boundary decisions",
+        "facet": "decisiones de autorización, mínimo privilegio y límites de confianza",
         "currentLane": "HUMAN_CORE",
         "learningDisposition": "ACTIVE",
-        "reason": "Consequential security judgment and supervision cannot currently be retired."
+        "reason": "El criterio y la supervisión de seguridad con consecuencias todavía no se pueden retirar."
       }
     ]
   }
