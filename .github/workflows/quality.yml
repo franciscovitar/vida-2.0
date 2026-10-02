@@ -30,6 +30,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Format exact Professional files for artifact
+        run: |
+          npx prettier --write \
+            data/generated/professional-snapshot.json \
+            docs/professional-intelligence.md \
+            lib/professional/contract.ts \
+            README.md \
+            tests/professional-intelligence.test.ts \
+            types/professional-intelligence.ts
+
+      - name: Upload formatted Professional files
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatted-professional
+          path: |
+            data/generated/professional-snapshot.json
+            docs/professional-intelligence.md
+            lib/professional/contract.ts
+            README.md
+            tests/professional-intelligence.test.ts
+            types/professional-intelligence.ts
+          if-no-files-found: error
+
       - name: Test project
         run: npm test
 
