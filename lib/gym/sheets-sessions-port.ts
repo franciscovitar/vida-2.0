@@ -176,14 +176,23 @@ function mapSessions(sessionRows: readonly Row[], setRows: readonly Row[]): Sess
   return sessions.sort((a, b) => b.session.date.localeCompare(a.session.date));
 }
 
+function completionFromStatus(status: string | null): boolean | null {
+  // A row in canonical Gym Sessions represents observed/completed training.
+  // Manual conversational logs historically left status blank, so absence of
+  // status must not hide a real session from analytics. Explicit non-complete
+  // states still win, while unknown future values remain unclassified.
+  if (status === null || status === 'complete') return true;
+  if (['pending', 'partial', 'failed', 'reverted'].includes(status)) return false;
+  return null;
+}
+
 function summariesFromSessions(sessions: readonly SessionWithStatus[]): GymSessionSummary[] {
   return sessions.map(({ session, status }) => ({
     key: session.key,
     date: session.date,
     label: session.dayLabel ?? session.routineName,
     durationMinutes: session.durationMinutes,
-    completed:
-      status === 'complete' ? true : status === 'pending' || status === 'partial' ? false : null,
+    completed: completionFromStatus(status),
   }));
 }
 
