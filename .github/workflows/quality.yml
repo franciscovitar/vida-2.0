@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: feat/professional-growth-frontier-v1
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -60,7 +62,7 @@ jobs:
         run: npm run verify
 
       - name: Commit formatted Professional files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/professional-growth-frontier-v1'
+        if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/feat/professional-growth-frontier-v1')
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
