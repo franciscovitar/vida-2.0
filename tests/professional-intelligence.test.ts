@@ -14,7 +14,7 @@ function snapshotText(): string {
   return readFileSync(snapshotPath, 'utf8');
 }
 
-test('PRO-01. snapshot V3 válido, sanitizado y con provenance de PAS main', () => {
+test('PRO-01. snapshot V4 válido, sanitizado y con provenance de PAS main', () => {
   const raw = snapshotText();
   const parsed = parseProfessionalSnapshot(JSON.parse(raw));
 
@@ -22,7 +22,7 @@ test('PRO-01. snapshot V3 válido, sanitizado y con provenance de PAS main', () 
   assert.equal(parsed.source.repository, 'franciscovitar/personal-ai-system');
   assert.equal(parsed.source.ref, 'main');
   assert.match(parsed.source.commit, /^[a-f0-9]{40}$/);
-  assert.equal(parsed.schemaVersion, 3);
+  assert.equal(parsed.schemaVersion, 4);
 
   assert.doesNotMatch(raw, /drive\.google\.com/i);
   assert.doesNotMatch(raw, /NOTION_API_TOKEN|GOOGLE_PRIVATE_KEY|AUTH_SECRET/);
@@ -397,4 +397,51 @@ test('PRO-24. UI profesional sigue siendo read-only para ownership y evita score
 
   assert.doesNotMatch(source, /setOwnership|updateOwnership|cambiar ownership/i);
   assert.match(source, /No es un porcentaje de empleabilidad ni de dominio profesional total/);
+});
+
+
+test('PRO-25. cada Growth item lleva un Verification Blueprint canónico', () => {
+  const parsed = parseProfessionalSnapshot(JSON.parse(snapshotText()));
+  assert.ok(parsed);
+
+  assert.equal(
+    parsed.growth.items.every(
+      (item) =>
+        item.learningHandoff.sessionMode === 'ONE_PRACTICAL_SCENARIO_AT_A_TIME' &&
+        item.learningHandoff.mustDemonstrate.length > 0 &&
+        item.learningHandoff.freshEvidenceRule.length > 0,
+    ),
+    true,
+  );
+});
+
+test('PRO-26. contrato rechaza un learning handoff incompleto o con modo de IA inválido', () => {
+  const missing = JSON.parse(snapshotText()) as {
+    growth: { items: Array<{ learningHandoff?: unknown }> };
+  };
+  delete missing.growth.items[0].learningHandoff;
+  assert.equal(parseProfessionalSnapshot(missing), null);
+
+  const invalid = JSON.parse(snapshotText()) as {
+    growth: { items: Array<{ learningHandoff: { aiAssistanceMode: string } }> };
+  };
+  invalid.growth.items[0].learningHandoff.aiAssistanceMode = 'BLIND_AI';
+  assert.equal(parseProfessionalSnapshot(invalid), null);
+});
+
+test('PRO-27. UI sólo transporta el handoff y ofrece copiar la práctica adaptativa', () => {
+  const dashboardSource = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalDashboard.tsx'),
+    'utf8',
+  );
+  const handoffSource = readFileSync(
+    join(process.cwd(), 'components/professional/ProfessionalLearningHandoff.tsx'),
+    'utf8',
+  );
+
+  assert.match(dashboardSource, /buildProfessionalLearningHandoffPrompt/);
+  assert.match(dashboardSource, /ProfessionalLearningHandoff/);
+  assert.match(handoffSource, /Copiar práctica para ChatGPT/);
+  assert.match(handoffSource, /navigator\.clipboard\.writeText/);
+  assert.doesNotMatch(handoffSource, /ownershipLane\s*=|mastery\s*=|fetch\(/i);
 });

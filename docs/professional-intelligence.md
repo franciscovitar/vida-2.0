@@ -138,7 +138,7 @@ npm run verify
 
 ## Professional Growth + Delegation Frontier
 
-The generated snapshot now uses schema V3 and carries the sanitized current Professional Growth state from PAS `main`.
+The generated snapshot now uses schema V4 and carries the sanitized current Professional Growth state plus its Adaptive Learning handoff from PAS `main`.
 
 The unit of delegation is a **task/facet**, not an entire technology. A broad skill may therefore contain work in different lanes at the same time.
 
@@ -154,3 +154,23 @@ When a facet becomes safely delegable:
 If later evidence shows repeated rework, unsafe output, stronger market demand for direct depth or loss of supervisory judgment, the facet can return to `HUMAN_PLUS_AI` or `HUMAN_CORE`.
 
 Adaptive practice remains owned by Learning OS. The snapshot only carries the current target, facets and routing state.
+
+
+## Adaptive Learning handoff
+
+Each active Growth item carries a canonical read-only `learningHandoff`:
+
+- session mode;
+- allowed AI-assistance mode;
+- minimum `mustDemonstrate` verification targets;
+- fresh-evidence rule.
+
+Vida 2.0 does not infer those rules from the ownership badge. The server-side prompt builder only serializes the snapshot contract into a self-contained Adaptive Learning start prompt.
+
+The client CTA only copies that prompt. It does not write mastery, ownership or Professional state.
+
+Current V1 behavior:
+- `HUMAN_CORE` -> `ATTEMPT_FIRST`;
+- `HUMAN_PLUS_AI` -> `AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION`;
+- one practical scenario at a time;
+- familiar/repeated success is not treated as mastery.

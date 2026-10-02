@@ -14,12 +14,14 @@ import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { CareerResilience } from '@/components/professional/CareerResilience';
+import { ProfessionalLearningHandoff } from '@/components/professional/ProfessionalLearningHandoff';
 import { TechnologyLibrary } from '@/components/professional/TechnologyLibrary';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import {
   findIntelligenceArticleForProfessionalRef,
   intelligenceArticleHref,
 } from '@/lib/intelligence/contract';
+import { buildProfessionalLearningHandoffPrompt } from '@/lib/professional/learning-handoff';
 import type {
   IntelligenceArticleSummary,
   IntelligenceEditorialData,
@@ -308,6 +310,13 @@ export function ProfessionalDashboard({
                   <strong>Próximo paso</strong>
                   <span>{item.practiceContract}</span>
                 </div>
+
+                <ProfessionalLearningHandoff
+                  prompt={buildProfessionalLearningHandoffPrompt(
+                    item,
+                    snapshot.growth.targetRoleFamily,
+                  )}
+                />
 
                 <More label="Ver qué falta y cómo comprobarlo">
                   <div className={styles['growth-detail-grid']}>
