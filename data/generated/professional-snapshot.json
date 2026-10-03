@@ -570,10 +570,7 @@
     ]
   },
   "growth": {
-    "targetRoleFamily": [
-      "Software Engineer",
-      "Full-Stack Product Engineer"
-    ],
+    "targetRoleFamily": ["Software Engineer", "Full-Stack Product Engineer"],
     "cycleProgress": {
       "closed": 0,
       "total": 5,
@@ -583,7 +580,7 @@
       {
         "rank": 1,
         "id": "GROWTH-001",
-        "capability": "Production reliability, observability and recovery",
+        "capability": "Producción, confiabilidad, observabilidad y recuperación",
         "skillRefs": [
           "production-deployment-cloud",
           "distributed-systems-reliability",
@@ -591,72 +588,69 @@
         ],
         "ownershipLane": "HUMAN_CORE",
         "status": "PRACTICING",
-        "whyNow": "A real Vida 2.0 release failure was diagnosed and recovered through CI/typecheck evidence, clean QA, post-merge QA and Production readback. This establishes bounded release-reliability practice, but deeper runtime observability, incident diagnosis, SLI/SLO and recovery exercises remain high-value gaps in current software/full-stack/product roles.",
+        "whyNow": "Ya diagnosticamos y recuperamos un fallo real de release en Vida 2.0 usando evidencia de CI/typecheck, QA limpio, verificación post-merge y readback de Production. Eso ya cuenta como práctica acotada de confiabilidad de releases, pero todavía falta profundizar observabilidad de runtime, diagnóstico de incidentes, SLI/SLO y recuperación.",
         "targetFacets": [
-          "logs vs metrics vs traces",
-          "latency/error/saturation diagnosis",
-          "safe rollback and recovery",
-          "backup/restore readback",
-          "SLI/SLO basics",
-          "incident reasoning and postmortem",
-          "Docker/container runtime basics",
-          "environment/config/secrets boundaries across deployment targets"
+          "logs vs. métricas vs. trazas",
+          "diagnóstico de latencia, errores y saturación",
+          "rollback seguro y recuperación",
+          "verificación de backup y restore",
+          "bases de SLI/SLO",
+          "razonamiento de incidentes y postmortem",
+          "Docker y fundamentos de runtime de contenedores",
+          "límites de entorno, configuración y secretos entre destinos de despliegue"
         ],
         "learningRoute": "BOUNDED_LAB_PLUS_PROJECT_EXPERIENCE",
-        "practiceContract": "Diagnose fresh production scenarios and choose the minimum evidence needed before acting.",
+        "practiceContract": "Diagnosticar escenarios nuevos de producción y elegir la evidencia mínima necesaria antes de actuar.",
         "learningHandoff": {
           "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
           "aiAssistanceMode": "ATTEMPT_FIRST",
           "mustDemonstrate": [
-            "Choose the minimum useful production signals before acting and distinguish logs, metrics and traces.",
-            "Diagnose a likely bottleneck or failure mode from fresh evidence rather than guessing.",
-            "Choose a safe rollback/recovery path and explain how recovery will be read back."
+            "Elegir las señales mínimas útiles de producción antes de actuar y distinguir logs, métricas y trazas.",
+            "Diagnosticar un cuello de botella o modo de fallo probable a partir de evidencia nueva, no de intuición.",
+            "Elegir un camino seguro de rollback o recuperación y explicar cómo verificar que la recuperación funcionó."
           ],
-          "freshEvidenceRule": "Use a fresh incident scenario or controlled drill that was not previously rehearsed; the user must commit to a diagnosis/action before corrective feedback."
+          "freshEvidenceRule": "Usar un escenario de incidente o ejercicio controlado nuevo; primero tenés que comprometerte con un diagnóstico y una acción antes de recibir la corrección."
         },
-        "evidenceTarget": "Next deeper verification: a fresh runtime/operational scenario with real observability evidence (logs/metrics/traces as applicable), safe recovery/readback and short postmortem. The completed 2026-10-02 release incident counts as practice, not full mastery.",
-        "projectCandidate": "Use Vida 2.0 or Football Intelligence App; do not create a new project first.",
+        "evidenceTarget": "La próxima verificación más profunda debe usar un escenario nuevo de runtime u operación con evidencia real de observabilidad, recuperación segura con readback y un postmortem corto. El incidente de release del 02/10 cuenta como práctica, no como dominio completo.",
+        "projectCandidate": "Usar Vida 2.0 o Football Intelligence App; no crear un proyecto nuevo primero.",
         "confidence": "HIGH"
       },
       {
         "rank": 2,
         "id": "GROWTH-002",
-        "capability": "SQL, relational modeling and PostgreSQL transaction reasoning",
-        "skillRefs": [
-          "sql-relational-data-modeling",
-          "postgresql-transactional-persistence"
-        ],
+        "capability": "SQL, modelado relacional y razonamiento de transacciones en PostgreSQL",
+        "skillRefs": ["sql-relational-data-modeling", "postgresql-transactional-persistence"],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
-        "whyNow": "PostgreSQL is already part of the portfolio, while personal query/index/isolation depth is not verified. Current full-stack and data-adjacent roles repeatedly ask for complex SQL, schema design, indexes, transaction/locking and performance reasoning.",
+        "whyNow": "PostgreSQL ya aparece en tu portfolio, pero todavía no está verificada tu profundidad personal en consultas, índices y aislamiento. Los roles full-stack y cercanos a datos repiten SQL complejo, diseño de esquemas, índices, transacciones, locking y rendimiento.",
         "targetFacets": [
-          "joins, aggregation and window functions",
-          "constraints and schema design",
-          "indexes and selectivity",
-          "EXPLAIN/EXPLAIN ANALYZE reasoning",
-          "transactions and isolation",
-          "locking/concurrency",
-          "idempotent writes"
+          "joins, agregaciones y funciones de ventana",
+          "constraints y diseño de esquema",
+          "índices y selectividad",
+          "razonamiento con EXPLAIN / EXPLAIN ANALYZE",
+          "transacciones y aislamiento",
+          "locking y concurrencia",
+          "escrituras idempotentes"
         ],
         "learningRoute": "MICRO_LAB_PLUS_DIRECT_VERIFICATION",
-        "practiceContract": "Fresh schemas/problems; write or critique SQL, inspect query evidence, reason through concurrency/failure.",
+        "practiceContract": "Trabajar con esquemas y problemas nuevos: escribir o criticar SQL, inspeccionar evidencia de consultas y razonar sobre concurrencia y fallos.",
         "learningHandoff": {
           "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
           "aiAssistanceMode": "ATTEMPT_FIRST",
           "mustDemonstrate": [
-            "Write or critique SQL against a fresh schema while preserving the intended semantics.",
-            "Use query evidence to reason about indexes/selectivity instead of adding indexes by intuition.",
-            "Reason correctly about transaction isolation, locking, concurrency and idempotent writes in a fresh case."
+            "Escribir o criticar SQL sobre un esquema nuevo preservando la semántica buscada.",
+            "Usar evidencia de la consulta para razonar sobre índices y selectividad, no agregar índices por intuición.",
+            "Razonar correctamente sobre aislamiento, locking, concurrencia y escrituras idempotentes en un caso nuevo."
           ],
-          "freshEvidenceRule": "Use a new schema/query/concurrency case; familiar examples and repeated query patterns do not count as sufficient verification."
+          "freshEvidenceRule": "Usar un esquema, consulta o caso de concurrencia nuevo; ejemplos familiares o patrones repetidos no alcanzan como verificación."
         },
-        "evidenceTarget": "Fresh SQL/index/transaction lab solved and explained without relying on repeated examples.",
+        "evidenceTarget": "Un laboratorio nuevo de SQL, índices y transacciones resuelto y explicado sin depender de ejemplos repetidos.",
         "confidence": "HIGH"
       },
       {
         "rank": 3,
         "id": "GROWTH-003",
-        "capability": "Architecture, APIs and failure-aware backend design",
+        "capability": "Arquitectura, APIs y diseño backend consciente de fallos",
         "skillRefs": [
           "software-design-architecture",
           "requirements-specification",
@@ -664,70 +658,68 @@
         ],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
-        "whyNow": "Current projects contain strong boundaries, but direct trade-off reasoning remains unverified. The 2026-10-02 market-fit sample repeatedly surfaced Node/backend work, APIs, webhooks, retries/idempotency, background jobs and integration boundaries. Treat Node/Nest/Express as implementation vehicles, not a separate memorization curriculum.",
+        "whyNow": "Tus proyectos ya muestran buenos límites, pero falta verificar de forma directa el razonamiento de trade-offs. El Market-fit QA del 02/10 repitió Node/backend, APIs, webhooks, retries/idempotencia, background jobs y límites de integración. Node/Nest/Express se tratan como vehículos de implementación, no como otro temario para memorizar.",
         "targetFacets": [
-          "service/module boundaries",
-          "REST/API contracts",
-          "webhooks and idempotency",
-          "timeouts/retries/backoff",
-          "queues/background jobs",
-          "caching and invalidation basics",
-          "failure modes and trade-offs",
-          "backend runtime implementation using Node/Nest/Express or an equivalent real project path"
+          "límites entre servicios y módulos",
+          "contratos REST/API",
+          "webhooks e idempotencia",
+          "timeouts, retries y backoff",
+          "colas y background jobs",
+          "bases de caché e invalidación",
+          "modos de fallo y trade-offs",
+          "implementación backend real con Node/Nest/Express o una ruta equivalente en un proyecto real"
         ],
         "learningRoute": "DIRECT_VERIFICATION_PLUS_BOUNDED_DESIGN_LAB",
-        "practiceContract": "Given a changed constraint or failure mode, redesign an existing path and explain rejected alternatives.",
+        "practiceContract": "Ante una restricción o modo de fallo nuevo, rediseñar un camino existente y explicar por qué descartaste otras alternativas.",
         "learningHandoff": {
           "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
           "aiAssistanceMode": "ATTEMPT_FIRST",
           "mustDemonstrate": [
-            "Choose service/module and API boundaries from requirements and failure constraints.",
-            "Design retries, idempotency, queues/background jobs and timeout behavior for a changed scenario.",
-            "Explain rejected alternatives and the reliability/cost/complexity trade-offs."
+            "Elegir límites entre servicios, módulos y APIs a partir de requisitos y restricciones de fallo.",
+            "Diseñar retries, idempotencia, colas, background jobs y timeouts para un escenario modificado.",
+            "Explicar alternativas descartadas y los trade-offs de confiabilidad, costo y complejidad."
           ],
-          "freshEvidenceRule": "Use a changed constraint or failure mode the user has not already practiced; require an explicit design decision and trade-off explanation."
+          "freshEvidenceRule": "Usar una restricción o modo de fallo que no hayas practicado antes y exigir una decisión de diseño explícita con explicación de trade-offs."
         },
-        "evidenceTarget": "Fresh design review plus one bounded backend/integration implementation if an artifact gap remains.",
+        "evidenceTarget": "Una revisión de diseño nueva más una implementación acotada de backend/integración si todavía queda un hueco de evidencia.",
         "confidence": "HIGH"
       },
       {
         "rank": 4,
         "id": "GROWTH-004",
-        "capability": "Security, authorization and least-privilege reasoning",
-        "skillRefs": [
-          "security-privacy-least-privilege"
-        ],
+        "capability": "Seguridad, autorización y razonamiento de mínimo privilegio",
+        "skillRefs": ["security-privacy-least-privilege"],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
-        "whyNow": "Security already appears in current systems, but direct threat-model/authz reasoning is unverified. Market and broader employer signals continue to raise cybersecurity and trustworthy AI/software operation in importance.",
+        "whyNow": "La seguridad ya aparece en tus sistemas, pero el razonamiento directo de threat modeling y autorización todavía no está verificado. Las señales de mercado siguen elevando la importancia de ciberseguridad y operación confiable de software e IA.",
         "targetFacets": [
-          "authentication vs authorization",
-          "server-side authorization",
-          "least privilege",
-          "secrets and environment boundaries",
-          "RLS/trust boundaries",
-          "common API abuse paths",
-          "basic threat modeling"
+          "autenticación vs. autorización",
+          "autorización del lado servidor",
+          "mínimo privilegio",
+          "secretos y límites de entorno",
+          "RLS y límites de confianza",
+          "rutas comunes de abuso de APIs",
+          "threat modeling básico"
         ],
         "learningRoute": "DIRECT_VERIFICATION_PLUS_CODE_REVIEW",
-        "practiceContract": "Threat-model a real boundary, identify an exploit path and choose the smallest effective mitigation.",
+        "practiceContract": "Hacer threat modeling de un límite real, identificar una ruta de explotación y elegir la mitigación efectiva más pequeña.",
         "learningHandoff": {
           "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
           "aiAssistanceMode": "ATTEMPT_FIRST",
           "mustDemonstrate": [
-            "Identify authentication, authorization and trust boundaries in a fresh system slice.",
-            "Find a plausible abuse path or privilege escalation route.",
-            "Choose the smallest effective least-privilege mitigation and explain residual risk."
+            "Identificar autenticación, autorización y límites de confianza en una parte nueva de un sistema.",
+            "Encontrar una ruta plausible de abuso o escalada de privilegios.",
+            "Elegir la mitigación efectiva más pequeña con mínimo privilegio y explicar el riesgo residual."
           ],
-          "freshEvidenceRule": "Use a fresh boundary or abuse case; the user must identify the threat and mitigation before seeing the model answer."
+          "freshEvidenceRule": "Usar un límite o caso de abuso nuevo; primero tenés que identificar la amenaza y la mitigación antes de ver la respuesta del modelo."
         },
-        "evidenceTarget": "One fresh threat-model/review artifact and direct explanation.",
+        "evidenceTarget": "Un artefacto nuevo de threat model/revisión y una explicación directa.",
         "confidence": "MEDIUM_HIGH"
       },
       {
         "rank": 5,
         "id": "GROWTH-005",
-        "capability": "Applied LLM runtime engineering and AI-output verification",
+        "capability": "Ingeniería de runtimes con LLM y verificación de salidas de IA",
         "skillRefs": [
           "applied-llm-systems",
           "ai-native-orchestration",
@@ -735,29 +727,29 @@
         ],
         "ownershipLane": "HUMAN_PLUS_AI",
         "status": "QUEUED",
-        "whyNow": "AI-native orchestration is already a differentiator, but retrieval/evals/latency/cost/observability evidence is incomplete. AI tooling is mainstream among developers while accuracy/debugging concerns make human verification increasingly valuable.",
+        "whyNow": "La orquestación AI-native ya es un diferencial, pero la evidencia en retrieval, evals, latencia, costo y observabilidad todavía está incompleta. Las herramientas de IA ya son comunes entre desarrolladores y los problemas de precisión/debugging vuelven cada vez más valiosa la verificación humana.",
         "targetFacets": [
-          "grounding/retrieval boundaries",
-          "structured outputs and tool contracts",
-          "eval-set design",
-          "failure taxonomy",
-          "quality vs latency/cost",
-          "AI observability",
-          "permissions and fail-closed/defer behavior"
+          "límites de grounding y retrieval",
+          "salidas estructuradas y contratos de herramientas",
+          "diseño de eval sets",
+          "taxonomía de fallos",
+          "calidad vs. latencia/costo",
+          "observabilidad de IA",
+          "permisos y comportamiento fail-closed/defer"
         ],
         "learningRoute": "CONDITIONAL_LAB",
-        "practiceContract": "Design and critique a bounded AI workflow using explicit eval and failure criteria instead of prompt intuition.",
+        "practiceContract": "Diseñar y criticar un workflow de IA acotado usando criterios explícitos de evaluación y fallo, no intuición de prompts.",
         "learningHandoff": {
           "sessionMode": "ONE_PRACTICAL_SCENARIO_AT_A_TIME",
           "aiAssistanceMode": "AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION",
           "mustDemonstrate": [
-            "Define grounding/tool boundaries and explicit success/failure criteria before implementation.",
-            "Design an eval set or failure taxonomy that can reveal quality regressions.",
-            "Interpret quality, latency, cost and observability evidence and decide whether the workflow is acceptable."
+            "Definir límites de grounding y herramientas, junto con criterios explícitos de éxito y fallo antes de implementar.",
+            "Diseñar un eval set o una taxonomía de fallos capaz de detectar regresiones de calidad.",
+            "Interpretar evidencia de calidad, latencia, costo y observabilidad y decidir si el workflow es aceptable."
           ],
-          "freshEvidenceRule": "Use a new bounded AI workflow or changed failure constraint; AI may assist execution, but the user must set criteria and personally interpret the verification evidence."
+          "freshEvidenceRule": "Usar un workflow de IA nuevo o una restricción de fallo modificada; la IA puede ayudar a ejecutar, pero vos definís los criterios e interpretás personalmente la evidencia."
         },
-        "evidenceTarget": "Reproducible applied-LLM experiment with eval evidence and failure analysis if AI-native roles/projects justify it.",
+        "evidenceTarget": "Un experimento reproducible con LLM aplicado, evidencia de evals y análisis de fallos si un rol o proyecto AI-native lo justifica.",
         "confidence": "MEDIUM_HIGH"
       }
     ]
@@ -765,11 +757,7 @@
   "delegationFrontier": {
     "lastReviewed": "2026-10-02",
     "model": "TASK_FACET_ENVIRONMENT_CONSEQUENCE_VERIFICATION",
-    "publicLanes": [
-      "HUMAN_CORE",
-      "HUMAN_PLUS_AI",
-      "AI_DELEGATED"
-    ],
+    "publicLanes": ["HUMAN_CORE", "HUMAN_PLUS_AI", "AI_DELEGATED"],
     "retiredState": "RETIRED_FROM_ACTIVE_LEARNING",
     "queueRule": "Retired facets consume no active study budget; refill the bounded top-5 queue from the next highest-value unresolved gap.",
     "sentinelRule": "Keep only minimal periodic fresh verification for retired facets that remain safety-sensitive or prerequisite to higher-level judgment.",
