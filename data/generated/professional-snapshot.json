@@ -3,8 +3,8 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "8017c7863933ff97cfe4af95e965d8a1628b3f07",
-    "generatedAt": "2026-10-02",
+    "commit": "8f46a6e12552c7e5ebfb22d859c6b1cf6db1c4e7",
+    "generatedAt": "2026-10-03",
     "observedAt": "2026-10-02",
     "staleAfterDays": 45
   },
@@ -587,15 +587,17 @@
           "testing-debugging-verification"
         ],
         "ownershipLane": "HUMAN_CORE",
-        "status": "QUEUED",
-        "whyNow": "Tus artefactos ya muestran despliegues protegidos y cambios seguros, pero todavía falta comprobar de forma directa diagnóstico de incidentes y recuperación. Los roles full-stack/producto actuales repiten CI/CD, logs, métricas, alertas, ownership de producción y observabilidad.",
+        "status": "PRACTICING",
+        "whyNow": "Ya diagnosticamos y recuperamos un fallo real de release en Vida 2.0 usando evidencia de CI/typecheck, QA limpio, verificación post-merge y readback de Production. Eso ya cuenta como práctica acotada de confiabilidad de releases, pero todavía falta profundizar observabilidad de runtime, diagnóstico de incidentes, SLI/SLO y recuperación.",
         "targetFacets": [
           "logs vs. métricas vs. trazas",
           "diagnóstico de latencia, errores y saturación",
           "rollback seguro y recuperación",
           "verificación de backup y restore",
           "bases de SLI/SLO",
-          "razonamiento de incidentes y postmortem"
+          "razonamiento de incidentes y postmortem",
+          "Docker y fundamentos de runtime de contenedores",
+          "límites de entorno, configuración y secretos entre destinos de despliegue"
         ],
         "learningRoute": "BOUNDED_LAB_PLUS_PROJECT_EXPERIENCE",
         "practiceContract": "Diagnosticar escenarios nuevos de producción y elegir la evidencia mínima necesaria antes de actuar.",
@@ -609,7 +611,7 @@
           ],
           "freshEvidenceRule": "Usar un escenario de incidente o ejercicio controlado nuevo; primero tenés que comprometerte con un diagnóstico y una acción antes de recibir la corrección."
         },
-        "evidenceTarget": "Un ejercicio controlado de fallo y recuperación con evidencia de observabilidad, verificación de recuperación y un postmortem corto.",
+        "evidenceTarget": "La próxima verificación más profunda debe usar un escenario nuevo de runtime u operación con evidencia real de observabilidad, recuperación segura con readback y un postmortem corto. El incidente de release del 02/10 cuenta como práctica, no como dominio completo.",
         "projectCandidate": "Usar Vida 2.0 o Football Intelligence App; no crear un proyecto nuevo primero.",
         "confidence": "HIGH"
       },
@@ -656,7 +658,7 @@
         ],
         "ownershipLane": "HUMAN_CORE",
         "status": "QUEUED",
-        "whyNow": "Tus proyectos ya muestran buenos límites, pero falta verificar de forma directa el razonamiento de trade-offs. Los roles representativos enfatizan APIs, webhooks, retries/idempotencia, background jobs, límites de integración y propuestas claras ante ambigüedad.",
+        "whyNow": "Tus proyectos ya muestran buenos límites, pero falta verificar de forma directa el razonamiento de trade-offs. El Market-fit QA del 02/10 repitió Node/backend, APIs, webhooks, retries/idempotencia, background jobs y límites de integración. Node/Nest/Express se tratan como vehículos de implementación, no como otro temario para memorizar.",
         "targetFacets": [
           "límites entre servicios y módulos",
           "contratos REST/API",
@@ -664,7 +666,8 @@
           "timeouts, retries y backoff",
           "colas y background jobs",
           "bases de caché e invalidación",
-          "modos de fallo y trade-offs"
+          "modos de fallo y trade-offs",
+          "implementación backend real con Node/Nest/Express o una ruta equivalente en un proyecto real"
         ],
         "learningRoute": "DIRECT_VERIFICATION_PLUS_BOUNDED_DESIGN_LAB",
         "practiceContract": "Ante una restricción o modo de fallo nuevo, rediseñar un camino existente y explicar por qué descartaste otras alternativas.",
