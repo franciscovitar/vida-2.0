@@ -5,24 +5,32 @@ import type {
   WorldPublishedPiece,
   WorldSurfaceData,
   WorldSurfaceSnapshot,
-} from '@/types/world-intelligence';
+} from "@/types/world-intelligence";
 
 export const WORLD_DOMAINS: readonly {
   id: WorldDomain;
   slug: string;
   label: string;
 }[] = [
-  { id: 'POLITICS_GEOPOLITICS', slug: 'politica-geopolitica', label: 'Política & Geopolítica' },
-  { id: 'ECONOMICS', slug: 'economia', label: 'Economía' },
-  { id: 'SCIENCE', slug: 'ciencia', label: 'Ciencia' },
-  { id: 'PSYCHOLOGY_BEHAVIOR', slug: 'psicologia', label: 'Psicología' },
-  { id: 'HEALTH', slug: 'salud', label: 'Salud' },
-  { id: 'TECH_AI', slug: 'tecnologia-ia', label: 'Tecnología & IA' },
-  { id: 'HISTORY_CULTURE', slug: 'historia-cultura', label: 'Historia & Cultura' },
   {
-    id: 'PRODUCTIVITY_HABITS',
-    slug: 'productividad-habitos',
-    label: 'Productividad & Hábitos',
+    id: "POLITICS_GEOPOLITICS",
+    slug: "politica-geopolitica",
+    label: "Política & Geopolítica",
+  },
+  { id: "ECONOMICS", slug: "economia", label: "Economía" },
+  { id: "SCIENCE", slug: "ciencia", label: "Ciencia" },
+  { id: "PSYCHOLOGY_BEHAVIOR", slug: "psicologia", label: "Psicología" },
+  { id: "HEALTH", slug: "salud", label: "Salud" },
+  { id: "TECH_AI", slug: "tecnologia-ia", label: "Tecnología & IA" },
+  {
+    id: "HISTORY_CULTURE",
+    slug: "historia-cultura",
+    label: "Historia & Cultura",
+  },
+  {
+    id: "PRODUCTIVITY_HABITS",
+    slug: "productividad-habitos",
+    label: "Productividad & Hábitos",
   },
 ];
 
@@ -32,22 +40,25 @@ const SHA256 = /^[a-f0-9]{64}$/;
 const GIT_SHA = /^[a-f0-9]{40}$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function isString(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0;
+  return typeof value === "string" && value.length > 0;
 }
 
 function isNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
+  return typeof value === "number" && Number.isFinite(value);
 }
 
 function validDomain(value: unknown): value is WorldDomain {
-  return typeof value === 'string' && DOMAIN_SET.has(value as WorldDomain);
+  return typeof value === "string" && DOMAIN_SET.has(value as WorldDomain);
 }
 
-function validSummary(value: unknown, mode: 'NOW' | 'LEARN'): value is WorldPieceSummary {
+function validSummary(
+  value: unknown,
+  mode: "NOW" | "LEARN",
+): value is WorldPieceSummary {
   if (!isRecord(value)) return false;
 
   return (
@@ -64,16 +75,24 @@ function validSummary(value: unknown, mode: 'NOW' | 'LEARN'): value is WorldPiec
     isString(value.humanReviewRef) &&
     isString(value.editorialDraftSha256) &&
     SHA256.test(value.editorialDraftSha256) &&
-    value.publicationState === 'HUMAN_APPROVED'
+    value.publicationState === "HUMAN_APPROVED"
   );
 }
 
-function allItems(snapshot: WorldSurfaceSnapshot): readonly WorldPieceSummary[] {
+function allItems(
+  snapshot: WorldSurfaceSnapshot,
+): readonly WorldPieceSummary[] {
   return [...snapshot.now.items, ...snapshot.learn.items];
 }
 
-export function parseWorldSurfaceSnapshot(value: unknown): WorldSurfaceSnapshot | null {
-  if (!isRecord(value) || value.schemaVersion !== 1 || value.kind !== 'world_vida_surface') {
+export function parseWorldSurfaceSnapshot(
+  value: unknown,
+): WorldSurfaceSnapshot | null {
+  if (
+    !isRecord(value) ||
+    value.schemaVersion !== 1 ||
+    value.kind !== "world_vida_surface"
+  ) {
     return null;
   }
 
@@ -88,12 +107,12 @@ export function parseWorldSurfaceSnapshot(value: unknown): WorldSurfaceSnapshot 
 
   const source = value.source;
   if (
-    source.repository !== 'franciscovitar/personal-ai-system' ||
+    source.repository !== "franciscovitar/personal-ai-system" ||
     !isString(source.ref) ||
     !isString(source.commit) ||
     !GIT_SHA.test(source.commit) ||
     source.canonicalSurfaceRef !==
-      'AI/projects/world-intelligence/fixtures/PUBLISHED_SURFACE_V1.json' ||
+      "AI/projects/world-intelligence/fixtures/PUBLISHED_SURFACE_V1.json" ||
     !isString(source.generatedAt) ||
     !isString(source.observedAt) ||
     !isNumber(source.staleAfterHours) ||
@@ -106,13 +125,13 @@ export function parseWorldSurfaceSnapshot(value: unknown): WorldSurfaceSnapshot 
   const learnItems = value.learn.items;
   if (
     !Array.isArray(nowItems) ||
-    !nowItems.every((item) => validSummary(item, 'NOW')) ||
+    !nowItems.every((item) => validSummary(item, "NOW")) ||
     !Array.isArray(learnItems) ||
-    !learnItems.every((item) => validSummary(item, 'LEARN')) ||
+    !learnItems.every((item) => validSummary(item, "LEARN")) ||
     !isNumber(value.now.targetReadingSeconds) ||
     !isNumber(value.now.selectedReadingSeconds) ||
     !isString(value.editionDate) ||
-    (value.freshnessState !== 'CURRENT' && value.freshnessState !== 'STALE') ||
+    (value.freshnessState !== "CURRENT" && value.freshnessState !== "STALE") ||
     !isString(value.provenanceVersion) ||
     !Array.isArray(value.coverageNotes) ||
     !value.coverageNotes.every(isString) ||
@@ -132,7 +151,10 @@ export function parseWorldSurfaceSnapshot(value: unknown): WorldSurfaceSnapshot 
     slugs.add(item.slug);
   }
 
-  const selected = snapshot.now.items.reduce((sum, item) => sum + item.readingSeconds, 0);
+  const selected = snapshot.now.items.reduce(
+    (sum, item) => sum + item.readingSeconds,
+    0,
+  );
   if (
     selected !== snapshot.now.selectedReadingSeconds ||
     selected > snapshot.now.targetReadingSeconds
@@ -146,7 +168,9 @@ export function parseWorldSurfaceSnapshot(value: unknown): WorldSurfaceSnapshot 
     const domain = snapshot.domains.find((item) => item.id === meta.id);
     if (!domain || domain.label !== meta.label) return null;
 
-    const actual = items.filter((item) => item.primaryDomain === meta.id).length;
+    const actual = items.filter(
+      (item) => item.primaryDomain === meta.id,
+    ).length;
     if (domain.publishedItems !== actual) return null;
   }
 
@@ -171,7 +195,7 @@ function validBlock(value: unknown): boolean {
 
   return (
     isString(value.kind) &&
-    typeof value.material === 'boolean' &&
+    typeof value.material === "boolean" &&
     isString(value.text) &&
     Array.isArray(value.claimRefs) &&
     value.claimRefs.every(isString) &&
@@ -202,13 +226,15 @@ function validSourceNote(value: unknown): boolean {
   );
 }
 
-export function parseWorldPublishedPiece(value: unknown): WorldPublishedPiece | null {
+export function parseWorldPublishedPiece(
+  value: unknown,
+): WorldPublishedPiece | null {
   if (
     !isRecord(value) ||
     value.schemaVersion !== 1 ||
-    value.kind !== 'world_published_piece' ||
-    value.publicationState !== 'HUMAN_APPROVED' ||
-    (value.mode !== 'NOW' && value.mode !== 'LEARN')
+    value.kind !== "world_published_piece" ||
+    value.publicationState !== "HUMAN_APPROVED" ||
+    (value.mode !== "NOW" && value.mode !== "LEARN")
   ) {
     return null;
   }
@@ -241,7 +267,7 @@ export function parseWorldPublishedPiece(value: unknown): WorldPublishedPiece | 
 
   const source = value.source;
   if (
-    source.repository !== 'franciscovitar/personal-ai-system' ||
+    source.repository !== "franciscovitar/personal-ai-system" ||
     !isString(source.ref) ||
     !isString(source.commit) ||
     !GIT_SHA.test(source.commit) ||
@@ -255,20 +281,28 @@ export function parseWorldPublishedPiece(value: unknown): WorldPublishedPiece | 
   return value as unknown as WorldPublishedPiece;
 }
 
-export function isWorldSurfaceStale(snapshot: WorldSurfaceSnapshot, now = new Date()): boolean {
+export function isWorldSurfaceStale(
+  snapshot: WorldSurfaceSnapshot,
+  now = new Date(),
+): boolean {
   const generated = new Date(snapshot.source.generatedAt);
   if (Number.isNaN(generated.getTime())) return true;
 
   return (
-    now.getTime() - generated.getTime() > snapshot.source.staleAfterHours * 60 * 60 * 1000
+    now.getTime() - generated.getTime() >
+    snapshot.source.staleAfterHours * 60 * 60 * 1000
   );
 }
 
-export function resolveWorldSurfaceText(raw: string | null, now?: Date): WorldSurfaceData {
+export function resolveWorldSurfaceText(
+  raw: string | null,
+  now?: Date,
+): WorldSurfaceData {
   if (raw === null) {
     return {
-      status: 'missing',
-      notice: 'World no está disponible: falta la superficie publicada derivada.',
+      status: "missing",
+      notice:
+        "World no está disponible: falta la superficie publicada derivada.",
       stale: false,
       snapshot: null,
     };
@@ -279,8 +313,9 @@ export function resolveWorldSurfaceText(raw: string | null, now?: Date): WorldSu
     parsed = JSON.parse(raw);
   } catch {
     return {
-      status: 'invalid',
-      notice: 'World no está disponible: la superficie publicada no es JSON válido.',
+      status: "invalid",
+      notice:
+        "World no está disponible: la superficie publicada no es JSON válido.",
       stale: false,
       snapshot: null,
     };
@@ -289,18 +324,20 @@ export function resolveWorldSurfaceText(raw: string | null, now?: Date): WorldSu
   const snapshot = parseWorldSurfaceSnapshot(parsed);
   if (!snapshot) {
     return {
-      status: 'invalid',
-      notice: 'World no está disponible: la superficie derivada no cumple el contrato V1.',
+      status: "invalid",
+      notice:
+        "World no está disponible: la superficie derivada no cumple el contrato V1.",
       stale: false,
       snapshot: null,
     };
   }
 
-  const stale = snapshot.freshnessState === 'STALE' || isWorldSurfaceStale(snapshot, now);
+  const stale =
+    snapshot.freshnessState === "STALE" || isWorldSurfaceStale(snapshot, now);
   return {
-    status: 'ready',
+    status: "ready",
     notice: stale
-      ? 'Esta edición sigue disponible, pero está marcada como desactualizada. No se presenta como estado fresco del mundo.'
+      ? "Esta edición sigue disponible, pero está marcada como desactualizada. No se presenta como estado fresco del mundo."
       : null,
     stale,
     snapshot,
@@ -315,8 +352,8 @@ export function resolveWorldPieceText(
 ): WorldPieceData {
   if (raw === null) {
     return {
-      status: 'missing',
-      notice: 'La pieza no está disponible: falta su derivado publicado.',
+      status: "missing",
+      notice: "La pieza no está disponible: falta su derivado publicado.",
       stale: false,
       summary,
       piece: null,
@@ -328,8 +365,8 @@ export function resolveWorldPieceText(
     parsed = JSON.parse(raw);
   } catch {
     return {
-      status: 'invalid',
-      notice: 'La pieza no está disponible: su derivado no es JSON válido.',
+      status: "invalid",
+      notice: "La pieza no está disponible: su derivado no es JSON válido.",
       stale: false,
       summary,
       piece: null,
@@ -352,8 +389,9 @@ export function resolveWorldPieceText(
     piece.source.canonicalRef !== summary.pieceRef
   ) {
     return {
-      status: 'invalid',
-      notice: 'La pieza no está disponible: su contenido no coincide con la superficie canónica.',
+      status: "invalid",
+      notice:
+        "La pieza no está disponible: su contenido no coincide con la superficie canónica.",
       stale: false,
       summary,
       piece: null,
@@ -362,12 +400,12 @@ export function resolveWorldPieceText(
 
   const stale = isWorldSurfaceStale(snapshot, now);
   return {
-    status: 'ready',
+    status: "ready",
     notice:
-      stale && piece.mode === 'NOW'
-        ? 'Esta pieza actual pertenece a una edición desactualizada; conserva valor histórico, pero no debe leerse como estado fresco.'
+      stale && piece.mode === "NOW"
+        ? "Esta pieza actual pertenece a una edición desactualizada; conserva valor histórico, pero no debe leerse como estado fresco."
         : null,
-    stale: stale && piece.mode === 'NOW',
+    stale: stale && piece.mode === "NOW",
     summary,
     piece,
   };
@@ -379,7 +417,7 @@ export function worldPieceHref(item: WorldPieceSummary): string {
 
 export function worldDomainHref(domain: WorldDomain): string {
   const meta = WORLD_DOMAINS.find((item) => item.id === domain);
-  return meta ? `/world/tema/${meta.slug}` : '/world';
+  return meta ? `/world/tema/${meta.slug}` : "/world";
 }
 
 export function worldDomainFromSlug(slug: string): WorldDomain | null {
@@ -390,6 +428,8 @@ export function worldDomainLabel(domain: WorldDomain): string {
   return WORLD_DOMAINS.find((item) => item.id === domain)?.label ?? domain;
 }
 
-export function listWorldItems(snapshot: WorldSurfaceSnapshot): readonly WorldPieceSummary[] {
+export function listWorldItems(
+  snapshot: WorldSurfaceSnapshot,
+): readonly WorldPieceSummary[] {
   return [...snapshot.now.items, ...snapshot.learn.items];
 }
