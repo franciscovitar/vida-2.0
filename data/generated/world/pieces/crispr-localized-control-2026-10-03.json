@@ -129,12 +129,7 @@
           "material": true,
           "text": "Primero diseñaron una versión compacta y fotosensible de Cas12f. “Fotosensible” acá quiere decir que fue preparada para poder activarse con luz. Esa Cas12f y su ARN guía podían viajar juntas dentro de una sola partícula AAV.",
           "claimRefs": ["RC2"],
-          "backgroundRefs": [
-            "BG-PHOTOSWITCHABLE",
-            "BG-CAS12F",
-            "BG-GUIDE-RNA",
-            "BG-AAV"
-          ]
+          "backgroundRefs": ["BG-PHOTOSWITCHABLE", "BG-CAS12F", "BG-GUIDE-RNA", "BG-AAV"]
         },
         {
           "kind": "EXPLANATION",
