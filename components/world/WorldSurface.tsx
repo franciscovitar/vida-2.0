@@ -4,7 +4,11 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { listWorldItems, worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
-import type { WorldDomain, WorldPieceSummary, WorldSurfaceData } from '@/types/world-intelligence';
+import type {
+  WorldDomain,
+  WorldPieceSummary,
+  WorldSurfaceData,
+} from '@/types/world-intelligence';
 
 import { WorldNavigation } from './WorldNavigation';
 import styles from './World.module.scss';
@@ -82,10 +86,12 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
     items = snapshot.learn.items;
   } else if (view.kind === 'library') {
     title = 'Biblioteca';
-    description = 'Lo publicado queda disponible sin convertirse en pendientes ni deuda de lectura.';
+    description =
+      'Lo publicado queda disponible sin convertirse en pendientes ni deuda de lectura.';
   } else if (view.kind === 'domain') {
     title = worldDomainLabel(view.domain);
-    description = 'El mismo estado publicado, filtrado por dominio. Vida no vuelve a rankear la evidencia.';
+    description =
+      'El mismo estado publicado, filtrado por dominio. Vida no vuelve a rankear la evidencia.';
     items = all.filter((item) => item.primaryDomain === view.domain);
   }
 
@@ -94,8 +100,16 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
       <WorldNavigation />
 
       {data.notice ? (
-        <div className={styles.notice} data-tone={data.stale ? 'warning' : 'info'} role="status">
-          {data.stale ? <CircleAlert size={16} aria-hidden="true" /> : <Info size={16} aria-hidden="true" />}
+        <div
+          className={styles.notice}
+          data-tone={data.stale ? 'warning' : 'info'}
+          role="status"
+        >
+          {data.stale ? (
+            <CircleAlert size={16} aria-hidden="true" />
+          ) : (
+            <Info size={16} aria-hidden="true" />
+          )}
           <span>{data.notice}</span>
         </div>
       ) : null}
@@ -105,14 +119,19 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
           <section className={styles.hero} aria-labelledby="world-today-title">
             <div>
               <p className={styles.eyebrow}>Edición · {snapshot.editionDate}</p>
-              <h2 id="world-today-title">Lo suficiente para entender, no para quedar atrapado leyendo.</h2>
+              <h2 id="world-today-title">
+                Lo suficiente para entender, no para quedar atrapado leyendo.
+              </h2>
               <p>
                 {snapshot.now.selectedReadingSeconds > 0
                   ? `Ahora: ${minutes(snapshot.now.selectedReadingSeconds)} de lectura seleccionada.`
                   : 'Hoy no hay historias actuales publicadas.'}
               </p>
             </div>
-            <span className={styles['freshness-pill']} data-stale={data.stale ? 'true' : 'false'}>
+            <span
+              className={styles['freshness-pill']}
+              data-stale={data.stale ? 'true' : 'false'}
+            >
               {data.stale ? 'Edición desactualizada' : 'Edición vigente'}
             </span>
           </section>
@@ -123,11 +142,15 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
                 <p className={styles.eyebrow}>Ahora</p>
                 <h2 id="world-now-title">Tu edición de hoy</h2>
               </div>
-              <Link className={styles['section-link']} href="/world/ahora">Ver Ahora →</Link>
+              <Link className={styles['section-link']} href="/world/ahora">
+                Ver Ahora →
+              </Link>
             </div>
             {snapshot.now.items.length ? (
               <div className={styles.grid}>
-                {snapshot.now.items.map((item) => <PieceCard key={item.briefId} item={item} />)}
+                {snapshot.now.items.map((item) => (
+                  <PieceCard key={item.briefId} item={item} />
+                ))}
               </div>
             ) : (
               <EmptyState text="No hay una historia actual que justifique ocupar tu atención." />
@@ -140,11 +163,15 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
                 <p className={styles.eyebrow}>Aprender</p>
                 <h2 id="world-learn-title">Aprendé algo</h2>
               </div>
-              <Link className={styles['section-link']} href="/world/aprender">Ver Aprender →</Link>
+              <Link className={styles['section-link']} href="/world/aprender">
+                Ver Aprender →
+              </Link>
             </div>
             {snapshot.learn.items.length ? (
               <div className={styles.grid}>
-                {snapshot.learn.items.map((item) => <PieceCard key={item.briefId} item={item} />)}
+                {snapshot.learn.items.map((item) => (
+                  <PieceCard key={item.briefId} item={item} />
+                ))}
               </div>
             ) : (
               <EmptyState text="No hay una pieza evergreen publicada para esta edición." />
@@ -155,15 +182,23 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
         <section className={styles.section} aria-labelledby="world-view-title">
           <div className={styles['section-heading']}>
             <div>
-              <p className={styles.eyebrow}>{view.kind === 'library' ? 'Sin backlog' : 'World Intelligence'}</p>
+              <p className={styles.eyebrow}>
+                {view.kind === 'library' ? 'Sin backlog' : 'World Intelligence'}
+              </p>
               <h2 id="world-view-title">{title}</h2>
               <p className={styles['section-description']}>{description}</p>
             </div>
-            {view.kind === 'library' ? <BookOpen size={20} aria-hidden="true" /> : <Sparkles size={20} aria-hidden="true" />}
+            {view.kind === 'library' ? (
+              <BookOpen size={20} aria-hidden="true" />
+            ) : (
+              <Sparkles size={20} aria-hidden="true" />
+            )}
           </div>
           {items.length ? (
             <div className={styles.grid}>
-              {items.map((item) => <PieceCard key={item.briefId} item={item} />)}
+              {items.map((item) => (
+                <PieceCard key={item.briefId} item={item} />
+              ))}
             </div>
           ) : (
             <EmptyState text="Todavía no hay una pieza human-approved publicada en este dominio." />
@@ -174,12 +209,17 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
       {snapshot.coverageNotes.length ? (
         <section className={styles['coverage-note']} aria-labelledby="world-coverage-title">
           <strong id="world-coverage-title">Cobertura de esta edición</strong>
-          {snapshot.coverageNotes.map((note) => <p key={note}>{note}</p>)}
+          {snapshot.coverageNotes.map((note) => (
+            <p key={note}>{note}</p>
+          ))}
         </section>
       ) : null}
 
       <footer className={styles.provenance}>
-        <span>PAS <code>{snapshot.source.commit.slice(0, 8)}</code> · observado {snapshot.source.observedAt}</span>
+        <span>
+          PAS <code>{snapshot.source.commit.slice(0, 8)}</code> · observado{' '}
+          {snapshot.source.observedAt}
+        </span>
         <span>{snapshot.provenanceVersion}</span>
       </footer>
     </div>

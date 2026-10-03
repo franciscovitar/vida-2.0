@@ -24,7 +24,11 @@ test('WORLD-01. superficie válida, finita y human-approved', () => {
   assert.equal(parsed.readingDebt, false);
   assert.equal(parsed.now.items.length, 1);
   assert.equal(parsed.learn.items.length, 1);
-  assert.ok([...parsed.now.items, ...parsed.learn.items].every((item) => item.publicationState === 'HUMAN_APPROVED'));
+  assert.ok(
+    [...parsed.now.items, ...parsed.learn.items].every(
+      (item) => item.publicationState === 'HUMAN_APPROVED',
+    ),
+  );
   assert.doesNotMatch(raw, /NOTION_API_TOKEN|GOOGLE_PRIVATE_KEY|AUTH_SECRET/);
 });
 
@@ -34,10 +38,17 @@ test('WORLD-02. superficie faltante o corrupta falla cerrado', () => {
 });
 
 test('WORLD-03. frescura se hace visible sin fabricar edición nueva', () => {
-  const fresh = resolveWorldSurfaceText(surfaceText(), new Date('2026-10-03T18:00:00-03:00'));
+  const fresh = resolveWorldSurfaceText(
+    surfaceText(),
+    new Date('2026-10-03T18:00:00-03:00'),
+  );
   assert.equal(fresh.status, 'ready');
   assert.equal(fresh.stale, false);
-  const stale = resolveWorldSurfaceText(surfaceText(), new Date('2026-10-06T18:00:00-03:00'));
+
+  const stale = resolveWorldSurfaceText(
+    surfaceText(),
+    new Date('2026-10-06T18:00:00-03:00'),
+  );
   assert.equal(stale.status, 'ready');
   assert.equal(stale.stale, true);
   assert.match(stale.notice ?? '', /desactualizada/i);
@@ -46,6 +57,7 @@ test('WORLD-03. frescura se hace visible sin fabricar edición nueva', () => {
 test('WORLD-04. cada card resuelve exactamente a su pieza y provenance', () => {
   const surface = parseWorldSurfaceSnapshot(JSON.parse(surfaceText()));
   assert.ok(surface);
+
   for (const summary of [...surface.now.items, ...surface.learn.items]) {
     const raw = readFileSync(join(root, 'pieces', `${summary.slug}.json`), 'utf8');
     const piece = parseWorldPublishedPiece(JSON.parse(raw));
@@ -54,13 +66,28 @@ test('WORLD-04. cada card resuelve exactamente a su pieza y provenance', () => {
     assert.equal(piece.source.ref, surface.source.ref);
     assert.equal(piece.source.canonicalRef, summary.pieceRef);
     assert.equal(piece.editorialDraftSha256, summary.editorialDraftSha256);
-    assert.equal(resolveWorldPieceText(raw, summary, surface, new Date('2026-10-03T18:00:00-03:00')).status, 'ready');
+    assert.equal(
+      resolveWorldPieceText(
+        raw,
+        summary,
+        surface,
+        new Date('2026-10-03T18:00:00-03:00'),
+      ).status,
+      'ready',
+    );
   }
 });
 
 test('WORLD-05. piezas conservan el estándar zero-knowledge aprobado', () => {
-  const crispr = readFileSync(join(root, 'pieces', 'crispr-localized-control-2026-10-03.json'), 'utf8');
-  const entanglement = readFileSync(join(root, 'pieces', 'que-es-entrelazamiento-cuantico.json'), 'utf8');
+  const crispr = readFileSync(
+    join(root, 'pieces', 'crispr-localized-control-2026-10-03.json'),
+    'utf8',
+  );
+  const entanglement = readFileSync(
+    join(root, 'pieces', 'que-es-entrelazamiento-cuantico.json'),
+    'utf8',
+  );
+
   assert.match(crispr, /Empecemos desde cero/);
   assert.match(crispr, /ARN guía/);
   assert.match(crispr, /Mecanoluminiscente/);
@@ -78,7 +105,11 @@ test('WORLD-06. seis rutas y loader autenticado', () => {
     'app/(app)/world/tema/[domain]/page.tsx',
     'app/(app)/world/pieza/[slug]/page.tsx',
   ];
-  for (const path of paths) assert.match(readFileSync(join(process.cwd(), path), 'utf8'), /force-dynamic/);
+
+  for (const path of paths) {
+    assert.match(readFileSync(join(process.cwd(), path), 'utf8'), /force-dynamic/);
+  }
+
   const source = readFileSync(join(process.cwd(), 'lib/data/world-source.ts'), 'utf8');
   assert.match(source, /requireAuthorizedSession/);
   assert.doesNotMatch(source, /fetch\(|axios|openai|anthropic/i);

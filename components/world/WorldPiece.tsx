@@ -65,7 +65,11 @@ export function WorldPieceView({ data }: { data: WorldPieceData }) {
           <section className={styles['article-section']} key={section.id}>
             <h2>{section.title}</h2>
             {section.blocks.map((block, index) => (
-              <p key={`${section.id}-${index}`} className={styles['article-block']} data-kind={block.kind}>
+              <p
+                key={`${section.id}-${index}`}
+                className={styles['article-block']}
+                data-kind={block.kind}
+              >
                 {block.text}
               </p>
             ))}
@@ -89,8 +93,12 @@ export function WorldPieceView({ data }: { data: WorldPieceData }) {
         <ul>
           {piece.backgroundNotes.map((source) => (
             <li key={source.backgroundRef}>
-              <a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.term}</a>
-              <span>{source.sourceRole} · {source.sourceId}</span>
+              <a href={source.sourceUrl} target="_blank" rel="noreferrer">
+                {source.term}
+              </a>
+              <span>
+                {source.sourceRole} · {source.sourceId}
+              </span>
             </li>
           ))}
         </ul>
@@ -105,7 +113,10 @@ export function WorldPieceView({ data }: { data: WorldPieceData }) {
       </nav>
 
       <footer className={styles.provenance}>
-        <span>PAS <code>{piece.source.commit.slice(0, 8)}</code> · draft <code>{piece.editorialDraftSha256.slice(0, 10)}</code></span>
+        <span>
+          PAS <code>{piece.source.commit.slice(0, 8)}</code> · draft{' '}
+          <code>{piece.editorialDraftSha256.slice(0, 10)}</code>
+        </span>
         <span>HUMAN_APPROVED</span>
       </footer>
     </article>
