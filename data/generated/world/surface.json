@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_vida_surface",
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "world-vida-integration-v1-20261003",
+    "commit": "e82e570b797d0817b4eef02f88316d16c4dd836e",
+    "canonicalSurfaceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_SURFACE_V1.json",
+    "generatedAt": "2026-10-03T17:45:00-03:00",
+    "observedAt": "2026-10-03T14:20:00-03:00",
+    "staleAfterHours": 36
+  },
+  "editionDate": "2026-10-03",
+  "freshnessState": "CURRENT",
+  "provenanceVersion": "world-v1-phase9-human-approved",
+  "readingDebt": false,
+  "now": {
+    "targetReadingSeconds": 360,
+    "selectedReadingSeconds": 240,
+    "items": [
+      {
+        "briefId": "WORLD-PILOT-CRISPR-2026-10-03",
+        "mode": "NOW",
+        "slug": "crispr-localized-control-2026-10-03",
+        "primaryDomain": "SCIENCE",
+        "headline": "🧬 CRISPR: probaron en ratones una forma de activar la edición genética en zonas elegidas",
+        "deck": "CRISPR es una tecnología para modificar ADN. En este estudio, investigadores probaron en ratones una manera de encender esa edición desde fuera del cuerpo y concentrarla en regiones específicas de músculo y cerebro.",
+        "readingSeconds": 240,
+        "deltaMarker": "NEW_STORY",
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_CRISPR_V1.json",
+        "editorialDraftSha256": "1b33334dbbe127b1e37e3a88ea8460f02ba8c2bb4144a6b4c684f3da5719f09c",
+        "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_CRISPR_2026-10-03.json",
+        "publicationState": "HUMAN_APPROVED"
+      }
+    ]
+  },
+  "learn": {
+    "items": [
+      {
+        "briefId": "L-ENTANGLEMENT-2016",
+        "mode": "LEARN",
+        "slug": "que-es-entrelazamiento-cuantico",
+        "primaryDomain": "SCIENCE",
+        "headline": "🔗 Entrelazamiento cuántico: qué tiene de raro de verdad",
+        "deck": "No hace falta saber física cuántica para empezar. La idea central es distinguir una correlación normal —dos cosas relacionadas— de un caso cuántico en el que la descripción completa pertenece al sistema formado por ambas partes.",
+        "readingSeconds": 240,
+        "conceptId": "CONCEPT-QUANTUM-ENTANGLEMENT",
+        "subdomain": "PHYSICS",
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_LEARN_ENTANGLEMENT_V1.json",
+        "editorialDraftSha256": "e596289478f69e99a8380542aa8bae1dd2b8d138ca019088a15bc23f8bb51686",
+        "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_LEARN_ENTANGLEMENT_2026-10-03.json",
+        "publicationState": "HUMAN_APPROVED"
+      }
+    ]
+  },
+  "domains": [
+    {
+      "id": "POLITICS_GEOPOLITICS",
+      "label": "Política & Geopolítica",
+      "publishedItems": 0
+    },
+    {
+      "id": "ECONOMICS",
+      "label": "Economía",
+      "publishedItems": 0
+    },
+    {
+      "id": "SCIENCE",
+      "label": "Ciencia",
+      "publishedItems": 2
+    },
+    {
+      "id": "PSYCHOLOGY_BEHAVIOR",
+      "label": "Psicología",
+      "publishedItems": 0
+    },
+    {
+      "id": "HEALTH",
+      "label": "Salud",
+      "publishedItems": 0
+    },
+    {
+      "id": "TECH_AI",
+      "label": "Tecnología & IA",
+      "publishedItems": 0
+    },
+    {
+      "id": "HISTORY_CULTURE",
+      "label": "Historia & Cultura",
+      "publishedItems": 0
+    },
+    {
+      "id": "PRODUCTIVITY_HABITS",
+      "label": "Productividad & Hábitos",
+      "publishedItems": 0
+    }
+  ],
+  "coverageNotes": [
+    "Phase 9 exposes only exact Phase 8 human-approved editorial pieces. Phase 6 pilot briefs without an exact approved Phase 8 publication artifact are intentionally not user-facing here.",
+    "This bounded integration surface is a pilot, not a claim of complete daily world coverage."
+  ]
+}

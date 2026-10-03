@@ -10,6 +10,7 @@ import {
   FileText,
   Film,
   HeartPulse,
+  Globe2,
   LayoutDashboard,
   LineChart,
   ListTodo,
@@ -38,6 +39,7 @@ export type NavIconKey =
   | 'proyectos'
   | 'professional'
   | 'inteligencia'
+  | 'world'
   | 'tareas'
   | 'aprendizaje'
   | 'compras'
@@ -78,6 +80,7 @@ export const NAV_ICON_MAP: Record<NavIconKey, LucideIcon> = {
   proyectos: Boxes,
   professional: Brain,
   inteligencia: LineChart,
+  world: Globe2,
   tareas: ListTodo,
   aprendizaje: BookOpen,
   compras: ShoppingCart,
@@ -106,6 +109,7 @@ export const primaryNav: NavItemData[] = [
   },
   { label: 'Proyectos', href: '/proyectos', icon: 'proyectos', domain: 'projects' },
   { label: 'Inteligencia', href: '/inteligencia', icon: 'inteligencia', domain: 'productivity' },
+  { label: 'World', href: '/world', icon: 'world', domain: 'learning' },
   { label: 'Profesional', href: '/professional', icon: 'professional', domain: 'projects' },
   { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },
   { label: 'Dieta', href: '/dieta', icon: 'dieta', domain: 'health' },
