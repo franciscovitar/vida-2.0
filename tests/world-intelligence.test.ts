@@ -117,15 +117,21 @@ test('WORLD-08. dominios usan slugs estables', () => {
   assert.equal(worldDomainFromSlug('cualquier-cosa'), null);
 });
 
-test('WORLD-09. Phase 10 usa feedback explícito y store operacional fail-closed', () => {
+test('WORLD-09. Phase 10 usa feedback explícito y PostgreSQL lazy/fail-closed', () => {
   const article = readFileSync(join(process.cwd(), 'components/world/WorldPiece.tsx'), 'utf8');
   const feedback = readFileSync(join(process.cwd(), 'components/world/WorldFeedback.tsx'), 'utf8');
   const store = readFileSync(join(process.cwd(), 'lib/world/feedback-store.ts'), 'utf8');
+  const postgres = readFileSync(join(process.cwd(), 'lib/world/feedback-postgres.ts'), 'utf8');
 
   assert.match(article, /<WorldFeedback/);
   assert.match(feedback, /saveWorldFeedbackAction/);
-  assert.match(store, /not-configured/);
-  assert.doesNotMatch(store, /google|sheet|localStorage/i);
+  assert.match(store, /createWorldFeedbackPostgresPort/);
+  assert.match(postgres, /@neondatabase\/serverless/);
+  assert.match(postgres, /WORLD_DATABASE_URL/);
+  assert.match(postgres, /DATABASE_URL/);
+  assert.match(postgres, /not-configured/);
+  assert.match(postgres, /ON CONFLICT \(brief_id\)/);
+  assert.doesNotMatch(store + postgres, /google|sheet|localStorage/i);
 });
 
 test('WORLD-10. navegación general expone World', () => {

@@ -1,19 +1,12 @@
 import 'server-only';
 
-import type { WorldFeedbackStorePort } from '@/lib/world/feedback';
+import { createWorldFeedbackPostgresPort } from '@/lib/world/feedback-postgres';
 
 /**
  * Phase 10 storage boundary.
  *
- * The deterministic feedback/UI layer is intentionally usable before a live
- * PostgreSQL provider is provisioned. Until the canonical World store is
- * connected, reads/writes fail closed while article rendering remains intact.
+ * Initialization is lazy. Builds and article reads remain safe when no database
+ * URL is configured. Writes become available only when Vida receives the
+ * isolated World PostgreSQL connection server-side.
  */
-export const worldFeedbackStorePort: WorldFeedbackStorePort = {
-  async readCurrent() {
-    return { ok: false, code: 'not-configured' };
-  },
-  async upsert() {
-    return { ok: false, code: 'not-configured' };
-  },
-};
+export const worldFeedbackStorePort = createWorldFeedbackPostgresPort();

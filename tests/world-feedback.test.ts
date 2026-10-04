@@ -11,6 +11,10 @@ import {
   type WorldFeedbackStorePort,
   upsertWorldFeedbackWithPort,
 } from '@/lib/world/feedback';
+import {
+  createWorldFeedbackPostgresPort,
+  type WorldFeedbackSql,
+} from '@/lib/world/feedback-postgres';
 import type { WorldPublishedPiece } from '@/types/world-intelligence';
 
 const PIECE = JSON.parse(
@@ -160,4 +164,115 @@ test('WF7. acción exige sesión y resuelve metadata desde la pieza canónica', 
   assert.match(component, /Muy detallado/);
   assert.doesNotMatch(component, /textarea|contentEditable/i);
   assert.match(page, /getWorldPiecePageData/);
+});
+
+test('WF8. adapter PostgreSQL falla cerrado sin URL y no crea cliente', async () => {
+  let factoryCalls = 0;
+  const port = createWorldFeedbackPostgresPort({
+    databaseUrl: () => null,
+    sqlFactory: () => {
+      factoryCalls += 1;
+      throw new Error('sqlFactory should not run without a database URL');
+    },
+  });
+
+  assert.deepEqual(await port.readCurrent(PIECE.briefId), {
+    ok: false,
+    code: 'not-configured',
+  });
+  assert.deepEqual(await port.upsert(existing()), {
+    ok: false,
+    code: 'not-configured',
+  });
+  assert.equal(factoryCalls, 0);
+});
+
+test('WF9. adapter PostgreSQL parametriza upsert y normaliza read-back', async () => {
+  let stored: WorldFeedbackRecord | null = null;
+  const observedQueries: string[] = [];
+
+  const sql: WorldFeedbackSql = async (strings, ...values) => {
+    const query = strings.join('?');
+    observedQueries.push(query);
+
+    if (/^\s*SELECT/.test(query)) {
+      if (!stored) return [];
+      return [
+        {
+          brief_id: stored.briefId,
+          feedback: stored.feedback,
+          feedback_version: stored.feedbackVersion,
+          concept_id: stored.conceptId,
+          cluster_id: stored.clusterId,
+          primary_domain: stored.primaryDomain,
+          updated_at: stored.updatedAt,
+        },
+      ];
+    }
+
+    if (/^\s*INSERT/.test(query)) {
+      stored = {
+        briefId: String(values[0]),
+        feedback: values[1] as WorldFeedbackRecord['feedback'],
+        feedbackVersion: WORLD_FEEDBACK_VERSION,
+        conceptId: values[3] === null ? null : String(values[3]),
+        clusterId: values[4] === null ? null : String(values[4]),
+        primaryDomain: values[5] as WorldFeedbackRecord['primaryDomain'],
+        updatedAt: String(values[6]),
+      };
+      return [];
+    }
+
+    throw new Error('unexpected query');
+  };
+
+  const port = createWorldFeedbackPostgresPort({
+    databaseUrl: () => 'postgresql://world-isolated.invalid/db',
+    sqlFactory: () => sql,
+  });
+
+  const record = existing('WANT_DEEPER');
+  record.updatedAt = '2026-10-04T15:00:00.000Z';
+
+  assert.deepEqual(await port.upsert(record), { ok: true });
+  const read = await port.readCurrent(record.briefId);
+  assert.equal(read.ok, true);
+  if (!read.ok) return;
+  assert.deepEqual(read.record, record);
+  assert.ok(observedQueries.some((query) => /ON CONFLICT \(brief_id\)/.test(query)));
+  assert.ok(observedQueries.every((query) => !query.includes(record.briefId)));
+});
+
+test('WF10. adapter PostgreSQL no filtra errores ni acepta filas inválidas', async () => {
+  const permissionPort = createWorldFeedbackPostgresPort({
+    databaseUrl: () => 'postgresql://world-isolated.invalid/db',
+    sqlFactory: () => async () => {
+      const error = new Error('provider detail');
+      Object.assign(error, { code: '42501' });
+      throw error;
+    },
+  });
+  assert.deepEqual(await permissionPort.readCurrent(PIECE.briefId), {
+    ok: false,
+    code: 'permission-error',
+  });
+
+  const invalidRowPort = createWorldFeedbackPostgresPort({
+    databaseUrl: () => 'postgresql://world-isolated.invalid/db',
+    sqlFactory: () => async () => [
+      {
+        brief_id: PIECE.briefId,
+        feedback: 'USEFUL',
+        feedback_version: WORLD_FEEDBACK_VERSION,
+        concept_id: PIECE.conceptId ?? null,
+        cluster_id: null,
+        primary_domain: 'NOT_A_DOMAIN',
+        updated_at: '2026-10-04T15:00:00.000Z',
+      },
+    ],
+  });
+  assert.deepEqual(await invalidRowPort.readCurrent(PIECE.briefId), {
+    ok: false,
+    code: 'read-error',
+  });
 });
