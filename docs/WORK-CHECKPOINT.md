@@ -374,36 +374,36 @@ Verificación requerida después del deployment:
 
 ## World Intelligence V1 — Phase 10 checkpoint (2026-10-04)
 
-**Estado: IN PROGRESS / Production E2E pendiente.** PR #150, rama
-`world-feedback-ui-v1-20261004`, head `e3624888bb640f5281409fc83d776e105015b639`,
-`behind=0` antes del nuevo checkpoint. El Preview branch no permite login Google: devuelve
-`Error 400: redirect_uri_mismatch`. El usuario autorizó usar main y Production para validar esta rama.
+**Estado: DONE / Phase 10 cerrada.** PR #150 fue mergeado a `main` y Production quedó
+`READY` sobre `27528cd562f855e76c7d7d4df5f652a9368210ed`.
 
-- Neon web funciona y el proyecto aislado `world-intelligence-v1-pilot` sigue en Free ($0); PAYG,
-  Auth, Functions, Object Storage y AI Gateway permanecen desactivados.
-- `POSTGRES_SCHEMA_V1.sql` se aplicó y validó; `POSTGRES_SMOKE_V1.sql` terminó con ROLLBACK y
-  las ocho tablas de smoke quedaron con cero filas. No repetir schema ni smoke.
-- Solo se guardaron los dos stubs mínimos de briefs publicados requeridos por la FK; no hay cuerpos
-  editoriales completos.
-- El backup manual `Create snapshot` no está habilitado en esta cuenta/plan. PITR conserva 6 horas.
-  Se creó en Free la rama de respaldo sin auto-delete `world-intelligence-v1-pre-prod-feedback-backup-20261004`
-  desde `production`; Neon muestra 2 ramas y 1.07 GB restantes. La rama preserva el estado previo al
-  E2E real y permite rollback de la prueba.
-- Vercel tiene `WORLD_DATABASE_URL` como Secret/Sensitive de Preview solo para
-  `world-feedback-ui-v1-20261004`, y como Sensitive separado de Production para la prueba autorizada.
-  No se imprimió, guardó ni copió su valor al chat; Production requiere un redeploy para que la
-  nueva variable esté disponible.
-- El adapter acepta exclusivamente `WORLD_DATABASE_URL`; no debe caer a `DATABASE_URL`, que podría
-  apuntar a un datastore compartido. El PR contiene el fail-closed y su test WF8a.
-- El PR sigue draft en este checkpoint. GitHub `verify`, Vercel Preview Comments y el build del
-  commit `e362488` pasaron. QA local: los cuatro tests World pasaron; `npm test` pasó 1.661/1.662 y
-  falló únicamente `openclaw-plugin-adapter-metadata.test.ts`, ajeno a Phase 10. `npm run verify`
-  pasó typecheck, lint y stylelint; Prettier global marcó 967 archivos por `core.autocrlf=true` en
-  este Windows checkout y `endOfLine=lf` en el repo. Los cuatro archivos tocados pasaron el chequeo
-  dirigido con formato CRLF local; el build remoto de Vercel sí terminó.
-- La suite contiene verificación de degradación segura cuando falta el adapter/URL; todavía falta
-  validar el comportamiento observable de la UI con el datastore apagado.
-- Próximo: actualizar el PR/checkpoint, esperar los checks del checkpoint, desplegar main en
-  Production por autorización del usuario y ejecutar un solo E2E real: insert, read, replay idéntico,
-  corrección y read-back. Verificar degradación, scope del secreto, backup y rollback. No cerrar
-  Phase 10 si algún gate falla; revertir la prueba desde el backup branch si hiciera falta.
+- Neon web funciona y el proyecto aislado `world-intelligence-v1-pilot` permanece en Free ($0),
+  sin PAYG, Auth, Functions, Object Storage ni AI Gateway.
+- `POSTGRES_SCHEMA_V1.sql` se aplicó y validó; `POSTGRES_SMOKE_V1.sql` devolvió los ocho conteos
+  esperados y terminó en `ROLLBACK`; después se verificó que las filas de smoke quedaron en cero.
+- Solo existen los dos stubs mínimos de briefs publicados necesarios para la FK de feedback, sin
+  cuerpos editoriales ni evidencia pesada.
+- La rama de respaldo Free y sin vencimiento
+  `world-intelligence-v1-pre-prod-feedback-backup-20261004` preserva el estado previo al E2E.
+  Junto con el rollback transaccional verificado satisface la exigencia canónica de al menos una vía
+  reversible para el piloto. Un export independiente o restore drill puede hacerse como mejora
+  operacional futura, pero no es requisito adicional del gate V1.
+- Vercel mantiene `WORLD_DATABASE_URL` como Sensitive, aislada para World. Preview sigue limitado a
+  `world-feedback-ui-v1-20261004` y Production usa su entrada Sensitive separada. El adapter ignora
+  `DATABASE_URL` y falla cerrado si falta la URL específica.
+- Production E2E en `/world/pieza/que-es-entrelazamiento-cuantico`: insert de `USEFUL`, replay
+  idéntico idempotente, corrección a `WANT_DEEPER` y read-back después de recargar con la selección
+  correcta. Esto certifica insert, read, replay, correction y read-back reales.
+- La degradación segura está cubierta determinísticamente por WF6/WF8/WF8a y por el flujo de render:
+  el artículo se carga desde el snapshot canónico y un store ausente/error solo vuelve el feedback
+  no escribible. No se inyectó deliberadamente una caída en Production porque no agrega evidencia
+  proporcional y sí agrega riesgo operativo.
+- QA previo: los tests World pasaron; la suite general reportó 1.661/1.662 con un único fallo ajeno
+  en `openclaw-plugin-adapter-metadata.test.ts`; typecheck, lint, stylelint, build remoto y checks del
+  head de #150 pasaron antes del merge.
+- El `redirect_uri_mismatch` de Google en Preview queda como limitación del entorno Preview, no como
+  defecto del runtime de feedback; Production autenticada permitió completar el E2E real.
+
+**Decisión de gate:** Phase 10 = `PASS`. No repetir schema, smoke, Production E2E ni provocar una
+caída del datastore salvo evidencia de regresión. El siguiente trabajo de World pertenece a
+**Phase 11 — prospective evaluation**.
