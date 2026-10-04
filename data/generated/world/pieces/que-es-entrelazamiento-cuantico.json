@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "HUMAN_APPROVED",
+  "mode": "LEARN",
+  "briefId": "L-ENTANGLEMENT-2016",
+  "conceptId": "CONCEPT-QUANTUM-ENTANGLEMENT",
+  "slug": "que-es-entrelazamiento-cuantico",
+  "primaryDomain": "SCIENCE",
+  "secondaryDomains": [],
+  "subdomain": "PHYSICS",
+  "headline": "🔗 Entrelazamiento cuántico: qué tiene de raro de verdad",
+  "deck": "No hace falta saber física cuántica para empezar. La idea central es distinguir una correlación normal —dos cosas relacionadas— de un caso cuántico en el que la descripción completa pertenece al sistema formado por ambas partes.",
+  "readingSeconds": 240,
+  "publishedAt": "2026-10-03T17:45:00-03:00",
+  "editorialDraftSha256": "e596289478f69e99a8380542aa8bae1dd2b8d138ca019088a15bc23f8bb51686",
+  "backgroundNotes": [
+    {
+      "backgroundRef": "BG-QUANTUM",
+      "term": "cuántico",
+      "plainLanguageDefinition": "Se refiere a las reglas físicas usadas para describir sistemas muy pequeños, como átomos, electrones o partículas de luz, donde la física cotidiana no alcanza para describir todo lo que ocurre.",
+      "sourceId": "IBM-QUANTUM-BASICS",
+      "sourceRole": "AUTHORITATIVE_TECHNICAL_BACKGROUND",
+      "sourceUrl": "https://learning.quantum.ibm.com/course/basics-of-quantum-information"
+    },
+    {
+      "backgroundRef": "BG-CORRELATION",
+      "term": "correlación",
+      "plainLanguageDefinition": "Una relación entre dos resultados: conocer algo de uno ayuda a anticipar o conocer algo del otro.",
+      "sourceId": "QUANTA-ENTANGLEMENT-2016",
+      "sourceRole": "EXPERT_EXPLAINER_BACKGROUND",
+      "sourceUrl": "https://www.quantamagazine.org/entanglement-made-simple-20160428/"
+    },
+    {
+      "backgroundRef": "BG-QUANTUM-STATE",
+      "term": "estado cuántico",
+      "plainLanguageDefinition": "La descripción matemática que se usa para representar un sistema cuántico y calcular las probabilidades de los resultados que pueden aparecer al medirlo.",
+      "sourceId": "QUANTA-QUANTUM-EXPERIMENTS-2025",
+      "sourceRole": "EXPERT_EXPLAINER_BACKGROUND",
+      "sourceUrl": "https://www.quantamagazine.org/ai-comes-up-with-bizarre-physics-experiments-but-they-work-20250721/"
+    },
+    {
+      "backgroundRef": "BG-ENTANGLED-STATE",
+      "term": "estado entrelazado",
+      "plainLanguageDefinition": "Un estado cuántico conjunto que no puede describirse simplemente como dos estados independientes, uno para cada parte.",
+      "sourceId": "IBM-ENTANGLEMENT-ACTION",
+      "sourceRole": "AUTHORITATIVE_TECHNICAL_BACKGROUND",
+      "sourceUrl": "https://learning.quantum.ibm.com/course/basics-of-quantum-information/entanglement-in-action"
+    },
+    {
+      "backgroundRef": "BG-QUANTUM-INFORMATION",
+      "term": "información cuántica",
+      "plainLanguageDefinition": "El estudio de cómo representar, transmitir y procesar información usando sistemas que obedecen reglas cuánticas.",
+      "sourceId": "IBM-QUANTUM-BASICS",
+      "sourceRole": "AUTHORITATIVE_TECHNICAL_BACKGROUND",
+      "sourceUrl": "https://learning.quantum.ibm.com/course/basics-of-quantum-information"
+    }
+  ],
+  "sections": [
+    {
+      "id": "intuition",
+      "title": "🧩 Primero: dos palabras que necesitamos",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": false,
+          "text": "“Cuántico” se refiere a las reglas físicas que usamos para describir sistemas muy pequeños, como átomos, electrones o partículas de luz. Y una “correlación” es simplemente una relación entre dos resultados: saber algo de uno te ayuda a anticipar algo del otro.",
+          "claimRefs": [],
+          "backgroundRefs": ["BG-QUANTUM", "BG-CORRELATION"]
+        },
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "Con eso alcanza para empezar: que dos cosas estén fuertemente relacionadas no significa automáticamente que estén cuánticamente entrelazadas. Primero conviene entender una correlación común y después ver qué agrega la física cuántica.",
+          "claimRefs": ["KQ1"],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "concept",
+      "title": "🧠 El salto cuántico",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": false,
+          "text": "En física cuántica se habla de “estado cuántico”: es la descripción matemática que se usa para representar el sistema y calcular qué resultados pueden aparecer al medirlo. No hace falta manejar las ecuaciones para entender la idea.",
+          "claimRefs": [],
+          "backgroundRefs": ["BG-QUANTUM-STATE"]
+        },
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "En un estado entrelazado, la descripción completa puede pertenecer al sistema formado por las dos partes juntas y no reducirse a dos estados independientes, uno para cada parte. Dicho simple: no siempre podés contar toda la historia describiendo A por un lado y B por el otro; parte esencial de la descripción está en la relación A+B.",
+          "claimRefs": ["KQ2"],
+          "backgroundRefs": ["BG-ENTANGLED-STATE"]
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "title": "📦 Un ejemplo para separar “correlación” de “entrelazamiento”",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "Imaginá dos cajas preparadas juntas. En una pusieron una ficha roja y en la otra una azul, pero vos no sabés cuál está en cuál. Mandan una caja a Córdoba y otra a Tokio. Abrís la de Córdoba y encontrás la roja: inmediatamente sabés que en Tokio está la azul. Hay una correlación perfecta, pero no hizo falta que ninguna caja enviara una señal instantánea a la otra; la relación ya estaba preparada desde el comienzo. Esa clase de correlación, por sí sola, no es el fenómeno cuántico que queremos explicar.",
+          "claimRefs": ["KQ1"],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "analogy",
+      "title": "🎵 Una analogía para visualizar el entrelazamiento",
+      "blocks": [
+        {
+          "kind": "ANALOGY",
+          "material": false,
+          "text": "Ahora pensá en una armonía musical. Podés estudiar cada nota por separado: una nota tiene su altura, su duración, su volumen. Pero cuando dos notas suenan juntas aparece una relación —la armonía— que pertenece a la combinación. Si solo describís cada nota aislada, te falta una parte de lo que querías describir. La analogía apunta a eso: en el entrelazamiento, parte de la descripción relevante pertenece al sistema conjunto. ⚠️ El límite de la comparación es importante: una armonía musical es completamente clásica; no reproduce las reglas cuánticas ni demuestra entrelazamiento. Solo sirve para formar la imagen mental de que “el todo” puede necesitar una descripción que no se obtiene separando completamente sus partes.",
+          "claimRefs": [],
+          "backgroundRefs": [],
+          "analogyLimitExplicit": true
+        }
+      ]
+    },
+    {
+      "id": "important_limit",
+      "title": "🚫 ¿Entonces pueden mandarse mensajes instantáneos?",
+      "blocks": [
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "No. El entrelazamiento no permite usar una partícula como un WhatsApp más rápido que la luz. Las mediciones pueden mostrar correlaciones muy fuertes, pero eso no te da un canal controlable para elegir un mensaje y hacerlo aparecer instantáneamente del otro lado. Para comparar resultados y obtener información utilizable, las personas todavía necesitan comunicar sus resultados por medios normales.",
+          "claimRefs": ["KQ3"],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "why_it_matters",
+      "title": "💡 ¿Por qué importa?",
+      "blocks": [
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "El entrelazamiento es un recurso central de la información cuántica. “Información cuántica” es el campo que estudia cómo representar, transmitir y procesar información usando sistemas que obedecen reglas cuánticas. El entrelazamiento aparece en distintos protocolos —es decir, procedimientos o “recetas” de pasos— de comunicación y procesamiento cuántico.",
+          "claimRefs": ["KQ4"],
+          "backgroundRefs": ["BG-QUANTUM-INFORMATION"]
+        }
+      ]
+    },
+    {
+      "id": "where_to_go_next",
+      "title": "🧠 La imagen mental para llevarte",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "No imagines dos bolitas mágicas mandándose mensajes. Imaginá dos partes de un sistema para las que, en ciertos estados cuánticos, la descripción más completa pertenece al conjunto. Esa es la idea que diferencia al entrelazamiento de una simple historia de “dos cosas que coinciden”.",
+          "claimRefs": ["KQ1", "KQ2", "KQ3"],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-QUANTA-2016",
+      "role": "EXPERT_EXPLAINER"
+    },
+    {
+      "sourceId": "SRC-QUANTA-2026",
+      "role": "EXPERT_EXPLAINER"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "4ef65a46b3da9bcd2af11fc64091114ec53b29be",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_LEARN_ENTANGLEMENT_V1.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_LEARN_ENTANGLEMENT_V1.json",
+    "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_LEARN_ENTANGLEMENT_2026-10-03.json"
+  }
+}
