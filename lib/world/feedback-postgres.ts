@@ -8,17 +8,24 @@ import {
   type WorldFeedbackStoreFailureCode,
   type WorldFeedbackStorePort,
 } from '@/lib/world/feedback';
-import type { WorldDomain } from '@/types/world-intelligence';
+import type { WorldDomain, WorldPublishedPiece } from '@/types/world-intelligence';
 
 export type WorldFeedbackSql = (
   strings: TemplateStringsArray,
   ...values: unknown[]
 ) => Promise<Record<string, unknown>[]>;
 
-interface WorldFeedbackPostgresOptions {
+export interface WorldFeedbackPostgresOptions {
   databaseUrl?: () => string | null;
   sqlFactory?: (databaseUrl: string) => WorldFeedbackSql;
 }
+
+export type WorldBriefRegistrationResult =
+  | { ok: true }
+  | {
+      ok: false;
+      code: WorldFeedbackStoreFailureCode | 'metadata-mismatch';
+    };
 
 const DOMAIN_SET = new Set<WorldDomain>(WORLD_DOMAINS.map((item) => item.id));
 
@@ -91,6 +98,110 @@ function failureCode(
     if (['42501', '28000', '28P01'].includes(error.code)) return 'permission-error';
   }
   return fallback;
+}
+
+function worldBriefType(piece: WorldPublishedPiece): 'NOW_STORY' | 'LEARN_PIECE' {
+  return piece.mode === 'NOW' ? 'NOW_STORY' : 'LEARN_PIECE';
+}
+
+function worldBriefFreshness(piece: WorldPublishedPiece): 'CURRENT' | 'EVERGREEN' {
+  return piece.mode === 'NOW' ? 'CURRENT' : 'EVERGREEN';
+}
+
+function canonicalDomains(piece: WorldPublishedPiece): WorldDomain[] {
+  return Array.from(new Set([piece.primaryDomain, ...piece.secondaryDomains]));
+}
+
+function registeredBriefMatchesPiece(
+  row: Record<string, unknown>,
+  piece: WorldPublishedPiece,
+): boolean {
+  return (
+    row.id === piece.briefId &&
+    row.type === worldBriefType(piece) &&
+    row.concept_id === (piece.conceptId ?? null) &&
+    row.slug === piece.slug &&
+    row.primary_domain === piece.primaryDomain
+  );
+}
+
+/**
+ * Registers only the metadata required for feedback's brief FK.
+ *
+ * The published Vida piece remains the source of truth. This helper never stores
+ * editorial body text or evidence, never falls back to DATABASE_URL, and never
+ * mutates an existing brief row. A conflicting existing row fails closed.
+ */
+export async function ensureWorldFeedbackBriefRegistered(
+  piece: WorldPublishedPiece,
+  options: WorldFeedbackPostgresOptions = {},
+): Promise<WorldBriefRegistrationResult> {
+  const databaseUrl = (options.databaseUrl ?? configuredDatabaseUrl)();
+  if (!databaseUrl) return { ok: false, code: 'not-configured' };
+
+  const sql = (options.sqlFactory ?? defaultSqlFactory)(databaseUrl);
+  const domains = canonicalDomains(piece);
+
+  try {
+    await sql`
+      INSERT INTO world_intelligence.brief (
+        id,
+        type,
+        cluster_id,
+        concept_id,
+        slug,
+        primary_domain,
+        domains,
+        headline,
+        deck,
+        body,
+        evidence_state,
+        reading_seconds,
+        confidence,
+        freshness,
+        source_observation_cutoff,
+        last_verified_at
+      ) VALUES (
+        ${piece.briefId},
+        ${worldBriefType(piece)},
+        NULL,
+        ${piece.conceptId ?? null},
+        ${piece.slug},
+        ${piece.primaryDomain},
+        string_to_array(${domains.join(',')}, ','),
+        ${piece.headline},
+        ${piece.deck},
+        ${JSON.stringify({ storage: 'metadata-only' })}::jsonb,
+        'PUBLISHABLE',
+        ${piece.readingSeconds},
+        NULL,
+        ${worldBriefFreshness(piece)},
+        ${piece.publishedAt}::timestamptz,
+        ${piece.publishedAt}::timestamptz
+      )
+      ON CONFLICT (id) DO NOTHING
+    `;
+
+    const rows = await sql`
+      SELECT
+        id,
+        type,
+        concept_id,
+        slug,
+        primary_domain
+      FROM world_intelligence.brief
+      WHERE id = ${piece.briefId}
+      LIMIT 1
+    `;
+
+    if (rows.length !== 1 || !registeredBriefMatchesPiece(rows[0], piece)) {
+      return { ok: false, code: 'metadata-mismatch' };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, code: failureCode(error, 'write-error') };
+  }
 }
 
 export function createWorldFeedbackPostgresPort(
