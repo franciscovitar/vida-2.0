@@ -113,19 +113,12 @@ function registeredBriefMatchesPiece(
   row: Record<string, unknown>,
   piece: WorldPublishedPiece,
 ): boolean {
-  const domains = row.domains;
   return (
     row.id === piece.briefId &&
     row.type === worldBriefType(piece) &&
     row.concept_id === (piece.conceptId ?? null) &&
     row.slug === piece.slug &&
-    row.primary_domain === piece.primaryDomain &&
-    Array.isArray(domains) &&
-    domains.length === canonicalDomains(piece).length &&
-    domains.every((domain, index) => domain === canonicalDomains(piece)[index]) &&
-    row.headline === piece.headline &&
-    row.deck === piece.deck &&
-    Number(row.reading_seconds) === piece.readingSeconds
+    row.primary_domain === piece.primaryDomain
   );
 }
 
@@ -172,7 +165,7 @@ export async function ensureWorldFeedbackBriefRegistered(
         ${piece.conceptId ?? null},
         ${piece.slug},
         ${piece.primaryDomain},
-        ${domains}::text[],
+        string_to_array(${domains.join(',')}, ','),
         ${piece.headline},
         ${piece.deck},
         ${JSON.stringify({ storage: 'metadata-only' })}::jsonb,
@@ -192,11 +185,7 @@ export async function ensureWorldFeedbackBriefRegistered(
         type,
         concept_id,
         slug,
-        primary_domain,
-        domains,
-        headline,
-        deck,
-        reading_seconds
+        primary_domain
       FROM world_intelligence.brief
       WHERE id = ${piece.briefId}
       LIMIT 1
