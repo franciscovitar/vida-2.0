@@ -158,7 +158,10 @@ test('WF7. acción exige sesión y resuelve metadata desde la pieza canónica', 
   assert.match(action, /getWorldPieceDataByBriefId/);
   assert.match(action, /ensureWorldFeedbackBriefRegistered/);
   assert.match(action, /isWorldFeedbackValue/);
-  assert.ok(action.indexOf('isWorldFeedbackValue') < action.indexOf('ensureWorldFeedbackBriefRegistered'));
+  assert.ok(
+    action.lastIndexOf('isWorldFeedbackValue') <
+      action.lastIndexOf('ensureWorldFeedbackBriefRegistered'),
+  );
   assert.ok(
     action.lastIndexOf('ensureWorldFeedbackBriefRegistered') <
       action.lastIndexOf('upsertWorldFeedbackWithPort'),
@@ -229,6 +232,15 @@ test('WF8a. DATABASE_URL compartida se ignora si falta WORLD_DATABASE_URL', asyn
       ok: false,
       code: 'not-configured',
     });
+    assert.deepEqual(
+      await ensureWorldFeedbackBriefRegistered(PIECE, {
+        sqlFactory: () => {
+          factoryCalls += 1;
+          throw new Error('brief registration must not use a shared DATABASE_URL');
+        },
+      }),
+      { ok: false, code: 'not-configured' },
+    );
     assert.equal(factoryCalls, 0);
   } finally {
     if (originalWorldUrl === undefined) delete process.env.WORLD_DATABASE_URL;
