@@ -3,8 +3,8 @@
   "kind": "world_vida_surface",
   "source": {
     "repository": "franciscovitar/personal-ai-system",
-    "ref": "world-vida-integration-v1-20261003",
-    "commit": "e82e570b797d0817b4eef02f88316d16c4dd836e",
+    "ref": "main",
+    "commit": "4ef65a46b3da9bcd2af11fc64091114ec53b29be",
     "canonicalSurfaceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_SURFACE_V1.json",
     "generatedAt": "2026-10-03T17:45:00-03:00",
     "observedAt": "2026-10-03T14:20:00-03:00",

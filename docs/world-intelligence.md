@@ -23,6 +23,10 @@ World fails closed when the surface or a piece is missing, invalid or provenance
 
 Phase 9 does not create a duplicate feedback store. The canonical labels are shown as the next Phase 10 capability, but no write is attempted until the World operational adapter exists.
 
-## Merge refresh
+## Canonical source
 
-Before protected merge, refresh generated derivatives from PAS `main` and point their source metadata to the final canonical merge commit.
+Generated derivatives are pinned to PAS `main` commit:
+
+`4ef65a46b3da9bcd2af11fc64091114ec53b29be`
+
+Any future refresh must preserve the same read-only boundary and exact published-piece provenance.
