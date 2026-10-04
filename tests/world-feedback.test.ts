@@ -187,6 +187,40 @@ test('WF8. adapter PostgreSQL falla cerrado sin URL y no crea cliente', async ()
   assert.equal(factoryCalls, 0);
 });
 
+test('WF8a. DATABASE_URL compartida se ignora si falta WORLD_DATABASE_URL', async () => {
+  const originalWorldUrl = process.env.WORLD_DATABASE_URL;
+  const originalDefaultUrl = process.env.DATABASE_URL;
+  let factoryCalls = 0;
+
+  try {
+    delete process.env.WORLD_DATABASE_URL;
+    process.env.DATABASE_URL = 'postgresql://shared.invalid/db';
+
+    const port = createWorldFeedbackPostgresPort({
+      sqlFactory: () => {
+        factoryCalls += 1;
+        throw new Error('sqlFactory must not use a shared DATABASE_URL');
+      },
+    });
+
+    assert.deepEqual(await port.readCurrent(PIECE.briefId), {
+      ok: false,
+      code: 'not-configured',
+    });
+    assert.deepEqual(await port.upsert(existing()), {
+      ok: false,
+      code: 'not-configured',
+    });
+    assert.equal(factoryCalls, 0);
+  } finally {
+    if (originalWorldUrl === undefined) delete process.env.WORLD_DATABASE_URL;
+    else process.env.WORLD_DATABASE_URL = originalWorldUrl;
+
+    if (originalDefaultUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = originalDefaultUrl;
+  }
+});
+
 test('WF9. adapter PostgreSQL parametriza upsert y normaliza read-back', async () => {
   let stored: WorldFeedbackRecord | null = null;
   const observedQueries: string[] = [];

@@ -24,10 +24,7 @@ const DOMAIN_SET = new Set<WorldDomain>(WORLD_DOMAINS.map((item) => item.id));
 
 function configuredDatabaseUrl(): string | null {
   const worldSpecific = process.env.WORLD_DATABASE_URL?.trim();
-  if (worldSpecific) return worldSpecific;
-
-  const marketplaceDefault = process.env.DATABASE_URL?.trim();
-  return marketplaceDefault || null;
+  return worldSpecific || null;
 }
 
 function defaultSqlFactory(databaseUrl: string): WorldFeedbackSql {

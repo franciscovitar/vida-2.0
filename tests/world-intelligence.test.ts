@@ -128,7 +128,7 @@ test('WORLD-09. Phase 10 usa feedback explícito y PostgreSQL lazy/fail-closed',
   assert.match(store, /createWorldFeedbackPostgresPort/);
   assert.match(postgres, /@neondatabase\/serverless/);
   assert.match(postgres, /WORLD_DATABASE_URL/);
-  assert.match(postgres, /DATABASE_URL/);
+  assert.doesNotMatch(postgres, /process\.env\.DATABASE_URL/);
   assert.match(postgres, /not-configured/);
   assert.match(postgres, /ON CONFLICT \(brief_id\)/);
   assert.doesNotMatch(store + postgres, /google|sheet|localStorage/i);

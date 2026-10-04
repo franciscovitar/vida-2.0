@@ -371,3 +371,39 @@ Verificación requerida después del deployment:
 - Si cambia la arquitectura o una dependencia por decisión explícita, actualizar este documento y
   también `AGENTS.md` sólo si la decisión pasa a ser una regla durable.
 - Este archivo conserva estado operativo; las reglas permanentes viven en `AGENTS.md`.
+
+## World Intelligence V1 — Phase 10 checkpoint (2026-10-04)
+
+**Estado: IN PROGRESS / E2E PENDING.** Revalidado desde PR #150, rama
+`world-feedback-ui-v1-20261004`, commit `cc4b89bc52904d1a0dc5dddec6a3f3ae41da4c76`,
+`behind=0`. El checkout de trabajo estaba limpio al iniciar este checkpoint.
+
+- Neon web funciona y el proyecto aislado `world-intelligence-v1-pilot` permanece en Free; no se
+  habilitó PAYG ni se activaron productos adicionales.
+- `POSTGRES_SCHEMA_V1.sql` fue aplicado; validación correcta: esquema y tablas esperadas presentes,
+  FK de feedback a brief y clave primaria verificadas.
+- `POSTGRES_SMOKE_V1.sql` completó y revirtió su transacción; verificación posterior devolvió cero
+  filas de smoke en las ocho tablas.
+- Sólo se guardaron los dos stubs mínimos de briefs publicados necesarios para la FK; no se copió
+  contenido editorial completo.
+- Vercel guarda `WORLD_DATABASE_URL` como Secret únicamente en Preview para
+  `world-feedback-ui-v1-20261004`. La entrada Preview general creada durante el formulario inicial
+  fue eliminada y se comprobó que queda una sola entrada, con alcance de rama. Production no tiene
+  esta variable.
+- El adapter no debe caer a `DATABASE_URL`: ese valor podría apuntar a un datastore compartido.
+  La rama local elimina ese fallback y agrega una verificación de fallo cerrado; cambio pendiente de
+  QA y push.
+- QA local: los cuatro tests World pasaron; `npm test` pasó 1.661/1.662 y sólo falló
+  `openclaw-plugin-adapter-metadata.test.ts`, ajeno a Phase 10. `npm run verify` pasó typecheck,
+  lint y stylelint, pero el chequeo global de Prettier marcó 967 archivos porque este checkout de
+  Windows tiene `core.autocrlf=true` y el repo fija `endOfLine=lf`. Los cuatro archivos tocados sí
+  pasan el chequeo dirigido con el formato CRLF local. El build de `verify` no llegó a ejecutarse.
+- El redeploy del commit actual en esa rama quedó `Ready`. La app todavía no se probó porque Chrome
+  bloqueó la navegación mientras estaba abierta una UI de extensión; pedir que se cierre y retomar.
+- Neon muestra ventana de restore de 6 horas. La acción manual `Create snapshot` aparece deshabilitada
+  en esta cuenta/plan; no se creó snapshot ni se cambió de plan. El rollback transaccional del smoke
+  sí quedó comprobado.
+- No se expusieron ni guardaron credenciales fuera del secreto server-side. No repetir schema ni
+  smoke. Pendiente: feedback E2E real (insertar, leer, replay idéntico, corrección, read-back),
+  degradación segura en la app, backup/export dentro de Free, QA final, actualización del PR y gates
+  posteriores de merge/Production.
