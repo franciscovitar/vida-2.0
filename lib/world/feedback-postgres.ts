@@ -22,7 +22,10 @@ export interface WorldFeedbackPostgresOptions {
 
 export type WorldBriefRegistrationResult =
   | { ok: true }
-  | { ok: false; code: WorldFeedbackStoreFailureCode | 'metadata-mismatch' };
+  | {
+      ok: false;
+      code: WorldFeedbackStoreFailureCode | 'metadata-mismatch';
+    };
 
 const DOMAIN_SET = new Set<WorldDomain>(WORLD_DOMAINS.map((item) => item.id));
 
