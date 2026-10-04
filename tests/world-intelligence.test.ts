@@ -117,10 +117,18 @@ test('WORLD-08. dominios usan slugs estables', () => {
   assert.equal(worldDomainFromSlug('cualquier-cosa'), null);
 });
 
-test('WORLD-09. feedback no finge persistencia antes de Phase 10', () => {
+test('WORLD-09. Phase 10 usa feedback explícito y store operacional fail-closed', () => {
   const article = readFileSync(join(process.cwd(), 'components/world/WorldPiece.tsx'), 'utf8');
-  assert.match(article, /Feedback explícito: Phase 10/);
-  assert.doesNotMatch(article, /saveWorldFeedback|upsertWorldFeedback/);
+  const feedback = readFileSync(
+    join(process.cwd(), 'components/world/WorldFeedback.tsx'),
+    'utf8',
+  );
+  const store = readFileSync(join(process.cwd(), 'lib/world/feedback-store.ts'), 'utf8');
+
+  assert.match(article, /<WorldFeedback/);
+  assert.match(feedback, /saveWorldFeedbackAction/);
+  assert.match(store, /not-configured/);
+  assert.doesNotMatch(store, /google|sheet|localStorage/i);
 });
 
 test('WORLD-10. navegación general expone World', () => {
