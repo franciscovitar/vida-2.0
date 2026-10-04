@@ -13,6 +13,7 @@ import {
 } from '@/lib/world/feedback';
 import {
   createWorldFeedbackPostgresPort,
+  ensureWorldFeedbackBriefRegistered,
   type WorldFeedbackSql,
 } from '@/lib/world/feedback-postgres';
 import type { WorldPublishedPiece } from '@/types/world-intelligence';
@@ -155,6 +156,13 @@ test('WF7. acción exige sesión y resuelve metadata desde la pieza canónica', 
 
   assert.match(action, /verifySession/);
   assert.match(action, /getWorldPieceDataByBriefId/);
+  assert.match(action, /ensureWorldFeedbackBriefRegistered/);
+  assert.match(action, /isWorldFeedbackValue/);
+  assert.ok(action.indexOf('isWorldFeedbackValue') < action.indexOf('ensureWorldFeedbackBriefRegistered'));
+  assert.ok(
+    action.lastIndexOf('ensureWorldFeedbackBriefRegistered') <
+      action.lastIndexOf('upsertWorldFeedbackWithPort'),
+  );
   assert.doesNotMatch(action, /conceptId|primaryDomain|clusterId/);
   assert.match(component, /Útil/);
   assert.match(component, /Ya lo sabía/);
@@ -184,6 +192,16 @@ test('WF8. adapter PostgreSQL falla cerrado sin URL y no crea cliente', async ()
     ok: false,
     code: 'not-configured',
   });
+  assert.deepEqual(
+    await ensureWorldFeedbackBriefRegistered(PIECE, {
+      databaseUrl: () => null,
+      sqlFactory: () => {
+        factoryCalls += 1;
+        throw new Error('sqlFactory should not run without a database URL');
+      },
+    }),
+    { ok: false, code: 'not-configured' },
+  );
   assert.equal(factoryCalls, 0);
 });
 
@@ -275,6 +293,84 @@ test('WF9. adapter PostgreSQL parametriza upsert y normaliza read-back', async (
   assert.deepEqual(read.record, record);
   assert.ok(observedQueries.some((query) => /ON CONFLICT \(brief_id\)/.test(query)));
   assert.ok(observedQueries.every((query) => !query.includes(record.briefId)));
+});
+
+test('WF9a. un brief publicado nuevo se registra con metadata mínima e idempotente', async () => {
+  let registered: Record<string, unknown> | null = null;
+  const observedQueries: string[] = [];
+
+  const sql: WorldFeedbackSql = async (strings, ...values) => {
+    const query = strings.join('?');
+    observedQueries.push(query);
+
+    if (/^\s*INSERT INTO world_intelligence\.brief/.test(query)) {
+      if (!registered) {
+        registered = {
+          id: values[0],
+          type: values[1],
+          concept_id: values[2],
+          slug: values[3],
+          primary_domain: values[4],
+          domains: values[5],
+          headline: values[6],
+          deck: values[7],
+          reading_seconds: values[9],
+        };
+      }
+      return [];
+    }
+
+    if (/^\s*SELECT[\s\S]*FROM world_intelligence\.brief/.test(query)) {
+      return registered ? [registered] : [];
+    }
+
+    throw new Error('unexpected query');
+  };
+
+  const options = {
+    databaseUrl: () => 'postgresql://world-isolated.invalid/db',
+    sqlFactory: () => sql,
+  };
+
+  assert.deepEqual(await ensureWorldFeedbackBriefRegistered(PIECE, options), { ok: true });
+  assert.deepEqual(await ensureWorldFeedbackBriefRegistered(PIECE, options), { ok: true });
+  assert.ok(observedQueries.some((query) => /ON CONFLICT \(id\) DO NOTHING/.test(query)));
+  assert.ok(observedQueries.some((query) => /'PUBLISHABLE'/.test(query)));
+  assert.ok(observedQueries.every((query) => !query.includes(PIECE.briefId)));
+  assert.ok(observedQueries.every((query) => !query.includes(PIECE.headline)));
+});
+
+test('WF9b. un brief preexistente con metadata conflictiva falla cerrado', async () => {
+  const sql: WorldFeedbackSql = async (strings) => {
+    const query = strings.join('?');
+
+    if (/^\s*INSERT INTO world_intelligence\.brief/.test(query)) return [];
+    if (/^\s*SELECT[\s\S]*FROM world_intelligence\.brief/.test(query)) {
+      return [
+        {
+          id: PIECE.briefId,
+          type: 'LEARN_PIECE',
+          concept_id: PIECE.conceptId ?? null,
+          slug: PIECE.slug,
+          primary_domain: PIECE.primaryDomain,
+          domains: [PIECE.primaryDomain, ...PIECE.secondaryDomains],
+          headline: 'metadata conflict',
+          deck: PIECE.deck,
+          reading_seconds: PIECE.readingSeconds,
+        },
+      ];
+    }
+
+    throw new Error('unexpected query');
+  };
+
+  assert.deepEqual(
+    await ensureWorldFeedbackBriefRegistered(PIECE, {
+      databaseUrl: () => 'postgresql://world-isolated.invalid/db',
+      sqlFactory: () => sql,
+    }),
+    { ok: false, code: 'metadata-mismatch' },
+  );
 });
 
 test('WF10. adapter PostgreSQL no filtra errores ni acepta filas inválidas', async () => {
