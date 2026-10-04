@@ -38,9 +38,7 @@ function memoryPort(initial: WorldFeedbackRecord | null): WorldFeedbackStorePort
   };
 }
 
-function existing(
-  feedback: WorldFeedbackRecord['feedback'] = 'USEFUL',
-): WorldFeedbackRecord {
+function existing(feedback: WorldFeedbackRecord['feedback'] = 'USEFUL'): WorldFeedbackRecord {
   return {
     briefId: PIECE.briefId,
     feedback,
@@ -147,18 +145,9 @@ test('WF6. store no configurado no rompe el artículo', async () => {
 });
 
 test('WF7. acción exige sesión y resuelve metadata desde la pieza canónica', () => {
-  const action = readFileSync(
-    join(process.cwd(), 'app/actions/world-feedback.ts'),
-    'utf8',
-  );
-  const component = readFileSync(
-    join(process.cwd(), 'components/world/WorldFeedback.tsx'),
-    'utf8',
-  );
-  const page = readFileSync(
-    join(process.cwd(), 'app/(app)/world/pieza/[slug]/page.tsx'),
-    'utf8',
-  );
+  const action = readFileSync(join(process.cwd(), 'app/actions/world-feedback.ts'), 'utf8');
+  const component = readFileSync(join(process.cwd(), 'components/world/WorldFeedback.tsx'), 'utf8');
+  const page = readFileSync(join(process.cwd(), 'app/(app)/world/pieza/[slug]/page.tsx'), 'utf8');
 
   assert.match(action, /verifySession/);
   assert.match(action, /getWorldPieceDataByBriefId/);

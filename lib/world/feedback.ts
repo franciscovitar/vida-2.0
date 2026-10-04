@@ -30,10 +30,7 @@ export interface WorldFeedbackInput {
 }
 
 export type WorldFeedbackStoreFailureCode =
-  | 'not-configured'
-  | 'read-error'
-  | 'write-error'
-  | 'permission-error';
+  'not-configured' | 'read-error' | 'write-error' | 'permission-error';
 
 export interface WorldFeedbackStorePort {
   readCurrent(
@@ -117,10 +114,9 @@ function sameCanonicalMetadata(a: WorldFeedbackRecord, b: WorldFeedbackRecord): 
   );
 }
 
-export function worldFeedbackMetadataFromPiece(piece: WorldPublishedPiece): Omit<
-  WorldFeedbackRecord,
-  'feedback' | 'updatedAt'
-> {
+export function worldFeedbackMetadataFromPiece(
+  piece: WorldPublishedPiece,
+): Omit<WorldFeedbackRecord, 'feedback' | 'updatedAt'> {
   return {
     briefId: piece.briefId,
     feedbackVersion: WORLD_FEEDBACK_VERSION,
