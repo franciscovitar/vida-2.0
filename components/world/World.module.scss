@@ -122,7 +122,7 @@
 .piece-card p,
 .article-deck,
 .article-block,
-.feedback-pending p,
+.feedback-card p,
 .coverage-note p {
   color: var(--text-muted);
 }
@@ -264,7 +264,7 @@
 
 .article-header,
 .article-body,
-.feedback-pending,
+.feedback-card,
 .source-section,
 .back-links {
   max-width: 52rem;
@@ -329,25 +329,60 @@
   background: var(--surface-2);
 }
 
-.feedback-pending {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
+.feedback-card {
+  display: grid;
+  gap: 0.7rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-2);
 }
 
-.feedback-pending strong {
+.feedback-copy strong {
   color: var(--text);
   font-size: 0.78rem;
 }
 
-.feedback-pending p {
+.feedback-copy p {
   margin: 0.25rem 0 0;
   font-size: 0.72rem;
   line-height: 1.5;
+}
+
+.feedback-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.feedback-button {
+  padding: 0.45rem 0.62rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.feedback-button[data-selected='true'] {
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.feedback-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.feedback-status {
+  min-height: 1em;
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.68rem;
 }
 
 .source-section {
