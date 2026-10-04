@@ -1,11 +1,13 @@
-import { CircleAlert, Info } from 'lucide-react';
+import { CircleAlert } from 'lucide-react';
 import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { worldDomainLabel } from '@/lib/world/contract';
+import type { WorldFeedbackSnapshot } from '@/lib/world/feedback';
 import type { WorldPieceData } from '@/types/world-intelligence';
 
+import { WorldFeedback } from './WorldFeedback';
 import { WorldNavigation } from './WorldNavigation';
 import styles from './World.module.scss';
 
@@ -13,7 +15,13 @@ function minutes(seconds: number): string {
   return `${Math.max(1, Math.round(seconds / 60))} min`;
 }
 
-export function WorldPieceView({ data }: { data: WorldPieceData }) {
+export function WorldPieceView({
+  data,
+  feedback,
+}: {
+  data: WorldPieceData;
+  feedback: WorldFeedbackSnapshot;
+}) {
   if (data.status !== 'ready' || !data.piece || !data.summary) {
     return (
       <div className={styles.stack}>
@@ -77,17 +85,7 @@ export function WorldPieceView({ data }: { data: WorldPieceData }) {
         ))}
       </div>
 
-      <section className={styles['feedback-pending']} aria-labelledby="world-feedback-title">
-        <Info size={17} aria-hidden="true" />
-        <div>
-          <strong id="world-feedback-title">Feedback explícito: Phase 10</strong>
-          <p>
-            Útil · Ya lo sabía · Quiero profundizar · No me interesa · Muy básico · Muy detallado.
-            Todavía no se guardan respuestas: no creamos una base paralela solo para simular el
-            flujo.
-          </p>
-        </div>
-      </section>
+      <WorldFeedback briefId={piece.briefId} snapshot={feedback} />
 
       <section className={styles['source-section']} aria-labelledby="world-sources-title">
         <h2 id="world-sources-title">Fuentes y contexto</h2>
