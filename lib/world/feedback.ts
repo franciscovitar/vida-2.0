@@ -100,9 +100,7 @@ function fail(code: WorldFeedbackWriteCode, operationId: string): WorldFeedbackW
 }
 
 export function isWorldFeedbackValue(value: unknown): value is WorldFeedbackValue {
-  return (
-    typeof value === 'string' && (WORLD_FEEDBACK_VALUES as readonly string[]).includes(value)
-  );
+  return typeof value === 'string' && (WORLD_FEEDBACK_VALUES as readonly string[]).includes(value);
 }
 
 function validBriefId(value: unknown): value is string {

@@ -3,10 +3,7 @@
 import { useState, useTransition } from 'react';
 
 import { saveWorldFeedbackAction } from '@/app/actions/world-feedback';
-import type {
-  WorldFeedbackSnapshot,
-  WorldFeedbackValue,
-} from '@/lib/world/feedback';
+import type { WorldFeedbackSnapshot, WorldFeedbackValue } from '@/lib/world/feedback';
 
 import styles from './World.module.scss';
 

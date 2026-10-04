@@ -15,10 +15,7 @@ import type { WorldPublishedPiece } from '@/types/world-intelligence';
 
 const PIECE = JSON.parse(
   readFileSync(
-    join(
-      process.cwd(),
-      'data/generated/world/pieces/que-es-entrelazamiento-cuantico.json',
-    ),
+    join(process.cwd(), 'data/generated/world/pieces/que-es-entrelazamiento-cuantico.json'),
     'utf8',
   ),
 ) as WorldPublishedPiece;
@@ -41,7 +38,9 @@ function memoryPort(initial: WorldFeedbackRecord | null): WorldFeedbackStorePort
   };
 }
 
-function existing(feedback: WorldFeedbackRecord['feedback'] = 'USEFUL'): WorldFeedbackRecord {
+function existing(
+  feedback: WorldFeedbackRecord['feedback'] = 'USEFUL',
+): WorldFeedbackRecord {
   return {
     briefId: PIECE.briefId,
     feedback,
@@ -148,7 +147,10 @@ test('WF6. store no configurado no rompe el artículo', async () => {
 });
 
 test('WF7. acción exige sesión y resuelve metadata desde la pieza canónica', () => {
-  const action = readFileSync(join(process.cwd(), 'app/actions/world-feedback.ts'), 'utf8');
+  const action = readFileSync(
+    join(process.cwd(), 'app/actions/world-feedback.ts'),
+    'utf8',
+  );
   const component = readFileSync(
     join(process.cwd(), 'components/world/WorldFeedback.tsx'),
     'utf8',

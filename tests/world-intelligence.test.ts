@@ -38,11 +38,17 @@ test('WORLD-02. superficie faltante o corrupta falla cerrado', () => {
 });
 
 test('WORLD-03. frescura se hace visible sin fabricar edición nueva', () => {
-  const fresh = resolveWorldSurfaceText(surfaceText(), new Date('2026-10-03T18:00:00-03:00'));
+  const fresh = resolveWorldSurfaceText(
+    surfaceText(),
+    new Date('2026-10-03T18:00:00-03:00'),
+  );
   assert.equal(fresh.status, 'ready');
   assert.equal(fresh.stale, false);
 
-  const stale = resolveWorldSurfaceText(surfaceText(), new Date('2026-10-06T18:00:00-03:00'));
+  const stale = resolveWorldSurfaceText(
+    surfaceText(),
+    new Date('2026-10-06T18:00:00-03:00'),
+  );
   assert.equal(stale.status, 'ready');
   assert.equal(stale.stale, true);
   assert.match(stale.notice ?? '', /desactualizada/i);
@@ -61,7 +67,12 @@ test('WORLD-04. cada card resuelve exactamente a su pieza y provenance', () => {
     assert.equal(piece.source.canonicalRef, summary.pieceRef);
     assert.equal(piece.editorialDraftSha256, summary.editorialDraftSha256);
     assert.equal(
-      resolveWorldPieceText(raw, summary, surface, new Date('2026-10-03T18:00:00-03:00')).status,
+      resolveWorldPieceText(
+        raw,
+        summary,
+        surface,
+        new Date('2026-10-03T18:00:00-03:00'),
+      ).status,
       'ready',
     );
   }
@@ -118,7 +129,10 @@ test('WORLD-08. dominios usan slugs estables', () => {
 });
 
 test('WORLD-09. Phase 10 usa feedback explícito y store operacional fail-closed', () => {
-  const article = readFileSync(join(process.cwd(), 'components/world/WorldPiece.tsx'), 'utf8');
+  const article = readFileSync(
+    join(process.cwd(), 'components/world/WorldPiece.tsx'),
+    'utf8',
+  );
   const feedback = readFileSync(
     join(process.cwd(), 'components/world/WorldFeedback.tsx'),
     'utf8',
