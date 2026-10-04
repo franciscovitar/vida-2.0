@@ -3,7 +3,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { verifySession } from '@/lib/auth/dal';
-import { getWorldPieceData } from '@/lib/data/world-source';
+import { getWorldPieceDataByBriefId } from '@/lib/data/world-source';
 import {
   WORLD_FEEDBACK_WRITE_MESSAGES,
   type WorldFeedbackInput,
@@ -34,7 +34,7 @@ export async function saveWorldFeedbackAction(
     };
   }
 
-  const pieceData = await getWorldPieceDataByBriefId(input.briefId);
+  const pieceData = await getWorldPieceDataByBriefId(input.briefId, { skipSessionCheck: true });
   if (pieceData.status !== 'ready' || !pieceData.piece) {
     return {
       ok: false,
@@ -62,9 +62,4 @@ export async function saveWorldFeedbackAction(
       message: WORLD_FEEDBACK_WRITE_MESSAGES['write-error'],
     };
   }
-}
-
-async function getWorldPieceDataByBriefId(briefId: string) {
-  const { getWorldPieceDataByBriefId: loadByBriefId } = await import('@/lib/data/world-source');
-  return loadByBriefId(briefId, { skipSessionCheck: true });
 }
