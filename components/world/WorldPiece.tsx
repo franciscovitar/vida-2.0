@@ -71,7 +71,7 @@ export function WorldPieceView({
       <div className={styles['article-body']}>
         {piece.sections.map((section) => (
           <section className={styles['article-section']} key={section.id}>
-            <h2>{section.title}</h2>
+            {section.title ? <h2>{section.title}</h2> : null}
             {section.blocks.map((block, index) => (
               <p
                 key={`${section.id}-${index}`}
@@ -116,7 +116,7 @@ export function WorldPieceView({
           PAS <code>{piece.source.commit.slice(0, 8)}</code> · draft{' '}
           <code>{piece.editorialDraftSha256.slice(0, 10)}</code>
         </span>
-        <span>HUMAN_APPROVED</span>
+        <span>Revisada y publicada</span>
       </footer>
     </article>
   );
