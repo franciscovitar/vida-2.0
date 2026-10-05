@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "HUMAN_APPROVED",
+  "mode": "NOW",
+  "briefId": "WORLD-2026-10-05-FRANCE-EURO",
+  "slug": "francia-euro-deuda-2026-10-05",
+  "primaryDomain": "ECONOMICS",
+  "secondaryDomains": [
+    "POLITICS_GEOPOLITICS"
+  ],
+  "headline": "🇫🇷 Francia sacude al euro: el mercado vuelve a mirar el riesgo de deuda europea",
+  "deck": "Las dudas sobre el déficit y la capacidad política de Francia para ordenar sus cuentas llevaron al euro a un mínimo de 17 meses y aumentaron con fuerza la prima exigida por los inversores para financiar al Estado francés.",
+  "readingSeconds": 120,
+  "publishedAt": "2026-10-05T09:10:00-03:00",
+  "editorialDraftSha256": "0e20a1e4e95845bdf30d858489b338648754c33d546cc0ff925c778af04187ba",
+  "backgroundNotes": [
+    {
+      "backgroundRef": "SRC-FRANCE-REUTERS-FX-2026-10-05",
+      "term": "Reuters",
+      "plainLanguageDefinition": "Cobertura de la caída del euro y la tensión en bonos franceses por preocupaciones fiscales.",
+      "sourceId": "SRC-REUTERS",
+      "sourceRole": "REPUTABLE_MEDIA",
+      "sourceUrl": "https://www.reuters.com/world/asia-pacific/dollar-holds-firm-french-fiscal-woes-keep-euro-back-foot-2026-10-05/"
+    },
+    {
+      "backgroundRef": "SRC-FRANCE-AP-DEBT-2026-10-01",
+      "term": "Associated Press",
+      "plainLanguageDefinition": "Contexto factual sobre la deuda pública francesa y su peso en la campaña de 2027.",
+      "sourceId": "SRC-AP",
+      "sourceRole": "REPUTABLE_MEDIA",
+      "sourceUrl": "https://apnews.com/article/7cd020a54d0810a8d9df8a5544cd5312"
+    },
+    {
+      "backgroundRef": "SRC-EUROZONE-REUTERS-PMI-2026-10-05",
+      "term": "Reuters PMI",
+      "plainLanguageDefinition": "Datos de actividad empresarial de la zona euro que muestran expansión pese a la tensión financiera francesa.",
+      "sourceId": "SRC-REUTERS",
+      "sourceRole": "REPUTABLE_MEDIA",
+      "sourceUrl": "https://www.reuters.com/world/europe/euro-zone-business-growth-hits-over-3-12-year-high-despite-inflation-worries-pmi-2026-10-05/"
+    }
+  ],
+  "sections": [
+    {
+      "id": "body",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "Cuando un país pide prestado, los inversores exigen una tasa de interés. Para medir cuánto preocupa Francia, el mercado suele comparar sus bonos con los de Alemania, considerados más seguros dentro de la zona euro. Esa diferencia de rendimiento se amplió hasta alrededor de 150 puntos básicos, niveles que no se veían desde la crisis de deuda europea de 2011. Al mismo tiempo, el euro cayó a su valor más bajo frente al dólar en 17 meses.",
+          "claimRefs": [
+            "FRANCE-1",
+            "FRANCE-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "La preocupación combina tres cosas: deuda pública elevada, dificultad para reducir el déficit y un escenario político complicado antes de las elecciones presidenciales de 2027. La deuda francesa ronda actualmente el 119% del PIB.",
+          "claimRefs": [
+            "FRANCE-2",
+            "FRANCE-3"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "Esto no significa que Europa ya esté entrando en otra crisis de deuda. De hecho, la actividad empresarial de la zona euro acaba de registrar su ritmo de expansión más fuerte en más de tres años.",
+          "claimRefs": [
+            "FRANCE-4"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "INTERPRETIVE",
+          "material": true,
+          "text": "Lo importante es la señal: Francia es una de las economías centrales del euro. Si financiarla se vuelve persistentemente más caro, el problema puede empezar a afectar al euro, al Banco Central Europeo y a las condiciones financieras del resto del bloque.",
+          "claimRefs": [
+            "FRANCE-5"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "Qué mirar ahora: el presupuesto francés, la diferencia de tasas Francia-Alemania y si la tensión queda contenida en Francia o empieza a propagarse.",
+          "claimRefs": [
+            "FRANCE-6"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-REUTERS",
+      "role": "REPUTABLE_MEDIA",
+      "publisher": "Reuters"
+    },
+    {
+      "sourceId": "SRC-AP",
+      "role": "REPUTABLE_MEDIA",
+      "publisher": "Associated Press"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "cd3a83173299896f65a19841459c633c6be02759",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_FRANCE_EURO_2026-10-05.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_NOW_FRANCE_EURO_2026-10-05.json",
+    "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_FRANCE_EURO_2026-10-05.json"
+  }
+}
