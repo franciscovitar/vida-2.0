@@ -14,8 +14,20 @@ export const metadata: Metadata = { title: 'Tema · World' };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export default async function WorldDomainPage({ params }: { params: Promise<{ domain: string }> }) {
-  const { domain: slug } = await params;
+type TemporalResolution = 'day' | 'week' | 'month' | 'year';
+
+function temporalResolution(value: string | undefined): TemporalResolution {
+  return value === 'week' || value === 'month' || value === 'year' ? value : 'day';
+}
+
+export default async function WorldDomainPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ domain: string }>;
+  searchParams: Promise<{ period?: string }>;
+}) {
+  const [{ domain: slug }, { period }] = await Promise.all([params, searchParams]);
   const domain = worldDomainFromSlug(slug);
   if (!domain) notFound();
 
@@ -29,7 +41,10 @@ export default async function WorldDomainPage({ params }: { params: Promise<{ do
         icon={Layers3}
         domain="neutral"
       />
-      <WorldSurfaceView data={data} view={{ kind: 'domain', domain }} />
+      <WorldSurfaceView
+        data={data}
+        view={{ kind: 'domain', domain, period: temporalResolution(period) }}
+      />
     </div>
   );
 }
