@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "WEEK",
+  "periodKey": "2026-W40",
+  "state": "CLOSED",
+  "label": "28 de septiembre–4 de octubre de 2026 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2026-09-28T00:00:00-03:00",
+    "end": "2026-10-04T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/WEEK_2026-W40_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W40-POL-1",
+          "headline": "La diplomacia con Irán siguió abierta pero frágil",
+          "summary": "Washington y Teherán intercambiaron señales contradictorias sobre sanciones y negociaciones, mientras el conflicto regional seguía condicionando la seguridad de Oriente Medio.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/middle-east/trump-denies-offering-iran-sanctions-relief-tehran-says-ready-talks-2026-09-29/"
+          ]
+        },
+        {
+          "itemId": "W40-POL-2",
+          "headline": "Los ataques hutíes volvieron a tensionar infraestructura energética",
+          "summary": "Un nuevo ataque contra instalaciones saudíes mostró que el riesgo regional seguía activo incluso después de meses de intentos de estabilización.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/energy/oil-climbs-after-yemeni-houthis-attack-saudi-aramco-sites-2026-10-04/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W40-ECO-1",
+          "headline": "Bonos caros y petróleo alto mantuvieron la presión macroeconómica",
+          "summary": "Los mercados cerraron septiembre con rendimientos elevados y persistente riesgo energético, una combinación incómoda para inflación, deuda y crecimiento.",
+          "sourceRefs": [
+            "https://www.reuters.com/commentary/reuters-open-interest/global-markets-trading-day-graphic-2026-09-28/",
+            "https://www.reuters.com/business/energy/oil-climbs-after-yemeni-houthis-attack-saudi-aramco-sites-2026-10-04/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W40-SCI-1",
+          "headline": "La pérdida de glaciares suizos volvió a mostrar la velocidad del calentamiento alpino",
+          "summary": "El reporte de cierre de septiembre estimó una pérdida anual de 5,5% del volumen glaciar, la segunda mayor caída porcentual registrada.",
+          "sourceRefs": [
+            "https://apnews.com/article/e847da14ad64ce6a3f188c05636e4b73"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W40-TECH-1",
+          "headline": "Grandes empresas de IA firmaron un pacto voluntario de seguridad en Estados Unidos",
+          "summary": "Ejecutivos de compañías líderes acordaron compromisos voluntarios de seguridad, mostrando que la gobernanza de modelos avanzados ya se discute junto con su despliegue comercial.",
+          "sourceRefs": [
+            "https://www.reuters.com/legal/government/trump-host-zuckerberg-anthropics-amodei-other-ai-titans-tuesday-2026-09-29/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

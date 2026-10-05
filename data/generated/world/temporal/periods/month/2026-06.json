@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "MONTH",
+  "periodKey": "2026-06",
+  "state": "CLOSED",
+  "label": "Junio de 2026 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2026-06-01T00:00:00-03:00",
+    "end": "2026-06-30T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-06_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202606-POL-1",
+          "headline": "Estados Unidos e Irán anunciaron un acuerdo de paz en el marco del G7",
+          "summary": "El 15 de junio Donald Trump anunció un acuerdo entre Estados Unidos e Irán, con una firma formal prevista, mientras los líderes del G7 se reunían en Francia.",
+          "sourceRefs": [
+            "https://www.reuters.com/podcasts/iran-us-deal-g7-summit-irans-world-cup-opener-2026-06-15/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202606-SCI-1",
+          "headline": "Dos terremotos sacudieron Venezuela",
+          "summary": "Dos sismos registrados el 24 y 25 de junio estuvieron entre los eventos naturales destacados globalmente durante el mes.",
+          "sourceRefs": [
+            "https://apnews.com/photo-gallery/major-global-news-moments-may-ap-photos-3462aeb752c1ead571dab7c39873e985"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202606-TECH-1",
+          "headline": "La IA siguió expandiéndose a traducción, dispositivos y modelos locales",
+          "summary": "Google destacó Gemini 3.5 Live Translate, Android 17 y Gemma 4 de 12B como parte de una expansión hacia experiencias de uso y ejecución local.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-june-2026/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

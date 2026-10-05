@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "MONTH",
+  "periodKey": "2026-07",
+  "state": "CLOSED",
+  "label": "Julio de 2026 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2026-07-01T00:00:00-03:00",
+    "end": "2026-07-31T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-07_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202607-POL-1",
+          "headline": "Los hutíes volvieron a elevar el riesgo sobre rutas marítimas críticas",
+          "summary": "Ataques contra petroleros saudíes en el mar Rojo reabrieron el riesgo sobre Bab el-Mandeb y extendieron la dimensión marítima de la crisis regional.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/middle-east/houthis-say-they-attacked-saudi-tankers-red-sea-threatening-new-chokepoint-iran-2026-07-23/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202607-ECO-1",
+          "headline": "El petróleo volvió a superar los 100 dólares bajo presión geopolítica",
+          "summary": "Los ataques a buques y el riesgo sobre corredores energéticos mantuvieron elevados los precios del crudo y la preocupación por inflación y transporte.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/middle-east/houthis-say-they-attacked-saudi-tankers-red-sea-threatening-new-chokepoint-iran-2026-07-23/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202607-SCI-1",
+          "headline": "Canadá atravesó otra temporada intensa de incendios forestales",
+          "summary": "A fines de julio los incendios se extendían por el oeste canadiense, alimentados por calor y rayos, con millones de hectáreas afectadas en la temporada.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/environment/wildfires-spread-western-canada-temperatures-rise-lightning-strikes-2026-07-24/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202607-TECH-1",
+          "headline": "Los laboratorios siguieron empujando agentes y robótica",
+          "summary": "Google presentó nuevos modelos Gemini orientados a agentes y avances en Robotics ER2, reforzando el puente entre razonamiento digital y acción física.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-july-2026/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

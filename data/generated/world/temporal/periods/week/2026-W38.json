@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "WEEK",
+  "periodKey": "2026-W38",
+  "state": "CLOSED",
+  "label": "14–20 de septiembre de 2026 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2026-09-14T00:00:00-03:00",
+    "end": "2026-09-20T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/WEEK_2026-W38_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W38-POL-1",
+          "headline": "La ONU abrió una semana marcada por guerras, IA, clima y desigualdad",
+          "summary": "En la antesala de la Asamblea General, António Guterres colocó conflictos abiertos, gobernanza de IA, clima e inequidad entre los riesgos centrales del momento.",
+          "sourceRefs": [
+            "https://www.un.org/es/node/248096",
+            "https://www.reuters.com/world/china/world-leaders-return-un-amid-wars-middle-east-ukraine-2026-09-20/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W38-ECO-1",
+          "headline": "Los bancos centrales endurecieron el tono mientras petróleo y bonos seguían bajo presión",
+          "summary": "La semana combinó decisiones monetarias más restrictivas, rendimientos elevados y petróleo caro, reforzando el riesgo de una inflación más persistente.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-18/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W38-TECH-1",
+          "headline": "Gemini 3.8 Live apuntó a interacción más fluida y razonamiento en tiempo real",
+          "summary": "Google presentó Gemini 3.8 Live y una variante con razonamiento extendido, continuando la carrera por modelos interactivos capaces de sostener tareas más complejas.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-8-live-gemini-3-8-live-extended-thinking/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

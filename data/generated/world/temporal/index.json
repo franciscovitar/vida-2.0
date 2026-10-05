@@ -4,9 +4,9 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "392b241a2291b28a197b49fbb858b14a5822c3ac",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/TEMPORAL_INDEX_V1.json",
-    "generatedAt": "2026-10-05T12:45:00-03:00"
+    "generatedAt": "2026-10-05T17:45:00Z"
   },
   "latest": {
     "day": {
@@ -15,10 +15,113 @@
       "state": "IN_PROGRESS",
       "localRef": "periods/day/2026-10-05.json"
     },
-    "week": null,
-    "month": null,
-    "year": null
+    "week": {
+      "periodKey": "2026-W40",
+      "label": "28 de septiembre–4 de octubre de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/week/2026-W40.json"
+    },
+    "month": {
+      "periodKey": "2026-09",
+      "label": "Septiembre de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-09.json"
+    },
+    "year": {
+      "periodKey": "2025",
+      "label": "2025 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/year/2025.json"
+    }
   },
-  "months": [],
-  "years": []
+  "weeks": [
+    {
+      "periodKey": "2026-W40",
+      "label": "28 de septiembre–4 de octubre de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/week/2026-W40.json"
+    },
+    {
+      "periodKey": "2026-W39",
+      "label": "21–27 de septiembre de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/week/2026-W39.json"
+    },
+    {
+      "periodKey": "2026-W38",
+      "label": "14–20 de septiembre de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/week/2026-W38.json"
+    },
+    {
+      "periodKey": "2026-W37",
+      "label": "7–13 de septiembre de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/week/2026-W37.json"
+    }
+  ],
+  "months": [
+    {
+      "periodKey": "2026-09",
+      "label": "Septiembre de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-09.json"
+    },
+    {
+      "periodKey": "2026-08",
+      "label": "Agosto de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-08.json"
+    },
+    {
+      "periodKey": "2026-07",
+      "label": "Julio de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-07.json"
+    },
+    {
+      "periodKey": "2026-06",
+      "label": "Junio de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-06.json"
+    },
+    {
+      "periodKey": "2026-05",
+      "label": "Mayo de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-05.json"
+    },
+    {
+      "periodKey": "2026-04",
+      "label": "Abril de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-04.json"
+    },
+    {
+      "periodKey": "2026-03",
+      "label": "Marzo de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-03.json"
+    },
+    {
+      "periodKey": "2026-02",
+      "label": "Febrero de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-02.json"
+    },
+    {
+      "periodKey": "2026-01",
+      "label": "Enero de 2026 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/month/2026-01.json"
+    }
+  ],
+  "years": [
+    {
+      "periodKey": "2025",
+      "label": "2025 · reconstrucción retrospectiva",
+      "state": "CLOSED",
+      "localRef": "periods/year/2025.json"
+    }
+  ]
 }
