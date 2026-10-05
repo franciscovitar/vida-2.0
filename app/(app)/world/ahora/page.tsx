@@ -12,8 +12,18 @@ export const metadata: Metadata = { title: 'World · Ahora' };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export default async function Page() {
-  const data = await getWorldSurfaceData();
+type TemporalResolution = 'day' | 'week' | 'month' | 'year';
+
+function temporalResolution(value: string | undefined): TemporalResolution {
+  return value === 'week' || value === 'month' || value === 'year' ? value : 'day';
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ period?: string }>;
+}) {
+  const [{ period }, data] = await Promise.all([searchParams, getWorldSurfaceData()]);
 
   return (
     <div className={pageStyles.page}>
@@ -23,7 +33,7 @@ export default async function Page() {
         icon={Radio}
         domain="neutral"
       />
-      <WorldSurfaceView data={data} view={{ kind: 'now' }} />
+      <WorldSurfaceView data={data} view={{ kind: 'now', period: temporalResolution(period) }} />
     </div>
   );
 }
