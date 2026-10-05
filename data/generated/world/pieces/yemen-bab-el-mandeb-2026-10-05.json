@@ -6,9 +6,7 @@
   "briefId": "WORLD-2026-10-05-YEMEN-BAB-EL-MANDEB",
   "slug": "yemen-bab-el-mandeb-2026-10-05",
   "primaryDomain": "POLITICS_GEOPOLITICS",
-  "secondaryDomains": [
-    "ECONOMICS"
-  ],
+  "secondaryDomains": ["ECONOMICS"],
   "headline": "🇾🇪 Yemen vuelve a escalar cerca del Bab el-Mandeb, un paso clave para el comercio mundial",
   "deck": "Fuerzas del gobierno yemení, respaldadas por una coalición liderada por Arabia Saudita, avanzaron contra los hutíes en la zona del estrecho que conecta el mar Rojo con el golfo de Adén.",
   "readingSeconds": 120,
@@ -49,46 +47,35 @@
           "kind": "FACTUAL",
           "material": true,
           "text": "Bab el-Mandeb es uno de esos lugares que parecen pequeños en el mapa pero tienen impacto global: es la salida sur del mar Rojo y forma parte de la ruta marítima que termina conectando Asia y Oriente Medio con el canal de Suez y Europa.",
-          "claimRefs": [
-            "YEMEN-1"
-          ],
+          "claimRefs": ["YEMEN-1"],
           "backgroundRefs": []
         },
         {
           "kind": "FACTUAL",
           "material": true,
           "text": "Este lunes, fuerzas del gobierno yemení apoyadas por Arabia Saudita avanzaron sobre posiciones hutíes cerca del estrecho. Reuters informó que tomaron buena parte del distrito de Dhubab, mientras los hutíes mantienen presión en otras zonas, especialmente alrededor de Taiz. AP también reportó una intensificación de los bombardeos de la coalición.",
-          "claimRefs": [
-            "YEMEN-1",
-            "YEMEN-2"
-          ],
+          "claimRefs": ["YEMEN-1", "YEMEN-2"],
           "backgroundRefs": []
         },
         {
           "kind": "INTERPRETIVE",
           "material": true,
           "text": "¿Por qué importa fuera de Yemen? Porque un deterioro de la seguridad en esta zona puede volver a alterar rutas de barcos, tiempos de transporte, seguros y energía. Además, ocurre mientras otras rutas petroleras de Oriente Medio también están bajo tensión.",
-          "claimRefs": [
-            "YEMEN-3"
-          ],
+          "claimRefs": ["YEMEN-3"],
           "backgroundRefs": []
         },
         {
           "kind": "FACTUAL",
           "material": true,
           "text": "El costo humano ya parte de una base muy grave: la OMS estima que cerca de 20 millones de personas en Yemen necesitan asistencia sanitaria.",
-          "claimRefs": [
-            "YEMEN-4"
-          ],
+          "claimRefs": ["YEMEN-4"],
           "backgroundRefs": []
         },
         {
           "kind": "LIMIT",
           "material": true,
           "text": "Qué mirar ahora: si la ofensiva cambia realmente el control de la costa, si los hutíes responden contra barcos o infraestructura regional y si la escalada abre o cierra espacio para negociaciones. Las líneas de frente están cambiando rápido, así que las afirmaciones territoriales deben seguir verificándose.",
-          "claimRefs": [
-            "YEMEN-5"
-          ],
+          "claimRefs": ["YEMEN-5"],
           "backgroundRefs": []
         }
       ]
