@@ -108,7 +108,6 @@ export const primaryNav: NavItemData[] = [
     domain: 'productivity',
   },
   { label: 'Proyectos', href: '/proyectos', icon: 'proyectos', domain: 'projects' },
-  { label: 'Inteligencia', href: '/inteligencia', icon: 'inteligencia', domain: 'productivity' },
   { label: 'World', href: '/world', icon: 'world', domain: 'learning' },
   { label: 'Profesional', href: '/professional', icon: 'professional', domain: 'projects' },
   { label: 'Gimnasio', href: '/gimnasio', icon: 'gimnasio', domain: 'health' },

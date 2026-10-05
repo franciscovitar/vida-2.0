@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ProfessionalDashboard } from '@/components/professional/ProfessionalDashboard';
+import { ProfessionalNavigation } from '@/components/professional/ProfessionalNavigation';
 import { getProfessionalIntelligencePageData } from '@/lib/data/professional-intelligence-source';
 
 import pageStyles from '../page.module.scss';
@@ -19,10 +20,12 @@ export default async function ProfessionalPage() {
     <div className={pageStyles.page}>
       <PageHeader
         title="Profesional"
-        description="Qué conviene desarrollar, qué ya podés demostrar, cómo se mueve el mercado y qué hacer vos vs. qué delegar a la IA."
+        description="Qué cambió en el trabajo, la IA y la tecnología; qué significa para vos y qué conviene hacer."
         icon={Brain}
         domain="projects"
       />
+
+      <ProfessionalNavigation current="panorama" />
 
       <ProfessionalDashboard
         data={data.professional}
