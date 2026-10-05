@@ -3,7 +3,11 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { WORLD_DOMAINS, worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
+import {
+  WORLD_DOMAINS,
+  worldDomainLabel,
+  worldPieceHref,
+} from '@/lib/world/contract';
 import type {
   WorldCoverageState,
   WorldDomainOutcome,
@@ -80,7 +84,10 @@ function ArchiveLinks({
   const base = granularity === 'MONTH' ? '/world/ahora/mes' : '/world/ahora/ano';
 
   return (
-    <nav className={styles['archive-row']} aria-label={`Archivo de ${granularityLabel(granularity)}`}>
+    <nav
+      className={styles['archive-row']}
+      aria-label={`Archivo de ${granularityLabel(granularity)}`}
+    >
       {entries.map((entry) => (
         <Link key={entry.periodKey} href={`${base}?period=${entry.periodKey}`}>
           {entry.label}
@@ -145,7 +152,8 @@ export function WorldTemporalView({ data }: { data: WorldTemporalPageData }) {
           <section className={styles['period-hero']} aria-labelledby="world-period-title">
             <div>
               <p className={styles.eyebrow}>
-                {granularityLabel(period.granularity)} · {period.state === 'CLOSED' ? 'Cerrado' : 'En curso'}
+                {granularityLabel(period.granularity)} ·{' '}
+                {period.state === 'CLOSED' ? 'Cerrado' : 'En curso'}
               </p>
               <h2 id="world-period-title">{period.label}</h2>
               <p>
@@ -168,7 +176,9 @@ export function WorldTemporalView({ data }: { data: WorldTemporalPageData }) {
 
           <div className={styles['domain-stack']}>
             {WORLD_DOMAINS.map((meta) => {
-              const domain = period.domains.find((candidate) => candidate.domain === meta.id);
+              const domain = period.domains.find(
+                (candidate) => candidate.domain === meta.id,
+              );
               if (!domain) return null;
 
               const deepDives = domain.deepDiveBriefIds
@@ -244,10 +254,12 @@ export function WorldTemporalView({ data }: { data: WorldTemporalPageData }) {
 
           <footer className={styles.provenance}>
             <span>
-              PAS <code>{period.source.commit.slice(0, 8)}</code> · observado {period.source.observedAt}
+              PAS <code>{period.source.commit.slice(0, 8)}</code> · observado{' '}
+              {period.source.observedAt}
             </span>
             <span>
-              <CalendarRange size={13} aria-hidden="true" /> {period.window.start} → {period.window.end}
+              <CalendarRange size={13} aria-hidden="true" /> {period.window.start} →{' '}
+              {period.window.end}
             </span>
           </footer>
         </>
