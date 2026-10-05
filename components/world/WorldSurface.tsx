@@ -9,12 +9,14 @@ import type { WorldDomain, WorldPieceSummary, WorldSurfaceData } from '@/types/w
 import { WorldNavigation } from './WorldNavigation';
 import styles from './World.module.scss';
 
+type WorldTemporalResolution = 'day' | 'week' | 'month' | 'year';
+
 type View =
   | { kind: 'home' }
-  | { kind: 'now' }
+  | { kind: 'now'; period?: WorldTemporalResolution }
   | { kind: 'learn' }
   | { kind: 'library' }
-  | { kind: 'domain'; domain: WorldDomain };
+  | { kind: 'domain'; domain: WorldDomain; period?: WorldTemporalResolution };
 
 function minutes(seconds: number): string {
   return `${Math.max(1, Math.round(seconds / 60))} min`;
@@ -44,6 +46,52 @@ function EmptyState({ text }: { text: string }) {
   return <p className={styles.empty}>{text}</p>;
 }
 
+
+const TEMPORAL_OPTIONS: readonly {
+  id: WorldTemporalResolution;
+  label: string;
+}[] = [
+  { id: 'day', label: 'Día' },
+  { id: 'week', label: 'Semana' },
+  { id: 'month', label: 'Mes' },
+  { id: 'year', label: 'Año' },
+];
+
+function WorldTemporalNavigation({
+  period,
+  domain,
+}: {
+  period: WorldTemporalResolution;
+  domain?: WorldDomain;
+}) {
+  const base = domain ? `/world/tema/${WORLD_DOMAINS.find((item) => item.id === domain)?.slug ?? ''}` : '/world/ahora';
+
+  return (
+    <nav className={styles['temporal-row']} aria-label="Resolución temporal de World">
+      {TEMPORAL_OPTIONS.map((item) => (
+        <Link
+          key={item.id}
+          className={styles['temporal-link']}
+          data-active={item.id === period ? 'true' : 'false'}
+          href={`${base}?period=${item.id}`}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function temporalUnavailableText(period: WorldTemporalResolution): string {
+  if (period === 'week') {
+    return 'Todavía no hay un cierre semanal publicado bajo la nueva Pirámide Temporal.';
+  }
+  if (period === 'month') {
+    return 'Todavía no hay un cierre mensual publicado. Los meses cerrados quedarán archivados acá.';
+  }
+  return 'Todavía no hay un cierre anual publicado. Los años cerrados quedarán archivados acá.';
+}
+
 export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view: View }) {
   if (data.status !== 'ready' || !data.snapshot) {
     return (
@@ -68,14 +116,26 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
 
   const snapshot = data.snapshot;
   const all = [...snapshot.now.items, ...snapshot.learn.items];
+  const temporalPeriod =
+    view.kind === 'now' || view.kind === 'domain' ? (view.period ?? 'day') : 'day';
   let title = 'World';
   let description = 'Una edición finita para entender lo que importa sin convertirlo en un feed.';
   let items: readonly WorldPieceSummary[] = all;
 
   if (view.kind === 'now') {
-    title = 'Ahora';
-    description = 'Qué cambió en el mundo y merece atención hoy.';
-    items = snapshot.now.items;
+    title =
+      temporalPeriod === 'day'
+        ? 'Día'
+        : temporalPeriod === 'week'
+          ? 'Semana'
+          : temporalPeriod === 'month'
+            ? 'Mes'
+            : 'Año';
+    description =
+      temporalPeriod === 'day'
+        ? 'Panorama del último día publicado y sus historias en profundidad.'
+        : temporalUnavailableText(temporalPeriod);
+    items = temporalPeriod === 'day' ? snapshot.now.items : [];
   } else if (view.kind === 'learn') {
     title = 'Aprender';
     description = 'Ideas durables que vale la pena entender aunque no sean nuevas.';
@@ -87,13 +147,26 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
     items = snapshot.library.items;
   } else if (view.kind === 'domain') {
     title = worldDomainLabel(view.domain);
-    description = 'Piezas publicadas de este tema, sin volver a ordenar la selección editorial.';
-    items = all.filter((item) => item.primaryDomain === view.domain);
+    description =
+      temporalPeriod === 'day'
+        ? 'Última edición publicada de este tema.'
+        : temporalUnavailableText(temporalPeriod);
+    items =
+      temporalPeriod === 'day'
+        ? all.filter((item) => item.primaryDomain === view.domain)
+        : [];
   }
 
   return (
     <div className={styles.stack}>
       <WorldNavigation />
+
+      {view.kind === 'now' || view.kind === 'domain' ? (
+        <WorldTemporalNavigation
+          period={temporalPeriod}
+          domain={view.kind === 'domain' ? view.domain : undefined}
+        />
+      ) : null}
 
       {data.notice ? (
         <div className={styles.notice} data-tone={data.stale ? 'warning' : 'info'} role="status">
@@ -129,7 +202,7 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
             <div className={styles['section-heading']}>
               <div>
                 <p className={styles.eyebrow}>Ahora</p>
-                <h2 id="world-now-title">Tu edición de hoy</h2>
+                <h2 id="world-now-title">Última edición publicada</h2>
               </div>
               <Link className={styles['section-link']} href="/world/ahora">
                 Ver Ahora →
