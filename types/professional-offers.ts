@@ -1,9 +1,5 @@
 export type ProfessionalOfferAccessClass =
-  | 'FREE'
-  | 'FREEMIUM'
-  | 'PAID'
-  | 'OPEN_SOURCE'
-  | 'USAGE_BASED';
+  'FREE' | 'FREEMIUM' | 'PAID' | 'OPEN_SOURCE' | 'USAGE_BASED';
 
 export type ProfessionalOfferRankingStatus = 'COMPARISON_ONLY' | 'RANKED';
 
