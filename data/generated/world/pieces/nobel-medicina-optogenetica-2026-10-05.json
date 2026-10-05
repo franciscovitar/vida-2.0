@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "HUMAN_APPROVED",
+  "mode": "NOW",
+  "briefId": "WORLD-2026-10-05-NOBEL-OPTOGENETICS",
+  "slug": "nobel-medicina-optogenetica-2026-10-05",
+  "primaryDomain": "SCIENCE",
+  "secondaryDomains": [
+    "HEALTH"
+  ],
+  "headline": "💡 Nobel de Medicina 2026: premiaron la optogenética, una forma de encender y apagar neuronas con luz",
+  "deck": "Karl Deisseroth, Peter Hegemann y Georg Nagel recibieron el Nobel por una herramienta que convirtió proteínas sensibles a la luz en interruptores para estudiar circuitos del cerebro.",
+  "readingSeconds": 120,
+  "publishedAt": "2026-10-05T09:10:00-03:00",
+  "editorialDraftSha256": "ff2614c918800e4055496d2c569b30424d95bb59b2acca1411f84dd472a86398",
+  "backgroundNotes": [
+    {
+      "backgroundRef": "SRC-NOBEL-REUTERS-2026-10-05",
+      "term": "Reuters",
+      "plainLanguageDefinition": "Cobertura factual del Nobel de Medicina 2026 y los trabajos premiados en optogenética.",
+      "sourceId": "SRC-REUTERS",
+      "sourceRole": "REPUTABLE_MEDIA",
+      "sourceUrl": "https://www.reuters.com/business/healthcare-pharmaceuticals/deisseroth-hegemann-nagelwin-2026-nobel-medicine-prize-2026-10-05/"
+    },
+    {
+      "backgroundRef": "SRC-NOBEL-NATURE-2026-10-05",
+      "term": "Nature",
+      "plainLanguageDefinition": "Cobertura científica del Nobel y explicación del impacto de la optogenética en neurociencia.",
+      "sourceId": "SRC-NATURE",
+      "sourceRole": "SPECIALIST_ANALYSIS",
+      "sourceUrl": "https://www.nature.com/articles/d41586-026-03091-2"
+    },
+    {
+      "backgroundRef": "SRC-OPTO-NATURE-2025",
+      "term": "Nature Neuroscience",
+      "plainLanguageDefinition": "Revisión sobre traducción clínica y usos potenciales de la optogenética en humanos.",
+      "sourceId": "SRC-NATURE",
+      "sourceRole": "SCHOLARLY_BACKGROUND",
+      "sourceUrl": "https://www.nature.com/articles/s41593-025-02097-9"
+    }
+  ],
+  "sections": [
+    {
+      "id": "body",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "Para entender la optogenética, imaginá que querés descubrir qué hace un grupo concreto de neuronas. Observar cuándo se activan ayuda, pero no demuestra que sean la causa de una conducta. La optogenética agregó algo mucho más potente: la posibilidad de activar o desactivar células elegidas usando luz.",
+          "claimRefs": [
+            "NOBEL-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "El Nobel de Medicina 2026 fue para Karl Deisseroth, Peter Hegemann y Georg Nagel por los descubrimientos que hicieron posible esa técnica. La historia empezó estudiando proteínas de algas que reaccionan a la luz. Hegemann y Nagel ayudaron a identificar canales que pueden abrirse cuando reciben luz; más tarde, Deisseroth llevó ese principio a neuronas de mamíferos.",
+          "claimRefs": [
+            "NOBEL-1",
+            "NOBEL-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "INTERPRETIVE",
+          "material": true,
+          "text": "El resultado fue una herramienta con la que los investigadores pueden preguntar cosas como: “¿qué pasa si activo exactamente este circuito del cerebro?” y observar la consecuencia. Eso transformó el estudio de comportamiento, sueño, movimiento, memoria y enfermedades neurológicas. Nature calificó la técnica como una revolución para la neurociencia.",
+          "claimRefs": [
+            "NOBEL-2",
+            "NOBEL-3"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "Hay investigaciones que intentan llevarla a tratamientos —por ejemplo, restauración parcial de visión—, pero eso no significa que hoy exista una terapia optogenética general para enfermedades cerebrales. Su impacto más consolidado sigue siendo como herramienta de investigación.",
+          "claimRefs": [
+            "NOBEL-4"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-REUTERS",
+      "role": "REPUTABLE_MEDIA",
+      "publisher": "Reuters"
+    },
+    {
+      "sourceId": "SRC-NATURE",
+      "role": "SPECIALIST_ANALYSIS",
+      "publisher": "Nature"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "cd3a83173299896f65a19841459c633c6be02759",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_OPTOGENETICS_2026-10-05.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_NOW_NOBEL_OPTOGENETICS_2026-10-05.json",
+    "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_OPTOGENETICS_2026-10-05.json"
+  }
+}
