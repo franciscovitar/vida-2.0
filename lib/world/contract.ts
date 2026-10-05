@@ -55,12 +55,13 @@ function validDomain(value: unknown): value is WorldDomain {
   return typeof value === 'string' && DOMAIN_SET.has(value as WorldDomain);
 }
 
-function validSummary(value: unknown, mode: 'NOW' | 'LEARN'): value is WorldPieceSummary {
+function validSummary(value: unknown, mode?: 'NOW' | 'LEARN'): value is WorldPieceSummary {
   if (!isRecord(value)) return false;
+  if (value.mode !== 'NOW' && value.mode !== 'LEARN') return false;
+  if (mode && value.mode !== mode) return false;
 
   return (
     isString(value.briefId) &&
-    value.mode === mode &&
     isString(value.slug) &&
     SAFE_SLUG.test(value.slug) &&
     validDomain(value.primaryDomain) &&
@@ -72,6 +73,8 @@ function validSummary(value: unknown, mode: 'NOW' | 'LEARN'): value is WorldPiec
     isString(value.humanReviewRef) &&
     isString(value.editorialDraftSha256) &&
     SHA256.test(value.editorialDraftSha256) &&
+    (value.sourceCommit === undefined ||
+      (isString(value.sourceCommit) && GIT_SHA.test(value.sourceCommit))) &&
     value.publicationState === 'HUMAN_APPROVED'
   );
 }
@@ -89,7 +92,8 @@ export function parseWorldSurfaceSnapshot(value: unknown): WorldSurfaceSnapshot 
     value.readingDebt !== false ||
     !isRecord(value.source) ||
     !isRecord(value.now) ||
-    !isRecord(value.learn)
+    !isRecord(value.learn) ||
+    !isRecord(value.library)
   ) {
     return null;
   }
@@ -112,11 +116,14 @@ export function parseWorldSurfaceSnapshot(value: unknown): WorldSurfaceSnapshot 
 
   const nowItems = value.now.items;
   const learnItems = value.learn.items;
+  const libraryItems = value.library.items;
   if (
     !Array.isArray(nowItems) ||
     !nowItems.every((item) => validSummary(item, 'NOW')) ||
     !Array.isArray(learnItems) ||
     !learnItems.every((item) => validSummary(item, 'LEARN')) ||
+    !Array.isArray(libraryItems) ||
+    !libraryItems.every((item) => validSummary(item)) ||
     !isNumber(value.now.targetReadingSeconds) ||
     !isNumber(value.now.selectedReadingSeconds) ||
     !isString(value.editionDate) ||
@@ -138,6 +145,25 @@ export function parseWorldSurfaceSnapshot(value: unknown): WorldSurfaceSnapshot 
     if (ids.has(item.briefId) || slugs.has(item.slug)) return null;
     ids.add(item.briefId);
     slugs.add(item.slug);
+  }
+
+  const libraryIds = new Set<string>();
+  const librarySlugs = new Set<string>();
+  for (const item of snapshot.library.items) {
+    if (libraryIds.has(item.briefId) || librarySlugs.has(item.slug)) return null;
+    libraryIds.add(item.briefId);
+    librarySlugs.add(item.slug);
+  }
+
+  for (const item of items) {
+    const archived = snapshot.library.items.find((candidate) => candidate.briefId === item.briefId);
+    if (
+      !archived ||
+      archived.slug !== item.slug ||
+      archived.editorialDraftSha256 !== item.editorialDraftSha256
+    ) {
+      return null;
+    }
   }
 
   const selected = snapshot.now.items.reduce((sum, item) => sum + item.readingSeconds, 0);
@@ -193,7 +219,7 @@ function validSection(value: unknown): boolean {
 
   return (
     isString(value.id) &&
-    isString(value.title) &&
+    typeof value.title === 'string' &&
     Array.isArray(value.blocks) &&
     value.blocks.length > 0 &&
     value.blocks.every(validBlock)
@@ -353,7 +379,7 @@ export function resolveWorldPieceText(
     piece.deck !== summary.deck ||
     piece.readingSeconds !== summary.readingSeconds ||
     piece.editorialDraftSha256 !== summary.editorialDraftSha256 ||
-    piece.source.commit !== snapshot.source.commit ||
+    piece.source.commit !== (summary.sourceCommit ?? snapshot.source.commit) ||
     piece.source.ref !== snapshot.source.ref ||
     piece.source.canonicalRef !== summary.pieceRef
   ) {
@@ -366,12 +392,16 @@ export function resolveWorldPieceText(
     };
   }
 
-  const stale = isWorldSurfaceStale(snapshot, now);
+  const historical =
+    summary.sourceCommit !== undefined && summary.sourceCommit !== snapshot.source.commit;
+  const stale = isWorldSurfaceStale(snapshot, now) || historical;
   return {
     status: 'ready',
     notice:
       stale && piece.mode === 'NOW'
-        ? 'Esta pieza actual pertenece a una edición desactualizada; conserva valor histórico, pero no debe leerse como estado fresco.'
+        ? historical
+          ? 'Esta pieza pertenece a una edición anterior; conserva valor histórico, pero no debe leerse como estado fresco.'
+          : 'Esta pieza actual pertenece a una edición desactualizada; conserva valor histórico, pero no debe leerse como estado fresco.'
         : null,
     stale: stale && piece.mode === 'NOW',
     summary,
@@ -397,5 +427,5 @@ export function worldDomainLabel(domain: WorldDomain): string {
 }
 
 export function listWorldItems(snapshot: WorldSurfaceSnapshot): readonly WorldPieceSummary[] {
-  return [...snapshot.now.items, ...snapshot.learn.items];
+  return snapshot.library.items;
 }
