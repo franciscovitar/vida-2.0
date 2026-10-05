@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "b25dbc9b68323d076b6f469da5b6fde506e8716a",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-04_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T21:35:00Z",
+    "observedAt": "2026-10-05T21:35:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada final de suficiencia editorial, nueva investigación externa y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,10 +29,37 @@
       "summaryItems": [
         {
           "itemId": "M202604-POL-1",
-          "headline": "Irán, Estados Unidos e Israel alcanzaron una tregua de dos semanas",
-          "summary": "El 8 de abril las partes acordaron un cese del fuego temporal después de semanas de guerra y fuerte disrupción regional.",
+          "headline": "Estados Unidos, Irán e Israel pactaron una tregua temporal después de semanas de guerra",
+          "summary": "El acuerdo del 8 de abril redujo por unos días el riesgo de una escalada todavía mayor y abrió expectativas de reactivar rutas energéticas. Su fragilidad era evidente: el cese del fuego no resolvía las causas del conflicto ni garantizaba que Hormuz y otros corredores recuperaran normalidad sostenida.",
           "sourceRefs": [
-            "https://apnews.com/article/c7fe7501fb389f48800dd1899851b7dc"
+            "https://apnews.com/article/c7fe7501fb389f48800dd1899851b7dc",
+            "https://www.investing.com/news/stock-market-news/oil-dives-stocks-surge-as-trump-agrees-twoweek-ceasefire-4601841"
+          ]
+        },
+        {
+          "itemId": "M202604-POL-2",
+          "headline": "El colapso de las conversaciones volvió a escalar el conflicto con un bloqueo estadounidense a puertos iraníes",
+          "summary": "Pocos días después de la tregua, el fracaso de las negociaciones y el anuncio de un bloqueo naval mostraron lo fácil que era revertir avances diplomáticos. La medida volvió a elevar el riesgo de choque directo y puso en tensión a países que dependían del Golfo para energía y comercio.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/global-markets-view-europe-2026-04-13/"
+          ]
+        },
+        {
+          "itemId": "M202604-POL-3",
+          "headline": "Israel golpeó Beirut mientras Líbano volvía a quedar dentro del frente regional",
+          "summary": "Los ataques sobre la capital libanesa mostraron que el conflicto con Irán seguía expandiendo presión sobre aliados y territorios vinculados a Teherán. Para Líbano, significó otra vez exposición a una guerra más amplia pese a sus propias fragilidades políticas, económicas y humanitarias.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/region/middle-east/page/2/",
+            "https://www.ap.org/news-highlights/spotlights/2026/white-house-correspondents-dinner-artemis-launch-and-iran-war-april-2026-in-ap-photos/"
+          ]
+        },
+        {
+          "itemId": "M202604-POL-4",
+          "headline": "Hungría cerró la era Orbán con una victoria contundente de Peter Magyar",
+          "summary": "Tras 16 años de Viktor Orbán, la oposición de centroderecha ganó con un mandato para acercar nuevamente al país a la Unión Europea y revisar parte del legado institucional del gobierno anterior. El resultado también quitó a Rusia uno de sus aliados más cercanos dentro del bloque europeo.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/europe/hungarians-vote-landmark-election-closely-watched-by-eu-russia-us-2026-04-11/",
+            "https://www.reuters.com/world/europe/orban-ousted-after-16-years-hungarians-flock-pro-eu-rival-2026-04-12/"
           ]
         }
       ],
@@ -46,10 +73,26 @@
       "summaryItems": [
         {
           "itemId": "M202604-ECO-1",
-          "headline": "La tregua buscó contener una crisis que ya golpeaba a los mercados de energía",
-          "summary": "El acuerdo llegó después de que la guerra alterara el mercado energético, mostrando la conexión entre conflicto militar y economía global.",
+          "headline": "La tregua con Irán provocó una fuerte caída del petróleo y un alivio inmediato en los mercados",
+          "summary": "El anuncio del cese del fuego llevó al crudo por debajo de los 100 dólares y disparó una recuperación de acciones y bonos. La reacción mostró cuánto del miedo inflacionario y financiero de marzo estaba concentrado en la continuidad del conflicto y el cierre efectivo de rutas del Golfo.",
           "sourceRefs": [
-            "https://apnews.com/article/c7fe7501fb389f48800dd1899851b7dc"
+            "https://www.investing.com/news/stock-market-news/oil-dives-stocks-surge-as-trump-agrees-twoweek-ceasefire-4601841"
+          ]
+        },
+        {
+          "itemId": "M202604-ECO-2",
+          "headline": "El fracaso diplomático volvió a disparar el petróleo por encima de 100 dólares",
+          "summary": "Cuando las conversaciones se rompieron y Washington anunció el bloqueo de puertos iraníes, el mercado revirtió rápidamente parte del alivio previo. El episodio mostró que energía e inflación estaban dominadas por acontecimientos políticos de muy corto plazo, complicando planificación empresarial y decisiones de bancos centrales.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/global-markets-view-europe-2026-04-13/"
+          ]
+        },
+        {
+          "itemId": "M202604-ECO-3",
+          "headline": "Hormuz siguió operando muy por debajo de su capacidad normal incluso durante la tregua",
+          "summary": "El tráfico restringido mantuvo costos de transporte y seguros elevados y limitó la capacidad de una pausa militar para normalizar rápidamente el mercado. La lección fue que reparar logística y confianza lleva más tiempo que anunciar un cese del fuego, especialmente cuando infraestructura energética ya fue dañada.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/energy/oil-prices-rise-after-strikes-saudi-oil-facilities-2026-04-10/"
           ]
         }
       ],
@@ -60,7 +103,25 @@
       "domain": "SCIENCE",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202604-SCI-1",
+          "headline": "Artemis II llevó seres humanos alrededor de la Luna por primera vez en más de medio siglo",
+          "summary": "El 1 de abril cuatro astronautas partieron a bordo de Orion en una misión de casi diez días alrededor de la Luna. Fue el primer vuelo tripulado de Orion y la primera vez desde Apollo 17 que personas abandonaron la órbita terrestre, un ensayo clave para futuras misiones lunares.",
+          "sourceRefs": [
+            "https://www.nasa.gov/news-release/liftoff-nasa-launches-astronauts-on-historic-artemis-moon-mission/",
+            "https://www.nasa.gov/news-release/nasas-artemis-ii-mission-leaves-earth-orbit-for-flight-around-moon/"
+          ]
+        },
+        {
+          "itemId": "M202604-SCI-2",
+          "headline": "La tripulación de Artemis II regresó tras batir un nuevo récord de distancia humana",
+          "summary": "La cápsula Orion amerizó el 10 de abril después de completar el vuelo lunar, validando sistemas de soporte, navegación y reentrada necesarios para la siguiente etapa del programa. La misión no aterrizó en la Luna, pero redujo riesgos antes de operaciones más complejas de acoplamiento y descenso.",
+          "sourceRefs": [
+            "https://www.nasa.gov/news-release/la-nasa-da-la-bienvenida-a-la-tierra-a-los-exploradores-lunares-de-artemis-ii-quienes-batieron-records/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -76,7 +137,16 @@
       "domain": "HEALTH",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202604-HEA-1",
+          "headline": "La OMS mantuvo la vigilancia internacional sobre mpox mientras persistían brotes multicountry",
+          "summary": "El reporte de fines de abril mostró que mpox seguía necesitando seguimiento coordinado y capacidad diagnóstica en varias regiones. El problema había perdido presencia mediática respecto de años anteriores, pero seguía siendo una prueba de cuánto puede durar una emergencia sanitaria aun cuando deja de ser noticia cotidiana.",
+          "sourceRefs": [
+            "https://www.who.int/emergencies/situation-reports"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -87,10 +157,50 @@
       "summaryItems": [
         {
           "itemId": "M202604-TECH-1",
-          "headline": "Google Cloud profundizó su apuesta por agentes e infraestructura de IA",
-          "summary": "Cloud Next presentó una plataforma empresarial de agentes y una nueva generación de TPU.",
+          "headline": "Google Cloud convirtió los agentes en el centro de su estrategia empresarial",
+          "summary": "Cloud Next presentó una plataforma de agentes para empresas y herramientas para llevarlos a procesos reales con datos y permisos corporativos. El foco dejó de ser demostrar que un agente puede completar una tarea aislada y pasó a cómo gobernarlo, conectarlo y operarlo de forma repetible.",
           "sourceRefs": [
-            "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/google-cloud-next-26-recap/"
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026/"
+          ]
+        },
+        {
+          "itemId": "M202604-TECH-2",
+          "headline": "Google mostró una nueva generación de TPU diseñada para la era agentiva",
+          "summary": "La octava generación de chips especializados apuntó a reducir costo y consumo de una carga de trabajo que crecía rápidamente. La infraestructura volvió a ser un cuello de botella visible: mejores modelos importaban, pero también la capacidad física de entrenarlos y servir millones de inferencias.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026/"
+          ]
+        },
+        {
+          "itemId": "M202604-TECH-3",
+          "headline": "Gemma 4 empujó la capacidad de modelos abiertos más pequeños",
+          "summary": "Google presentó una nueva generación de Gemma con mejor relación entre tamaño y rendimiento. El avance fue relevante para organizaciones que no querían depender siempre de APIs cerradas y necesitaban modelos que pudieran ejecutarse o adaptarse con mayor control sobre costos, privacidad e infraestructura.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026/"
+          ]
+        },
+        {
+          "itemId": "M202604-TECH-4",
+          "headline": "GPT-5.5 llevó los agentes hacia tareas largas de trabajo real",
+          "summary": "OpenAI presentó un modelo enfocado en programación, investigación, documentos, hojas de cálculo, uso de software y ejecución de tareas ambiguas de varios pasos. El lanzamiento reforzó una transición clara: el valor empezaba a medirse por completar trabajo de principio a fin y no solo por responder preguntas difíciles.",
+          "sourceRefs": [
+            "https://openai.com/index/introducing-gpt-5-5/"
+          ]
+        },
+        {
+          "itemId": "M202604-TECH-5",
+          "headline": "ChatGPT incorporó agentes compartidos para organizaciones",
+          "summary": "Workspace Agents permitió que equipos crearan agentes reutilizables conectados con conocimiento y herramientas de la organización, operando bajo permisos corporativos. Esto convirtió la automatización agentiva en un objeto compartido y gobernable, más cercano a un proceso de trabajo que a una conversación individual.",
+          "sourceRefs": [
+            "https://openai.com/index/introducing-workspace-agents-in-chatgpt/"
+          ]
+        },
+        {
+          "itemId": "M202604-TECH-6",
+          "headline": "OpenAI obtuvo autorización FedRAMP Moderate para ampliar el uso gubernamental de IA",
+          "summary": "La certificación habilitó un camino más formal para que agencias federales estadounidenses usaran ChatGPT Enterprise y la API bajo requisitos de seguridad y gobernanza. El hito mostró que la adopción institucional depende tanto de controles y cumplimiento como de la capacidad técnica de los modelos.",
+          "sourceRefs": [
+            "https://openai.com/index/openai-available-at-fedramp-moderate/"
           ]
         }
       ],

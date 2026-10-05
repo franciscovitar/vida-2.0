@@ -13,20 +13,46 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "b25dbc9b68323d076b6f469da5b6fde506e8716a",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-05_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T21:35:00Z",
+    "observedAt": "2026-10-05T21:35:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada final de suficiencia editorial, nueva investigación externa y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
       "domain": "POLITICS_GEOPOLITICS",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202605-POL-1",
+          "headline": "La crisis energética cubana volvió a sacar gente a las calles",
+          "summary": "Havana enfrentó apagones de decenas de horas y un colapso parcial de la red en medio de fuertes restricciones de combustible. Las protestas mostraron que el deterioro energético ya no era solo una dificultad económica: estaba erosionando tolerancia social y capacidad estatal para sostener la vida cotidiana.",
+          "sourceRefs": [
+            "https://www.reutersconnect.com/item/protests-break-out-in-havana-over-power-cuts/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX1JDMlI4TEFEN0o3UA",
+            "https://www.reutersconnect.com/item/cubas-electrical-grid-suffers-partial-collapse-as-protests-flare/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX1JDMjM5TEFaNTRKTg"
+          ]
+        },
+        {
+          "itemId": "M202605-POL-2",
+          "headline": "Las protestas del Primero de Mayo en Turquía terminaron en choques con la policía",
+          "summary": "Sindicatos y organizaciones de izquierda intentaron movilizarse hacia Taksim y fueron contenidos con gases, agua y detenciones. El episodio recordó que las disputas sobre salarios, derechos laborales y espacio público seguían siendo una fuente importante de tensión política incluso fuera de los grandes conflictos militares.",
+          "sourceRefs": [
+            "https://www.reutersconnect.com/item/turkish-labour-unions-left-wing-organisations-protest-to-mark-may-day-clash-with-police/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX1ZBNzE0MjAxMDUyMDI2UlAx"
+          ]
+        },
+        {
+          "itemId": "M202605-POL-3",
+          "headline": "La guerra y el bloqueo energético siguieron presionando a gobiernos lejos del frente",
+          "summary": "Las imágenes y protestas del mes mostraron cómo conflictos internacionales se traducían en cortes de energía, movilizaciones y tensiones domésticas. La política exterior dejó de sentirse distante cuando combustible, alimentos y servicios básicos empezaron a depender de decisiones tomadas fuera de las fronteras nacionales.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2026/protests-outbreaks-and-global-unrest-may-2026-in-ap-photos/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -37,8 +63,16 @@
       "summaryItems": [
         {
           "itemId": "M202605-ECO-1",
-          "headline": "Hormuz y la fragilidad de la tregua siguieron condicionando energía e inflación",
-          "summary": "La incertidumbre sobre el acuerdo entre Irán y Estados Unidos mantuvo al petróleo y a las expectativas de inflación como factores centrales para mercados y bancos centrales.",
+          "headline": "Hormuz siguió siendo el principal riesgo para petróleo, inflación y bancos centrales",
+          "summary": "Aunque había esfuerzos diplomáticos, la incertidumbre sobre la apertura completa del estrecho mantuvo una prima elevada sobre energía y transporte. El problema ya no era solo producción: seguros, rutas alternativas y capacidad de refinación hacían que incluso una mejora militar tardara en llegar a los precios finales.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-05-29/"
+          ]
+        },
+        {
+          "itemId": "M202605-ECO-2",
+          "headline": "La economía global llegó a mitad de año con menos margen frente a nuevos shocks",
+          "summary": "Mercados y bancos centrales tuvieron que equilibrar energía cara, inflación resistente y crecimiento desigual mientras seguían absorbiendo el costo de una guerra prolongada. El escenario reducía el espacio para recortes de tasas y hacía que cada dato de actividad o inflación moviera expectativas de forma mucho más brusca.",
           "sourceRefs": [
             "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-05-29/"
           ]
@@ -67,7 +101,33 @@
       "domain": "HEALTH",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202605-HEA-1",
+          "headline": "Un brote internacional de virus Andes en un crucero activó una respuesta sanitaria multinacional",
+          "summary": "La OMS fue notificada a comienzos de mayo después de casos graves de enfermedad respiratoria y muertes entre pasajeros del MV Hondius. La investigación identificó transmisión entre personas y obligó a coordinar evacuaciones, cuarentenas y rastreo de contactos en decenas de países.",
+          "sourceRefs": [
+            "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON600",
+            "https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing---7-may-2026"
+          ]
+        },
+        {
+          "itemId": "M202605-HEA-2",
+          "headline": "El brote de virus Andes creció a 13 casos y tres muertes",
+          "summary": "Para fines de mayo la OMS reportó casos confirmados en varios países y mantuvo una cuarentena prolongada para contactos de alto riesgo. El episodio fue inusual porque el virus Andes puede transmitirse entre personas, algo que no ocurre con la mayoría de los hantavirus conocidos.",
+          "sourceRefs": [
+            "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON604"
+          ]
+        },
+        {
+          "itemId": "M202605-HEA-3",
+          "headline": "Mpox siguió aumentando en África mientras otros brotes exigían vigilancia simultánea",
+          "summary": "La OMS mantenía seguimiento de mpox, cólera y otros eventos al mismo tiempo que respondía al nuevo brote de hantavirus. El desafío operativo era precisamente la simultaneidad: sistemas de salud con recursos finitos necesitan detectar señales nuevas sin abandonar emergencias que llevan meses activas.",
+          "sourceRefs": [
+            "https://www.who.int/emergencies/situation-reports"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -78,10 +138,58 @@
       "summaryItems": [
         {
           "itemId": "M202605-TECH-1",
-          "headline": "Google I/O aceleró el giro hacia experiencias agentivas",
-          "summary": "Las novedades de I/O incluyeron nuevas generaciones de Gemini y funciones orientadas a agentes en Search y otros productos.",
+          "headline": "Gemini 3.5 consolidó la apuesta por agentes y programación",
+          "summary": "Google presentó una generación orientada a inteligencia de frontera para coding y tareas agentivas. La carrera tecnológica empezó a premiar no solo capacidad de respuesta, sino persistencia, uso de herramientas y habilidad para completar procesos que antes requerían múltiples interacciones humanas.",
           "sourceRefs": [
-            "https://blog.google/innovation-and-ai/technology/developers-tools/google-io-2026-collection/"
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-may-2026/"
+          ]
+        },
+        {
+          "itemId": "M202605-TECH-2",
+          "headline": "Gemini Omni unificó razonamiento y generación multimodal",
+          "summary": "El modelo permitió combinar texto, imágenes, audio y video como entrada y generar contenido audiovisual con conocimiento del mundo. La importancia estaba en borrar fronteras entre modalidades: el mismo sistema podía comprender una situación y producir un resultado creativo sin encadenar herramientas separadas.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-may-2026/"
+          ]
+        },
+        {
+          "itemId": "M202605-TECH-3",
+          "headline": "Google Search incorporó agentes que podían monitorear información en segundo plano",
+          "summary": "La empresa presentó agentes de información capaces de seguir temas y devolver actualizaciones con enlaces y acciones. El buscador dejó de ser únicamente una herramienta que responde en el momento y empezó a experimentar con tareas persistentes que continúan después de cerrar la consulta.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-may-2026/"
+          ]
+        },
+        {
+          "itemId": "M202605-TECH-4",
+          "headline": "Android Halo apareció como centro para supervisar agentes desde el teléfono",
+          "summary": "Google introdujo una capa donde el usuario podía ver progreso y recibir asistencia contextual sin abrir cada agente por separado. La idea anticipó un problema nuevo: cuando existen varios agentes actuando en paralelo, la interfaz importante pasa a ser cómo supervisarlos y no solo cómo iniciar cada tarea.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-may-2026/"
+          ]
+        },
+        {
+          "itemId": "M202605-TECH-5",
+          "headline": "Google unió salud personal, IA y nuevos dispositivos en una misma estrategia",
+          "summary": "Google Health y Fitbit Air ampliaron el uso de IA para bienestar y seguimiento personal. El movimiento mostró cómo los asistentes se estaban extendiendo hacia datos continuos del cuerpo y hábitos, un terreno donde utilidad potencial y exigencias de privacidad crecen al mismo tiempo.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-may-2026/"
+          ]
+        },
+        {
+          "itemId": "M202605-TECH-6",
+          "headline": "OpenAI reforzó la procedencia de contenido generado con estándares y marcas verificables",
+          "summary": "La empresa avanzó con Content Credentials, SynthID y herramientas de verificación para ayudar a identificar el origen de imágenes generadas. La necesidad de procedencia crecía a medida que la calidad de generación hacía cada vez menos confiable juzgar autenticidad simplemente mirando una pieza.",
+          "sourceRefs": [
+            "https://openai.com/index/advancing-content-provenance/"
+          ]
+        },
+        {
+          "itemId": "M202605-TECH-7",
+          "headline": "ChatGPT amplió la memoria personalizada y mostró qué fuentes usaba para recordar",
+          "summary": "OpenAI mejoró la recuperación de contexto desde chats, memorias, archivos y Gmail conectado, además de hacer visibles las fuentes de memoria. El avance buscó aumentar continuidad sin convertir el recuerdo en una caja negra, un equilibrio importante para asistentes que acompañan proyectos durante meses o años.",
+          "sourceRefs": [
+            "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
           ]
         }
       ],
@@ -95,10 +203,10 @@
       "summaryItems": [
         {
           "itemId": "M202605-CUL-1",
-          "headline": "Hajj y Eid al-Adha movilizaron a millones",
-          "summary": "Las celebraciones y peregrinaciones islámicas estuvieron entre las imágenes globales más relevantes de finales de mayo.",
+          "headline": "Eid al-Adha y el inicio de Hajj volvieron a movilizar comunidades musulmanas a escala global",
+          "summary": "Las celebraciones y peregrinaciones de fines de mayo reunieron a millones de personas y ofrecieron uno de los pocos acontecimientos culturales simultáneos de alcance verdaderamente mundial. En un mes marcado por guerra y protestas, también mostraron continuidad de prácticas religiosas y comunitarias de enorme escala.",
           "sourceRefs": [
-            "https://apnews.com/photo-gallery/major-global-news-moments-may-ap-photos-b11cd19318724da0845c60f3a85e8cd5"
+            "https://www.ap.org/news-highlights/spotlights/2026/protests-outbreaks-and-global-unrest-may-2026-in-ap-photos/"
           ]
         }
       ],

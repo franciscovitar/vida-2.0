@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "b25dbc9b68323d076b6f469da5b6fde506e8716a",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-06_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T21:35:00Z",
+    "observedAt": "2026-10-05T21:35:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada final de suficiencia editorial, nueva investigación externa y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,8 +29,24 @@
       "summaryItems": [
         {
           "itemId": "M202606-POL-1",
-          "headline": "Estados Unidos e Irán anunciaron un acuerdo de paz en el marco del G7",
-          "summary": "El 15 de junio Donald Trump anunció un acuerdo entre Estados Unidos e Irán, con una firma formal prevista, mientras los líderes del G7 se reunían en Francia.",
+          "headline": "Estados Unidos e Irán anunciaron un acuerdo de paz después de meses de guerra",
+          "summary": "Donald Trump anunció el 15 de junio un acuerdo con Irán y una firma formal prevista en Suiza. El anuncio representó la oportunidad más clara del año para detener un conflicto que ya había alterado energía, rutas marítimas y política regional, aunque el cumplimiento seguía siendo la prueba decisiva.",
+          "sourceRefs": [
+            "https://www.reuters.com/podcasts/iran-us-deal-g7-summit-irans-world-cup-opener-2026-06-15/"
+          ]
+        },
+        {
+          "itemId": "M202606-POL-2",
+          "headline": "El G7 se reunió en Francia con guerra, economía y seguridad energética dominando la agenda",
+          "summary": "La cumbre ocurrió justo cuando Washington anunciaba su acuerdo con Irán y continuaba la guerra en Ucrania. Los líderes tuvieron que discutir una combinación poco cómoda de seguridad, inflación, comercio y coordinación internacional, mostrando cómo las grandes crisis geopolíticas ya estaban estrechamente conectadas con política económica.",
+          "sourceRefs": [
+            "https://www.reuters.com/podcasts/iran-us-deal-g7-summit-irans-world-cup-opener-2026-06-15/"
+          ]
+        },
+        {
+          "itemId": "M202606-POL-3",
+          "headline": "La guerra en Ucrania siguió activa pese al desplazamiento de atención hacia Oriente Medio",
+          "summary": "Mientras el conflicto con Irán dominaba titulares, Ucrania continuó siendo un frente militar y diplomático abierto. La simultaneidad de ambas guerras presionó recursos, alianzas y capacidad de coordinación occidental, y redujo la posibilidad de tratar cada crisis como un problema aislado.",
           "sourceRefs": [
             "https://www.reuters.com/podcasts/iran-us-deal-g7-summit-irans-world-cup-opener-2026-06-15/"
           ]
@@ -43,7 +59,24 @@
       "domain": "ECONOMICS",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202606-ECO-1",
+          "headline": "El acuerdo con Irán abrió la posibilidad de reducir parte de la prima energética acumulada durante la guerra",
+          "summary": "La expectativa de menor riesgo sobre Hormuz ofreció alivio potencial a petróleo, transporte e inflación, aunque la infraestructura y la confianza no podían recuperarse de inmediato. Los mercados necesitaban distinguir entre un acuerdo político y una normalización real de flujos, seguros y capacidad de refinación.",
+          "sourceRefs": [
+            "https://www.reuters.com/podcasts/iran-us-deal-g7-summit-irans-world-cup-opener-2026-06-15/"
+          ]
+        },
+        {
+          "itemId": "M202606-ECO-2",
+          "headline": "Los datos posteriores mostraron que la economía estadounidense creció lentamente en el segundo trimestre",
+          "summary": "La información de junio publicada después del cierre del mes mostró crecimiento anualizado cercano al 1,5%, con un mercado laboral de contratación lenta pero pocos despidos. La inversión ligada a IA seguía aportando demanda, mientras comercio y energía continuaban condicionados por la incertidumbre global.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/declining-imports-compress-us-trade-deficit-june-2026-08-04/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -54,10 +87,18 @@
       "summaryItems": [
         {
           "itemId": "M202606-SCI-1",
-          "headline": "Dos terremotos sacudieron Venezuela",
-          "summary": "Dos sismos registrados el 24 y 25 de junio estuvieron entre los eventos naturales destacados globalmente durante el mes.",
+          "headline": "Dos terremotos sacudieron Venezuela en días consecutivos",
+          "summary": "Los sismos del 24 y 25 de junio estuvieron entre los eventos naturales más visibles del mes y recordaron la vulnerabilidad sísmica regional. Además del daño inmediato, estos episodios ponen a prueba infraestructura, comunicaciones y capacidad de respuesta en países que ya enfrentan tensiones políticas y económicas.",
           "sourceRefs": [
-            "https://apnews.com/photo-gallery/major-global-news-moments-may-ap-photos-3462aeb752c1ead571dab7c39873e985"
+            "https://www.ap.org/news-highlights/spotlights/2026/venezuela-earthquakes-world-cup-and-global-tensions-june-2026-in-ap-photos/"
+          ]
+        },
+        {
+          "itemId": "M202606-SCI-2",
+          "headline": "Europa occidental registró su junio más cálido conocido",
+          "summary": "Copernicus calculó una temperatura media regional más de tres grados por encima del promedio 1991–2020, con olas de calor, incendios, cierres de escuelas y miles de muertes adicionales estimadas. El récord mostró cómo el calentamiento cambia no solo promedios climáticos sino capacidad de infraestructura y salud para soportar extremos.",
+          "sourceRefs": [
+            "https://www.reuters.com/sustainability/cop/western-europe-records-hottest-june-record-eu-scientists-say-2026-07-09/"
           ]
         }
       ],
@@ -76,7 +117,24 @@
       "domain": "HEALTH",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202606-HEA-1",
+          "headline": "La investigación del brote de virus Andes confirmó una respuesta internacional de gran escala",
+          "summary": "Un análisis publicado en junio describió evacuaciones, cuarentenas, seguimiento de cientos de contactos y coordinación entre numerosos países por el brote del MV Hondius. El episodio se convirtió en un caso real de cómo los mecanismos internacionales de vigilancia funcionan cuando una enfermedad rara cruza fronteras mediante viajes.",
+          "sourceRefs": [
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC13291726/"
+          ]
+        },
+        {
+          "itemId": "M202606-HEA-2",
+          "headline": "Mpox aumentó nuevamente durante mayo, según datos consolidados por la OMS en junio",
+          "summary": "La OMS reportó después que mayo había registrado 1.844 casos confirmados en 34 países, con África concentrando la mayoría. El aumento recordó que mpox seguía siendo una amenaza desigual geográficamente y que la reducción de atención mediática no equivalía a eliminación del problema sanitario.",
+          "sourceRefs": [
+            "https://www.who.int/publications/journals/weekly-epidemiological-record/wer101-27"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -87,8 +145,48 @@
       "summaryItems": [
         {
           "itemId": "M202606-TECH-1",
-          "headline": "La IA siguió expandiéndose a traducción, dispositivos y modelos locales",
-          "summary": "Google destacó Gemini 3.5 Live Translate, Android 17 y Gemma 4 de 12B como parte de una expansión hacia experiencias de uso y ejecución local.",
+          "headline": "OpenAI adelantó GPT-5.6 Sol como siguiente salto de su línea de frontera",
+          "summary": "La vista previa destacó mejoras en programación, ciencia y ciberseguridad junto con un sistema de seguridad más robusto. También introdujo una familia con opciones más baratas, señal de que la competencia empezaba a optimizar simultáneamente capacidad máxima y costo por tarea.",
+          "sourceRefs": [
+            "https://openai.com/index/previewing-gpt-5-6-sol/"
+          ]
+        },
+        {
+          "itemId": "M202606-TECH-2",
+          "headline": "ChatGPT cambió su sistema de memoria para sintetizar contexto de largo plazo",
+          "summary": "OpenAI presentó Dreaming, un mecanismo pensado para evitar recuerdos obsoletos y mantener preferencias y proyectos más frescos. La memoria dejó de ser simplemente guardar hechos: empezó a tratarse como un problema de síntesis, vigencia y selección de contexto a lo largo de meses o años.",
+          "sourceRefs": [
+            "https://openai.com/index/chatgpt-memory-dreaming/"
+          ]
+        },
+        {
+          "itemId": "M202606-TECH-3",
+          "headline": "GPT-Rosalind avanzó como modelo especializado para investigación biomédica",
+          "summary": "OpenAI amplió capacidades en razonamiento biológico, química medicinal, genómica y flujos experimentales. El movimiento mostró otra dirección de la IA avanzada: modelos generales siguen creciendo, pero parte del valor científico puede venir de sistemas especializados con herramientas y conocimiento adaptados a un dominio.",
+          "sourceRefs": [
+            "https://openai.com/research/index/release/"
+          ]
+        },
+        {
+          "itemId": "M202606-TECH-4",
+          "headline": "Gemini 3.5 Live Translate llevó traducción más natural a interacciones en tiempo real",
+          "summary": "Google presentó una experiencia pensada para conversar a través de idiomas con menor fricción. La traducción dejó de parecer un proceso de copiar texto entre aplicaciones y se acercó a una capa simultánea capaz de acompañar conversación, viaje y trabajo multicultural en tiempo real.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-june-2026/"
+          ]
+        },
+        {
+          "itemId": "M202606-TECH-5",
+          "headline": "Android 17 reforzó la integración de IA como parte del sistema operativo",
+          "summary": "Las novedades de Google apuntaron a que funciones inteligentes aparezcan de forma más continua entre aplicaciones y tareas. En lugar de abrir un chatbot específico, el usuario empieza a encontrarse con IA en capas del sistema que pueden asistir según contexto, dispositivo y actividad.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-june-2026/"
+          ]
+        },
+        {
+          "itemId": "M202606-TECH-6",
+          "headline": "Gemma 4 de 12B mostró que modelos locales más capaces seguían ganando espacio",
+          "summary": "Google destacó una versión capaz de ejecutarse en equipos personales, reduciendo la necesidad de enviar todas las tareas a la nube. Ese tipo de modelo es importante para privacidad, latencia y costo, y amplía el conjunto de aplicaciones donde la IA puede funcionar sin conexión permanente.",
           "sourceRefs": [
             "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-june-2026/"
           ]
@@ -101,7 +199,24 @@
       "domain": "HISTORY_CULTURE",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202606-CUL-1",
+          "headline": "El Mundial 2026 comenzó como el torneo más grande en la historia de la FIFA",
+          "summary": "México abrió el campeonato el 11 de junio, en una edición ampliada a 48 selecciones, 104 partidos y tres países anfitriones. Más allá del deporte, la escala convirtió al Mundial en un evento logístico, turístico y cultural de enorme alcance para Norteamérica y audiencias globales.",
+          "sourceRefs": [
+            "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/estadio-azteca-mexico-city-host-opening-match-world-cup-2026"
+          ]
+        },
+        {
+          "itemId": "M202606-CUL-2",
+          "headline": "Messi volvió a convertirse en uno de los grandes símbolos del Mundial",
+          "summary": "El gol de Lionel Messi en el debut argentino fue una de las imágenes centrales del mes. Su presencia conectó el torneo de 2026 con la historia reciente del fútbol y convirtió cada partido de Argentina en un acontecimiento que excedía largamente a su audiencia deportiva habitual.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2026/venezuela-earthquakes-world-cup-and-global-tensions-june-2026-in-ap-photos/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },

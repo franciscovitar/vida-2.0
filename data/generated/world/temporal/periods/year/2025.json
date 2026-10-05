@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "b25dbc9b68323d076b6f469da5b6fde506e8716a",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/YEAR_2025_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T21:35:00Z",
+    "observedAt": "2026-10-05T21:35:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada final de suficiencia editorial, nueva investigación externa y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,10 +29,75 @@
       "summaryItems": [
         {
           "itemId": "Y2025-POL-1",
-          "headline": "Guerras prolongadas y reordenamiento político",
-          "summary": "Ucrania y Gaza siguieron entre los grandes focos de conflicto del año, mientras 2025 también estuvo marcado por cambios políticos y tensiones internacionales que redefinieron la agenda global.",
+          "headline": "Donald Trump volvió a la Casa Blanca y reorientó con fuerza la política exterior estadounidense",
+          "summary": "El regreso de Trump puso aranceles, migración, presión sobre aliados y una visión más transaccional de las relaciones internacionales en el centro de la agenda. Durante el año, socios y rivales tuvieron que recalcular cuánto podían confiar en reglas multilaterales frente a decisiones unilaterales de Washington.",
           "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/",
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-POL-2",
+          "headline": "La guerra de Ucrania entró en otro año sin una salida decisiva",
+          "summary": "Los combates continuaron, junto con ataques de largo alcance, presión sobre infraestructura y esfuerzos diplomáticos intermitentes. El conflicto siguió consumiendo recursos europeos y rusos, redefiniendo defensa en la OTAN y mostrando que una guerra de desgaste puede alterar presupuestos y alianzas durante años.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/",
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-POL-3",
+          "headline": "Gaza siguió siendo uno de los grandes centros de destrucción y crisis humanitaria del mundo",
+          "summary": "El año combinó combate, desplazamiento y negociaciones que finalmente produjeron un cese del fuego frágil. Aunque una pausa redujo parte de la violencia, la devastación acumulada, la cuestión de los rehenes y el futuro político de Gaza mantuvieron abierto uno de los conflictos más polarizantes del sistema internacional.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/",
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-POL-4",
+          "headline": "Israel e Irán cruzaron un nuevo umbral de enfrentamiento directo",
+          "summary": "La escalada entre ambos países mostró que la rivalidad regional podía transformarse rápidamente en ataques abiertos y arrastrar a potencias externas. Más allá de la duración de cada episodio, el año dejó un Oriente Medio con menos separación entre guerra indirecta, misiles, energía y seguridad nuclear.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/",
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-POL-5",
+          "headline": "India y Pakistán volvieron a demostrar lo peligroso que sigue siendo su conflicto",
+          "summary": "Una nueva escalada militar entre dos potencias nucleares reactivó temores sobre errores de cálculo y represalias. Aunque el episodio no derivó en una guerra prolongada, recordó que Cachemira y el terrorismo transfronterizo continúan siendo puntos capaces de disparar crisis regionales de consecuencias mucho mayores.",
+          "sourceRefs": [
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025",
             "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        },
+        {
+          "itemId": "Y2025-POL-6",
+          "headline": "Las protestas y cambios de gobierno mostraron un año de fuerte inestabilidad política",
+          "summary": "Desde Asia hasta África y América Latina, manifestaciones, elecciones disputadas, crisis institucionales y golpes de poder alteraron gobiernos y coaliciones. El patrón común fue una ciudadanía menos tolerante con inflación, corrupción, desigualdad o estancamiento, y élites políticas con menos margen para absorber el descontento.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/",
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-POL-7",
+          "headline": "América Latina vivió más presión migratoria, polarización y conflictos institucionales",
+          "summary": "La región combinó deportaciones y migración inversa, encarcelamiento de figuras políticas, violencia contra el crimen organizado y protestas. El año mostró que seguridad, democracia y relación con Estados Unidos volvieron a mezclarse de forma especialmente intensa en varios países latinoamericanos.",
+          "sourceRefs": [
+            "https://apnews.com/article/fcdc87aafd34c84cce86ef8ebdc9d17a",
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        },
+        {
+          "itemId": "Y2025-POL-8",
+          "headline": "El multilateralismo siguió funcionando, pero con señales claras de desgaste",
+          "summary": "Conflictos prolongados, guerras comerciales y disputas sobre seguridad mostraron los límites de instituciones internacionales para imponer soluciones. Al mismo tiempo, acuerdos sanitarios y cooperación técnica demostraron que los marcos multilaterales todavía pueden producir resultados cuando existe suficiente coincidencia de intereses.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/",
+            "https://www.who.int/news-room/spotlight/stronger-together-milestones-that-mattered-in-2025",
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025"
           ]
         }
       ],
@@ -43,7 +108,45 @@
       "domain": "ECONOMICS",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "Y2025-ECO-1",
+          "headline": "Los aranceles volvieron a convertirse en una herramienta central de política económica",
+          "summary": "La administración Trump utilizó amenazas y nuevas barreras comerciales como mecanismo de negociación, reabriendo tensiones con China, Europa y otros socios. Para empresas y mercados, el costo no fue solo el impuesto directo: también aumentaron incertidumbre, necesidad de diversificar proveedores y riesgo de represalias.",
+          "sourceRefs": [
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025",
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        },
+        {
+          "itemId": "Y2025-ECO-2",
+          "headline": "La economía global empezó a organizarse más alrededor de bloques y seguridad económica",
+          "summary": "Gobiernos trataron cadenas de suministro, minerales críticos, chips, energía y manufactura como asuntos estratégicos y no únicamente comerciales. Esa lógica favoreció subsidios y producción local, pero también hizo más costoso operar en un mundo donde eficiencia podía perder prioridad frente a resiliencia y control político.",
+          "sourceRefs": [
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025",
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        },
+        {
+          "itemId": "Y2025-ECO-3",
+          "headline": "La carrera por inteligencia artificial pasó a exigir inversiones de infraestructura gigantescas",
+          "summary": "Centros de datos, chips, electricidad y capacidad de cómputo se convirtieron en recursos estratégicos para empresas y países. La IA dejó de ser solo una historia de software: empezó a influir en gasto de capital, redes eléctricas, mercados bursátiles y decisiones sobre dónde construir nueva infraestructura digital.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/google-ai-news-recap-2025/",
+            "https://blog.google/innovation-and-ai/products/2025-research-breakthroughs/",
+            "https://openai.com/index/gpt-5-new-era-of-work/"
+          ]
+        },
+        {
+          "itemId": "Y2025-ECO-4",
+          "headline": "Conflictos y clima mantuvieron energía, alimentos y seguros como fuentes recurrentes de riesgo",
+          "summary": "Guerras, incendios, inundaciones y huracanes afectaron rutas, producción e infraestructura en varias regiones. Aun cuando la inflación general se moderaba en algunos países, estos shocks mostraron que precios y crecimiento seguían expuestos a eventos físicos y geopolíticos difíciles de anticipar con modelos económicos normales.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/",
+            "https://www.euronews.com/2026/01/02/year-in-review-our-pick-of-the-major-global-news-events-that-shaped-a-turbulent-2025"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -54,10 +157,42 @@
       "summaryItems": [
         {
           "itemId": "Y2025-SCI-1",
-          "headline": "Bennu aportó nuevas pistas sobre los ingredientes de la vida",
-          "summary": "El análisis de las muestras del asteroide Bennu reveló moléculas relevantes para la química de la vida y señales de una historia asociada a agua salada.",
+          "headline": "Las muestras de Bennu revelaron una química sorprendentemente rica en ingredientes vinculados con la vida",
+          "summary": "NASA encontró compuestos orgánicos y señales de una historia asociada con agua salada en material del asteroide. El hallazgo no prueba vida extraterrestre, pero fortalece la idea de que moléculas necesarias para química prebiótica pueden formarse y transportarse ampliamente por el Sistema Solar.",
           "sourceRefs": [
             "https://www.nasa.gov/news-release/nasas-asteroid-bennu-sample-reveals-mix-of-lifes-ingredients/"
+          ]
+        },
+        {
+          "itemId": "Y2025-SCI-2",
+          "headline": "La IA empezó a funcionar como herramienta de investigación científica y no solo como asistente general",
+          "summary": "Google destacó avances en sistemas capaces de ayudar a explorar biología, materiales, matemática y otras áreas científicas. El cambio relevante fue pasar de resumir literatura a proponer, analizar o acelerar partes del proceso de descubrimiento, aunque la validación experimental siguió siendo indispensable.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/2025-research-breakthroughs/"
+          ]
+        },
+        {
+          "itemId": "Y2025-SCI-3",
+          "headline": "Los modelos de razonamiento avanzaron hacia problemas que requieren explorar y actuar",
+          "summary": "La investigación de IA en 2025 se desplazó desde respuestas multimodales hacia sistemas con más planificación, memoria, agentes y capacidad de usar herramientas. Para ciencia, eso abrió la posibilidad de automatizar partes enteras de experimentos computacionales o análisis que antes requerían supervisión constante.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/2025-research-breakthroughs/"
+          ]
+        },
+        {
+          "itemId": "Y2025-SCI-4",
+          "headline": "El clima extremo volvió a dejar una señal física global difícil de ignorar",
+          "summary": "Incendios en California y otras regiones, inundaciones, terremotos y huracanes marcaron el año con destrucción y evacuaciones. No todos esos desastres tienen la misma relación causal con el clima, pero la combinación mostró cuánto dependen sociedades modernas de infraestructura capaz de resistir eventos severos.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        },
+        {
+          "itemId": "Y2025-SCI-5",
+          "headline": "La investigación cuántica siguió acercándose desde demostraciones hacia aplicaciones más útiles",
+          "summary": "Google destacó avances destinados a mejorar corrección de errores, simulación y uso práctico de computación cuántica. Aunque la tecnología seguía lejos de reemplazar computadoras convencionales, el progreso apuntaba a resolver gradualmente los problemas de estabilidad y escala que históricamente frenaron aplicaciones reales.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/2025-research-breakthroughs/"
           ]
         }
       ],
@@ -79,10 +214,59 @@
       "summaryItems": [
         {
           "itemId": "Y2025-HEA-1",
-          "headline": "La OMS aprobó el Acuerdo sobre Pandemias",
-          "summary": "La Asamblea Mundial de la Salud adoptó en mayo el Acuerdo sobre Pandemias de la OMS, un nuevo marco internacional para mejorar prevención, preparación y respuesta ante futuras pandemias.",
+          "headline": "La OMS adoptó el primer Acuerdo sobre Pandemias",
+          "summary": "La Asamblea Mundial de la Salud aprobó un marco internacional para mejorar prevención, preparación y respuesta ante futuras pandemias. El acuerdo buscó evitar parte de los fallos vistos durante COVID-19, especialmente en cooperación, intercambio de patógenos y acceso más equitativo a vacunas, diagnósticos y tratamientos.",
           "sourceRefs": [
+            "https://www.who.int/news-room/spotlight/stronger-together-milestones-that-mattered-in-2025",
             "https://www.who.int/news/item/20-05-2025-world-health-assembly-adopts-historic-pandemic-agreement-to-make-the-world-more-equitable-and-safer-from-future-pandemics"
+          ]
+        },
+        {
+          "itemId": "Y2025-HEA-2",
+          "headline": "Maldivas logró la triple eliminación de transmisión maternoinfantil de tres enfermedades",
+          "summary": "El país fue reconocido por eliminar transmisión de VIH, sífilis y hepatitis B de madre a hijo, un hito que muestra cuánto pueden lograr vacunación, diagnóstico prenatal y tratamiento sostenido. Brasil también fue reconocido por eliminar la transmisión maternoinfantil de VIH a gran escala.",
+          "sourceRefs": [
+            "https://www.who.int/news-room/spotlight/stronger-together-milestones-that-mattered-in-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-HEA-3",
+          "headline": "Varios países eliminaron enfermedades tropicales desatendidas",
+          "summary": "Burundi, Egipto y Fiji eliminaron tracoma; Guinea y Kenia eliminaron enfermedad del sueño; y Níger se convirtió en el primer país africano en eliminar oncocercosis. Son éxitos menos visibles que una nueva vacuna, pero representan décadas de vigilancia, tratamiento comunitario y fortalecimiento sanitario.",
+          "sourceRefs": [
+            "https://www.who.int/news-room/spotlight/stronger-together-milestones-that-mattered-in-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-HEA-4",
+          "headline": "Más países se declararon libres de malaria y se amplió la vacunación infantil",
+          "summary": "Georgia, Surinam y Timor-Leste obtuvieron certificación como países libres de malaria, mientras siete nuevos países africanos introdujeron vacunas. La expansión combinó herramientas clásicas y nuevas vacunas, mostrando que una enfermedad histórica puede retroceder cuando prevención, financiamiento y vigilancia se sostienen durante años.",
+          "sourceRefs": [
+            "https://www.who.int/news-room/spotlight/stronger-together-milestones-that-mattered-in-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-HEA-5",
+          "headline": "La vacunación contra HPV siguió ampliándose como estrategia para eliminar cáncer cervical",
+          "summary": "Países de varias regiones expandieron vacunación y cribado, y la OMS informó decenas de millones de niñas protegidas. El objetivo es singular: convertir un cáncer frecuente en una enfermedad potencialmente eliminable mediante prevención antes de que la infección produzca lesiones y enfermedad invasiva.",
+          "sourceRefs": [
+            "https://www.who.int/news-room/spotlight/stronger-together-milestones-that-mattered-in-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-HEA-6",
+          "headline": "Las muertes por tuberculosis continuaron bajando, pero la enfermedad siguió matando a más de un millón de personas",
+          "summary": "La OMS registró descensos importantes durante la década en África y Europa, aunque TB seguía vinculada a pobreza, VIH, diabetes, tabaquismo y desnutrición. El progreso mostró que tratamiento y diagnóstico funcionan, pero también que eliminar la enfermedad requiere intervenir sobre condiciones sociales más amplias.",
+          "sourceRefs": [
+            "https://www.who.int/news-room/spotlight/stronger-together-milestones-that-mattered-in-2025"
+          ]
+        },
+        {
+          "itemId": "Y2025-HEA-7",
+          "headline": "El calor extremo pasó a tratarse cada vez más como una emergencia sanitaria",
+          "summary": "La OMS y Brasil estimaron cientos de miles de muertes anuales relacionadas con calor y advirtieron que numerosos hospitales están expuestos a interrupciones climáticas. El cambio conceptual fue importante: adaptación climática dejó de ser solo infraestructura o ambiente y pasó también a formar parte de planificación sanitaria.",
+          "sourceRefs": [
+            "https://www.who.int/news-room/spotlight/stronger-together-milestones-that-mattered-in-2025"
           ]
         }
       ],
@@ -96,10 +280,71 @@
       "summaryItems": [
         {
           "itemId": "Y2025-TECH-1",
-          "headline": "La IA avanzó hacia razonamiento y agentes",
-          "summary": "Durante 2025 los grandes laboratorios empujaron modelos con más razonamiento y sistemas capaces de ejecutar tareas de varios pasos; Google resumió el año como un salto hacia agentes y aplicaciones científicas más autónomas.",
+          "headline": "Operator mostró por primera vez a gran escala un agente que podía usar un navegador por el usuario",
+          "summary": "OpenAI lanzó una vista previa capaz de hacer clic, escribir y navegar para completar tareas web. Aunque tenía limitaciones, el producto hizo tangible la transición desde chatbots que aconsejan hacia sistemas que actúan directamente en interfaces diseñadas originalmente para personas.",
           "sourceRefs": [
-            "https://blog.google/innovation-and-ai/products/2025-research-breakthroughs/"
+            "https://openai.com/index/introducing-operator/"
+          ]
+        },
+        {
+          "itemId": "Y2025-TECH-2",
+          "headline": "Deep Research convirtió la navegación autónoma y síntesis extensa en un producto de consumo",
+          "summary": "OpenAI presentó un agente que podía buscar, analizar y combinar cientos de fuentes durante varios minutos. La capacidad cambió expectativas sobre investigación asistida: en lugar de responder inmediatamente, el sistema podía dedicar tiempo a construir un informe y modificar su estrategia mientras encontraba nueva evidencia.",
+          "sourceRefs": [
+            "https://openai.com/index/introducing-deep-research/"
+          ]
+        },
+        {
+          "itemId": "Y2025-TECH-3",
+          "headline": "La Responses API y el Agents SDK dieron a desarrolladores bloques más directos para construir agentes",
+          "summary": "OpenAI integró búsqueda web, archivos, uso de computadora y herramientas dentro de una plataforma orientada a sistemas autónomos. Eso redujo la cantidad de infraestructura personalizada necesaria y ayudó a mover los agentes desde prototipos con prompts hacia aplicaciones más observables y mantenibles.",
+          "sourceRefs": [
+            "https://openai.com/index/new-tools-for-building-agents/"
+          ]
+        },
+        {
+          "itemId": "Y2025-TECH-4",
+          "headline": "GPT-5 unificó respuestas rápidas y razonamiento profundo dentro de un mismo sistema",
+          "summary": "OpenAI lanzó una arquitectura que decide cuándo responder directamente y cuándo usar más razonamiento, con mejoras en programación, escritura, salud y percepción visual. Para el usuario, la innovación fue menos visible como selector de modelos y más como una experiencia que intenta elegir automáticamente cuánto pensar.",
+          "sourceRefs": [
+            "https://openai.com/index/introducing-gpt-5/"
+          ]
+        },
+        {
+          "itemId": "Y2025-TECH-5",
+          "headline": "Google llevó la IA generativa mucho más profundo dentro de Search y sus productos principales",
+          "summary": "AI Mode, nuevas experiencias Gemini y funciones en dispositivos expandieron la IA desde una aplicación separada hacia búsqueda, productividad y hardware. La estrategia mostró que el siguiente campo de competencia no era solo quién tenía el mejor modelo, sino quién podía integrarlo en productos usados todos los días.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/google-ai-news-recap-2025/"
+          ]
+        },
+        {
+          "itemId": "Y2025-TECH-6",
+          "headline": "Los agentes pasaron de demostraciones a una categoría central de producto",
+          "summary": "Google y OpenAI dedicaron el año a sistemas capaces de planificar, navegar, usar herramientas y sostener tareas de varios pasos. El cambio marcó una nueva expectativa: la IA útil no debía limitarse a producir texto, sino también coordinar acciones y continuar trabajando después de una respuesta inicial.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/2025-research-breakthroughs/",
+            "https://blog.google/innovation-and-ai/products/google-ai-news-recap-2025/",
+            "https://openai.com/index/new-tools-for-building-agents/"
+          ]
+        },
+        {
+          "itemId": "Y2025-TECH-7",
+          "headline": "La IA comenzó a penetrar con más fuerza en empresas y trabajo profesional",
+          "summary": "OpenAI informó millones de usuarios pagos en productos empresariales mientras Google integraba modelos en herramientas de productividad. El impacto todavía era desigual, pero el año consolidó a la IA como presupuesto empresarial, infraestructura y cambio de procesos, no únicamente como experimento individual.",
+          "sourceRefs": [
+            "https://openai.com/index/gpt-5-new-era-of-work/",
+            "https://blog.google/innovation-and-ai/products/google-ai-news-recap-2025/"
+          ]
+        },
+        {
+          "itemId": "Y2025-TECH-8",
+          "headline": "La carrera tecnológica se desplazó hacia eficiencia, seguridad y costo además de capacidad bruta",
+          "summary": "Con modelos más avanzados, empresas empezaron a prestar más atención a cuándo usar razonamiento, cómo controlar agentes, qué información recordar y cuánto cuesta cada tarea. La maduración del mercado convirtió eficiencia y gobernanza en factores de competencia junto con benchmarks de inteligencia.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/google-ai-news-recap-2025/",
+            "https://blog.google/innovation-and-ai/products/2025-research-breakthroughs/",
+            "https://openai.com/index/introducing-gpt-5/"
           ]
         }
       ],
@@ -113,8 +358,33 @@
       "summaryItems": [
         {
           "itemId": "Y2025-CUL-1",
-          "headline": "La elección de León XIV marcó un cambio histórico en el Vaticano",
-          "summary": "La elección del papa León XIV fue uno de los hitos institucionales y culturales destacados del año.",
+          "headline": "La elección de León XIV abrió una nueva etapa histórica para la Iglesia católica",
+          "summary": "Tras la muerte del papa Francisco, el cónclave eligió a León XIV, uno de los acontecimientos institucionales y religiosos más observados del año. La transición importó por el peso global de la Iglesia y por cómo un cambio de pontífice puede modificar prioridades diplomáticas, sociales y pastorales durante años.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        },
+        {
+          "itemId": "Y2025-CUL-2",
+          "headline": "El Dalai Lama cumplió 90 años y reabrió el debate sobre su sucesión",
+          "summary": "Miles de seguidores celebraron al líder tibetano en Dharamshala mientras él reafirmaba que la tradición de reencarnación continuaría. La cuestión tiene dimensión espiritual y política porque China sostiene que debe intervenir en la elección de su sucesor, algo rechazado por gran parte de la comunidad tibetana.",
+          "sourceRefs": [
+            "https://apnews.com/article/1a246dc2be3c6d1e65066575ee650c2f",
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        },
+        {
+          "itemId": "Y2025-CUL-3",
+          "headline": "Hajj volvió a reunir a millones de musulmanes en uno de los mayores rituales colectivos del planeta",
+          "summary": "La peregrinación a La Meca siguió siendo un acontecimiento religioso, logístico y sanitario de enorme escala. En un año de conflictos y desplazamientos, las imágenes del Hajj también recordaron la capacidad de prácticas centenarias para mantener continuidad y sentido compartido entre comunidades distribuidas por todo el mundo.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        },
+        {
+          "itemId": "Y2025-CUL-4",
+          "headline": "Ceremonias y celebraciones en zonas de guerra mostraron formas de continuidad social bajo destrucción",
+          "summary": "AP destacó, entre otras escenas, bodas colectivas en Gaza y reuniones comunitarias en contextos de conflicto. Su importancia no está en competir con las noticias militares, sino en mostrar que incluso durante guerras prolongadas las personas intentan preservar rituales, vínculos y proyectos de vida.",
           "sourceRefs": [
             "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
           ]
