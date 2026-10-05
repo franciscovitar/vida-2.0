@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
+import { WORLD_DOMAINS, worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
 import type { WorldDomain, WorldPieceSummary, WorldSurfaceData } from '@/types/world-intelligence';
 
 import { WorldNavigation } from './WorldNavigation';
