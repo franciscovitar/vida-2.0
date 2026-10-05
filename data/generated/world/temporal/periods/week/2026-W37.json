@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "be6e1fbedb11561179c6e115b7383fa3f2ab2549",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/WEEK_2026-W37_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T20:50:00Z",
+    "observedAt": "2026-10-05T20:50:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada editorial de suficiencia adicional y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -30,7 +30,7 @@
         {
           "itemId": "W37-POL-1",
           "headline": "Ucrania y Estados Unidos exploraron nuevas ideas de negociación",
-          "summary": "Washington y Kyiv discutieron propuestas para reactivar una salida negociada, aunque durante la semana no apareció un avance concluyente.",
+          "summary": "Washington y Kyiv discutieron propuestas para reactivar una salida negociada, mientras Moscú dejó abierta la posibilidad de retomar contactos. No hubo un avance concluyente: la diplomacia se movía en paralelo a una guerra todavía intensa y cualquier acuerdo seguía dependiendo de seguridad y territorio.",
           "sourceRefs": [
             "https://www.reuters.com/world/europe/kremlin-says-it-does-not-rule-out-restart-peace-talks-with-ukraine-us-2026-09-07/",
             "https://www.reuters.com/world/europe/zelenskiy-says-us-envoys-presented-decent-ideas-peace-talks-2026-09-08/"
@@ -39,9 +39,17 @@
         {
           "itemId": "W37-POL-2",
           "headline": "Los ataques rusos mantuvieron la presión sobre Kyiv",
-          "summary": "Los ataques con misiles y drones sobre la capital ucraniana recordaron que la diplomacia seguía ocurriendo en paralelo a una guerra activa.",
+          "summary": "Misiles y drones volvieron a golpear la capital ucraniana mientras se discutían posibles marcos de negociación. La simultaneidad importó porque mostró que ninguna de las partes estaba congelando operaciones para dar espacio político a las conversaciones.",
           "sourceRefs": [
             "https://apnews.com/photo-gallery/major-global-news-moments-september-ap-photos-b4c300876a104484bf37a85efa1847cc"
+          ]
+        },
+        {
+          "itemId": "W37-POL-3",
+          "headline": "El avance hutí volvió a poner a Bab el‑Mandeb en riesgo",
+          "summary": "Las fuerzas hutíes avanzaron sobre posiciones costeras y aumentaron la presión sobre una ruta clave entre el mar Rojo y el golfo de Adén. Arabia Saudita pidió más apoyo mientras Washington evitaba comprometerse con una intervención terrestre directa, manteniendo abierto un foco regional con impacto global.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/middle-east/houthi-advance-yemen-puts-us-new-bind-2026-09-12/"
           ]
         }
       ],
@@ -52,7 +60,24 @@
       "domain": "ECONOMICS",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "W37-ECO-1",
+          "headline": "El Brent superó los 100 dólares mientras crecían los ataques a petroleros",
+          "summary": "El petróleo se mantuvo por encima de los 100 dólares por barril debido a ataques marítimos y temor a nuevas disrupciones en Hormuz y Bab el‑Mandeb. El shock se transmitía rápidamente a seguros, fletes e inflación, no solo al precio nominal del crudo.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/energy/brent-holds-above-100-tanker-attacks-deepen-supply-fear-2026-09-10/"
+          ]
+        },
+        {
+          "itemId": "W37-ECO-2",
+          "headline": "Mercados, inflación y tasas volvieron a tensionarse al mismo tiempo",
+          "summary": "Wall Street retrocedió, el petróleo rondó los 100 dólares, el cobre tocó máximos y subieron las expectativas de endurecimiento monetario en varias economías. La mezcla de energía cara y actividad todavía resistente complicó la expectativa de que los bancos centrales pudieran aflojar pronto.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-08/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -87,10 +112,26 @@
       "summaryItems": [
         {
           "itemId": "W37-TECH-1",
-          "headline": "GPT-6 Astra empezó a trasladarse a flujos de trabajo concretos",
-          "summary": "OpenAI presentó ejemplos de trabajo que quedaban al alcance del nuevo modelo, moviendo la conversación desde capacidades generales hacia tareas profesionales ejecutables.",
+          "headline": "GPT‑Live‑1 llevó voz natural full‑duplex a la API de OpenAI",
+          "summary": "El nuevo modelo permitió conversaciones continuas con mejor seguimiento de instrucciones, voces personalizadas y soporte para telefonía. La relevancia práctica es que los agentes de voz pueden integrarse más directamente en atención, ventas y flujos operativos sin encadenar tantos componentes separados.",
+          "sourceRefs": [
+            "https://openai.com/index/introducing-gpt-live-1-in-the-api/"
+          ]
+        },
+        {
+          "itemId": "W37-TECH-2",
+          "headline": "OpenAI mostró cómo Astra empezaba a convertirse en trabajo ejecutable",
+          "summary": "La compañía publicó ejemplos de tareas profesionales y técnicas que el modelo podía completar con más autonomía. El paso de benchmark a workflow importa porque la utilidad real de estos sistemas depende de cuánto trabajo completo pueden resolver, no solo de respuestas aisladas.",
           "sourceRefs": [
             "https://openai.com/index/the-work-now-within-reach/"
+          ]
+        },
+        {
+          "itemId": "W37-TECH-3",
+          "headline": "La API de OpenAI mejoró la observabilidad del prompt caching",
+          "summary": "Nuevos diagnósticos hicieron más visible cuándo se reutiliza contexto y cómo afecta costo y latencia. Es una mejora menos espectacular que un nuevo modelo, pero relevante para llevar agentes largos a producción sin pagar repetidamente por el mismo prefijo.",
+          "sourceRefs": [
+            "https://developers.openai.com/api/docs/changelog"
           ]
         }
       ],

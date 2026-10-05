@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "be6e1fbedb11561179c6e115b7383fa3f2ab2549",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-07_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T20:50:00Z",
+    "observedAt": "2026-10-05T20:50:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada editorial de suficiencia adicional y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,10 +29,26 @@
       "summaryItems": [
         {
           "itemId": "M202607-POL-1",
-          "headline": "Los hutíes volvieron a elevar el riesgo sobre rutas marítimas críticas",
-          "summary": "Ataques contra petroleros saudíes en el mar Rojo reabrieron el riesgo sobre Bab el-Mandeb y extendieron la dimensión marítima de la crisis regional.",
+          "headline": "Los hutíes elevaron el riesgo sobre Bab el‑Mandeb y el mar Rojo",
+          "summary": "Los ataques contra petroleros saudíes devolvieron al centro de la crisis al estrecho de Bab el‑Mandeb, una de las rutas marítimas más sensibles del comercio energético. El problema dejó de ser solo militar: cualquier interrupción sostenida podía encarecer transporte, seguros y energía en varias regiones.",
           "sourceRefs": [
             "https://www.reuters.com/world/middle-east/houthis-say-they-attacked-saudi-tankers-red-sea-threatening-new-chokepoint-iran-2026-07-23/"
+          ]
+        },
+        {
+          "itemId": "M202607-POL-2",
+          "headline": "Estados Unidos volvió a tantear negociaciones con Irán en medio de una guerra todavía activa",
+          "summary": "Donald Trump señaló la posibilidad de nuevas conversaciones con Teherán mientras continuaban ataques contra activos estadounidenses y Arabia Saudita asumía un papel militar más visible. La apertura diplomática no equivalía a desescalada: el conflicto seguía condicionando seguridad regional y rutas energéticas.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-07-31/"
+          ]
+        },
+        {
+          "itemId": "M202607-POL-3",
+          "headline": "La guerra siguió teniendo un costo humano directo para Estados Unidos",
+          "summary": "La repatriación de militares estadounidenses muertos en Oriente Medio mostró que la intervención ya tenía consecuencias internas visibles para Washington. Eso elevó el peso político doméstico de una guerra que hasta entonces podía percibirse principalmente a través de petróleo, misiles y diplomacia.",
+          "sourceRefs": [
+            "https://apnews.com/photo-gallery/major-global-news-moments-july-ap-photos-e53ee595d56aa9a566bd175b61106718"
           ]
         }
       ],
@@ -47,9 +63,33 @@
         {
           "itemId": "M202607-ECO-1",
           "headline": "El petróleo volvió a superar los 100 dólares bajo presión geopolítica",
-          "summary": "Los ataques a buques y el riesgo sobre corredores energéticos mantuvieron elevados los precios del crudo y la preocupación por inflación y transporte.",
+          "summary": "Los ataques a buques y el riesgo sobre corredores energéticos mantuvieron el crudo por encima de niveles que vuelven a importar para inflación, transporte y política monetaria. La variable crítica pasó a ser no solo cuánto petróleo existía, sino si podía circular con seguridad y a costos razonables.",
           "sourceRefs": [
             "https://www.reuters.com/world/middle-east/houthis-say-they-attacked-saudi-tankers-red-sea-threatening-new-chokepoint-iran-2026-07-23/"
+          ]
+        },
+        {
+          "itemId": "M202607-ECO-2",
+          "headline": "Una venta masiva de acciones ligadas a IA puso a prueba el entusiasmo del mercado",
+          "summary": "Una corrección de varios billones de dólares golpeó a compañías vinculadas con inteligencia artificial y produjo volatilidad excepcional en fabricantes de chips. El episodio no cerró el ciclo de inversión en IA, pero obligó a volver a mirar rentabilidad, valuaciones y cuánto crecimiento futuro ya estaba descontado en precios.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-07-31/"
+          ]
+        },
+        {
+          "itemId": "M202607-ECO-3",
+          "headline": "Estados Unidos y Japón intervinieron juntos para sostener al yen",
+          "summary": "Washington y Tokio realizaron su primera intervención coordinada sobre el yen desde 1998. La medida mostró hasta qué punto la combinación de tasas, energía cara y movimientos de capital había convertido al mercado cambiario japonés en un problema de estabilidad, no simplemente de cotización.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-07-31/"
+          ]
+        },
+        {
+          "itemId": "M202607-ECO-4",
+          "headline": "India enfrentó más presión sobre la rupia y la inflación",
+          "summary": "El banco central indio quedó atrapado entre sostener una moneda debilitada y responder a presiones inflacionarias más persistentes. El caso ilustró un problema más amplio de economías importadoras de energía: petróleo caro y dólar fuerte reducen margen de maniobra monetaria.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-07-31/"
           ]
         }
       ],
@@ -64,9 +104,17 @@
         {
           "itemId": "M202607-SCI-1",
           "headline": "Canadá atravesó otra temporada intensa de incendios forestales",
-          "summary": "A fines de julio los incendios se extendían por el oeste canadiense, alimentados por calor y rayos, con millones de hectáreas afectadas en la temporada.",
+          "summary": "Los incendios se extendieron por el oeste canadiense con calor y rayos favoreciendo nuevos focos y millones de hectáreas afectadas durante la temporada. Además del daño inmediato, el episodio reforzó la señal de temporadas de fuego más largas y difíciles de contener bajo condiciones extremas.",
           "sourceRefs": [
             "https://www.reuters.com/business/environment/wildfires-spread-western-canada-temperatures-rise-lightning-strikes-2026-07-24/"
+          ]
+        },
+        {
+          "itemId": "M202607-SCI-2",
+          "headline": "Europa volvió a sufrir incendios y calor extremo",
+          "summary": "Una ola de calor alimentó incendios graves en distintos puntos de Europa y elevó nuevamente el costo humano, ambiental y económico de los extremos térmicos. La preocupación se amplificó por señales oceánicas compatibles con un posible episodio fuerte de El Niño, aunque su evolución todavía requería seguimiento.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-07-31/"
           ]
         }
       ],
@@ -96,10 +144,26 @@
       "summaryItems": [
         {
           "itemId": "M202607-TECH-1",
-          "headline": "Los laboratorios siguieron empujando agentes y robótica",
-          "summary": "Google presentó nuevos modelos Gemini orientados a agentes y avances en Robotics ER2, reforzando el puente entre razonamiento digital y acción física.",
+          "headline": "Google lanzó una nueva tanda de modelos Gemini pensados para agentes",
+          "summary": "Gemini 3.6 Flash, 3.5 Flash‑Lite y 3.5 Flash Cyber apuntaron a mejorar eficiencia, latencia y confiabilidad para workflows agentivos en producción. La señal importante fue la maduración de los agentes desde demos hacia infraestructura más barata y operable.",
           "sourceRefs": [
             "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-july-2026/"
+          ]
+        },
+        {
+          "itemId": "M202607-TECH-2",
+          "headline": "Gemini Robotics ER 2 llevó el razonamiento agentivo al mundo físico",
+          "summary": "El nuevo modelo de robótica combinó comprensión de video, planificación de tareas y coordinación entre robots. Eso amplió la frontera de los agentes: ya no solo razonar sobre archivos o navegadores, sino observar el entorno y coordinar acciones físicas de varios pasos.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/gemini-robotics-er-2/"
+          ]
+        },
+        {
+          "itemId": "M202607-TECH-3",
+          "headline": "Los agentes administrados ganaron capacidades más cercanas a producción",
+          "summary": "Google amplió Managed Agents con ejecución en segundo plano, MCP remoto, funciones personalizadas y renovación de credenciales. Son piezas menos llamativas que un nuevo modelo, pero importantes para construir agentes persistentes y conectados con sistemas reales.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/developers-tools/expanding-managed-agents-gemini-api/"
           ]
         }
       ],
