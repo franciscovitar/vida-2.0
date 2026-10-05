@@ -2,28 +2,28 @@ import { Radio } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
-import { WorldSurfaceView } from '@/components/world/WorldSurface';
-import { getWorldSurfaceData } from '@/lib/data/world-source';
+import { WorldTemporalView } from '@/components/world/WorldTemporal';
+import { getWorldTemporalPageData } from '@/lib/data/world-source';
 
 import pageStyles from '../../page.module.scss';
 
-export const metadata: Metadata = { title: 'World · Ahora' };
+export const metadata: Metadata = { title: 'World · Ahora · Día' };
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function Page() {
-  const data = await getWorldSurfaceData();
+  const data = await getWorldTemporalPageData('DAY');
 
   return (
     <div className={pageStyles.page}>
       <PageHeader
         title="World · Ahora"
-        description="Qué cambió en el mundo y merece atención, sin feed infinito ni repetición."
+        description="Panorama del último día cerrado, con profundidad solo donde hace falta."
         icon={Radio}
         domain="neutral"
       />
-      <WorldSurfaceView data={data} view={{ kind: 'now' }} />
+      <WorldTemporalView data={data} />
     </div>
   );
 }
