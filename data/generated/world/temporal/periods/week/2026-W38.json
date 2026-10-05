@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "be6e1fbedb11561179c6e115b7383fa3f2ab2549",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/WEEK_2026-W38_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T20:50:00Z",
+    "observedAt": "2026-10-05T20:50:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada editorial de suficiencia adicional y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,11 +29,27 @@
       "summaryItems": [
         {
           "itemId": "W38-POL-1",
-          "headline": "La ONU abrió una semana marcada por guerras, IA, clima y desigualdad",
-          "summary": "En la antesala de la Asamblea General, António Guterres colocó conflictos abiertos, gobernanza de IA, clima e inequidad entre los riesgos centrales del momento.",
+          "headline": "La ONU abrió una semana dominada por guerras, IA, clima y desigualdad",
+          "summary": "La Asamblea General volvió a concentrar a líderes mundiales en un contexto de guerras abiertas y dudas sobre la capacidad del sistema multilateral. La agenda mostró que seguridad, tecnología y clima ya no funcionan como debates separados.",
           "sourceRefs": [
-            "https://www.un.org/es/node/248096",
-            "https://www.reuters.com/world/china/world-leaders-return-un-amid-wars-middle-east-ukraine-2026-09-20/"
+            "https://www.reuters.com/world/china/world-leaders-return-un-amid-wars-middle-east-ukraine-2026-09-20/",
+            "https://www.un.org/es/node/248096"
+          ]
+        },
+        {
+          "itemId": "W38-POL-2",
+          "headline": "Estados Unidos y China abrieron conversaciones específicas sobre riesgos de IA",
+          "summary": "Funcionarios de ambos países incluyeron inteligencia artificial, comercio y minerales críticos en una ronda de diálogo. Crear canales de notificación y gestión de incidentes importa porque la competencia tecnológica ya tiene riesgos de seguridad comparables a otros ámbitos estratégicos.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/finance/us-treasurys-bessent-chinas-he-launch-talks-ai-trade-critical-minerals-2026-09-20/"
+          ]
+        },
+        {
+          "itemId": "W38-POL-3",
+          "headline": "Trump llegó a la ONU con una agenda bilateral intensa",
+          "summary": "Washington preparó reuniones con múltiples líderes en paralelo a las sesiones formales de Naciones Unidas. La diplomacia bilateral siguió ganando peso frente a los grandes foros, especialmente en guerras y negociaciones donde las instituciones multilaterales tenían capacidad limitada para imponer resultados.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/us/trump-eyes-busy-week-meetings-un-general-assembly-gathers-2026-09-20/"
           ]
         }
       ],
@@ -47,10 +63,26 @@
       "summaryItems": [
         {
           "itemId": "W38-ECO-1",
-          "headline": "Los bancos centrales endurecieron el tono mientras petróleo y bonos seguían bajo presión",
-          "summary": "La semana combinó decisiones monetarias más restrictivas, rendimientos elevados y petróleo caro, reforzando el riesgo de una inflación más persistente.",
+          "headline": "La Reserva Federal realizó su primera suba de tasas desde 2023",
+          "summary": "La Fed aumentó 25 puntos básicos mientras petróleo e inflación seguían presionando y los rendimientos de bonos subían. El giro confirmó que el escenario había cambiado: los mercados pasaron de esperar recortes a discutir cuántas subas adicionales podían venir.",
           "sourceRefs": [
-            "https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-18/"
+            "https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-16/"
+          ]
+        },
+        {
+          "itemId": "W38-ECO-2",
+          "headline": "El mercado ya había empezado la semana anticipando un endurecimiento de la Fed",
+          "summary": "Grandes bancos revisaron sus pronósticos y comenzaron a esperar una suba en septiembre ante inflación más persistente. Ese cambio de consenso ayudó a empujar al alza tasas de largo plazo antes de la decisión formal.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/goldman-sachs-now-expects-fed-hike-rates-september-2026-09-14/"
+          ]
+        },
+        {
+          "itemId": "W38-ECO-3",
+          "headline": "El Banco de Inglaterra optó por mantener tasas y moderar el ajuste cuantitativo",
+          "summary": "El BoE enfrentó el mismo dilema global entre inflación alimentada por energía y una economía sensible a costos financieros altos. La decisión de pausar tasas mientras reducía el ritmo de QT buscó evitar un endurecimiento excesivo por dos canales a la vez.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/bank-england-set-hold-rates-steady-slow-qt-2026-09-14/"
           ]
         }
       ],
@@ -88,10 +120,18 @@
       "summaryItems": [
         {
           "itemId": "W38-TECH-1",
-          "headline": "Gemini 3.8 Live apuntó a interacción más fluida y razonamiento en tiempo real",
-          "summary": "Google presentó Gemini 3.8 Live y una variante con razonamiento extendido, continuando la carrera por modelos interactivos capaces de sostener tareas más complejas.",
+          "headline": "Gemini 3.8 Live llevó más razonamiento a las conversaciones de voz",
+          "summary": "Google presentó una versión para escala y otra Extended Thinking capaz de dedicar más razonamiento a tareas complejas. La interacción hablada se acercó a una interfaz de agente: entender contexto, razonar varios pasos y responder sin abandonar la conversación.",
           "sourceRefs": [
             "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-8-live-gemini-3-8-live-extended-thinking/"
+          ]
+        },
+        {
+          "itemId": "W38-TECH-2",
+          "headline": "Gemini 3.5 Transcribe mejoró la capa de escucha para aplicaciones en tiempo real",
+          "summary": "Google presentó un modelo orientado a transcripción de voz junto con herramientas para construir experiencias de audio. Es una pieza clave para agentes que deben comprender llamadas, reuniones o conversaciones antes de poder actuar sobre ellas.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/developers-tools/build-real-time-voice-applications-gemini-audio/"
           ]
         }
       ],

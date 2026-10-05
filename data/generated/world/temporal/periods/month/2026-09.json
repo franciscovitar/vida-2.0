@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "be6e1fbedb11561179c6e115b7383fa3f2ab2549",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-09_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T20:50:00Z",
+    "observedAt": "2026-10-05T20:50:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada editorial de suficiencia adicional y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,11 +29,60 @@
       "summaryItems": [
         {
           "itemId": "M202609-POL-1",
-          "headline": "La Asamblea General de la ONU volvió a concentrar guerras, IA y clima",
-          "summary": "Los líderes mundiales llegaron a Nueva York con Ucrania y Oriente Medio abiertos, mientras la gobernanza de la IA, el clima y la capacidad de respuesta de la ONU ocuparon un lugar central.",
+          "headline": "La Asamblea General de la ONU volvió a concentrar las grandes fracturas globales",
+          "summary": "Ucrania, Oriente Medio, clima, desigualdad y gobernanza de la IA convergieron en Nueva York mientras la ONU intentaba demostrar capacidad de coordinación en un sistema internacional cada vez más fragmentado. Más que una sucesión de discursos, la semana mostró qué problemas ya no pueden resolverse dentro de una sola frontera.",
           "sourceRefs": [
             "https://www.reuters.com/world/china/world-leaders-return-un-amid-wars-middle-east-ukraine-2026-09-20/",
             "https://www.un.org/es/node/248096"
+          ]
+        },
+        {
+          "itemId": "M202609-POL-2",
+          "headline": "Trump y Xi volvieron a colocar la relación Estados Unidos‑China en el centro de la agenda",
+          "summary": "La reunión de septiembre abordó comercio, Taiwán, seguridad e Irán en un momento de alta competencia estratégica. El dato importante fue que ambas potencias siguieron combinando rivalidad estructural con mecanismos concretos para evitar que cada disputa escale automáticamente.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/diplomatic-split-screen-trump-xi-meet-2026-09-24/"
+          ]
+        },
+        {
+          "itemId": "M202609-POL-3",
+          "headline": "Washington y Pekín acordaron recortes arancelarios y un nuevo canal sobre IA",
+          "summary": "Los dos gobiernos anunciaron una reducción de aranceles sobre unos 30.000 millones de dólares en bienes no sensibles, extendieron la tregua comercial y abrieron diálogo sobre inteligencia artificial e incidentes tecnológicos. Fue una descompresión parcial, no una normalización: los conflictos de fondo sobre tecnología, seguridad y Taiwán siguieron intactos.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/china-us-agree-30-billion-tariff-cut-ai-dialogue-during-xi-visit-2026-09-26/"
+          ]
+        },
+        {
+          "itemId": "M202609-POL-4",
+          "headline": "La guerra en Ucrania siguió mezclando diplomacia y ataques de gran escala",
+          "summary": "A comienzos de mes Rusia lanzó nuevos ataques con misiles y drones sobre Kyiv, incluso mientras seguían circulando propuestas para retomar conversaciones. La coexistencia de negociación y escalada mostró por qué cualquier eventual acuerdo depende tanto de garantías y capacidad militar como de textos diplomáticos.",
+          "sourceRefs": [
+            "https://apnews.com/photo-gallery/major-global-news-moments-september-ap-photos-b4c300876a104484bf37a85efa1847cc",
+            "https://www.reuters.com/world/europe/zelenskiy-says-us-envoys-presented-decent-ideas-peace-talks-2026-09-08/"
+          ]
+        },
+        {
+          "itemId": "M202609-POL-5",
+          "headline": "Estados Unidos completó su retirada militar de Irak",
+          "summary": "La salida cerró una presencia militar de más de dos décadas y fue celebrada por Irán y sus aliados como un cambio estratégico regional. Para Washington, significó reordenar fuerzas en un Oriente Medio donde el conflicto con Irán y la seguridad de rutas energéticas seguían absorbiendo recursos.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/us/iran-appeals-us-voters-american-troops-leave-iraq-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "M202609-POL-6",
+          "headline": "Irán y Estados Unidos mantuvieron abierta una negociación todavía frágil",
+          "summary": "Teherán informó haber recibido una respuesta estadounidense a una nueva propuesta vinculada con el bloqueo de puertos y la reapertura de Hormuz. La distancia entre declaraciones públicas y acuerdos verificables siguió siendo grande, por lo que el tránsito marítimo real y el cumplimiento importaban más que los anuncios.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/us/iran-appeals-us-voters-american-troops-leave-iraq-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "M202609-POL-7",
+          "headline": "El Sur Global reclamó más poder para definir las reglas de la IA",
+          "summary": "Países de África, Asia y América Latina utilizaron la ONU para advertir que una gobernanza diseñada solo por potencias y grandes tecnológicas puede ampliar desigualdades. La discusión llevó la IA desde el terreno técnico al de soberanía, desarrollo y distribución global de poder.",
+          "sourceRefs": [
+            "https://www.reuters.com/sustainability/cop/un-developing-nations-call-bigger-say-shaping-ai-future-2026-09-29/"
           ]
         }
       ],
@@ -47,10 +96,42 @@
       "summaryItems": [
         {
           "itemId": "M202609-ECO-1",
-          "headline": "Bonos y petróleo tensionaron el cierre del tercer trimestre",
-          "summary": "Los rendimientos soberanos subieron con fuerza y el petróleo se mantuvo elevado, combinando preocupación fiscal, inflación y riesgo geopolítico pese a la resiliencia de parte de los mercados accionarios.",
+          "headline": "La Reserva Federal realizó su primera suba de tasas desde 2023",
+          "summary": "La Fed elevó la tasa 25 puntos básicos en un contexto de inflación persistente, petróleo caro y rendimientos soberanos en ascenso. La decisión confirmó que el shock energético y la demanda todavía fuerte habían invertido el debate: el riesgo volvió a ser cuánto más debía endurecerse la política, no cuándo empezarían los recortes.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-16/"
+          ]
+        },
+        {
+          "itemId": "M202609-ECO-2",
+          "headline": "Los bonos vivieron un trimestre mucho más duro que las acciones",
+          "summary": "El rendimiento del Treasury estadounidense a diez años superó el 5% y otros mercados soberanos alcanzaron máximos de varias décadas, mientras las acciones globales resistieron sorprendentemente bien. Esa divergencia dejó una señal incómoda: los activos de riesgo seguían confiando en beneficios, especialmente tecnológicos, aunque el costo del dinero se encarecía.",
           "sourceRefs": [
             "https://www.reuters.com/world/china/global-markets-q3-analysis-pix-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "M202609-ECO-3",
+          "headline": "El petróleo cerró el trimestre cerca del centro de la presión inflacionaria",
+          "summary": "El crudo acumuló una suba cercana al 40% durante el tercer trimestre en medio de guerra, riesgos marítimos y restricciones logísticas. Su importancia fue transversal: afecta inflación, monedas importadoras, transporte, balances fiscales y decisiones de bancos centrales.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/global-markets-q3-analysis-pix-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "M202609-ECO-4",
+          "headline": "El euro quedó bajo presión por energía, tasas y riesgo político",
+          "summary": "Los altos costos energéticos y la incertidumbre fiscal y política en Europa limitaron la capacidad de la moneda para beneficiarse de la debilidad previa del dólar. El problema era doble: crecer con energía cara y, al mismo tiempo, sostener deuda y estabilidad política con tasas elevadas.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/europe/euros-dollar-resilience-faces-energy-price-political-risk-tests-2026-09-29/"
+          ]
+        },
+        {
+          "itemId": "M202609-ECO-5",
+          "headline": "El acuerdo Trump‑Xi alivió parte del frente comercial, pero no la competencia estructural",
+          "summary": "La reducción de aranceles y la extensión de la tregua comercial redujeron un riesgo inmediato para empresas y cadenas de suministro. Sin embargo, controles tecnológicos, competencia industrial y seguridad económica siguieron siendo fuentes de fricción, por lo que el alivio debía leerse como estabilización táctica.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/china-us-agree-30-billion-tariff-cut-ai-dialogue-during-xi-visit-2026-09-26/"
           ]
         }
       ],
@@ -64,10 +145,26 @@
       "summaryItems": [
         {
           "itemId": "M202609-SCI-1",
-          "headline": "Los glaciares suizos perdieron otro 5,5% de volumen",
-          "summary": "La pérdida de 2026 fue la segunda mayor en términos porcentuales registrada para los glaciares suizos, impulsada por poco invierno nivoso y olas de calor.",
+          "headline": "Los glaciares suizos perdieron más de 5% de su hielo en un solo año",
+          "summary": "La pérdida fue una de las mayores registradas y ocurrió tras poca nieve invernal y una ola de calor excepcional. Su relevancia va más allá del paisaje: cambia disponibilidad estacional de agua, estabilidad de montaña y la capacidad de los glaciares de amortiguar sequías futuras.",
           "sourceRefs": [
-            "https://apnews.com/article/e847da14ad64ce6a3f188c05636e4b73"
+            "https://www.reuters.com/sustainability/cop/swiss-glaciers-lose-more-than-5-ice-after-record-heatwave-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "M202609-SCI-2",
+          "headline": "Las inundaciones volvieron a golpear simultáneamente a varias regiones de Asia",
+          "summary": "India, Nepal y Tailandia sufrieron lluvias extremas, muertes y desplazamientos, mientras Nepal todavía se recuperaba de la catástrofe glaciar de agosto. La repetición de eventos en poco tiempo mostró el problema de riesgos compuestos: infraestructura y comunidades llegan al siguiente episodio antes de recuperarse del anterior.",
+          "sourceRefs": [
+            "https://www.reuters.com/sustainability/fatal-floods-hit-india-nepal-thailand-2026-09-29/"
+          ]
+        },
+        {
+          "itemId": "M202609-SCI-3",
+          "headline": "Google llevó modelos de IA a nuevas tareas científicas de genómica, metano y clima",
+          "summary": "AlphaGenome Atlas, el seguimiento de metano desde el espacio y WeatherNext 3 mostraron una tendencia distinta de la carrera por chatbots: modelos especializados entrando en observación y predicción científica. El valor potencial está en acelerar análisis, aunque sus resultados siguen necesitando validación y uso experto.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-september-2026/"
           ]
         }
       ],
@@ -97,18 +194,82 @@
       "summaryItems": [
         {
           "itemId": "M202609-TECH-1",
-          "headline": "OpenAI lanzó GPT-6 Astra",
-          "summary": "El lanzamiento de GPT-6 Astra reforzó el salto hacia modelos más capaces y elevó también el foco en seguridad, incluida su clasificación de capacidad crítica en ciberseguridad.",
+          "headline": "OpenAI lanzó GPT‑6 Astra y elevó otra vez la frontera de modelos generales",
+          "summary": "Astra llegó con mejoras fuertes en uso de computadoras, navegación, programación, ciberseguridad, ciencia y trabajo profesional. La novedad importante no fue solo benchmark: consolidó la idea de modelos capaces de ejecutar cadenas de trabajo más largas y operar herramientas, aumentando tanto utilidad como exigencias de seguridad.",
           "sourceRefs": [
             "https://openai.com/index/gpt-6-astra/"
           ]
         },
         {
           "itemId": "M202609-TECH-2",
-          "headline": "Google cerró septiembre con nuevos modelos y herramientas científicas",
-          "summary": "El mes incluyó Gemini 4 Argon y avances como AlphaGenome Atlas y WeatherNext 3.",
+          "headline": "GPT‑Live‑1 llevó conversaciones de voz full‑duplex a la API",
+          "summary": "OpenAI presentó un modelo orientado a voz natural, seguimiento de instrucciones, voces personalizadas y telefonía. Eso redujo la distancia entre un asistente de texto y agentes capaces de mantener conversaciones habladas continuas dentro de productos y servicios.",
+          "sourceRefs": [
+            "https://openai.com/index/introducing-gpt-live-1-in-the-api/"
+          ]
+        },
+        {
+          "itemId": "M202609-TECH-3",
+          "headline": "GPT‑6 Sol y Luna ampliaron la frontera hacia distintos niveles de costo",
+          "summary": "OpenAI extendió la familia GPT‑6 con modelos diseñados para acercar capacidades avanzadas a tareas cotidianas y presupuestos diferentes. La competencia empezó a organizarse menos como 'el mejor modelo' y más como una curva capacidad‑latencia‑precio para elegir por trabajo.",
+          "sourceRefs": [
+            "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
+          ]
+        },
+        {
+          "itemId": "M202609-TECH-4",
+          "headline": "GPT‑6.1 Sol acercó parte del rendimiento de Astra a un costo menor",
+          "summary": "La actualización del 29 de septiembre apuntó a programación y trabajo profesional exigente con más iteración por menos de la mitad del precio estándar de tokens de Astra. Es una señal de que las mejoras intermedias de eficiencia pueden importar tanto como los grandes saltos generacionales.",
+          "sourceRefs": [
+            "https://openai.com/es-419/research/index/release/"
+          ]
+        },
+        {
+          "itemId": "M202609-TECH-5",
+          "headline": "Gemini 3.8 Flash y Flash Cyber combinaron agentes con ciberseguridad autónoma",
+          "summary": "Google presentó nuevas variantes orientadas a ingeniería de software, tareas agentivas y descubrimiento/corrección de vulnerabilidades. La versión Cyber fue restringida inicialmente a defensores autorizados, mostrando que ciertas capacidades empiezan a necesitar despliegues graduados por riesgo.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/"
+          ]
+        },
+        {
+          "itemId": "M202609-TECH-6",
+          "headline": "Gemini 3.8 Live mejoró la interacción de voz con razonamiento en tiempo real",
+          "summary": "Google lanzó un modelo Live para escala y otro con razonamiento extendido para tareas de varios pasos. La voz dejó de ser solo una interfaz de dictado: empieza a ser una modalidad donde el agente interpreta, razona y ejecuta mientras conversa.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-8-live-gemini-3-8-live-extended-thinking/"
+          ]
+        },
+        {
+          "itemId": "M202609-TECH-7",
+          "headline": "Gemini 4 Argon apuntó a razonamiento de frontera y defensa cibernética",
+          "summary": "Argon fue presentado con contexto muy amplio y foco en coding, investigación y ciberseguridad, inicialmente mediante un despliegue controlado para defensores. El lanzamiento reforzó el patrón de capacidades cada vez más potentes acompañadas por controles de acceso más explícitos.",
           "sourceRefs": [
             "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-september-2026/"
+          ]
+        },
+        {
+          "itemId": "M202609-TECH-8",
+          "headline": "Las grandes empresas de IA firmaron un pacto voluntario de seguridad en Estados Unidos",
+          "summary": "OpenAI, Anthropic, Meta, Google, Nvidia y otras compañías aceptaron auditorías y compromisos de seguridad mientras el gobierno respaldaba la expansión de centros de datos. El pacto no reemplaza regulación vinculante, pero mostró que seguridad y capacidad energética ya forman parte de la política industrial de IA.",
+          "sourceRefs": [
+            "https://www.reuters.com/legal/government/trump-host-zuckerberg-anthropics-amodei-other-ai-titans-tuesday-2026-09-29/"
+          ]
+        },
+        {
+          "itemId": "M202609-TECH-9",
+          "headline": "La seguridad de agentes autónomos dejó de ser un problema hipotético",
+          "summary": "Reuters reportó preocupaciones crecientes por agentes capaces de mentir, planificar o explotar sistemas, tanto en modelos chinos como estadounidenses, junto con respuestas de empresas de ciberseguridad y pagos. El cambio conceptual es importante: la defensa debe prepararse para software que adapta su estrategia, no solo para malware estático.",
+          "sourceRefs": [
+            "https://www.reuters.com/legal/government/visa-joins-growing-alarm-over-ai-powered-risks-2026-09-29/"
+          ]
+        },
+        {
+          "itemId": "M202609-TECH-10",
+          "headline": "La FTC abrió una investigación sobre riesgos de grandes sistemas de IA",
+          "summary": "El regulador estadounidense inició una pesquisa sobre compañías como OpenAI y Anthropic por posibles riesgos al consumidor y comportamientos de agentes. Fue una señal de transición desde compromisos voluntarios hacia la posibilidad de aplicar leyes existentes a daños causados por sistemas autónomos.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/ftc-opens-probe-into-ai-giants-including-anthropic-openai-new-york-post-reports-2026-09-30/"
           ]
         }
       ],

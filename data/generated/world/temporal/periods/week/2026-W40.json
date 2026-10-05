@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "be6e1fbedb11561179c6e115b7383fa3f2ab2549",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/WEEK_2026-W40_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T20:50:00Z",
+    "observedAt": "2026-10-05T20:50:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada editorial de suficiencia adicional y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,18 +29,34 @@
       "summaryItems": [
         {
           "itemId": "W40-POL-1",
-          "headline": "La diplomacia con Irán siguió abierta pero frágil",
-          "summary": "Washington y Teherán intercambiaron señales contradictorias sobre sanciones y negociaciones, mientras el conflicto regional seguía condicionando la seguridad de Oriente Medio.",
+          "headline": "La diplomacia entre Estados Unidos e Irán siguió abierta, pero sin un acuerdo verificable",
+          "summary": "Teherán dijo haber recibido una respuesta estadounidense a su propuesta sobre puertos y Hormuz mientras Washington mantenía señales contradictorias. La semana confirmó que los anuncios políticos no bastaban: tránsito marítimo, bloqueos y cumplimiento seguían siendo la prueba real de desescalada.",
           "sourceRefs": [
-            "https://www.reuters.com/world/middle-east/trump-denies-offering-iran-sanctions-relief-tehran-says-ready-talks-2026-09-29/"
+            "https://www.reuters.com/world/us/iran-appeals-us-voters-american-troops-leave-iraq-2026-09-30/"
           ]
         },
         {
           "itemId": "W40-POL-2",
-          "headline": "Los ataques hutíes volvieron a tensionar infraestructura energética",
-          "summary": "Un nuevo ataque contra instalaciones saudíes mostró que el riesgo regional seguía activo incluso después de meses de intentos de estabilización.",
+          "headline": "Estados Unidos completó su retirada militar de Irak",
+          "summary": "La salida puso fin a una presencia de 21 años y fue presentada por Irán y sus aliados como una victoria estratégica. Para Washington implicó redistribuir atención y recursos mientras otros frentes regionales, especialmente Irán y Yemen, seguían activos.",
           "sourceRefs": [
-            "https://www.reuters.com/business/energy/oil-climbs-after-yemeni-houthis-attack-saudi-aramco-sites-2026-10-04/"
+            "https://www.reuters.com/world/us/iran-appeals-us-voters-american-troops-leave-iraq-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "W40-POL-3",
+          "headline": "Rusia volvió a golpear infraestructura energética ucraniana",
+          "summary": "Ataques aéreos alrededor de Kyiv y contra el sistema energético mantuvieron la presión de cara al invierno. La infraestructura civil siguió siendo parte del campo de batalla porque su degradación afecta capacidad económica, vida cotidiana y resistencia política.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/europe/russian-air-strikes-kill-one-injure-five-around-kyiv-officials-say-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "W40-POL-4",
+          "headline": "Arabia Saudita preparó una ofensiva para recuperar el control sobre Bab el‑Mandeb",
+          "summary": "Riad avanzó con planes para apoyar una operación yemení contra los hutíes después de que éstos ampliaran su control costero. El estrecho importa mucho más allá de Yemen: conecta el mar Rojo con rutas de energía y comercio entre Asia, Europa y el Mediterráneo.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/asia-pacific/saudis-plan-assault-houthis-break-red-sea-chokehold-2026-10-02/"
           ]
         }
       ],
@@ -54,11 +70,26 @@
       "summaryItems": [
         {
           "itemId": "W40-ECO-1",
-          "headline": "Bonos caros y petróleo alto mantuvieron la presión macroeconómica",
-          "summary": "Los mercados cerraron septiembre con rendimientos elevados y persistente riesgo energético, una combinación incómoda para inflación, deuda y crecimiento.",
+          "headline": "El cierre del tercer trimestre dejó acciones resistentes y bonos bajo fuerte presión",
+          "summary": "Las bolsas globales seguían arriba en el año pese a rendimientos soberanos que alcanzaron máximos de décadas. La combinación mostraba dos narrativas opuestas: optimismo por beneficios y tecnología frente a un costo de capital cada vez más alto.",
           "sourceRefs": [
-            "https://www.reuters.com/commentary/reuters-open-interest/global-markets-trading-day-graphic-2026-09-28/",
-            "https://www.reuters.com/business/energy/oil-climbs-after-yemeni-houthis-attack-saudi-aramco-sites-2026-10-04/"
+            "https://www.reuters.com/world/china/global-markets-q3-analysis-pix-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "W40-ECO-2",
+          "headline": "Petróleo caro y tasas altas empezaron a pesar más sobre el optimismo global",
+          "summary": "Con el crudo por encima de 100 dólares y bancos centrales endureciendo, los mercados enfrentaron un escenario menos benigno que meses atrás. Francia, Japón, Brasil y Estados Unidos mostraban distintas versiones del mismo problema: financiar crecimiento y deuda con energía y dinero caros.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-10-02/"
+          ]
+        },
+        {
+          "itemId": "W40-ECO-3",
+          "headline": "Europa volvió a sentir presión por energía y riesgo fiscal",
+          "summary": "El euro y los bonos europeos quedaron expuestos a energía cara, déficits elevados y tensiones políticas, especialmente en Francia. El riesgo era que un shock externo de energía se combinara con poco margen fiscal y monetario para absorberlo.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/europe/euros-dollar-resilience-faces-energy-price-political-risk-tests-2026-09-29/"
           ]
         }
       ],
@@ -72,10 +103,18 @@
       "summaryItems": [
         {
           "itemId": "W40-SCI-1",
-          "headline": "La pérdida de glaciares suizos volvió a mostrar la velocidad del calentamiento alpino",
-          "summary": "El reporte de cierre de septiembre estimó una pérdida anual de 5,5% del volumen glaciar, la segunda mayor caída porcentual registrada.",
+          "headline": "Los glaciares suizos perdieron más de 5% de su hielo en 2026",
+          "summary": "El año dejó una de las peores pérdidas registradas, después de poca nieve y una ola de calor récord. La tendencia amenaza reservas de agua y aumenta inestabilidad de montaña, además de ser una señal física acumulativa del calentamiento europeo.",
           "sourceRefs": [
-            "https://apnews.com/article/e847da14ad64ce6a3f188c05636e4b73"
+            "https://www.reuters.com/sustainability/cop/swiss-glaciers-lose-more-than-5-ice-after-record-heatwave-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "W40-SCI-2",
+          "headline": "Inundaciones graves afectaron India, Nepal y Tailandia mientras México enfrentó al huracán Polo",
+          "summary": "Las lluvias extremas provocaron muertes, evacuaciones y daños en varias regiones casi al mismo tiempo. Nepal volvió a sufrir apenas un mes después de su catástrofe glaciar, mostrando cómo eventos repetidos reducen la capacidad de recuperación de comunidades e infraestructura.",
+          "sourceRefs": [
+            "https://www.reuters.com/sustainability/fatal-floods-hit-india-nepal-thailand-2026-09-29/"
           ]
         }
       ],
@@ -106,9 +145,33 @@
         {
           "itemId": "W40-TECH-1",
           "headline": "Grandes empresas de IA firmaron un pacto voluntario de seguridad en Estados Unidos",
-          "summary": "Ejecutivos de compañías líderes acordaron compromisos voluntarios de seguridad, mostrando que la gobernanza de modelos avanzados ya se discute junto con su despliegue comercial.",
+          "summary": "OpenAI, Anthropic, Meta, Google, Nvidia y otras compañías acordaron auditorías y compromisos de seguridad mientras la Casa Blanca apoyaba una expansión fuerte de centros de datos. El acuerdo fue un paso de coordinación, aunque siguió dependiendo de compromisos voluntarios y leyes existentes.",
           "sourceRefs": [
             "https://www.reuters.com/legal/government/trump-host-zuckerberg-anthropics-amodei-other-ai-titans-tuesday-2026-09-29/"
+          ]
+        },
+        {
+          "itemId": "W40-TECH-2",
+          "headline": "Países en desarrollo reclamaron voz propia en la gobernanza mundial de IA",
+          "summary": "Gobiernos de África, Asia y América Latina advirtieron en Naciones Unidas que no quieren limitarse a consumir sistemas y reglas diseñadas por potencias ricas. El debate vinculó directamente IA con desigualdad, soberanía y oportunidades de desarrollo.",
+          "sourceRefs": [
+            "https://www.reuters.com/sustainability/cop/un-developing-nations-call-bigger-say-shaping-ai-future-2026-09-29/"
+          ]
+        },
+        {
+          "itemId": "W40-TECH-3",
+          "headline": "La preocupación por agentes autónomos pasó de laboratorio a seguridad financiera",
+          "summary": "Empresas como Visa alertaron sobre sistemas capaces de adaptar ataques y comenzaron a desplegar defensas también agentivas. El cambio es importante porque un atacante autónomo puede iterar a velocidad de máquina, haciendo insuficiente parte de la respuesta humana manual.",
+          "sourceRefs": [
+            "https://www.reuters.com/legal/government/visa-joins-growing-alarm-over-ai-powered-risks-2026-09-29/"
+          ]
+        },
+        {
+          "itemId": "W40-TECH-4",
+          "headline": "OpenAI presentó GPT‑6.1 Sol con una mejora fuerte en costo‑rendimiento",
+          "summary": "La actualización acercó parte del rendimiento de Astra en programación y trabajo profesional a un modelo más barato para iterar. Este tipo de avance cambia decisiones de producto rápidamente porque puede volver económicamente viables workflows que con el modelo máximo eran demasiado costosos.",
+          "sourceRefs": [
+            "https://openai.com/es-419/research/index/release/"
           ]
         }
       ],

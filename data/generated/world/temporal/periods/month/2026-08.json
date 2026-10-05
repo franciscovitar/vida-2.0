@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "be6e1fbedb11561179c6e115b7383fa3f2ab2549",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-08_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T20:50:00Z",
+    "observedAt": "2026-10-05T20:50:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada editorial de suficiencia adicional y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -30,9 +30,25 @@
         {
           "itemId": "M202608-POL-1",
           "headline": "Colombia inició un giro político con la asunción de Abelardo De La Espriella",
-          "summary": "El nuevo presidente asumió el 7 de agosto con una agenda centrada en seguridad y austeridad fiscal, marcando un desplazamiento hacia la derecha en la política colombiana.",
+          "summary": "El nuevo presidente asumió con una agenda centrada en seguridad, lucha contra el narcotráfico, austeridad estatal y reactivación de petróleo y gas. Su llegada marcó un desplazamiento hacia la derecha en Colombia y añadió otra pieza al reordenamiento político regional.",
           "sourceRefs": [
             "https://www.reuters.com/world/americas/de-la-espriella-take-office-colombia-president-pledges-security-crackdown-2026-08-07/"
+          ]
+        },
+        {
+          "itemId": "M202608-POL-2",
+          "headline": "La negociación para reabrir Hormuz avanzó, pero seguía lejos de estar cerrada",
+          "summary": "Washington y Teherán discutieron fórmulas para reabrir plenamente el estrecho, pero persistieron diferencias sobre inspecciones, tarifas y control del tráfico marítimo. El valor del acuerdo era enorme porque Hormuz seguía conectando diplomacia, seguridad regional y el precio efectivo de la energía.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/middle-east/deal-reopen-hormuz-2026-08-05/"
+          ]
+        },
+        {
+          "itemId": "M202608-POL-3",
+          "headline": "Ucrania intensificó ataques contra infraestructura económica rusa",
+          "summary": "Kyiv atacó refinerías, depósitos y otros objetivos económicos dentro de Rusia, mientras Moscú respondió contra activos económicos ucranianos y rutas del mar Negro. La guerra siguió desplazándose desde el frente militar hacia la capacidad de cada país para financiar, abastecer y sostener el conflicto.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/europe/putin-says-ukraine-opened-pandoras-box-with-strikes-economic-targets-2026-08-22/"
           ]
         }
       ],
@@ -46,10 +62,26 @@
       "summaryItems": [
         {
           "itemId": "M202608-ECO-1",
-          "headline": "Las dudas sobre el acuerdo con Irán volvieron a mover petróleo y mercados",
-          "summary": "La incertidumbre sobre el cumplimiento del acuerdo y el riesgo en Hormuz mantuvieron al crudo como una fuente recurrente de volatilidad global.",
+          "headline": "Hormuz siguió funcionando como un impuesto geopolítico sobre la energía",
+          "summary": "Las negociaciones incluían tarifas e inspecciones sobre el tránsito mientras las pérdidas acumuladas para productores y los costos de seguridad crecían. Aunque hubiera petróleo disponible, la incertidumbre sobre acceso, seguros y rutas mantuvo una prima significativa sobre energía y transporte.",
           "sourceRefs": [
-            "https://www.reuters.com/world/china/global-markets-global-markets-2026-08-11/"
+            "https://www.reuters.com/world/middle-east/deal-reopen-hormuz-2026-08-05/"
+          ]
+        },
+        {
+          "itemId": "M202608-ECO-2",
+          "headline": "El déficit comercial de bienes de Estados Unidos se amplió con fuerza en agosto",
+          "summary": "El déficit aumentó 11,5% hasta unos 132.600 millones de dólares, con importaciones creciendo con rapidez. Parte del impulso vino de bienes de capital asociados a la expansión de infraestructura de IA, mostrando cómo el boom tecnológico también estaba moviendo comercio e inversión física.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/us-goods-trade-deficit-widens-sharply-august-2026-09-30/"
+          ]
+        },
+        {
+          "itemId": "M202608-ECO-3",
+          "headline": "La inflación estadounidense dio algo de aire mientras el consumo siguió fuerte",
+          "summary": "El índice PCE avanzó menos de lo esperado y el consumo aumentó con fuerza, una combinación que evitó una señal inmediata de estanflación. Para la Reserva Federal era una foto incómoda pero manejable: demanda robusta, inflación todavía presente y más margen para esperar datos antes de endurecer otra vez.",
+          "sourceRefs": [
+            "https://www.reuters.com/markets/us/us-inflation-rises-less-than-expected-august-consumer-spending-surges-2026-09-30/"
           ]
         }
       ],
@@ -63,10 +95,18 @@
       "summaryItems": [
         {
           "itemId": "M202608-SCI-1",
-          "headline": "Inundaciones repentinas golpearon Nepal",
-          "summary": "Las inundaciones de fines de agosto estuvieron entre los eventos naturales más destacados del mes y volvieron a poner en primer plano la vulnerabilidad frente a extremos meteorológicos.",
+          "headline": "Un posible colapso glaciar desencadenó la catástrofe de Nepal",
+          "summary": "Imágenes satelitales y análisis de especialistas apuntaron al desprendimiento de una gran masa de hielo, roca y sedimento como disparador de la inundación repentina del 26 de agosto. El evento elevó el río en minutos y mostró cómo el calentamiento puede convertir cambios glaciares en riesgos abruptos aguas abajo.",
           "sourceRefs": [
-            "https://apnews.com/photo-gallery/major-global-news-moments-august-ap-photos-dce948b81b434237bd03cd10f580e519"
+            "https://www.reuters.com/business/environment/glacier-collapse-may-have-triggered-deadly-nepal-flash-flood-experts-say-2026-08-26/"
+          ]
+        },
+        {
+          "itemId": "M202608-SCI-2",
+          "headline": "La tragedia de Nepal expuso un riesgo creciente en toda la cordillera del Himalaya",
+          "summary": "Los glaciares de la región se están derritiendo mucho más rápido que décadas atrás, y el desastre volvió tangible el vínculo entre calentamiento, inestabilidad de hielo y sedimentos, infraestructura hidroeléctrica y asentamientos en valles estrechos. No todos los eventos pueden atribuirse a una única causa climática, pero la vulnerabilidad física está aumentando.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/environment/glacier-collapse-may-have-triggered-deadly-nepal-flash-flood-experts-say-2026-08-26/"
           ]
         }
       ],
@@ -85,7 +125,16 @@
       "domain": "HEALTH",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202608-HEA-1",
+          "headline": "Los desastres del Himalaya también dañaron la capacidad sanitaria local",
+          "summary": "Un gran deslizamiento posterior afectó a decenas de miles de personas y dañó instalaciones de salud, agua y saneamiento. El riesgo dejó de ser solo trauma inmediato: desplazamiento, interrupción de atención y enfermedades transmisibles pasaron a formar parte de la emergencia.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/environment/over-90000-affected-by-himalayan-landslide-red-cross-says-2026-08-28/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -96,10 +145,43 @@
       "summaryItems": [
         {
           "itemId": "M202608-TECH-1",
-          "headline": "Gemini avanzó en velocidad, dispositivos y modelos de clima",
-          "summary": "Google presentó Gemini 3.7 Flash, nuevas funciones asociadas a Pixel 11 y mejoras en modelos de clima y transcripción.",
+          "headline": "Gemini 3.7 Flash empujó la relación capacidad‑costo para código y agentes",
+          "summary": "Google presentó 3.7 Flash como un modelo de trabajo para software, knowledge work y agentes, con un precio introductorio menor que la generación previa. La competencia dejó de medirse solo por el modelo más inteligente: latencia y costo por tarea empezaron a ser igual de estratégicos.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-3-7-flash/"
+          ]
+        },
+        {
+          "itemId": "M202608-TECH-2",
+          "headline": "Pixel 11 llevó más IA directamente al dispositivo",
+          "summary": "La nueva familia Pixel llegó con Tensor G6 y la generación más reciente de Gemini Nano. La tendencia relevante es que una parte mayor de la inteligencia se ejecuta en el teléfono, reduciendo latencia y dependencia permanente de la nube para algunas funciones.",
           "sourceRefs": [
             "https://blog.google/innovation-and-ai/technology/google-ai-updates-august-2026/"
+          ]
+        },
+        {
+          "itemId": "M202608-TECH-3",
+          "headline": "Gemini superó los 1.000 millones de usuarios mensuales",
+          "summary": "Google informó que la aplicación superó ese umbral y destacó un crecimiento fuerte del uso por voz. El dato mostró que los asistentes generativos ya estaban compitiendo como productos de consumo masivo, no solo como herramientas de nicho para desarrolladores.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/google-ai-updates-august-2026/"
+          ]
+        },
+        {
+          "itemId": "M202608-TECH-4",
+          "headline": "La generación de video ganó más control con Gemini Omni 1.1 Flash",
+          "summary": "El modelo añadió extensión de escenas, interpolación entre fotogramas, escalado 4K y prototipado más rápido. La mejora importante fue el paso de generar clips aislados a ofrecer controles más cercanos a un flujo creativo profesional.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/google-ai-updates-august-2026/"
+          ]
+        },
+        {
+          "itemId": "M202608-TECH-5",
+          "headline": "Gemini siguió expandiéndose hacia transcripción, clima y aplicaciones conectadas",
+          "summary": "Agosto también sumó Gemini 3.5 Transcribe, modelos abiertos para clima y más integraciones con servicios externos. En conjunto, la estrategia fue convertir el asistente en una capa que escucha, predice y actúa entre aplicaciones, no únicamente un chat.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/google-ai-updates-august-2026/",
+            "https://blog.google/innovation-and-ai/products/gemini-app/new-connected-apps-services-gemini-august-2026/"
           ]
         }
       ],
