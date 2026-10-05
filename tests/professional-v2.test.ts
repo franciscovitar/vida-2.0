@@ -38,7 +38,10 @@ test('PRO-V2-02. primera comparación no inventa un ganador sin evidencia sufici
   );
   assert.ok(parsed);
   assert.equal(parsed.comparisonGroups[0]?.rankingStatus, 'COMPARISON_ONLY');
-  assert.match(parsed.comparisonGroups[0]?.rankingReason ?? '', /evidence|evidencia|controlled/i);
+  assert.match(
+    parsed.comparisonGroups[0]?.rankingReason ?? '',
+    /evidence|evidencia|controlled/i,
+  );
 });
 
 test('PRO-V2-03. navegación absorbe Inteligencia y expone Herramientas', () => {
