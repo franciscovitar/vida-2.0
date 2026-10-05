@@ -127,6 +127,9 @@ test('WORLD-07. sin feed infinito ni deuda de lectura', () => {
   const article = readFileSync(join(process.cwd(), 'components/world/WorldPiece.tsx'), 'utf8');
   assert.doesNotMatch(ui + article, /streak|racha|unread count|infinite scroll/i);
   assert.match(ui, /cola de pendientes|historia actual/i);
+  assert.match(ui, /story-grid/);
+  assert.match(ui, /story-card/);
+  assert.doesNotMatch(ui, /freshness-pill/);
 });
 
 test('WORLD-08. dominios usan slugs estables', () => {
@@ -198,7 +201,7 @@ test('WORLD-12. Pirámide Temporal falla cerrado y conserva cobertura explícita
   assert.ok(index);
   assert.ok(period);
 
-  assert.equal(index.latest.day?.periodKey, '2026-10-05');
+  assert.equal(index.latest.day, null);
   assert.equal(index.weeks.length, 4);
   assert.equal(index.months.length, 9);
   assert.equal(index.years.length, 1);

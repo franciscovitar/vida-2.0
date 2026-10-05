@@ -22,26 +22,35 @@ function minutes(seconds: number): string {
 
 function PieceCard({ item }: { item: WorldPieceSummary }) {
   return (
-    <Card as="article" className={styles['piece-card']}>
+    <article className={styles['story-card']} data-domain={item.primaryDomain}>
       <div className={styles['card-meta']}>
-        <span>{item.mode === 'NOW' ? 'Ahora' : 'Aprender'}</span>
-        <span>{worldDomainLabel(item.primaryDomain)}</span>
+        <span className={styles['story-kicker']}>{worldDomainLabel(item.primaryDomain)}</span>
         <span className={styles['reading-time']}>
           <Clock3 size={13} aria-hidden="true" />
           {minutes(item.readingSeconds)}
         </span>
       </div>
-      <h2>{item.headline}</h2>
+      <h3>{item.headline}</h3>
       <p>{item.deck}</p>
       <Link className={styles['read-link']} href={worldPieceHref(item)}>
         Entenderlo bien →
       </Link>
-    </Card>
+    </article>
   );
 }
 
 function EmptyState({ text }: { text: string }) {
   return <p className={styles.empty}>{text}</p>;
+}
+
+function EditorialItems({ items }: { items: readonly WorldPieceSummary[] }) {
+  return (
+    <div className={styles['story-grid']}>
+      {items.map((item) => (
+        <PieceCard key={item.briefId} item={item} />
+      ))}
+    </div>
+  );
 }
 
 export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view: View }) {
@@ -108,87 +117,70 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
 
       {view.kind === 'home' ? (
         <>
-          <section className={styles.hero} aria-labelledby="world-today-title">
+          <section className={styles['period-hero']} aria-labelledby="world-today-title">
             <div>
-              <p className={styles.eyebrow}>Edición · {snapshot.editionDate}</p>
-              <h2 id="world-today-title">
-                Lo suficiente para entender, no para quedar atrapado leyendo.
-              </h2>
+              <p className={styles.eyebrow}>Edición vigente · {snapshot.editionDate}</p>
+              <h2 id="world-today-title">Tu edición de hoy</h2>
               <p>
                 {snapshot.now.selectedReadingSeconds > 0
-                  ? `Ahora: ${minutes(snapshot.now.selectedReadingSeconds)} de lectura seleccionada.`
+                  ? `${snapshot.now.items.length} historias seleccionadas · ${minutes(
+                      snapshot.now.selectedReadingSeconds,
+                    )} de lectura.`
                   : 'Hoy no hay historias actuales publicadas.'}
               </p>
+              <div className={styles['period-meta-line']}>
+                <span>{data.stale ? 'Edición desactualizada' : 'Actualizada'}</span>
+                <span>No genera deuda de lectura</span>
+              </div>
             </div>
-            <span className={styles['freshness-pill']} data-stale={data.stale ? 'true' : 'false'}>
-              {data.stale ? 'Edición desactualizada' : 'Edición vigente'}
-            </span>
           </section>
 
-          <section className={styles.section} aria-labelledby="world-now-title">
-            <div className={styles['section-heading']}>
-              <div>
-                <p className={styles.eyebrow}>Ahora</p>
-                <h2 id="world-now-title">Tu edición de hoy</h2>
-              </div>
-              <Link className={styles['section-link']} href="/world/ahora">
-                Ver Ahora →
-              </Link>
+          <section className={styles['editorial-section']} aria-labelledby="world-now-title">
+            <div className={styles['editorial-section-heading']}>
+              <p className={styles.eyebrow}>Ahora</p>
+              <h3 id="world-now-title">Lo que importa hoy</h3>
             </div>
             {snapshot.now.items.length ? (
-              <div className={styles.grid}>
-                {snapshot.now.items.map((item) => (
-                  <PieceCard key={item.briefId} item={item} />
-                ))}
-              </div>
+              <EditorialItems items={snapshot.now.items} />
             ) : (
               <EmptyState text="No hay una historia actual que justifique ocupar tu atención." />
             )}
+            <Link className={styles['section-link']} href="/world/ahora">
+              Ver el cierre diario →
+            </Link>
           </section>
 
-          <section className={styles.section} aria-labelledby="world-learn-title">
-            <div className={styles['section-heading']}>
-              <div>
-                <p className={styles.eyebrow}>Aprender</p>
-                <h2 id="world-learn-title">Aprendé algo</h2>
-              </div>
-              <Link className={styles['section-link']} href="/world/aprender">
-                Ver Aprender →
-              </Link>
+          <section className={styles['editorial-section']} aria-labelledby="world-learn-title">
+            <div className={styles['editorial-section-heading']}>
+              <p className={styles.eyebrow}>Aprender</p>
+              <h3 id="world-learn-title">Aprendé algo que dure</h3>
             </div>
             {snapshot.learn.items.length ? (
-              <div className={styles.grid}>
-                {snapshot.learn.items.map((item) => (
-                  <PieceCard key={item.briefId} item={item} />
-                ))}
-              </div>
+              <EditorialItems items={snapshot.learn.items} />
             ) : (
               <EmptyState text="No hay una pieza evergreen publicada para esta edición." />
             )}
+            <Link className={styles['section-link']} href="/world/aprender">
+              Ver Aprender →
+            </Link>
           </section>
         </>
       ) : (
-        <section className={styles.section} aria-labelledby="world-view-title">
-          <div className={styles['section-heading']}>
-            <div>
-              <p className={styles.eyebrow}>
-                {view.kind === 'library' ? 'Sin backlog' : 'World Intelligence'}
-              </p>
-              <h2 id="world-view-title">{title}</h2>
-              <p className={styles['section-description']}>{description}</p>
-            </div>
-            {view.kind === 'library' ? (
-              <BookOpen size={20} aria-hidden="true" />
-            ) : (
-              <Sparkles size={20} aria-hidden="true" />
-            )}
+        <section className={styles['editorial-section']} aria-labelledby="world-view-title">
+          <div className={styles['editorial-section-heading']}>
+            <p className={styles.eyebrow}>
+              {view.kind === 'library' ? 'Sin backlog' : 'World Intelligence'}
+            </p>
+            <h3 id="world-view-title">{title}</h3>
+            <p className={styles['section-description']}>{description}</p>
           </div>
+          {view.kind === 'library' ? (
+            <BookOpen size={20} aria-hidden="true" />
+          ) : (
+            <Sparkles size={20} aria-hidden="true" />
+          )}
           {items.length ? (
-            <div className={styles.grid}>
-              {items.map((item) => (
-                <PieceCard key={item.briefId} item={item} />
-              ))}
-            </div>
+            <EditorialItems items={items} />
           ) : (
             <EmptyState text="Todavía no hay una pieza revisada y publicada en este dominio." />
           )}
