@@ -6,7 +6,6 @@ import path from 'node:path';
 import {
   resolveWorldTemporalIndexText,
   resolveWorldTemporalPeriodText,
-  selectWorldTemporalEntry,
 } from '@/lib/world/temporal-contract';
 import type {
   WorldTemporalIndex,
@@ -40,7 +39,13 @@ export async function loadWorldTemporalPeriod(
 
   try {
     const period = resolveWorldTemporalPeriodText(await readText());
-    if (!period || period.periodKey !== entry.periodKey || period.state !== entry.state) return null;
+    if (
+      !period ||
+      period.periodKey !== entry.periodKey ||
+      period.state !== entry.state
+    ) {
+      return null;
+    }
     return period;
   } catch {
     return null;
