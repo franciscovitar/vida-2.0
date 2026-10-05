@@ -39,11 +39,7 @@ export async function loadWorldTemporalPeriod(
 
   try {
     const period = resolveWorldTemporalPeriodText(await readText());
-    if (
-      !period ||
-      period.periodKey !== entry.periodKey ||
-      period.state !== entry.state
-    ) {
+    if (!period || period.periodKey !== entry.periodKey || period.state !== entry.state) {
       return null;
     }
     return period;

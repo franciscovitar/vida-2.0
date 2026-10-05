@@ -7,10 +7,7 @@ export type WorldTemporalGranularity = 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
 export type WorldTemporalState = 'IN_PROGRESS' | 'CLOSED' | 'CORRECTED';
 export type WorldCoverageState = 'COVERAGE_OK' | 'COVERAGE_PARTIAL' | 'COVERAGE_FAILED';
 export type WorldDomainOutcome =
-  | 'HAS_MATERIAL_ITEMS'
-  | 'NO_MATERIAL_CHANGE'
-  | 'COVERAGE_PARTIAL'
-  | 'COVERAGE_FAILED';
+  'HAS_MATERIAL_ITEMS' | 'NO_MATERIAL_CHANGE' | 'COVERAGE_PARTIAL' | 'COVERAGE_FAILED';
 
 export type WorldDomain =
   | 'POLITICS_GEOPOLITICS'
@@ -230,4 +227,3 @@ export interface WorldTemporalPageData {
   period: WorldTemporalPeriod | null;
   surface: WorldSurfaceSnapshot | null;
 }
-

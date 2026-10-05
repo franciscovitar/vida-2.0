@@ -228,14 +228,8 @@ test('WORLD-12. Pirámide Temporal falla cerrado y conserva cobertura explícita
 });
 
 test('WORLD-13. navegación temporal expone Día, Semana, Mes y Año sin crear backlog', () => {
-  const nav = readFileSync(
-    join(process.cwd(), 'components/world/WorldNavigation.tsx'),
-    'utf8',
-  );
-  const temporal = readFileSync(
-    join(process.cwd(), 'components/world/WorldTemporal.tsx'),
-    'utf8',
-  );
+  const nav = readFileSync(join(process.cwd(), 'components/world/WorldNavigation.tsx'), 'utf8');
+  const temporal = readFileSync(join(process.cwd(), 'components/world/WorldTemporal.tsx'), 'utf8');
 
   assert.match(nav, /Día/);
   assert.match(nav, /Semana/);

@@ -3,11 +3,7 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import {
-  WORLD_DOMAINS,
-  worldDomainLabel,
-  worldPieceHref,
-} from '@/lib/world/contract';
+import { WORLD_DOMAINS, worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
 import type {
   WorldCoverageState,
   WorldDomainOutcome,
@@ -157,8 +153,8 @@ export function WorldTemporalView({ data }: { data: WorldTemporalPageData }) {
               </p>
               <h2 id="world-period-title">{period.label}</h2>
               <p>
-                Panorama primero; profundidad solo donde realmente aporta. No es una cola de noticias
-                para ponerse al día.
+                Panorama primero; profundidad solo donde realmente aporta. No es una cola de
+                noticias para ponerse al día.
               </p>
             </div>
             {coverageCounts ? (
@@ -176,9 +172,7 @@ export function WorldTemporalView({ data }: { data: WorldTemporalPageData }) {
 
           <div className={styles['domain-stack']}>
             {WORLD_DOMAINS.map((meta) => {
-              const domain = period.domains.find(
-                (candidate) => candidate.domain === meta.id,
-              );
+              const domain = period.domains.find((candidate) => candidate.domain === meta.id);
               if (!domain) return null;
 
               const deepDives = domain.deepDiveBriefIds
@@ -199,10 +193,7 @@ export function WorldTemporalView({ data }: { data: WorldTemporalPageData }) {
                       <p className={styles.eyebrow}>Resumen del período</p>
                       <h2 id={`world-period-${domain.domain}`}>{meta.label}</h2>
                     </div>
-                    <span
-                      className={styles['coverage-pill']}
-                      data-state={domain.coverageState}
-                    >
+                    <span className={styles['coverage-pill']} data-state={domain.coverageState}>
                       {coverageLabel(domain.coverageState)}
                     </span>
                   </div>

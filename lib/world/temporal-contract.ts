@@ -30,11 +30,7 @@ function isGranularity(value: unknown): value is WorldTemporalGranularity {
 }
 
 function isCoverageState(value: unknown): value is WorldCoverageState {
-  return (
-    value === 'COVERAGE_OK' ||
-    value === 'COVERAGE_PARTIAL' ||
-    value === 'COVERAGE_FAILED'
-  );
+  return value === 'COVERAGE_OK' || value === 'COVERAGE_PARTIAL' || value === 'COVERAGE_FAILED';
 }
 
 function isDomainOutcome(value: unknown): value is WorldDomainOutcome {
@@ -47,10 +43,7 @@ function isDomainOutcome(value: unknown): value is WorldDomainOutcome {
 }
 
 function isDomain(value: unknown): value is WorldDomain {
-  return (
-    typeof value === 'string' &&
-    WORLD_DOMAINS.some((candidate) => candidate.id === value)
-  );
+  return typeof value === 'string' && WORLD_DOMAINS.some((candidate) => candidate.id === value);
 }
 
 function safeLocalRef(value: unknown): value is string {

@@ -58,4 +58,3 @@ Planned UX after the World Phase 11 final gate:
 No new primary navigation mode is required. No unread counts, streaks, catch-up debt or time-based forgetting claims are allowed. `UNKNOWN_BASELINE` must remain visibly unknown until supported by explicit state/evidence.
 
 **Phase 11 guard:** this is a handoff contract only for now. Do not change the live World V1 prospective-evaluation UI or ranking until the final V1 gate closes.
-
