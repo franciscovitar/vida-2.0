@@ -55,6 +55,14 @@ function validDomain(value: unknown): value is WorldDomain {
   return typeof value === 'string' && DOMAIN_SET.has(value as WorldDomain);
 }
 
+function validPublicationState(value: unknown): boolean {
+  return value === 'HUMAN_APPROVED' || value === 'OWNER_AUTHORIZED_AUTOMATION';
+}
+
+function hasAuthorizationRef(value: Record<string, unknown>): boolean {
+  return isString(value.humanReviewRef) || isString(value.authorizationRef);
+}
+
 function validSummary(value: unknown, mode?: 'NOW' | 'LEARN'): value is WorldPieceSummary {
   if (!isRecord(value)) return false;
   if (value.mode !== 'NOW' && value.mode !== 'LEARN') return false;
@@ -70,12 +78,12 @@ function validSummary(value: unknown, mode?: 'NOW' | 'LEARN'): value is WorldPie
     isNumber(value.readingSeconds) &&
     value.readingSeconds > 0 &&
     isString(value.pieceRef) &&
-    isString(value.humanReviewRef) &&
+    hasAuthorizationRef(value) &&
     isString(value.editorialDraftSha256) &&
     SHA256.test(value.editorialDraftSha256) &&
     (value.sourceCommit === undefined ||
       (isString(value.sourceCommit) && GIT_SHA.test(value.sourceCommit))) &&
-    value.publicationState === 'HUMAN_APPROVED'
+    validPublicationState(value.publicationState)
   );
 }
 
@@ -241,7 +249,7 @@ export function parseWorldPublishedPiece(value: unknown): WorldPublishedPiece | 
     !isRecord(value) ||
     value.schemaVersion !== 1 ||
     value.kind !== 'world_published_piece' ||
-    value.publicationState !== 'HUMAN_APPROVED' ||
+    !validPublicationState(value.publicationState) ||
     (value.mode !== 'NOW' && value.mode !== 'LEARN')
   ) {
     return null;
@@ -281,7 +289,7 @@ export function parseWorldPublishedPiece(value: unknown): WorldPublishedPiece | 
     !GIT_SHA.test(source.commit) ||
     !isString(source.canonicalRef) ||
     !isString(source.editorialDraftRef) ||
-    !isString(source.humanReviewRef)
+    !hasAuthorizationRef(source)
   ) {
     return null;
   }

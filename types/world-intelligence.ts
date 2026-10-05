@@ -1,6 +1,6 @@
 export type WorldSourceStatus = 'ready' | 'missing' | 'invalid';
 export type WorldMode = 'NOW' | 'LEARN';
-export type WorldPublicationState = 'HUMAN_APPROVED';
+export type WorldPublicationState = 'HUMAN_APPROVED' | 'OWNER_AUTHORIZED_AUTOMATION';
 export type WorldFreshnessState = 'CURRENT' | 'STALE';
 
 export type WorldTemporalGranularity = 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
@@ -32,7 +32,8 @@ export interface WorldPieceSummary {
   subdomain?: string;
   pieceRef: string;
   editorialDraftSha256: string;
-  humanReviewRef: string;
+  humanReviewRef?: string;
+  authorizationRef?: string;
   sourceCommit?: string;
   publicationState: WorldPublicationState;
 }
@@ -125,7 +126,8 @@ export interface WorldPublishedPiece {
     commit: string;
     canonicalRef: string;
     editorialDraftRef: string;
-    humanReviewRef: string;
+    humanReviewRef?: string;
+    authorizationRef?: string;
   };
 }
 
