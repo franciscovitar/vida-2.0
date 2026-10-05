@@ -87,7 +87,7 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
   } else if (view.kind === 'domain') {
     title = worldDomainLabel(view.domain);
     description =
-      'El mismo estado publicado, filtrado por dominio. Vida no vuelve a rankear la evidencia.';
+      'Piezas publicadas de este tema, sin volver a ordenar la selección editorial.';
     items = all.filter((item) => item.primaryDomain === view.domain);
   }
 
@@ -190,26 +190,17 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
               ))}
             </div>
           ) : (
-            <EmptyState text="Todavía no hay una pieza human-approved publicada en este dominio." />
+            <EmptyState text="Todavía no hay una pieza revisada y publicada en este dominio." />
           )}
         </section>
       )}
-
-      {snapshot.coverageNotes.length ? (
-        <section className={styles['coverage-note']} aria-labelledby="world-coverage-title">
-          <strong id="world-coverage-title">Cobertura de esta edición</strong>
-          {snapshot.coverageNotes.map((note) => (
-            <p key={note}>{note}</p>
-          ))}
-        </section>
-      ) : null}
 
       <footer className={styles.provenance}>
         <span>
           PAS <code>{snapshot.source.commit.slice(0, 8)}</code> · observado{' '}
           {snapshot.source.observedAt}
         </span>
-        <span>{snapshot.provenanceVersion}</span>
+        <span>Fuente editorial trazable</span>
       </footer>
     </div>
   );
