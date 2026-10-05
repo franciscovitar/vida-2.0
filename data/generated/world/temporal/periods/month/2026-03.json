@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "b25dbc9b68323d076b6f469da5b6fde506e8716a",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-03_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T21:35:00Z",
+    "observedAt": "2026-10-05T21:35:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada final de suficiencia editorial, nueva investigación externa y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,11 +29,27 @@
       "summaryItems": [
         {
           "itemId": "M202603-POL-1",
-          "headline": "La guerra con Irán se expandió y alteró la seguridad regional",
-          "summary": "Durante marzo continuaron los ataques, las represalias y el impacto regional de la guerra iniciada a fines de febrero.",
+          "headline": "La guerra con Irán se expandió y convirtió al Golfo en un frente global",
+          "summary": "Los ataques y represalias posteriores a la ofensiva de febrero afectaron rutas marítimas, bases e infraestructura en varios países. El conflicto dejó de poder analizarse como una guerra bilateral: su capacidad para interrumpir energía, transporte y alianzas hizo que las consecuencias alcanzaran rápidamente a economías lejanas.",
           "sourceRefs": [
-            "https://apnews.com/photo-gallery/photos-trump-iran-israel-noem-lebanon-cuba-89cbad3b977f2593f53cf6affe1be26f",
-            "https://apnews.com/article/7b94d5de628bf8df2de6b728efff2285"
+            "https://www.ap.org/news-highlights/spotlights/2026/major-global-news-moments-of-march-in-ap-photos/"
+          ]
+        },
+        {
+          "itemId": "M202603-POL-2",
+          "headline": "La crisis cubana pasó de apagones crónicos a protestas abiertas",
+          "summary": "Cortes de electricidad a gran escala paralizaron actividades cotidianas y derivaron en cacerolazos y manifestaciones en La Habana. La fragilidad del sistema eléctrico se convirtió en una crisis política porque el desabastecimiento energético afectaba trabajo, alimentos, comunicaciones y confianza en la capacidad del Estado para sostener servicios básicos.",
+          "sourceRefs": [
+            "https://www.reutersconnect.com/item/havana-in-darkness-as-massive-blackout-hits-cuba/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX1ZBMDk5MDA0MDMyMDI2UlAx",
+            "https://www.reutersconnect.com/item/cubans-bang-pots-in-protest-as-national-power-grid-collapses/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX1ZBNDY5MjE3MDMyMDI2UlAx"
+          ]
+        },
+        {
+          "itemId": "M202603-POL-3",
+          "headline": "Líbano volvió a quedar atrapado en la expansión regional del conflicto",
+          "summary": "La guerra con Irán y sus aliados extendió ataques y presión sobre Líbano, elevando otra vez el riesgo de que frentes que parecían separados terminaran fusionándose. El problema estratégico era precisamente ese: cada nueva represalia podía sumar un actor y hacer más difícil una salida negociada.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2026/major-global-news-moments-of-march-in-ap-photos/"
           ]
         }
       ],
@@ -47,11 +63,25 @@
       "summaryItems": [
         {
           "itemId": "M202603-ECO-1",
-          "headline": "El conflicto con Irán se transformó también en un problema energético",
-          "summary": "Las disrupciones y el riesgo sobre rutas energéticas convirtieron la guerra en un factor central para petróleo, inflación y mercados globales.",
+          "headline": "Hormuz dejó de ser un riesgo teórico y pasó a interrumpir de verdad el comercio energético",
+          "summary": "Los envíos de petróleo y gas se redujeron de forma abrupta mientras la guerra dificultaba el tránsito por el estrecho. Al concentrar una parte enorme de las exportaciones del Golfo, cualquier bloqueo convertía un conflicto regional en un shock potencial para inflación, transporte y balanzas comerciales de medio mundo.",
           "sourceRefs": [
-            "https://apnews.com/article/7b94d5de628bf8df2de6b728efff2285"
+            "https://www.reuters.com/business/energy/opec-debates-oil-output-boost-us-war-iran-disrupts-shipments-2026-03-01/"
           ]
+        },
+        {
+          "itemId": "M202603-ECO-2",
+          "headline": "OPEC+ intentó compensar la crisis con un aumento de oferta demasiado pequeño para resolverla",
+          "summary": "El grupo acordó elevar producción en unos 206.000 barriles diarios desde abril, pero la cifra era mínima frente a posibles pérdidas de varios millones de barriles por el conflicto. La respuesta mostró un límite estructural: incluso los grandes productores no podían reemplazar rápidamente todas las rutas y capacidades afectadas.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/energy/opec-debates-oil-output-boost-us-war-iran-disrupts-shipments-2026-03-01/"
+          ]
+        },
+        {
+          "itemId": "M202603-ECO-3",
+          "headline": "OpenAI captó 122.000 millones de dólares y volvió visible la escala financiera de la carrera por IA",
+          "summary": "La ronda dejó una valoración posinversión de 852.000 millones de dólares y mostró que entrenar, desplegar y distribuir modelos de frontera ya requería capital comparable al de grandes sectores industriales. El acceso sostenido a cómputo pasó a ser una ventaja estratégica tan importante como el propio avance algorítmico.",
+          "sourceRefs": ["https://openai.com/index/accelerating-the-next-phase-ai/"]
         }
       ],
       "deepDiveBriefIds": [],
@@ -77,7 +107,20 @@
       "domain": "HEALTH",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202603-HEA-1",
+          "headline": "La OMS siguió tratando mpox como una emergencia internacional que requería vigilancia sostenida",
+          "summary": "Los reportes de marzo mostraron que el brote multicountry seguía activo y necesitaba seguimiento epidemiológico coordinado. La lección era que una emergencia puede dejar de dominar titulares y continuar siendo material para salud pública, especialmente cuando transmisión, acceso a vacunas y capacidad de vigilancia son desiguales.",
+          "sourceRefs": ["https://www.who.int/emergencies/situation-reports"]
+        },
+        {
+          "itemId": "M202603-HEA-2",
+          "headline": "Afganistán y Somalia mostraron cómo conflicto y fragilidad agravan riesgos sanitarios",
+          "summary": "La OMS publicó análisis de situación para ambos países durante marzo, señalando amenazas derivadas de desplazamiento, acceso limitado a atención y servicios básicos débiles. Son crisis menos visibles que una pandemia, pero combinan enfermedades prevenibles con sistemas incapaces de absorber shocks prolongados.",
+          "sourceRefs": ["https://www.who.int/emergencies/situation-reports"]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -88,11 +131,31 @@
       "summaryItems": [
         {
           "itemId": "M202603-TECH-1",
-          "headline": "Search Live amplió la interacción conversacional a escala global",
-          "summary": "Google expandió Search Live a más de 200 países y territorios, usando Gemini para conversaciones multimodales en tiempo real dentro de Search.",
+          "headline": "Search Live se expandió a más de 200 países y llevó la conversación multimodal al buscador",
+          "summary": "Google amplió el acceso a una experiencia donde el usuario puede hablar o mostrar con la cámara lo que está viendo y mantener una conversación sobre ello. La búsqueda empezó a parecerse menos a escribir consultas y más a consultar un asistente que interpreta contexto en tiempo real.",
           "sourceRefs": [
-            "https://blog.google/products-and-platforms/products/search/search-live-global-expansion/"
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-march-2026/"
           ]
+        },
+        {
+          "itemId": "M202603-TECH-2",
+          "headline": "Gemini ganó más presencia dentro de Docs, Sheets, Slides y Drive",
+          "summary": "Google integró capacidades más profundas de asistencia y creación en las herramientas de productividad. La tendencia era importante porque la IA empezaba a desaparecer como aplicación separada y a convertirse en una capa dentro del trabajo cotidiano, utilizando archivos y proyectos ya existentes como contexto.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-march-2026/"
+          ]
+        },
+        {
+          "itemId": "M202603-TECH-3",
+          "headline": "GPT-5.4 mini amplió el acceso a razonamiento cuando se agotaban límites de modelos mayores",
+          "summary": "OpenAI comenzó a usar una versión mini como respaldo para usuarios que alcanzaban límites de GPT-5.4 Thinking. El cambio importó menos por el nombre del modelo que por la estrategia: mantener razonamiento disponible a menor costo en lugar de volver automáticamente a una experiencia puramente rápida.",
+          "sourceRefs": ["https://help.openai.com/es-419/articles/6825453-chatgpt-release-notes"]
+        },
+        {
+          "itemId": "M202603-TECH-4",
+          "headline": "El financiamiento de OpenAI confirmó que la IA de frontera ya era también una carrera de infraestructura",
+          "summary": "La empresa vinculó explícitamente capital, cómputo, distribución y adopción empresarial como un ciclo que refuerza su capacidad. Eso mostró que la ventaja competitiva en IA ya no dependía únicamente de investigación: también de poder financiar centros de datos, servir millones de usuarios y sostener iteración acelerada.",
+          "sourceRefs": ["https://openai.com/index/accelerating-the-next-phase-ai/"]
         }
       ],
       "deepDiveBriefIds": [],
@@ -102,7 +165,16 @@
       "domain": "HISTORY_CULTURE",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202603-CUL-1",
+          "headline": "Los Oscar volvieron a ofrecer un momento cultural compartido en medio de una agenda dominada por la guerra",
+          "summary": "La ceremonia del 15 de marzo premió, entre otros, a Jessie Buckley y Michael B. Jordan y concentró atención global durante una noche. Su relevancia no fue geopolítica, sino cultural: siguió siendo uno de los pocos rituales mediáticos capaces de producir una conversación internacional común.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2026/major-global-news-moments-of-march-in-ap-photos/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },

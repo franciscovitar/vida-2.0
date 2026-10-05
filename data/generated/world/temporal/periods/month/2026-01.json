@@ -13,13 +13,13 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "commit": "b25dbc9b68323d076b6f469da5b6fde506e8716a",
     "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-01_BACKFILL_V1.json",
-    "generatedAt": "2026-10-05T17:45:00Z",
-    "observedAt": "2026-10-05T17:45:00Z"
+    "generatedAt": "2026-10-05T21:35:00Z",
+    "observedAt": "2026-10-05T21:35:00Z"
   },
   "readingDebt": false,
-  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "transitionNote": "Reconstrucción retrospectiva archivística revisada el 2026-10-05 con una pasada final de suficiencia editorial, nueva investigación externa y evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
   "topStoryBriefIds": [],
   "domains": [
     {
@@ -29,18 +29,36 @@
       "summaryItems": [
         {
           "itemId": "M202601-POL-1",
-          "headline": "Estados Unidos capturó a Nicolás Maduro",
-          "summary": "Associated Press registró la captura de Nicolás Maduro por fuerzas estadounidenses y su traslado fuera de Venezuela como uno de los acontecimientos que definieron enero.",
+          "headline": "Estados Unidos capturó a Nicolás Maduro y alteró el equilibrio político venezolano",
+          "summary": "La captura y traslado de Nicolás Maduro fuera de Venezuela convirtió enero en un mes de ruptura para la política regional. Más allá del desenlace inmediato, el episodio reabrió preguntas sobre soberanía, sucesión de poder y hasta dónde Washington estaba dispuesto a usar fuerza directa en el hemisferio occidental.",
           "sourceRefs": [
-            "https://apnews.com/photo-gallery/photos-january-trump-venezuela-minneapolis-ice-immigration-c09e941f80ec61fe493b8f03eb047408"
+            "https://www.ap.org/news-highlights/spotlights/2026/major-global-news-moments-of-january-in-ap-photos/"
           ]
         },
         {
           "itemId": "M202601-POL-2",
-          "headline": "La política migratoria estadounidense volvió al centro del conflicto interno",
-          "summary": "Las operaciones federales de inmigración en Minneapolis y las protestas asociadas fueron otro eje dominante de la cobertura del mes.",
+          "headline": "La ofensiva de Trump sobre Groenlandia tensó la relación con Europa",
+          "summary": "La insistencia de Donald Trump en controlar Groenlandia dejó de ser una provocación retórica y pasó a amenazar vínculos diplomáticos y comerciales con Dinamarca y la Unión Europea. Gobiernos europeos empezaron a discutir contramedidas, mostrando que incluso aliados de la OTAN podían entrar en una lógica de coerción económica.",
           "sourceRefs": [
-            "https://apnews.com/photo-gallery/photos-january-trump-venezuela-minneapolis-ice-immigration-c09e941f80ec61fe493b8f03eb047408"
+            "https://www.reutersconnect.com/item/wrap-trumps-greenland-ambition-threatens-trade-relations-as-russia-questions-danish-sovereignty/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX0xWQTAwNTgxNzAyMDAxMjAyNlJQMQ",
+            "https://www.reutersconnect.com/item/wrap-eu-states-condemn-trump-tariff-threats-consider-countermeasures/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX0xWQTAwOTc2NzgxODAxMjAyNlJQMQ"
+          ]
+        },
+        {
+          "itemId": "M202601-POL-3",
+          "headline": "Siria avanzó sobre territorios kurdos mientras el SDF comenzó procesos de desarme e integración",
+          "summary": "Los choques entre fuerzas del gobierno sirio y el SDF se combinaron con procesos de entrega de armas y regularización de combatientes en Raqqa. La transición era frágil porque también involucraba prisiones con miembros de Estado Islámico y el rediseño del poder territorial en el noreste del país.",
+          "sourceRefs": [
+            "https://www.reutersconnect.com/item/sdf-members-in-raqqa-settle-their-status-with-syrian-government/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX0xWQTAwMTAzNjAyNzAxMjAyNlJQMQ",
+            "https://today.lorientlejour.com/article/1492041/kurdish-led-sdf-accuses-government-factions-of-attacking-shaddadi-prison-as-syrian-forces-tighten-grip.html"
+          ]
+        },
+        {
+          "itemId": "M202601-POL-4",
+          "headline": "Davos mostró una relación transatlántica mucho más áspera",
+          "summary": "El Foro Económico Mundial quedó atravesado por la agenda de Trump, las amenazas sobre Groenlandia y nuevas tensiones comerciales. Líderes europeos salieron con una conclusión incómoda: depender demasiado de decisiones estadounidenses podía convertirse en un riesgo estratégico y económico que requería respuestas más coordinadas.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/davos/five-takeaways-davos-2026-2026-01-23/"
           ]
         }
       ],
@@ -51,7 +69,32 @@
       "domain": "ECONOMICS",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202601-ECO-1",
+          "headline": "Las amenazas arancelarias por Groenlandia devolvieron el riesgo comercial a los mercados",
+          "summary": "La posibilidad de que Estados Unidos usara aranceles contra aliados europeos por una disputa territorial volvió a conectar geopolítica con comercio. Empresas y gobiernos tuvieron que contemplar otra vez escenarios de represalias, cadenas de suministro más caras y mayor fragmentación económica entre socios que hasta poco antes se trataban como aliados estables.",
+          "sourceRefs": [
+            "https://www.reutersconnect.com/item/wrap-eu-states-condemn-trump-tariff-threats-consider-countermeasures/dGFnOnJldXRlcnMuY29tLDIwMjY6bmV3c21sX0xWQTAwOTc2NzgxODAxMjAyNlJQMQ"
+          ]
+        },
+        {
+          "itemId": "M202601-ECO-2",
+          "headline": "Davos giró de crecimiento global a resiliencia, IA y fragmentación",
+          "summary": "Banqueros y ejecutivos discutieron menos sobre una recuperación sincronizada y más sobre cómo operar entre aranceles, tensiones geopolíticas, stablecoins, automatización e inversión en IA. La idea central fue que la economía global podía seguir creciendo, pero con más costos de adaptación y menos certeza sobre las reglas comunes.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/davos/five-takeaways-davos-2026-2026-01-23/"
+          ]
+        },
+        {
+          "itemId": "M202601-ECO-3",
+          "headline": "El retorno político de los combustibles fósiles ganó visibilidad en Davos",
+          "summary": "La administración Trump defendió una agenda energética más favorable a petróleo y gas justo cuando Europa buscaba reducir vulnerabilidades externas. El contraste mostró que energía, clima y seguridad económica iban a seguir mezclándose: la discusión dejó de ser solo cuánto producir y pasó también por de quién depender.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/davos/five-takeaways-davos-2026-2026-01-23/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },
@@ -86,11 +129,33 @@
       "summaryItems": [
         {
           "itemId": "M202601-TECH-1",
-          "headline": "Gemini sumó más personalización y funciones proactivas",
-          "summary": "Google concentró sus novedades de enero en Personal Intelligence para Gemini y nuevas integraciones en Search, Gmail y otros productos.",
+          "headline": "Google empujó a Gemini hacia una IA más personal y proactiva",
+          "summary": "Personal Intelligence empezó a conectar contexto del usuario con productos como Gemini y Search para anticipar necesidades en lugar de esperar cada instrucción. El cambio importante fue pasar de un asistente reactivo a sistemas que usan memoria y contexto para proponer acciones útiles antes de que el usuario formule todo desde cero.",
           "sourceRefs": [
             "https://blog.google/innovation-and-ai/products/google-ai-updates-january-2026/"
           ]
+        },
+        {
+          "itemId": "M202601-TECH-2",
+          "headline": "Chrome incorporó navegación agentiva con Auto Browse",
+          "summary": "Google mostró un navegador capaz de ejecutar tareas de varios pasos como reservar viajes o coordinar trámites. La función acercó la idea de agentes a una interfaz cotidiana: el navegador dejó de ser solo un lugar donde mirar páginas y empezó a convertirse en una capa que actúa sobre ellas.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/google-ai-updates-january-2026/"
+          ]
+        },
+        {
+          "itemId": "M202601-TECH-3",
+          "headline": "Gmail avanzó hacia una bandeja que prioriza y sintetiza por el usuario",
+          "summary": "Google amplió AI Overviews, respuestas sugeridas y funciones de búsqueda y corrección dentro de Gmail, además de probar AI Inbox. El objetivo era reducir trabajo de clasificación y recuperación de información, moviendo el correo desde una lista cronológica hacia una experiencia asistida por contexto.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/google-ai-updates-january-2026/"
+          ]
+        },
+        {
+          "itemId": "M202601-TECH-4",
+          "headline": "OpenAI lanzó Health como espacio separado para información médica personal",
+          "summary": "ChatGPT comenzó a desplegar un entorno específico para salud con conexiones a historiales médicos y datos de bienestar, manteniendo esos datos separados del resto de la experiencia. El lanzamiento mostró que los asistentes generales empezaban a especializarse en dominios donde privacidad, trazabilidad y límites de uso son críticos.",
+          "sourceRefs": ["https://help.openai.com/en/articles/6825453-chatgpt-release-notes"]
         }
       ],
       "deepDiveBriefIds": [],
@@ -100,7 +165,16 @@
       "domain": "HISTORY_CULTURE",
       "coverageState": "COVERAGE_PARTIAL",
       "outcome": "COVERAGE_PARTIAL",
-      "summaryItems": [],
+      "summaryItems": [
+        {
+          "itemId": "M202601-CUL-1",
+          "headline": "La política internacional volvió a dominar el imaginario público de inicio de año",
+          "summary": "Las imágenes que definieron enero —Venezuela, Groenlandia, Davos, protestas y conflictos regionales— mostraron un inicio de 2026 mucho más político que celebratorio. El tono cultural del mes quedó marcado por la sensación de que decisiones de poder podían cambiar fronteras, alianzas y vida cotidiana con gran rapidez.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2026/major-global-news-moments-of-january-in-ap-photos/"
+          ]
+        }
+      ],
       "deepDiveBriefIds": [],
       "followUps": []
     },

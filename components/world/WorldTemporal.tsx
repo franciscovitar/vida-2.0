@@ -3,10 +3,9 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { WORLD_DOMAINS, worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
+import { worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
 import type {
   WorldCoverageState,
-  WorldDomain,
   WorldPieceSummary,
   WorldTemporalGranularity,
   WorldTemporalIndexEntry,
@@ -46,7 +45,8 @@ function granularityLabel(granularity: WorldTemporalGranularity): string {
 function periodOrientation(granularity: WorldTemporalGranularity): string {
   if (granularity === 'DAY') return 'Lo que sobrevivió al ruido del último día cerrado.';
   if (granularity === 'WEEK') return 'Las historias y cambios que realmente definieron la semana.';
-  if (granularity === 'MONTH') return 'Los hechos y tendencias que vale la pena conservar de este mes.';
+  if (granularity === 'MONTH')
+    return 'Los hechos y tendencias que vale la pena conservar de este mes.';
   return 'Los acontecimientos y cambios estructurales que ayudan a entender el año.';
 }
 
@@ -236,11 +236,7 @@ export function WorldTemporalView({ data }: { data: WorldTemporalPageData }) {
     <div className={styles.stack}>
       <WorldNavigation showTemporal />
 
-      <ArchiveLinks
-        data={data}
-        granularity={data.granularity}
-        currentKey={period.periodKey}
-      />
+      <ArchiveLinks data={data} granularity={data.granularity} currentKey={period.periodKey} />
 
       <section className={styles['period-hero']} aria-labelledby="world-period-title">
         <div>
@@ -265,11 +261,7 @@ export function WorldTemporalView({ data }: { data: WorldTemporalPageData }) {
           </div>
           <div className={styles['story-grid']}>
             {stories.map(({ domain, item }) => (
-              <article
-                key={item.itemId}
-                className={styles['story-card']}
-                data-domain={domain}
-              >
+              <article key={item.itemId} className={styles['story-card']} data-domain={domain}>
                 <span className={styles['story-kicker']}>{worldDomainLabel(domain)}</span>
                 <h3>{item.headline}</h3>
                 <p>{item.summary}</p>
