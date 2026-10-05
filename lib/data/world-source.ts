@@ -3,13 +3,94 @@ import 'server-only';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { listWorldItems } from '@/lib/world/contract';
 import { loadWorldPiece, loadWorldSurface } from '@/lib/world/snapshot';
+import {
+  loadWorldTemporalIndex,
+  loadWorldTemporalPeriod,
+  selectWorldTemporalEntry,
+} from '@/lib/world/temporal';
 import { loadWorldFeedbackWithPort } from '@/lib/world/feedback';
 import { worldFeedbackStorePort } from '@/lib/world/feedback-store';
-import type { WorldPieceData } from '@/types/world-intelligence';
+import type {
+  WorldPieceData,
+  WorldTemporalGranularity,
+  WorldTemporalPageData,
+} from '@/types/world-intelligence';
 
 export async function getWorldSurfaceData() {
   await requireAuthorizedSession();
   return loadWorldSurface();
+}
+
+export async function getWorldTemporalPageData(
+  granularity: WorldTemporalGranularity,
+  periodKey?: string | null,
+): Promise<WorldTemporalPageData> {
+  await requireAuthorizedSession();
+
+  const [surface, index] = await Promise.all([loadWorldSurface(), loadWorldTemporalIndex()]);
+  if (surface.status !== 'ready' || !surface.snapshot) {
+    return {
+      status: surface.status,
+      notice: surface.notice,
+      granularity,
+      index,
+      period: null,
+      surface: null,
+    };
+  }
+
+  if (!index) {
+    return {
+      status: 'missing',
+      notice: 'La navegación temporal de World todavía no está disponible.',
+      granularity,
+      index: null,
+      period: null,
+      surface: surface.snapshot,
+    };
+  }
+
+  const entry = selectWorldTemporalEntry(index, granularity, periodKey);
+  if (!entry) {
+    const label =
+      granularity === 'WEEK'
+        ? 'una semana cerrada'
+        : granularity === 'MONTH'
+          ? 'un mes archivado'
+          : granularity === 'YEAR'
+            ? 'un año archivado'
+            : 'un día publicado';
+
+    return {
+      status: 'ready',
+      notice: `Todavía no hay ${label} disponible en esta escala.`,
+      granularity,
+      index,
+      period: null,
+      surface: surface.snapshot,
+    };
+  }
+
+  const period = await loadWorldTemporalPeriod(entry);
+  if (!period) {
+    return {
+      status: 'invalid',
+      notice: 'El período temporal publicado no cumple el contrato de World.',
+      granularity,
+      index,
+      period: null,
+      surface: surface.snapshot,
+    };
+  }
+
+  return {
+    status: 'ready',
+    notice: period.transitionNote ?? null,
+    granularity,
+    index,
+    period,
+    surface: surface.snapshot,
+  };
 }
 
 export async function getWorldPieceData(slug: string): Promise<WorldPieceData> {
