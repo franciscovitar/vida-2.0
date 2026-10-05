@@ -202,7 +202,7 @@ test('WORLD-12. Pirámide Temporal falla cerrado y conserva cobertura explícita
   assert.equal(index.weeks.length, 4);
   assert.equal(index.months.length, 9);
   assert.equal(index.years.length, 1);
-  assert.equal(selectWorldTemporalEntry(index, 'DAY')?.periodKey, '2026-10-05');
+  assert.equal(selectWorldTemporalEntry(index, 'DAY'), null);
   assert.equal(selectWorldTemporalEntry(index, 'WEEK')?.periodKey, '2026-W40');
   assert.equal(selectWorldTemporalEntry(index, 'WEEK', '2026-W39')?.periodKey, '2026-W39');
   assert.equal(selectWorldTemporalEntry(index, 'MONTH', '2026-09')?.periodKey, '2026-09');
@@ -245,9 +245,12 @@ test('WORLD-13. navegación temporal expone Día, Semana, Mes y Año sin crear b
   assert.match(nav, /\/world\/ahora\/semana/);
   assert.match(nav, /\/world\/ahora\/mes/);
   assert.match(nav, /\/world\/ahora\/ano/);
-  assert.match(temporal, /Cobertura parcial/);
-  assert.match(temporal, /En profundidad/);
+  assert.match(temporal, /Archivo retrospectivo/);
+  assert.match(temporal, /Sobre esta edición/);
+  assert.match(temporal, /Lo que importa de este período/);
+  assert.match(temporal, /materialDomains/);
   assert.match(temporal, /En seguimiento/);
+  assert.doesNotMatch(temporal, /coverage-summary/);
   assert.match(temporal, /data\.index\.weeks/);
   assert.match(weekPage, /searchParams/);
   assert.match(weekPage, /getWorldTemporalPageData\('WEEK', period\)/);

@@ -59,11 +59,14 @@ export async function getWorldTemporalPageData(
           ? 'un mes archivado'
           : granularity === 'YEAR'
             ? 'un año archivado'
-            : 'un día publicado';
+            : 'un día cerrado';
 
     return {
       status: 'ready',
-      notice: `Todavía no hay ${label} disponible en esta escala.`,
+      notice:
+        granularity === 'DAY'
+          ? 'Todavía no hay un cierre diario completo disponible. La próxima edición aparecerá automáticamente cuando cierre el día.'
+          : `Todavía no hay ${label} disponible en esta escala.`,
       granularity,
       index,
       period: null,
