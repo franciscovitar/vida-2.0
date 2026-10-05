@@ -3,6 +3,16 @@ export type WorldMode = 'NOW' | 'LEARN';
 export type WorldPublicationState = 'HUMAN_APPROVED';
 export type WorldFreshnessState = 'CURRENT' | 'STALE';
 
+export type WorldTemporalGranularity = 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
+export type WorldTemporalState = 'IN_PROGRESS' | 'CLOSED' | 'CORRECTED';
+export type WorldCoverageState = 'COVERAGE_OK' | 'COVERAGE_PARTIAL' | 'COVERAGE_FAILED';
+export type WorldDomainOutcome =
+  | 'HAS_MATERIAL_ITEMS'
+  | 'NO_MATERIAL_CHANGE'
+  | 'COVERAGE_PARTIAL'
+  | 'COVERAGE_FAILED';
+
+
 export type WorldDomain =
   | 'POLITICS_GEOPOLITICS'
   | 'ECONOMICS'
@@ -137,3 +147,88 @@ export interface WorldPieceData {
   summary: WorldPieceSummary | null;
   piece: WorldPublishedPiece | null;
 }
+
+export interface WorldTemporalIndexEntry {
+  periodKey: string;
+  label: string;
+  state: WorldTemporalState;
+  localRef: string;
+}
+
+export interface WorldTemporalIndex {
+  schemaVersion: 1;
+  kind: 'world_temporal_index';
+  source: {
+    repository: 'franciscovitar/personal-ai-system';
+    ref: string;
+    commit: string;
+    canonicalRef: string;
+    generatedAt: string;
+  };
+  latest: {
+    day: WorldTemporalIndexEntry | null;
+    week: WorldTemporalIndexEntry | null;
+    month: WorldTemporalIndexEntry | null;
+    year: WorldTemporalIndexEntry | null;
+  };
+  months: readonly WorldTemporalIndexEntry[];
+  years: readonly WorldTemporalIndexEntry[];
+}
+
+export interface WorldTemporalSummaryItem {
+  itemId: string;
+  headline: string;
+  summary: string;
+  sourceRefs: readonly string[];
+}
+
+export interface WorldTemporalFollowUp {
+  storylineId: string;
+  label: string;
+  status: string;
+}
+
+export interface WorldTemporalDomainSection {
+  domain: WorldDomain;
+  coverageState: WorldCoverageState;
+  outcome: WorldDomainOutcome;
+  summaryItems: readonly WorldTemporalSummaryItem[];
+  deepDiveBriefIds: readonly string[];
+  followUps: readonly WorldTemporalFollowUp[];
+}
+
+export interface WorldTemporalPeriod {
+  schemaVersion: 1;
+  kind: 'world_temporal_period';
+  granularity: WorldTemporalGranularity;
+  periodKey: string;
+  state: WorldTemporalState;
+  label: string;
+  window: {
+    start: string;
+    end: string;
+    timezone: string;
+  };
+  source: {
+    repository: 'franciscovitar/personal-ai-system';
+    ref: string;
+    commit: string;
+    canonicalRef: string;
+    generatedAt: string;
+    observedAt: string;
+  };
+  readingDebt: false;
+  transitionNote?: string;
+  topStoryBriefIds: readonly string[];
+  domains: readonly WorldTemporalDomainSection[];
+}
+
+export interface WorldTemporalPageData {
+  status: WorldSourceStatus;
+  notice: string | null;
+  granularity: WorldTemporalGranularity;
+  index: WorldTemporalIndex | null;
+  period: WorldTemporalPeriod | null;
+  surface: WorldSurfaceSnapshot | null;
+}
+
