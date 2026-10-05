@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "DAY",
+  "periodKey": "2026-10-05",
+  "state": "IN_PROGRESS",
+  "label": "5 de octubre de 2026 · transición",
+  "window": {
+    "start": "2026-10-05T00:00:00-03:00",
+    "end": "2026-10-05T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "cd3a83173299896f65a19841459c633c6be02759",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/DAY_2026-10-05_TRANSITION_V1.json",
+    "generatedAt": "2026-10-05T12:45:00-03:00",
+    "observedAt": "2026-10-05T09:00:00-03:00"
+  },
+  "readingDebt": false,
+  "transitionNote": "Edición publicada antes de activar el coverage pass completo. Las piezas profundas siguen siendo válidas, pero esta fecha no debe interpretarse como panorama exhaustivo de los ocho dominios.",
+  "topStoryBriefIds": [
+    "WORLD-2026-10-05-YEMEN-BAB-EL-MANDEB",
+    "WORLD-2026-10-05-NOBEL-OPTOGENETICS",
+    "WORLD-2026-10-05-FRANCE-EURO"
+  ],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [
+        "WORLD-2026-10-05-YEMEN-BAB-EL-MANDEB"
+      ],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [
+        "WORLD-2026-10-05-FRANCE-EURO"
+      ],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [
+        "WORLD-2026-10-05-NOBEL-OPTOGENETICS"
+      ],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}
