@@ -10,6 +10,11 @@ import {
   resolveWorldSurfaceText,
   worldDomainFromSlug,
 } from '@/lib/world/contract';
+import {
+  parseWorldTemporalIndex,
+  parseWorldTemporalPeriod,
+  selectWorldTemporalEntry,
+} from '@/lib/world/temporal';
 
 const root = join(process.cwd(), 'data', 'generated', 'world');
 const surfacePath = join(root, 'surface.json');
@@ -95,10 +100,13 @@ test('WORLD-05. piezas conservan el estándar zero-knowledge aprobado', () => {
   assert.match(entanglement, /WhatsApp más rápido que la luz/);
 });
 
-test('WORLD-06. seis rutas y loader autenticado', () => {
+test('WORLD-06. rutas principales y temporales usan loader autenticado', () => {
   const paths = [
     'app/(app)/world/page.tsx',
     'app/(app)/world/ahora/page.tsx',
+    'app/(app)/world/ahora/semana/page.tsx',
+    'app/(app)/world/ahora/mes/page.tsx',
+    'app/(app)/world/ahora/ano/page.tsx',
     'app/(app)/world/aprender/page.tsx',
     'app/(app)/world/biblioteca/page.tsx',
     'app/(app)/world/tema/[domain]/page.tsx',
@@ -176,4 +184,69 @@ test('WORLD-11. Biblioteca preserva historia sin mezclarla con la edición actua
   const article = readFileSync(join(process.cwd(), 'components/world/WorldPiece.tsx'), 'utf8');
   assert.match(ui, /snapshot\.library\.items/);
   assert.match(article, /section\.title \?/);
+});
+
+
+test('WORLD-12. Pirámide Temporal falla cerrado y conserva cobertura explícita', () => {
+  const indexRaw = readFileSync(join(root, 'temporal', 'index.json'), 'utf8');
+  const periodRaw = readFileSync(
+    join(root, 'temporal', 'periods', 'day', '2026-10-05.json'),
+    'utf8',
+  );
+
+  const index = parseWorldTemporalIndex(JSON.parse(indexRaw));
+  const period = parseWorldTemporalPeriod(JSON.parse(periodRaw));
+  assert.ok(index);
+  assert.ok(period);
+
+  assert.equal(index.latest.day?.periodKey, '2026-10-05');
+  assert.equal(index.months.length, 0);
+  assert.equal(index.years.length, 0);
+  assert.equal(selectWorldTemporalEntry(index, 'DAY')?.periodKey, '2026-10-05');
+  assert.equal(selectWorldTemporalEntry(index, 'WEEK'), null);
+  assert.equal(selectWorldTemporalEntry(index, 'MONTH', '2026-09'), null);
+
+  assert.equal(period.granularity, 'DAY');
+  assert.equal(period.state, 'IN_PROGRESS');
+  assert.equal(period.domains.length, 8);
+  assert.ok(period.domains.every((domain) => domain.coverageState === 'COVERAGE_PARTIAL'));
+  assert.ok(period.domains.every((domain) => domain.outcome === 'COVERAGE_PARTIAL'));
+  assert.equal(period.topStoryBriefIds.length, 3);
+  assert.match(period.transitionNote ?? '', /coverage pass completo/i);
+
+  assert.equal(parseWorldTemporalIndex({}), null);
+  assert.equal(
+    parseWorldTemporalPeriod({
+      ...JSON.parse(periodRaw),
+      domains: JSON.parse(periodRaw).domains.map((domain: Record<string, unknown>) => ({
+        ...domain,
+        coverageState: 'COVERAGE_PARTIAL',
+        outcome: 'NO_MATERIAL_CHANGE',
+      })),
+    }),
+    null,
+  );
+});
+
+test('WORLD-13. navegación temporal expone Día, Semana, Mes y Año sin crear backlog', () => {
+  const nav = readFileSync(
+    join(process.cwd(), 'components/world/WorldNavigation.tsx'),
+    'utf8',
+  );
+  const temporal = readFileSync(
+    join(process.cwd(), 'components/world/WorldTemporal.tsx'),
+    'utf8',
+  );
+
+  assert.match(nav, /Día/);
+  assert.match(nav, /Semana/);
+  assert.match(nav, /Mes/);
+  assert.match(nav, /Año/);
+  assert.match(nav, /\/world\/ahora\/semana/);
+  assert.match(nav, /\/world\/ahora\/mes/);
+  assert.match(nav, /\/world\/ahora\/ano/);
+  assert.match(temporal, /Cobertura parcial/);
+  assert.match(temporal, /En profundidad/);
+  assert.match(temporal, /En seguimiento/);
+  assert.doesNotMatch(temporal, /unread count|infinite scroll|streak/i);
 });
