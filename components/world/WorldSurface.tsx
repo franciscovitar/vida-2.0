@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { listWorldItems, worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
+import { worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
 import type { WorldDomain, WorldPieceSummary, WorldSurfaceData } from '@/types/world-intelligence';
 
 import { WorldNavigation } from './WorldNavigation';
@@ -67,7 +67,7 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
   }
 
   const snapshot = data.snapshot;
-  const all = listWorldItems(snapshot);
+  const all = [...snapshot.now.items, ...snapshot.learn.items];
   let title = 'World';
   let description = 'Una edición finita para entender lo que importa sin convertirlo en un feed.';
   let items: readonly WorldPieceSummary[] = all;
@@ -84,6 +84,7 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
     title = 'Biblioteca';
     description =
       'Lo publicado queda disponible sin convertirse en pendientes ni deuda de lectura.';
+    items = snapshot.library.items;
   } else if (view.kind === 'domain') {
     title = worldDomainLabel(view.domain);
     description = 'Piezas publicadas de este tema, sin volver a ordenar la selección editorial.';
