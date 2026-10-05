@@ -233,7 +233,10 @@ function latestEntry(
   index: WorldTemporalIndex,
   granularity: WorldTemporalGranularity,
 ): WorldTemporalIndexEntry | null {
-  if (granularity === 'DAY') return index.latest.day;
+  if (granularity === 'DAY') {
+    const day = index.latest.day;
+    return day && day.state !== 'IN_PROGRESS' ? day : null;
+  }
   if (granularity === 'WEEK') return index.latest.week;
   if (granularity === 'MONTH') return index.latest.month;
   return index.latest.year;
