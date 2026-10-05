@@ -25,7 +25,9 @@ test('WORLD-01. superficie válida, finita y human-approved', () => {
   assert.equal(parsed.now.items.length, 3);
   assert.equal(parsed.learn.items.length, 0);
   assert.equal(parsed.library.items.length, 5);
-  assert.ok(parsed.library.items.every((item) => item.publicationState === 'HUMAN_APPROVED'));
+  assert.ok(
+    parsed.library.items.every((item) => item.publicationState === 'HUMAN_APPROVED'),
+  );
   assert.doesNotMatch(raw, /NOTION_API_TOKEN|GOOGLE_PRIVATE_KEY|AUTH_SECRET/);
 });
 
@@ -151,12 +153,13 @@ test('WORLD-10. navegación general expone World', () => {
   assert.match(nav, /icon: 'world'/);
 });
 
-
 test('WORLD-11. Biblioteca preserva historia sin mezclarla con la edición actual', () => {
   const surface = parseWorldSurfaceSnapshot(JSON.parse(surfaceText()));
   assert.ok(surface);
 
-  const currentIds = new Set([...surface.now.items, ...surface.learn.items].map((item) => item.briefId));
+  const currentIds = new Set(
+    [...surface.now.items, ...surface.learn.items].map((item) => item.briefId),
+  );
   const libraryIds = new Set(surface.library.items.map((item) => item.briefId));
 
   assert.equal(currentIds.size, 3);
