@@ -12,7 +12,6 @@ export type WorldDomainOutcome =
   | 'COVERAGE_PARTIAL'
   | 'COVERAGE_FAILED';
 
-
 export type WorldDomain =
   | 'POLITICS_GEOPOLITICS'
   | 'ECONOMICS'
