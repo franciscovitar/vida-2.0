@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "8217eca53dd0a3db59b075fe2e92f11f39b1c851",
+    "canonicalRef": "AI/projects/professional-intelligence/OFFER_VARIANTS_CURRENT_V1.json",
+    "generatedAt": "2026-10-05",
+    "observedAt": "2026-10-05",
+    "staleAfterDays": 14
+  },
+  "status": "CURRENT_COMPARISON_FOUNDATION",
+  "notes": [
+    "This file stores offer variants, not universal product winners.",
+    "Relative ranking remains unsupported until task-specific comparative evidence is sufficient.",
+    "Official provider sources establish current plan facts; relative quality requires independent and/or personal eval evidence."
+  ],
+  "comparisonGroups": [
+    {
+      "id": "coding-ai-individual",
+      "label": "IA para programar — planes individuales",
+      "taskFamily": "SOFTWARE_ENGINEERING_GENERAL",
+      "rankingStatus": "COMPARISON_ONLY",
+      "rankingReason": "Current plan/limit facts are verified, but there is not yet enough controlled task-specific personal/comparable evidence to publish a universal #1 ordering.",
+      "offerIds": [
+        "chatgpt-free",
+        "chatgpt-plus",
+        "claude-free",
+        "claude-pro",
+        "claude-max-5x",
+        "claude-max-20x",
+        "cursor-hobby",
+        "cursor-pro",
+        "cursor-pro-plus",
+        "cursor-ultra",
+        "github-copilot-free",
+        "github-copilot-pro",
+        "github-copilot-pro-plus",
+        "github-copilot-max"
+      ]
+    }
+  ],
+  "offers": [
+    {
+      "id": "chatgpt-free",
+      "provider": "OpenAI",
+      "product": "ChatGPT",
+      "plan": "Free",
+      "channels": ["APP", "CODEX"],
+      "accessClass": "FREE",
+      "headlinePriceUsdMonthly": 0,
+      "keyLimit": "Codex y Work tienen acceso limitado; la página oficial no publica un número fijo universal de solicitudes.",
+      "limitExactness": "QUALITATIVE_OFFICIAL",
+      "resetCadence": "DYNAMIC_OR_FEATURE_SPECIFIC",
+      "included": [
+        "GPT-5.6 Luna para chat cotidiano",
+        "Codex limitado",
+        "ChatGPT Work limitado en desktop"
+      ],
+      "excludedOrCapped": ["modelos avanzados de pago", "uso de Codex ampliado", "Work completo"],
+      "sustainedUseFit": "LIGHT_OR_OCCASIONAL_FOR_CODEX",
+      "officialSources": ["https://chatgpt.com/pricing/"],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "chatgpt-plus",
+      "provider": "OpenAI",
+      "product": "ChatGPT",
+      "plan": "Plus",
+      "channels": ["APP", "CODEX", "WORK"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 20,
+      "keyLimit": "Uso ampliado, pero siguen aplicando límites variables por modelo/herramienta; no es ilimitado.",
+      "limitExactness": "QUALITATIVE_OFFICIAL",
+      "resetCadence": "DYNAMIC_OR_FEATURE_SPECIFIC",
+      "included": [
+        "GPT-6 reasoning",
+        "Codex ampliado",
+        "ChatGPT Work en desktop/web/mobile",
+        "deep research ampliado"
+      ],
+      "excludedOrCapped": ["API se factura por separado", "límites de uso siguen aplicando"],
+      "sustainedUseFit": "REGULAR",
+      "officialSources": [
+        "https://chatgpt.com/pricing/",
+        "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus"
+      ],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "claude-free",
+      "provider": "Anthropic",
+      "product": "Claude",
+      "plan": "Free",
+      "channels": ["APP"],
+      "accessClass": "FREE",
+      "headlinePriceUsdMonthly": 0,
+      "keyLimit": "Uso limitado para uso ocasional; Anthropic no publica un número fijo universal de mensajes.",
+      "limitExactness": "QUALITATIVE_OFFICIAL",
+      "resetCadence": "USAGE_WINDOW_PROVIDER_MANAGED",
+      "included": ["chat web/desktop/mobile", "generación de código", "búsqueda web"],
+      "excludedOrCapped": ["Claude Code requiere Pro o Max", "uso sustancialmente menor que Pro"],
+      "sustainedUseFit": "LIGHT_OR_OCCASIONAL",
+      "officialSources": [
+        "https://www.anthropic.com/pricing",
+        "https://support.claude.com/en/articles/11049762-choose-a-claude-plan"
+      ],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "claude-pro",
+      "provider": "Anthropic",
+      "product": "Claude",
+      "plan": "Pro",
+      "channels": ["APP", "CLAUDE_CODE"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 20,
+      "keyLimit": "Al menos 5× el uso por sesión del plan Free; la ventana de sesión se restablece cada 5 horas y también existe límite semanal.",
+      "limitExactness": "RELATIVE_EXACT_OFFICIAL",
+      "resetCadence": "5_HOUR_SESSION_PLUS_WEEKLY",
+      "included": ["Claude Code", "Research", "extended thinking", "más modelos", "Projects"],
+      "excludedOrCapped": ["API Console se factura por separado", "uso no es ilimitado"],
+      "sustainedUseFit": "REGULAR",
+      "officialSources": [
+        "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+        "https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work"
+      ],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "claude-max-5x",
+      "provider": "Anthropic",
+      "product": "Claude",
+      "plan": "Max 5x",
+      "channels": ["APP", "CLAUDE_CODE"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 100,
+      "keyLimit": "5× la capacidad por sesión de Pro; sesión con reset cada 5 horas y límite semanal adicional.",
+      "limitExactness": "RELATIVE_EXACT_OFFICIAL",
+      "resetCadence": "5_HOUR_SESSION_PLUS_WEEKLY",
+      "included": ["Claude Code", "prioridad", "más output", "acceso temprano"],
+      "excludedOrCapped": ["no es ilimitado", "API separada"],
+      "sustainedUseFit": "FREQUENT",
+      "officialSources": ["https://support.claude.com/en/articles/11049741-what-is-the-max-plan"],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "claude-max-20x",
+      "provider": "Anthropic",
+      "product": "Claude",
+      "plan": "Max 20x",
+      "channels": ["APP", "CLAUDE_CODE"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 200,
+      "keyLimit": "20× la capacidad por sesión de Pro; sesión con reset cada 5 horas y límite semanal adicional.",
+      "limitExactness": "RELATIVE_EXACT_OFFICIAL",
+      "resetCadence": "5_HOUR_SESSION_PLUS_WEEKLY",
+      "included": ["Claude Code", "prioridad", "más output", "acceso temprano"],
+      "excludedOrCapped": ["no es ilimitado", "API separada"],
+      "sustainedUseFit": "DAILY_HIGH",
+      "officialSources": ["https://support.claude.com/en/articles/11049741-what-is-the-max-plan"],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "cursor-hobby",
+      "provider": "Anysphere",
+      "product": "Cursor",
+      "plan": "Hobby",
+      "channels": ["IDE"],
+      "accessClass": "FREE",
+      "headlinePriceUsdMonthly": 0,
+      "keyLimit": "Solicitudes de Agent limitadas; Cursor no publica hoy un número exacto en su pricing oficial.",
+      "limitExactness": "QUALITATIVE_OFFICIAL",
+      "resetCadence": "NOT_PUBLICLY_SPECIFIED",
+      "included": ["Composer", "Agent limitado"],
+      "excludedOrCapped": ["uso de Agent limitado", "sin garantías de volumen sostenido"],
+      "sustainedUseFit": "LIGHT_OR_OCCASIONAL",
+      "officialSources": ["https://cursor.com/pricing"],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "cursor-pro",
+      "provider": "Anysphere",
+      "product": "Cursor",
+      "plan": "Pro",
+      "channels": ["IDE", "CLOUD_AGENT"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 20,
+      "keyLimit": "Límites de Agent ampliados; el consumo depende del modelo y el uso incluido puede agotarse antes con modelos más caros.",
+      "limitExactness": "QUALITATIVE_PLUS_USAGE_MODEL_OFFICIAL",
+      "resetCadence": "MONTHLY_INCLUDED_USAGE",
+      "included": [
+        "frontier models",
+        "Cloud Agents",
+        "MCP/skills/hooks",
+        "unlimited tab completions"
+      ],
+      "excludedOrCapped": [
+        "Agent no es ilimitado en todos los modelos",
+        "uso adicional puede facturarse"
+      ],
+      "sustainedUseFit": "REGULAR",
+      "officialSources": [
+        "https://cursor.com/pricing",
+        "https://cursor.com/docs/models-and-pricing"
+      ],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "cursor-pro-plus",
+      "provider": "Anysphere",
+      "product": "Cursor",
+      "plan": "Pro+",
+      "channels": ["IDE", "CLOUD_AGENT"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 60,
+      "keyLimit": "3× los límites de Agent de Pro.",
+      "limitExactness": "RELATIVE_EXACT_OFFICIAL",
+      "resetCadence": "MONTHLY_INCLUDED_USAGE",
+      "included": ["todo Pro", "3× Agent"],
+      "excludedOrCapped": ["uso adicional puede facturarse"],
+      "sustainedUseFit": "DAILY_AGENT",
+      "officialSources": [
+        "https://cursor.com/pricing",
+        "https://cursor.com/docs/models-and-pricing"
+      ],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "cursor-ultra",
+      "provider": "Anysphere",
+      "product": "Cursor",
+      "plan": "Ultra",
+      "channels": ["IDE", "CLOUD_AGENT"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 200,
+      "keyLimit": "20× los límites de Agent de Pro.",
+      "limitExactness": "RELATIVE_EXACT_OFFICIAL",
+      "resetCadence": "MONTHLY_INCLUDED_USAGE",
+      "included": ["todo Pro", "20× Agent"],
+      "excludedOrCapped": ["sigue sujeto al modelo de uso del plan"],
+      "sustainedUseFit": "POWER_USER",
+      "officialSources": [
+        "https://cursor.com/pricing",
+        "https://cursor.com/docs/models-and-pricing"
+      ],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "github-copilot-free",
+      "provider": "GitHub",
+      "product": "GitHub Copilot",
+      "plan": "Free",
+      "channels": ["IDE", "CLI", "GITHUB"],
+      "accessClass": "FREE",
+      "headlinePriceUsdMonthly": 0,
+      "keyLimit": "2.000 completados por mes y 50 solicitudes de chat; chat/agent adicional es limitado.",
+      "limitExactness": "EXACT_OFFICIAL",
+      "resetCadence": "MONTHLY",
+      "included": ["IDE", "CLI", "agent mode", "MCP", "2.000 completados/mes"],
+      "excludedOrCapped": ["50 chat requests", "sin cloud agent", "sin code review"],
+      "sustainedUseFit": "LIGHT_TO_MODERATE_COMPLETION",
+      "officialSources": ["https://github.com/features/copilot/plans"],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "github-copilot-pro",
+      "provider": "GitHub",
+      "product": "GitHub Copilot",
+      "plan": "Pro",
+      "channels": ["IDE", "CLI", "GITHUB", "CLOUD_AGENT"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 10,
+      "keyLimit": "Completados ilimitados; incluye USD 15/mes de créditos de IA para chat/agentes y permite comprar uso adicional.",
+      "limitExactness": "EXACT_OFFICIAL",
+      "resetCadence": "MONTHLY_CREDITS",
+      "included": [
+        "unlimited completions",
+        "cloud agent",
+        "code review",
+        "model selection",
+        "third-party agents"
+      ],
+      "excludedOrCapped": ["agent/chat consumen créditos"],
+      "sustainedUseFit": "REGULAR",
+      "officialSources": ["https://github.com/features/copilot/plans"],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "github-copilot-pro-plus",
+      "provider": "GitHub",
+      "product": "GitHub Copilot",
+      "plan": "Pro+",
+      "channels": ["IDE", "CLI", "GITHUB", "CLOUD_AGENT"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 39,
+      "keyLimit": "Incluye USD 70/mes de créditos de IA y más de 4× el uso incluido de Pro.",
+      "limitExactness": "EXACT_OFFICIAL",
+      "resetCadence": "MONTHLY_CREDITS",
+      "included": ["todo Pro", "premium models", "audit logs", "más créditos"],
+      "excludedOrCapped": ["agent/chat consumen créditos"],
+      "sustainedUseFit": "FREQUENT",
+      "officialSources": ["https://github.com/features/copilot/plans"],
+      "lastVerified": "2026-10-05"
+    },
+    {
+      "id": "github-copilot-max",
+      "provider": "GitHub",
+      "product": "GitHub Copilot",
+      "plan": "Max",
+      "channels": ["IDE", "CLI", "GITHUB", "CLOUD_AGENT"],
+      "accessClass": "PAID",
+      "headlinePriceUsdMonthly": 100,
+      "keyLimit": "Incluye USD 200/mes de créditos de IA; diseñado para flujos agentivos sostenidos de alto volumen.",
+      "limitExactness": "EXACT_OFFICIAL",
+      "resetCadence": "MONTHLY_CREDITS",
+      "included": ["todo Pro+", "priority access", "USD 200 AI credits"],
+      "excludedOrCapped": ["el uso sigue consumiendo créditos"],
+      "sustainedUseFit": "DAILY_HIGH",
+      "officialSources": ["https://github.com/features/copilot/plans"],
+      "lastVerified": "2026-10-05"
+    }
+  ]
+}
