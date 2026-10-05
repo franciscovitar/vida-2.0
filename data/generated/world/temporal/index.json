@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_index",
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "392b241a2291b28a197b49fbb858b14a5822c3ac",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/TEMPORAL_INDEX_V1.json",
+    "generatedAt": "2026-10-05T12:45:00-03:00"
+  },
+  "latest": {
+    "day": {
+      "periodKey": "2026-10-05",
+      "label": "5 de octubre de 2026 · transición",
+      "state": "IN_PROGRESS",
+      "localRef": "periods/day/2026-10-05.json"
+    },
+    "week": null,
+    "month": null,
+    "year": null
+  },
+  "months": [],
+  "years": []
+}
