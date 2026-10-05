@@ -14,7 +14,7 @@ import {
   parseWorldTemporalIndex,
   parseWorldTemporalPeriod,
   selectWorldTemporalEntry,
-} from '@/lib/world/temporal';
+} from '@/lib/world/temporal-contract';
 
 const root = join(process.cwd(), 'data', 'generated', 'world');
 const surfacePath = join(root, 'surface.json');
