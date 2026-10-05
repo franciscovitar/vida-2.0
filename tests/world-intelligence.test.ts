@@ -186,7 +186,6 @@ test('WORLD-11. Biblioteca preserva historia sin mezclarla con la edición actua
   assert.match(article, /section\.title \?/);
 });
 
-
 test('WORLD-12. Pirámide Temporal falla cerrado y conserva cobertura explícita', () => {
   const indexRaw = readFileSync(join(root, 'temporal', 'index.json'), 'utf8');
   const periodRaw = readFileSync(
