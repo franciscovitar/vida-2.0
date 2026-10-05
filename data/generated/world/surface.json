@@ -4,19 +4,68 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "4ef65a46b3da9bcd2af11fc64091114ec53b29be",
+    "commit": "cd3a83173299896f65a19841459c633c6be02759",
     "canonicalSurfaceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_SURFACE_V1.json",
-    "generatedAt": "2026-10-03T17:45:00-03:00",
-    "observedAt": "2026-10-03T14:20:00-03:00",
+    "generatedAt": "2026-10-05T09:10:00-03:00",
+    "observedAt": "2026-10-05T09:00:00-03:00",
     "staleAfterHours": 36
   },
-  "editionDate": "2026-10-03",
+  "editionDate": "2026-10-05",
   "freshnessState": "CURRENT",
-  "provenanceVersion": "world-v1-phase9-human-approved",
+  "provenanceVersion": "world-v1-phase11-daily-human-approved",
   "readingDebt": false,
   "now": {
     "targetReadingSeconds": 360,
-    "selectedReadingSeconds": 240,
+    "selectedReadingSeconds": 360,
+    "items": [
+      {
+        "briefId": "WORLD-2026-10-05-YEMEN-BAB-EL-MANDEB",
+        "mode": "NOW",
+        "slug": "yemen-bab-el-mandeb-2026-10-05",
+        "primaryDomain": "POLITICS_GEOPOLITICS",
+        "headline": "🇾🇪 Yemen vuelve a escalar cerca del Bab el-Mandeb, un paso clave para el comercio mundial",
+        "deck": "Fuerzas del gobierno yemení, respaldadas por una coalición liderada por Arabia Saudita, avanzaron contra los hutíes en la zona del estrecho que conecta el mar Rojo con el golfo de Adén.",
+        "readingSeconds": 120,
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_YEMEN_2026-10-05.json",
+        "editorialDraftSha256": "40e7966e0a38dde4621dc1e416f80695ea7976ceb3bea4abfd3c96afdcaa1b4d",
+        "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_YEMEN_2026-10-05.json",
+        "publicationState": "HUMAN_APPROVED",
+        "deltaMarker": "NEW_STORY"
+      },
+      {
+        "briefId": "WORLD-2026-10-05-NOBEL-OPTOGENETICS",
+        "mode": "NOW",
+        "slug": "nobel-medicina-optogenetica-2026-10-05",
+        "primaryDomain": "SCIENCE",
+        "headline": "💡 Nobel de Medicina 2026: premiaron la optogenética, una forma de encender y apagar neuronas con luz",
+        "deck": "Karl Deisseroth, Peter Hegemann y Georg Nagel recibieron el Nobel por una herramienta que convirtió proteínas sensibles a la luz en interruptores para estudiar circuitos del cerebro.",
+        "readingSeconds": 120,
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_OPTOGENETICS_2026-10-05.json",
+        "editorialDraftSha256": "ff2614c918800e4055496d2c569b30424d95bb59b2acca1411f84dd472a86398",
+        "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_OPTOGENETICS_2026-10-05.json",
+        "publicationState": "HUMAN_APPROVED",
+        "deltaMarker": "NEW_STORY"
+      },
+      {
+        "briefId": "WORLD-2026-10-05-FRANCE-EURO",
+        "mode": "NOW",
+        "slug": "francia-euro-deuda-2026-10-05",
+        "primaryDomain": "ECONOMICS",
+        "headline": "🇫🇷 Francia sacude al euro: el mercado vuelve a mirar el riesgo de deuda europea",
+        "deck": "Las dudas sobre el déficit y la capacidad política de Francia para ordenar sus cuentas llevaron al euro a un mínimo de 17 meses y aumentaron con fuerza la prima exigida por los inversores para financiar al Estado francés.",
+        "readingSeconds": 120,
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_FRANCE_EURO_2026-10-05.json",
+        "editorialDraftSha256": "0e20a1e4e95845bdf30d858489b338648754c33d546cc0ff925c778af04187ba",
+        "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_FRANCE_EURO_2026-10-05.json",
+        "publicationState": "HUMAN_APPROVED",
+        "deltaMarker": "NEW_STORY"
+      }
+    ]
+  },
+  "learn": {
+    "items": []
+  },
+  "library": {
     "items": [
       {
         "briefId": "WORLD-PILOT-CRISPR-2026-10-03",
@@ -26,16 +75,13 @@
         "headline": "🧬 CRISPR: probaron en ratones una forma de activar la edición genética en zonas elegidas",
         "deck": "CRISPR es una tecnología para modificar ADN. En este estudio, investigadores probaron en ratones una manera de encender esa edición desde fuera del cuerpo y concentrarla en regiones específicas de músculo y cerebro.",
         "readingSeconds": 240,
-        "deltaMarker": "NEW_STORY",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_CRISPR_V1.json",
         "editorialDraftSha256": "1b33334dbbe127b1e37e3a88ea8460f02ba8c2bb4144a6b4c684f3da5719f09c",
         "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_CRISPR_2026-10-03.json",
-        "publicationState": "HUMAN_APPROVED"
-      }
-    ]
-  },
-  "learn": {
-    "items": [
+        "publicationState": "HUMAN_APPROVED",
+        "deltaMarker": "NEW_STORY",
+        "sourceCommit": "4ef65a46b3da9bcd2af11fc64091114ec53b29be"
+      },
       {
         "briefId": "L-ENTANGLEMENT-2016",
         "mode": "LEARN",
@@ -44,12 +90,58 @@
         "headline": "🔗 Entrelazamiento cuántico: qué tiene de raro de verdad",
         "deck": "No hace falta saber física cuántica para empezar. La idea central es distinguir una correlación normal —dos cosas relacionadas— de un caso cuántico en el que la descripción completa pertenece al sistema formado por ambas partes.",
         "readingSeconds": 240,
-        "conceptId": "CONCEPT-QUANTUM-ENTANGLEMENT",
-        "subdomain": "PHYSICS",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_LEARN_ENTANGLEMENT_V1.json",
         "editorialDraftSha256": "e596289478f69e99a8380542aa8bae1dd2b8d138ca019088a15bc23f8bb51686",
         "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_LEARN_ENTANGLEMENT_2026-10-03.json",
-        "publicationState": "HUMAN_APPROVED"
+        "publicationState": "HUMAN_APPROVED",
+        "conceptId": "CONCEPT-QUANTUM-ENTANGLEMENT",
+        "subdomain": "PHYSICS",
+        "sourceCommit": "4ef65a46b3da9bcd2af11fc64091114ec53b29be"
+      },
+      {
+        "briefId": "WORLD-2026-10-05-YEMEN-BAB-EL-MANDEB",
+        "mode": "NOW",
+        "slug": "yemen-bab-el-mandeb-2026-10-05",
+        "primaryDomain": "POLITICS_GEOPOLITICS",
+        "headline": "🇾🇪 Yemen vuelve a escalar cerca del Bab el-Mandeb, un paso clave para el comercio mundial",
+        "deck": "Fuerzas del gobierno yemení, respaldadas por una coalición liderada por Arabia Saudita, avanzaron contra los hutíes en la zona del estrecho que conecta el mar Rojo con el golfo de Adén.",
+        "readingSeconds": 120,
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_YEMEN_2026-10-05.json",
+        "editorialDraftSha256": "40e7966e0a38dde4621dc1e416f80695ea7976ceb3bea4abfd3c96afdcaa1b4d",
+        "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_YEMEN_2026-10-05.json",
+        "publicationState": "HUMAN_APPROVED",
+        "deltaMarker": "NEW_STORY",
+        "sourceCommit": "cd3a83173299896f65a19841459c633c6be02759"
+      },
+      {
+        "briefId": "WORLD-2026-10-05-NOBEL-OPTOGENETICS",
+        "mode": "NOW",
+        "slug": "nobel-medicina-optogenetica-2026-10-05",
+        "primaryDomain": "SCIENCE",
+        "headline": "💡 Nobel de Medicina 2026: premiaron la optogenética, una forma de encender y apagar neuronas con luz",
+        "deck": "Karl Deisseroth, Peter Hegemann y Georg Nagel recibieron el Nobel por una herramienta que convirtió proteínas sensibles a la luz en interruptores para estudiar circuitos del cerebro.",
+        "readingSeconds": 120,
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_OPTOGENETICS_2026-10-05.json",
+        "editorialDraftSha256": "ff2614c918800e4055496d2c569b30424d95bb59b2acca1411f84dd472a86398",
+        "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_OPTOGENETICS_2026-10-05.json",
+        "publicationState": "HUMAN_APPROVED",
+        "deltaMarker": "NEW_STORY",
+        "sourceCommit": "cd3a83173299896f65a19841459c633c6be02759"
+      },
+      {
+        "briefId": "WORLD-2026-10-05-FRANCE-EURO",
+        "mode": "NOW",
+        "slug": "francia-euro-deuda-2026-10-05",
+        "primaryDomain": "ECONOMICS",
+        "headline": "🇫🇷 Francia sacude al euro: el mercado vuelve a mirar el riesgo de deuda europea",
+        "deck": "Las dudas sobre el déficit y la capacidad política de Francia para ordenar sus cuentas llevaron al euro a un mínimo de 17 meses y aumentaron con fuerza la prima exigida por los inversores para financiar al Estado francés.",
+        "readingSeconds": 120,
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_FRANCE_EURO_2026-10-05.json",
+        "editorialDraftSha256": "0e20a1e4e95845bdf30d858489b338648754c33d546cc0ff925c778af04187ba",
+        "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_FRANCE_EURO_2026-10-05.json",
+        "publicationState": "HUMAN_APPROVED",
+        "deltaMarker": "NEW_STORY",
+        "sourceCommit": "cd3a83173299896f65a19841459c633c6be02759"
       }
     ]
   },
@@ -57,17 +149,17 @@
     {
       "id": "POLITICS_GEOPOLITICS",
       "label": "Política & Geopolítica",
-      "publishedItems": 0
+      "publishedItems": 1
     },
     {
       "id": "ECONOMICS",
       "label": "Economía",
-      "publishedItems": 0
+      "publishedItems": 1
     },
     {
       "id": "SCIENCE",
       "label": "Ciencia",
-      "publishedItems": 2
+      "publishedItems": 1
     },
     {
       "id": "PSYCHOLOGY_BEHAVIOR",
@@ -96,7 +188,7 @@
     }
   ],
   "coverageNotes": [
-    "Phase 9 exposes only exact Phase 8 human-approved editorial pieces. Phase 6 pilot briefs without an exact approved Phase 8 publication artifact are intentionally not user-facing here.",
-    "This bounded integration surface is a pilot, not a claim of complete daily world coverage."
+    "Daily edition published after exact human approval on 2026-10-05.",
+    "Historical published pieces remain available through Biblioteca without creating reading debt."
   ]
 }
