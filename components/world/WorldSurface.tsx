@@ -86,8 +86,7 @@ export function WorldSurfaceView({ data, view }: { data: WorldSurfaceData; view:
       'Lo publicado queda disponible sin convertirse en pendientes ni deuda de lectura.';
   } else if (view.kind === 'domain') {
     title = worldDomainLabel(view.domain);
-    description =
-      'Piezas publicadas de este tema, sin volver a ordenar la selección editorial.';
+    description = 'Piezas publicadas de este tema, sin volver a ordenar la selección editorial.';
     items = all.filter((item) => item.primaryDomain === view.domain);
   }
 
