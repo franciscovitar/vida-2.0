@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: quality-${{ github.ref }}
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: world-temporal-pyramid-ui-20261005
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -29,6 +31,35 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Format World temporal files
+        run: >
+          npx prettier --write
+          components/world/WorldTemporal.tsx
+          data/generated/world/temporal/periods/day/2026-10-05.json
+          docs/world-intelligence.md
+          lib/world/temporal-contract.ts
+          lib/world/temporal.ts
+          tests/world-intelligence.test.ts
+          types/world-intelligence.ts
+
+      - name: Commit formatting if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/world/WorldTemporal.tsx
+          git add data/generated/world/temporal/periods/day/2026-10-05.json
+          git add docs/world-intelligence.md
+          git add lib/world/temporal-contract.ts
+          git add lib/world/temporal.ts
+          git add tests/world-intelligence.test.ts
+          git add types/world-intelligence.ts
+          if git diff --cached --quiet; then
+            echo "No formatting changes needed"
+          else
+            git commit -m "style(world): apply Prettier to temporal pyramid"
+            git push origin HEAD:world-temporal-pyramid-ui-20261005
+          fi
 
       - name: Test project
         run: npm test
