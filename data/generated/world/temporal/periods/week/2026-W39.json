@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "WEEK",
+  "periodKey": "2026-W39",
+  "state": "CLOSED",
+  "label": "21–27 de septiembre de 2026 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2026-09-21T00:00:00-03:00",
+    "end": "2026-09-27T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/WEEK_2026-W39_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W39-POL-1",
+          "headline": "Trump y Xi llegaron a una cumbre con comercio y seguridad en primer plano",
+          "summary": "La reunión del 24 de septiembre puso sobre la mesa comercio, Taiwán e Irán en un momento de alta competencia estratégica entre Estados Unidos y China.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/xi-rolls-into-trump-summit-with-chinas-trade-engine-roaring-2026-09-21/"
+          ]
+        },
+        {
+          "itemId": "W39-POL-2",
+          "headline": "La Asamblea General de la ONU concentró la diplomacia global",
+          "summary": "Guerras abiertas, gobernanza de IA y el futuro del multilateralismo dominaron la agenda de los líderes reunidos en Nueva York.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/world-leaders-return-un-amid-wars-middle-east-ukraine-2026-09-20/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "W39-TECH-1",
+          "headline": "OpenAI presentó GPT-6 Sol y Luna",
+          "summary": "Los nuevos modelos ampliaron la familia GPT-6 con perfiles distintos de capacidad y costo, reforzando la segmentación entre trabajo complejo y uso cotidiano eficiente.",
+          "sourceRefs": [
+            "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

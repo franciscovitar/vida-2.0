@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "MONTH",
+  "periodKey": "2026-01",
+  "state": "CLOSED",
+  "label": "Enero de 2026 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2026-01-01T00:00:00-03:00",
+    "end": "2026-01-31T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-01_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202601-POL-1",
+          "headline": "Estados Unidos capturó a Nicolás Maduro",
+          "summary": "Associated Press registró la captura de Nicolás Maduro por fuerzas estadounidenses y su traslado fuera de Venezuela como uno de los acontecimientos que definieron enero.",
+          "sourceRefs": [
+            "https://apnews.com/photo-gallery/photos-january-trump-venezuela-minneapolis-ice-immigration-c09e941f80ec61fe493b8f03eb047408"
+          ]
+        },
+        {
+          "itemId": "M202601-POL-2",
+          "headline": "La política migratoria estadounidense volvió al centro del conflicto interno",
+          "summary": "Las operaciones federales de inmigración en Minneapolis y las protestas asociadas fueron otro eje dominante de la cobertura del mes.",
+          "sourceRefs": [
+            "https://apnews.com/photo-gallery/photos-january-trump-venezuela-minneapolis-ice-immigration-c09e941f80ec61fe493b8f03eb047408"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202601-TECH-1",
+          "headline": "Gemini sumó más personalización y funciones proactivas",
+          "summary": "Google concentró sus novedades de enero en Personal Intelligence para Gemini y nuevas integraciones en Search, Gmail y otros productos.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/google-ai-updates-january-2026/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

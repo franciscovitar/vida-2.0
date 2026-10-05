@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "YEAR",
+  "periodKey": "2025",
+  "state": "CLOSED",
+  "label": "2025 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2025-01-01T00:00:00-03:00",
+    "end": "2025-12-31T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/YEAR_2025_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "Y2025-POL-1",
+          "headline": "Guerras prolongadas y reordenamiento político",
+          "summary": "Ucrania y Gaza siguieron entre los grandes focos de conflicto del año, mientras 2025 también estuvo marcado por cambios políticos y tensiones internacionales que redefinieron la agenda global.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "Y2025-SCI-1",
+          "headline": "Bennu aportó nuevas pistas sobre los ingredientes de la vida",
+          "summary": "El análisis de las muestras del asteroide Bennu reveló moléculas relevantes para la química de la vida y señales de una historia asociada a agua salada.",
+          "sourceRefs": [
+            "https://www.nasa.gov/news-release/nasas-asteroid-bennu-sample-reveals-mix-of-lifes-ingredients/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "Y2025-HEA-1",
+          "headline": "La OMS aprobó el Acuerdo sobre Pandemias",
+          "summary": "La Asamblea Mundial de la Salud adoptó en mayo el Acuerdo sobre Pandemias de la OMS, un nuevo marco internacional para mejorar prevención, preparación y respuesta ante futuras pandemias.",
+          "sourceRefs": [
+            "https://www.who.int/news/item/20-05-2025-world-health-assembly-adopts-historic-pandemic-agreement-to-make-the-world-more-equitable-and-safer-from-future-pandemics"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "Y2025-TECH-1",
+          "headline": "La IA avanzó hacia razonamiento y agentes",
+          "summary": "Durante 2025 los grandes laboratorios empujaron modelos con más razonamiento y sistemas capaces de ejecutar tareas de varios pasos; Google resumió el año como un salto hacia agentes y aplicaciones científicas más autónomas.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/products/2025-research-breakthroughs/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "Y2025-CUL-1",
+          "headline": "La elección de León XIV marcó un cambio histórico en el Vaticano",
+          "summary": "La elección del papa León XIV fue uno de los hitos institucionales y culturales destacados del año.",
+          "sourceRefs": [
+            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

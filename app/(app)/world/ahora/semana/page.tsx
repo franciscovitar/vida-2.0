@@ -12,8 +12,14 @@ export const metadata: Metadata = { title: 'World · Ahora · Semana' };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export default async function Page() {
-  const data = await getWorldTemporalPageData('WEEK');
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ period?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const period = typeof params.period === 'string' ? params.period : null;
+  const data = await getWorldTemporalPageData('WEEK', period);
 
   return (
     <div className={pageStyles.page}>

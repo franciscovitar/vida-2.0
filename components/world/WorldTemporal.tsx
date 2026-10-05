@@ -72,12 +72,22 @@ function ArchiveLinks({
   data: WorldTemporalPageData;
   granularity: WorldTemporalGranularity;
 }) {
-  if (!data.index || (granularity !== 'MONTH' && granularity !== 'YEAR')) return null;
+  if (!data.index || granularity === 'DAY') return null;
 
-  const entries = granularity === 'MONTH' ? data.index.months : data.index.years;
+  const entries =
+    granularity === 'WEEK'
+      ? data.index.weeks
+      : granularity === 'MONTH'
+        ? data.index.months
+        : data.index.years;
   if (!entries.length) return null;
 
-  const base = granularity === 'MONTH' ? '/world/ahora/mes' : '/world/ahora/ano';
+  const base =
+    granularity === 'WEEK'
+      ? '/world/ahora/semana'
+      : granularity === 'MONTH'
+        ? '/world/ahora/mes'
+        : '/world/ahora/ano';
 
   return (
     <nav

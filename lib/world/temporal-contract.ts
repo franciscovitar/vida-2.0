@@ -78,6 +78,7 @@ export function parseWorldTemporalIndex(value: unknown): WorldTemporalIndex | nu
     value.kind !== 'world_temporal_index' ||
     !isRecord(value.source) ||
     !isRecord(value.latest) ||
+    !Array.isArray(value.weeks) ||
     !Array.isArray(value.months) ||
     !Array.isArray(value.years)
   ) {
@@ -102,10 +103,12 @@ export function parseWorldTemporalIndex(value: unknown): WorldTemporalIndex | nu
     if (row !== null && parseEntry(row) === null) return null;
   }
 
+  if (!value.weeks.every((row) => parseEntry(row) !== null)) return null;
   if (!value.months.every((row) => parseEntry(row) !== null)) return null;
   if (!value.years.every((row) => parseEntry(row) !== null)) return null;
 
   const keys = [
+    ...value.weeks.map((row) => (row as WorldTemporalIndexEntry).periodKey),
     ...value.months.map((row) => (row as WorldTemporalIndexEntry).periodKey),
     ...value.years.map((row) => (row as WorldTemporalIndexEntry).periodKey),
   ];
@@ -243,11 +246,13 @@ export function selectWorldTemporalEntry(
 ): WorldTemporalIndexEntry | null {
   if (periodKey) {
     const pool =
-      granularity === 'MONTH'
-        ? index.months
-        : granularity === 'YEAR'
-          ? index.years
-          : [latestEntry(index, granularity)].filter(
+      granularity === 'WEEK'
+        ? index.weeks
+        : granularity === 'MONTH'
+          ? index.months
+          : granularity === 'YEAR'
+            ? index.years
+            : [latestEntry(index, granularity)].filter(
               (row): row is WorldTemporalIndexEntry => row !== null,
             );
     return pool.find((row) => row.periodKey === periodKey) ?? null;

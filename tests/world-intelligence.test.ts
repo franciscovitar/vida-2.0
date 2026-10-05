@@ -199,11 +199,14 @@ test('WORLD-12. Pirámide Temporal falla cerrado y conserva cobertura explícita
   assert.ok(period);
 
   assert.equal(index.latest.day?.periodKey, '2026-10-05');
-  assert.equal(index.months.length, 0);
-  assert.equal(index.years.length, 0);
+  assert.equal(index.weeks.length, 4);
+  assert.equal(index.months.length, 9);
+  assert.equal(index.years.length, 1);
   assert.equal(selectWorldTemporalEntry(index, 'DAY')?.periodKey, '2026-10-05');
-  assert.equal(selectWorldTemporalEntry(index, 'WEEK'), null);
-  assert.equal(selectWorldTemporalEntry(index, 'MONTH', '2026-09'), null);
+  assert.equal(selectWorldTemporalEntry(index, 'WEEK')?.periodKey, '2026-W40');
+  assert.equal(selectWorldTemporalEntry(index, 'WEEK', '2026-W39')?.periodKey, '2026-W39');
+  assert.equal(selectWorldTemporalEntry(index, 'MONTH', '2026-09')?.periodKey, '2026-09');
+  assert.equal(selectWorldTemporalEntry(index, 'YEAR', '2025')?.periodKey, '2025');
 
   assert.equal(period.granularity, 'DAY');
   assert.equal(period.state, 'IN_PROGRESS');
@@ -230,6 +233,10 @@ test('WORLD-12. Pirámide Temporal falla cerrado y conserva cobertura explícita
 test('WORLD-13. navegación temporal expone Día, Semana, Mes y Año sin crear backlog', () => {
   const nav = readFileSync(join(process.cwd(), 'components/world/WorldNavigation.tsx'), 'utf8');
   const temporal = readFileSync(join(process.cwd(), 'components/world/WorldTemporal.tsx'), 'utf8');
+  const weekPage = readFileSync(
+    join(process.cwd(), 'app/(app)/world/ahora/semana/page.tsx'),
+    'utf8',
+  );
 
   assert.match(nav, /Día/);
   assert.match(nav, /Semana/);
@@ -241,5 +248,8 @@ test('WORLD-13. navegación temporal expone Día, Semana, Mes y Año sin crear b
   assert.match(temporal, /Cobertura parcial/);
   assert.match(temporal, /En profundidad/);
   assert.match(temporal, /En seguimiento/);
+  assert.match(temporal, /data\.index\.weeks/);
+  assert.match(weekPage, /searchParams/);
+  assert.match(weekPage, /getWorldTemporalPageData\('WEEK', period\)/);
   assert.doesNotMatch(temporal, /unread count|infinite scroll|streak/i);
 });

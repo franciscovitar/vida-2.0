@@ -169,6 +169,7 @@ export interface WorldTemporalIndex {
     month: WorldTemporalIndexEntry | null;
     year: WorldTemporalIndexEntry | null;
   };
+  weeks: readonly WorldTemporalIndexEntry[];
   months: readonly WorldTemporalIndexEntry[];
   years: readonly WorldTemporalIndexEntry[];
 }

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "MONTH",
+  "periodKey": "2026-05",
+  "state": "CLOSED",
+  "label": "Mayo de 2026 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2026-05-01T00:00:00-03:00",
+    "end": "2026-05-31T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-05_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202605-ECO-1",
+          "headline": "Hormuz y la fragilidad de la tregua siguieron condicionando energía e inflación",
+          "summary": "La incertidumbre sobre el acuerdo entre Irán y Estados Unidos mantuvo al petróleo y a las expectativas de inflación como factores centrales para mercados y bancos centrales.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/take-five/global-markets-themes-graphic-2026-05-29/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202605-TECH-1",
+          "headline": "Google I/O aceleró el giro hacia experiencias agentivas",
+          "summary": "Las novedades de I/O incluyeron nuevas generaciones de Gemini y funciones orientadas a agentes en Search y otros productos.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/developers-tools/google-io-2026-collection/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202605-CUL-1",
+          "headline": "Hajj y Eid al-Adha movilizaron a millones",
+          "summary": "Las celebraciones y peregrinaciones islámicas estuvieron entre las imágenes globales más relevantes de finales de mayo.",
+          "sourceRefs": [
+            "https://apnews.com/photo-gallery/major-global-news-moments-may-ap-photos-b11cd19318724da0845c60f3a85e8cd5"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

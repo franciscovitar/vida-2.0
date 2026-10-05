@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "MONTH",
+  "periodKey": "2026-08",
+  "state": "CLOSED",
+  "label": "Agosto de 2026 · reconstrucción retrospectiva",
+  "window": {
+    "start": "2026-08-01T00:00:00-03:00",
+    "end": "2026-08-31T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "e92d001771b5affd3777dc755f2c20b03e692dd2",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/MONTH_2026-08_BACKFILL_V1.json",
+    "generatedAt": "2026-10-05T17:45:00Z",
+    "observedAt": "2026-10-05T17:45:00Z"
+  },
+  "readingDebt": false,
+  "transitionNote": "Reconstrucción retrospectiva archivística generada el 2026-10-05 con evidencia verificable disponible. No representa un coverage pass observado en tiempo real, mantiene cobertura retrospectiva parcial y no cuenta como evidencia prospectiva de Phase 11.",
+  "topStoryBriefIds": [],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202608-POL-1",
+          "headline": "Colombia inició un giro político con la asunción de Abelardo De La Espriella",
+          "summary": "El nuevo presidente asumió el 7 de agosto con una agenda centrada en seguridad y austeridad fiscal, marcando un desplazamiento hacia la derecha en la política colombiana.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/americas/de-la-espriella-take-office-colombia-president-pledges-security-crackdown-2026-08-07/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202608-ECO-1",
+          "headline": "Las dudas sobre el acuerdo con Irán volvieron a mover petróleo y mercados",
+          "summary": "La incertidumbre sobre el cumplimiento del acuerdo y el riesgo en Hormuz mantuvieron al crudo como una fuente recurrente de volatilidad global.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/china/global-markets-global-markets-2026-08-11/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202608-SCI-1",
+          "headline": "Inundaciones repentinas golpearon Nepal",
+          "summary": "Las inundaciones de fines de agosto estuvieron entre los eventos naturales más destacados del mes y volvieron a poner en primer plano la vulnerabilidad frente a extremos meteorológicos.",
+          "sourceRefs": [
+            "https://apnews.com/photo-gallery/major-global-news-moments-august-ap-photos-dce948b81b434237bd03cd10f580e519"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [
+        {
+          "itemId": "M202608-TECH-1",
+          "headline": "Gemini avanzó en velocidad, dispositivos y modelos de clima",
+          "summary": "Google presentó Gemini 3.7 Flash, nuevas funciones asociadas a Pixel 11 y mejoras en modelos de clima y transcripción.",
+          "sourceRefs": [
+            "https://blog.google/innovation-and-ai/technology/google-ai-updates-august-2026/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}
