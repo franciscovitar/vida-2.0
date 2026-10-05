@@ -22,7 +22,7 @@
     "stylelint:fix": "stylelint \"**/*.{css,scss}\" --fix",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --write package.json scripts/world-format-dump.mjs components/world/World.module.scss components/world/WorldTemporal.tsx lib/world/temporal-contract.ts data/generated/world/temporal/periods/month/2026-01.json data/generated/world/temporal/periods/month/2026-02.json data/generated/world/temporal/periods/month/2026-03.json data/generated/world/temporal/periods/month/2026-04.json data/generated/world/temporal/periods/month/2026-05.json data/generated/world/temporal/periods/month/2026-06.json data/generated/world/temporal/periods/month/2026-08.json data/generated/world/temporal/periods/month/2026-09.json data/generated/world/temporal/periods/week/2026-W37.json data/generated/world/temporal/periods/week/2026-W38.json data/generated/world/temporal/periods/week/2026-W39.json data/generated/world/temporal/periods/week/2026-W40.json data/generated/world/temporal/periods/year/2025.json && node scripts/world-format-dump.mjs && prettier --check .",
+    "format:check": "prettier --check .",
     "test": "node --import tsx --test \"tests/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
     "verify": "npm run check && npm run build",

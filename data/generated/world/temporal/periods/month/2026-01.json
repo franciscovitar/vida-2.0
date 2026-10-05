@@ -155,9 +155,7 @@
           "itemId": "M202601-TECH-4",
           "headline": "OpenAI lanzó Health como espacio separado para información médica personal",
           "summary": "ChatGPT comenzó a desplegar un entorno específico para salud con conexiones a historiales médicos y datos de bienestar, manteniendo esos datos separados del resto de la experiencia. El lanzamiento mostró que los asistentes generales empezaban a especializarse en dominios donde privacidad, trazabilidad y límites de uso son críticos.",
-          "sourceRefs": [
-            "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
-          ]
+          "sourceRefs": ["https://help.openai.com/en/articles/6825453-chatgpt-release-notes"]
         }
       ],
       "deepDiveBriefIds": [],

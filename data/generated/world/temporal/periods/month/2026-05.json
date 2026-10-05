@@ -115,17 +115,13 @@
           "itemId": "M202605-HEA-2",
           "headline": "El brote de virus Andes creció a 13 casos y tres muertes",
           "summary": "Para fines de mayo la OMS reportó casos confirmados en varios países y mantuvo una cuarentena prolongada para contactos de alto riesgo. El episodio fue inusual porque el virus Andes puede transmitirse entre personas, algo que no ocurre con la mayoría de los hantavirus conocidos.",
-          "sourceRefs": [
-            "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON604"
-          ]
+          "sourceRefs": ["https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON604"]
         },
         {
           "itemId": "M202605-HEA-3",
           "headline": "Mpox siguió aumentando en África mientras otros brotes exigían vigilancia simultánea",
           "summary": "La OMS mantenía seguimiento de mpox, cólera y otros eventos al mismo tiempo que respondía al nuevo brote de hantavirus. El desafío operativo era precisamente la simultaneidad: sistemas de salud con recursos finitos necesitan detectar señales nuevas sin abandonar emergencias que llevan meses activas.",
-          "sourceRefs": [
-            "https://www.who.int/emergencies/situation-reports"
-          ]
+          "sourceRefs": ["https://www.who.int/emergencies/situation-reports"]
         }
       ],
       "deepDiveBriefIds": [],
@@ -180,17 +176,13 @@
           "itemId": "M202605-TECH-6",
           "headline": "OpenAI reforzó la procedencia de contenido generado con estándares y marcas verificables",
           "summary": "La empresa avanzó con Content Credentials, SynthID y herramientas de verificación para ayudar a identificar el origen de imágenes generadas. La necesidad de procedencia crecía a medida que la calidad de generación hacía cada vez menos confiable juzgar autenticidad simplemente mirando una pieza.",
-          "sourceRefs": [
-            "https://openai.com/index/advancing-content-provenance/"
-          ]
+          "sourceRefs": ["https://openai.com/index/advancing-content-provenance/"]
         },
         {
           "itemId": "M202605-TECH-7",
           "headline": "ChatGPT amplió la memoria personalizada y mostró qué fuentes usaba para recordar",
           "summary": "OpenAI mejoró la recuperación de contexto desde chats, memorias, archivos y Gmail conectado, además de hacer visibles las fuentes de memoria. El avance buscó aumentar continuidad sin convertir el recuerdo en una caja negra, un equilibrio importante para asistentes que acompañan proyectos durante meses o años.",
-          "sourceRefs": [
-            "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
-          ]
+          "sourceRefs": ["https://help.openai.com/en/articles/6825453-chatgpt-release-notes"]
         }
       ],
       "deepDiveBriefIds": [],

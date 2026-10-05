@@ -98,9 +98,7 @@
           "itemId": "M202609-ECO-1",
           "headline": "La Reserva Federal realizó su primera suba de tasas desde 2023",
           "summary": "La Fed elevó la tasa 25 puntos básicos en un contexto de inflación persistente, petróleo caro y rendimientos soberanos en ascenso. La decisión confirmó que el shock energético y la demanda todavía fuerte habían invertido el debate: el riesgo volvió a ser cuánto más debía endurecerse la política, no cuándo empezarían los recortes.",
-          "sourceRefs": [
-            "https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-16/"
-          ]
+          "sourceRefs": ["https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-16/"]
         },
         {
           "itemId": "M202609-ECO-2",
@@ -196,33 +194,25 @@
           "itemId": "M202609-TECH-1",
           "headline": "OpenAI lanzó GPT‑6 Astra y elevó otra vez la frontera de modelos generales",
           "summary": "Astra llegó con mejoras fuertes en uso de computadoras, navegación, programación, ciberseguridad, ciencia y trabajo profesional. La novedad importante no fue solo benchmark: consolidó la idea de modelos capaces de ejecutar cadenas de trabajo más largas y operar herramientas, aumentando tanto utilidad como exigencias de seguridad.",
-          "sourceRefs": [
-            "https://openai.com/index/gpt-6-astra/"
-          ]
+          "sourceRefs": ["https://openai.com/index/gpt-6-astra/"]
         },
         {
           "itemId": "M202609-TECH-2",
           "headline": "GPT‑Live‑1 llevó conversaciones de voz full‑duplex a la API",
           "summary": "OpenAI presentó un modelo orientado a voz natural, seguimiento de instrucciones, voces personalizadas y telefonía. Eso redujo la distancia entre un asistente de texto y agentes capaces de mantener conversaciones habladas continuas dentro de productos y servicios.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-gpt-live-1-in-the-api/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-gpt-live-1-in-the-api/"]
         },
         {
           "itemId": "M202609-TECH-3",
           "headline": "GPT‑6 Sol y Luna ampliaron la frontera hacia distintos niveles de costo",
           "summary": "OpenAI extendió la familia GPT‑6 con modelos diseñados para acercar capacidades avanzadas a tareas cotidianas y presupuestos diferentes. La competencia empezó a organizarse menos como 'el mejor modelo' y más como una curva capacidad‑latencia‑precio para elegir por trabajo.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-gpt-6-sol-and-luna/"]
         },
         {
           "itemId": "M202609-TECH-4",
           "headline": "GPT‑6.1 Sol acercó parte del rendimiento de Astra a un costo menor",
           "summary": "La actualización del 29 de septiembre apuntó a programación y trabajo profesional exigente con más iteración por menos de la mitad del precio estándar de tokens de Astra. Es una señal de que las mejoras intermedias de eficiencia pueden importar tanto como los grandes saltos generacionales.",
-          "sourceRefs": [
-            "https://openai.com/es-419/research/index/release/"
-          ]
+          "sourceRefs": ["https://openai.com/es-419/research/index/release/"]
         },
         {
           "itemId": "M202609-TECH-5",

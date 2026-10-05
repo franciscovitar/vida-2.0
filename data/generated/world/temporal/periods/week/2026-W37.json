@@ -73,9 +73,7 @@
           "itemId": "W37-ECO-2",
           "headline": "Mercados, inflación y tasas volvieron a tensionarse al mismo tiempo",
           "summary": "Wall Street retrocedió, el petróleo rondó los 100 dólares, el cobre tocó máximos y subieron las expectativas de endurecimiento monetario en varias economías. La mezcla de energía cara y actividad todavía resistente complicó la expectativa de que los bancos centrales pudieran aflojar pronto.",
-          "sourceRefs": [
-            "https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-08/"
-          ]
+          "sourceRefs": ["https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-08/"]
         }
       ],
       "deepDiveBriefIds": [],
@@ -114,25 +112,19 @@
           "itemId": "W37-TECH-1",
           "headline": "GPT‑Live‑1 llevó voz natural full‑duplex a la API de OpenAI",
           "summary": "El nuevo modelo permitió conversaciones continuas con mejor seguimiento de instrucciones, voces personalizadas y soporte para telefonía. La relevancia práctica es que los agentes de voz pueden integrarse más directamente en atención, ventas y flujos operativos sin encadenar tantos componentes separados.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-gpt-live-1-in-the-api/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-gpt-live-1-in-the-api/"]
         },
         {
           "itemId": "W37-TECH-2",
           "headline": "OpenAI mostró cómo Astra empezaba a convertirse en trabajo ejecutable",
           "summary": "La compañía publicó ejemplos de tareas profesionales y técnicas que el modelo podía completar con más autonomía. El paso de benchmark a workflow importa porque la utilidad real de estos sistemas depende de cuánto trabajo completo pueden resolver, no solo de respuestas aisladas.",
-          "sourceRefs": [
-            "https://openai.com/index/the-work-now-within-reach/"
-          ]
+          "sourceRefs": ["https://openai.com/index/the-work-now-within-reach/"]
         },
         {
           "itemId": "W37-TECH-3",
           "headline": "La API de OpenAI mejoró la observabilidad del prompt caching",
           "summary": "Nuevos diagnósticos hicieron más visible cuándo se reutiliza contexto y cómo afecta costo y latencia. Es una mejora menos espectacular que un nuevo modelo, pero relevante para llevar agentes largos a producción sin pagar repetidamente por el mismo prefijo.",
-          "sourceRefs": [
-            "https://developers.openai.com/api/docs/changelog"
-          ]
+          "sourceRefs": ["https://developers.openai.com/api/docs/changelog"]
         }
       ],
       "deepDiveBriefIds": [],

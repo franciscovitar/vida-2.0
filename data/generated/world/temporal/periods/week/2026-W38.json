@@ -65,9 +65,7 @@
           "itemId": "W38-ECO-1",
           "headline": "La Reserva Federal realizó su primera suba de tasas desde 2023",
           "summary": "La Fed aumentó 25 puntos básicos mientras petróleo e inflación seguían presionando y los rendimientos de bonos subían. El giro confirmó que el escenario había cambiado: los mercados pasaron de esperar recortes a discutir cuántas subas adicionales podían venir.",
-          "sourceRefs": [
-            "https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-16/"
-          ]
+          "sourceRefs": ["https://www.reuters.com/world/china/global-markets-wrapup-1-2026-09-16/"]
         },
         {
           "itemId": "W38-ECO-2",

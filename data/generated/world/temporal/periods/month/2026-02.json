@@ -114,9 +114,7 @@
           "itemId": "M202602-HEA-2",
           "headline": "Cólera, mpox y emergencias humanitarias siguieron exigiendo vigilancia internacional",
           "summary": "Los reportes de emergencia de la OMS durante febrero incluyeron actualizaciones sobre cólera, mpox, inundaciones en el sudeste de África y la crisis de Sudán. El patrón común fue que conflicto, desplazamiento y sistemas sanitarios débiles seguían amplificando enfermedades que en contextos estables serían mucho más controlables.",
-          "sourceRefs": [
-            "https://www.who.int/emergencies/situation-reports"
-          ]
+          "sourceRefs": ["https://www.who.int/emergencies/situation-reports"]
         }
       ],
       "deepDiveBriefIds": [],

@@ -81,9 +81,7 @@
           "itemId": "M202603-ECO-3",
           "headline": "OpenAI captó 122.000 millones de dólares y volvió visible la escala financiera de la carrera por IA",
           "summary": "La ronda dejó una valoración posinversión de 852.000 millones de dólares y mostró que entrenar, desplegar y distribuir modelos de frontera ya requería capital comparable al de grandes sectores industriales. El acceso sostenido a cómputo pasó a ser una ventaja estratégica tan importante como el propio avance algorítmico.",
-          "sourceRefs": [
-            "https://openai.com/index/accelerating-the-next-phase-ai/"
-          ]
+          "sourceRefs": ["https://openai.com/index/accelerating-the-next-phase-ai/"]
         }
       ],
       "deepDiveBriefIds": [],
@@ -114,17 +112,13 @@
           "itemId": "M202603-HEA-1",
           "headline": "La OMS siguió tratando mpox como una emergencia internacional que requería vigilancia sostenida",
           "summary": "Los reportes de marzo mostraron que el brote multicountry seguía activo y necesitaba seguimiento epidemiológico coordinado. La lección era que una emergencia puede dejar de dominar titulares y continuar siendo material para salud pública, especialmente cuando transmisión, acceso a vacunas y capacidad de vigilancia son desiguales.",
-          "sourceRefs": [
-            "https://www.who.int/emergencies/situation-reports"
-          ]
+          "sourceRefs": ["https://www.who.int/emergencies/situation-reports"]
         },
         {
           "itemId": "M202603-HEA-2",
           "headline": "Afganistán y Somalia mostraron cómo conflicto y fragilidad agravan riesgos sanitarios",
           "summary": "La OMS publicó análisis de situación para ambos países durante marzo, señalando amenazas derivadas de desplazamiento, acceso limitado a atención y servicios básicos débiles. Son crisis menos visibles que una pandemia, pero combinan enfermedades prevenibles con sistemas incapaces de absorber shocks prolongados.",
-          "sourceRefs": [
-            "https://www.who.int/emergencies/situation-reports"
-          ]
+          "sourceRefs": ["https://www.who.int/emergencies/situation-reports"]
         }
       ],
       "deepDiveBriefIds": [],
@@ -155,17 +149,13 @@
           "itemId": "M202603-TECH-3",
           "headline": "GPT-5.4 mini amplió el acceso a razonamiento cuando se agotaban límites de modelos mayores",
           "summary": "OpenAI comenzó a usar una versión mini como respaldo para usuarios que alcanzaban límites de GPT-5.4 Thinking. El cambio importó menos por el nombre del modelo que por la estrategia: mantener razonamiento disponible a menor costo en lugar de volver automáticamente a una experiencia puramente rápida.",
-          "sourceRefs": [
-            "https://help.openai.com/es-419/articles/6825453-chatgpt-release-notes"
-          ]
+          "sourceRefs": ["https://help.openai.com/es-419/articles/6825453-chatgpt-release-notes"]
         },
         {
           "itemId": "M202603-TECH-4",
           "headline": "El financiamiento de OpenAI confirmó que la IA de frontera ya era también una carrera de infraestructura",
           "summary": "La empresa vinculó explícitamente capital, cómputo, distribución y adopción empresarial como un ciclo que refuerza su capacidad. Eso mostró que la ventaja competitiva en IA ya no dependía únicamente de investigación: también de poder financiar centros de datos, servir millones de usuarios y sostener iteración acelerada.",
-          "sourceRefs": [
-            "https://openai.com/index/accelerating-the-next-phase-ai/"
-          ]
+          "sourceRefs": ["https://openai.com/index/accelerating-the-next-phase-ai/"]
         }
       ],
       "deepDiveBriefIds": [],

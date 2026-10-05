@@ -122,9 +122,7 @@
           "itemId": "M202606-HEA-1",
           "headline": "La investigación del brote de virus Andes confirmó una respuesta internacional de gran escala",
           "summary": "Un análisis publicado en junio describió evacuaciones, cuarentenas, seguimiento de cientos de contactos y coordinación entre numerosos países por el brote del MV Hondius. El episodio se convirtió en un caso real de cómo los mecanismos internacionales de vigilancia funcionan cuando una enfermedad rara cruza fronteras mediante viajes.",
-          "sourceRefs": [
-            "https://pmc.ncbi.nlm.nih.gov/articles/PMC13291726/"
-          ]
+          "sourceRefs": ["https://pmc.ncbi.nlm.nih.gov/articles/PMC13291726/"]
         },
         {
           "itemId": "M202606-HEA-2",
@@ -147,25 +145,19 @@
           "itemId": "M202606-TECH-1",
           "headline": "OpenAI adelantó GPT-5.6 Sol como siguiente salto de su línea de frontera",
           "summary": "La vista previa destacó mejoras en programación, ciencia y ciberseguridad junto con un sistema de seguridad más robusto. También introdujo una familia con opciones más baratas, señal de que la competencia empezaba a optimizar simultáneamente capacidad máxima y costo por tarea.",
-          "sourceRefs": [
-            "https://openai.com/index/previewing-gpt-5-6-sol/"
-          ]
+          "sourceRefs": ["https://openai.com/index/previewing-gpt-5-6-sol/"]
         },
         {
           "itemId": "M202606-TECH-2",
           "headline": "ChatGPT cambió su sistema de memoria para sintetizar contexto de largo plazo",
           "summary": "OpenAI presentó Dreaming, un mecanismo pensado para evitar recuerdos obsoletos y mantener preferencias y proyectos más frescos. La memoria dejó de ser simplemente guardar hechos: empezó a tratarse como un problema de síntesis, vigencia y selección de contexto a lo largo de meses o años.",
-          "sourceRefs": [
-            "https://openai.com/index/chatgpt-memory-dreaming/"
-          ]
+          "sourceRefs": ["https://openai.com/index/chatgpt-memory-dreaming/"]
         },
         {
           "itemId": "M202606-TECH-3",
           "headline": "GPT-Rosalind avanzó como modelo especializado para investigación biomédica",
           "summary": "OpenAI amplió capacidades en razonamiento biológico, química medicinal, genómica y flujos experimentales. El movimiento mostró otra dirección de la IA avanzada: modelos generales siguen creciendo, pero parte del valor científico puede venir de sistemas especializados con herramientas y conocimiento adaptados a un dominio.",
-          "sourceRefs": [
-            "https://openai.com/research/index/release/"
-          ]
+          "sourceRefs": ["https://openai.com/research/index/release/"]
         },
         {
           "itemId": "M202606-TECH-4",

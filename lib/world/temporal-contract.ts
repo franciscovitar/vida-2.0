@@ -256,8 +256,8 @@ export function selectWorldTemporalEntry(
           : granularity === 'YEAR'
             ? index.years
             : [latestEntry(index, granularity)].filter(
-              (row): row is WorldTemporalIndexEntry => row !== null,
-            );
+                (row): row is WorldTemporalIndexEntry => row !== null,
+              );
     return pool.find((row) => row.periodKey === periodKey) ?? null;
   }
 

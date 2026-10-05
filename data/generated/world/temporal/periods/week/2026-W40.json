@@ -170,9 +170,7 @@
           "itemId": "W40-TECH-4",
           "headline": "OpenAI presentó GPT‑6.1 Sol con una mejora fuerte en costo‑rendimiento",
           "summary": "La actualización acercó parte del rendimiento de Astra en programación y trabajo profesional a un modelo más barato para iterar. Este tipo de avance cambia decisiones de producto rápidamente porque puede volver económicamente viables workflows que con el modelo máximo eran demasiado costosos.",
-          "sourceRefs": [
-            "https://openai.com/es-419/research/index/release/"
-          ]
+          "sourceRefs": ["https://openai.com/es-419/research/index/release/"]
         }
       ],
       "deepDiveBriefIds": [],

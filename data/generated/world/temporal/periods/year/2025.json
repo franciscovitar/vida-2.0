@@ -183,9 +183,7 @@
           "itemId": "Y2025-SCI-4",
           "headline": "El clima extremo volvió a dejar una señal física global difícil de ignorar",
           "summary": "Incendios en California y otras regiones, inundaciones, terremotos y huracanes marcaron el año con destrucción y evacuaciones. No todos esos desastres tienen la misma relación causal con el clima, pero la combinación mostró cuánto dependen sociedades modernas de infraestructura capaz de resistir eventos severos.",
-          "sourceRefs": [
-            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
-          ]
+          "sourceRefs": ["https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"]
         },
         {
           "itemId": "Y2025-SCI-5",
@@ -282,33 +280,25 @@
           "itemId": "Y2025-TECH-1",
           "headline": "Operator mostró por primera vez a gran escala un agente que podía usar un navegador por el usuario",
           "summary": "OpenAI lanzó una vista previa capaz de hacer clic, escribir y navegar para completar tareas web. Aunque tenía limitaciones, el producto hizo tangible la transición desde chatbots que aconsejan hacia sistemas que actúan directamente en interfaces diseñadas originalmente para personas.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-operator/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-operator/"]
         },
         {
           "itemId": "Y2025-TECH-2",
           "headline": "Deep Research convirtió la navegación autónoma y síntesis extensa en un producto de consumo",
           "summary": "OpenAI presentó un agente que podía buscar, analizar y combinar cientos de fuentes durante varios minutos. La capacidad cambió expectativas sobre investigación asistida: en lugar de responder inmediatamente, el sistema podía dedicar tiempo a construir un informe y modificar su estrategia mientras encontraba nueva evidencia.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-deep-research/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-deep-research/"]
         },
         {
           "itemId": "Y2025-TECH-3",
           "headline": "La Responses API y el Agents SDK dieron a desarrolladores bloques más directos para construir agentes",
           "summary": "OpenAI integró búsqueda web, archivos, uso de computadora y herramientas dentro de una plataforma orientada a sistemas autónomos. Eso redujo la cantidad de infraestructura personalizada necesaria y ayudó a mover los agentes desde prototipos con prompts hacia aplicaciones más observables y mantenibles.",
-          "sourceRefs": [
-            "https://openai.com/index/new-tools-for-building-agents/"
-          ]
+          "sourceRefs": ["https://openai.com/index/new-tools-for-building-agents/"]
         },
         {
           "itemId": "Y2025-TECH-4",
           "headline": "GPT-5 unificó respuestas rápidas y razonamiento profundo dentro de un mismo sistema",
           "summary": "OpenAI lanzó una arquitectura que decide cuándo responder directamente y cuándo usar más razonamiento, con mejoras en programación, escritura, salud y percepción visual. Para el usuario, la innovación fue menos visible como selector de modelos y más como una experiencia que intenta elegir automáticamente cuánto pensar.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-gpt-5/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-gpt-5/"]
         },
         {
           "itemId": "Y2025-TECH-5",
@@ -360,9 +350,7 @@
           "itemId": "Y2025-CUL-1",
           "headline": "La elección de León XIV abrió una nueva etapa histórica para la Iglesia católica",
           "summary": "Tras la muerte del papa Francisco, el cónclave eligió a León XIV, uno de los acontecimientos institucionales y religiosos más observados del año. La transición importó por el peso global de la Iglesia y por cómo un cambio de pontífice puede modificar prioridades diplomáticas, sociales y pastorales durante años.",
-          "sourceRefs": [
-            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
-          ]
+          "sourceRefs": ["https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"]
         },
         {
           "itemId": "Y2025-CUL-2",
@@ -377,17 +365,13 @@
           "itemId": "Y2025-CUL-3",
           "headline": "Hajj volvió a reunir a millones de musulmanes en uno de los mayores rituales colectivos del planeta",
           "summary": "La peregrinación a La Meca siguió siendo un acontecimiento religioso, logístico y sanitario de enorme escala. En un año de conflictos y desplazamientos, las imágenes del Hajj también recordaron la capacidad de prácticas centenarias para mantener continuidad y sentido compartido entre comunidades distribuidas por todo el mundo.",
-          "sourceRefs": [
-            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
-          ]
+          "sourceRefs": ["https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"]
         },
         {
           "itemId": "Y2025-CUL-4",
           "headline": "Ceremonias y celebraciones en zonas de guerra mostraron formas de continuidad social bajo destrucción",
           "summary": "AP destacó, entre otras escenas, bodas colectivas en Gaza y reuniones comunitarias en contextos de conflicto. Su importancia no está en competir con las noticias militares, sino en mostrar que incluso durante guerras prolongadas las personas intentan preservar rituales, vínculos y proyectos de vida.",
-          "sourceRefs": [
-            "https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"
-          ]
+          "sourceRefs": ["https://www.ap.org/news-highlights/spotlights/2025/2025-year-in-review/"]
         }
       ],
       "deepDiveBriefIds": [],

@@ -105,9 +105,7 @@
           "itemId": "W39-TECH-1",
           "headline": "OpenAI presentó GPT‑6 Sol y Luna para distintos equilibrios entre capacidad y costo",
           "summary": "Los nuevos modelos extendieron los avances de Astra hacia opciones más rápidas y económicas. Eso reforzó un cambio práctico en la industria: elegir modelo empieza a parecerse a elegir infraestructura por workload, no a usar siempre el modelo máximo.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-gpt-6-sol-and-luna/"]
         },
         {
           "itemId": "W39-TECH-2",

@@ -142,9 +142,7 @@
           "itemId": "M202604-HEA-1",
           "headline": "La OMS mantuvo la vigilancia internacional sobre mpox mientras persistían brotes multicountry",
           "summary": "El reporte de fines de abril mostró que mpox seguía necesitando seguimiento coordinado y capacidad diagnóstica en varias regiones. El problema había perdido presencia mediática respecto de años anteriores, pero seguía siendo una prueba de cuánto puede durar una emergencia sanitaria aun cuando deja de ser noticia cotidiana.",
-          "sourceRefs": [
-            "https://www.who.int/emergencies/situation-reports"
-          ]
+          "sourceRefs": ["https://www.who.int/emergencies/situation-reports"]
         }
       ],
       "deepDiveBriefIds": [],
@@ -183,25 +181,19 @@
           "itemId": "M202604-TECH-4",
           "headline": "GPT-5.5 llevó los agentes hacia tareas largas de trabajo real",
           "summary": "OpenAI presentó un modelo enfocado en programación, investigación, documentos, hojas de cálculo, uso de software y ejecución de tareas ambiguas de varios pasos. El lanzamiento reforzó una transición clara: el valor empezaba a medirse por completar trabajo de principio a fin y no solo por responder preguntas difíciles.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-gpt-5-5/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-gpt-5-5/"]
         },
         {
           "itemId": "M202604-TECH-5",
           "headline": "ChatGPT incorporó agentes compartidos para organizaciones",
           "summary": "Workspace Agents permitió que equipos crearan agentes reutilizables conectados con conocimiento y herramientas de la organización, operando bajo permisos corporativos. Esto convirtió la automatización agentiva en un objeto compartido y gobernable, más cercano a un proceso de trabajo que a una conversación individual.",
-          "sourceRefs": [
-            "https://openai.com/index/introducing-workspace-agents-in-chatgpt/"
-          ]
+          "sourceRefs": ["https://openai.com/index/introducing-workspace-agents-in-chatgpt/"]
         },
         {
           "itemId": "M202604-TECH-6",
           "headline": "OpenAI obtuvo autorización FedRAMP Moderate para ampliar el uso gubernamental de IA",
           "summary": "La certificación habilitó un camino más formal para que agencias federales estadounidenses usaran ChatGPT Enterprise y la API bajo requisitos de seguridad y gobernanza. El hito mostró que la adopción institucional depende tanto de controles y cumplimiento como de la capacidad técnica de los modelos.",
-          "sourceRefs": [
-            "https://openai.com/index/openai-available-at-fedramp-moderate/"
-          ]
+          "sourceRefs": ["https://openai.com/index/openai-available-at-fedramp-moderate/"]
         }
       ],
       "deepDiveBriefIds": [],
