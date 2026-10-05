@@ -3,10 +3,9 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { WORLD_DOMAINS, worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
+import { worldDomainLabel, worldPieceHref } from '@/lib/world/contract';
 import type {
   WorldCoverageState,
-  WorldDomain,
   WorldPieceSummary,
   WorldTemporalGranularity,
   WorldTemporalIndexEntry,
