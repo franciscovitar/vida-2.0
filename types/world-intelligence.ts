@@ -27,6 +27,7 @@ export interface WorldPieceSummary {
   pieceRef: string;
   editorialDraftSha256: string;
   humanReviewRef: string;
+  sourceCommit?: string;
   publicationState: WorldPublicationState;
 }
 
@@ -58,6 +59,7 @@ export interface WorldSurfaceSnapshot {
     items: readonly WorldPieceSummary[];
   };
   learn: { items: readonly WorldPieceSummary[] };
+  library: { items: readonly WorldPieceSummary[] };
   domains: readonly WorldDomainSummary[];
   coverageNotes: readonly string[];
 }
