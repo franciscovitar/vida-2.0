@@ -177,3 +177,24 @@ test('WORLD-11. Biblioteca preserva historia sin mezclarla con la edición actua
   assert.match(ui, /snapshot\.library\.items/);
   assert.match(article, /section\.title \?/);
 });
+
+
+test('WORLD-12. Ahora expone Día/Semana/Mes/Año sin fabricar rollups inexistentes', () => {
+  const ui = readFileSync(join(process.cwd(), 'components/world/WorldSurface.tsx'), 'utf8');
+  const nowRoute = readFileSync(join(process.cwd(), 'app/(app)/world/ahora/page.tsx'), 'utf8');
+  const domainRoute = readFileSync(
+    join(process.cwd(), 'app/(app)/world/tema/[domain]/page.tsx'),
+    'utf8',
+  );
+
+  assert.match(ui, /label: 'Día'/);
+  assert.match(ui, /label: 'Semana'/);
+  assert.match(ui, /label: 'Mes'/);
+  assert.match(ui, /label: 'Año'/);
+  assert.match(ui, /temporalPeriod === 'day' \? snapshot\.now\.items : \[\]/);
+  assert.match(ui, /Todavía no hay un cierre semanal publicado/);
+  assert.match(ui, /Los meses cerrados quedarán archivados acá/);
+  assert.match(ui, /Los años cerrados quedarán archivados acá/);
+  assert.match(nowRoute, /searchParams/);
+  assert.match(domainRoute, /searchParams/);
+});
