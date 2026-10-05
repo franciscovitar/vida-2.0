@@ -22,13 +22,10 @@ test('WORLD-01. superficie válida, finita y human-approved', () => {
   assert.equal(parsed.source.repository, 'franciscovitar/personal-ai-system');
   assert.match(parsed.source.commit, /^[a-f0-9]{40}$/);
   assert.equal(parsed.readingDebt, false);
-  assert.equal(parsed.now.items.length, 1);
-  assert.equal(parsed.learn.items.length, 1);
-  assert.ok(
-    [...parsed.now.items, ...parsed.learn.items].every(
-      (item) => item.publicationState === 'HUMAN_APPROVED',
-    ),
-  );
+  assert.equal(parsed.now.items.length, 3);
+  assert.equal(parsed.learn.items.length, 0);
+  assert.equal(parsed.library.items.length, 5);
+  assert.ok(parsed.library.items.every((item) => item.publicationState === 'HUMAN_APPROVED'));
   assert.doesNotMatch(raw, /NOTION_API_TOKEN|GOOGLE_PRIVATE_KEY|AUTH_SECRET/);
 });
 
@@ -38,11 +35,11 @@ test('WORLD-02. superficie faltante o corrupta falla cerrado', () => {
 });
 
 test('WORLD-03. frescura se hace visible sin fabricar edición nueva', () => {
-  const fresh = resolveWorldSurfaceText(surfaceText(), new Date('2026-10-03T18:00:00-03:00'));
+  const fresh = resolveWorldSurfaceText(surfaceText(), new Date('2026-10-05T11:00:00-03:00'));
   assert.equal(fresh.status, 'ready');
   assert.equal(fresh.stale, false);
 
-  const stale = resolveWorldSurfaceText(surfaceText(), new Date('2026-10-06T18:00:00-03:00'));
+  const stale = resolveWorldSurfaceText(surfaceText(), new Date('2026-10-07T22:00:00-03:00'));
   assert.equal(stale.status, 'ready');
   assert.equal(stale.stale, true);
   assert.match(stale.notice ?? '', /desactualizada/i);
@@ -52,18 +49,31 @@ test('WORLD-04. cada card resuelve exactamente a su pieza y provenance', () => {
   const surface = parseWorldSurfaceSnapshot(JSON.parse(surfaceText()));
   assert.ok(surface);
 
-  for (const summary of [...surface.now.items, ...surface.learn.items]) {
+  for (const summary of surface.library.items) {
     const raw = readFileSync(join(root, 'pieces', `${summary.slug}.json`), 'utf8');
     const piece = parseWorldPublishedPiece(JSON.parse(raw));
     assert.ok(piece);
-    assert.equal(piece.source.commit, surface.source.commit);
+    assert.equal(piece.source.commit, summary.sourceCommit ?? surface.source.commit);
     assert.equal(piece.source.ref, surface.source.ref);
     assert.equal(piece.source.canonicalRef, summary.pieceRef);
     assert.equal(piece.editorialDraftSha256, summary.editorialDraftSha256);
-    assert.equal(
-      resolveWorldPieceText(raw, summary, surface, new Date('2026-10-03T18:00:00-03:00')).status,
-      'ready',
+
+    const resolved = resolveWorldPieceText(
+      raw,
+      summary,
+      surface,
+      new Date('2026-10-05T11:00:00-03:00'),
     );
+    assert.equal(resolved.status, 'ready');
+
+    if (
+      summary.mode === 'NOW' &&
+      summary.sourceCommit &&
+      summary.sourceCommit !== surface.source.commit
+    ) {
+      assert.equal(resolved.stale, true);
+      assert.match(resolved.notice ?? '', /edición anterior/i);
+    }
   }
 });
 
@@ -139,4 +149,30 @@ test('WORLD-10. navegación general expone World', () => {
   assert.match(nav, /label: 'World'/);
   assert.match(nav, /href: '\/world'/);
   assert.match(nav, /icon: 'world'/);
+});
+
+
+test('WORLD-11. Biblioteca preserva historia sin mezclarla con la edición actual', () => {
+  const surface = parseWorldSurfaceSnapshot(JSON.parse(surfaceText()));
+  assert.ok(surface);
+
+  const currentIds = new Set([...surface.now.items, ...surface.learn.items].map((item) => item.briefId));
+  const libraryIds = new Set(surface.library.items.map((item) => item.briefId));
+
+  assert.equal(currentIds.size, 3);
+  assert.equal(libraryIds.size, 5);
+  for (const id of currentIds) assert.ok(libraryIds.has(id));
+
+  assert.ok(
+    surface.library.items.some(
+      (item) =>
+        item.briefId === 'WORLD-PILOT-CRISPR-2026-10-03' &&
+        item.sourceCommit === '4ef65a46b3da9bcd2af11fc64091114ec53b29be',
+    ),
+  );
+
+  const ui = readFileSync(join(process.cwd(), 'components/world/WorldSurface.tsx'), 'utf8');
+  const article = readFileSync(join(process.cwd(), 'components/world/WorldPiece.tsx'), 'utf8');
+  assert.match(ui, /snapshot\.library\.items/);
+  assert.match(article, /section\.title \?/);
 });
