@@ -203,6 +203,11 @@ function macroFromItems(input: {
           : known.length > 0
             ? 'partial'
             : 'none',
+    approximate: false,
+    estimateQuality:
+      known.length === 0
+        ? 'unknown'
+        : aggregateConfidence(active.map((row) => confidenceValue(row.confidence))),
     knownItemCount: known.length,
     totalItemCount: active.length,
   };
@@ -332,6 +337,8 @@ function buildNutrients(
         name: stringValue(row.nutrientName) ?? catalog.name,
         group: nutrientGroup(row.group, catalog.group),
         amount: numberValue(row.amount),
+        amountLow: numberValue(row.amountLow),
+        amountHigh: numberValue(row.amountHigh),
         unit: stringValue(row.unit) ?? targetUnit ?? catalog.unit,
         target: targetAmount ?? numberValue(row.targetAmount ?? row.target),
         lowerTarget: lowerTarget ?? numberValue(row.lowerTarget),
@@ -349,6 +356,8 @@ function buildNutrients(
         name: catalog.name,
         group: catalog.group,
         amount: derived.amount,
+        amountLow: null,
+        amountHigh: null,
         unit: targetUnit ?? catalog.unit,
         target: targetAmount,
         lowerTarget,
@@ -369,6 +378,8 @@ function buildNutrients(
         name: catalog.name,
         group: catalog.group,
         amount: derived.amount,
+        amountLow: null,
+        amountHigh: null,
         unit: targetUnit ?? catalog.unit,
         target: targetAmount,
         lowerTarget,
@@ -387,6 +398,8 @@ function buildNutrients(
       name: catalog.name,
       group: catalog.group,
       amount: null,
+      amountLow: null,
+      amountHigh: null,
       unit: targetUnit ?? catalog.unit,
       target: targetAmount,
       lowerTarget,
@@ -437,6 +450,8 @@ function parseAiInsights(result: ReadTabResult, today: string): NutritionAiInsig
       detail,
       evidence: stringValue(row.evidence),
       window: stringValue(row.window),
+      confidence: qualityValue(row.confidence),
+      limitations: stringValue(row.limitations),
     });
     seen.add(category);
   }

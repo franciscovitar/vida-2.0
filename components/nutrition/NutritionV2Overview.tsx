@@ -29,12 +29,31 @@ function formatNumber(value: number | null, digits = 0): string {
   }).format(value);
 }
 
-function formatEnergy(data: NutritionDashboardData['todayEnergy']): string {
-  if (data.amount !== null) return `${formatNumber(data.amount)} kcal`;
-  if (data.low !== null && data.high !== null) {
-    return `${formatNumber(data.low)}–${formatNumber(data.high)} kcal`;
+function displayPointEstimate(
+  amount: number | null,
+  low: number | null,
+  high: number | null,
+): { value: number | null; approximate: boolean } {
+  if (amount !== null && Number.isFinite(amount)) return { value: amount, approximate: false };
+  if (low !== null && high !== null) {
+    return { value: (low + high) / 2, approximate: true };
   }
-  return 'Sin total todavía';
+  if (low !== null || high !== null) return { value: low ?? high, approximate: true };
+  return { value: null, approximate: false };
+}
+
+function formatEnergyEstimate(
+  amount: number | null,
+  low: number | null,
+  high: number | null,
+): string {
+  const display = displayPointEstimate(amount, low, high);
+  if (display.value === null) return 'Sin total todavía';
+  return `${display.approximate ? '≈' : ''}${formatNumber(display.value)} kcal`;
+}
+
+function formatEnergy(data: NutritionDashboardData['todayEnergy']): string {
+  return formatEnergyEstimate(data.amount, data.low, data.high);
 }
 
 function percentage(amount: number | null, target: number | null): number | null {
@@ -69,8 +88,17 @@ function MacroBar({ macro }: { macro: NutritionMacroProgress }) {
         <div>
           <span>{macro.label}</span>
           <strong>
-            {macro.amount === null ? '—' : `${formatNumber(macro.amount, 1)} g`}
-            {macro.coverage === 'partial' ? <small> conocidos</small> : null}
+            {macro.amount === null
+              ? '—'
+              : `${macro.approximate ? '≈' : ''}${formatNumber(
+                  macro.amount,
+                  macro.approximate ? 0 : 1,
+                )} g`}
+            {macro.approximate ? (
+              <small> estimado · calidad {qualityLabel(macro.estimateQuality).toLowerCase()}</small>
+            ) : macro.coverage === 'partial' ? (
+              <small> conocidos</small>
+            ) : null}
           </strong>
         </div>
         <span className={styles['coverage-chip']}>{coverageLabel(macro.coverage)}</span>
@@ -89,22 +117,27 @@ function MacroBar({ macro }: { macro: NutritionMacroProgress }) {
 }
 
 function nutrientProgress(nutrient: NutritionNutrientValue): number | null {
-  return percentage(nutrient.amount, nutrient.target);
+  const display = displayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh);
+  return percentage(display.value, nutrient.target);
 }
 
 function NutrientRow({ nutrient }: { nutrient: NutritionNutrientValue }) {
+  const display = displayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh);
   const progress = nutrientProgress(nutrient);
   const style = {
     '--nutrient-progress': `${Math.min(progress ?? 0, 100)}%`,
   } as CSSProperties;
   return (
-    <div className={styles['nutrient-row']} data-has-value={nutrient.amount !== null}>
+    <div className={styles['nutrient-row']} data-has-value={display.value !== null}>
       <div className={styles['nutrient-copy']}>
         <strong>{nutrient.name}</strong>
         <span>
-          {nutrient.amount === null
+          {display.value === null
             ? 'Sin dato'
-            : `${formatNumber(nutrient.amount, nutrient.amount < 10 ? 1 : 0)} ${nutrient.unit}`}
+            : `${display.approximate ? '≈' : ''}${formatNumber(
+                display.value,
+                display.value < 10 ? 1 : 0,
+              )} ${nutrient.unit}`}
         </span>
       </div>
       <div className={styles['nutrient-progress']}>
@@ -112,9 +145,19 @@ function NutrientRow({ nutrient }: { nutrient: NutritionNutrientValue }) {
           <span className={styles.fill} style={style} />
         </div>
         <small>
-          {nutrient.target === null
-            ? coverageLabel(nutrient.sourceCoverage)
-            : `${progress ?? 0}% de ${formatNumber(nutrient.target, nutrient.target < 10 ? 1 : 0)} ${nutrient.unit}`}
+          {display.value === null
+            ? nutrient.target === null
+              ? coverageLabel(nutrient.sourceCoverage)
+              : `Referencia ${formatNumber(
+                  nutrient.target,
+                  nutrient.target < 10 ? 1 : 0,
+                )} ${nutrient.unit}`
+            : nutrient.target === null
+              ? coverageLabel(nutrient.sourceCoverage)
+              : `${progress}% de ${formatNumber(
+                  nutrient.target,
+                  nutrient.target < 10 ? 1 : 0,
+                )} ${nutrient.unit}`}
         </small>
       </div>
     </div>
@@ -128,19 +171,21 @@ function InsightCard({
 }: {
   icon: ReactNode;
   title: string;
-  insight: NutritionAiInsight | undefined;
+  insight: NutritionAiInsight;
 }) {
   return (
-    <article className={styles.insight} data-tone={insight?.tone ?? 'neutral'}>
+    <article className={styles.insight} data-tone={insight.tone}>
       <span className={styles['insight-icon']}>{icon}</span>
       <div>
         <small>{title}</small>
-        <strong>{insight?.title ?? 'Todavía no calculado'}</strong>
-        <p>
-          {insight?.detail ??
-            'Este bloque solo mostrará análisis que Nutrition Intelligence haya guardado en el store.'}
-        </p>
-        {insight?.evidence ? <span className={styles.evidence}>{insight.evidence}</span> : null}
+        <strong>{insight.title}</strong>
+        <p>{insight.detail}</p>
+        <span className={styles.evidence}>
+          Confianza {qualityLabel(insight.confidence).toLowerCase()}
+          {insight.window ? ` · ${insight.window}` : ''}
+        </span>
+        {insight.evidence ? <span className={styles.evidence}>{insight.evidence}</span> : null}
+        {insight.limitations ? <span className={styles.evidence}>{insight.limitations}</span> : null}
       </div>
     </article>
   );
@@ -155,11 +200,14 @@ function weekday(date: string): string {
 
 export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) {
   const targetEnergy = data.target?.energyKcal ?? null;
-  const energyProgress = percentage(data.todayEnergy.amount, targetEnergy);
-  const remaining =
-    data.todayEnergy.amount !== null && targetEnergy !== null
-      ? Math.max(targetEnergy - data.todayEnergy.amount, 0)
-      : null;
+  const energyDisplay = displayPointEstimate(
+    data.todayEnergy.amount,
+    data.todayEnergy.low,
+    data.todayEnergy.high,
+  );
+  const energyProgress = percentage(energyDisplay.value, targetEnergy);
+  const energyDelta =
+    energyDisplay.value !== null && targetEnergy !== null ? energyDisplay.value - targetEnergy : null;
   const ringStyle = {
     '--energy-progress': `${Math.min(energyProgress ?? 0, 100)}%`,
   } as CSSProperties;
@@ -173,7 +221,10 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
   const energyCompleteDays = recent.filter((point) => point.energyCoverage === 'complete').length;
   const macroCompleteDays = recent.filter((point) => point.macroCoverage === 'complete').length;
   const lowConfidenceItems = recent.reduce((sum, point) => sum + point.lowConfidenceItemCount, 0);
-  const knownNutrients = data.nutrients.filter((nutrient) => nutrient.amount !== null);
+  const knownNutrients = data.nutrients.filter(
+    (nutrient) =>
+      displayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh).value !== null,
+  );
   const targetedNutrients = data.nutrients.filter((nutrient) => nutrient.target !== null);
   const highlighted = knownNutrients
     .slice()
@@ -244,13 +295,27 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
               </strong>
             </div>
             <div>
-              <span>Restante</span>
-              <strong>{remaining === null ? '—' : `${formatNumber(remaining)} kcal`}</strong>
+              <span>Diferencia</span>
+              <strong>
+                {energyDelta === null
+                  ? '—'
+                  : energyDelta === 0
+                    ? 'En objetivo'
+                    : `${energyDelta > 0 ? '+' : ''}${formatNumber(energyDelta)} kcal`}
+              </strong>
             </div>
             <div>
               <span>Calidad</span>
               <strong>{qualityLabel(data.todayEnergy.quality)}</strong>
             </div>
+            {data.todayEnergy.low !== null && data.todayEnergy.high !== null ? (
+              <div>
+                <span>Rango</span>
+                <strong>
+                  {formatNumber(data.todayEnergy.low)}–{formatNumber(data.todayEnergy.high)} kcal
+                </strong>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -282,7 +347,12 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
               recent.map((point) => {
                 const low = point.energyKcalLow ?? point.energyKcal ?? 0;
                 const high = point.energyKcalHigh ?? point.energyKcal ?? low;
-                const center = point.energyKcal;
+                const centerDisplay = displayPointEstimate(
+                  point.energyKcal,
+                  point.energyKcalLow,
+                  point.energyKcalHigh,
+                );
+                const center = centerDisplay.value;
                 const chartStyle = {
                   '--range-low': `${Math.min((low / scaleMax) * 100, 100)}%`,
                   '--range-high': `${Math.min((high / scaleMax) * 100, 100)}%`,
@@ -296,7 +366,11 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
                       {low > 0 || high > 0 ? <span className={styles['range-mark']} /> : null}
                       {center !== null ? <span className={styles['center-mark']} /> : null}
                     </div>
-                    <strong>{center === null ? '—' : formatNumber(center)}</strong>
+                    <strong>
+                      {center === null
+                        ? '—'
+                        : `${centerDisplay.approximate ? '≈' : ''}${formatNumber(center)}`}
+                    </strong>
                     <span>{weekday(point.date)}</span>
                   </div>
                 );
@@ -412,7 +486,8 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
         </details>
       </section>
 
-      <section className={styles.panel} aria-labelledby="nutrition-ai-title">
+      {data.aiInsights.length > 0 ? (
+        <section className={styles.panel} aria-labelledby="nutrition-ai-title">
         <div className={styles['section-heading']}>
           <div>
             <p className={styles.eyebrow}>ANÁLISIS IA</p>
@@ -425,21 +500,27 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
           <BrainCircuit size={21} aria-hidden="true" />
         </div>
         <div className={styles['insight-grid']}>
-          <InsightCard
-            icon={<Sparkles size={17} aria-hidden="true" />}
-            title="Potencial antioxidante"
-            insight={antioxidant}
-          />
-          <InsightCard
-            icon={<Leaf size={17} aria-hidden="true" />}
-            title="Perfil antiinflamatorio"
-            insight={antiInflammatory}
-          />
-          <InsightCard
-            icon={<Flame size={17} aria-hidden="true" />}
-            title="Mejora de mayor impacto"
-            insight={improvement}
-          />
+          {antioxidant ? (
+            <InsightCard
+              icon={<Sparkles size={17} aria-hidden="true" />}
+              title="Potencial antioxidante"
+              insight={antioxidant}
+            />
+          ) : null}
+          {antiInflammatory ? (
+            <InsightCard
+              icon={<Leaf size={17} aria-hidden="true" />}
+              title="Perfil antiinflamatorio"
+              insight={antiInflammatory}
+            />
+          ) : null}
+          {improvement ? (
+            <InsightCard
+              icon={<Flame size={17} aria-hidden="true" />}
+              title="Mejora de mayor impacto"
+              insight={improvement}
+            />
+          ) : null}
           {pattern ? (
             <InsightCard
               icon={<BrainCircuit size={17} aria-hidden="true" />}
@@ -448,7 +529,8 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
             />
           ) : null}
         </div>
-      </section>
+        </section>
+      ) : null}
 
       <section className={styles.panel} aria-labelledby="nutrition-meals-title">
         <div className={styles['section-heading']}>
@@ -483,13 +565,21 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
                 </div>
                 <div className={styles['meal-energy']}>
                   <strong>
-                    {meal.energyKcal !== null
-                      ? `${formatNumber(meal.energyKcal)} kcal`
-                      : meal.energyKcalLow !== null && meal.energyKcalHigh !== null
-                        ? `${formatNumber(meal.energyKcalLow)}–${formatNumber(meal.energyKcalHigh)}`
-                        : '—'}
+                    {formatEnergyEstimate(
+                      meal.energyKcal,
+                      meal.energyKcalLow,
+                      meal.energyKcalHigh,
+                    )}
                   </strong>
-                  <span data-confidence={meal.confidence}>{meal.confidence}</span>
+                  <span data-confidence={meal.confidence}>
+                    {meal.energyKcal === null &&
+                    meal.energyKcalLow !== null &&
+                    meal.energyKcalHigh !== null
+                      ? `${formatNumber(meal.energyKcalLow)}–${formatNumber(
+                          meal.energyKcalHigh,
+                        )} · ${meal.confidence}`
+                      : meal.confidence}
+                  </span>
                 </div>
               </article>
             ))}

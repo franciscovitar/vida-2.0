@@ -160,7 +160,7 @@ function estimatedItemMacros(row: Row): ItemMacroEstimate {
   const shareTotal = missing.reduce((sum, key) => sum + energySplit[key], 0);
   const allocate = (key: MacroKey, divisor: number, known: number | null): number | null => {
     if (known !== null) return known;
-    if (shareTotal <= 0) return 0;
+    if (shareTotal <= 0) return null;
     return (residual * (energySplit[key] / shareTotal)) / divisor;
   };
 
@@ -168,7 +168,11 @@ function estimatedItemMacros(row: Row): ItemMacroEstimate {
     protein: allocate('protein', 4, protein),
     carbohydrate: allocate('carbohydrate', 4, carbohydrate),
     fat: allocate('fat', 9, fat),
-    fiber: fiber ?? Math.min((energy / 100) * energySplit.fiberPer100Kcal, 15),
+    fiber:
+      fiber ??
+      (energySplit.fiberPer100Kcal > 0
+        ? Math.min((energy / 100) * energySplit.fiberPer100Kcal, 15)
+        : null),
   };
 }
 
@@ -225,25 +229,25 @@ export async function loadApproximateDayMacros(
   }> = [
     {
       key: 'protein',
-      label: 'Proteína aprox.',
+      label: 'Proteína',
       column: 'proteinGrams',
       estimateField: 'protein',
     },
     {
       key: 'carbohydrate',
-      label: 'Carbohidratos aprox.',
+      label: 'Carbohidratos',
       column: 'carbohydrateGrams',
       estimateField: 'carbohydrate',
     },
     {
       key: 'fat',
-      label: 'Grasas aprox.',
+      label: 'Grasas',
       column: 'fatGrams',
       estimateField: 'fat',
     },
     {
       key: 'fiber',
-      label: 'Fibra aprox.',
+      label: 'Fibra',
       column: 'fiberGrams',
       estimateField: 'fiber',
     },
@@ -272,6 +276,9 @@ export async function loadApproximateDayMacros(
       target: targetFor(definition.key, target),
       unit: 'g',
       coverage: coverageFor(items.length, usable),
+      approximate: usable > exactKnown,
+      estimateQuality:
+        usable === 0 ? 'unknown' : exactKnown === usable ? 'high' : exactKnown > 0 ? 'mixed' : 'low',
       knownItemCount: exactKnown,
       totalItemCount: items.length,
     } satisfies NutritionMacroProgress;

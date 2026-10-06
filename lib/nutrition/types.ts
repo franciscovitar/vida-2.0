@@ -25,6 +25,8 @@ export interface NutritionMacroProgress {
   target: number | null;
   unit: 'g';
   coverage: NutritionCoverage;
+  approximate: boolean;
+  estimateQuality: NutritionEstimateQuality;
   knownItemCount: number;
   totalItemCount: number;
 }
@@ -58,6 +60,8 @@ export interface NutritionNutrientValue {
   name: string;
   group: NutrientGroup;
   amount: number | null;
+  amountLow: number | null;
+  amountHigh: number | null;
   unit: string;
   target: number | null;
   lowerTarget: number | null;
@@ -75,6 +79,8 @@ export interface NutritionAiInsight {
   detail: string;
   evidence: string | null;
   window: string | null;
+  confidence: NutritionEstimateQuality;
+  limitations: string | null;
 }
 
 export interface NutritionDashboardData {
