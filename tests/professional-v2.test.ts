@@ -199,7 +199,6 @@ test('PRO-V2-15. Biblioteca tecnológica es referencia progresiva y no adopción
   assert.doesNotMatch(library, /unreadCount|streakCount|readingDebt|backlogCount/i);
 });
 
-
 test('PRO-V2-16. Panorama explicita cambio, impacto, implicación y decisión', () => {
   const panorama = repoText('components/professional/ProfessionalPanorama.tsx');
 

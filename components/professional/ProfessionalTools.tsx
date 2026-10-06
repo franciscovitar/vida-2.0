@@ -48,10 +48,7 @@ function filterOffers(
   return [...offers];
 }
 
-function groupHref(
-  group: ProfessionalOfferComparisonGroup,
-  filter: string,
-): string {
+function groupHref(group: ProfessionalOfferComparisonGroup, filter: string): string {
   const params = new URLSearchParams();
   params.set('group', group.id);
   if (filter !== 'all') params.set('filter', filter);
@@ -90,8 +87,7 @@ export function ProfessionalTools({
 
   const snapshot = data.snapshot;
   const group =
-    snapshot.comparisonGroups.find((item) => item.id === groupId) ??
-    snapshot.comparisonGroups[0];
+    snapshot.comparisonGroups.find((item) => item.id === groupId) ?? snapshot.comparisonGroups[0];
 
   if (!group) {
     return (

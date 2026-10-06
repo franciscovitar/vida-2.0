@@ -16,10 +16,7 @@
   },
   "status": "CURRENT_MULTI_GEOGRAPHY_COMPARISON",
   "rule": "This is a dimension-by-dimension comparison. It intentionally has no overall score, winner, rank or hiring probability.",
-  "targetRoleIds": [
-    "software-engineer",
-    "full-stack-product-engineer"
-  ],
+  "targetRoleIds": ["software-engineer", "full-stack-product-engineer"],
   "roles": [
     {
       "id": "ai-native-product-engineer",
@@ -35,9 +32,7 @@
         "AI and big data among WEF fastest-growing skill groups",
         "AI workflow adoption increasingly common but verification/trust remains material in Stack Overflow surveys"
       ],
-      "unresolved": [
-        "No standard occupation maps exactly to this composite role"
-      ],
+      "unresolved": ["No standard occupation maps exactly to this composite role"],
       "remoteSamples": [
         {
           "sample": "Lemon.io Senior .NET Full-stack Developer",
@@ -60,12 +55,8 @@
       },
       "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
       "comparisonStatus": "COMPARABLE_WITH_STRONG_OCCUPATION_PROXIES",
-      "macroSignals": [
-        "Software and Application Developers among WEF fastest-growing tech roles"
-      ],
-      "unresolved": [
-        "Full-stack/Product Engineer is broader than BLS Web Developer"
-      ],
+      "macroSignals": ["Software and Application Developers among WEF fastest-growing tech roles"],
+      "unresolved": ["Full-stack/Product Engineer is broader than BLS Web Developer"],
       "remoteSamples": [
         {
           "sample": "Lemon.io Senior .NET Full-stack Developer",
@@ -88,9 +79,7 @@
       },
       "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
       "comparisonStatus": "COMPARABLE_WITH_DIRECT_US_OCCUPATION_AND_ARGENTINA_PROXY",
-      "macroSignals": [
-        "Software and Application Developers among WEF fastest-growing tech roles"
-      ],
+      "macroSignals": ["Software and Application Developers among WEF fastest-growing tech roles"],
       "unresolved": [],
       "remoteSamples": [
         {
@@ -199,9 +188,7 @@
       },
       "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
       "comparisonStatus": "COMPARABLE_WITH_ARGENTINA_DIRECT_PROXY_AND_US_ADJACENT_OCCUPATIONS",
-      "macroSignals": [
-        "Networks and cybersecurity among WEF fastest-growing skill groups"
-      ],
+      "macroSignals": ["Networks and cybersecurity among WEF fastest-growing skill groups"],
       "unresolved": [
         "Real operations/observability/incident/restore evidence is a material personal gap",
         "DevOps/SRE is not identical to Network Architect"

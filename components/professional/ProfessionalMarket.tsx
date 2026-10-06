@@ -224,8 +224,8 @@ export function ProfessionalMarket({
             <p className={styles.eyebrow}>Skills con señal de mercado</p>
             <h3 id="market-skills-title">Qué capacidades merecen atención</h3>
             <p>
-              Son señales direccionales y contextuales. No equivalen a una lista universal de
-              skills ni reemplazan tu evidencia personal.
+              Son señales direccionales y contextuales. No equivalen a una lista universal de skills
+              ni reemplazan tu evidencia personal.
             </p>
           </div>
           <div className={styles['market-skill-grid']}>
@@ -367,7 +367,9 @@ export function ProfessionalMarket({
           {market.limitations.map((item) => (
             <li key={item}>{item}</li>
           ))}
-          {detail?.commonGaps.map((item) => <li key={item}>{item}</li>)}
+          {detail?.commonGaps.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
         </ul>
       </details>
 

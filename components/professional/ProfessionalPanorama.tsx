@@ -165,8 +165,8 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
                 profundizar, no una predicción individual.
               </p>
               <p className={styles['panorama-action']}>
-                <strong>Para vos:</strong> seguí la señal en Mercado y mantené visibles su
-                geografía y período antes de cambiar el plan.
+                <strong>Para vos:</strong> seguí la señal en Mercado y mantené visibles su geografía
+                y período antes de cambiar el plan.
               </p>
             </article>
           ) : null}
