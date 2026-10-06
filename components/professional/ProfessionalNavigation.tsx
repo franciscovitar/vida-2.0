@@ -2,10 +2,11 @@ import Link from 'next/link';
 
 import styles from './ProfessionalV2.module.scss';
 
-type ProfessionalSection = 'panorama' | 'herramientas';
+type ProfessionalSection = 'panorama' | 'mercado' | 'herramientas';
 
 const ITEMS: Array<{ id: ProfessionalSection; label: string; href: string }> = [
   { id: 'panorama', label: 'Panorama', href: '/professional' },
+  { id: 'mercado', label: 'Mercado', href: '/professional/mercado' },
   { id: 'herramientas', label: 'Herramientas', href: '/professional/herramientas' },
 ];
 

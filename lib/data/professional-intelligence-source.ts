@@ -29,3 +29,15 @@ export async function getProfessionalToolsPageData() {
   await requireAuthorizedSession();
   return loadProfessionalOfferVariants();
 }
+
+
+export async function getProfessionalMarketPageData() {
+  await requireAuthorizedSession();
+
+  const [professional, careerResilience] = await Promise.all([
+    loadProfessionalSnapshot(),
+    loadCareerResilience(),
+  ]);
+
+  return { professional, careerResilience };
+}
