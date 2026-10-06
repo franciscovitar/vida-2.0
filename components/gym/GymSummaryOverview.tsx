@@ -1,13 +1,5 @@
 import Link from 'next/link';
-import {
-  Activity,
-  Bike,
-  CalendarDays,
-  Dumbbell,
-  LineChart,
-  Sparkles,
-  Target,
-} from 'lucide-react';
+import { Activity, Bike, CalendarDays, Dumbbell, LineChart, Sparkles, Target } from 'lucide-react';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';

@@ -154,7 +154,6 @@ Cardio y fútbol dejan de mostrarse como checks del Habit Tracker, pero sus colu
 - la UI distingue observación, estimación y benchmark;
 - la UI describe asociaciones/cambios, no causas ni diagnósticos.
 
-
 ## Arquitectura de presentación V2.3
 
 Desde 2026-10-06, la interfaz de Gimnasio se organiza por tarea en cuatro superficies derivadas:
