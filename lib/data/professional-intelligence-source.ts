@@ -30,7 +30,6 @@ export async function getProfessionalToolsPageData() {
   return loadProfessionalOfferVariants();
 }
 
-
 export async function getProfessionalMarketPageData() {
   await requireAuthorizedSession();
 

@@ -90,7 +90,6 @@ test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada 
   assert.doesNotMatch(panorama, /\/professional\/(crecimiento|biblioteca)/);
 });
 
-
 test('PRO-V2-06. Mercado tiene ruta propia y navegación primaria interna', () => {
   const nav = repoText('components/professional/ProfessionalNavigation.tsx');
   const route = repoText('app/(app)/professional/mercado/page.tsx');

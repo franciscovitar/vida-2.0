@@ -46,8 +46,7 @@ export function ProfessionalMarket({
 
   const snapshot = professional.snapshot;
   const market = snapshot.market;
-  const resilience =
-    careerResilience.status === 'ready' ? careerResilience.snapshot : null;
+  const resilience = careerResilience.status === 'ready' ? careerResilience.snapshot : null;
 
   return (
     <div className={styles.market}>
