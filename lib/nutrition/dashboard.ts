@@ -564,9 +564,9 @@ export async function loadNutritionDashboardData(
   const targetRows = rowsFrom(targetsResult);
   const currentDate = cordobaToday();
   const target = chooseTarget(targetRows, today, currentDate);
-  const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate)
-    .filter((row) => row.date <= today)
-    .slice(-90);
+  const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate).filter(
+    (row) => row.date <= today,
+  );
   const todayMealIds = new Set(
     activeRows(mealRows)
       .filter((row) => stringValue(row.date) === today)
@@ -635,21 +635,31 @@ export async function loadNutritionDashboardData(
         ? 'none'
         : 'partial';
 
-  const history = baseHistory.map((point) =>
-    point.date === today && hasRawToday
-      ? {
-          ...point,
-          energyKcal: rawTodayEnergy.amount,
-          energyKcalLow: rawTodayEnergy.low,
-          energyKcalHigh: rawTodayEnergy.high,
-          estimateQuality: rawTodayEnergy.quality,
-          energyCoverage: rawTodayEnergy.coverage,
-          macroCoverage: rawMacroCoverage,
-          trackedMealCount: activeTodayMeals.length,
-          lowConfidenceItemCount: rawTodayEnergy.lowConfidenceItemCount,
-        }
-      : point,
-  );
+  const rawTodayPoint: NutritionDailyPoint = {
+    date: today,
+    energyKcal: rawTodayEnergy.amount,
+    energyKcalLow: rawTodayEnergy.low,
+    energyKcalHigh: rawTodayEnergy.high,
+    targetDecisionId: target?.decisionId ?? null,
+    energyTargetKcal: target?.energyKcal ?? null,
+    energyTargetKcalLow: target?.energyKcalLow ?? null,
+    energyTargetKcalHigh: target?.energyKcalHigh ?? null,
+    estimateQuality: rawTodayEnergy.quality,
+    energyCoverage: rawTodayEnergy.coverage,
+    macroCoverage: rawMacroCoverage,
+    trackedMealCount: activeTodayMeals.length,
+    lowConfidenceItemCount: rawTodayEnergy.lowConfidenceItemCount,
+  };
+  const hasSummaryPoint = baseHistory.some((point) => point.date === today);
+  const reconciledHistory =
+    hasRawToday && !hasSummaryPoint
+      ? [...baseHistory, rawTodayPoint]
+      : baseHistory.map((point) =>
+          point.date === today && hasRawToday ? { ...point, ...rawTodayPoint } : point,
+        );
+  const history = reconciledHistory
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-90);
   const todayDaily = history.find((row) => row.date === today) ?? null;
 
   const personalFiberTarget = target?.fiberGrams ?? null;
