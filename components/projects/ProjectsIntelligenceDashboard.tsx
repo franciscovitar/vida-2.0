@@ -269,7 +269,13 @@ function SectionHeading({
   );
 }
 
-function CompletedRow({ project }: { project: ProjectCardView }) {
+function CompletedRow({
+  project,
+  fallbackLabel = 'Terminado',
+}: {
+  project: ProjectCardView;
+  fallbackLabel?: string;
+}) {
   return (
     <li className={styles['completed-row']}>
       <div>
@@ -277,7 +283,7 @@ function CompletedRow({ project }: { project: ProjectCardView }) {
         {project.type ? <span>{project.type}</span> : null}
       </div>
       <div className={styles['completed-status']}>
-        <span className="tabular">{project.progress.percentLabel ?? 'Completado'}</span>
+        <span className="tabular">{project.progress.percentLabel ?? fallbackLabel}</span>
         {project.lastAdvanceLabel ? <small>{project.lastAdvanceLabel}</small> : null}
       </div>
     </li>
@@ -286,6 +292,7 @@ function CompletedRow({ project }: { project: ProjectCardView }) {
 
 export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntelligenceData }) {
   const view = buildProjectsIntelligenceView(data);
+  const focusProjects = [...view.focus, ...view.blocked];
 
   if (!view.ready) {
     const tone = NOTICE_TONE[view.status] ?? 'warning';
@@ -323,14 +330,26 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
 
   return (
     <div className={styles.stack}>
-      <ul className={styles['summary-strip']} aria-label="Resumen del portfolio visible">
+      <ul className={styles['summary-strip']} aria-label="Resumen del portfolio">
         <li>
-          <strong className="tabular">{view.focus.length}</strong>
+          <strong className="tabular">{focusProjects.length}</strong>
           <span>En foco</span>
         </li>
         <li>
           <strong className="tabular">{view.upcoming.length}</strong>
           <span>Próximos</span>
+        </li>
+        <li>
+          <strong className="tabular">{view.waiting.length}</strong>
+          <span>En revisión</span>
+        </li>
+        <li>
+          <strong className="tabular">{view.completed.length}</strong>
+          <span>Terminados</span>
+        </li>
+        <li>
+          <strong className="tabular">{view.cancelled.length}</strong>
+          <span>Cancelados / postergados indefinidamente</span>
         </li>
       </ul>
 
@@ -338,15 +357,19 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
         <SectionHeading
           id="projects-focus-title"
           title="En foco"
-          description="Solo lo que está activo ahora."
-          count={view.focus.length}
+          description="Activos y bloqueados que requieren atención ahora."
+          count={focusProjects.length}
         />
-        {view.focus.length === 0 ? (
-          <p className={styles.empty}>Ningún proyecto activo.</p>
+        {focusProjects.length === 0 ? (
+          <p className={styles.empty}>Ningún proyecto en foco.</p>
         ) : (
           <div className={styles['project-grid']} data-density="focus">
-            {view.focus.map((project) => (
-              <ProjectCard key={project.id} project={project} emphasis={view.focus.length === 1} />
+            {focusProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                emphasis={focusProjects.length === 1}
+              />
             ))}
           </div>
         )}
@@ -368,63 +391,54 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
         </section>
       ) : null}
 
-      {view.waiting.length + view.blocked.length + view.history.length > 0 ? (
+      {view.waiting.length > 0 ? (
         <details className={styles['completed-section']}>
           <summary>
-            <span>Ver más proyectos</span>
-            <span className={styles.count}>
-              {view.waiting.length + view.blocked.length + view.history.length}
-            </span>
+            <span>En revisión</span>
+            <span className={styles.count}>{view.waiting.length}</span>
           </summary>
           <div className={styles['more-projects-content']}>
-            {view.waiting.length > 0 ? (
-              <section className={styles.section} aria-labelledby="projects-review-title">
-                <SectionHeading
-                  id="projects-review-title"
-                  title="En revisión / para usar"
-                  description="Ya tuvieron construcción real. Quedan preservados para uso, prueba o revisión posterior."
-                  count={view.waiting.length}
-                />
-                <div className={styles['project-grid']}>
-                  {view.waiting.map((project) => (
-                    <ProjectCard key={project.id} project={project} statusLabel="En revisión" />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            {view.blocked.length > 0 ? (
-              <section className={styles.section} aria-labelledby="projects-blocked-title">
-                <SectionHeading
-                  id="projects-blocked-title"
-                  title="Bloqueados"
-                  description="Necesitan resolver un bloqueo antes de seguir."
-                  count={view.blocked.length}
-                />
-                <div className={styles['project-grid']}>
-                  {view.blocked.map((project) => (
-                    <ProjectCard key={project.id} project={project} />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            {view.history.length > 0 ? (
-              <section className={styles.section} aria-labelledby="projects-history-title">
-                <SectionHeading
-                  id="projects-history-title"
-                  title="Completados e historial"
-                  description="Cerrados o cancelados; disponibles solo como referencia."
-                  count={view.history.length}
-                />
-                <ul className={styles['completed-list']}>
-                  {view.history.map((project) => (
-                    <CompletedRow key={project.id} project={project} />
-                  ))}
-                </ul>
-              </section>
-            ) : null}
+            <p className={styles['disclosure-description']}>
+              Ya tuvieron construcción real y quedan para uso, prueba o revisión posterior.
+            </p>
+            <div className={styles['project-grid']}>
+              {view.waiting.map((project) => (
+                <ProjectCard key={project.id} project={project} statusLabel="En revisión" />
+              ))}
+            </div>
           </div>
+        </details>
+      ) : null}
+
+      {view.completed.length > 0 ? (
+        <details className={styles['completed-section']}>
+          <summary>
+            <span>Terminados</span>
+            <span className={styles.count}>{view.completed.length}</span>
+          </summary>
+          <ul className={styles['completed-list']}>
+            {view.completed.map((project) => (
+              <CompletedRow key={project.id} project={project} />
+            ))}
+          </ul>
+        </details>
+      ) : null}
+
+      {view.cancelled.length > 0 ? (
+        <details className={styles['completed-section']}>
+          <summary>
+            <span>Cancelados / postergados indefinidamente</span>
+            <span className={styles.count}>{view.cancelled.length}</span>
+          </summary>
+          <ul className={styles['completed-list']}>
+            {view.cancelled.map((project) => (
+              <CompletedRow
+                key={project.id}
+                project={project}
+                fallbackLabel="Cancelado / postergado"
+              />
+            ))}
+          </ul>
         </details>
       ) : null}
 
