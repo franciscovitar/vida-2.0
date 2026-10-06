@@ -39,8 +39,10 @@ La UI muestra proteína, carbohidratos, grasas y fibra.
 - si un alimento material no tiene un macro cuantificado, ese valor permanece desconocido para ese alimento y el total diario no se presenta como completo;
 - un subtotal parcial puede mostrarse como cantidad conocida, pero no genera porcentaje de meta ni conclusión de adecuación;
 - energía parcial tampoco genera porcentaje o diferencia contra el objetivo;
-- cuando existen Meals/Food Items activos para el día, Vida recompone la energía desde esos registros crudos y no deja que un Daily Summary atrasado los sobrescriba;
-- Daily Summary sigue siendo una vista materializada útil para historia/fallback, no autoridad por encima de Food Items;
+- cuando existen Meals/Food Items activos para una fecha, Vida recompone esa fecha desde los registros crudos y no deja que un Daily Summary atrasado los sobrescriba;
+- la reconciliación aplica también a Tendencias: una corrección histórica o un día todavía no materializado puede aparecer desde autoridad cruda;
+- una comida activa sin items o un item inválido ligado a esa comida degrada cobertura en vez de permitir un falso `complete`;
+- Daily Summary sigue siendo una vista materializada útil para fallback cuando no hay autoridad cruda disponible, no autoridad por encima de Food Items;
 - desconocido nunca se convierte en cero.
 
 Los objetivos activos de `Targets` tienen prioridad para energía/macros. En particular, la meta personal activa de fibra prevalece visualmente sobre una referencia dietaria genérica de `Nutrient Targets`.

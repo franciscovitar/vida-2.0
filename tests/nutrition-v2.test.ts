@@ -7,6 +7,10 @@ import {
   partitionNutritionFoodItemRows,
 } from '@/lib/nutrition/food-item-integrity';
 import { deriveNutritionFreshness } from '@/lib/nutrition/freshness';
+import {
+  buildNutritionRawDayFacts,
+  reconcileNutritionHistoryWithRaw,
+} from '@/lib/nutrition/history-reconciliation';
 import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import {
@@ -203,6 +207,122 @@ test('un rango energético completo puede ser autoridad sin fabricar valor centr
       lowConfidenceItemCount: 0,
     },
   );
+});
+
+test('Tendencias reemplaza un Daily Summary histórico viejo con autoridad cruda', () => {
+  const rawDays = buildNutritionRawDayFacts(
+    [{ mealId: 'm1', date: '2026-10-01', status: 'active' }],
+    [
+      {
+        mealId: 'm1',
+        status: 'active',
+        energyKcal: 400,
+        proteinGrams: 30,
+        carbohydrateGrams: 40,
+        fatGrams: 10,
+        fiberGrams: 5,
+        confidence: 'high',
+      },
+    ],
+    [],
+    '2026-10-06',
+  );
+  const history = reconcileNutritionHistoryWithRaw(
+    [
+      {
+        date: '2026-10-01',
+        energyKcal: 999,
+        energyKcalLow: 999,
+        energyKcalHigh: 999,
+        targetDecisionId: 'old-target',
+        energyTargetKcal: 2500,
+        energyTargetKcalLow: null,
+        energyTargetKcalHigh: null,
+        estimateQuality: 'low',
+        energyCoverage: 'complete',
+        macroCoverage: 'complete',
+        trackedMealCount: 1,
+        lowConfidenceItemCount: 1,
+      },
+    ],
+    [
+      {
+        decisionId: 'old-target',
+        effectiveFrom: '2026-09-01',
+        effectiveTo: '2026-10-02',
+        status: 'superseded',
+        energyTargetKcal: 2500,
+      },
+    ],
+    rawDays,
+    '2026-10-06',
+    '2026-10-06',
+  );
+
+  assert.equal(history[0]?.energyKcal, 400);
+  assert.equal(history[0]?.energyCoverage, 'complete');
+  assert.equal(history[0]?.macroCoverage, 'complete');
+  assert.equal(history[0]?.estimateQuality, 'high');
+  assert.equal(history[0]?.targetDecisionId, 'old-target');
+});
+
+test('un día crudo aparece en Tendencias aunque Daily Summary todavía no exista', () => {
+  const rawDays = buildNutritionRawDayFacts(
+    [{ mealId: 'm2', date: '2026-10-05', status: 'active' }],
+    [{ mealId: 'm2', status: 'active', energyKcal: 700, confidence: 'medium' }],
+    [],
+    '2026-10-06',
+  );
+  const history = reconcileNutritionHistoryWithRaw(
+    [],
+    [
+      {
+        decisionId: 'target-current',
+        effectiveFrom: '2026-10-01',
+        status: 'active',
+        energyTargetKcal: 2600,
+      },
+    ],
+    rawDays,
+    '2026-10-06',
+    '2026-10-06',
+  );
+
+  assert.equal(history.length, 1);
+  assert.equal(history[0]?.date, '2026-10-05');
+  assert.equal(history[0]?.energyKcal, 700);
+  assert.equal(history[0]?.targetDecisionId, 'target-current');
+});
+
+test('items inválidos o comidas sin items impiden cobertura completa histórica', () => {
+  const rawDays = buildNutritionRawDayFacts(
+    [
+      { mealId: 'm1', date: '2026-10-04', status: 'active' },
+      { mealId: 'm2', date: '2026-10-04', status: 'active' },
+      { mealId: 'm3', date: '2026-10-04', status: 'active' },
+    ],
+    [
+      {
+        mealId: 'm1',
+        status: 'active',
+        energyKcal: 500,
+        proteinGrams: 25,
+        carbohydrateGrams: 50,
+        fatGrams: 20,
+        fiberGrams: 6,
+        confidence: 'high',
+      },
+    ],
+    [{ mealId: 'm2', status: 'active', energyKcal: 'fila-desalineada' }],
+    '2026-10-06',
+  );
+  const day = rawDays.get('2026-10-04');
+
+  assert.ok(day);
+  assert.equal(day.unknownContributionCount, 2);
+  assert.equal(day.energy.coverage, 'partial');
+  assert.equal(day.energy.totalItemCount, 3);
+  assert.equal(day.macroCoverage, 'partial');
 });
 
 test('unknown nutricional permanece unknown en la capa de presentación', () => {

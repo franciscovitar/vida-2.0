@@ -46,7 +46,14 @@ function aggregateQuality(values: readonly NutritionEstimateQuality[]): Nutritio
 
 export function summarizeNutritionRawDayEnergy(
   items: readonly EnergyRow[],
+  options: { additionalUnknownItemCount?: number } = {},
 ): NutritionRawDayEnergy {
+  const additionalUnknownItemCount = Math.max(
+    0,
+    Math.trunc(options.additionalUnknownItemCount ?? 0),
+  );
+  const totalItemCount = items.length + additionalUnknownItemCount;
+
   if (items.length === 0) {
     return {
       amount: null,
@@ -55,7 +62,7 @@ export function summarizeNutritionRawDayEnergy(
       coverage: 'none',
       quality: 'unknown',
       quantifiedItemCount: 0,
-      totalItemCount: 0,
+      totalItemCount,
       lowConfidenceItemCount: 0,
     };
   }
@@ -100,7 +107,7 @@ export function summarizeNutritionRawDayEnergy(
   }
 
   const coverage: NutritionCoverage =
-    fullyQuantifiedItemCount === items.length
+    additionalUnknownItemCount === 0 && fullyQuantifiedItemCount === items.length
       ? 'complete'
       : quantifiedItemCount > 0
         ? 'partial'
@@ -113,7 +120,7 @@ export function summarizeNutritionRawDayEnergy(
     coverage,
     quality: aggregateQuality(qualities),
     quantifiedItemCount,
-    totalItemCount: items.length,
+    totalItemCount,
     lowConfidenceItemCount,
   };
 }

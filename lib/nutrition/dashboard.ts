@@ -3,8 +3,11 @@ import 'server-only';
 import type { PlainCell } from '@/lib/data/plain';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 
-import { summarizeNutritionRawDayEnergy } from './day-energy';
 import { deriveNutritionFreshness } from './freshness';
+import {
+  buildNutritionRawDayFacts,
+  reconcileNutritionHistoryWithRaw,
+} from './history-reconciliation';
 import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
 import { classifyNutritionTargetSemantics } from './target-semantics';
@@ -224,10 +227,12 @@ function macroFromItems(input: {
   column: string;
   target: number | null;
   items: readonly Row[];
+  unknownItemCount: number;
 }): NutritionMacroProgress {
   const active = activeRows(input.items);
   const values = active.map((row) => numberValue(row[input.column]));
   const known = values.filter((value): value is number => value !== null);
+  const totalItemCount = active.length + input.unknownItemCount;
   return {
     key: input.key,
     label: input.label,
@@ -235,9 +240,9 @@ function macroFromItems(input: {
     target: input.target,
     unit: 'g',
     coverage:
-      active.length === 0
+      totalItemCount === 0
         ? 'none'
-        : known.length === active.length
+        : input.unknownItemCount === 0 && known.length === active.length
           ? 'complete'
           : known.length > 0
             ? 'partial'
@@ -248,7 +253,7 @@ function macroFromItems(input: {
         ? 'unknown'
         : aggregateConfidence(active.map((row) => confidenceValue(row.confidence))),
     knownItemCount: known.length,
-    totalItemCount: active.length,
+    totalItemCount,
   };
 }
 
@@ -567,32 +572,43 @@ export async function loadNutritionDashboardData(
   const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate).filter(
     (row) => row.date <= today,
   );
+  const rawDays = buildNutritionRawDayFacts(
+    mealRows,
+    itemPartition.valid,
+    itemPartition.invalid,
+    today,
+  );
+  const history = reconcileNutritionHistoryWithRaw(
+    baseHistory,
+    targetRows,
+    rawDays,
+    today,
+    currentDate,
+  );
+  const todayRawFacts = rawDays.get(today) ?? null;
   const todayMealIds = new Set(
     activeRows(mealRows)
       .filter((row) => stringValue(row.date) === today)
       .map((row) => stringValue(row.mealId))
       .filter((id): id is string => Boolean(id)),
   );
-  const invalidTodayItemCount = itemPartition.invalid.filter((row) => {
-    const mealId = stringValue(row.mealId);
-    return Boolean(mealId && todayMealIds.has(mealId));
-  }).length;
+  const unknownTodayContributionCount = todayRawFacts?.unknownContributionCount ?? 0;
   const sourceStatus =
-    invalidTodayItemCount > 0 && baseSourceStatus === 'ready' ? 'partial' : baseSourceStatus;
+    unknownTodayContributionCount > 0 && baseSourceStatus === 'ready'
+      ? 'partial'
+      : baseSourceStatus;
   const activeTodayMeals = activeRows(mealRows).filter((row) => stringValue(row.date) === today);
   const todayItems = activeRows(itemPartition.valid).filter((row) => {
     const mealId = stringValue(row.mealId);
     return Boolean(mealId && todayMealIds.has(mealId));
   });
-  const hasRawToday = activeTodayMeals.length > 0 || todayItems.length > 0;
-  const rawTodayEnergy = summarizeNutritionRawDayEnergy(todayItems);
   const todayDailyRow = dailyRows.find((row) => stringValue(row.date) === today) ?? null;
   const rawAsOf = latestTimestamp([...activeTodayMeals, ...todayItems]);
   const summaryAsOf = todayDailyRow ? latestTimestamp([todayDailyRow], ['updatedAt']) : null;
   const freshness = deriveNutritionFreshness({
     dataDate: today,
     currentDate,
-    hasRawIntake: hasRawToday,
+    hasRawIntake: todayRawFacts !== null,
     rawAsOf,
     summaryAsOf,
   });
@@ -604,6 +620,7 @@ export async function loadNutritionDashboardData(
       column: 'proteinGrams',
       target: target?.proteinGrams ?? null,
       items: todayItems,
+      unknownItemCount: unknownTodayContributionCount,
     }),
     macroFromItems({
       key: 'carbohydrate',
@@ -611,6 +628,7 @@ export async function loadNutritionDashboardData(
       column: 'carbohydrateGrams',
       target: target?.carbohydrateGrams ?? null,
       items: todayItems,
+      unknownItemCount: unknownTodayContributionCount,
     }),
     macroFromItems({
       key: 'fat',
@@ -618,6 +636,7 @@ export async function loadNutritionDashboardData(
       column: 'fatGrams',
       target: target?.fatGrams ?? null,
       items: todayItems,
+      unknownItemCount: unknownTodayContributionCount,
     }),
     macroFromItems({
       key: 'fiber',
@@ -625,41 +644,10 @@ export async function loadNutritionDashboardData(
       column: 'fiberGrams',
       target: target?.fiberGrams ?? null,
       items: todayItems,
+      unknownItemCount: unknownTodayContributionCount,
     }),
   ];
 
-  const rawMacroCoverage: NutritionCoverage =
-    macros.every((macro) => macro.coverage === 'complete')
-      ? 'complete'
-      : macros.every((macro) => macro.coverage === 'none')
-        ? 'none'
-        : 'partial';
-
-  const rawTodayPoint: NutritionDailyPoint = {
-    date: today,
-    energyKcal: rawTodayEnergy.amount,
-    energyKcalLow: rawTodayEnergy.low,
-    energyKcalHigh: rawTodayEnergy.high,
-    targetDecisionId: target?.decisionId ?? null,
-    energyTargetKcal: target?.energyKcal ?? null,
-    energyTargetKcalLow: target?.energyKcalLow ?? null,
-    energyTargetKcalHigh: target?.energyKcalHigh ?? null,
-    estimateQuality: rawTodayEnergy.quality,
-    energyCoverage: rawTodayEnergy.coverage,
-    macroCoverage: rawMacroCoverage,
-    trackedMealCount: activeTodayMeals.length,
-    lowConfidenceItemCount: rawTodayEnergy.lowConfidenceItemCount,
-  };
-  const hasSummaryPoint = baseHistory.some((point) => point.date === today);
-  const reconciledHistory =
-    hasRawToday && !hasSummaryPoint
-      ? [...baseHistory, rawTodayPoint]
-      : baseHistory.map((point) =>
-          point.date === today && hasRawToday ? { ...point, ...rawTodayPoint } : point,
-        );
-  const history = reconciledHistory
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(-90);
   const todayDaily = history.find((row) => row.date === today) ?? null;
 
   const personalFiberTarget = target?.fiberGrams ?? null;
