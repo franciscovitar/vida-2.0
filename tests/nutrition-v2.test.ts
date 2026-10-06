@@ -749,7 +749,6 @@ test('un target puntual conserva prioridad sobre sus límites auxiliares', () =>
   assert.equal(nutritionDisplayDeltaToTarget(2600, null, null, 2500, 2400, 2700), 100);
 });
 
-
 test('Hoy histórico puede usar una decisión superseded vigente para esa fecha', () => {
   const target = selectNutritionTargetRowForDate(
     [

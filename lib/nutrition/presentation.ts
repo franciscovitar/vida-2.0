@@ -38,7 +38,6 @@ export function nutritionDisplayDelta(
   return display.value === null ? null : display.value - target;
 }
 
-
 export function nutritionDisplayDeltaToTarget(
   amount: number | null,
   low: number | null,
