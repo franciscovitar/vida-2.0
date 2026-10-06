@@ -279,9 +279,7 @@ export function buildProjectsIntelligenceView(
     focus: cards.filter((card) => card.status === 'Activo'),
     upcoming: cards.filter(
       (card) =>
-        card.status === 'En espera' &&
-        card.progress.measurable &&
-        card.progress.percent === 0,
+        card.status === 'En espera' && card.progress.measurable && card.progress.percent === 0,
     ),
     waiting: cards.filter(
       (card) =>
