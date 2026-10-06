@@ -341,6 +341,7 @@ test('AI Insight sigue vigente cuando toda la evidencia de su ventana es anterio
       foodItems: [
         {
           mealId: 'm1',
+          foodItemId: 'f1',
           updatedAt: '2026-10-05T20:05:00-03:00',
         },
       ],
@@ -375,6 +376,7 @@ test('AI Insight queda stale si un Food Item de su ventana cambia después', () 
       foodItems: [
         {
           mealId: 'm1',
+          foodItemId: 'f1',
           updatedAt: '2026-10-06T12:30:00-03:00',
         },
       ],
@@ -413,10 +415,12 @@ test('una mutación fuera de la ventana no invalida un AI Insight actual', () =>
       foodItems: [
         {
           mealId: 'inside',
+          foodItemId: 'inside-item',
           updatedAt: '2026-10-05T20:05:00-03:00',
         },
         {
           mealId: 'outside',
+          foodItemId: 'outside-item',
           updatedAt: '2026-10-06T13:00:00-03:00',
         },
       ],
@@ -774,7 +778,9 @@ test('AI Insight queda stale cuando cambia Food Nutrients dentro de su ventana',
           updatedAt: '2026-10-05T20:00:00-03:00',
         },
       ],
-      foodItems: [{ mealId: 'm1', updatedAt: '2026-10-05T20:05:00-03:00' }],
+      foodItems: [
+        { mealId: 'm1', foodItemId: 'f1', updatedAt: '2026-10-05T20:05:00-03:00' },
+      ],
       foodNutrients: [
         {
           foodItemId: 'f1',
