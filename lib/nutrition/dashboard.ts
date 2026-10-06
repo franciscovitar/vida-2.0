@@ -608,7 +608,7 @@ export async function loadNutritionDashboardData(
   const freshness = deriveNutritionFreshness({
     dataDate: today,
     currentDate,
-    hasRawIntake: todayRawFacts !== null,
+    hasRawIntake: (todayRawFacts?.mealCount ?? 0) > 0,
     rawAsOf,
     summaryAsOf,
   });

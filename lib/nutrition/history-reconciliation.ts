@@ -42,7 +42,7 @@ function rawMacroCoverage(
   unknownContributionCount: number,
 ): NutritionCoverage {
   const columns = ['proteinGrams', 'carbohydrateGrams', 'fatGrams', 'fiberGrams'] as const;
-  if (items.length === 0) return unknownContributionCount > 0 ? 'none' : 'none';
+  if (items.length === 0) return 'none';
 
   const knownCounts = columns.map(
     (column) => items.filter((item) => numberValue(item[column]) !== null).length,
@@ -60,15 +60,16 @@ export function buildNutritionRawDayFacts(
   invalidItemRows: readonly NutritionRawHistoryRow[],
   endDate: string,
 ): Map<string, NutritionRawDayFacts> {
-  const activeMeals = mealRows.filter(isActive).filter((row) => {
+  const relevantMeals = mealRows.filter((row) => {
     const date = stringValue(row.date);
     return Boolean(date && date <= endDate);
   });
+  const activeMeals = relevantMeals.filter(isActive);
   const activeValidItems = validItemRows.filter(isActive);
   const facts = new Map<string, NutritionRawDayFacts>();
 
   const dates = new Set(
-    activeMeals
+    relevantMeals
       .map((row) => stringValue(row.date))
       .filter((date): date is string => Boolean(date)),
   );

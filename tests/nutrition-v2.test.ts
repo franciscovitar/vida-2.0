@@ -294,6 +294,44 @@ test('un día crudo aparece en Tendencias aunque Daily Summary todavía no exist
   assert.equal(history[0]?.targetDecisionId, 'target-current');
 });
 
+test('void de la única comida limpia un Daily Summary histórico obsoleto', () => {
+  const rawDays = buildNutritionRawDayFacts(
+    [{ mealId: 'm-old', date: '2026-10-03', status: 'void' }],
+    [{ mealId: 'm-old', status: 'void', energyKcal: 900, confidence: 'high' }],
+    [],
+    '2026-10-06',
+  );
+  const history = reconcileNutritionHistoryWithRaw(
+    [
+      {
+        date: '2026-10-03',
+        energyKcal: 900,
+        energyKcalLow: 900,
+        energyKcalHigh: 900,
+        targetDecisionId: null,
+        energyTargetKcal: null,
+        energyTargetKcalLow: null,
+        energyTargetKcalHigh: null,
+        estimateQuality: 'high',
+        energyCoverage: 'complete',
+        macroCoverage: 'complete',
+        trackedMealCount: 1,
+        lowConfidenceItemCount: 0,
+      },
+    ],
+    [],
+    rawDays,
+    '2026-10-06',
+    '2026-10-06',
+  );
+
+  assert.equal(history.length, 1);
+  assert.equal(history[0]?.energyKcal, null);
+  assert.equal(history[0]?.energyCoverage, 'none');
+  assert.equal(history[0]?.macroCoverage, 'none');
+  assert.equal(history[0]?.trackedMealCount, 0);
+});
+
 test('items inválidos o comidas sin items impiden cobertura completa histórica', () => {
   const rawDays = buildNutritionRawDayFacts(
     [

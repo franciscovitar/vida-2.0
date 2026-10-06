@@ -41,6 +41,7 @@ La UI muestra proteína, carbohidratos, grasas y fibra.
 - energía parcial tampoco genera porcentaje o diferencia contra el objetivo;
 - cuando existen Meals/Food Items activos para una fecha, Vida recompone esa fecha desde los registros crudos y no deja que un Daily Summary atrasado los sobrescriba;
 - la reconciliación aplica también a Tendencias: una corrección histórica o un día todavía no materializado puede aparecer desde autoridad cruda;
+- un `void`, supersession o reasignación retroactiva también puede limpiar el día anterior aunque el Daily Summary materializado todavía no se haya reconstruido;
 - una comida activa sin items o un item inválido ligado a esa comida degrada cobertura en vez de permitir un falso `complete`;
 - Daily Summary sigue siendo una vista materializada útil para fallback cuando no hay autoridad cruda disponible, no autoridad por encima de Food Items;
 - desconocido nunca se convierte en cero.
