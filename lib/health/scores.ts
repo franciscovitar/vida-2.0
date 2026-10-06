@@ -1,3 +1,4 @@
+import type { RhythmStabilityResult } from '@/lib/health/rhythm';
 import type {
   HealthBaselineSignal,
   HealthImportKind,
@@ -43,7 +44,7 @@ export interface HealthExplainableScore {
   trend: HealthScoreTrend;
   contributors: readonly HealthScoreContributor[];
   uncertainties: readonly string[];
-  calculationVersion: 'health-scores-v1.1.0';
+  calculationVersion: 'health-scores-v1.2.0';
 }
 
 export interface HealthMomentum {
@@ -77,7 +78,7 @@ const RELIABILITY_FACTOR: Readonly<Record<HealthScoreReliabilityTier, number>> =
   C: 0.62,
 };
 
-const SCORE_VERSION = 'health-scores-v1.1.0' as const;
+const SCORE_VERSION = 'health-scores-v1.2.0' as const;
 const MOMENTUM_VERSION = 'health-momentum-v1.1.0' as const;
 const STRONG_BASELINE_DAYS = 14;
 
@@ -186,7 +187,10 @@ function weightedAggregate(
   const availableWeight = available.reduce((sum, item) => sum + item.weight, 0);
   const coverage = totalWeight === 0 ? 0 : availableWeight / totalWeight;
 
-  if (availableWeight === 0 || coverage < minCoverage) {
+  // Compare weights directly with a tiny epsilon so decimal weight sums such as
+  // 0.35 + 0.2 + 0.15 + 0.2 + 0.1 cannot fail an exact coverage gate by
+  // floating-point rounding (for example 0.5 / 1.0000000000000002).
+  if (availableWeight === 0 || availableWeight + 1e-9 < totalWeight * minCoverage) {
     return {
       score: null,
       confidence: evidenceConfidence(coverage, sourceFactor, 0.6, 0.35),
@@ -347,7 +351,10 @@ function sourceFactorFor(health: HealthPageData): number {
   return importFactor(health.today.kind);
 }
 
-function buildSleepScore(health: HealthPageData): HealthExplainableScore {
+function buildSleepScore(
+  health: HealthPageData,
+  rhythm: RhythmStabilityResult | null,
+): HealthExplainableScore {
   const today = health.signals.today;
   const duration = today?.values.sleep ?? null;
   const inBed = today?.values.sleepInBed ?? null;
@@ -366,6 +373,9 @@ function buildSleepScore(health: HealthPageData): HealthExplainableScore {
     recentAverage !== null && baseline !== null
       ? personalDeviationScore(recentAverage, baseline, 'lower-is-worse')
       : null;
+
+  const sleepMidpoint = rhythm?.contributors.find((item) => item.id === 'sleep-midpoint') ?? null;
+  const wakeTime = rhythm?.contributors.find((item) => item.id === 'wake-time') ?? null;
 
   const contributors: WeightedContributor[] = [
     contributor({
@@ -434,25 +444,45 @@ function buildSleepScore(health: HealthPageData): HealthExplainableScore {
     }),
     contributor({
       id: 'regularity',
-      label: 'Regularidad horaria',
-      score: null,
+      label: 'Regularidad del midpoint',
+      score: sleepMidpoint?.score ?? null,
       weight: 0.2,
       reliability: 'A',
-      direction: 'unknown',
-      detail: 'Pendiente de conservar inicio/fin exactos del sueño en el pipeline.',
+      direction:
+        sleepMidpoint?.score === null || sleepMidpoint?.score === undefined
+          ? 'unknown'
+          : sleepMidpoint.score >= 80
+            ? 'positive'
+            : sleepMidpoint.score < 60
+              ? 'negative'
+              : 'neutral',
+      detail:
+        sleepMidpoint?.score === null || sleepMidpoint?.score === undefined
+          ? 'Sin suficientes pares de noches consecutivas para puntuar regularidad.'
+          : sleepMidpoint.detail,
       evidenceRefs: [],
-      baselineDays: null,
+      baselineDays: rhythm?.validSleepNights ?? null,
     }),
     contributor({
-      id: 'timing',
-      label: 'Timing circadiano',
-      score: null,
+      id: 'wake-consistency',
+      label: 'Consistencia al despertar',
+      score: wakeTime?.score ?? null,
       weight: 0.1,
       reliability: 'A',
-      direction: 'unknown',
-      detail: 'Pendiente de horarios exactos y consistentes de sueño.',
+      direction:
+        wakeTime?.score === null || wakeTime?.score === undefined
+          ? 'unknown'
+          : wakeTime.score >= 80
+            ? 'positive'
+            : wakeTime.score < 60
+              ? 'negative'
+              : 'neutral',
+      detail:
+        wakeTime?.score === null || wakeTime?.score === undefined
+          ? 'Sin suficientes pares de noches consecutivas para puntuar el horario de despertar.'
+          : wakeTime.detail,
       evidenceRefs: [],
-      baselineDays: null,
+      baselineDays: rhythm?.validSleepNights ?? null,
     }),
   ];
 
@@ -465,7 +495,7 @@ function buildSleepScore(health: HealthPageData): HealthExplainableScore {
   return {
     evidenceStrength: 'moderate',
     evidenceSummary:
-      'Duración y continuidad aportan señal útil, pero los wearables difieren de PSG y todavía faltan regularidad/timing exactos.',
+      'Duración, tendencia y regularidad horaria aportan señal útil; los wearables difieren de PSG y la continuidad sólo pesa cuando la fuente entrega tiempo-en-cama utilizable.',
     id: 'sleep',
     label: 'Sueño',
     question: '¿Qué tan favorable fue tu patrón de sueño para recuperación y continuidad?',
@@ -485,7 +515,9 @@ function buildSleepScore(health: HealthPageData): HealthExplainableScore {
       ...(health.signals.baseline.sleep.days < STRONG_BASELINE_DAYS
         ? ['La base de sueño todavía no alcanzó 14 días válidos.']
         : []),
-      'La regularidad y el timing siguen deshabilitados hasta conservar horarios exactos.',
+      ...(sleepMidpoint?.score === null || sleepMidpoint?.score === undefined
+        ? ['La regularidad horaria no aporta al score hasta tener suficientes noches consecutivas.']
+        : []),
       'Las etapas de sueño del wearable no dominan este score.',
     ],
     calculationVersion: SCORE_VERSION,
@@ -955,7 +987,7 @@ function buildReadinessScore(
     contributors,
     uncertainties: [
       'El agregado usa media geométrica para limitar compensación entre dominios.',
-      'Carga Gym y check-in subjetivo todavía no están incorporados al Readiness.',
+      'La carga Gym no pesa directamente en Readiness; se conserva como contexto separado para evitar doble conteo.',
       'No representa probabilidad de estar sano ni aptitud médica para entrenar.',
     ],
     calculationVersion: SCORE_VERSION,
@@ -1070,8 +1102,11 @@ function buildMomentum(health: HealthPageData): HealthMomentum {
   };
 }
 
-export function buildExplainableHealthScores(health: HealthPageData): HealthScoreboard {
-  const sleep = buildSleepScore(health);
+export function buildExplainableHealthScores(
+  health: HealthPageData,
+  rhythm: RhythmStabilityResult | null = null,
+): HealthScoreboard {
+  const sleep = buildSleepScore(health, rhythm);
   const cardio = buildCardioScore(health);
   const activity = buildActivityScore(health);
   const mobility = buildMobilityScore(health);

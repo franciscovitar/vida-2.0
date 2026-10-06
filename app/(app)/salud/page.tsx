@@ -1,84 +1,34 @@
-import { Activity, Flame, Footprints, HeartPulse, Moon, Wind } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Activity, HeartPulse } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
-import { CompareHint } from '@/components/domain/CompareHint';
 import styles from '@/components/domain/DomainPage.module.scss';
 import { PeriodSelector } from '@/components/domain/PeriodSelector';
-import { SparkBars } from '@/components/domain/SparkBars';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
-import { HealthCheckinCard } from '@/components/health/HealthCheckinCard';
 import {
   HealthContextSection,
-  HealthDeviationRadarSection,
   HealthPrioritiesSection,
-  HealthScoreboardSection,
   HealthTodayHero,
   HealthTrajectorySection,
 } from '@/components/health/HealthIntelligenceSections';
+import { HealthNavigation } from '@/components/health/HealthNavigation';
+import {
+  HealthLongitudinalSummary,
+  HealthReadinessSummary,
+} from '@/components/health/HealthScoreCards';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { getDomainPages } from '@/lib/data/domain-pages';
-import { getHealthContextInputs } from '@/lib/health/context-sources';
-import { buildPersonalDeviationRadar } from '@/lib/health/deviation-radar';
-import { buildHealthIntelligence } from '@/lib/health/intelligence';
-import { loadHealthCheckinSnapshot } from '@/lib/health/checkin-sheet';
-import {
-  buildRhythmFeaturesViewModel,
-  loadRhythmFeaturesSnapshot,
-} from '@/lib/health/rhythm-features-sheet';
+import { loadHealthPageModel } from '@/lib/health/page-data';
 import { periodLabel, parsePeriodParam } from '@/lib/periods';
-import type { HealthInsightKind, HealthMetricGroupId } from '@/types/domain-pages';
+import type { HealthInsightKind } from '@/types/domain-pages';
 
 import pageStyles from '../page.module.scss';
 import local from './page.module.scss';
 
 export const metadata: Metadata = { title: 'Salud' };
-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-type GroupDefinition = {
-  id: HealthMetricGroupId;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-};
-
-const GROUPS: readonly GroupDefinition[] = [
-  {
-    id: 'sleep',
-    title: 'Sueño',
-    description: 'Duración y composición del sueño, sin completar huecos con cero.',
-    icon: Moon,
-  },
-  {
-    id: 'cardio',
-    title: 'Corazón y recuperación',
-    description: 'Frecuencia cardíaca y HRV como señales de tendencia, no como diagnóstico.',
-    icon: HeartPulse,
-  },
-  {
-    id: 'movement',
-    title: 'Movimiento',
-    description: 'Actividad diaria, distancia y métricas de marcha disponibles.',
-    icon: Footprints,
-  },
-  {
-    id: 'oxygen',
-    title: 'Oxígeno',
-    description: 'SpO₂ cuando la fuente entrega datos suficientes.',
-    icon: Wind,
-  },
-  {
-    id: 'energy',
-    title: 'Energía',
-    description: 'Gasto activo y energía de reposo derivada de la fuente canónica.',
-    icon: Flame,
-  },
-];
 
 const CHANGE_KIND_LABELS: Readonly<Record<HealthInsightKind, string>> = {
   fact: 'Hecho',
@@ -93,20 +43,8 @@ export default async function SaludPage({
 }) {
   const params = await searchParams;
   const periodDays = parsePeriodParam(params.period);
-  const [data, context, rhythmSnapshot, checkinSnapshot] = await Promise.all([
-    getDomainPages(periodDays),
-    getHealthContextInputs(),
-    loadRhythmFeaturesSnapshot(),
-    loadHealthCheckinSnapshot(),
-  ]);
-  const health = data.health;
-  const rhythm = buildRhythmFeaturesViewModel(rhythmSnapshot);
-  const deviationRadar = buildPersonalDeviationRadar(health);
-  const intelligence = buildHealthIntelligence({
-    health,
-    gym: context.gym,
-    nutrition: context.nutrition,
-  });
+  const { health, intelligence, deviationRadar } = await loadHealthPageModel(periodDays);
+  const actionable = intelligence.priorities.filter((priority) => priority.id !== 'maintenance');
 
   return (
     <div className={pageStyles.page}>
@@ -121,19 +59,9 @@ export default async function SaludPage({
           </Suspense>
         }
       />
+      <HealthNavigation current="summary" />
 
       {health.notice ? <IntegrationNotice status={health.status} message={health.notice} /> : null}
-
-      <HealthCheckinCard
-        targetDate={checkinSnapshot.targetDate}
-        initial={checkinSnapshot.today}
-        writable={checkinSnapshot.writable}
-        notice={checkinSnapshot.notice}
-      />
-
-      <HealthScoreboardSection scoreboard={intelligence.scores} rhythm={rhythm} />
-
-      <HealthDeviationRadarSection radar={deviationRadar} />
 
       <HealthTodayHero
         brief={intelligence.dailyBrief}
@@ -141,13 +69,15 @@ export default async function SaludPage({
         quality={intelligence.evidenceQuality}
       />
 
+      <HealthReadinessSummary score={intelligence.scores.readiness} />
+
       <HealthTrajectorySection trajectory={intelligence.trajectory} />
 
       <Card aria-labelledby="health-insights-title">
         <SectionHeader
           id="health-insights-title"
           title="Qué cambió"
-          description="Observaciones determinísticas separadas en hecho, tendencia y contexto. Una coincidencia nunca se presenta como causa."
+          description="Sólo cambios materiales, cobertura y contexto temporal relevante."
           domain="health"
         />
         <div className={local['insight-grid']}>
@@ -168,155 +98,85 @@ export default async function SaludPage({
 
       <HealthContextSection context={intelligence.crossDomain} />
 
-      <HealthPrioritiesSection priorities={intelligence.priorities} />
+      {actionable.length > 0 ? <HealthPrioritiesSection priorities={actionable} /> : null}
 
-      <Card aria-labelledby="health-coverage-title">
-        <SectionHeader
-          id="health-coverage-title"
-          title="Cobertura del período"
-          description="Base de todo lo anterior. Los faltantes siguen siendo faltantes, nunca ceros."
-          domain="health"
-        />
-        <div className={local['coverage-head']}>
-          <span className={local['today-state']} data-kind={health.today.kind}>
-            <Activity size={17} aria-hidden="true" />
-            <span>
-              <strong>{health.today.label}</strong>
-              {health.today.details ? <small>{health.today.details}</small> : null}
-            </span>
+      <HealthLongitudinalSummary
+        momentum={intelligence.scores.momentum}
+        radar={deviationRadar}
+      />
+
+      <details className={local['coverage-disclosure']}>
+        <summary>
+          <span>
+            <Activity size={16} aria-hidden="true" />
+            <strong>Datos y cobertura</strong>
           </span>
-        </div>
-        <div className={local['summary-grid']}>
-          <div className={local['summary-item']}>
-            <span>Con datos</span>
-            <strong className="tabular">{health.availableDays}</strong>
-            <small>de {periodDays} días</small>
-          </div>
-          <div className={local['summary-item']}>
-            <span>Completos</span>
-            <strong className="tabular">{health.completeDays}</strong>
-            <small>importaciones</small>
-          </div>
-          <div
-            className={local['summary-item']}
-            data-tone={health.partialDays > 0 ? 'watch' : 'neutral'}
-          >
-            <span>Parciales</span>
-            <strong className="tabular">{health.partialDays}</strong>
-            <small>todavía en reconciliación</small>
-          </div>
-          <div
-            className={local['summary-item']}
-            data-tone={health.sourceIncompleteDays > 0 ? 'watch' : 'neutral'}
-          >
-            <span>Incompletos fuente</span>
-            <strong className="tabular">{health.sourceIncompleteDays}</strong>
-            <small>confirmados en raw</small>
-          </div>
-          <div className={local['summary-item']}>
-            <span>Base personal</span>
-            <strong className="tabular">{health.signals.baselineCoverageDays}</strong>
-            <small>de {health.signals.baselineWindowDays} días previos</small>
-          </div>
-        </div>
-      </Card>
-
-      {GROUPS.map((group) => {
-        const metrics = health.metrics.filter((metric) => metric.group === group.id);
-        if (metrics.length === 0) return null;
-        const Icon = group.icon;
-
-        return (
-          <Card key={group.id} aria-labelledby={`health-${group.id}-title`}>
-            <div className={local['section-heading']}>
-              <span className={local['section-icon']} aria-hidden="true">
-                <Icon size={18} />
+          <small>
+            {health.availableDays}/{periodDays} días · {health.partialDays} parcial(es)
+          </small>
+        </summary>
+        <div className={local['coverage-body']}>
+          <div className={local['coverage-head']}>
+            <span className={local['today-state']} data-kind={health.today.kind}>
+              <Activity size={17} aria-hidden="true" />
+              <span>
+                <strong>{health.today.label}</strong>
+                {health.today.details ? <small>{health.today.details}</small> : null}
               </span>
-              <SectionHeader
-                id={`health-${group.id}-title`}
-                title={group.title}
-                description={group.description}
-                domain="health"
-              />
-            </div>
-
-            <div className={local['metric-grid']}>
-              {metrics.map((metric) => (
-                <article key={metric.id} className={local['metric-card']}>
-                  <div className={local['metric-top']}>
-                    <span>{metric.label}</span>
-                    <small>{metric.coverageDays} d</small>
-                  </div>
-                  <p className={`${local['metric-value']} tabular`}>
-                    {metric.averageLabel}
-                    {metric.average === null || !metric.unit ? null : <span>{metric.unit}</span>}
-                  </p>
-                  <div className={local['spark-wrap']}>
-                    <SparkBars
-                      values={metric.series}
-                      label={`Tendencia de ${metric.label}`}
-                      domain="health"
-                    />
-                  </div>
-                  <div className={local.comparisons}>
-                    <CompareHint compare={metric.compare} prefix="vs. período anterior" />
-                    <CompareHint compare={metric.baselineCompare} prefix="vs. base 30d" />
-                  </div>
-                </article>
-              ))}
-            </div>
-          </Card>
-        );
-      })}
-
-      <Card aria-labelledby="health-history-title">
-        <SectionHeader
-          id="health-history-title"
-          title="Historial diario"
-          description="Detalle crudo útil para auditar la lectura visual. Los faltantes siguen siendo faltantes."
-          domain="health"
-        />
-        {health.history.length === 0 ? (
-          <p className={styles.sub}>Sin días de salud en este período.</p>
-        ) : (
-          <div className={styles['table-wrap']}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th scope="col">Fecha</th>
-                  <th scope="col">Sueño</th>
-                  <th scope="col">Pasos</th>
-                  <th scope="col">FC reposo</th>
-                  <th scope="col">Importación</th>
-                  <th scope="col">Entrenamiento</th>
-                </tr>
-              </thead>
-              <tbody>
-                {health.history.map((row) => (
-                  <tr key={row.date}>
-                    <td>{row.label}</td>
-                    <td className="tabular">{row.sleep}</td>
-                    <td className="tabular">{row.steps}</td>
-                    <td className="tabular">{row.restingHr}</td>
-                    <td>
-                      <span className={styles.badge} data-kind={row.importKind}>
-                        {row.importKind === 'partial'
-                          ? 'Parcial'
-                          : row.importKind === 'source-incomplete'
-                            ? 'Incompleta fuente'
-                            : row.importKind === 'complete'
-                              ? 'Completa'
-                              : '—'}
-                      </span>
-                    </td>
-                    <td>{row.workout}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            </span>
           </div>
-        )}
-      </Card>
+
+          <div className={local['summary-grid']}>
+            <div className={local['summary-item']}>
+              <span>Con datos</span>
+              <strong className="tabular">{health.availableDays}</strong>
+              <small>de {periodDays} días</small>
+            </div>
+            <div className={local['summary-item']}>
+              <span>Completos</span>
+              <strong className="tabular">{health.completeDays}</strong>
+              <small>importaciones</small>
+            </div>
+            <div className={local['summary-item']} data-tone={health.partialDays > 0 ? 'watch' : 'neutral'}>
+              <span>Parciales</span>
+              <strong className="tabular">{health.partialDays}</strong>
+              <small>en reconciliación</small>
+            </div>
+            <div className={local['summary-item']}>
+              <span>Base personal</span>
+              <strong className="tabular">{health.signals.baselineCoverageDays}</strong>
+              <small>de {health.signals.baselineWindowDays} días</small>
+            </div>
+          </div>
+
+          {health.history.length > 0 ? (
+            <div className={styles['table-wrap']}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Sueño</th>
+                    <th scope="col">Pasos</th>
+                    <th scope="col">FC reposo</th>
+                    <th scope="col">Importación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {health.history.map((row) => (
+                    <tr key={row.date}>
+                      <td>{row.label}</td>
+                      <td className="tabular">{row.sleep}</td>
+                      <td className="tabular">{row.steps}</td>
+                      <td className="tabular">{row.restingHr}</td>
+                      <td>{row.importKind === 'partial' ? 'Parcial' : row.importKind === 'source-incomplete' ? 'Incompleta' : 'Completa'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </div>
+      </details>
     </div>
   );
 }
