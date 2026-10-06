@@ -47,7 +47,9 @@ export function MonthlyReviewCard({
             </span>
             <div>
               <strong>{copy.title}</strong>
-              <p>Usá tus datos reales del período y cambiá sólo lo que tenga evidencia suficiente.</p>
+              <p>
+                Usá tus datos reales del período y cambiá sólo lo que tenga evidencia suficiente.
+              </p>
             </div>
           </div>
           <CopyAnalysisButton text={copy.prompt} />

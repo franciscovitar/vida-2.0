@@ -68,7 +68,6 @@ test('Gym Cardio prioriza el plan real antes de la equivalencia MET-min', () => 
   assert.ok(planIndex < equivalentIndex);
 });
 
-
 test('Gym jerarquiza detalle secundario mediante progressive disclosure', () => {
   const dashboard = source('components/gym/GymDashboard.tsx');
   const routine = source('components/gym/GymRoutineTabs.tsx');
