@@ -125,6 +125,7 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
         summaries={data.sessionSummaries}
         weeklyTarget={data.weeklyTarget ?? null}
         today={data.targetDate}
+        routine={data.routine}
       />
 
       {hasUsefulContext ? (
