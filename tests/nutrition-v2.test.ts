@@ -7,6 +7,7 @@ import {
 } from '@/lib/nutrition/food-item-integrity';
 import { deriveNutritionFreshness } from '@/lib/nutrition/freshness';
 import { selectNutritionMacros } from '@/lib/nutrition/macro-selection';
+import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import {
   nutritionDisplayDelta,
@@ -288,4 +289,66 @@ test('Tendencias usa 28D por defecto y acepta sólo ventanas soportadas', () => 
   assert.equal(normalizeNutritionWindow('7d'), '7d');
   assert.equal(normalizeNutritionWindow('90d'), '90d');
   assert.equal(nutritionWindowDays('28d'), 28);
+});
+
+
+test('Nutrientes promedia sólo días completos y detecta una señal persistente de adecuación', () => {
+  const summary = [
+    { date: '2026-10-01', nutrientKey: 'magnesium', amount: 300, sourceCoverage: 'complete', confidence: 'high' },
+    { date: '2026-10-02', nutrientKey: 'magnesium', amount: 350, sourceCoverage: 'complete', confidence: 'high' },
+    { date: '2026-10-03', nutrientKey: 'magnesium', amount: 450, sourceCoverage: 'complete', confidence: 'high' },
+    { date: '2026-10-04', nutrientKey: 'magnesium', amount: 100, sourceCoverage: 'partial', confidence: 'medium' },
+    { date: '2026-10-05', nutrientKey: 'magnesium', amount: 320, sourceCoverage: 'complete', confidence: 'high' },
+  ];
+  const targets = [
+    {
+      decisionId: 'mg-rda',
+      effectiveFrom: '2026-01-01',
+      status: 'active',
+      nutrientKey: 'magnesium',
+      targetAmount: 400,
+      unit: 'mg',
+      basis: 'RDA',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, targets, '2026-10-05', 7);
+  const magnesium = data.nutrients.find((nutrient) => nutrient.key === 'magnesium');
+
+  assert.ok(magnesium);
+  assert.equal(magnesium.completeDays, 4);
+  assert.equal(magnesium.partialDays, 1);
+  assert.equal(magnesium.averageAmount, 355);
+  assert.equal(magnesium.evaluatedDays, 4);
+  assert.equal(magnesium.attentionDays, 3);
+  assert.equal(magnesium.attentionKind, 'below-reference');
+  assert.equal(data.attention[0]?.key, 'magnesium');
+});
+
+test('Nutrientes interpreta UL como días por encima del límite y no como meta a alcanzar', () => {
+  const summary = [
+    { date: '2026-10-01', nutrientKey: 'sodium', amount: 2500, sourceCoverage: 'complete', confidence: 'high' },
+    { date: '2026-10-02', nutrientKey: 'sodium', amount: 2000, sourceCoverage: 'complete', confidence: 'high' },
+    { date: '2026-10-03', nutrientKey: 'sodium', amount: 2600, sourceCoverage: 'complete', confidence: 'high' },
+  ];
+  const targets = [
+    {
+      decisionId: 'sodium-ul',
+      effectiveFrom: '2026-01-01',
+      status: 'active',
+      nutrientKey: 'sodium',
+      targetAmount: 2300,
+      unit: 'mg',
+      basis: 'UL',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, targets, '2026-10-03', 7);
+  const sodium = data.nutrients.find((nutrient) => nutrient.key === 'sodium');
+
+  assert.ok(sodium);
+  assert.equal(sodium.attentionKind, 'above-limit');
+  assert.equal(sodium.attentionDays, 2);
+  assert.equal(sodium.evaluatedDays, 3);
+  assert.equal(data.attention[0]?.key, 'sodium');
 });
