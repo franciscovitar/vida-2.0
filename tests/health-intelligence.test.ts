@@ -785,27 +785,33 @@ test('la página conserva métricas detalladas, historial y base personal', () =
   assert.ok(health.insights.every((insight) => insight.kind !== undefined));
 });
 
-test('la UI de Salud lidera con la lectura y mantiene la evidencia debajo', () => {
+test('la UI de Salud lidera con la lectura y mantiene la evidencia bajo jerarquía', () => {
   const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
   const sections = readFileSync(
     join(process.cwd(), 'components', 'health', 'HealthIntelligenceSections.tsx'),
     'utf8',
   );
+  const scoreCards = readFileSync(
+    join(process.cwd(), 'components', 'health', 'HealthScoreCards.tsx'),
+    'utf8',
+  );
   const heroIndex = page.indexOf('<HealthTodayHero');
+  const readinessIndex = page.indexOf('<HealthReadinessSummary');
   const trajectoryIndex = page.indexOf('<HealthTrajectorySection');
   const changesIndex = page.indexOf('health-insights-title');
   const contextIndex = page.indexOf('<HealthContextSection');
-  const prioritiesIndex = page.indexOf('<HealthPrioritiesSection');
-  const historyIndex = page.indexOf('health-history-title');
+  const longitudinalIndex = page.indexOf('<HealthLongitudinalSummary');
+  const coverageIndex = page.indexOf('coverage-disclosure');
 
   assert.ok(heroIndex > 0);
-  assert.ok(heroIndex < trajectoryIndex);
+  assert.ok(heroIndex < readinessIndex);
+  assert.ok(readinessIndex < trajectoryIndex);
   assert.ok(trajectoryIndex < changesIndex);
   assert.ok(changesIndex < contextIndex);
-  assert.ok(contextIndex < prioritiesIndex);
-  assert.ok(prioritiesIndex < historyIndex);
-  assert.match(page, /no como diagnóstico/i);
+  assert.ok(contextIndex < longitudinalIndex);
+  assert.ok(longitudinalIndex < coverageIndex);
+  assert.match(scoreCards, /no es diagnóstico ni aptitud médica/i);
   assert.match(sections, /Resumen diario de salud/);
   assert.match(page, /brief=\{intelligence\.dailyBrief\}/);
-  assert.match(page, /SparkBars/);
+  assert.doesNotMatch(page, /HealthCheckinCard/);
 });

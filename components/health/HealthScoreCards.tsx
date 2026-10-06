@@ -48,6 +48,7 @@ export function HealthReadinessSummary({ score }: { score: HealthExplainableScor
           {score.score === null ? null : <small>/100</small>}
         </div>
       </div>
+      <p className={styles.caveat}>Score de bienestar/readiness; no es diagnóstico ni aptitud médica.</p>
       <details className={styles.details}>
         <summary>Ver evidencia del Readiness</summary>
         <div className={styles['contributor-grid']}>
@@ -85,6 +86,7 @@ export function HealthDomainScoreCard({ score }: { score: HealthExplainableScore
           <span>Confianza {score.confidence}%</span>
           <span>Evidencia {score.evidenceStrength}</span>
         </div>
+        <p className={styles.caveat}>Score de bienestar/tendencia; no es diagnóstico.</p>
         <details className={styles.details}>
           <summary>Ver cálculo</summary>
           <div className={styles['contributor-grid']}>
