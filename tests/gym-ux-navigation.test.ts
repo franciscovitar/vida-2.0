@@ -75,7 +75,8 @@ test('Gym jerarquiza detalle secundario mediante progressive disclosure', () => 
 
   assert.match(dashboard, /Contexto de Salud y agenda/);
   assert.doesNotMatch(dashboard, /Actividad reciente:/);
-  assert.match(routine, /Movilidad, recuperación y complementos/);
+  assert.match(routine, /Movilidad \/ postura/);
+  assert.match(routine, /Progresión y descarga/);
   assert.match(progress, /Referencia externa/);
   assert.match(progress, /benchmark-disclosure/);
 });
@@ -88,4 +89,30 @@ test('Gym mantiene revisión mensual e historial como acciones secundarias', () 
   assert.match(dashboard, /Ver sesiones anteriores/);
   assert.match(dashboard, /MonthlyReviewCard domain="gym" compact/);
   assert.match(review, /compact\?: boolean/);
+});
+
+test('Gym Rutina separa complementos por función y omite cardio/metadatos', () => {
+  const routine = source('components/gym/GymRoutineTabs.tsx');
+
+  assert.match(routine, /Movilidad \/ postura/);
+  assert.match(routine, /Progresión y descarga/);
+  assert.doesNotMatch(routine, /const cardioSections/);
+  assert.match(routine, /versi\[oó\]n/);
+  assert.doesNotMatch(routine, /Movilidad, recuperación y complementos/);
+  assert.doesNotMatch(routine, /bloque\(s\)/);
+});
+
+test('Gym deja diagnósticos técnicos sólo en Resumen y colapsados por defecto', () => {
+  const dashboard = source('components/gym/GymDashboard.tsx');
+  const warningUsages = dashboard.match(/<WarningCard data=\{data\} \/>/g) ?? [];
+
+  assert.equal(warningUsages.length, 1);
+  assert.match(dashboard, /Diagnóstico de datos/);
+  assert.match(dashboard, /diagnostic-disclosure/);
+});
+
+test('Cardio separa visualmente la carga equivalente de su explicación', () => {
+  const styles = source('components/gym/GymWeeklyCardio.module.scss');
+  assert.match(styles, /\.secondary-heading/);
+  assert.match(styles, /display: flex/);
 });

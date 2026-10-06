@@ -498,3 +498,29 @@ test('9D-4. pestañas vacías son un estado real y no un mock', async () => {
   assert.equal(snapshot.sessions.length, 0);
   assert.match(snapshot.notice ?? '', /todavía no hay sesiones/i);
 });
+
+test('9D-1b. notas del día no se convierten en ejercicios ni warnings', () => {
+  const content = page([
+    textBlock('heading_1', 'Rutina de pesas', 'weights-h'),
+    textBlock('heading_2', 'Día 2 — Pierna', 'day-2'),
+    textBlock('numbered_list_item', 'Prensa horizontal — 3x6/10 — descanso 90 s.', 'leg-1'),
+    textBlock('heading_3', 'Notas del día', 'notes-h'),
+    textBlock('bulleted_list_item', 'El sóleo sentado deja de ser obligatorio.', 'note-1'),
+    textBlock('bulleted_list_item', 'Dead bug queda como herramienta opcional.', 'note-2'),
+    textBlock('heading_1', 'Progresión', 'progression-h'),
+    textBlock('bulleted_list_item', 'Mantener carga mientras haya progreso.', 'progression-1'),
+  ]);
+
+  const parsed = parseGymRoutineFromContentPage(content);
+
+  assert.equal(parsed.routine.days.length, 1);
+  assert.equal(parsed.routine.days[0]!.exercises.length, 1);
+  assert.deepEqual(parsed.routine.days[0]!.notes, [
+    'El sóleo sentado deja de ser obligatorio.',
+    'Dead bug queda como herramienta opcional.',
+  ]);
+  assert.equal(
+    parsed.warnings.some((warning) => warning.code === 'exercise-without-prescription'),
+    false,
+  );
+});
