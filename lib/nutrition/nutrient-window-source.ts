@@ -3,6 +3,7 @@ import 'server-only';
 import type { PlainCell } from '@/lib/data/plain';
 import type { SheetReadCode } from '@/lib/google/errors';
 
+import { auditNutritionNutrientSummaryFreshness } from './nutrient-summary-freshness';
 import {
   buildNutritionNutrientWindow,
   type NutritionNutrientWindowData,
@@ -27,34 +28,103 @@ export interface NutritionNutrientWindowResult extends NutritionNutrientWindowDa
   source: {
     status: 'ready' | 'partial' | 'unavailable';
     code: SheetReadCode | null;
+    targetStatus: 'ready' | 'missing' | 'unavailable';
+    staleDateCount: number;
+    unverifiableDateCount: number;
   };
+}
+
+function windowStartDate(endDate: string, windowDays: number): string {
+  const date = new Date(`${endDate}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() - Math.max(windowDays - 1, 0));
+  return date.toISOString().slice(0, 10);
+}
+
+function optionalStatus(result: Awaited<ReturnType<typeof readNutritionTabValues>>) {
+  if (result.ok) return 'ready' as const;
+  return result.code === 'missing-tab' ? ('missing' as const) : ('unavailable' as const);
 }
 
 export async function loadNutritionNutrientWindow(
   endDate: string,
   windowDays: number,
 ): Promise<NutritionNutrientWindowResult> {
-  const [summaryResult, targetResult] = await Promise.all([
+  const [summaryResult, targetResult, mealsResult, itemsResult, dailyResult] = await Promise.all([
     readNutritionTabValues('Nutrient Summary'),
     readNutritionTabValues('Nutrient Targets'),
+    readNutritionTabValues('Meals'),
+    readNutritionTabValues('Food Items'),
+    readNutritionTabValues('Daily Summary'),
   ]);
 
   const summaryRows = summaryResult.ok ? rowsFromValues(summaryResult.values) : [];
   const targetRows = targetResult.ok ? rowsFromValues(targetResult.values) : [];
-  const data = buildNutritionNutrientWindow(summaryRows, targetRows, endDate, windowDays);
+  const startDate = windowStartDate(endDate, windowDays);
+  const auditSourcesReady = mealsResult.ok && itemsResult.ok && dailyResult.ok;
+
+  const freshness = auditSourcesReady
+    ? auditNutritionNutrientSummaryFreshness(
+        summaryRows,
+        rowsFromValues(mealsResult.values),
+        rowsFromValues(itemsResult.values),
+        rowsFromValues(dailyResult.values),
+        startDate,
+        endDate,
+      )
+    : summaryRows
+        .map((row) => String(row.date ?? '').trim())
+        .filter((date) => date >= startDate && date <= endDate)
+        .filter((date, index, values) => Boolean(date) && values.indexOf(date) === index)
+        .map((date) => ({
+          date,
+          state: 'unverifiable' as const,
+          latestEvidenceAt: null,
+          earliestSummaryAt: null,
+        }));
+
+  const rejectedDates = new Set(
+    freshness
+      .filter((entry) => entry.state !== 'current')
+      .map((entry) => entry.date),
+  );
+  const usableSummaryRows = summaryRows.filter(
+    (row) => !rejectedDates.has(String(row.date ?? '').trim()),
+  );
+  const staleDateCount = freshness.filter((entry) => entry.state === 'stale').length;
+  const unverifiableDateCount = freshness.filter(
+    (entry) => entry.state === 'unverifiable',
+  ).length;
+  const data = buildNutritionNutrientWindow(
+    usableSummaryRows,
+    targetRows,
+    endDate,
+    windowDays,
+  );
 
   if (!summaryResult.ok) {
     return {
       ...data,
-      source: { status: 'unavailable', code: summaryResult.code },
+      source: {
+        status: 'unavailable',
+        code: summaryResult.code,
+        targetStatus: optionalStatus(targetResult),
+        staleDateCount: 0,
+        unverifiableDateCount: 0,
+      },
     };
   }
+
+  const targetStatus = optionalStatus(targetResult);
+  const freshnessIssue = staleDateCount > 0 || unverifiableDateCount > 0;
 
   return {
     ...data,
     source: {
-      status: targetResult.ok ? 'ready' : 'partial',
+      status: targetStatus === 'ready' && !freshnessIssue ? 'ready' : 'partial',
       code: targetResult.ok ? null : targetResult.code,
+      targetStatus,
+      staleDateCount,
+      unverifiableDateCount,
     },
   };
 }

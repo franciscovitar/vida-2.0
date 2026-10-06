@@ -85,6 +85,22 @@ export function NutritionNutrientTrends({
     ['other', 'Otros nutrientes'],
   ] as const;
   const withAverage = data.nutrients.filter((nutrient) => nutrient.averageAmount !== null).length;
+  const sourceMessages: string[] = [];
+  if (data.source.staleDateCount > 0) {
+    sourceMessages.push(
+      `Se omitieron ${data.source.staleDateCount} día(s) cuyo Nutrient Summary quedó detrás de evidencia más nueva.`,
+    );
+  }
+  if (data.source.unverifiableDateCount > 0) {
+    sourceMessages.push(
+      `No se pudieron validar ${data.source.unverifiableDateCount} día(s) por timestamps/evidencia incompletos.`,
+    );
+  }
+  if (data.source.targetStatus !== 'ready') {
+    sourceMessages.push(
+      'Las referencias de objetivos no pudieron leerse completamente; no se inventan metas.',
+    );
+  }
 
   if (data.source.status === 'unavailable') {
     return (
@@ -123,11 +139,8 @@ export function NutritionNutrientTrends({
             <strong>{data.attention.length}</strong>
           </article>
         </div>
-        {data.source.status === 'partial' ? (
-          <p className={styles.notice}>
-            Las cantidades están disponibles, pero las referencias de objetivos no pudieron leerse
-            completamente. No se inventan metas.
-          </p>
+        {sourceMessages.length > 0 ? (
+          <p className={styles.notice}>{sourceMessages.join(' ')}</p>
         ) : null}
       </section>
 

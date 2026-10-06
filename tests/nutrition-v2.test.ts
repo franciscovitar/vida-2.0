@@ -12,6 +12,7 @@ import {
   buildNutritionRawDayFacts,
   reconcileNutritionHistoryWithRaw,
 } from '@/lib/nutrition/history-reconciliation';
+import { auditNutritionNutrientSummaryFreshness } from '@/lib/nutrition/nutrient-summary-freshness';
 import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import {
@@ -226,6 +227,113 @@ test('evidencia contractual sin timestamp vuelve no verificable el AI Insight', 
   );
 
   assert.equal(result.state, 'unverifiable');
+});
+
+test('Nutrient Summary queda current cuando fue reconstruido después de la evidencia', () => {
+  const result = auditNutritionNutrientSummaryFreshness(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        updatedAt: '2026-10-05T22:10:00-03:00',
+      },
+      {
+        date: '2026-10-05',
+        nutrientKey: 'sodium',
+        updatedAt: '2026-10-05T22:10:01-03:00',
+      },
+    ],
+    [
+      {
+        mealId: 'm1',
+        date: '2026-10-05',
+        updatedAt: '2026-10-05T22:00:00-03:00',
+      },
+    ],
+    [{ mealId: 'm1', updatedAt: '2026-10-05T22:01:00-03:00' }],
+    [{ date: '2026-10-05', updatedAt: '2026-10-05T22:05:00-03:00' }],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result.length, 1);
+  assert.equal(result[0]?.state, 'current');
+});
+
+test('Nutrient Summary queda stale si Food Items cambió después', () => {
+  const result = auditNutritionNutrientSummaryFreshness(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        updatedAt: '2026-10-05T22:10:00-03:00',
+      },
+    ],
+    [
+      {
+        mealId: 'm1',
+        date: '2026-10-05',
+        updatedAt: '2026-10-05T22:00:00-03:00',
+      },
+    ],
+    [{ mealId: 'm1', updatedAt: '2026-10-05T22:30:00-03:00' }],
+    [{ date: '2026-10-05', updatedAt: '2026-10-05T22:05:00-03:00' }],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result[0]?.state, 'stale');
+  assert.equal(result[0]?.latestEvidenceAt, '2026-10-05T22:30:00-03:00');
+});
+
+test('Nutrient Summary usa la fila más vieja del rebuild para evitar mezcla parcial', () => {
+  const result = auditNutritionNutrientSummaryFreshness(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        updatedAt: '2026-10-05T21:50:00-03:00',
+      },
+      {
+        date: '2026-10-05',
+        nutrientKey: 'sodium',
+        updatedAt: '2026-10-05T22:20:00-03:00',
+      },
+    ],
+    [
+      {
+        mealId: 'm1',
+        date: '2026-10-05',
+        updatedAt: '2026-10-05T22:00:00-03:00',
+      },
+    ],
+    [{ mealId: 'm1', updatedAt: '2026-10-05T22:00:00-03:00' }],
+    [{ date: '2026-10-05', updatedAt: '2026-10-05T22:00:00-03:00' }],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result[0]?.state, 'stale');
+  assert.equal(result[0]?.earliestSummaryAt, '2026-10-05T21:50:00-03:00');
+});
+
+test('Nutrient Summary sin timestamps contractuales falla cerrado', () => {
+  const result = auditNutritionNutrientSummaryFreshness(
+    [{ date: '2026-10-05', nutrientKey: 'fiber', updatedAt: null }],
+    [
+      {
+        mealId: 'm1',
+        date: '2026-10-05',
+        updatedAt: '2026-10-05T22:00:00-03:00',
+      },
+    ],
+    [],
+    [],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result[0]?.state, 'unverifiable');
 });
 
 test('Nutrition V2 exige un spreadsheet dedicado y no cae al Sheet general', () => {
