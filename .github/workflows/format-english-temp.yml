@@ -1,0 +1,36 @@
+name: Temp format English dashboard
+
+on:
+  push:
+    branches:
+      - english-speaking-live-projection-20261006
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: english-speaking-live-projection-20261006
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format English dashboard
+        run: npx prettier --write components/english-learning/EnglishLearningDashboard.tsx components/english-learning/EnglishLearningDashboard.module.scss
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/english-learning/EnglishLearningDashboard.tsx components/english-learning/EnglishLearningDashboard.module.scss
+          git commit -m "Format English dashboard"
+          git push origin HEAD:english-speaking-live-projection-20261006
