@@ -287,18 +287,36 @@ test('PI-V5. Próxima acción: resuelta, no resoluble, ausente y múltiples cand
   assert.equal(view.focus[0].quality.multipleNextActionCandidates, true);
 });
 
-test('PI-V6. En espera se agrupa aparte de En foco', () => {
+test('PI-V6. En espera separa próximos sin iniciar de proyectos ya avanzados para revisión', () => {
   const active = project({ id: 'proj-active', status: 'Activo' });
-  const waiting = project({ id: 'proj-waiting', status: 'En espera' });
-  const view = buildProjectsIntelligenceView(dataFixture([active, waiting]));
+  const upcoming = project({
+    id: 'proj-upcoming',
+    status: 'En espera',
+    progress: { measurable: true, percent: 0, completedWeight: 0, totalWeight: 100 },
+  });
+  const review = project({
+    id: 'proj-review',
+    status: 'En espera',
+    progress: { measurable: true, percent: 45, completedWeight: 45, totalWeight: 100 },
+  });
+  const unknown = project({
+    id: 'proj-unknown',
+    status: 'En espera',
+    progress: { measurable: false, reason: 'no-milestones' },
+  });
+  const view = buildProjectsIntelligenceView(dataFixture([active, upcoming, review, unknown]));
 
   assert.deepEqual(
     view.focus.map((card) => card.id),
     ['proj-active'],
   );
   assert.deepEqual(
+    view.upcoming.map((card) => card.id),
+    ['proj-upcoming'],
+  );
+  assert.deepEqual(
     view.waiting.map((card) => card.id),
-    ['proj-waiting'],
+    ['proj-review', 'proj-unknown'],
   );
 });
 

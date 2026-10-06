@@ -245,6 +245,9 @@ export interface ProjectsIntelligenceView {
   qualityRows: QualityRow[];
   qualityAllClear: boolean;
   focus: ProjectCardView[];
+  /** En espera todavía no iniciado: visible como próximo, sin competir con En foco. */
+  upcoming: ProjectCardView[];
+  /** En espera con avance real: construcción pausada, queda para uso/revisión bajo Ver más. */
   waiting: ProjectCardView[];
   blocked: ProjectCardView[];
   avoidForNow: ProjectCardView[];
@@ -272,7 +275,17 @@ export function buildProjectsIntelligenceView(
     qualityRows,
     qualityAllClear: qualityRows.every((row) => row.count === 0),
     focus: cards.filter((card) => card.status === 'Activo'),
-    waiting: cards.filter((card) => card.status === 'En espera'),
+    upcoming: cards.filter(
+      (card) =>
+        card.status === 'En espera' &&
+        card.progress.measurable &&
+        card.progress.percent === 0,
+    ),
+    waiting: cards.filter(
+      (card) =>
+        card.status === 'En espera' &&
+        !(card.progress.measurable && card.progress.percent === 0),
+    ),
     blocked: cards.filter((card) => card.status === 'Bloqueado'),
     avoidForNow: cards.filter(
       (card) =>
