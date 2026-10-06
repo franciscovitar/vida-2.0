@@ -73,12 +73,14 @@ function effectiveCoverageForCompleteClaim(input: {
   declaredSourceCount: number | null;
   declaredUnquantifiedCount: number | null;
   hasDuplicateSources: boolean;
+  hasInvalidItemIdentity: boolean;
   allSourcesComplete: boolean;
 }): { coverage: NutritionCoverage; unverifiable: boolean } {
   if (
     input.declaredSourceCount === null ||
     input.declaredUnquantifiedCount === null ||
-    input.hasDuplicateSources
+    input.hasDuplicateSources ||
+    input.hasInvalidItemIdentity
   ) {
     return { coverage: 'unknown', unverifiable: true };
   }
@@ -141,12 +143,12 @@ export function sanitizeNutritionNutrientSummaryIntegrity(
         .map((meal) => stringValue(meal.mealId))
         .filter((mealId): mealId is string => Boolean(mealId)),
     );
+    const dayItems = activeItems.filter((item) => {
+      const mealId = stringValue(item.mealId);
+      return Boolean(mealId && mealIds.has(mealId));
+    });
     const activeItemIds = new Set(
-      activeItems
-        .filter((item) => {
-          const mealId = stringValue(item.mealId);
-          return Boolean(mealId && mealIds.has(mealId));
-        })
+      dayItems
         .map((item) => stringValue(item.foodItemId))
         .filter((foodItemId): foodItemId is string => Boolean(foodItemId)),
     );
@@ -170,6 +172,7 @@ export function sanitizeNutritionNutrientSummaryIntegrity(
       declaredSourceCount: countValue(row.sourceFoodItemCount),
       declaredUnquantifiedCount: countValue(row.unquantifiedRelevantItemCount),
       hasDuplicateSources: uniqueSourceIds.size !== sourceIds.length,
+      hasInvalidItemIdentity: activeItemIds.size !== dayItems.length,
       allSourcesComplete:
         lowerRows.length > 0 &&
         lowerRows.every((nutrient) => coverageValue(nutrient.coverage) === 'complete'),

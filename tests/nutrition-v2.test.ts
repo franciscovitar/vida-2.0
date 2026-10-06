@@ -547,6 +547,40 @@ test('complete con contadores faltantes falla como cobertura desconocida', () =>
   assert.equal(result.unverifiableRowCount, 1);
 });
 
+test('complete con Food Item activo sin identidad falla cerrado', () => {
+  const result = sanitizeNutritionNutrientSummaryIntegrity(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        sourceCoverage: 'complete',
+        sourceFoodItemCount: 1,
+        unquantifiedRelevantItemCount: 0,
+      },
+    ],
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [
+      { mealId: 'm1', foodItemId: 'f1', status: 'active' },
+      { mealId: 'm1', foodItemId: null, status: 'active' },
+    ],
+    [
+      {
+        foodItemId: 'f1',
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        coverage: 'complete',
+        status: 'active',
+      },
+    ],
+    '2026-10-05',
+    '2026-10-05',
+  );
+
+  assert.equal(result.rows[0]?.sourceCoverage, 'unknown');
+  assert.equal(result.unverifiableRowCount, 1);
+});
+
 test('Vida nunca asciende un partial a complete por su cuenta', () => {
   const result = sanitizeNutritionNutrientSummaryIntegrity(
     [
