@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cache } from 'react';
 
+import snapshotProfile from './profile.snapshot.json';
 import type { EnglishLearnerProfile, EnglishProfileLoadResult } from './types';
 
 const DEFAULT_REPOSITORY = 'franciscovitar/personal-ai-system';
@@ -43,6 +44,24 @@ function decodeGithubContent(payload: GithubContentsResponse): unknown {
   return JSON.parse(json) as unknown;
 }
 
+function loadFromSnapshot(): EnglishProfileLoadResult {
+  const raw: unknown = snapshotProfile;
+
+  if (!isProfile(raw)) {
+    return {
+      state: 'invalid',
+      profile: null,
+      notice: 'La proyección versionada de English Speaking Lab no cumple el contrato esperado.',
+    };
+  }
+
+  return {
+    state: 'ready',
+    profile: raw,
+    notice: `Proyección read-only actualizada al ${raw.updated}. GitHub canónico sigue siendo la fuente de verdad.`,
+  };
+}
+
 async function loadFromGithub(): Promise<EnglishProfileLoadResult> {
   const token = process.env.ENGLISH_PROFILE_GITHUB_TOKEN?.trim();
   if (!token) {
@@ -50,7 +69,7 @@ async function loadFromGithub(): Promise<EnglishProfileLoadResult> {
       state: 'unconfigured',
       profile: null,
       notice:
-        'English Speaking Lab está listo, pero falta configurar la credencial de lectura del perfil canónico.',
+        'La lectura remota de GitHub no tiene credencial configurada; se usará la última proyección versionada si está disponible.',
     };
   }
 
@@ -104,23 +123,32 @@ async function loadFromGithub(): Promise<EnglishProfileLoadResult> {
 }
 
 export const loadEnglishLearnerProfile = cache(async (): Promise<EnglishProfileLoadResult> => {
-  const source = process.env.ENGLISH_PROFILE_DATA_SOURCE?.trim() || 'disabled';
+  const source = process.env.ENGLISH_PROFILE_DATA_SOURCE?.trim() || 'snapshot';
 
-  if (source === 'disabled') {
-    return {
-      state: 'unconfigured',
-      profile: null,
-      notice: 'La integración read-only con English Speaking Lab todavía está desactivada.',
-    };
+  if (source === 'github') {
+    const remote = await loadFromGithub();
+    if (remote.profile) return remote;
+
+    const fallback = loadFromSnapshot();
+    if (fallback.profile) {
+      return {
+        ...fallback,
+        notice: `${remote.notice} Mostrando la última proyección versionada (${fallback.profile.updated}).`,
+      };
+    }
+
+    return remote;
   }
 
-  if (source !== 'github') {
-    return {
-      state: 'invalid',
-      profile: null,
-      notice: 'ENGLISH_PROFILE_DATA_SOURCE tiene un valor no permitido.',
-    };
+  // "disabled" was the original production default. Keep it backward-compatible:
+  // remote GitHub access may remain disabled while the private, versioned projection is still usable.
+  if (source === 'snapshot' || source === 'disabled') {
+    return loadFromSnapshot();
   }
 
-  return loadFromGithub();
+  return {
+    state: 'invalid',
+    profile: null,
+    notice: 'ENGLISH_PROFILE_DATA_SOURCE tiene un valor no permitido.',
+  };
 });
