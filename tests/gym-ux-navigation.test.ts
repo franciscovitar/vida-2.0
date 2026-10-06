@@ -75,7 +75,8 @@ test('Gym jerarquiza detalle secundario mediante progressive disclosure', () => 
 
   assert.match(dashboard, /Contexto de Salud y agenda/);
   assert.doesNotMatch(dashboard, /Actividad reciente:/);
-  assert.match(routine, /Movilidad, recuperación y complementos/);
+  assert.match(routine, /Movilidad \/ postura/);
+  assert.match(routine, /Progresión y descarga/);
   assert.match(progress, /Referencia externa/);
   assert.match(progress, /benchmark-disclosure/);
 });
@@ -96,8 +97,8 @@ test('Gym Rutina separa complementos por función y omite cardio/metadatos', () 
 
   assert.match(routine, /Movilidad \/ postura/);
   assert.match(routine, /Progresión y descarga/);
-  assert.match(routine, /section\.kind === 'cardio'/);
-  assert.match(routine, /!\/\^versi\[oó\]n\$\/i/);
+  assert.doesNotMatch(routine, /const cardioSections/);
+  assert.match(routine, /versi\[oó\]n/);
   assert.doesNotMatch(routine, /Movilidad, recuperación y complementos/);
   assert.doesNotMatch(routine, /bloque\(s\)/);
 });
