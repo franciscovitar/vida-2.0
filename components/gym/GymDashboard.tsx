@@ -95,9 +95,9 @@ function WarningCard({ data }: { data: GymDashboardData }) {
 export function GymDashboardView({ data }: { data: GymDashboardData }) {
   const hasUsefulContext = Boolean(
     data.readiness.sleep ||
-      data.readiness.energy ||
-      data.readiness.recentExercise ||
-      data.readiness.commitments.length > 0,
+    data.readiness.energy ||
+    data.readiness.recentExercise ||
+    data.readiness.commitments.length > 0,
   );
 
   return (
