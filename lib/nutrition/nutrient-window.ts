@@ -158,13 +158,11 @@ function targetRowForDate(
 }
 
 function referenceForDay(
-  summaryRow: Row,
   targetRows: readonly Row[],
   nutrientKey: string,
   date: string,
 ): NutritionNutrientReference | null {
-  const canonical = referenceFromRow(targetRowForDate(targetRows, nutrientKey, date));
-  return canonical ?? referenceFromRow(summaryRow);
+  return referenceFromRow(targetRowForDate(targetRows, nutrientKey, date));
 }
 
 function attentionKindFor(
@@ -250,7 +248,7 @@ export function buildNutritionNutrientWindow(
         value: display.value,
         approximate: display.approximate,
         quality: qualityValue(row.confidence),
-        reference: date ? referenceForDay(row, targetRows, catalog.key, date) : null,
+        reference: date ? referenceForDay(targetRows, catalog.key, date) : null,
       });
     }
 
@@ -258,7 +256,8 @@ export function buildNutritionNutrientWindow(
       completePoints.length === 0
         ? null
         : completePoints.reduce((sum, point) => sum + point.value, 0) / completePoints.length;
-    const currentReference = referenceFromRow(targetRowForDate(targetRows, catalog.key, endDate));
+    const currentTargetRow = targetRowForDate(targetRows, catalog.key, endDate);
+    const currentReference = referenceFromRow(currentTargetRow);
 
     let evaluatedDays = 0;
     let attentionDays = 0;
@@ -283,7 +282,7 @@ export function buildNutritionNutrientWindow(
       key: catalog.key,
       name: catalog.name,
       group: catalog.group,
-      unit: currentReference ? stringValue(targetRowForDate(targetRows, catalog.key, endDate)?.unit) ?? catalog.unit : catalog.unit,
+      unit: currentReference ? stringValue(currentTargetRow?.unit) ?? catalog.unit : catalog.unit,
       averageAmount,
       averageApproximate: completePoints.some((point) => point.approximate),
       daysWithData,
@@ -304,7 +303,8 @@ export function buildNutritionNutrientWindow(
       (nutrient) =>
         nutrient.evaluatedDays >= 3 &&
         nutrient.attentionDays >= 2 &&
-        nutrient.attentionRate !== null,
+        nutrient.attentionRate !== null &&
+        nutrient.attentionRate >= 0.5,
     )
     .sort(
       (a, b) =>

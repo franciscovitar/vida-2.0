@@ -352,3 +352,75 @@ test('Nutrientes interpreta UL como días por encima del límite y no como meta 
   assert.equal(sodium.evaluatedDays, 3);
   assert.equal(data.attention[0]?.key, 'sodium');
 });
+
+
+test('Nutrientes no infiere semántica desde targetAmount del resumen si falta Nutrient Targets', () => {
+  const summary = [
+    {
+      date: '2026-10-01',
+      nutrientKey: 'sodium',
+      amount: 2500,
+      targetAmount: 2300,
+      targetDecisionId: 'sodium-ul',
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-02',
+      nutrientKey: 'sodium',
+      amount: 2600,
+      targetAmount: 2300,
+      targetDecisionId: 'sodium-ul',
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-03',
+      nutrientKey: 'sodium',
+      amount: 2700,
+      targetAmount: 2300,
+      targetDecisionId: 'sodium-ul',
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, [], '2026-10-03', 7);
+  const sodium = data.nutrients.find((nutrient) => nutrient.key === 'sodium');
+
+  assert.ok(sodium);
+  assert.equal(sodium.evaluatedDays, 0);
+  assert.equal(sodium.attentionDays, 0);
+  assert.equal(sodium.currentReference, null);
+  assert.equal(data.attention.length, 0);
+});
+
+test('Nutrientes no eleva una señal aislada si afecta menos de la mitad de los días evaluables', () => {
+  const summary = Array.from({ length: 10 }, (_, index) => ({
+    date: `2026-09-${String(index + 1).padStart(2, '0')}`,
+    nutrientKey: 'magnesium',
+    amount: index < 2 ? 300 : 450,
+    sourceCoverage: 'complete',
+    confidence: 'high',
+  }));
+  const targets = [
+    {
+      decisionId: 'mg-rda',
+      effectiveFrom: '2026-01-01',
+      status: 'active',
+      nutrientKey: 'magnesium',
+      targetAmount: 400,
+      unit: 'mg',
+      basis: 'RDA',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, targets, '2026-09-10', 28);
+  const magnesium = data.nutrients.find((nutrient) => nutrient.key === 'magnesium');
+
+  assert.ok(magnesium);
+  assert.equal(magnesium.evaluatedDays, 10);
+  assert.equal(magnesium.attentionDays, 2);
+  assert.equal(magnesium.attentionRate, 0.2);
+  assert.equal(data.attention.some((nutrient) => nutrient.key === 'magnesium'), false);
+});

@@ -165,7 +165,7 @@
   text-align: right;
 }
 
-@media (max-width <= 760px) {
+@media (width <= 760px) {
   .summary,
   .panel {
     border-radius: var(--radius);
