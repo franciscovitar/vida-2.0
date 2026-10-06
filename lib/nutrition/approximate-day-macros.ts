@@ -160,7 +160,7 @@ function estimatedItemMacros(row: Row): ItemMacroEstimate {
   const shareTotal = missing.reduce((sum, key) => sum + energySplit[key], 0);
   const allocate = (key: MacroKey, divisor: number, known: number | null): number | null => {
     if (known !== null) return known;
-    if (shareTotal <= 0) return null;
+    if (shareTotal <= 0 || residual <= 0) return null;
     return (residual * (energySplit[key] / shareTotal)) / divisor;
   };
 

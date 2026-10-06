@@ -6,6 +6,10 @@ import {
   partitionNutritionFoodItemRows,
 } from '@/lib/nutrition/food-item-integrity';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
+import {
+  nutritionDisplayDelta,
+  nutritionDisplayPointEstimate,
+} from '@/lib/nutrition/presentation';
 import { getNutritionSheetsConfig, getNutritionSpreadsheetId } from '@/lib/nutrition/sheets-config';
 
 const FAKE_NUTRITION_ID = 'nutrition_sheet_example_1234567890';
@@ -129,4 +133,26 @@ test('una fila histórica inválida no borra las filas válidas actuales', () =>
   assert.equal(partition.valid[0], current);
   assert.equal(partition.invalid.length, 1);
   assert.equal(partition.invalid[0], malformedHistorical);
+});
+
+
+test('unknown nutricional permanece unknown en la capa de presentación', () => {
+  assert.deepEqual(nutritionDisplayPointEstimate(null, null, null), {
+    value: null,
+    approximate: false,
+  });
+  assert.equal(nutritionDisplayDelta(null, null, null, 2500), null);
+});
+
+test('un rango puede usar midpoint visual sin dejar de ser aproximado', () => {
+  assert.deepEqual(nutritionDisplayPointEstimate(null, 2400, 2800), {
+    value: 2600,
+    approximate: true,
+  });
+});
+
+test('el delta energético conserva sobre-target y under-target sin clamp', () => {
+  assert.equal(nutritionDisplayDelta(2670, null, null, 2500), 170);
+  assert.equal(nutritionDisplayDelta(2300, null, null, 2500), -200);
+  assert.equal(nutritionDisplayDelta(null, 2400, 2600, 2500), 0);
 });

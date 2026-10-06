@@ -12,6 +12,10 @@ import {
 } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 
+import {
+  nutritionDisplayDelta,
+  nutritionDisplayPointEstimate,
+} from '@/lib/nutrition/presentation';
 import type {
   NutritionAiInsight,
   NutritionDashboardData,
@@ -29,25 +33,12 @@ function formatNumber(value: number | null, digits = 0): string {
   }).format(value);
 }
 
-function displayPointEstimate(
-  amount: number | null,
-  low: number | null,
-  high: number | null,
-): { value: number | null; approximate: boolean } {
-  if (amount !== null && Number.isFinite(amount)) return { value: amount, approximate: false };
-  if (low !== null && high !== null) {
-    return { value: (low + high) / 2, approximate: true };
-  }
-  if (low !== null || high !== null) return { value: low ?? high, approximate: true };
-  return { value: null, approximate: false };
-}
-
 function formatEnergyEstimate(
   amount: number | null,
   low: number | null,
   high: number | null,
 ): string {
-  const display = displayPointEstimate(amount, low, high);
+  const display = nutritionDisplayPointEstimate(amount, low, high);
   if (display.value === null) return 'Sin total todavía';
   return `${display.approximate ? '≈' : ''}${formatNumber(display.value)} kcal`;
 }
@@ -117,12 +108,12 @@ function MacroBar({ macro }: { macro: NutritionMacroProgress }) {
 }
 
 function nutrientProgress(nutrient: NutritionNutrientValue): number | null {
-  const display = displayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh);
+  const display = nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh);
   return percentage(display.value, nutrient.target);
 }
 
 function NutrientRow({ nutrient }: { nutrient: NutritionNutrientValue }) {
-  const display = displayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh);
+  const display = nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh);
   const progress = nutrientProgress(nutrient);
   const style = {
     '--nutrient-progress': `${Math.min(progress ?? 0, 100)}%`,
@@ -200,14 +191,18 @@ function weekday(date: string): string {
 
 export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) {
   const targetEnergy = data.target?.energyKcal ?? null;
-  const energyDisplay = displayPointEstimate(
+  const energyDisplay = nutritionDisplayPointEstimate(
     data.todayEnergy.amount,
     data.todayEnergy.low,
     data.todayEnergy.high,
   );
   const energyProgress = percentage(energyDisplay.value, targetEnergy);
-  const energyDelta =
-    energyDisplay.value !== null && targetEnergy !== null ? energyDisplay.value - targetEnergy : null;
+  const energyDelta = nutritionDisplayDelta(
+    data.todayEnergy.amount,
+    data.todayEnergy.low,
+    data.todayEnergy.high,
+    targetEnergy,
+  );
   const ringStyle = {
     '--energy-progress': `${Math.min(energyProgress ?? 0, 100)}%`,
   } as CSSProperties;
@@ -223,7 +218,7 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
   const lowConfidenceItems = recent.reduce((sum, point) => sum + point.lowConfidenceItemCount, 0);
   const knownNutrients = data.nutrients.filter(
     (nutrient) =>
-      displayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh).value !== null,
+      nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh).value !== null,
   );
   const targetedNutrients = data.nutrients.filter((nutrient) => nutrient.target !== null);
   const highlighted = knownNutrients
@@ -347,7 +342,7 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
               recent.map((point) => {
                 const low = point.energyKcalLow ?? point.energyKcal ?? 0;
                 const high = point.energyKcalHigh ?? point.energyKcal ?? low;
-                const centerDisplay = displayPointEstimate(
+                const centerDisplay = nutritionDisplayPointEstimate(
                   point.energyKcal,
                   point.energyKcalLow,
                   point.energyKcalHigh,
@@ -438,8 +433,19 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
               <article key={nutrient.key} className={styles.highlight}>
                 <span>{nutrient.name}</span>
                 <strong>
-                  {formatNumber(nutrient.amount, (nutrient.amount ?? 0) < 10 ? 1 : 0)}{' '}
-                  {nutrient.unit}
+                  {(() => {
+                    const display = nutritionDisplayPointEstimate(
+                      nutrient.amount,
+                      nutrient.amountLow,
+                      nutrient.amountHigh,
+                    );
+                    return display.value === null
+                      ? 'Sin dato'
+                      : `${display.approximate ? '≈' : ''}${formatNumber(
+                          display.value,
+                          display.value < 10 ? 1 : 0,
+                        )} ${nutrient.unit}`;
+                  })()}
                 </strong>
                 <small>
                   {nutrient.target === null
@@ -490,11 +496,11 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
         <section className={styles.panel} aria-labelledby="nutrition-ai-title">
         <div className={styles['section-heading']}>
           <div>
-            <p className={styles.eyebrow}>ANÁLISIS IA</p>
-            <h2 id="nutrition-ai-title">Calidad de la dieta y oportunidades</h2>
+            <p className={styles.eyebrow}>QUÉ MERECE ATENCIÓN</p>
+            <h2 id="nutrition-ai-title">Oportunidades y patrones</h2>
             <p>
-              Vida no genera estas conclusiones: solo renderiza el análisis guardado por Nutrition
-              Intelligence junto con su evidencia.
+              Solo aparecen conclusiones persistidas por Nutrition Intelligence cuando existe
+              evidencia suficiente para mostrarlas.
             </p>
           </div>
           <BrainCircuit size={21} aria-hidden="true" />
