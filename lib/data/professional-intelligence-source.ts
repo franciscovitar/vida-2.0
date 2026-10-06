@@ -40,3 +40,8 @@ export async function getProfessionalMarketPageData() {
 
   return { professional, careerResilience };
 }
+
+export async function getProfessionalGrowthPageData() {
+  await requireAuthorizedSession();
+  return loadProfessionalSnapshot();
+}
