@@ -74,7 +74,9 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
       ) : null}
 
       <section className={styles['panorama-hero']} aria-labelledby="professional-panorama-title">
-        <p className={styles.eyebrow}>Panorama profesional · observado {snapshot.source.observedAt}</p>
+        <p className={styles.eyebrow}>
+          Panorama profesional · observado {snapshot.source.observedAt}
+        </p>
         <h2 id="professional-panorama-title">Tu panorama profesional</h2>
         <p>{snapshot.profileSummary}</p>
         <div className={styles['panorama-meta']}>

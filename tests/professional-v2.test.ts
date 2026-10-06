@@ -65,7 +65,6 @@ test('PRO-V2-03. Inteligencia queda absorbida por Profesional', () => {
   assert.equal(component.includes('Gratis'), true);
 });
 
-
 test('PRO-V2-04. Panorama reemplaza el dashboard largo sin borrar su implementación', () => {
   const route = repoText('app/(app)/professional/page.tsx');
   const panorama = repoText('components/professional/ProfessionalPanorama.tsx');
