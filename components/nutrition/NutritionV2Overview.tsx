@@ -1,11 +1,9 @@
 import {
   Apple,
   BrainCircuit,
-  ChevronDown,
   CircleGauge,
   Flame,
   Leaf,
-  Microscope,
   ShieldCheck,
   Sparkles,
   Utensils,
@@ -16,12 +14,10 @@ import {
   nutritionDisplayDelta,
   nutritionDisplayPointEstimate,
 } from '@/lib/nutrition/presentation';
-import { nutritionProgressTarget } from '@/lib/nutrition/target-semantics';
 import type {
   NutritionAiInsight,
   NutritionDashboardData,
   NutritionMacroProgress,
-  NutritionNutrientValue,
 } from '@/lib/nutrition/types';
 
 import styles from './NutritionV2Overview.module.scss';
@@ -128,93 +124,6 @@ function SourceStatus({ source }: { source: NutritionDashboardData['source'] }) 
   );
 }
 
-function nutrientProgress(nutrient: NutritionNutrientValue): number | null {
-  const display = nutritionDisplayPointEstimate(
-    nutrient.amount,
-    nutrient.amountLow,
-    nutrient.amountHigh,
-  );
-  const progressTarget = nutritionProgressTarget({
-    target: nutrient.target,
-    lowerTarget: nutrient.lowerTarget,
-    upperTarget: nutrient.upperTarget,
-    basis: nutrient.targetBasis,
-  });
-  return percentage(display.value, progressTarget);
-}
-
-function nutrientReferenceLabel(nutrient: NutritionNutrientValue): string {
-  const formatTarget = (value: number) =>
-    `${formatNumber(value, value < 10 ? 1 : 0)} ${nutrient.unit}`;
-
-  if (nutrient.targetSemantics === 'upper-limit') {
-    const limit = nutrient.upperTarget ?? nutrient.target;
-    return limit === null ? 'Límite registrado' : `Límite ≤ ${formatTarget(limit)}`;
-  }
-
-  if (nutrient.targetSemantics === 'range') {
-    if (nutrient.lowerTarget !== null && nutrient.upperTarget !== null) {
-      return `Referencia ${formatTarget(nutrient.lowerTarget)}–${formatTarget(
-        nutrient.upperTarget,
-      )}`;
-    }
-    return 'Rango de referencia';
-  }
-
-  if (nutrient.targetSemantics === 'adequacy') {
-    const target = nutrient.target ?? nutrient.lowerTarget;
-    if (target === null) return 'Referencia de adecuación';
-    const limit =
-      nutrient.upperTarget !== null ? ` · límite ${formatTarget(nutrient.upperTarget)}` : '';
-    return `Referencia ≥ ${formatTarget(target)}${limit}`;
-  }
-
-  if (nutrient.targetSemantics === 'point' && nutrient.target !== null) {
-    return `Objetivo ${formatTarget(nutrient.target)}`;
-  }
-
-  return coverageLabel(nutrient.sourceCoverage);
-}
-
-function NutrientRow({ nutrient }: { nutrient: NutritionNutrientValue }) {
-  const display = nutritionDisplayPointEstimate(
-    nutrient.amount,
-    nutrient.amountLow,
-    nutrient.amountHigh,
-  );
-  const progress = nutrientProgress(nutrient);
-  const style = {
-    '--nutrient-progress': `${Math.min(progress ?? 0, 100)}%`,
-  } as CSSProperties;
-  return (
-    <div className={styles['nutrient-row']} data-has-value={display.value !== null}>
-      <div className={styles['nutrient-copy']}>
-        <strong>{nutrient.name}</strong>
-        <span>
-          {display.value === null
-            ? 'Sin dato'
-            : `${display.approximate ? '≈' : ''}${formatNumber(
-                display.value,
-                display.value < 10 ? 1 : 0,
-              )} ${nutrient.unit}`}
-        </span>
-      </div>
-      <div className={styles['nutrient-progress']}>
-        {progress !== null ? (
-          <div className={styles.track} aria-hidden="true">
-            <span className={styles.fill} style={style} />
-          </div>
-        ) : null}
-        <small>
-          {display.value !== null && progress !== null
-            ? `${progress}% · ${nutrientReferenceLabel(nutrient)}`
-            : nutrientReferenceLabel(nutrient)}
-        </small>
-      </div>
-    </div>
-  );
-}
-
 function InsightCard({
   icon,
   title,
@@ -277,7 +186,7 @@ function shortTrendDate(date: string): string {
   }).format(new Date(`${date}T12:00:00Z`));
 }
 
-export type NutritionOverviewMode = 'today' | 'trends' | 'nutrients';
+export type NutritionOverviewMode = 'today' | 'trends';
 
 export function NutritionV2Overview({
   data,
@@ -340,39 +249,6 @@ export function NutritionV2Overview({
   const energyCompleteDays = recent.filter((point) => point.energyCoverage === 'complete').length;
   const macroCompleteDays = recent.filter((point) => point.macroCoverage === 'complete').length;
   const lowConfidenceItems = recent.reduce((sum, point) => sum + point.lowConfidenceItemCount, 0);
-  const knownNutrients = data.nutrients.filter(
-    (nutrient) =>
-      nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh)
-        .value !== null,
-  );
-  const targetedNutrients = data.nutrients.filter(
-    (nutrient) => nutrient.targetSemantics !== 'none' && nutrient.targetSemantics !== 'unknown',
-  );
-  const highlighted = knownNutrients
-    .slice()
-    .sort(
-      (a, b) =>
-        (nutrientProgress(a) ?? Number.POSITIVE_INFINITY) -
-        (nutrientProgress(b) ?? Number.POSITIVE_INFINITY),
-    )
-    .slice(0, 8);
-  const groups = [
-    ['vitamin', 'Vitaminas'],
-    ['mineral', 'Minerales'],
-    ['other', 'Otros nutrientes'],
-  ] as const;
-  const nutrientTargetsReady = data.optionalSources.nutrientTargets === 'ready';
-  const nutrientSummaryReady = data.optionalSources.nutrientSummary === 'ready';
-  const nutrientSourcesLabel =
-    nutrientTargetsReady && nutrientSummaryReady
-      ? 'Activas'
-      : nutrientTargetsReady || nutrientSummaryReady
-        ? 'Parciales'
-        : data.optionalSources.nutrientTargets === 'missing' &&
-            data.optionalSources.nutrientSummary === 'missing'
-          ? 'Pendientes'
-          : 'No disponibles';
-
   const improvement = data.aiInsights.find((insight) => insight.category === 'improvement');
   const pattern = data.aiInsights.find((insight) => insight.category === 'pattern');
   const antioxidant = data.aiInsights.find((insight) => insight.category === 'antioxidants');
@@ -535,111 +411,10 @@ export function NutritionV2Overview({
             <article>
               <span>Baja confianza</span>
               <strong>{lowConfidenceItems}</strong>
-              <small>ítems en los últimos 7 días</small>
+              <small>ítems en los últimos {windowDays} días</small>
             </article>
           </div>
         </div>
-      </section>
-
-      <section
-        className={styles.panel}
-        hidden={mode !== 'nutrients'}
-        aria-labelledby="micronutrients-title"
-      >
-        <div className={styles['section-heading']}>
-          <div>
-            <p className={styles.eyebrow}>MICRONUTRIENTES</p>
-            <h2 id="micronutrients-title">Vitaminas, minerales y otros nutrientes</h2>
-            <p>
-              Vida combina cantidades de `Nutrient Summary` con referencias de `Nutrient Targets` y
-              mantiene como desconocido cualquier valor que Nutrition Intelligence todavía no haya
-              cuantificado.
-            </p>
-          </div>
-          <Microscope size={21} aria-hidden="true" />
-        </div>
-
-        <div className={styles['nutrient-summary']}>
-          <article>
-            <span>Con datos hoy</span>
-            <strong>{knownNutrients.length}</strong>
-            <small>de {data.nutrients.length} nutrientes visibles</small>
-          </article>
-          <article>
-            <span>Con objetivo</span>
-            <strong>{targetedNutrients.length}</strong>
-            <small>referencias activas cargadas en el store</small>
-          </article>
-          <article>
-            <span>Fuentes de micros</span>
-            <strong>{nutrientSourcesLabel}</strong>
-            <small>resumen diario + referencias de objetivos</small>
-          </article>
-        </div>
-
-        {highlighted.length > 0 ? (
-          <div className={styles['highlight-grid']}>
-            {highlighted.map((nutrient) => (
-              <article key={nutrient.key} className={styles.highlight}>
-                <span>{nutrient.name}</span>
-                <strong>
-                  {(() => {
-                    const display = nutritionDisplayPointEstimate(
-                      nutrient.amount,
-                      nutrient.amountLow,
-                      nutrient.amountHigh,
-                    );
-                    return display.value === null
-                      ? 'Sin dato'
-                      : `${display.approximate ? '≈' : ''}${formatNumber(
-                          display.value,
-                          display.value < 10 ? 1 : 0,
-                        )} ${nutrient.unit}`;
-                  })()}
-                </strong>
-                <small>
-                  {nutrientProgress(nutrient) === null
-                    ? nutrientReferenceLabel(nutrient)
-                    : `${nutrientProgress(nutrient)}% · ${nutrientReferenceLabel(nutrient)}`}
-                </small>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className={styles['micro-empty']}>
-            <Leaf size={22} aria-hidden="true" />
-            <div>
-              <strong>
-                Las referencias ya están listas; faltan valores micronutricionales de consumo.
-              </strong>
-              <p>
-                Cuando Nutrition Intelligence complete `Nutrient Summary`, las cantidades aparecerán
-                acá contra sus referencias sin necesidad de cambiar la pantalla.
-              </p>
-            </div>
-          </div>
-        )}
-
-        <details className={styles.details}>
-          <summary>
-            <span>Ver todos los nutrientes ({data.nutrients.length})</span>
-            <ChevronDown size={17} aria-hidden="true" />
-          </summary>
-          <div className={styles['nutrient-groups']}>
-            {groups.map(([group, label]) => (
-              <section key={group}>
-                <h3>{label}</h3>
-                <div className={styles['nutrient-list']}>
-                  {data.nutrients
-                    .filter((nutrient) => nutrient.group === group)
-                    .map((nutrient) => (
-                      <NutrientRow key={nutrient.key} nutrient={nutrient} />
-                    ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        </details>
       </section>
 
       {mode === 'today' && todayInsight ? (
