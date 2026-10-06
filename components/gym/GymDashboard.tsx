@@ -55,40 +55,61 @@ function publicWarningSubject(subject: string | null): string | null {
 }
 
 function WarningCard({ data }: { data: GymDashboardData }) {
-  if (data.warnings.length === 0) return null;
+  const needsAttention = [
+    'error',
+    'partial',
+    'ambiguous',
+    'empty',
+    'forbidden',
+    'not-configured',
+  ].includes(data.moduleStatus);
+
+  if (data.warnings.length === 0 && !needsAttention) return null;
 
   return (
-    <Card>
-      <SectionHeader
-        title="Hay información que conviene revisar"
-        description="Sólo aparece cuando una fuente o lectura puede afectar lo que ves."
-      />
-      <ul className={styles.notes}>
-        {data.warnings.map((warning, index) => {
-          const subject = publicWarningSubject(warning.subject);
-          return (
-            <li key={`${warning.code}-${index}`} className={styles.warn}>
-              {subject ? `${subject}: ` : null}
-              {warning.message}
-            </li>
-          );
-        })}
-      </ul>
-      <details className={styles.disclosure}>
-        <summary>Ver estado de fuentes</summary>
-        <p className={styles.body}>Estado del módulo: {MODULE_STATUS_LABELS[data.moduleStatus]}</p>
-        <ul className={styles.sources}>
-          {data.sources.map((source) => (
-            <li key={source.kind}>
-              <span className={styles['source-kind']}>{SOURCE_KIND_LABELS[source.kind]}</span>
-              <Badge domain="neutral" variant="outline">
-                {SOURCE_STATE_LABELS[source.state]}
-              </Badge>
-            </li>
-          ))}
-        </ul>
-      </details>
-    </Card>
+    <details className={styles['diagnostic-disclosure']} open={needsAttention}>
+      <summary>
+        <span>
+          <strong>{needsAttention ? 'Revisar datos de Gimnasio' : 'Diagnóstico de datos'}</strong>
+          <small>
+            {data.warnings.length > 0
+              ? `${data.warnings.length} aviso(s) técnico(s)`
+              : 'Estado de las fuentes del módulo'}
+          </small>
+        </span>
+        <span>{needsAttention ? 'Atención' : 'Ver detalle'}</span>
+      </summary>
+
+      <div className={styles['diagnostic-body']}>
+        {data.warnings.length > 0 ? (
+          <ul className={styles.notes}>
+            {data.warnings.map((warning, index) => {
+              const subject = publicWarningSubject(warning.subject);
+              return (
+                <li key={`${warning.code}-${index}`} className={styles.warn}>
+                  {subject ? `${subject}: ` : null}
+                  {warning.message}
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+
+        <div className={styles['diagnostic-sources']}>
+          <span>Estado del módulo: {MODULE_STATUS_LABELS[data.moduleStatus]}</span>
+          <ul className={styles.sources}>
+            {data.sources.map((source) => (
+              <li key={source.kind}>
+                <span className={styles['source-kind']}>{SOURCE_KIND_LABELS[source.kind]}</span>
+                <Badge domain="neutral" variant="outline">
+                  {SOURCE_STATE_LABELS[source.state]}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </details>
   );
 }
 
@@ -186,7 +207,7 @@ export function GymRoutineDashboardView({ data }: { data: GymDashboardData }) {
         </Card>
       )}
 
-      <WarningCard data={data} />
+      
     </div>
   );
 }
@@ -267,7 +288,7 @@ export function GymProgressDashboardView({ data }: { data: GymDashboardData }) {
       </Card>
 
       <MonthlyReviewCard domain="gym" compact />
-      <WarningCard data={data} />
+      
     </div>
   );
 }
@@ -286,7 +307,7 @@ export function GymCardioDashboardView({ data }: { data: GymDashboardData }) {
           />
         </Card>
       )}
-      <WarningCard data={data} />
+      
     </div>
   );
 }

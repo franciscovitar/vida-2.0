@@ -231,12 +231,14 @@ export function parseGymRoutineFromContentPage(page: ContentPage): ParseRoutineR
   let currentSupplemental: SupplementalDraft | null = null;
   let inWeightsSection = false;
   let currentExerciseSubsection: string | null = null;
+  let currentDayNotesMode = false;
   let unstructuredCount = 0;
 
   const startDay = (label: string): DayDraft => {
     currentDay = { label, notes: [], exercises: [] };
     days.push(currentDay);
     currentExerciseSubsection = null;
+    currentDayNotesMode = false;
     return currentDay;
   };
 
@@ -251,6 +253,7 @@ export function parseGymRoutineFromContentPage(page: ContentPage): ParseRoutineR
     supplemental.push(currentSupplemental);
     currentDay = null;
     currentExerciseSubsection = null;
+    currentDayNotesMode = false;
     return currentSupplemental;
   };
 
@@ -316,9 +319,15 @@ export function parseGymRoutineFromContentPage(page: ContentPage): ParseRoutineR
         } else if (inWeightsSection && looksLikeDayLabel(text)) {
           startDay(text);
         } else if (inWeightsSection && currentDay) {
-          currentExerciseSubsection = text;
-          const note = sanitizeGymNote(text);
-          if (note) currentDay.notes.push(note);
+          if (/^notas?(?:\s+del\s+d[ií]a)?$/i.test(text)) {
+            currentExerciseSubsection = null;
+            currentDayNotesMode = true;
+          } else {
+            currentExerciseSubsection = text;
+            currentDayNotesMode = false;
+            const note = sanitizeGymNote(text);
+            if (note) currentDay.notes.push(note);
+          }
         } else if (currentSupplemental) {
           currentSupplemental.subsection = text;
         } else if (looksLikeDayLabel(text)) {
@@ -336,8 +345,14 @@ export function parseGymRoutineFromContentPage(page: ContentPage): ParseRoutineR
 
       if (isListItem(block.type)) {
         if (text) {
-          if (inWeightsSection && currentDay) addExercise(text);
-          else if (currentSupplemental) addSupplementalText(text, true);
+          if (inWeightsSection && currentDay) {
+            if (currentDayNotesMode) {
+              const note = sanitizeGymNote(text);
+              if (note) currentDay.notes.push(note);
+            } else {
+              addExercise(text);
+            }
+          } else if (currentSupplemental) addSupplementalText(text, true);
           else {
             const note = sanitizeGymNote(text);
             if (note) rootNotes.push(note);

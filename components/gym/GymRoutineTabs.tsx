@@ -125,6 +125,38 @@ export function GymRoutineTabs({
     ? latestComparableSession({ dayLabel: day.label, sessions, summaries, today })
     : null;
 
+
+  const mobilitySections = routine.supplementalSections.filter(
+    (section) => section.kind === 'mobility' || section.kind === 'recovery',
+  );
+  const planningSections = routine.supplementalSections.filter(
+    (section) => section.kind === 'planning',
+  );
+  const noteSections = routine.supplementalSections.filter(
+    (section) => section.kind === 'notes' && !/^versi[oó]n$/i.test(section.label),
+  );
+
+  const guideGroups = [
+    {
+      key: 'mobility',
+      title: 'Movilidad / postura',
+      description: 'Protocolo complementario para hacer fuera del bloque principal de pesas.',
+      sections: mobilitySections,
+    },
+    {
+      key: 'planning',
+      title: 'Progresión y descarga',
+      description: 'Criterios para progresar y ajustar carga o volumen cuando haga falta.',
+      sections: planningSections,
+    },
+    {
+      key: 'notes',
+      title: 'Notas complementarias',
+      description: 'Información adicional del plan que no cambia la sesión principal.',
+      sections: noteSections,
+    },
+  ].filter((group) => group.sections.length > 0);
+
   return (
     <div className={styles.routine}>
       {days.length > 0 ? (
@@ -209,31 +241,38 @@ export function GymRoutineTabs({
         <p className={styles.body}>Sin días estructurados en la rutina.</p>
       )}
 
-      {routine.supplementalSections.length > 0 ? (
-        <details className={styles['supplemental-disclosure']}>
-          <summary>
-            <span>Movilidad, recuperación y complementos</span>
-            <small>{routine.supplementalSections.length} bloque(s)</small>
-          </summary>
-          <div className={styles['supplemental-grid']}>
-            {routine.supplementalSections.map((section) => (
-              <section key={section.key} className={styles.supplemental}>
-                <div className={styles['supplemental-heading']}>
-                  <span>{SECTION_LABELS[section.kind]}</span>
-                  <h3>{section.label}</h3>
-                </div>
-                {section.description ? <p className={styles.body}>{section.description}</p> : null}
-                {section.items.length > 0 ? (
-                  <ol className={styles['supplemental-items']}>
-                    {section.items.map((item, index) => (
-                      <li key={`${index}-${item}`}>{item}</li>
-                    ))}
-                  </ol>
-                ) : null}
-              </section>
-            ))}
-          </div>
-        </details>
+      {guideGroups.length > 0 ? (
+        <div className={styles['routine-guides']}>
+          {guideGroups.map((group) => (
+            <details key={group.key} className={styles['guide-disclosure']}>
+              <summary>
+                <span>
+                  <strong>{group.title}</strong>
+                  <small>{group.description}</small>
+                </span>
+                <span>Ver</span>
+              </summary>
+              <div className={styles['guide-content']}>
+                {group.sections.map((section) => (
+                  <section key={section.key} className={styles.supplemental}>
+                    <div className={styles['supplemental-heading']}>
+                      <span>{SECTION_LABELS[section.kind]}</span>
+                      <h3>{section.label}</h3>
+                    </div>
+                    {section.description ? <p className={styles.body}>{section.description}</p> : null}
+                    {section.items.length > 0 ? (
+                      <ol className={styles['supplemental-items']}>
+                        {section.items.map((item, index) => (
+                          <li key={`${index}-${item}`}>{item}</li>
+                        ))}
+                      </ol>
+                    ) : null}
+                  </section>
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
       ) : null}
     </div>
   );
