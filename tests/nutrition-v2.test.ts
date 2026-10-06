@@ -1640,6 +1640,7 @@ test('Nutrientes resuelve la decisión de target efectiva para cada fecha del pe
       confidence: 'high',
     },
   ];
+  // Keep open-ended target dates explicit so this fixture remains a valid PlainCell Row.
   const targets = [
     {
       decisionId: 'mg-old',
