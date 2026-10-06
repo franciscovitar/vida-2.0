@@ -23,7 +23,14 @@ function isActive(row: InsightRow): boolean {
 }
 
 export function nutritionAiInsightGroupKey(row: InsightRow): string | null {
-  const category = stringValue(row.category)?.toLowerCase();
+  const rawCategory = stringValue(row.category)?.toLowerCase();
+  const category =
+    rawCategory === 'antioxidants' ||
+    rawCategory === 'anti-inflammatory' ||
+    rawCategory === 'improvement' ||
+    rawCategory === 'pattern'
+      ? rawCategory
+      : null;
   const window = stringValue(row.window)?.toLowerCase();
   if (!category || !window) return null;
   return `${category}\u0000${window}`;

@@ -104,6 +104,27 @@ test('AI Insights duplicados en categoría + ventana quedan ambiguos', () => {
   assert.equal(result.rows[0]?.insightId, 'pattern');
 });
 
+test('categorías de AI Insights no soportadas no degradan la unicidad visible', () => {
+  const result = auditNutritionAiInsightUniqueness([
+    {
+      insightId: 'x1',
+      category: 'experimental',
+      window: '7d',
+      status: 'active',
+    },
+    {
+      insightId: 'x2',
+      category: 'experimental',
+      window: '7d',
+      status: 'active',
+    },
+  ]);
+
+  assert.equal(result.duplicateGroupCount, 0);
+  assert.equal(result.duplicateRowCount, 0);
+  assert.equal(result.rows.length, 2);
+});
+
 test('AI Insights superseded no compite con el insight activo de su ventana', () => {
   const result = auditNutritionAiInsightUniqueness([
     {
