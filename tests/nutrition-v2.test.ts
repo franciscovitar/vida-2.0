@@ -292,11 +292,41 @@ test('Tendencias usa 28D por defecto y acepta sólo ventanas soportadas', () => 
 
 test('Nutrientes promedia sólo días completos y detecta una señal persistente de adecuación', () => {
   const summary = [
-    { date: '2026-10-01', nutrientKey: 'magnesium', amount: 300, sourceCoverage: 'complete', confidence: 'high' },
-    { date: '2026-10-02', nutrientKey: 'magnesium', amount: 350, sourceCoverage: 'complete', confidence: 'high' },
-    { date: '2026-10-03', nutrientKey: 'magnesium', amount: 450, sourceCoverage: 'complete', confidence: 'high' },
-    { date: '2026-10-04', nutrientKey: 'magnesium', amount: 100, sourceCoverage: 'partial', confidence: 'medium' },
-    { date: '2026-10-05', nutrientKey: 'magnesium', amount: 320, sourceCoverage: 'complete', confidence: 'high' },
+    {
+      date: '2026-10-01',
+      nutrientKey: 'magnesium',
+      amount: 300,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-02',
+      nutrientKey: 'magnesium',
+      amount: 350,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-03',
+      nutrientKey: 'magnesium',
+      amount: 450,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-04',
+      nutrientKey: 'magnesium',
+      amount: 100,
+      sourceCoverage: 'partial',
+      confidence: 'medium',
+    },
+    {
+      date: '2026-10-05',
+      nutrientKey: 'magnesium',
+      amount: 320,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
   ];
   const targets = [
     {
@@ -325,9 +355,27 @@ test('Nutrientes promedia sólo días completos y detecta una señal persistente
 
 test('Nutrientes interpreta UL como días por encima del límite y no como meta a alcanzar', () => {
   const summary = [
-    { date: '2026-10-01', nutrientKey: 'sodium', amount: 2500, sourceCoverage: 'complete', confidence: 'high' },
-    { date: '2026-10-02', nutrientKey: 'sodium', amount: 2000, sourceCoverage: 'complete', confidence: 'high' },
-    { date: '2026-10-03', nutrientKey: 'sodium', amount: 2600, sourceCoverage: 'complete', confidence: 'high' },
+    {
+      date: '2026-10-01',
+      nutrientKey: 'sodium',
+      amount: 2500,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-02',
+      nutrientKey: 'sodium',
+      amount: 2000,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-03',
+      nutrientKey: 'sodium',
+      amount: 2600,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
   ];
   const targets = [
     {
@@ -422,7 +470,6 @@ test('Nutrientes no eleva una señal aislada si afecta menos de la mitad de los 
   assert.equal(data.attention.some((nutrient) => nutrient.key === 'magnesium'), false);
 });
 
-
 test('Nutrientes puede detectar un UL aun cuando la misma decisión también tiene RDA', () => {
   const summary = [
     {
@@ -513,4 +560,62 @@ test('Nutrientes marca mixed si el mismo período cruza ambos extremos de una re
   assert.ok(magnesium);
   assert.equal(magnesium.attentionDays, 3);
   assert.equal(magnesium.attentionKind, 'mixed');
+});
+
+
+test('Nutrientes resuelve la decisión de target efectiva para cada fecha del período', () => {
+  const summary = [
+    {
+      date: '2026-10-01',
+      nutrientKey: 'magnesium',
+      amount: 420,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-02',
+      nutrientKey: 'magnesium',
+      amount: 420,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-03',
+      nutrientKey: 'magnesium',
+      amount: 420,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+  ];
+  const targets = [
+    {
+      decisionId: 'mg-old',
+      effectiveFrom: '2026-01-01',
+      effectiveTo: '2026-10-01',
+      status: 'active',
+      nutrientKey: 'magnesium',
+      targetAmount: 400,
+      unit: 'mg',
+      basis: 'RDA',
+    },
+    {
+      decisionId: 'mg-new',
+      effectiveFrom: '2026-10-02',
+      status: 'active',
+      nutrientKey: 'magnesium',
+      targetAmount: 450,
+      unit: 'mg',
+      basis: 'RDA',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, targets, '2026-10-03', 7);
+  const magnesium = data.nutrients.find((nutrient) => nutrient.key === 'magnesium');
+
+  assert.ok(magnesium);
+  assert.equal(magnesium.evaluatedDays, 3);
+  assert.equal(magnesium.attentionDays, 2);
+  assert.equal(magnesium.targetDecisionCount, 2);
+  assert.equal(magnesium.currentReference?.decisionId, 'mg-new');
+  assert.equal(data.attention[0]?.key, 'magnesium');
 });

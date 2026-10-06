@@ -29,7 +29,10 @@ function referenceLabel(reference: NutritionNutrientReference | null, unit: stri
 
   if (reference.semantics === 'adequacy') {
     const minimum = reference.target ?? reference.lowerTarget;
-    return minimum === null ? 'Referencia de adecuación' : `Referencia ≥ ${value(minimum)}`;
+    if (minimum === null) return 'Referencia de adecuación';
+    const upper =
+      reference.upperTarget !== null ? ` · límite ≤ ${value(reference.upperTarget)}` : '';
+    return `Referencia ≥ ${value(minimum)}${upper}`;
   }
 
   if (reference.semantics === 'upper-limit') {
@@ -45,7 +48,9 @@ function referenceLabel(reference: NutritionNutrientReference | null, unit: stri
   }
 
   if (reference.semantics === 'point' && reference.target !== null) {
-    return `Objetivo ${value(reference.target)}`;
+    const upper =
+      reference.upperTarget !== null ? ` · límite ≤ ${value(reference.upperTarget)}` : '';
+    return `Objetivo ${value(reference.target)}${upper}`;
   }
 
   return 'Referencia registrada';
