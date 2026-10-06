@@ -594,22 +594,22 @@ export function NutritionV2Overview({
           <div className={styles['insight-grid']}>
             {antioxidant ? (
               <InsightCard
-              icon={<Sparkles size={17} aria-hidden="true" />}
-              title="Potencial antioxidante"
+                icon={<Sparkles size={17} aria-hidden="true" />}
+                title="Potencial antioxidante"
                 insight={antioxidant}
               />
             ) : null}
             {antiInflammatory ? (
               <InsightCard
-              icon={<Leaf size={17} aria-hidden="true" />}
-              title="Perfil antiinflamatorio"
+                icon={<Leaf size={17} aria-hidden="true" />}
+                title="Perfil antiinflamatorio"
                 insight={antiInflammatory}
               />
             ) : null}
             {improvement ? (
               <InsightCard
-              icon={<Flame size={17} aria-hidden="true" />}
-              title="Mejora de mayor impacto"
+                icon={<Flame size={17} aria-hidden="true" />}
+                title="Mejora de mayor impacto"
                 insight={improvement}
               />
             ) : null}
