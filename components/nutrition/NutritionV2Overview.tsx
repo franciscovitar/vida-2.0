@@ -153,7 +153,9 @@ function InsightCard({
 
 function todayStatusCopy(status: NutritionDashboardData['todayEnergy']['dayStatus']): string {
   if (status === 'open') return 'Registro abierto: este resumen puede seguir cambiando hoy.';
-  if (status === 'closed') return 'Día cerrado para registro; las correcciones posteriores siguen siendo posibles.';
+  if (status === 'closed') {
+    return 'Día cerrado para registro; las correcciones posteriores siguen siendo posibles.';
+  }
   return 'Resumen derivado de lo registrado para este día.';
 }
 
