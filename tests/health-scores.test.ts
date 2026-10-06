@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import { buildHealthPageData } from '@/lib/adapters/salud-period';
 import { parseSalud } from '@/lib/adapters/salud';
 import { addDaysYmd } from '@/lib/adapters/dates';
+import { buildRhythmStability } from '@/lib/health/rhythm';
 import { buildExplainableHealthScores } from '@/lib/health/scores';
 import { SAL, SAL_EXTENDED, SALUD_HEADERS } from '@/lib/google/constants';
 import { periodWindow } from '@/lib/periods';
@@ -106,11 +107,8 @@ test('HS1. datos estables producen scores explicables y versionados', () => {
   assert.ok(scores.readiness.confidence > 0);
   const sleep = scores.domains.find((score) => score.id === 'sleep');
   assert.ok(sleep);
-  assert.ok(
-    sleep.confidence < 80,
-    'sin regularidad/timing exactos, la confianza del Sleep Score no debe parecer alta',
-  );
-  assert.equal(scores.readiness.calculationVersion, 'health-scores-v1.1.0');
+  assert.ok(sleep.confidence < 80, 'sin Rhythm objetivo, la confianza no debe parecer alta');
+  assert.equal(scores.readiness.calculationVersion, 'health-scores-v1.2.0');
   assert.equal(scores.readiness.evidenceStrength, 'limited');
   assert.equal(scores.domains.length, 5);
 
@@ -202,23 +200,76 @@ test('HS7. movilidad usa señal longitudinal propia y falla cerrado si no existe
   assert.equal(withoutMobility.band, 'insufficient');
 });
 
-test('HS8. la UI pone los scores antes del brief y conserva evidencia cruda debajo', () => {
+test('HS8. la UI de Salud ya no depende del check-in subjetivo', () => {
   const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
-  const section = readFileSync(
-    join(process.cwd(), 'components', 'health', 'HealthIntelligenceSections.tsx'),
+  assert.doesNotMatch(page, /HealthCheckinCard|loadHealthCheckinSnapshot/);
+  assert.match(page, /HealthTodayHero/);
+  assert.match(page, /HealthReadinessSummary/);
+});
+
+test('HS9. el umbral exacto de cobertura no falla por redondeo decimal', () => {
+  const rows = [
+    ...baselineRows().map((source) => {
+      const copy = [...source];
+      copy[HEADERS.indexOf(SAL_EXTENDED.sleepInBed)] = '';
+      return copy;
+    }),
+    (() => {
+      const copy = [...todayRow()];
+      copy[HEADERS.indexOf(SAL_EXTENDED.sleepInBed)] = '';
+      return copy;
+    })(),
+  ];
+  const sleep = buildExplainableHealthScores(healthFor(rows)).domains.find(
+    (score) => score.id === 'sleep',
+  );
+
+  assert.ok(sleep);
+  assert.notEqual(sleep.score, null);
+  assert.equal(sleep.contributors.find((item) => item.id === 'continuity')?.score, null);
+});
+
+test('HS10. Rhythm objetivo alimenta regularidad de Sleep Score sin inventar timing circadiano', () => {
+  const rhythm = buildRhythmStability({
+    sleep: Array.from({ length: 7 }, (_, index) => {
+      const day = 10 + index;
+      const date = `2026-09-${String(day).padStart(2, '0')}`;
+      return {
+        date,
+        sleepStart: `${date}T00:20:00-03:00`,
+        sleepEnd: `${date}T07:30:00-03:00`,
+      };
+    }),
+  });
+  assert.notEqual(rhythm.score, null);
+
+  const scores = buildExplainableHealthScores(healthFor([...baselineRows(), todayRow()]), rhythm);
+  const sleep = scores.domains.find((score) => score.id === 'sleep');
+
+  assert.ok(sleep);
+  assert.notEqual(sleep.score, null);
+  assert.notEqual(sleep.contributors.find((item) => item.id === 'regularity')?.score, null);
+  assert.notEqual(sleep.contributors.find((item) => item.id === 'wake-consistency')?.score, null);
+  assert.equal(
+    sleep.contributors.some((item) => item.label === 'Timing circadiano'),
+    false,
+  );
+  assert.notEqual(scores.readiness.score, null);
+});
+
+test('HS11. la UI objetiva pone el brief primero y separa los dominios', () => {
+  const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
+  const navigation = readFileSync(
+    join(process.cwd(), 'components', 'health', 'HealthNavigation.tsx'),
     'utf8',
   );
 
-  const scoresIndex = page.indexOf('<HealthScoreboardSection');
   const briefIndex = page.indexOf('<HealthTodayHero');
-  const rawIndex = page.indexOf('health-history-title');
-
-  assert.ok(scoresIndex > 0);
-  assert.ok(scoresIndex < briefIndex);
-  assert.ok(briefIndex < rawIndex);
-  assert.match(section, /Health Intelligence V1\.1/);
-  assert.match(section, /Confianza/);
-  assert.match(section, /Evidencia científica/);
-  assert.match(section, /Score de bienestar\/readiness, no diagnóstico/);
-  assert.match(section, /Ver cálculo/);
+  const readinessIndex = page.indexOf('<HealthReadinessSummary');
+  assert.ok(briefIndex > 0);
+  assert.ok(readinessIndex > briefIndex);
+  assert.doesNotMatch(page, /HealthCheckinCard|loadHealthCheckinSnapshot/);
+  assert.match(navigation, /\/salud\/sueno/);
+  assert.match(navigation, /\/salud\/corazon/);
+  assert.match(navigation, /\/salud\/actividad/);
 });

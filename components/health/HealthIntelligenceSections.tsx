@@ -242,7 +242,7 @@ export function HealthDeviationRadarSection({ radar }: { radar: PersonalDeviatio
   );
 }
 
-/** Health Intelligence V1.1 — significado primero, evidencia debajo. */
+/** Health Intelligence V1.2 — significado primero, evidencia debajo. */
 export function HealthScoreboardSection({
   scoreboard,
   rhythm,
@@ -260,7 +260,7 @@ export function HealthScoreboardSection({
         data-confidence={readiness.confidenceBand}
       >
         <div className={styles['readiness-copy']}>
-          <p className={styles.eyebrow}>Health Intelligence V1.1</p>
+          <p className={styles.eyebrow}>Health Intelligence V1.2</p>
           <div className={styles['readiness-title-row']}>
             <h2 id="health-scoreboard-title">Readiness</h2>
             <span className={styles['score-band']}>{SCORE_BAND_LABELS[readiness.band]}</span>

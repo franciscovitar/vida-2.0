@@ -253,3 +253,60 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.coverage-disclosure {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.coverage-disclosure > summary {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.coverage-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.coverage-disclosure > summary > span {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.coverage-disclosure > summary svg {
+  color: var(--c-health);
+}
+
+.coverage-disclosure > summary strong {
+  font-size: 0.78rem;
+}
+
+.coverage-disclosure > summary small {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+}
+
+.coverage-disclosure[open] > summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.coverage-body {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.85rem;
+}
+
+@media (width <= 640px) {
+  .coverage-disclosure > summary {
+    align-items: flex-start;
+  }
+}

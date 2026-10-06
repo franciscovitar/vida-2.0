@@ -29,6 +29,7 @@ import type {
   HealthPageData,
   HealthSignalId,
 } from '@/types/domain-pages';
+import type { RhythmStabilityResult } from '@/lib/health/rhythm';
 
 /* ------------------------------------------------------------------ */
 /* Umbrales de monitoreo personal                                      */
@@ -1159,6 +1160,7 @@ export interface HealthIntelligenceInput {
   health: HealthPageData;
   gym: HealthGymInput;
   nutrition: HealthNutritionInput;
+  rhythm?: RhythmStabilityResult | null;
 }
 
 export interface HealthIntelligence {
@@ -1198,7 +1200,7 @@ export function buildHealthIntelligence(input: HealthIntelligenceInput): HealthI
     quality: evidenceQuality,
     priorities,
   });
-  const scores = buildExplainableHealthScores(health);
+  const scores = buildExplainableHealthScores(health, input.rhythm ?? null);
 
   return {
     scores,

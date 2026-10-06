@@ -129,10 +129,19 @@ test('Health V2 agrupa métricas y compara período, baseline y calidad', () => 
   assert.ok(page.insights.some((insight) => insight.id === 'partial-data'));
 });
 
-test('Health V2 conserva una UI visual sin convertirla en diagnóstico', () => {
+test('Health V2 conserva evidencia visual por dominio sin convertirla en diagnóstico', () => {
   const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
+  const metricGroup = readFileSync(
+    join(process.cwd(), 'components', 'health', 'HealthMetricGroup.tsx'),
+    'utf8',
+  );
+  const scoreCards = readFileSync(
+    join(process.cwd(), 'components', 'health', 'HealthScoreCards.tsx'),
+    'utf8',
+  );
+
   assert.match(page, /<HealthTodayHero/);
-  assert.match(page, /base 30d/);
-  assert.match(page, /no como diagnóstico/i);
-  assert.match(page, /SparkBars/);
+  assert.match(metricGroup, /base 30d/);
+  assert.match(metricGroup, /SparkBars/);
+  assert.match(scoreCards, /no es diagnóstico/i);
 });
