@@ -344,10 +344,11 @@
 
 .chart {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--trend-columns, 7), minmax(2.4rem, 1fr));
   gap: 0.55rem;
   min-height: 12rem;
   padding: 0.6rem 0.2rem 0;
+  overflow-x: auto;
 }
 
 .chart-day {

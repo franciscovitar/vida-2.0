@@ -548,7 +548,7 @@ export async function loadNutritionDashboardData(
   const target = chooseTarget(targetRows, today);
   const history = parseDailyRows(dailyRows)
     .filter((row) => row.date <= today)
-    .slice(-14);
+    .slice(-90);
   const todayDaily = history.find((row) => row.date === today) ?? null;
   const todayMealIds = new Set(
     activeRows(mealRows)

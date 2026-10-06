@@ -269,14 +269,24 @@ function weekday(date: string): string {
     .replace('.', '');
 }
 
+function shortTrendDate(date: string): string {
+  return new Intl.DateTimeFormat('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: 'UTC',
+  }).format(new Date(`${date}T12:00:00Z`));
+}
+
 export type NutritionOverviewMode = 'today' | 'trends' | 'nutrients';
 
 export function NutritionV2Overview({
   data,
   mode = 'today',
+  windowDays = 28,
 }: {
   data: NutritionDashboardData;
   mode?: NutritionOverviewMode;
+  windowDays?: 7 | 28 | 90;
 }) {
   const targetEnergy = data.target?.energyKcal ?? null;
   const energyDisplay = nutritionDisplayPointEstimate(
@@ -295,7 +305,32 @@ export function NutritionV2Overview({
     '--energy-progress': `${Math.min(energyProgress ?? 0, 100)}%`,
   } as CSSProperties;
 
-  const recent = data.history.slice(-7);
+  const recent = data.history.slice(-windowDays);
+  const trendStyle = {
+    '--trend-columns': Math.max(recent.length, 1),
+  } as CSSProperties;
+  const comparableEnergy = recent
+    .filter((point) => point.energyCoverage === 'complete')
+    .map((point) =>
+      nutritionDisplayPointEstimate(
+        point.energyKcal,
+        point.energyKcalLow,
+        point.energyKcalHigh,
+      ),
+    )
+    .filter(
+      (
+        point,
+      ): point is {
+        value: number;
+        approximate: boolean;
+      } => point.value !== null,
+    );
+  const averageEnergy =
+    comparableEnergy.length > 0
+      ? comparableEnergy.reduce((sum, point) => sum + point.value, 0) / comparableEnergy.length
+      : null;
+  const averageEnergyApproximate = comparableEnergy.some((point) => point.approximate);
   const scaleMax = Math.max(
     targetEnergy ?? 0,
     ...recent.map((point) => point.energyKcalHigh ?? point.energyKcal ?? point.energyKcalLow ?? 0),
@@ -423,7 +458,7 @@ export function NutritionV2Overview({
       >
         <div className={styles['section-heading']}>
           <div>
-            <p className={styles.eyebrow}>ÚLTIMOS 7 DÍAS</p>
+            <p className={styles.eyebrow}>ÚLTIMOS {windowDays} DÍAS</p>
             <h2 id="nutrition-trend-title">Energía y calidad del registro</h2>
             <p>
               La banda muestra el rango cuando existe; el punto representa el valor central
@@ -434,7 +469,7 @@ export function NutritionV2Overview({
         </div>
 
         <div className={styles['trend-layout']}>
-          <div className={styles.chart}>
+          <div className={styles.chart} style={trendStyle}>
             {recent.length === 0 ? (
               <p className={styles.empty}>Todavía no hay historial diario para graficar.</p>
             ) : (
@@ -465,7 +500,7 @@ export function NutritionV2Overview({
                         ? '—'
                         : `${centerDisplay.approximate ? '≈' : ''}${formatNumber(center)}`}
                     </strong>
-                    <span>{weekday(point.date)}</span>
+                    <span>{windowDays === 7 ? weekday(point.date) : shortTrendDate(point.date)}</span>
                   </div>
                 );
               })
@@ -473,6 +508,17 @@ export function NutritionV2Overview({
           </div>
 
           <div className={styles['quality-grid']}>
+            <article>
+              <span>Energía media</span>
+              <strong>
+                {averageEnergy === null
+                  ? '—'
+                  : `${averageEnergyApproximate ? '≈' : ''}${formatNumber(averageEnergy)} kcal`}
+              </strong>
+              <small>
+                {comparableEnergy.length}/{recent.length} días comparables
+              </small>
+            </article>
             <article>
               <span>Energía completa</span>
               <strong>

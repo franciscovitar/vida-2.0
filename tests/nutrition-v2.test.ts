@@ -18,6 +18,7 @@ import {
   nutritionProgressTarget,
 } from '@/lib/nutrition/target-semantics';
 import type { NutritionMacroProgress } from '@/lib/nutrition/types';
+import { normalizeNutritionWindow, nutritionWindowDays } from '@/lib/nutrition/window';
 
 const FAKE_NUTRITION_ID = 'nutrition_sheet_example_1234567890';
 
@@ -278,4 +279,13 @@ test('un día histórico no se etiqueta como stale por su antigüedad', () => {
     }),
     'historical',
   );
+});
+
+
+test('Tendencias usa 28D por defecto y acepta sólo ventanas soportadas', () => {
+  assert.equal(normalizeNutritionWindow(undefined), '28d');
+  assert.equal(normalizeNutritionWindow('cualquier-cosa'), '28d');
+  assert.equal(normalizeNutritionWindow('7d'), '7d');
+  assert.equal(normalizeNutritionWindow('90d'), '90d');
+  assert.equal(nutritionWindowDays('28d'), 28);
 });
