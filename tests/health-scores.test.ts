@@ -229,36 +229,34 @@ test('HS9. el umbral exacto de cobertura no falla por redondeo decimal', () => {
   assert.equal(sleep.contributors.find((item) => item.id === 'continuity')?.score, null);
 });
 
-test(
-  'HS10. Rhythm objetivo alimenta regularidad de Sleep Score sin inventar timing circadiano',
-  () => {
-    const rhythm = buildRhythmStability({
-      sleep: Array.from({ length: 7 }, (_, index) => {
-        const day = 10 + index;
-        const date = `2026-09-${String(day).padStart(2, '0')}`;
-        return {
-          date,
-          sleepStart: `${date}T00:20:00-03:00`,
-          sleepEnd: `${date}T07:30:00-03:00`,
-        };
-      }),
-    });
-    assert.notEqual(rhythm.score, null);
+test('HS10. Rhythm objetivo alimenta regularidad de Sleep Score sin inventar timing circadiano', () => {
+  const rhythm = buildRhythmStability({
+    sleep: Array.from({ length: 7 }, (_, index) => {
+      const day = 10 + index;
+      const date = `2026-09-${String(day).padStart(2, '0')}`;
+      return {
+        date,
+        sleepStart: `${date}T00:20:00-03:00`,
+        sleepEnd: `${date}T07:30:00-03:00`,
+      };
+    }),
+  });
+  assert.notEqual(rhythm.score, null);
 
-    const scores = buildExplainableHealthScores(
-      healthFor([...baselineRows(), todayRow()]),
-      rhythm,
-    );
-    const sleep = scores.domains.find((score) => score.id === 'sleep');
+  const scores = buildExplainableHealthScores(
+    healthFor([...baselineRows(), todayRow()]),
+    rhythm,
+  );
+  const sleep = scores.domains.find((score) => score.id === 'sleep');
 
-    assert.ok(sleep);
-    assert.notEqual(sleep.score, null);
-    assert.notEqual(sleep.contributors.find((item) => item.id === 'regularity')?.score, null);
-    assert.notEqual(sleep.contributors.find((item) => item.id === 'wake-consistency')?.score, null);
-    assert.equal(sleep.contributors.some((item) => item.label === 'Timing circadiano'), false);
-    assert.notEqual(scores.readiness.score, null);
-  },
-);
+  assert.ok(sleep);
+  assert.notEqual(sleep.score, null);
+  assert.notEqual(sleep.contributors.find((item) => item.id === 'regularity')?.score, null);
+  assert.notEqual(sleep.contributors.find((item) => item.id === 'wake-consistency')?.score, null);
+  assert.equal(sleep.contributors.some((item) => item.label === 'Timing circadiano'), false);
+  assert.notEqual(scores.readiness.score, null);
+});
+
 test('HS11. la UI objetiva pone el brief primero y separa los dominios', () => {
   const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
   const navigation = readFileSync(
