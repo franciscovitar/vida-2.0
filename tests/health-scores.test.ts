@@ -253,14 +253,8 @@ test(
 
     assert.ok(sleep);
     assert.notEqual(sleep.score, null);
-    assert.notEqual(
-      sleep.contributors.find((item) => item.id === 'regularity')?.score,
-      null,
-    );
-    assert.notEqual(
-      sleep.contributors.find((item) => item.id === 'wake-consistency')?.score,
-      null,
-    );
+    assert.notEqual(sleep.contributors.find((item) => item.id === 'regularity')?.score, null);
+    assert.notEqual(sleep.contributors.find((item) => item.id === 'wake-consistency')?.score, null);
     assert.equal(sleep.contributors.some((item) => item.label === 'Timing circadiano'), false);
     assert.notEqual(scores.readiness.score, null);
   },
