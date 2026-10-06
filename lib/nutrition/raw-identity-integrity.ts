@@ -63,7 +63,7 @@ export function sanitizeNutritionRawIdentity<
   const duplicateMealIds = duplicateKeys(mealRows, 'mealId');
   const duplicateFoodItemIds = duplicateKeys(foodItemRows, 'foodItemId');
 
-  const rejectedMealRows: T[] = [];
+  const rejectedMealRows: MealRow[] = [];
   const usableMeals = mealRows.filter((row) => {
     if (!isActive(row)) return true;
     const mealId = stringValue(row.mealId);
@@ -79,7 +79,7 @@ export function sanitizeNutritionRawIdentity<
       .filter((mealId): mealId is string => Boolean(mealId)),
   );
 
-  const rejectedFoodItemRows: T[] = [];
+  const rejectedFoodItemRows: FoodItemRow[] = [];
   let missingFoodItemIdCount = 0;
   let orphanFoodItemCount = 0;
 
