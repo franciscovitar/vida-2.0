@@ -407,7 +407,7 @@ test('AI Insight queda stale cuando cambia Food Nutrients dentro de su ventana',
   assert.equal(result.latestEvidenceAt, '2026-10-06T12:30:00-03:00');
 });
 
-test('complete sobrevive aunque lower-level tenga rangos parciales si todos los items están cubiertos', () => {
+test('complete sobrevive con lower-level parcial si todos los items están cubiertos', () => {
   const result = sanitizeNutritionNutrientSummaryIntegrity(
     [
       {
