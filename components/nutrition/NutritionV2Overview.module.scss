@@ -102,6 +102,10 @@
   color: var(--c-habits);
 }
 
+.source-line[data-freshness='stale'] svg {
+  color: var(--c-projects);
+}
+
 .energy-summary {
   position: relative;
   z-index: 1;

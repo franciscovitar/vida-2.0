@@ -142,7 +142,6 @@ test('una fila histórica inválida no borra las filas válidas actuales', () =>
   assert.equal(partition.invalid[0], malformedHistorical);
 });
 
-
 test('unknown nutricional permanece unknown en la capa de presentación', () => {
   assert.deepEqual(nutritionDisplayPointEstimate(null, null, null), {
     value: null,
@@ -163,7 +162,6 @@ test('el delta energético conserva sobre-target y under-target sin clamp', () =
   assert.equal(nutritionDisplayDelta(2300, null, null, 2500), -200);
   assert.equal(nutritionDisplayDelta(null, 2400, 2600, 2500), 0);
 });
-
 
 function macro(
   key: NutritionMacroProgress['key'],

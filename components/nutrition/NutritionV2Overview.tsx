@@ -108,6 +108,26 @@ function MacroBar({ macro }: { macro: NutritionMacroProgress }) {
   );
 }
 
+function SourceStatus({ source }: { source: NutritionDashboardData['source'] }) {
+  return (
+    <div
+      className={styles['source-line']}
+      data-status={source.status}
+      data-freshness={source.freshness}
+    >
+      <ShieldCheck size={15} aria-hidden="true" />
+      <span>
+        {source.label}
+        {source.freshness === 'stale'
+          ? ' · resumen desactualizado'
+          : source.freshness === 'historical'
+            ? ' · día histórico'
+            : ''}
+      </span>
+    </div>
+  );
+}
+
 function nutrientProgress(nutrient: NutritionNutrientValue): number | null {
   const display = nutritionDisplayPointEstimate(
     nutrient.amount,
@@ -157,7 +177,11 @@ function nutrientReferenceLabel(nutrient: NutritionNutrientValue): string {
 }
 
 function NutrientRow({ nutrient }: { nutrient: NutritionNutrientValue }) {
-  const display = nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh);
+  const display = nutritionDisplayPointEstimate(
+    nutrient.amount,
+    nutrient.amountLow,
+    nutrient.amountHigh,
+  );
   const progress = nutrientProgress(nutrient);
   const style = {
     '--nutrient-progress': `${Math.min(progress ?? 0, 100)}%`,
@@ -262,7 +286,8 @@ export function NutritionV2Overview({
   const lowConfidenceItems = recent.reduce((sum, point) => sum + point.lowConfidenceItemCount, 0);
   const knownNutrients = data.nutrients.filter(
     (nutrient) =>
-      nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh).value !== null,
+      nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh)
+        .value !== null,
   );
   const targetedNutrients = data.nutrients.filter(
     (nutrient) => nutrient.targetSemantics !== 'none' && nutrient.targetSemantics !== 'unknown',
@@ -301,6 +326,8 @@ export function NutritionV2Overview({
 
   return (
     <div className={styles.stack}>
+      {mode !== 'today' ? <SourceStatus source={data.source} /> : null}
+
       <section
         className={styles.hero}
         hidden={mode !== 'today'}
@@ -314,21 +341,7 @@ export function NutritionV2Overview({
             longitudinal. Valores desconocidos siguen siendo desconocidos: no se rellenan huecos con
             ceros.
           </p>
-          <div
-            className={styles['source-line']}
-            data-status={data.source.status}
-            data-freshness={data.source.freshness}
-          >
-            <ShieldCheck size={15} aria-hidden="true" />
-            <span>
-              {data.source.label}
-              {data.source.freshness === 'stale'
-                ? ' · resumen desactualizado'
-                : data.source.freshness === 'historical'
-                  ? ' · día histórico'
-                  : ''}
-            </span>
-          </div>
+          <SourceStatus source={data.source} />
         </div>
 
         <div className={styles['energy-summary']}>
@@ -567,47 +580,47 @@ export function NutritionV2Overview({
 
       {mode === 'today' && data.aiInsights.length > 0 ? (
         <section className={styles.panel} aria-labelledby="nutrition-ai-title">
-        <div className={styles['section-heading']}>
-          <div>
-            <p className={styles.eyebrow}>QUÉ MERECE ATENCIÓN</p>
-            <h2 id="nutrition-ai-title">Oportunidades y patrones</h2>
-            <p>
-              Solo aparecen conclusiones persistidas por Nutrition Intelligence cuando existe
-              evidencia suficiente para mostrarlas.
-            </p>
+          <div className={styles['section-heading']}>
+            <div>
+              <p className={styles.eyebrow}>QUÉ MERECE ATENCIÓN</p>
+              <h2 id="nutrition-ai-title">Oportunidades y patrones</h2>
+              <p>
+                Solo aparecen conclusiones persistidas por Nutrition Intelligence cuando existe
+                evidencia suficiente para mostrarlas.
+              </p>
+            </div>
+            <BrainCircuit size={21} aria-hidden="true" />
           </div>
-          <BrainCircuit size={21} aria-hidden="true" />
-        </div>
-        <div className={styles['insight-grid']}>
-          {antioxidant ? (
-            <InsightCard
+          <div className={styles['insight-grid']}>
+            {antioxidant ? (
+              <InsightCard
               icon={<Sparkles size={17} aria-hidden="true" />}
               title="Potencial antioxidante"
-              insight={antioxidant}
-            />
-          ) : null}
-          {antiInflammatory ? (
-            <InsightCard
+                insight={antioxidant}
+              />
+            ) : null}
+            {antiInflammatory ? (
+              <InsightCard
               icon={<Leaf size={17} aria-hidden="true" />}
               title="Perfil antiinflamatorio"
-              insight={antiInflammatory}
-            />
-          ) : null}
-          {improvement ? (
-            <InsightCard
+                insight={antiInflammatory}
+              />
+            ) : null}
+            {improvement ? (
+              <InsightCard
               icon={<Flame size={17} aria-hidden="true" />}
               title="Mejora de mayor impacto"
-              insight={improvement}
-            />
-          ) : null}
-          {pattern ? (
-            <InsightCard
-              icon={<BrainCircuit size={17} aria-hidden="true" />}
-              title="Patrón observado"
-              insight={pattern}
-            />
-          ) : null}
-        </div>
+                insight={improvement}
+              />
+            ) : null}
+            {pattern ? (
+              <InsightCard
+                icon={<BrainCircuit size={17} aria-hidden="true" />}
+                title="Patrón observado"
+                insight={pattern}
+              />
+            ) : null}
+          </div>
         </section>
       ) : null}
 
