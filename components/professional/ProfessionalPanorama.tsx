@@ -167,9 +167,14 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
           ))}
         </div>
 
-        <Link className={styles['panorama-link']} href="/professional/herramientas">
-          Ver comparadores de herramientas →
-        </Link>
+        <div className={styles['panorama-links']}>
+          <Link className={styles['panorama-link']} href="/professional/mercado">
+            Ver mercado y resiliencia →
+          </Link>
+          <Link className={styles['panorama-link']} href="/professional/herramientas">
+            Ver comparadores de herramientas →
+          </Link>
+        </div>
       </section>
 
       <footer className={styles['panorama-provenance']}>

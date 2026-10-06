@@ -87,5 +87,45 @@ test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada 
   assert.match(panorama, /snapshot\.market\.globalSignals\[0\]/);
   assert.match(panorama, /snapshot\.strongestEvidence\[0\]/);
   assert.doesNotMatch(panorama, /Math\.random|overall score|winner/i);
-  assert.doesNotMatch(panorama, /\/professional\/(mercado|crecimiento|biblioteca)/);
+  assert.doesNotMatch(panorama, /\/professional\/(crecimiento|biblioteca)/);
+});
+
+test('PRO-V2-06. Mercado tiene ruta propia y navegación primaria interna', () => {
+  const nav = repoText('components/professional/ProfessionalNavigation.tsx');
+  const route = repoText('app/(app)/professional/mercado/page.tsx');
+  const source = repoText('lib/data/professional-intelligence-source.ts');
+
+  assert.match(nav, /label: 'Mercado'/);
+  assert.match(nav, /href: '\/professional\/mercado'/);
+  assert.match(route, /ProfessionalMarket/);
+  assert.match(route, /getProfessionalMarketPageData/);
+  assert.match(source, /loadCareerResilience/);
+});
+
+test('PRO-V2-07. Mercado separa geografías y no inventa remote fit', () => {
+  const market = repoText('components/professional/ProfessionalMarket.tsx');
+
+  assert.match(market, /Argentina separada de referencias internacionales/);
+  assert.match(market, /EE\.UU\. funciona como referencia estructural/);
+  assert.match(market, /no tiene una métrica comparable de remote fit/);
+  assert.match(market, /no publicamos un score ni una estimación/);
+  assert.doesNotMatch(market, /remoteScore|employabilityScore|overall score/i);
+});
+
+test('PRO-V2-08. Mercado conserva demanda, compensación y semántica cauta de IA', () => {
+  const market = repoText('components/professional/ProfessionalMarket.tsx');
+
+  assert.match(market, /market\.internationalBenchmarks\.map/);
+  assert.match(market, /market\.argentinaSalaryRoles\.map/);
+  assert.match(market, /resilience\.crossRoleFindings\.map/);
+  assert.match(market, /No son probabilidades\s+personales de desempleo/);
+  assert.match(market, /Escenario a 5 años/);
+});
+
+test('PRO-V2-09. Panorama enlaza sólo a superficies V2 ya existentes', () => {
+  const panorama = repoText('components/professional/ProfessionalPanorama.tsx');
+
+  assert.match(panorama, /href="\/professional\/mercado"/);
+  assert.match(panorama, /href="\/professional\/herramientas"/);
+  assert.doesNotMatch(panorama, /\/professional\/(crecimiento|biblioteca)/);
 });

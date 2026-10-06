@@ -463,3 +463,310 @@
     border-top-width: 2px;
   }
 }
+
+.panorama-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.1rem;
+}
+
+.market {
+  display: grid;
+  gap: 1.15rem;
+  min-width: 0;
+}
+
+.market-hero {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1.45rem 0 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.market-hero h2,
+.market-heading h3,
+.market-signal h4,
+.market-benchmark h4,
+.market-salary-role h4,
+.market-role-head h4 {
+  margin: 0;
+  color: var(--text);
+}
+
+.market-hero h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 4.8vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+.market-hero > p:not(.eyebrow) {
+  max-width: 70ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.62;
+}
+
+.market-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  color: var(--text-subtle);
+  font-size: 0.69rem;
+}
+
+.market-section {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.5rem 0 0.35rem;
+}
+
+.market-heading {
+  display: grid;
+  gap: 0.18rem;
+  max-width: 68ch;
+}
+
+.market-heading h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.35rem, 2.8vw, 1.8rem);
+  line-height: 1.15;
+}
+
+.market-heading > p:not(.eyebrow) {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.58;
+}
+
+.market-signal-grid,
+.market-salary-grid,
+.market-geo-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.market-signal,
+.market-salary-role,
+.market-geo-grid article,
+.market-finding-list article,
+.market-role-list article {
+  display: grid;
+  gap: 0.42rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.market-signal > strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--text);
+  font-size: 1.45rem;
+}
+
+.market-signal h4,
+.market-benchmark h4,
+.market-salary-role h4,
+.market-role-head h4 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.05rem;
+  line-height: 1.28;
+}
+
+.market-signal p,
+.market-geo-grid p,
+.market-finding-list p,
+.market-role-list p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.58;
+}
+
+.market-signal a,
+.market-salary-role a {
+  width: fit-content;
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.market-signal a:hover,
+.market-salary-role a:hover {
+  text-decoration: underline;
+}
+
+.market-kicker {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.market-benchmark-list {
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+
+.market-benchmark {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.market-benchmark > div:first-child {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.market-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.market-metrics div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.market-metrics dt {
+  color: var(--text-subtle);
+  font-size: 0.64rem;
+}
+
+.market-metrics dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.market-role-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.3rem 0.8rem;
+}
+
+.market-role-head span {
+  color: var(--text-subtle);
+  font-size: 0.67rem;
+}
+
+.market-salary-role ul,
+.market-limitations {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.market-salary-role li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.45rem 0.75rem;
+  align-items: baseline;
+  padding: 0.48rem 0;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.market-salary-role li strong {
+  color: var(--text);
+}
+
+.market-salary-role li small {
+  color: var(--text-subtle);
+  font-size: 0.64rem;
+}
+
+.market-geo-grid article > strong {
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.market-finding-list,
+.market-role-list {
+  display: grid;
+}
+
+.market-details {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.market-details > summary {
+  padding: 0.75rem 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.market-role-list {
+  padding-bottom: 0.8rem;
+}
+
+.market-role-horizon {
+  display: grid;
+  gap: 0.18rem;
+  padding-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.market-role-horizon strong {
+  color: var(--text);
+}
+
+.market-limitations {
+  padding: 0 0 0.8rem;
+}
+
+.market-limitations li {
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.market-provenance {
+  padding: 0.15rem 0;
+  color: var(--text-subtle);
+  font-size: 0.67rem;
+}
+
+.market-provenance code {
+  font-size: inherit;
+}
+
+@media (width >= 760px) {
+  .market-signal-grid,
+  .market-salary-grid,
+  .market-geo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.4rem;
+  }
+
+  .market-geo-grid article:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .market-benchmark {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.9fr);
+    align-items: center;
+  }
+}
