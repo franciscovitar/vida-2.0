@@ -4,7 +4,7 @@ import { Activity, Bike, CalendarDays, Dumbbell, LineChart, Sparkles, Target } f
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { computeGymV2Analytics } from '@/lib/gym/v2-analytics';
-import type { GymSession, GymSessionSummary } from '@/types/gym';
+import type { GymRoutine, GymSession, GymSessionSummary } from '@/types/gym';
 
 import styles from './GymSummaryOverview.module.scss';
 
@@ -19,13 +19,25 @@ export function GymSummaryOverview({
   summaries,
   weeklyTarget,
   today,
+  routine,
 }: {
   sessions: readonly GymSession[];
   summaries: readonly GymSessionSummary[];
   weeklyTarget: number | null;
   today: string;
+  routine: GymRoutine | null;
 }) {
-  const analytics = computeGymV2Analytics({ sessions, summaries, weeklyTarget, today });
+  const exerciseScopeNames =
+    routine?.presentation === 'structured'
+      ? routine.days.flatMap((day) => day.exercises.map((exercise) => exercise.name))
+      : undefined;
+  const analytics = computeGymV2Analytics({
+    sessions,
+    summaries,
+    weeklyTarget,
+    today,
+    exerciseScopeNames,
+  });
   const meaningfulInsights = analytics.insights
     .filter((insight) => insight.id !== 'weekly-frequency')
     .slice(0, 2);

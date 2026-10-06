@@ -319,6 +319,41 @@ function buildMuscleGroups(
   };
 }
 
+function normalizeExerciseIdentityLabel(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function exerciseBelongsToCurrentScope(
+  observedName: string,
+  currentExerciseNames: readonly string[],
+): boolean {
+  const observed = normalizeExerciseIdentityLabel(observedName);
+  if (!observed) return false;
+
+  return currentExerciseNames.some((currentName) => {
+    const current = normalizeExerciseIdentityLabel(currentName);
+    if (!current) return false;
+    if (observed === current || observed.includes(current) || current.includes(observed))
+      return true;
+
+    const observedTokens = new Set(observed.split(' ').filter((token) => token.length >= 3));
+    const currentTokens = new Set(current.split(' ').filter((token) => token.length >= 3));
+    if (observedTokens.size < 2 || currentTokens.size < 2) return false;
+
+    let shared = 0;
+    for (const token of observedTokens) {
+      if (currentTokens.has(token)) shared += 1;
+    }
+    return shared >= 2 && shared / Math.min(observedTokens.size, currentTokens.size) >= 0.66;
+  });
+}
+
 function buildInsights(input: {
   currentWeekSessions: number;
   previousWeekSessions: number;
@@ -401,6 +436,7 @@ export function computeGymV2Analytics(input: {
   summaries: readonly GymSessionSummary[];
   today: string;
   weeklyTarget: number | null;
+  exerciseScopeNames?: readonly string[];
 }): GymV2Analytics {
   const summaryByKey = new Map(input.summaries.map((summary) => [summary.key, summary]));
   const completed = input.sessions
@@ -425,7 +461,13 @@ export function computeGymV2Analytics(input: {
       ? Math.round((currentWeekSessions / input.weeklyTarget) * 100)
       : null;
 
-  const exerciseTrends = buildExerciseTrends(completed);
+  const allExerciseTrends = buildExerciseTrends(completed);
+  const exerciseTrends =
+    input.exerciseScopeNames && input.exerciseScopeNames.length > 0
+      ? allExerciseTrends.filter((item) =>
+          exerciseBelongsToCurrentScope(item.exerciseName, input.exerciseScopeNames ?? []),
+        )
+      : allExerciseTrends;
   const comparable = exerciseTrends.filter((item) => item.trend !== 'unknown');
   const improvingExercises = comparable.filter((item) => item.trend === 'up').length;
   const stableExercises = comparable.filter((item) => item.trend === 'steady').length;
