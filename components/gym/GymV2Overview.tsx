@@ -244,194 +244,198 @@ export function GymV2Overview({
           </summary>
           <div className={styles['benchmark-content']}>
             <Card aria-labelledby="gym-v2-benchmark-title">
-          <SectionHeader
-            id="gym-v2-benchmark-title"
-            title="Tu rango de fuerza"
-            description="Mismos benchmarks fijos de siempre, con una presentación de rango y una ETA dinámica separada del progreso personal."
-            domain="health"
-          />
-          <div className={benchmarkStyles.layout}>
-            <div
-              className={benchmarkStyles.summary}
-              data-rank={benchmark.level ?? 'below-beginner'}
-            >
-              <span>RANGO ACTUAL · {benchmark.scopeLabel}</span>
-              <strong>{benchmark.label}</strong>
-              <small>{benchmark.confidenceLabel}</small>
-              <p>{benchmark.detail}</p>
-            </div>
-
-            <div className={benchmarkStyles.list}>
-              {featuredBenchmarkExercises.map((exercise) => (
-                <article
-                  key={exercise.id}
-                  className={benchmarkStyles.exercise}
-                  data-rank={exercise.level}
+              <SectionHeader
+                id="gym-v2-benchmark-title"
+                title="Tu rango de fuerza"
+                description="Mismos benchmarks fijos de siempre, con una presentación de rango y una ETA dinámica separada del progreso personal."
+                domain="health"
+              />
+              <div className={benchmarkStyles.layout}>
+                <div
+                  className={benchmarkStyles.summary}
+                  data-rank={benchmark.level ?? 'below-beginner'}
                 >
-                  <div className={benchmarkStyles.heading}>
-                    <div>
-                      <h3>{exercise.benchmarkName}</h3>
-                      <small>
-                        {number(exercise.loadKg)} kg × {exercise.reps} · último{' '}
-                        {shortDate(exercise.latestDate)} · {exercise.confidenceLabel.toLowerCase()}
-                      </small>
-                    </div>
-                    <strong>{exercise.levelLabel}</strong>
-                  </div>
+                  <span>RANGO ACTUAL · {benchmark.scopeLabel}</span>
+                  <strong>{benchmark.label}</strong>
+                  <small>{benchmark.confidenceLabel}</small>
+                  <p>{benchmark.detail}</p>
+                </div>
 
-                  {exercise.nextLevelProgressPercent !== null ? (
-                    <div className={benchmarkStyles.progress}>
-                      <div className={benchmarkStyles.track} aria-hidden="true">
-                        <span
-                          style={
-                            {
-                              '--share': `${exercise.nextLevelProgressPercent}%`,
-                            } as ShareStyle
-                          }
-                        />
-                      </div>
-                      <div>
-                        <span>e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg</span>
-                        <span>
-                          {exercise.nextLevelLabel && exercise.nextThresholdKg !== null
-                            ? `${exercise.nextLevelProgressPercent}% del rango hacia ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
-                            : 'Máximo nivel de la referencia'}
-                        </span>
-                      </div>
-                      {exercise.nextLevelEtaLabel ? (
-                        <div className={benchmarkStyles.eta}>
-                          <span>ETA dinámica</span>
-                          <strong>{exercise.nextLevelEtaLabel}</strong>
-                          {exercise.nextLevelEtaDetail ? (
-                            <small>{exercise.nextLevelEtaDetail}</small>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <small className={benchmarkStyles.max}>
-                      e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg
-                    </small>
-                  )}
-                </article>
-              ))}
-            </div>
-          </div>
-
-          {externalExerciseCount > featuredBenchmarkExercises.length ? (
-            <details className={benchmarkStyles.disclosure}>
-              <summary>
-                <span>Ver todos los ejercicios</span>
-                <small>
-                  {externalExerciseCount} registrados · {benchmark.exercises.length} con nivel
-                </small>
-              </summary>
-
-              <div className={benchmarkStyles['all-exercises']}>
-                <section>
-                  <div className={benchmarkStyles['group-heading']}>
-                    <div>
-                      <strong>Con benchmark fijo</strong>
-                      <span>e1RM Epley comparado contra la tabla masculina guardada en Vida.</span>
-                    </div>
-                    <small>{benchmark.exercises.length}</small>
-                  </div>
-                  <div className={benchmarkStyles['compact-list']}>
-                    {benchmark.exercises.map((exercise) => (
-                      <article
-                        key={`all-${exercise.id}`}
-                        className={benchmarkStyles.compact}
-                        data-rank={exercise.level}
-                      >
+                <div className={benchmarkStyles.list}>
+                  {featuredBenchmarkExercises.map((exercise) => (
+                    <article
+                      key={exercise.id}
+                      className={benchmarkStyles.exercise}
+                      data-rank={exercise.level}
+                    >
+                      <div className={benchmarkStyles.heading}>
                         <div>
-                          <strong>{exercise.benchmarkName}</strong>
+                          <h3>{exercise.benchmarkName}</h3>
                           <small>
-                            {number(exercise.loadKg)} kg × {exercise.reps} → e1RM{' '}
-                            {number(exercise.estimatedOneRepMaxKg)} kg · {exercise.confidenceLabel}
-                            {exercise.nextLevelEtaLabel
-                              ? ` · ETA ${exercise.nextLevelEtaLabel}`
-                              : ''}
+                            {number(exercise.loadKg)} kg × {exercise.reps} · último{' '}
+                            {shortDate(exercise.latestDate)} ·{' '}
+                            {exercise.confidenceLabel.toLowerCase()}
                           </small>
                         </div>
-                        <span data-tone="benchmark">{exercise.levelLabel}</span>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-
-                {unratedBenchmarkExercises.length > 0 ? (
-                  <section>
-                    <div className={benchmarkStyles['group-heading']}>
-                      <div>
-                        <strong>En la tabla, sin e1RM calculable</strong>
-                        <span>
-                          La referencia existe, pero el último set no entra en el rango 1–15 reps o
-                          le falta carga/repeticiones.
-                        </span>
+                        <strong>{exercise.levelLabel}</strong>
                       </div>
-                      <small>{unratedBenchmarkExercises.length}</small>
-                    </div>
-                    <div className={benchmarkStyles['compact-list']}>
-                      {unratedBenchmarkExercises.map((exercise) => (
-                        <article key={exercise.key} className={benchmarkStyles.compact}>
-                          <div>
-                            <strong>{exercise.exerciseName}</strong>
-                            <small>
-                              {exercise.latestLoad === null || exercise.latestReps === null
-                                ? 'Sin set completo'
-                                : `${number(exercise.latestLoad)} kg × ${exercise.latestReps}`}{' '}
-                              · último {shortDate(exercise.latestDate)}
-                            </small>
-                          </div>
-                          <span data-tone="neutral">Sin e1RM</span>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-                ) : null}
 
-                {unsupportedBenchmarkExercises.length > 0 ? (
-                  <section>
-                    <div className={benchmarkStyles['group-heading']}>
-                      <div>
-                        <strong>Sin referencia en la tabla</strong>
-                        <span>
-                          El ejercicio sigue teniendo progreso personal, pero no recibe una
-                          categoría externa hasta agregar un benchmark fijo explícito.
-                        </span>
-                      </div>
-                      <small>{unsupportedBenchmarkExercises.length}</small>
-                    </div>
-                    <div className={benchmarkStyles['compact-list']}>
-                      {unsupportedBenchmarkExercises.map((exercise) => (
-                        <article key={exercise.key} className={benchmarkStyles.compact}>
-                          <div>
-                            <strong>{exercise.exerciseName}</strong>
-                            <small>
-                              {exercise.latestLoad === null || exercise.latestReps === null
-                                ? 'Sin set comparable'
-                                : `${number(exercise.latestLoad)} kg × ${exercise.latestReps}`}{' '}
-                              · último {shortDate(exercise.latestDate)}
-                            </small>
+                      {exercise.nextLevelProgressPercent !== null ? (
+                        <div className={benchmarkStyles.progress}>
+                          <div className={benchmarkStyles.track} aria-hidden="true">
+                            <span
+                              style={
+                                {
+                                  '--share': `${exercise.nextLevelProgressPercent}%`,
+                                } as ShareStyle
+                              }
+                            />
                           </div>
-                          <span data-tone="neutral">Sin benchmark</span>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-                ) : null}
+                          <div>
+                            <span>e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg</span>
+                            <span>
+                              {exercise.nextLevelLabel && exercise.nextThresholdKg !== null
+                                ? `${exercise.nextLevelProgressPercent}% del rango hacia ${exercise.nextLevelLabel} · ${number(exercise.nextThresholdKg)} kg`
+                                : 'Máximo nivel de la referencia'}
+                            </span>
+                          </div>
+                          {exercise.nextLevelEtaLabel ? (
+                            <div className={benchmarkStyles.eta}>
+                              <span>ETA dinámica</span>
+                              <strong>{exercise.nextLevelEtaLabel}</strong>
+                              {exercise.nextLevelEtaDetail ? (
+                                <small>{exercise.nextLevelEtaDetail}</small>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <small className={benchmarkStyles.max}>
+                          e1RM estimado: {number(exercise.estimatedOneRepMaxKg)} kg
+                        </small>
+                      )}
+                    </article>
+                  ))}
+                </div>
               </div>
-            </details>
-          ) : null}
 
-          <div className={benchmarkStyles.footnote}>
-            <Gauge size={16} aria-hidden="true" />
-            <p>
-              {benchmark.referenceLabel} · versión {benchmark.baselineVersion}.{' '}
-              {benchmark.methodologyNote} El nivel general es orientativo y no reemplaza tu progreso
-              personal.
-            </p>
-          </div>
+              {externalExerciseCount > featuredBenchmarkExercises.length ? (
+                <details className={benchmarkStyles.disclosure}>
+                  <summary>
+                    <span>Ver todos los ejercicios</span>
+                    <small>
+                      {externalExerciseCount} registrados · {benchmark.exercises.length} con nivel
+                    </small>
+                  </summary>
+
+                  <div className={benchmarkStyles['all-exercises']}>
+                    <section>
+                      <div className={benchmarkStyles['group-heading']}>
+                        <div>
+                          <strong>Con benchmark fijo</strong>
+                          <span>
+                            e1RM Epley comparado contra la tabla masculina guardada en Vida.
+                          </span>
+                        </div>
+                        <small>{benchmark.exercises.length}</small>
+                      </div>
+                      <div className={benchmarkStyles['compact-list']}>
+                        {benchmark.exercises.map((exercise) => (
+                          <article
+                            key={`all-${exercise.id}`}
+                            className={benchmarkStyles.compact}
+                            data-rank={exercise.level}
+                          >
+                            <div>
+                              <strong>{exercise.benchmarkName}</strong>
+                              <small>
+                                {number(exercise.loadKg)} kg × {exercise.reps} → e1RM{' '}
+                                {number(exercise.estimatedOneRepMaxKg)} kg ·{' '}
+                                {exercise.confidenceLabel}
+                                {exercise.nextLevelEtaLabel
+                                  ? ` · ETA ${exercise.nextLevelEtaLabel}`
+                                  : ''}
+                              </small>
+                            </div>
+                            <span data-tone="benchmark">{exercise.levelLabel}</span>
+                          </article>
+                        ))}
+                      </div>
+                    </section>
+
+                    {unratedBenchmarkExercises.length > 0 ? (
+                      <section>
+                        <div className={benchmarkStyles['group-heading']}>
+                          <div>
+                            <strong>En la tabla, sin e1RM calculable</strong>
+                            <span>
+                              La referencia existe, pero el último set no entra en el rango 1–15
+                              reps o le falta carga/repeticiones.
+                            </span>
+                          </div>
+                          <small>{unratedBenchmarkExercises.length}</small>
+                        </div>
+                        <div className={benchmarkStyles['compact-list']}>
+                          {unratedBenchmarkExercises.map((exercise) => (
+                            <article key={exercise.key} className={benchmarkStyles.compact}>
+                              <div>
+                                <strong>{exercise.exerciseName}</strong>
+                                <small>
+                                  {exercise.latestLoad === null || exercise.latestReps === null
+                                    ? 'Sin set completo'
+                                    : `${number(exercise.latestLoad)} kg × ${exercise.latestReps}`}{' '}
+                                  · último {shortDate(exercise.latestDate)}
+                                </small>
+                              </div>
+                              <span data-tone="neutral">Sin e1RM</span>
+                            </article>
+                          ))}
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {unsupportedBenchmarkExercises.length > 0 ? (
+                      <section>
+                        <div className={benchmarkStyles['group-heading']}>
+                          <div>
+                            <strong>Sin referencia en la tabla</strong>
+                            <span>
+                              El ejercicio sigue teniendo progreso personal, pero no recibe una
+                              categoría externa hasta agregar un benchmark fijo explícito.
+                            </span>
+                          </div>
+                          <small>{unsupportedBenchmarkExercises.length}</small>
+                        </div>
+                        <div className={benchmarkStyles['compact-list']}>
+                          {unsupportedBenchmarkExercises.map((exercise) => (
+                            <article key={exercise.key} className={benchmarkStyles.compact}>
+                              <div>
+                                <strong>{exercise.exerciseName}</strong>
+                                <small>
+                                  {exercise.latestLoad === null || exercise.latestReps === null
+                                    ? 'Sin set comparable'
+                                    : `${number(exercise.latestLoad)} kg × ${exercise.latestReps}`}{' '}
+                                  · último {shortDate(exercise.latestDate)}
+                                </small>
+                              </div>
+                              <span data-tone="neutral">Sin benchmark</span>
+                            </article>
+                          ))}
+                        </div>
+                      </section>
+                    ) : null}
+                  </div>
+                </details>
+              ) : null}
+
+              <div className={benchmarkStyles.footnote}>
+                <Gauge size={16} aria-hidden="true" />
+                <p>
+                  {benchmark.referenceLabel} · versión {benchmark.baselineVersion}.{' '}
+                  {benchmark.methodologyNote} El nivel general es orientativo y no reemplaza tu
+                  progreso personal.
+                </p>
+              </div>
             </Card>
           </div>
         </details>
