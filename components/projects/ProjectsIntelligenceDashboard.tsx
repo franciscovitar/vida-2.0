@@ -198,9 +198,11 @@ function ProjectDetails({ project }: { project: ProjectCardView }) {
 function ProjectCard({
   project,
   emphasis = false,
+  statusLabel,
 }: {
   project: ProjectCardView;
   emphasis?: boolean;
+  statusLabel?: string;
 }) {
   return (
     <article
@@ -212,7 +214,7 @@ function ProjectCard({
         <h3>{project.name}</h3>
         <div className={styles.badges}>
           <Badge domain={project.status === 'Activo' ? 'projects' : 'neutral'} variant="outline">
-            {project.status}
+            {statusLabel ?? project.status}
           </Badge>
           {project.type ? (
             <Badge domain="neutral" variant="outline">
@@ -321,22 +323,14 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
 
   return (
     <div className={styles.stack}>
-      <ul className={styles['summary-strip']} aria-label="Resumen del portfolio">
+      <ul className={styles['summary-strip']} aria-label="Resumen del portfolio visible">
         <li>
-          <strong className="tabular">{view.summary.active}</strong>
+          <strong className="tabular">{view.focus.length}</strong>
           <span>En foco</span>
         </li>
         <li>
-          <strong className="tabular">{view.summary.waiting}</strong>
-          <span>En espera</span>
-        </li>
-        <li>
-          <strong className="tabular">{view.summary.blocked}</strong>
-          <span>Bloqueados</span>
-        </li>
-        <li>
-          <strong className="tabular">{view.summary.completed}</strong>
-          <span>Completados</span>
+          <strong className="tabular">{view.upcoming.length}</strong>
+          <span>Próximos</span>
         </li>
       </ul>
 
@@ -358,49 +352,79 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
         )}
       </section>
 
-      {view.blocked.length > 0 ? (
-        <section className={styles.section} aria-labelledby="projects-blocked-title">
+      {view.upcoming.length > 0 ? (
+        <section className={styles.section} aria-labelledby="projects-upcoming-title">
           <SectionHeading
-            id="projects-blocked-title"
-            title="Bloqueados"
-            description="Necesitan resolver un bloqueo antes de seguir."
-            count={view.blocked.length}
+            id="projects-upcoming-title"
+            title="Próximos"
+            description="Todavía no arrancaron, pero son los siguientes candidatos a entrar en foco."
+            count={view.upcoming.length}
           />
           <div className={styles['project-grid']}>
-            {view.blocked.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+            {view.upcoming.map((project) => (
+              <ProjectCard key={project.id} project={project} statusLabel="Próximo" />
             ))}
           </div>
         </section>
       ) : null}
 
-      {view.waiting.length > 0 ? (
-        <section className={styles.section} aria-labelledby="projects-waiting-title">
-          <SectionHeading
-            id="projects-waiting-title"
-            title="En espera"
-            description="Preservados sin competir por tu atención diaria."
-            count={view.waiting.length}
-          />
-          <div className={styles['project-grid']}>
-            {view.waiting.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {view.history.length > 0 ? (
+      {view.waiting.length + view.blocked.length + view.history.length > 0 ? (
         <details className={styles['completed-section']}>
           <summary>
-            <span>Completados e historial</span>
-            <span className={styles.count}>{view.history.length}</span>
+            <span>Ver más proyectos</span>
+            <span className={styles.count}>
+              {view.waiting.length + view.blocked.length + view.history.length}
+            </span>
           </summary>
-          <ul className={styles['completed-list']}>
-            {view.history.map((project) => (
-              <CompletedRow key={project.id} project={project} />
-            ))}
-          </ul>
+          <div className={styles['more-projects-content']}>
+            {view.waiting.length > 0 ? (
+              <section className={styles.section} aria-labelledby="projects-review-title">
+                <SectionHeading
+                  id="projects-review-title"
+                  title="En revisión / para usar"
+                  description="Ya tuvieron construcción real. Quedan preservados para uso, prueba o revisión posterior."
+                  count={view.waiting.length}
+                />
+                <div className={styles['project-grid']}>
+                  {view.waiting.map((project) => (
+                    <ProjectCard key={project.id} project={project} statusLabel="En revisión" />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {view.blocked.length > 0 ? (
+              <section className={styles.section} aria-labelledby="projects-blocked-title">
+                <SectionHeading
+                  id="projects-blocked-title"
+                  title="Bloqueados"
+                  description="Necesitan resolver un bloqueo antes de seguir."
+                  count={view.blocked.length}
+                />
+                <div className={styles['project-grid']}>
+                  {view.blocked.map((project) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {view.history.length > 0 ? (
+              <section className={styles.section} aria-labelledby="projects-history-title">
+                <SectionHeading
+                  id="projects-history-title"
+                  title="Completados e historial"
+                  description="Cerrados o cancelados; disponibles solo como referencia."
+                  count={view.history.length}
+                />
+                <ul className={styles['completed-list']}>
+                  {view.history.map((project) => (
+                    <CompletedRow key={project.id} project={project} />
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+          </div>
         </details>
       ) : null}
 
