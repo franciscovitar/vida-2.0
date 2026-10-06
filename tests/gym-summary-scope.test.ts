@@ -88,6 +88,12 @@ test('Resumen limita señales a ejercicios de la rutina actual sin borrar histor
   assert.equal(scoped.comparableExercises, 1);
   assert.equal(scoped.exerciseTrends.length, 1);
   assert.match(scoped.exerciseTrends[0]!.exerciseName, /Prensa horizontal/i);
-  assert.equal(scoped.insights.some((insight) => /Face pull/i.test(insight.title)), false);
-  assert.equal(full.exerciseTrends.some((trend) => /Face pull/i.test(trend.exerciseName)), true);
+  assert.equal(
+    scoped.insights.some((insight) => /Face pull/i.test(insight.title)),
+    false,
+  );
+  assert.equal(
+    full.exerciseTrends.some((trend) => /Face pull/i.test(trend.exerciseName)),
+    true,
+  );
 });
