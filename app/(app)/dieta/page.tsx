@@ -7,9 +7,7 @@ import { NutritionDaySelector } from '@/components/nutrition/NutritionDaySelecto
 import { NutritionNavigation } from '@/components/nutrition/NutritionNavigation';
 import { NutritionV2Overview } from '@/components/nutrition/NutritionV2Overview';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
-import { loadApproximateDayMacros } from '@/lib/nutrition/approximate-day-macros';
 import { cordobaToday, loadNutritionDashboardData } from '@/lib/nutrition/dashboard';
-import { selectNutritionMacros } from '@/lib/nutrition/macro-selection';
 
 export const metadata: Metadata = { title: 'Nutrición' };
 export const dynamic = 'force-dynamic';
@@ -32,12 +30,7 @@ export default async function DietaPage({
   const currentDate = cordobaToday();
   const selectedDate = parseSelectedDate(params.date, currentDate);
   const selectedDateClock = new Date(`${selectedDate}T12:00:00-03:00`);
-  const rawData = await loadNutritionDashboardData(selectedDateClock);
-  const approximateMacros = await loadApproximateDayMacros(selectedDate, rawData.target);
-  const data = {
-    ...rawData,
-    macros: selectNutritionMacros(rawData.macros, approximateMacros),
-  };
+  const data = await loadNutritionDashboardData(selectedDateClock);
 
   return (
     <div className={pageStyles.page}>

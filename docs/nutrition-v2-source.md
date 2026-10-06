@@ -33,10 +33,10 @@ El spreadsheet se resuelve solo en servidor con `GOOGLE_NUTRITION_SPREADSHEET_ID
 
 La UI muestra proteína, carbohidratos, grasas y fibra.
 
-- con cobertura completa: el valor canónico tiene prioridad;
+- con cobertura completa: Vida muestra el total canónico derivado de valores realmente presentes;
 - con cobertura parcial: Vida suma únicamente valores conocidos y los etiqueta como `conocidos/parcial`;
-- el estimador heurístico es un fallback acotado para macros canónicos incompletos, no un reemplazo global;
-- todo fallback aproximado conserva `approximate` y `estimateQuality`;
+- Vida no infiere proteína, carbohidratos, grasas ni fibra desde calorías, nombre del alimento o una distribución heurística;
+- si un alimento material no tiene un macro cuantificado, ese valor permanece desconocido para ese alimento y el total diario no se presenta como completo;
 - desconocido nunca se convierte en cero.
 
 Los objetivos activos de `Targets` tienen prioridad para energía/macros. En particular, la meta personal activa de fibra prevalece visualmente sobre una referencia dietaria genérica de `Nutrient Targets`.

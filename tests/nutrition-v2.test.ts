@@ -6,7 +6,6 @@ import {
   partitionNutritionFoodItemRows,
 } from '@/lib/nutrition/food-item-integrity';
 import { deriveNutritionFreshness } from '@/lib/nutrition/freshness';
-import { selectNutritionMacros } from '@/lib/nutrition/macro-selection';
 import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import {
@@ -23,7 +22,6 @@ import {
   resolveNutritionHistoricalEnergyTarget,
   selectNutritionTargetRowForDate,
 } from '@/lib/nutrition/target-history';
-import type { NutritionMacroProgress } from '@/lib/nutrition/types';
 import { normalizeNutritionWindow, nutritionWindowDays } from '@/lib/nutrition/window';
 
 const FAKE_NUTRITION_ID = 'nutrition_sheet_example_1234567890';
@@ -168,44 +166,6 @@ test('el delta energético conserva sobre-target y under-target sin clamp', () =
   assert.equal(nutritionDisplayDelta(2670, null, null, 2500), 170);
   assert.equal(nutritionDisplayDelta(2300, null, null, 2500), -200);
   assert.equal(nutritionDisplayDelta(null, 2400, 2600, 2500), 0);
-});
-
-function macro(
-  key: NutritionMacroProgress['key'],
-  amount: number | null,
-  coverage: NutritionMacroProgress['coverage'],
-  approximate: boolean,
-): NutritionMacroProgress {
-  return {
-    key,
-    label: key,
-    amount,
-    target: null,
-    unit: 'g',
-    coverage,
-    approximate,
-    estimateQuality: approximate ? 'low' : 'high',
-    knownItemCount: approximate ? 0 : amount === null ? 0 : 1,
-    totalItemCount: 1,
-  };
-}
-
-test('el fallback heurístico no reemplaza un macro canónico completo', () => {
-  const selected = selectNutritionMacros(
-    [macro('protein', 100, 'complete', false)],
-    [macro('protein', 112, 'complete', true)],
-  );
-  assert.equal(selected[0]?.amount, 100);
-  assert.equal(selected[0]?.approximate, false);
-});
-
-test('el fallback heurístico sí puede completar un macro canónico incompleto', () => {
-  const selected = selectNutritionMacros(
-    [macro('protein', 80, 'partial', false)],
-    [macro('protein', 104, 'complete', true)],
-  );
-  assert.equal(selected[0]?.amount, 104);
-  assert.equal(selected[0]?.approximate, true);
 });
 
 test('RDA y AI se tratan como adecuación, no como upper limit', () => {
