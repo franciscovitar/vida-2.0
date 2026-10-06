@@ -49,9 +49,7 @@ export function auditNutritionAiInsightUniqueness<Row extends InsightRow>(
   }
 
   const duplicateGroupKeys = new Set(
-    [...counts.entries()]
-      .filter(([, count]) => count > 1)
-      .map(([key]) => key),
+    [...counts.entries()].filter(([, count]) => count > 1).map(([key]) => key),
   );
 
   let duplicateRowCount = 0;

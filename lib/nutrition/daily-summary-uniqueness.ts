@@ -32,20 +32,13 @@ export function sanitizeNutritionDailySummaryUniqueness<T extends Row>(
   }
 
   const duplicateDates = new Set(
-    [...counts.entries()]
-      .filter(([, count]) => count > 1)
-      .map(([date]) => date),
+    [...counts.entries()].filter(([, count]) => count > 1).map(([date]) => date),
   );
 
   let duplicateRowCount = 0;
   const rows = summaryRows.filter((row) => {
     const date = stringValue(row.date);
-    if (
-      !date ||
-      date < startDate ||
-      date > endDate ||
-      !duplicateDates.has(date)
-    ) {
+    if (!date || date < startDate || date > endDate || !duplicateDates.has(date)) {
       return true;
     }
     duplicateRowCount += 1;

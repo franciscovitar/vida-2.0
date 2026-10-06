@@ -103,8 +103,7 @@ export function buildNutritionRawDayFacts(
     const invalidMealsOnDate = invalidMealRows.filter(
       (row) => isActive(row) && stringValue(row.date) === date,
     ).length;
-    const unknownContributionCount =
-      invalidItems.length + mealsWithoutItems + invalidMealsOnDate;
+    const unknownContributionCount = invalidItems.length + mealsWithoutItems + invalidMealsOnDate;
     const energy = summarizeNutritionRawDayEnergy(validItems, {
       additionalUnknownItemCount: unknownContributionCount,
     });

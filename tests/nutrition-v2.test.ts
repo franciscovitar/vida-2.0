@@ -95,18 +95,14 @@ test('identidad raw excluye mealId y foodItemId duplicados activos', () => {
   assert.equal(result.duplicateFoodItemIdCount, 1);
   assert.equal(result.mealRows.length, 1);
   assert.equal(result.foodItemRows.length, 0);
-  assert.equal(
-    nutritionRawIdentityConflictDates(result, meals).has('2026-10-05'),
-    true,
-  );
+  assert.equal(nutritionRawIdentityConflictDates(result, meals).has('2026-10-05'), true);
 });
 
 test('Food Item orphan se excluye sin inventar fecha', () => {
   const meals = [{ mealId: 'm1', date: '2026-10-05', status: 'active' }];
-  const result = sanitizeNutritionRawIdentity(
-    meals,
-    [{ mealId: 'missing', foodItemId: 'f1', status: 'active' }],
-  );
+  const result = sanitizeNutritionRawIdentity(meals, [
+    { mealId: 'missing', foodItemId: 'f1', status: 'active' },
+  ]);
 
   assert.equal(result.foodItemRows.length, 0);
   assert.equal(result.orphanFoodItemCount, 1);
@@ -126,7 +122,10 @@ test('Daily Summary duplicado suprime todas las filas de esa fecha', () => {
 
   assert.equal(result.duplicateDateCount, 1);
   assert.equal(result.duplicateRowCount, 2);
-  assert.deepEqual(result.rows.map((row) => row.date), ['2026-10-04']);
+  assert.deepEqual(
+    result.rows.map((row) => row.date),
+    ['2026-10-04'],
+  );
 });
 
 test('AI Insight queda no verificable por ambigüedad raw dentro de su ventana', () => {
@@ -173,14 +172,8 @@ test('Targets activos solapados son ambiguos sólo donde sus intervalos se cruza
 
   assert.equal(nutritionTargetHasActiveAmbiguityForDate(rows, '2026-10-04'), false);
   assert.equal(nutritionTargetHasActiveAmbiguityForDate(rows, '2026-10-05'), true);
-  assert.equal(
-    auditNutritionTargetAmbiguity(rows, '2026-10-01', '2026-10-04').overlapPairCount,
-    0,
-  );
-  assert.equal(
-    auditNutritionTargetAmbiguity(rows, '2026-10-01', '2026-10-06').overlapPairCount,
-    1,
-  );
+  assert.equal(auditNutritionTargetAmbiguity(rows, '2026-10-01', '2026-10-04').overlapPairCount, 0);
+  assert.equal(auditNutritionTargetAmbiguity(rows, '2026-10-01', '2026-10-06').overlapPairCount, 1);
 });
 
 test('Nutrient Targets sólo marcan ambiguo el nutriente solapado', () => {
@@ -207,11 +200,7 @@ test('Nutrient Targets sólo marcan ambiguo el nutriente solapado', () => {
       status: 'active',
     },
   ];
-  const audit = auditNutritionNutrientTargetAmbiguity(
-    rows,
-    '2026-10-01',
-    '2026-10-06',
-  );
+  const audit = auditNutritionNutrientTargetAmbiguity(rows, '2026-10-01', '2026-10-06');
 
   assert.equal(audit.overlapPairCount, 1);
   assert.deepEqual([...audit.ambiguousNutrientKeys], ['magnesium']);
@@ -287,9 +276,7 @@ test('AI Insight queda no verificable si Targets se solapan dentro de su ventana
   const result = evaluateNutritionAiInsightFreshness(
     { date: '2026-10-06', window: '7d', createdAt: '2026-10-06T12:00:00-03:00' },
     {
-      meals: [
-        { mealId: 'm1', date: '2026-10-05', updatedAt: '2026-10-05T20:00:00-03:00' },
-      ],
+      meals: [{ mealId: 'm1', date: '2026-10-05', updatedAt: '2026-10-05T20:00:00-03:00' }],
       foodItems: [],
       dailySummary: [],
       nutrientSummary: [],
@@ -316,7 +303,6 @@ test('AI Insight queda no verificable si Targets se solapan dentro de su ventana
 
   assert.equal(result.state, 'unverifiable');
 });
-
 
 const authEnv = {
   GOOGLE_SERVICE_ACCOUNT_EMAIL: 'nutrition-reader@example.iam.gserviceaccount.com',
@@ -778,9 +764,7 @@ test('AI Insight queda stale cuando cambia Food Nutrients dentro de su ventana',
           updatedAt: '2026-10-05T20:00:00-03:00',
         },
       ],
-      foodItems: [
-        { mealId: 'm1', foodItemId: 'f1', updatedAt: '2026-10-05T20:05:00-03:00' },
-      ],
+      foodItems: [{ mealId: 'm1', foodItemId: 'f1', updatedAt: '2026-10-05T20:05:00-03:00' }],
       foodNutrients: [
         {
           foodItemId: 'f1',

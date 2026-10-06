@@ -142,10 +142,7 @@ export function evaluateNutritionAiInsightFreshness(
     };
   }
 
-  const rawIdentity = sanitizeNutritionRawIdentity(
-    evidence.meals,
-    evidence.foodItems,
-  );
+  const rawIdentity = sanitizeNutritionRawIdentity(evidence.meals, evidence.foodItems);
   const dailySummaryUniqueness = sanitizeNutritionDailySummaryUniqueness(
     evidence.dailySummary,
     window.start,
@@ -156,11 +153,7 @@ export function evaluateNutritionAiInsightFreshness(
     window.start,
     window.end,
   );
-  const targetAmbiguity = auditNutritionTargetAmbiguity(
-    evidence.targets,
-    window.start,
-    window.end,
-  );
+  const targetAmbiguity = auditNutritionTargetAmbiguity(evidence.targets, window.start, window.end);
   const nutrientTargetAmbiguity = auditNutritionNutrientTargetAmbiguity(
     evidence.nutrientTargets,
     window.start,
