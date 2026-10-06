@@ -2,11 +2,14 @@ import type { PlainCell } from '@/lib/data/plain';
 
 type Row = Readonly<Record<string, PlainCell | undefined>>;
 
-export interface NutritionRawIdentityIntegrityResult<T extends Row> {
-  mealRows: T[];
-  foodItemRows: T[];
-  rejectedMealRows: T[];
-  rejectedFoodItemRows: T[];
+export interface NutritionRawIdentityIntegrityResult<
+  MealRow extends Row,
+  FoodItemRow extends Row,
+> {
+  mealRows: MealRow[];
+  foodItemRows: FoodItemRow[];
+  rejectedMealRows: MealRow[];
+  rejectedFoodItemRows: FoodItemRow[];
   duplicateMealIdCount: number;
   duplicateFoodItemIdCount: number;
   missingMealIdCount: number;
@@ -50,10 +53,13 @@ function duplicateKeys<T extends Row>(
   );
 }
 
-export function sanitizeNutritionRawIdentity<T extends Row>(
-  mealRows: readonly T[],
-  foodItemRows: readonly T[],
-): NutritionRawIdentityIntegrityResult<T> {
+export function sanitizeNutritionRawIdentity<
+  MealRow extends Row,
+  FoodItemRow extends Row,
+>(
+  mealRows: readonly MealRow[],
+  foodItemRows: readonly FoodItemRow[],
+): NutritionRawIdentityIntegrityResult<MealRow, FoodItemRow> {
   const duplicateMealIds = duplicateKeys(mealRows, 'mealId');
   const duplicateFoodItemIds = duplicateKeys(foodItemRows, 'foodItemId');
 
@@ -106,9 +112,12 @@ export function sanitizeNutritionRawIdentity<T extends Row>(
   };
 }
 
-export function nutritionRawIdentityConflictDates<T extends Row>(
-  result: NutritionRawIdentityIntegrityResult<T>,
-  originalMealRows: readonly T[],
+export function nutritionRawIdentityConflictDates<
+  MealRow extends Row,
+  FoodItemRow extends Row,
+>(
+  result: NutritionRawIdentityIntegrityResult<MealRow, FoodItemRow>,
+  originalMealRows: readonly MealRow[],
 ): ReadonlySet<string> {
   const dates = new Set<string>();
 
@@ -141,9 +150,12 @@ export function nutritionRawIdentityConflictDates<T extends Row>(
   return dates;
 }
 
-export function nutritionRawIdentityHasConflictInWindow<T extends Row>(
-  result: NutritionRawIdentityIntegrityResult<T>,
-  originalMealRows: readonly T[],
+export function nutritionRawIdentityHasConflictInWindow<
+  MealRow extends Row,
+  FoodItemRow extends Row,
+>(
+  result: NutritionRawIdentityIntegrityResult<MealRow, FoodItemRow>,
+  originalMealRows: readonly MealRow[],
   startDate: string,
   endDate: string,
 ): boolean {
