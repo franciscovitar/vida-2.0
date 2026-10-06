@@ -3,9 +3,15 @@ import 'server-only';
 import type { PlainCell } from '@/lib/data/plain';
 import type { SheetReadCode } from '@/lib/google/errors';
 
+import { sanitizeNutritionDailySummaryUniqueness } from './daily-summary-uniqueness';
+import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { auditNutritionNutrientSummaryFreshness } from './nutrient-summary-freshness';
 import { sanitizeNutritionNutrientSummaryIntegrity } from './nutrient-summary-integrity';
 import { sanitizeNutritionNutrientSummaryUniqueness } from './nutrient-summary-uniqueness';
+import {
+  nutritionRawIdentityConflictDates,
+  sanitizeNutritionRawIdentity,
+} from './raw-identity-integrity';
 import {
   buildNutritionNutrientWindow,
   type NutritionNutrientWindowData,
@@ -38,6 +44,9 @@ export interface NutritionNutrientWindowResult extends NutritionNutrientWindowDa
     integritySuppressedSubtotalRowCount: number;
     duplicateSummaryKeyCount: number;
     duplicateSummaryRowCount: number;
+    rawIdentityConflictDateCount: number;
+    duplicateDailySummaryDateCount: number;
+    duplicateDailySummaryRowCount: number;
   };
 }
 
@@ -81,6 +90,32 @@ export async function loadNutritionNutrientWindow(
     ? rowsFromValues(foodNutrientsResult.values)
     : [];
   const startDate = windowStartDate(endDate, windowDays);
+  const itemPartition = partitionNutritionFoodItemRows(itemRows);
+  const rawIdentity = sanitizeNutritionRawIdentity(mealRows, itemPartition.valid);
+  const rawConflictDates = new Set(
+    nutritionRawIdentityConflictDates(rawIdentity, mealRows),
+  );
+  const mealDatesById = new Map<string, Set<string>>();
+  for (const meal of mealRows) {
+    if (String(meal.status ?? 'active').trim().toLowerCase() !== 'active') continue;
+    const mealId = String(meal.mealId ?? '').trim();
+    const date = String(meal.date ?? '').trim();
+    if (!mealId || !date) continue;
+    const dates = mealDatesById.get(mealId) ?? new Set<string>();
+    dates.add(date);
+    mealDatesById.set(mealId, dates);
+  }
+  for (const row of itemPartition.invalid) {
+    if (String(row.status ?? 'active').trim().toLowerCase() !== 'active') continue;
+    const mealId = String(row.mealId ?? '').trim();
+    if (!mealId) continue;
+    for (const date of mealDatesById.get(mealId) ?? []) rawConflictDates.add(date);
+  }
+  const dailyUniqueness = sanitizeNutritionDailySummaryUniqueness(
+    dailyRows,
+    startDate,
+    endDate,
+  );
   const uniqueness = sanitizeNutritionNutrientSummaryUniqueness(
     summaryRows,
     startDate,
@@ -92,9 +127,9 @@ export async function loadNutritionNutrientWindow(
   const freshness = auditSourcesReady
     ? auditNutritionNutrientSummaryFreshness(
         uniqueness.rows,
-        mealRows,
-        itemRows,
-        dailyRows,
+        rawIdentity.mealRows,
+        rawIdentity.foodItemRows,
+        dailyUniqueness.rows,
         startDate,
         endDate,
         foodNutrientRows,
@@ -110,8 +145,13 @@ export async function loadNutritionNutrientWindow(
           earliestSummaryAt: null,
         }));
 
+  const auditedFreshness = freshness.map((entry) =>
+    rawConflictDates.has(entry.date)
+      ? { ...entry, state: 'unverifiable' as const }
+      : entry,
+  );
   const rejectedDates = new Set(
-    freshness
+    auditedFreshness
       .filter((entry) => entry.state !== 'current')
       .map((entry) => entry.date),
   );
@@ -120,15 +160,18 @@ export async function loadNutritionNutrientWindow(
   );
   const integrity = sanitizeNutritionNutrientSummaryIntegrity(
     usableSummaryRows,
-    mealRows,
-    itemRows,
+    rawIdentity.mealRows,
+    rawIdentity.foodItemRows,
     foodNutrientRows,
     startDate,
     endDate,
   );
-  const staleDateCount = freshness.filter((entry) => entry.state === 'stale').length;
-  const unverifiableDateCount = freshness.filter(
+  const staleDateCount = auditedFreshness.filter((entry) => entry.state === 'stale').length;
+  const unverifiableDateCount = auditedFreshness.filter(
     (entry) => entry.state === 'unverifiable',
+  ).length;
+  const rawIdentityConflictDateCount = [...rawConflictDates].filter(
+    (date) => date >= startDate && date <= endDate,
   ).length;
   const data = buildNutritionNutrientWindow(
     integrity.rows,
@@ -151,6 +194,9 @@ export async function loadNutritionNutrientWindow(
         integritySuppressedSubtotalRowCount: 0,
         duplicateSummaryKeyCount: 0,
         duplicateSummaryRowCount: 0,
+        rawIdentityConflictDateCount: 0,
+        duplicateDailySummaryDateCount: 0,
+        duplicateDailySummaryRowCount: 0,
       },
     };
   }
@@ -159,6 +205,8 @@ export async function loadNutritionNutrientWindow(
   const freshnessIssue = staleDateCount > 0 || unverifiableDateCount > 0;
   const integrityIssue = integrity.downgradedDateCount > 0;
   const uniquenessIssue = uniqueness.duplicateKeyCount > 0;
+  const rawIdentityIssue = rawIdentityConflictDateCount > 0;
+  const dailyUniquenessIssue = dailyUniqueness.duplicateDateCount > 0;
 
   return {
     ...data,
@@ -167,7 +215,9 @@ export async function loadNutritionNutrientWindow(
         targetStatus === 'ready' &&
         !freshnessIssue &&
         !integrityIssue &&
-        !uniquenessIssue
+        !uniquenessIssue &&
+        !rawIdentityIssue &&
+        !dailyUniquenessIssue
           ? 'ready'
           : 'partial',
       code: targetResult.ok ? null : targetResult.code,
@@ -179,6 +229,9 @@ export async function loadNutritionNutrientWindow(
       integritySuppressedSubtotalRowCount: integrity.suppressedSubtotalRowCount,
       duplicateSummaryKeyCount: uniqueness.duplicateKeyCount,
       duplicateSummaryRowCount: uniqueness.duplicateRowCount,
+      rawIdentityConflictDateCount,
+      duplicateDailySummaryDateCount: dailyUniqueness.duplicateDateCount,
+      duplicateDailySummaryRowCount: dailyUniqueness.duplicateRowCount,
     },
   };
 }

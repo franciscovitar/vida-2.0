@@ -6,6 +6,7 @@ import {
   auditNutritionAiInsightUniqueness,
   nutritionAiInsightGroupKey,
 } from '@/lib/nutrition/ai-insight-integrity';
+import { sanitizeNutritionDailySummaryUniqueness } from '@/lib/nutrition/daily-summary-uniqueness';
 import { summarizeNutritionRawDayEnergy } from '@/lib/nutrition/day-energy';
 import {
   isNutritionFoodItemStructurallyValid,
@@ -21,6 +22,11 @@ import { sanitizeNutritionNutrientSummaryIntegrity } from '@/lib/nutrition/nutri
 import { sanitizeNutritionNutrientSummaryUniqueness } from '@/lib/nutrition/nutrient-summary-uniqueness';
 import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
+import {
+  nutritionRawIdentityConflictDates,
+  nutritionRawIdentityHasConflictInWindow,
+  sanitizeNutritionRawIdentity,
+} from '@/lib/nutrition/raw-identity-integrity';
 import {
   nutritionComparableProgressPercent,
   nutritionDisplayDelta,
@@ -1079,6 +1085,276 @@ test('Vida nunca asciende un partial a complete por su cuenta', () => {
 
   assert.equal(result.rows[0]?.sourceCoverage, 'partial');
   assert.equal(result.downgradedRowCount, 0);
+});
+
+test('identidad raw válida conserva Meals y Food Items', () => {
+  const result = sanitizeNutritionRawIdentity(
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [{ mealId: 'm1', foodItemId: 'f1', status: 'active' }],
+  );
+
+  assert.equal(result.mealRows.length, 1);
+  assert.equal(result.foodItemRows.length, 1);
+  assert.equal(result.duplicateMealIdCount, 0);
+  assert.equal(result.duplicateFoodItemIdCount, 0);
+  assert.equal(result.orphanFoodItemCount, 0);
+});
+
+test('mealId duplicado se excluye y marca su fecha como conflicto raw', () => {
+  const meals = [
+    { mealId: 'm1', date: '2026-10-05', status: 'active' },
+    { mealId: 'm1', date: '2026-10-05', status: 'active' },
+  ];
+  const result = sanitizeNutritionRawIdentity(
+    meals,
+    [{ mealId: 'm1', foodItemId: 'f1', status: 'active' }],
+  );
+  const dates = nutritionRawIdentityConflictDates(result, meals);
+
+  assert.equal(result.mealRows.length, 0);
+  assert.equal(result.foodItemRows.length, 0);
+  assert.equal(result.duplicateMealIdCount, 1);
+  assert.equal(result.orphanFoodItemCount, 1);
+  assert.equal(dates.has('2026-10-05'), true);
+  assert.equal(
+    nutritionRawIdentityHasConflictInWindow(
+      result,
+      meals,
+      '2026-10-01',
+      '2026-10-06',
+    ),
+    true,
+  );
+});
+
+test('foodItemId duplicado no se suma dos veces y conserva la comida padre', () => {
+  const meals = [{ mealId: 'm1', date: '2026-10-05', status: 'active' }];
+  const result = sanitizeNutritionRawIdentity(
+    meals,
+    [
+      { mealId: 'm1', foodItemId: 'f1', status: 'active' },
+      { mealId: 'm1', foodItemId: 'f1', status: 'active' },
+    ],
+  );
+
+  assert.equal(result.mealRows.length, 1);
+  assert.equal(result.foodItemRows.length, 0);
+  assert.equal(result.duplicateFoodItemIdCount, 1);
+  assert.equal(
+    nutritionRawIdentityConflictDates(result, meals).has('2026-10-05'),
+    true,
+  );
+});
+
+test('Food Item orphan se excluye sin inventar una fecha inexistente', () => {
+  const meals = [{ mealId: 'm1', date: '2026-10-05', status: 'active' }];
+  const result = sanitizeNutritionRawIdentity(
+    meals,
+    [{ mealId: 'missing', foodItemId: 'f1', status: 'active' }],
+  );
+
+  assert.equal(result.foodItemRows.length, 0);
+  assert.equal(result.orphanFoodItemCount, 1);
+  assert.equal(nutritionRawIdentityConflictDates(result, meals).size, 0);
+});
+
+test('Daily Summary duplicado suprime ambas filas de la fecha ambigua', () => {
+  const result = sanitizeNutritionDailySummaryUniqueness(
+    [
+      { date: '2026-10-05', energyKcal: 1000 },
+      { date: '2026-10-05', energyKcal: 1200 },
+      { date: '2026-10-04', energyKcal: 900 },
+    ],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result.duplicateDateCount, 1);
+  assert.equal(result.duplicateRowCount, 2);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0]?.date, '2026-10-04');
+});
+
+test('Daily Summary duplicado fuera de la ventana no contamina la consulta', () => {
+  const result = sanitizeNutritionDailySummaryUniqueness(
+    [
+      { date: '2026-09-01', energyKcal: 1000 },
+      { date: '2026-09-01', energyKcal: 1200 },
+      { date: '2026-10-05', energyKcal: 900 },
+    ],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result.duplicateDateCount, 0);
+  assert.equal(result.rows.length, 3);
+});
+
+test('Daily Summary duplicado puede reconstruirse desde autoridad raw', () => {
+  const sanitized = sanitizeNutritionDailySummaryUniqueness(
+    [
+      { date: '2026-10-05', energyKcal: 1000 },
+      { date: '2026-10-05', energyKcal: 1200 },
+    ],
+    '2026-10-05',
+    '2026-10-05',
+  );
+  const rawDays = buildNutritionRawDayFacts(
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [
+      {
+        mealId: 'm1',
+        foodItemId: 'f1',
+        status: 'active',
+        energyKcal: 700,
+        confidence: 'high',
+      },
+    ],
+    [],
+    '2026-10-05',
+  );
+  assert.equal(sanitized.rows.length, 0);
+  const history = reconcileNutritionHistoryWithRaw(
+    [],
+    [],
+    rawDays,
+    '2026-10-05',
+    '2026-10-06',
+  );
+
+  assert.equal(history.length, 1);
+  assert.equal(history[0]?.energyKcal, 700);
+  assert.equal(history[0]?.energyCoverage, 'complete');
+});
+
+test('comida raw rechazada degrada cobertura aunque no tenga items utilizables', () => {
+  const rawDays = buildNutritionRawDayFacts(
+    [],
+    [],
+    [],
+    '2026-10-05',
+    [{ mealId: 'dup', date: '2026-10-05', status: 'active' }],
+  );
+  const day = rawDays.get('2026-10-05');
+
+  assert.ok(day);
+  assert.equal(day.unknownContributionCount, 1);
+  assert.equal(day.energy.coverage, 'none');
+  assert.equal(day.energy.totalItemCount, 1);
+});
+
+test('item inválido no activo no degrada cobertura raw', () => {
+  const rawDays = buildNutritionRawDayFacts(
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [
+      {
+        mealId: 'm1',
+        foodItemId: 'f1',
+        status: 'active',
+        energyKcal: 500,
+        confidence: 'high',
+      },
+    ],
+    [{ mealId: 'm1', foodItemId: 'old', status: 'void' }],
+    '2026-10-05',
+  );
+  const day = rawDays.get('2026-10-05');
+
+  assert.ok(day);
+  assert.equal(day.unknownContributionCount, 0);
+  assert.equal(day.energy.coverage, 'complete');
+});
+
+test('Daily Summary duplicado dentro de ventana vuelve no verificable al AI Insight', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '7d',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [
+        {
+          mealId: 'm1',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:00:00-03:00',
+        },
+      ],
+      foodItems: [],
+      dailySummary: [
+        { date: '2026-10-05', updatedAt: '2026-10-05T21:00:00-03:00' },
+        { date: '2026-10-05', updatedAt: '2026-10-05T21:01:00-03:00' },
+      ],
+      nutrientSummary: [],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'unverifiable');
+});
+
+test('Daily Summary duplicado fuera de ventana no invalida el AI Insight', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '7d',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [
+        {
+          mealId: 'm1',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:00:00-03:00',
+        },
+      ],
+      foodItems: [],
+      dailySummary: [
+        { date: '2026-09-01', updatedAt: '2026-10-06T13:00:00-03:00' },
+        { date: '2026-09-01', updatedAt: '2026-10-06T13:01:00-03:00' },
+      ],
+      nutrientSummary: [],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'current');
+});
+
+test('mealId duplicado dentro de ventana vuelve no verificable al AI Insight', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '7d',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [
+        {
+          mealId: 'm1',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:00:00-03:00',
+        },
+        {
+          mealId: 'm1',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:01:00-03:00',
+        },
+      ],
+      foodItems: [],
+      dailySummary: [],
+      nutrientSummary: [],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'unverifiable');
 });
 
 test('Nutrition V2 exige un spreadsheet dedicado y no cae al Sheet general', () => {
