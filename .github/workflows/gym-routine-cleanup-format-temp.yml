@@ -1,0 +1,40 @@
+name: Temp format Gym routine cleanup
+
+on:
+  push:
+    branches:
+      - tmp/gym-routine-cleanup-format-20261006
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: tmp/gym-routine-cleanup-format-20261006
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format Gym routine cleanup
+        run: >
+          npx prettier --write
+          components/gym/GymDashboard.module.scss
+          components/gym/GymDashboard.tsx
+          components/gym/GymRoutineTabs.tsx
+          components/gym/GymWeeklyCardio.module.scss
+          tests/gym-dashboard.test.ts
+          tests/gym-ux-navigation.test.ts
+      - name: Commit formatting and remove temp workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/gym/GymDashboard.module.scss components/gym/GymDashboard.tsx components/gym/GymRoutineTabs.tsx components/gym/GymWeeklyCardio.module.scss tests/gym-dashboard.test.ts tests/gym-ux-navigation.test.ts
+          git rm .github/workflows/gym-routine-cleanup-format-temp.yml
+          git commit -m "Format Gym routine cleanup"
+          git push origin HEAD:tmp/gym-routine-cleanup-format-20261006
