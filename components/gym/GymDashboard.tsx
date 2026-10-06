@@ -206,8 +206,6 @@ export function GymRoutineDashboardView({ data }: { data: GymDashboardData }) {
           />
         </Card>
       )}
-
-      
     </div>
   );
 }
@@ -288,7 +286,6 @@ export function GymProgressDashboardView({ data }: { data: GymDashboardData }) {
       </Card>
 
       <MonthlyReviewCard domain="gym" compact />
-      
     </div>
   );
 }
@@ -307,7 +304,6 @@ export function GymCardioDashboardView({ data }: { data: GymDashboardData }) {
           />
         </Card>
       )}
-      
     </div>
   );
 }

@@ -91,7 +91,6 @@ test('Gym mantiene revisión mensual e historial como acciones secundarias', () 
   assert.match(review, /compact\?: boolean/);
 });
 
-
 test('Gym Rutina separa complementos por función y omite cardio/metadatos', () => {
   const routine = source('components/gym/GymRoutineTabs.tsx');
 

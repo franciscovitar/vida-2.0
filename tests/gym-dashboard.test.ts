@@ -499,7 +499,6 @@ test('9D-4. pestañas vacías son un estado real y no un mock', async () => {
   assert.match(snapshot.notice ?? '', /todavía no hay sesiones/i);
 });
 
-
 test('9D-1b. notas del día no se convierten en ejercicios ni warnings', () => {
   const content = page([
     textBlock('heading_1', 'Rutina de pesas', 'weights-h'),
