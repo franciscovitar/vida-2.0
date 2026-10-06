@@ -197,8 +197,11 @@ test('PI-V3. Fail closed: sin proyectos simulados ni secciones pobladas', () => 
     'Projects Intelligence no está configurado. Sin datos disponibles.',
   );
   assert.deepEqual(view.focus, []);
+  assert.deepEqual(view.upcoming, []);
   assert.deepEqual(view.waiting, []);
   assert.deepEqual(view.blocked, []);
+  assert.deepEqual(view.completed, []);
+  assert.deepEqual(view.cancelled, []);
   assert.deepEqual(view.avoidForNow, []);
   assert.deepEqual(view.history, []);
 });
@@ -225,8 +228,11 @@ test('PI-V3c. empty es estado canónico utilizable y llega al estado vacío inte
   assert.equal(view.isEmpty, true);
   assert.equal(view.unavailableMessage, null);
   assert.deepEqual(view.focus, []);
+  assert.deepEqual(view.upcoming, []);
   assert.deepEqual(view.waiting, []);
   assert.deepEqual(view.blocked, []);
+  assert.deepEqual(view.completed, []);
+  assert.deepEqual(view.cancelled, []);
   assert.deepEqual(view.avoidForNow, []);
   assert.deepEqual(view.history, []);
 });
@@ -320,11 +326,13 @@ test('PI-V6. En espera separa próximos sin iniciar de proyectos ya avanzados pa
   );
 });
 
-test('PI-V7. Completado y Cancelado van al historial, no al portfolio activo', () => {
+test('PI-V7. Terminados y cancelados quedan separados además del historial compatible', () => {
   const done = project({ id: 'proj-done', status: 'Completado' });
   const cancelled = project({ id: 'proj-cancelled', status: 'Cancelado' });
   const view = buildProjectsIntelligenceView(dataFixture([done, cancelled]));
 
+  assert.deepEqual(view.completed.map((card) => card.id), ['proj-done']);
+  assert.deepEqual(view.cancelled.map((card) => card.id), ['proj-cancelled']);
   assert.deepEqual(view.history.map((card) => card.id).sort(), ['proj-cancelled', 'proj-done']);
   assert.equal(view.focus.length, 0);
   assert.equal(view.waiting.length, 0);

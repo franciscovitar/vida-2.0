@@ -250,6 +250,8 @@ export interface ProjectsIntelligenceView {
   /** En espera con avance real: construcción pausada, queda para uso/revisión bajo Ver más. */
   waiting: ProjectCardView[];
   blocked: ProjectCardView[];
+  completed: ProjectCardView[];
+  cancelled: ProjectCardView[];
   avoidForNow: ProjectCardView[];
   history: ProjectCardView[];
 }
@@ -287,6 +289,8 @@ export function buildProjectsIntelligenceView(
         !(card.progress.measurable && card.progress.percent === 0),
     ),
     blocked: cards.filter((card) => card.status === 'Bloqueado'),
+    completed: cards.filter((card) => card.status === 'Completado'),
+    cancelled: cards.filter((card) => card.status === 'Cancelado'),
     avoidForNow: cards.filter(
       (card) =>
         card.pi.recommendation === 'Esperar' || card.pi.recommendation === 'Cancelar propuesto',
