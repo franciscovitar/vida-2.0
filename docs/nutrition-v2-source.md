@@ -6,6 +6,13 @@
 - Ingesta cuantitativa real: Google Sheet dedicado de Nutrition Intelligence.
 - Vida Web: vista derivada; no duplica comidas, alimentos del catálogo ni objetivos.
 
+La navegación primaria separa responsabilidades:
+
+- `/dieta` — **Hoy**: estado del día, energía/macros, registro y como máximo una señal persistida prioritaria;
+- `/dieta/tendencias` — **Tendencias**: ventanas 7D / 28D / 90D, con 28D por defecto;
+- `/dieta/nutrientes` — **Nutrientes**: patrones longitudinales, cobertura y referencias, también 7D / 28D / 90D con 28D por defecto;
+- `/dieta/plan` — **Plan**: contenido operativo read-only desde Notion.
+
 El spreadsheet se resuelve solo en servidor con `GOOGLE_NUTRITION_SPREADSHEET_ID` junto con la cuenta de servicio existente. El código no contiene el ID real y no hace fallback al Sheet general de hábitos ni al de Gimnasio.
 
 ## Tabs leídos por Vida
@@ -26,8 +33,10 @@ El spreadsheet se resuelve solo en servidor con `GOOGLE_NUTRITION_SPREADSHEET_ID
 
 La UI muestra proteína, carbohidratos, grasas y fibra.
 
-- con cobertura completa: el valor puede mostrarse como total del día;
+- con cobertura completa: el valor canónico tiene prioridad;
 - con cobertura parcial: Vida suma únicamente valores conocidos y los etiqueta como `conocidos/parcial`;
+- el estimador heurístico es un fallback acotado para macros canónicos incompletos, no un reemplazo global;
+- todo fallback aproximado conserva `approximate` y `estimateQuality`;
 - desconocido nunca se convierte en cero.
 
 Los objetivos activos de `Targets` tienen prioridad para energía/macros. En particular, la meta personal activa de fibra prevalece visualmente sobre una referencia dietaria genérica de `Nutrient Targets`.
@@ -35,6 +44,16 @@ Los objetivos activos de `Targets` tienen prioridad para energía/macros. En par
 ## Micronutrientes
 
 La pantalla contiene un catálogo visual amplio de vitaminas, minerales y otros nutrientes. Ese catálogo define nombres/unidades de presentación, no cantidades personales ni recomendaciones.
+
+La vista principal de Nutrientes es longitudinal. Para cada ventana:
+
+- sólo los días con `sourceCoverage = complete` entran en promedios comparables;
+- los días parciales siguen visibles como cobertura, pero no reducen artificialmente el promedio;
+- una señal de atención requiere al menos 3 días evaluables, al menos 2 días con la señal y presencia en al menos 50% de los días evaluables;
+- las referencias se resuelven por fecha desde `Nutrient Targets`, por lo que un cambio de decisión dentro del período no reescribe retrospectivamente los días anteriores;
+- una RDA/AI se interpreta como adecuación, un UL como límite superior y un rango como rango; una misma decisión puede contener adecuación + UL y ambos extremos se evalúan;
+- si `Nutrient Targets` no está disponible, Vida no adivina la semántica a partir de una copia de `targetAmount` en el resumen;
+- estas señales describen ingesta estimada repetida y nunca diagnostican deficiencia, toxicidad o estado clínico.
 
 `Nutrient Targets` aporta la referencia activa aun cuando todavía no exista consumo cuantificado. Vida resuelve por `nutrientKey` la fila activa más reciente cuyo rango de vigencia incluya el día actual.
 
@@ -106,13 +125,15 @@ La evidencia debe distinguir hechos del store, estimaciones y recomendaciones. N
 
 La vista toma ideas de trackers nutricionales de alta densidad informativa (energía, macros, reportes de micronutrientes y tendencias), pero usa el sistema visual propio de Vida 2.0 y prioriza:
 
-1. lectura rápida del día;
-2. incertidumbre visible;
-3. tendencias de 7 días;
-4. micronutrientes por divulgación progresiva;
-5. referencias visibles aunque todavía falte consumo cuantificado;
-6. análisis IA separado de datos observados;
-7. mobile-first.
+1. **Hoy** como superficie operativa de baja carga, no como dashboard enciclopédico;
+2. incertidumbre visible y `unknown ≠ zero`;
+3. **Tendencias** longitudinales 7D / 28D / 90D, con 28D por defecto;
+4. **Nutrientes** longitudinales con promedios sólo sobre días comparables;
+5. semántica explícita de adecuación, rango y upper limit;
+6. una sola señal de mayor valor en Hoy; interpretación más amplia queda en períodos/revisiones;
+7. **Plan** separado de consumo real y conservando Notion como autoridad;
+8. freshness visible cuando el resumen derivado queda detrás del intake crudo;
+9. mobile-first.
 
 ## Escrituras
 
