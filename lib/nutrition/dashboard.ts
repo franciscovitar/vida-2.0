@@ -3,6 +3,7 @@ import 'server-only';
 import type { PlainCell } from '@/lib/data/plain';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 
+import { summarizeNutritionRawDayEnergy } from './day-energy';
 import { deriveNutritionFreshness } from './freshness';
 import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
@@ -563,10 +564,9 @@ export async function loadNutritionDashboardData(
   const targetRows = rowsFrom(targetsResult);
   const currentDate = cordobaToday();
   const target = chooseTarget(targetRows, today, currentDate);
-  const history = parseDailyRows(dailyRows, targetRows, currentDate)
+  const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate)
     .filter((row) => row.date <= today)
     .slice(-90);
-  const todayDaily = history.find((row) => row.date === today) ?? null;
   const todayMealIds = new Set(
     activeRows(mealRows)
       .filter((row) => stringValue(row.date) === today)
@@ -584,13 +584,15 @@ export async function loadNutritionDashboardData(
     const mealId = stringValue(row.mealId);
     return Boolean(mealId && todayMealIds.has(mealId));
   });
+  const hasRawToday = activeTodayMeals.length > 0 || todayItems.length > 0;
+  const rawTodayEnergy = summarizeNutritionRawDayEnergy(todayItems);
   const todayDailyRow = dailyRows.find((row) => stringValue(row.date) === today) ?? null;
   const rawAsOf = latestTimestamp([...activeTodayMeals, ...todayItems]);
   const summaryAsOf = todayDailyRow ? latestTimestamp([todayDailyRow], ['updatedAt']) : null;
   const freshness = deriveNutritionFreshness({
     dataDate: today,
     currentDate,
-    hasRawIntake: activeTodayMeals.length > 0 || todayItems.length > 0,
+    hasRawIntake: hasRawToday,
     rawAsOf,
     summaryAsOf,
   });
@@ -625,6 +627,30 @@ export async function loadNutritionDashboardData(
       items: todayItems,
     }),
   ];
+
+  const rawMacroCoverage: NutritionCoverage =
+    macros.every((macro) => macro.coverage === 'complete')
+      ? 'complete'
+      : macros.every((macro) => macro.coverage === 'none')
+        ? 'none'
+        : 'partial';
+
+  const history = baseHistory.map((point) =>
+    point.date === today && hasRawToday
+      ? {
+          ...point,
+          energyKcal: rawTodayEnergy.amount,
+          energyKcalLow: rawTodayEnergy.low,
+          energyKcalHigh: rawTodayEnergy.high,
+          estimateQuality: rawTodayEnergy.quality,
+          energyCoverage: rawTodayEnergy.coverage,
+          macroCoverage: rawMacroCoverage,
+          trackedMealCount: activeTodayMeals.length,
+          lowConfidenceItemCount: rawTodayEnergy.lowConfidenceItemCount,
+        }
+      : point,
+  );
+  const todayDaily = history.find((row) => row.date === today) ?? null;
 
   const personalFiberTarget = target?.fiberGrams ?? null;
   const nutrients = buildNutrients(nutrientResult, nutrientTargetsResult, todayItems, today).map(

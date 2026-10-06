@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { summarizeNutritionRawDayEnergy } from '@/lib/nutrition/day-energy';
 import {
   isNutritionFoodItemStructurallyValid,
   partitionNutritionFoodItemRows,
@@ -146,6 +147,62 @@ test('una fila histórica inválida no borra las filas válidas actuales', () =>
   assert.equal(partition.valid[0], current);
   assert.equal(partition.invalid.length, 1);
   assert.equal(partition.invalid[0], malformedHistorical);
+});
+
+test('energía cruda completa prevalece con suma reproducible desde Food Items', () => {
+  assert.deepEqual(
+    summarizeNutritionRawDayEnergy([
+      { energyKcal: 400, confidence: 'high' },
+      { energyKcal: 600, energyKcalLow: 550, energyKcalHigh: 650, confidence: 'high' },
+    ]),
+    {
+      amount: 1000,
+      low: 950,
+      high: 1050,
+      coverage: 'complete',
+      quality: 'high',
+      quantifiedItemCount: 2,
+      totalItemCount: 2,
+      lowConfidenceItemCount: 0,
+    },
+  );
+});
+
+test('un item energético desconocido vuelve parcial al día sin inventar su aporte', () => {
+  assert.deepEqual(
+    summarizeNutritionRawDayEnergy([
+      { energyKcal: 400, confidence: 'high' },
+      { energyKcal: null, energyKcalLow: null, energyKcalHigh: null, confidence: 'low' },
+    ]),
+    {
+      amount: null,
+      low: 400,
+      high: 400,
+      coverage: 'partial',
+      quality: 'high',
+      quantifiedItemCount: 1,
+      totalItemCount: 2,
+      lowConfidenceItemCount: 1,
+    },
+  );
+});
+
+test('un rango energético completo puede ser autoridad sin fabricar valor central', () => {
+  assert.deepEqual(
+    summarizeNutritionRawDayEnergy([
+      { energyKcal: null, energyKcalLow: 500, energyKcalHigh: 700, confidence: 'medium' },
+    ]),
+    {
+      amount: null,
+      low: 500,
+      high: 700,
+      coverage: 'complete',
+      quality: 'medium',
+      quantifiedItemCount: 1,
+      totalItemCount: 1,
+      lowConfidenceItemCount: 0,
+    },
+  );
 });
 
 test('unknown nutricional permanece unknown en la capa de presentación', () => {
