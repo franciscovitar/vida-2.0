@@ -338,7 +338,9 @@ test('PI-V7. Terminados y cancelados quedan separados además del historial comp
   assert.equal(view.waiting.length, 0);
 });
 
-test('PI-V8. Calidad del portfolio: conteos explícitos y mensaje calmo cuando todo está en cero', () => {
+test(
+  'PI-V8. Calidad del portfolio: conteos explícitos y mensaje calmo cuando todo está en cero',
+  () => {
   const withIssues = dataFixture([project()], {
     quality: {
       missingDefinitionOfDone: 2,
@@ -359,19 +361,25 @@ test('PI-V8. Calidad del portfolio: conteos explícitos y mensaje calmo cuando t
   assert.ok(!('blocked' in rowsByKey));
 
   const clean = buildProjectsIntelligenceView(dataFixture([project()]));
-  assert.equal(clean.qualityAllClear, true);
-});
+    assert.equal(clean.qualityAllClear, true);
+  },
+);
 
-test('PI-V9. Evitar por ahora solo incluye recomendaciones persistidas Esperar/Cancelar propuesto', () => {
+test(
+  'PI-V9. Evitar por ahora solo incluye recomendaciones persistidas Esperar/Cancelar propuesto',
+  () => {
   const wait = project({ id: 'proj-wait', piRecommendation: 'Esperar' });
   const cancelProposed = project({ id: 'proj-cancel', piRecommendation: 'Cancelar propuesto' });
   const keepActive = project({ id: 'proj-keep', piRecommendation: 'Mantener activo' });
   const view = buildProjectsIntelligenceView(dataFixture([wait, cancelProposed, keepActive]));
 
-  assert.deepEqual(view.avoidForNow.map((card) => card.id).sort(), ['proj-cancel', 'proj-wait']);
-});
+    assert.deepEqual(view.avoidForNow.map((card) => card.id).sort(), ['proj-cancel', 'proj-wait']);
+  },
+);
 
-test('PI-V10. Hitos: orden ascendente solo si todos declaran `order`, si no orden de origen', () => {
+test(
+  'PI-V10. Hitos: orden ascendente solo si todos declaran `order`, si no orden de origen',
+  () => {
   const partialOrder = [
     milestone({ id: 'm1', name: 'Primero en origen', order: null }),
     milestone({ id: 'm2', name: 'Segundo en origen', order: 1 }),
@@ -396,7 +404,8 @@ test('PI-V10. Hitos: orden ascendente solo si todos declaran `order`, si no orde
     fullCard?.milestones.map((m) => m.id),
     ['m4', 'm3'],
   );
-});
+}  },
+);
 
 test('PI-V11. La card compacta prioriza Resultado esperado sin perder el DoD de detalle', () => {
   const card = buildProjectCardView(
