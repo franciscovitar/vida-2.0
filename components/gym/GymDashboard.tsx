@@ -169,7 +169,12 @@ export function GymRoutineDashboardView({ data }: { data: GymDashboardData }) {
             </details>
           ) : null}
 
-          <GymRoutineTabs routine={data.routine} />
+          <GymRoutineTabs
+            routine={data.routine}
+            sessions={data.sessions ?? []}
+            summaries={data.sessionSummaries}
+            today={data.targetDate}
+          />
         </Card>
       ) : data.documentaryPage ? (
         <Card>

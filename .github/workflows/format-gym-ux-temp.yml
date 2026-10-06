@@ -26,8 +26,10 @@ jobs:
           npx prettier --write
           components/gym/GymDashboard.module.scss
           components/gym/GymDashboard.tsx
-          components/gym/GymSummaryOverview.tsx
-          docs/gym-v2-source.md
+          components/gym/GymRoutineTabs.tsx
+          components/gym/GymV2Overview.tsx
+          components/gym/GymWeeklyCardio.tsx
+          tests/gym-ux-navigation.test.ts
       - name: Commit formatting
         run: |
           if git diff --quiet; then
@@ -36,6 +38,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add components/gym/GymDashboard.module.scss components/gym/GymDashboard.tsx components/gym/GymSummaryOverview.tsx docs/gym-v2-source.md
+          git add components/gym/GymDashboard.module.scss components/gym/GymDashboard.tsx components/gym/GymRoutineTabs.tsx components/gym/GymV2Overview.tsx components/gym/GymWeeklyCardio.tsx tests/gym-ux-navigation.test.ts
           git commit -m "Format Gym UX files"
           git push origin HEAD:tmp/gym-ux-format-20261006

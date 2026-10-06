@@ -37,3 +37,34 @@ test('Gym mantiene la carga compartida como lectura derivada y sin nueva escritu
   assert.match(loader, /loadGymWeeklyCardio/);
   assert.equal(/create|update|delete|write/i.test(loader), false);
 });
+
+
+test('Gym Rutina acerca la última ejecución comparable al ejercicio prescripto', () => {
+  const routine = source('components/gym/GymRoutineTabs.tsx');
+  const dashboard = source('components/gym/GymDashboard.tsx');
+
+  assert.match(routine, /Última sesión comparable/);
+  assert.match(routine, /Anterior/);
+  assert.match(routine, /completed === true/);
+  assert.match(dashboard, /sessions=\{data\.sessions \?\? \[\]\}/);
+  assert.match(dashboard, /summaries=\{data\.sessionSummaries\}/);
+});
+
+test('Gym Progreso no repite el resumen ni la tabla completa de semana anterior', () => {
+  const progress = source('components/gym/GymV2Overview.tsx');
+
+  assert.doesNotMatch(progress, /GymPreviousWeek/);
+  assert.doesNotMatch(progress, /gym-v2-insights-title/);
+  assert.match(progress, /gym-v2-exercises-title/);
+  assert.match(progress, /gym-v2-benchmark-title/);
+});
+
+test('Gym Cardio prioriza el plan real antes de la equivalencia MET-min', () => {
+  const cardio = source('components/gym/GymWeeklyCardio.tsx');
+  const planIndex = cardio.indexOf('Tu plan real');
+  const equivalentIndex = cardio.indexOf('Equivalencia acumulada');
+
+  assert.ok(planIndex >= 0);
+  assert.ok(equivalentIndex >= 0);
+  assert.ok(planIndex < equivalentIndex);
+});
