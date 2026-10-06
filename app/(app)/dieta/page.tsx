@@ -10,6 +10,7 @@ import { NutritionV2Overview } from '@/components/nutrition/NutritionV2Overview'
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { loadApproximateDayMacros } from '@/lib/nutrition/approximate-day-macros';
 import { cordobaToday, loadNutritionDashboardData } from '@/lib/nutrition/dashboard';
+import { selectNutritionMacros } from '@/lib/nutrition/macro-selection';
 
 export const metadata: Metadata = { title: 'Nutrición' };
 export const dynamic = 'force-dynamic';
@@ -36,7 +37,7 @@ export default async function DietaPage({
   const approximateMacros = await loadApproximateDayMacros(selectedDate, rawData.target);
   const data = {
     ...rawData,
-    macros: approximateMacros.length > 0 ? approximateMacros : rawData.macros,
+    macros: selectNutritionMacros(rawData.macros, approximateMacros),
   };
 
   return (

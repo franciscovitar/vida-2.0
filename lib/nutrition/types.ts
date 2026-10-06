@@ -2,6 +2,14 @@ import type { SheetReadCode } from '@/lib/google/errors';
 
 export type NutritionCoverage = 'complete' | 'partial' | 'none' | 'unknown';
 export type NutritionEstimateQuality = 'high' | 'medium' | 'low' | 'mixed' | 'unknown';
+export type NutritionNutrientTargetSemantics =
+  | 'adequacy'
+  | 'range'
+  | 'upper-limit'
+  | 'point'
+  | 'none'
+  | 'unknown';
+export type NutritionFreshness = 'current' | 'stale' | 'historical' | 'unknown';
 export type NutritionInsightCategory =
   'antioxidants' | 'anti-inflammatory' | 'improvement' | 'pattern';
 export type NutritionInsightTone = 'positive' | 'watch' | 'neutral';
@@ -66,6 +74,8 @@ export interface NutritionNutrientValue {
   target: number | null;
   lowerTarget: number | null;
   upperTarget: number | null;
+  targetBasis: string | null;
+  targetSemantics: NutritionNutrientTargetSemantics;
   confidence: 'high' | 'medium' | 'low' | 'mixed' | 'unknown';
   sourceCoverage: NutritionCoverage;
   notes: string | null;
@@ -88,6 +98,9 @@ export interface NutritionDashboardData {
     status: 'ready' | 'partial' | 'unavailable';
     code: SheetReadCode | null;
     label: string;
+    freshness: NutritionFreshness;
+    asOf: string | null;
+    rawAsOf: string | null;
   };
   today: string;
   target: NutritionTarget | null;

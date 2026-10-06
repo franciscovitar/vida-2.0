@@ -16,6 +16,7 @@ import {
   nutritionDisplayDelta,
   nutritionDisplayPointEstimate,
 } from '@/lib/nutrition/presentation';
+import { nutritionProgressTarget } from '@/lib/nutrition/target-semantics';
 import type {
   NutritionAiInsight,
   NutritionDashboardData,
@@ -108,8 +109,51 @@ function MacroBar({ macro }: { macro: NutritionMacroProgress }) {
 }
 
 function nutrientProgress(nutrient: NutritionNutrientValue): number | null {
-  const display = nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh);
-  return percentage(display.value, nutrient.target);
+  const display = nutritionDisplayPointEstimate(
+    nutrient.amount,
+    nutrient.amountLow,
+    nutrient.amountHigh,
+  );
+  const progressTarget = nutritionProgressTarget({
+    target: nutrient.target,
+    lowerTarget: nutrient.lowerTarget,
+    upperTarget: nutrient.upperTarget,
+    basis: nutrient.targetBasis,
+  });
+  return percentage(display.value, progressTarget);
+}
+
+function nutrientReferenceLabel(nutrient: NutritionNutrientValue): string {
+  const formatTarget = (value: number) =>
+    `${formatNumber(value, value < 10 ? 1 : 0)} ${nutrient.unit}`;
+
+  if (nutrient.targetSemantics === 'upper-limit') {
+    const limit = nutrient.upperTarget ?? nutrient.target;
+    return limit === null ? 'Límite registrado' : `Límite ≤ ${formatTarget(limit)}`;
+  }
+
+  if (nutrient.targetSemantics === 'range') {
+    if (nutrient.lowerTarget !== null && nutrient.upperTarget !== null) {
+      return `Referencia ${formatTarget(nutrient.lowerTarget)}–${formatTarget(
+        nutrient.upperTarget,
+      )}`;
+    }
+    return 'Rango de referencia';
+  }
+
+  if (nutrient.targetSemantics === 'adequacy') {
+    const target = nutrient.target ?? nutrient.lowerTarget;
+    if (target === null) return 'Referencia de adecuación';
+    const limit =
+      nutrient.upperTarget !== null ? ` · límite ${formatTarget(nutrient.upperTarget)}` : '';
+    return `Referencia ≥ ${formatTarget(target)}${limit}`;
+  }
+
+  if (nutrient.targetSemantics === 'point' && nutrient.target !== null) {
+    return `Objetivo ${formatTarget(nutrient.target)}`;
+  }
+
+  return coverageLabel(nutrient.sourceCoverage);
 }
 
 function NutrientRow({ nutrient }: { nutrient: NutritionNutrientValue }) {
@@ -132,23 +176,15 @@ function NutrientRow({ nutrient }: { nutrient: NutritionNutrientValue }) {
         </span>
       </div>
       <div className={styles['nutrient-progress']}>
-        <div className={styles.track} aria-hidden="true">
-          <span className={styles.fill} style={style} />
-        </div>
+        {progress !== null ? (
+          <div className={styles.track} aria-hidden="true">
+            <span className={styles.fill} style={style} />
+          </div>
+        ) : null}
         <small>
-          {display.value === null
-            ? nutrient.target === null
-              ? coverageLabel(nutrient.sourceCoverage)
-              : `Referencia ${formatNumber(
-                  nutrient.target,
-                  nutrient.target < 10 ? 1 : 0,
-                )} ${nutrient.unit}`
-            : nutrient.target === null
-              ? coverageLabel(nutrient.sourceCoverage)
-              : `${progress}% de ${formatNumber(
-                  nutrient.target,
-                  nutrient.target < 10 ? 1 : 0,
-                )} ${nutrient.unit}`}
+          {display.value !== null && progress !== null
+            ? `${progress}% · ${nutrientReferenceLabel(nutrient)}`
+            : nutrientReferenceLabel(nutrient)}
         </small>
       </div>
     </div>
@@ -220,10 +256,16 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
     (nutrient) =>
       nutritionDisplayPointEstimate(nutrient.amount, nutrient.amountLow, nutrient.amountHigh).value !== null,
   );
-  const targetedNutrients = data.nutrients.filter((nutrient) => nutrient.target !== null);
+  const targetedNutrients = data.nutrients.filter(
+    (nutrient) => nutrient.targetSemantics !== 'none' && nutrient.targetSemantics !== 'unknown',
+  );
   const highlighted = knownNutrients
     .slice()
-    .sort((a, b) => (nutrientProgress(a) ?? -1) - (nutrientProgress(b) ?? -1))
+    .sort(
+      (a, b) =>
+        (nutrientProgress(a) ?? Number.POSITIVE_INFINITY) -
+        (nutrientProgress(b) ?? Number.POSITIVE_INFINITY),
+    )
     .slice(0, 8);
   const groups = [
     ['vitamin', 'Vitaminas'],
@@ -260,9 +302,20 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
             longitudinal. Valores desconocidos siguen siendo desconocidos: no se rellenan huecos con
             ceros.
           </p>
-          <div className={styles['source-line']} data-status={data.source.status}>
+          <div
+            className={styles['source-line']}
+            data-status={data.source.status}
+            data-freshness={data.source.freshness}
+          >
             <ShieldCheck size={15} aria-hidden="true" />
-            <span>{data.source.label}</span>
+            <span>
+              {data.source.label}
+              {data.source.freshness === 'stale'
+                ? ' · resumen desactualizado'
+                : data.source.freshness === 'historical'
+                  ? ' · día histórico'
+                  : ''}
+            </span>
           </div>
         </div>
 
@@ -448,9 +501,9 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
                   })()}
                 </strong>
                 <small>
-                  {nutrient.target === null
-                    ? coverageLabel(nutrient.sourceCoverage)
-                    : `${nutrientProgress(nutrient)}% del objetivo`}
+                  {nutrientProgress(nutrient) === null
+                    ? nutrientReferenceLabel(nutrient)
+                    : `${nutrientProgress(nutrient)}% · ${nutrientReferenceLabel(nutrient)}`}
                 </small>
               </article>
             ))}

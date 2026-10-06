@@ -3,8 +3,10 @@ import 'server-only';
 import type { PlainCell } from '@/lib/data/plain';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 
+import { deriveNutritionFreshness } from './freshness';
 import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
+import { classifyNutritionTargetSemantics } from './target-semantics';
 import { readNutritionTabValues } from './sheets-read';
 import type {
   NutritionAiInsight,
@@ -100,6 +102,26 @@ function confidenceValue(value: PlainCell): 'high' | 'medium' | 'low' | 'mixed' 
 
 function activeRows(rows: readonly Row[]): Row[] {
   return rows.filter((row) => (stringValue(row.status)?.toLowerCase() ?? 'active') === 'active');
+}
+
+function latestTimestamp(
+  rows: readonly Row[],
+  fields: readonly string[] = ['updatedAt', 'createdAt', 'timestamp'],
+): string | null {
+  let latest: { raw: string; time: number } | null = null;
+
+  for (const row of rows) {
+    for (const field of fields) {
+      const raw = stringValue(row[field]);
+      if (!raw) continue;
+      const time = Date.parse(raw);
+      if (!Number.isFinite(time)) continue;
+      if (!latest || time > latest.time) latest = { raw, time };
+      break;
+    }
+  }
+
+  return latest?.raw ?? null;
 }
 
 function aggregateConfidence(
@@ -330,6 +352,16 @@ function buildNutrients(
     const upperTarget = numberValue(targetRow?.upperTarget ?? null);
     const targetUnit = stringValue(targetRow?.unit ?? null);
     const targetNotes = stringValue(targetRow?.notes ?? null);
+    const targetBasis = stringValue(targetRow?.basis ?? null);
+    const resolvedTarget = targetAmount ?? numberValue(row?.targetAmount ?? row?.target ?? null);
+    const resolvedLowerTarget = lowerTarget ?? numberValue(row?.lowerTarget ?? null);
+    const resolvedUpperTarget = upperTarget ?? numberValue(row?.upperTarget ?? null);
+    const targetSemantics = classifyNutritionTargetSemantics({
+      target: resolvedTarget,
+      lowerTarget: resolvedLowerTarget,
+      upperTarget: resolvedUpperTarget,
+      basis: targetBasis,
+    });
 
     if (row) {
       return {
@@ -340,9 +372,11 @@ function buildNutrients(
         amountLow: numberValue(row.amountLow),
         amountHigh: numberValue(row.amountHigh),
         unit: stringValue(row.unit) ?? targetUnit ?? catalog.unit,
-        target: targetAmount ?? numberValue(row.targetAmount ?? row.target),
-        lowerTarget: lowerTarget ?? numberValue(row.lowerTarget),
-        upperTarget: upperTarget ?? numberValue(row.upperTarget),
+        target: resolvedTarget,
+        lowerTarget: resolvedLowerTarget,
+        upperTarget: resolvedUpperTarget,
+        targetBasis,
+        targetSemantics,
         confidence: confidenceValue(row.confidence),
         sourceCoverage: coverageValue(row.sourceCoverage ?? row.coverage),
         notes: stringValue(row.notes) ?? targetNotes,
@@ -359,9 +393,11 @@ function buildNutrients(
         amountLow: null,
         amountHigh: null,
         unit: targetUnit ?? catalog.unit,
-        target: targetAmount,
-        lowerTarget,
-        upperTarget,
+        target: resolvedTarget,
+        lowerTarget: resolvedLowerTarget,
+        upperTarget: resolvedUpperTarget,
+        targetBasis,
+        targetSemantics,
         confidence: derived.amount === null ? 'unknown' : 'mixed',
         sourceCoverage: derived.coverage,
         notes:
@@ -381,9 +417,11 @@ function buildNutrients(
         amountLow: null,
         amountHigh: null,
         unit: targetUnit ?? catalog.unit,
-        target: targetAmount,
-        lowerTarget,
-        upperTarget,
+        target: resolvedTarget,
+        lowerTarget: resolvedLowerTarget,
+        upperTarget: resolvedUpperTarget,
+        targetBasis,
+        targetSemantics,
         confidence: derived.amount === null ? 'unknown' : 'mixed',
         sourceCoverage: derived.coverage,
         notes:
@@ -401,9 +439,11 @@ function buildNutrients(
       amountLow: null,
       amountHigh: null,
       unit: targetUnit ?? catalog.unit,
-      target: targetAmount,
-      lowerTarget,
-      upperTarget,
+      target: resolvedTarget,
+      lowerTarget: resolvedLowerTarget,
+      upperTarget: resolvedUpperTarget,
+      targetBasis,
+      targetSemantics,
       confidence: 'unknown',
       sourceCoverage: 'none',
       notes: targetNotes,
@@ -522,9 +562,20 @@ export async function loadNutritionDashboardData(
   }).length;
   const sourceStatus =
     invalidTodayItemCount > 0 && baseSourceStatus === 'ready' ? 'partial' : baseSourceStatus;
+  const activeTodayMeals = activeRows(mealRows).filter((row) => stringValue(row.date) === today);
   const todayItems = activeRows(itemPartition.valid).filter((row) => {
     const mealId = stringValue(row.mealId);
     return Boolean(mealId && todayMealIds.has(mealId));
+  });
+  const todayDailyRow = dailyRows.find((row) => stringValue(row.date) === today) ?? null;
+  const rawAsOf = latestTimestamp([...activeTodayMeals, ...todayItems]);
+  const summaryAsOf = todayDailyRow ? latestTimestamp([todayDailyRow], ['updatedAt']) : null;
+  const freshness = deriveNutritionFreshness({
+    dataDate: today,
+    currentDate: cordobaToday(),
+    hasRawIntake: activeTodayMeals.length > 0 || todayItems.length > 0,
+    rawAsOf,
+    summaryAsOf,
   });
 
   const macros: NutritionMacroProgress[] = [
@@ -562,7 +613,12 @@ export async function loadNutritionDashboardData(
   const nutrients = buildNutrients(nutrientResult, nutrientTargetsResult, todayItems, today).map(
     (nutrient) => {
       if (nutrient.key === 'fiber' && personalFiberTarget !== null) {
-        return { ...nutrient, target: personalFiberTarget };
+        return {
+          ...nutrient,
+          target: personalFiberTarget,
+          targetBasis: 'personal-target',
+          targetSemantics: 'point' as const,
+        };
       }
       return nutrient;
     },
@@ -578,6 +634,9 @@ export async function loadNutritionDashboardData(
           : sourceStatus === 'partial'
             ? 'Nutrition Intelligence · datos parciales'
             : 'Nutrition Intelligence · sin conexión',
+      freshness,
+      asOf: summaryAsOf,
+      rawAsOf,
     },
     today,
     target,
@@ -588,12 +647,9 @@ export async function loadNutritionDashboardData(
       coverage: todayDaily?.energyCoverage ?? 'none',
       quality: todayDaily?.estimateQuality ?? 'unknown',
       dayStatus:
-        stringValue(dailyRows.find((row) => stringValue(row.date) === today)?.dayStatus ?? null) ===
-        'closed'
+        stringValue(todayDailyRow?.dayStatus ?? null) === 'closed'
           ? 'closed'
-          : stringValue(
-                dailyRows.find((row) => stringValue(row.date) === today)?.dayStatus ?? null,
-              ) === 'open'
+          : stringValue(todayDailyRow?.dayStatus ?? null) === 'open'
             ? 'open'
             : 'unknown',
       trackedMealCount: todayDaily?.trackedMealCount ?? 0,
