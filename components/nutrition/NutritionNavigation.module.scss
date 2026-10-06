@@ -1,0 +1,21 @@
+.navigation {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+}
+
+.link {
+  flex: 0 0 auto;
+  padding: 0.72rem 0.85rem;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.link[aria-current='page'] {
+  border-bottom-color: var(--c-health);
+  color: var(--text);
+}

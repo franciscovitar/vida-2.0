@@ -2,10 +2,9 @@ import { UtensilsCrossed } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import pageStyles from '@/app/(app)/page.module.scss';
-import { MonthlyReviewCard } from '@/components/domain/MonthlyReviewCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { NutritionDaySelector } from '@/components/nutrition/NutritionDaySelector';
-import { NutritionPlanSection } from '@/components/nutrition/NutritionPlanSection';
+import { NutritionNavigation } from '@/components/nutrition/NutritionNavigation';
 import { NutritionV2Overview } from '@/components/nutrition/NutritionV2Overview';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { loadApproximateDayMacros } from '@/lib/nutrition/approximate-day-macros';
@@ -44,18 +43,17 @@ export default async function DietaPage({
     <div className={pageStyles.page}>
       <PageHeader
         title="Nutrición"
-        description="Calorías, macros, micronutrientes y análisis derivados de tu registro real."
+        description="Cómo venís hoy, qué registraste y qué merece atención ahora."
         icon={UtensilsCrossed}
         domain="health"
       />
+      <NutritionNavigation current="today" />
       <NutritionDaySelector
         dates={data.history.map((point) => point.date)}
         selectedDate={selectedDate}
         currentDate={currentDate}
       />
-      <NutritionV2Overview data={data} />
-      <MonthlyReviewCard domain="nutrition" />
-      <NutritionPlanSection />
+      <NutritionV2Overview data={data} mode="today" />
     </div>
   );
 }

@@ -225,7 +225,15 @@ function weekday(date: string): string {
     .replace('.', '');
 }
 
-export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) {
+export type NutritionOverviewMode = 'today' | 'trends' | 'nutrients';
+
+export function NutritionV2Overview({
+  data,
+  mode = 'today',
+}: {
+  data: NutritionDashboardData;
+  mode?: NutritionOverviewMode;
+}) {
   const targetEnergy = data.target?.energyKcal ?? null;
   const energyDisplay = nutritionDisplayPointEstimate(
     data.todayEnergy.amount,
@@ -293,7 +301,11 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
 
   return (
     <div className={styles.stack}>
-      <section className={styles.hero} aria-labelledby="nutrition-v2-title">
+      <section
+        className={styles.hero}
+        hidden={mode !== 'today'}
+        aria-labelledby="nutrition-v2-title"
+      >
         <div className={styles['hero-copy']}>
           <p className={styles.eyebrow}>NUTRICIÓN V2 · HOY</p>
           <h2 id="nutrition-v2-title">Tu nutrición, de macros a micros</h2>
@@ -374,7 +386,11 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
         </div>
       </section>
 
-      <section className={styles.panel} aria-labelledby="nutrition-trend-title">
+      <section
+        className={styles.panel}
+        hidden={mode !== 'trends'}
+        aria-labelledby="nutrition-trend-title"
+      >
         <div className={styles['section-heading']}>
           <div>
             <p className={styles.eyebrow}>ÚLTIMOS 7 DÍAS</p>
@@ -448,7 +464,11 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
         </div>
       </section>
 
-      <section className={styles.panel} aria-labelledby="micronutrients-title">
+      <section
+        className={styles.panel}
+        hidden={mode !== 'nutrients'}
+        aria-labelledby="micronutrients-title"
+      >
         <div className={styles['section-heading']}>
           <div>
             <p className={styles.eyebrow}>MICRONUTRIENTES</p>
@@ -545,7 +565,7 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
         </details>
       </section>
 
-      {data.aiInsights.length > 0 ? (
+      {mode === 'today' && data.aiInsights.length > 0 ? (
         <section className={styles.panel} aria-labelledby="nutrition-ai-title">
         <div className={styles['section-heading']}>
           <div>
@@ -591,7 +611,11 @@ export function NutritionV2Overview({ data }: { data: NutritionDashboardData }) 
         </section>
       ) : null}
 
-      <section className={styles.panel} aria-labelledby="nutrition-meals-title">
+      <section
+        className={styles.panel}
+        hidden={mode !== 'today'}
+        aria-labelledby="nutrition-meals-title"
+      >
         <div className={styles['section-heading']}>
           <div>
             <p className={styles.eyebrow}>REGISTRO DE HOY</p>

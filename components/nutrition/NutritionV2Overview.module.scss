@@ -3,6 +3,11 @@
   gap: 1rem;
 }
 
+.hero[hidden],
+.panel[hidden] {
+  display: none;
+}
+
 .hero,
 .panel {
   border: 1px solid var(--border);
