@@ -3,7 +3,11 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { parseProfessionalOfferVariants } from '@/lib/professional/offer-variants-contract';
+import {
+  parseProfessionalOfferVariants,
+  resolveProfessionalOfferVariantsText,
+} from '@/lib/professional/offer-variants-contract';
+import { parseProfessionalMarketDetail } from '@/lib/professional/market-detail-contract';
 
 const root = join(process.cwd(), 'data', 'generated');
 
@@ -68,14 +72,11 @@ test('PRO-V2-03. Inteligencia queda absorbida por Profesional', () => {
 test('PRO-V2-04. Panorama reemplaza el dashboard largo sin borrar su implementación', () => {
   const route = repoText('app/(app)/professional/page.tsx');
   const panorama = repoText('components/professional/ProfessionalPanorama.tsx');
-  const legacyDashboard = repoText('components/professional/ProfessionalDashboard.tsx');
-
   assert.match(route, /ProfessionalPanorama/);
   assert.doesNotMatch(route, /<ProfessionalDashboard/);
   assert.match(panorama, /Tu panorama profesional/);
   assert.match(panorama, /Qué cambió \/ qué se confirma/);
   assert.match(panorama, /Qué conviene hacer ahora/);
-  assert.match(legacyDashboard, /Crecimiento \/ Huecos a llenar/);
 });
 
 test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada acotada', () => {
@@ -85,7 +86,9 @@ test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada 
   assert.match(panorama, /snapshot\.growth\.items\[0\]/);
   assert.match(panorama, /snapshot\.forecast\.direction/);
   assert.match(panorama, /snapshot\.market\.globalSignals\[0\]/);
-  assert.match(panorama, /snapshot\.strongestEvidence\[0\]/);
+  assert.match(panorama, /DecisionBadge value="ACT"/);
+  assert.match(panorama, /DecisionBadge value="NO_CHANGE"/);
+  assert.match(panorama, /DecisionBadge value="WATCH"/);
   assert.doesNotMatch(panorama, /Math\.random|overall score|winner/i);
   assert.match(panorama, /href="\/professional\/biblioteca"/);
 });
@@ -194,4 +197,56 @@ test('PRO-V2-15. Biblioteca tecnológica es referencia progresiva y no adopción
   assert.match(library, /Explorar biblioteca completa/);
   assert.match(library, /no implica instalarla, pagarla ni aprenderla/i);
   assert.doesNotMatch(library, /unreadCount|streakCount|readingDebt|backlogCount/i);
+});
+
+
+test('PRO-V2-16. Panorama explicita cambio, impacto, implicación y decisión', () => {
+  const panorama = repoText('components/professional/ProfessionalPanorama.tsx');
+
+  assert.match(panorama, /Qué cambió \/ se confirma:/);
+  assert.match(panorama, /Por qué importa:/);
+  assert.match(panorama, /Para vos:/);
+  assert.match(panorama, /'ACT' \| 'TRY' \| 'LEARN' \| 'WATCH' \| 'IGNORE' \| 'NO_CHANGE'/);
+  assert.match(panorama, /moveDecision/);
+});
+
+test('PRO-V2-17. Mercado deriva roles objetivo, skills y seniority desde PAS', () => {
+  const raw = generatedText('professional-market-detail.json');
+  const parsed = parseProfessionalMarketDetail(JSON.parse(raw));
+  const market = repoText('components/professional/ProfessionalMarket.tsx');
+
+  assert.ok(parsed);
+  assert.deepEqual(parsed.targetRoleIds, ['software-engineer', 'full-stack-product-engineer']);
+  assert.equal(parsed.roles.length, 9);
+  assert.ok(parsed.skillSignals.length >= 3);
+  assert.equal(parsed.seniorityContext.levels.Junior, '0 to <2 years');
+  assert.match(market, /Roles objetivo y barrera de entrada/);
+  assert.match(market, /Skills con señal de mercado/);
+  assert.match(market, /No hay un “entry barrier score” universal/);
+  assert.doesNotMatch(market, /hireProbability|roleLeaderboard|overall score/i);
+});
+
+test('PRO-V2-18. Herramientas tiene selector por tarea y falla cerrado si queda stale', () => {
+  const raw = generatedText('professional-offer-variants.json');
+  const stale = resolveProfessionalOfferVariantsText(raw, new Date('2026-11-01T12:00:00Z'));
+  const tools = repoText('components/professional/ProfessionalTools.tsx');
+  const route = repoText('app/(app)/professional/herramientas/page.tsx');
+
+  assert.equal(stale.status, 'ready');
+  assert.equal(stale.stale, true);
+  assert.match(tools, /data\.status !== 'ready' \|\| !data\.snapshot \|\| data\.stale/);
+  assert.match(tools, /snapshot\.comparisonGroups\.map/);
+  assert.match(tools, /Comparadores por tarea/);
+  assert.match(tools, /Comparación sin ranking/);
+  assert.match(tools, /limitProvenanceLabel/);
+  assert.match(route, /group\?: string/);
+});
+
+test('PRO-V2-19. Home carga sólo el snapshot que realmente renderiza', () => {
+  const source = repoText('lib/data/professional-intelligence-source.ts');
+
+  assert.match(
+    source,
+    /getProfessionalIntelligencePageData\(\)[\s\S]*return \{ professional: await loadProfessionalSnapshot\(\) \}/,
+  );
 });

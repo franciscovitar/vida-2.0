@@ -1,6 +1,7 @@
 import { CircleAlert, Info } from 'lucide-react';
 
 import type {
+  ProfessionalOfferComparisonGroup,
   ProfessionalOfferVariant,
   ProfessionalOfferVariantsData,
 } from '@/types/professional-offers';
@@ -17,6 +18,16 @@ const FILTERS = [
 function priceLabel(offer: ProfessionalOfferVariant): string {
   if (offer.headlinePriceUsdMonthly === 0) return 'Gratis';
   return `USD ${offer.headlinePriceUsdMonthly}/mes`;
+}
+
+function limitProvenanceLabel(value: string): string {
+  if (value === 'EXACT_OFFICIAL') return 'límite exacto oficial';
+  if (value === 'RELATIVE_EXACT_OFFICIAL') return 'límite relativo oficial';
+  if (value === 'QUALITATIVE_OFFICIAL') return 'límite cualitativo oficial';
+  if (value === 'QUALITATIVE_PLUS_USAGE_MODEL_OFFICIAL') {
+    return 'límite oficial + modelo de consumo';
+  }
+  return 'provenance oficial';
 }
 
 function filterOffers(
@@ -37,27 +48,63 @@ function filterOffers(
   return [...offers];
 }
 
+function groupHref(
+  group: ProfessionalOfferComparisonGroup,
+  filter: string,
+): string {
+  const params = new URLSearchParams();
+  params.set('group', group.id);
+  if (filter !== 'all') params.set('filter', filter);
+  return `/professional/herramientas?${params.toString()}`;
+}
+
+function filterHref(groupId: string, filter: string): string {
+  const params = new URLSearchParams();
+  params.set('group', groupId);
+  if (filter !== 'all') params.set('filter', filter);
+  return `/professional/herramientas?${params.toString()}`;
+}
+
 export function ProfessionalTools({
   data,
   filter = 'all',
+  groupId,
 }: {
   data: ProfessionalOfferVariantsData;
   filter?: string;
+  groupId?: string;
 }) {
-  if (data.status !== 'ready' || !data.snapshot) {
+  if (data.status !== 'ready' || !data.snapshot || data.stale) {
     return (
-      <section className={styles.section}>
+      <section className={styles.section} aria-labelledby="professional-tools-unavailable">
         <div className={styles.notice} data-tone="warning" role="status">
           <CircleAlert size={16} aria-hidden="true" />
-          <span>{data.notice ?? 'Comparador no disponible.'}</span>
+          <span id="professional-tools-unavailable">
+            {data.notice ??
+              'El comparador no está disponible. Revalidá precio y límites antes de comparar.'}
+          </span>
         </div>
       </section>
     );
   }
 
   const snapshot = data.snapshot;
-  const group = snapshot.comparisonGroups[0];
-  const allowedIds = new Set(group?.offerIds ?? []);
+  const group =
+    snapshot.comparisonGroups.find((item) => item.id === groupId) ??
+    snapshot.comparisonGroups[0];
+
+  if (!group) {
+    return (
+      <section className={styles.section}>
+        <div className={styles.notice} data-tone="warning" role="status">
+          <CircleAlert size={16} aria-hidden="true" />
+          <span>No hay una categoría comparable disponible.</span>
+        </div>
+      </section>
+    );
+  }
+
+  const allowedIds = new Set(group.offerIds);
   const currentOffers = filterOffers(
     snapshot.offers.filter((offer) => allowedIds.has(offer.id)),
     filter,
@@ -65,38 +112,44 @@ export function ProfessionalTools({
 
   return (
     <div className={styles.stack}>
-      {data.notice ? (
-        <div className={styles.notice} data-tone="warning" role="status">
-          <CircleAlert size={16} aria-hidden="true" />
-          <span>{data.notice}</span>
-        </div>
-      ) : null}
-
       <section className={styles.hero} aria-labelledby="professional-tools-title">
-        <p className={styles.eyebrow}>Comparadores vivos</p>
-        <h2 id="professional-tools-title">IA para programar</h2>
+        <p className={styles.eyebrow}>Comparadores por tarea</p>
+        <h2 id="professional-tools-title">{group.label}</h2>
         <p>
-          Cada plan compite como una opción distinta. Precio, cuota y limitaciones pesan tanto como
-          la capacidad.
+          Cada plan compite como una oferta distinta. Precio, cuota, canal y limitaciones pesan
+          tanto como la capacidad.
         </p>
-        <div className={styles['hero-note']}>
-          <Info size={15} aria-hidden="true" />
-          <span>
-            Todavía no publico un #1 universal: primero necesitamos evidencia comparable suficiente
-            por tarea. La matriz de planes y límites sí está verificada.
-          </span>
-        </div>
       </section>
+
+      <nav className={styles['task-selector']} aria-label="Categorías del comparador">
+        {snapshot.comparisonGroups.map((item) => (
+          <a
+            aria-current={item.id === group.id ? 'page' : undefined}
+            href={groupHref(item, filter)}
+            key={item.id}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      <div className={styles['comparison-status']} data-status={group.rankingStatus}>
+        <Info size={15} aria-hidden="true" />
+        <div>
+          <strong>
+            {group.rankingStatus === 'RANKED'
+              ? 'Ranking respaldado por evidencia comparable'
+              : 'Comparación sin ranking'}
+          </strong>
+          <span>{group.rankingReason}</span>
+        </div>
+      </div>
 
       <nav className={styles.filters} aria-label="Filtros del comparador">
         {FILTERS.map((item) => (
           <a
             aria-current={filter === item.id ? 'page' : undefined}
-            href={
-              item.id === 'all'
-                ? '/professional/herramientas'
-                : `/professional/herramientas?filter=${item.id}`
-            }
+            href={filterHref(group.id, item.id)}
             key={item.id}
           >
             {item.label}
@@ -107,8 +160,8 @@ export function ProfessionalTools({
       <section className={styles.section} aria-labelledby="offer-comparison-title">
         <div className={styles['section-heading']}>
           <div>
-            <p className={styles.eyebrow}>Planes individuales</p>
-            <h3 id="offer-comparison-title">{group?.label ?? 'Comparación actual'}</h3>
+            <p className={styles.eyebrow}>Ofertas actuales</p>
+            <h3 id="offer-comparison-title">{group.label}</h3>
           </div>
           <span>{currentOffers.length} opciones</span>
         </div>
@@ -129,15 +182,18 @@ export function ProfessionalTools({
               <div className={styles['limit-block']}>
                 <span>Límite principal</span>
                 <p>{offer.keyLimit}</p>
+                <small>
+                  {limitProvenanceLabel(offer.limitExactness)} · verificado {offer.lastVerified}
+                </small>
               </div>
 
               <div className={styles['offer-meta']}>
                 <span>{offer.channels.join(' · ')}</span>
-                <span>verificado {offer.lastVerified}</span>
+                <span>{offer.accessClass.toLowerCase().replaceAll('_', ' ')}</span>
               </div>
 
               <details className={styles.details}>
-                <summary>Ver capacidades y restricciones</summary>
+                <summary>Ver capacidades, restricciones y fuentes</summary>
                 <div className={styles['details-body']}>
                   <div>
                     <strong>Incluye</strong>

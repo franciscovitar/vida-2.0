@@ -1,176 +1,122 @@
-# Professional Intelligence surface
+# Professional Intelligence V2
 
-`/professional` is a read-only authenticated derivative of the canonical Professional + Technology Intelligence state in `franciscovitar/personal-ai-system`.
+`/professional` is a read-only authenticated derivative of the canonical Professional Intelligence state in `franciscovitar/personal-ai-system`.
+
+## Product surfaces
+
+- `/professional` — Panorama: current professional brief, material changes and 1–3 current moves.
+- `/professional/mercado` — roles, demand/growth, compensation, seniority/entry context, remote samples, skill signals and AI transformation.
+- `/professional/herramientas` — task-specific offer comparisons with filters, price, main limit and provenance.
+- `/professional/crecimiento` — demonstrated evidence, bounded growth queue, Learning OS handoffs and Delegation Frontier.
+- `/professional/biblioteca` — legacy Intelligence articles, deep explanations and the Technology Library without reading debt.
+
+Legacy `/inteligencia` redirects to Professional. Historical article URLs remain readable for compatibility.
 
 ## Source-of-truth boundary
 
 Canonical intelligence stays in PAS `main`.
 
-Vida 2.0 stores only:
+Vida stores only sanitized generated derivatives:
 
-`data/generated/professional-snapshot.json`
+- `data/generated/professional-snapshot.json`
+- `data/generated/professional-market-detail.json`
+- `data/generated/professional-offer-variants.json`
+- `data/generated/ai-career-resilience.json`
+- `data/generated/technology-library.json`
+- `data/generated/intelligence-editorial-snapshot.json` plus sanitized article derivatives
 
-This file is a **sanitized generated derivative**, not an editable source of truth.
+These files are views, not editable sources of truth. They must preserve PAS repository/ref/commit and observation dates.
 
-It contains:
+## Panorama contract
 
-- current 1–2 now-moves;
-- current top development/evidence priorities;
-- bounded top-5 Professional Growth queue;
-- task/facet-level Delegation Frontier (Vos sí o sí / Vos + IA / Delegable);
-- explicit retirement from active learning when a facet becomes safely delegable;
-- bounded strong-evidence summary;
-- current market/forecast summary;
-- bounded AI/technology state;
-- learning/credential decisions;
-- profile-positioning findings;
-- AI Fluency calibration status;
-- PAS commit/ref + observed/generated dates.
+The visible current brief stays finite:
 
-It deliberately excludes:
+- normally 3–7 material changes;
+- 1–3 current moves;
+- each visible material change explains what changed or was confirmed, why it matters, what it means for the user and an explicit decision disposition;
+- allowed decision language is `ACT / TRY / LEARN / WATCH / IGNORE / NO_CHANGE`.
 
-- CV file bytes;
-- Drive URLs/IDs;
-- email/contact data;
-- private source corpora;
-- API tokens/secrets;
-- raw job-board records;
-- raw papers/news;
-- full evidence graph.
+The home must remain useful without opening any detail surface.
 
-## Fail-closed behavior
+## Market contract
 
-`lib/professional/snapshot.ts` reads the generated file server-side.
+Market keeps separate evidence layers for:
 
-`lib/professional/contract.ts` validates the DTO.
+- current target roles / best-fit context;
+- demand and growth;
+- compensation;
+- remote/geography;
+- seniority and entry context;
+- skills with market signal;
+- AI transformation/resilience.
 
-If the file is:
+It must not publish a universal role score, hiring probability, employability score or remote-fit score. Job-board samples are representative samples, not market-size estimates.
 
-- missing;
-- invalid JSON;
-- outside the expected schema;
+## Tools contract
 
-the UI renders an unavailable state. It does not fall back to mocks or fabricated recommendations.
+Product, plan and access channel remain distinct candidates.
 
-If the snapshot is older than its declared `staleAfterDays`, the UI still shows the last bounded state but displays an explicit stale warning. A stale snapshot must be refreshed before a sensitive decision.
+The UI exposes:
+
+- a task/category selector backed by canonical comparison groups;
+- comparison/ranking status;
+- filters;
+- price + main limit before expansion;
+- limit exactness/provenance and verification date;
+- official sources in detail.
+
+If the offer snapshot is missing, invalid or stale, the comparison fails closed. Stale price/quota data is not shown as a live comparison.
+
+A numeric/ordered ranking is shown only when the canonical group explicitly supports ranking. `COMPARISON_ONLY` must never be turned into a winner.
+
+## Growth contract
+
+Growth remains read-only in Vida.
+
+The PAS owns:
+
+- ownership lane;
+- active growth queue;
+- verification blueprint;
+- profile claim strength;
+- Delegation Frontier changes.
+
+Vida may copy an Adaptive Learning handoff but must not write mastery or ownership.
+
+## Library contract
+
+Library is voluntary reference memory:
+
+- no unread count;
+- no backlog;
+- no streak;
+- no catch-up requirement;
+- storing a technology does not imply installing, paying for or learning it.
+
+## Fail-closed and freshness
+
+Each derivative validates its schema before rendering.
+
+Missing/invalid data renders an unavailable state rather than mocks or fabricated recommendations.
+
+Stale current-state data remains visibly marked where historical/contextual reading is still useful. Consequential current comparisons such as active offer price/quota matrices fail closed when stale.
 
 ## Refresh contract
 
-The snapshot is replace-in-place.
+Derivatives are replace-in-place after the relevant PAS `main` state changes materially.
 
-Do not create dated snapshot files.
+- fast tool/price/quota slices: revalidate on their canonical cadence or event trigger;
+- role/market current state: refresh with the Professional monthly rebuild or material event;
+- growth/profile state: refresh after material personal evidence or verification outcomes;
+- historical editorial/library content may remain readable after it is no longer current.
 
-When PAS current state materially changes and the canonical PAS change has been merged:
-
-1. regenerate the sanitized derivative from PAS `main`;
-2. replace `data/generated/professional-snapshot.json`;
-3. update `source.commit`, `generatedAt` and `observedAt`;
-4. run Professional QA + repository tests/check/build;
-5. review the diff;
-6. merge through the normal protected-branch workflow.
-
-The monthly Professional Intelligence refresh should include this derivative refresh whenever a current-state field shown by Vida 2.0 changed.
-
-A weekly signal that only opens a PAS PR should **not** pre-publish unmerged intelligence into Vida 2.0.
-
-## UI contract
-
-The screen separates:
-
-- recommendations;
-- Crecimiento / Huecos a llenar;
-- current task/facet ownership and last frontier review;
-- demonstrated evidence;
-- uncertainty/gaps;
-- market/forecast context;
-- technology proposals;
-- learning decisions;
-- positioning findings;
-- AI Fluency evidence.
-
-It must not show:
-
-- universal role winner;
-- universal skill score;
-- universal employability/mastery/automation percentage;
-- universal “best AI”;
-- AI replacement probability;
-- job-board sample as market census;
-- stale salary as current salary;
-- technology candidate as already adopted.
-
-Technology adoption remains owned by PAS `system-maintenance`.
+Do not create dated derivative histories in Vida.
 
 ## Verification
 
-Dedicated tests live in:
+Dedicated coverage lives in:
 
-`tests/professional-intelligence.test.ts`
+- `tests/professional-intelligence.test.ts`
+- `tests/professional-v2.test.ts`
 
-They cover:
-
-- valid snapshot contract;
-- missing snapshot fail-closed;
-- invalid snapshot fail-closed;
-- stale detection;
-- system-maintenance ownership;
-- valid no-course/no-credential decision;
-- top-5 growth queue bound;
-- valid ownership lanes;
-- delegated/retired facets excluded from active learning;
-- frontier review metadata preserved;
-- no universal ranking/winner UI;
-- protected dynamic route and navigation.
-
-Final implementation verification still requires observing:
-
-```bash
-npm test
-npm run check
-npm run build
-```
-
-or the current canonical aggregate:
-
-```bash
-npm run verify
-```
-
-## Professional Growth + Delegation Frontier
-
-The generated snapshot now uses schema V4 and carries the sanitized current Professional Growth state plus its Adaptive Learning handoff from PAS `main`.
-
-The unit of delegation is a **task/facet**, not an entire technology. A broad skill may therefore contain work in different lanes at the same time.
-
-Vida 2.0 does not decide ownership. PAS owns reassignment using current market/frontier evidence plus personal AI Tool Eval / AI Fluency outcomes.
-
-When a facet becomes safely delegable:
-
-1. it is marked `AI_DELEGATED` / `RETIRED_FROM_ACTIVE_LEARNING` in canonical PAS state;
-2. it stops consuming an active study slot;
-3. the bounded top-5 queue can pull in the next unresolved gap;
-4. retirement is never displayed as personal mastery.
-
-If later evidence shows repeated rework, unsafe output, stronger market demand for direct depth or loss of supervisory judgment, the facet can return to `HUMAN_PLUS_AI` or `HUMAN_CORE`.
-
-Adaptive practice remains owned by Learning OS. The snapshot only carries the current target, facets and routing state.
-
-## Adaptive Learning handoff
-
-Each active Growth item carries a canonical read-only `learningHandoff`:
-
-- session mode;
-- allowed AI-assistance mode;
-- minimum `mustDemonstrate` verification targets;
-- fresh-evidence rule.
-
-Vida 2.0 does not infer those rules from the ownership badge. The server-side prompt builder only serializes the snapshot contract into a self-contained Adaptive Learning start prompt.
-
-The client CTA only copies that prompt. It does not write mastery, ownership or Professional state.
-
-Current V1 behavior:
-
-- `HUMAN_CORE` -> `ATTEMPT_FIRST`;
-- `HUMAN_PLUS_AI` -> `AI_ASSISTED_EXECUTION_WITH_HUMAN_VERIFICATION`;
-- one practical scenario at a time;
-- familiar/repeated success is not treated as mastery.
+Final implementation verification requires the repository test suite, static checks, production build and one coherent Preview before protected merge.

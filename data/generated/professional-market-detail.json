@@ -1,0 +1,314 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "9cfc13eb555d86672b7eb2529636f3a3a8d5449c",
+    "generatedAt": "2026-10-06",
+    "observedAt": "2026-09-18",
+    "staleAfterDays": 45,
+    "canonicalRefs": [
+      "AI/projects/professional-intelligence/ROLE_MARKET_COMPARISON_V1.json",
+      "AI/projects/professional-intelligence/ROLE_ARCHETYPES_V1.json",
+      "AI/projects/professional-intelligence/LABOR_MARKET_CURRENT_V1.json",
+      "AI/projects/professional-intelligence/PROFESSIONAL_GROWTH_CURRENT_V1.json"
+    ]
+  },
+  "status": "CURRENT_MULTI_GEOGRAPHY_COMPARISON",
+  "rule": "This is a dimension-by-dimension comparison. It intentionally has no overall score, winner, rank or hiring probability.",
+  "targetRoleIds": [
+    "software-engineer",
+    "full-stack-product-engineer"
+  ],
+  "roles": [
+    {
+      "id": "ai-native-product-engineer",
+      "name": "AI-Native Product Engineer",
+      "evidence": {
+        "demonstrated": 7,
+        "practiced": 2
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "COMPARABLE_AS_LOCAL_COMPOSITE_WITH_PROXY_OCCUPATIONS",
+      "macroSignals": [
+        "Software and Application Developers among WEF fastest-growing tech roles",
+        "AI and big data among WEF fastest-growing skill groups",
+        "AI workflow adoption increasingly common but verification/trust remains material in Stack Overflow surveys"
+      ],
+      "unresolved": [
+        "No standard occupation maps exactly to this composite role"
+      ],
+      "remoteSamples": [
+        {
+          "sample": "Lemon.io Senior .NET Full-stack Developer",
+          "geography": "LATAM + other regions",
+          "observedAt": "2026-09-18"
+        },
+        {
+          "sample": "Sticker Mule AI agent engineer",
+          "geography": "fully remote",
+          "observedAt": "2026-09-16"
+        }
+      ]
+    },
+    {
+      "id": "full-stack-product-engineer",
+      "name": "Full-Stack / Product Engineer",
+      "evidence": {
+        "demonstrated": 8,
+        "practiced": 1
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "COMPARABLE_WITH_STRONG_OCCUPATION_PROXIES",
+      "macroSignals": [
+        "Software and Application Developers among WEF fastest-growing tech roles"
+      ],
+      "unresolved": [
+        "Full-stack/Product Engineer is broader than BLS Web Developer"
+      ],
+      "remoteSamples": [
+        {
+          "sample": "Lemon.io Senior .NET Full-stack Developer",
+          "geography": "LATAM + other regions",
+          "observedAt": "2026-09-17"
+        },
+        {
+          "sample": "Rekluti Desarrollador Full Stack",
+          "geography": "LATAM",
+          "observedAt": "2026-08-22"
+        }
+      ]
+    },
+    {
+      "id": "software-engineer",
+      "name": "Software Engineer",
+      "evidence": {
+        "demonstrated": 5,
+        "practiced": 1
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "COMPARABLE_WITH_DIRECT_US_OCCUPATION_AND_ARGENTINA_PROXY",
+      "macroSignals": [
+        "Software and Application Developers among WEF fastest-growing tech roles"
+      ],
+      "unresolved": [],
+      "remoteSamples": [
+        {
+          "sample": "Lemon.io Senior .NET Full-stack Developer",
+          "geography": "LATAM + other regions",
+          "observedAt": "2026-09-17"
+        }
+      ]
+    },
+    {
+      "id": "systems-analyst-architect",
+      "name": "Systems Analyst / Software Architect",
+      "evidence": {
+        "demonstrated": 4,
+        "practiced": 3
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "COMPARABLE_BUT_ROLE_BOUNDARY_IS_COMPOSITE",
+      "macroSignals": [
+        "Analytical thinking remains a core employer skill in WEF; technological literacy is a fast-growing skill group"
+      ],
+      "unresolved": [
+        "Architecture depth requires direct personal verification",
+        "Argentina proxies split analysis vs architecture"
+      ],
+      "remoteSamples": [
+        {
+          "sample": "Agility Technologies Computer Systems Engineer/Architect",
+          "geography": "Northern America + LATAM",
+          "observedAt": "2026-09-18"
+        },
+        {
+          "sample": "ExtraHop Sr Solutions Architect",
+          "geography": "Remote",
+          "observedAt": "2026-09-15"
+        }
+      ]
+    },
+    {
+      "id": "applied-ai-engineer",
+      "name": "Applied AI Engineer",
+      "evidence": {
+        "demonstrated": 3,
+        "practiced": 5
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "COMPARABLE_WITH_ADJACENT_OCCUPATIONS_NOT_ONE_TO_ONE",
+      "macroSignals": [
+        "AI and Machine Learning Specialists among WEF fastest-growing tech roles",
+        "AI and big data tops WEF fastest-growing skill groups",
+        "ILO advises task-transformation framing rather than replacement probability"
+      ],
+      "unresolved": [
+        "Argentina AI Engineer sample is too sparse for robust compensation inference",
+        "Applied LLM runtime engineering evidence remains partial"
+      ],
+      "remoteSamples": [
+        {
+          "sample": "CodeRoad Agentic AI Engineer",
+          "geography": "LATAM",
+          "observedAt": "2026-09-18"
+        },
+        {
+          "sample": "Sticker Mule AI agent engineer",
+          "geography": "fully remote",
+          "observedAt": "2026-09-16"
+        },
+        {
+          "sample": "A.Team Senior Independent AI Engineer / Architect",
+          "geography": "Americas + Europe + Israel",
+          "observedAt": "2026-09-16"
+        }
+      ]
+    },
+    {
+      "id": "data-analytics-engineer",
+      "name": "Data / Analytics Engineer",
+      "evidence": {
+        "demonstrated": 2,
+        "practiced": 4
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "COMPARABLE_WITH_MULTIPLE_DATA_ROLE_PROXIES",
+      "macroSignals": [
+        "Big Data Specialists among WEF fastest-growing tech roles",
+        "AI and big data tops WEF fastest-growing skill groups"
+      ],
+      "unresolved": [
+        "Data Engineer lacks a clean one-to-one BLS benchmark in this V1 mapping",
+        "Python/SQL/data-pipeline personal depth needs verification if this path becomes consequential"
+      ],
+      "remoteSamples": [
+        {
+          "sample": "Lemon.io Senior Data Engineer",
+          "geography": "LATAM + Europe + USA + other regions",
+          "observedAt": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "platform-production-engineer",
+      "name": "Platform / Production Engineer",
+      "evidence": {
+        "demonstrated": 3,
+        "practiced": 3
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "COMPARABLE_WITH_ARGENTINA_DIRECT_PROXY_AND_US_ADJACENT_OCCUPATIONS",
+      "macroSignals": [
+        "Networks and cybersecurity among WEF fastest-growing skill groups"
+      ],
+      "unresolved": [
+        "Real operations/observability/incident/restore evidence is a material personal gap",
+        "DevOps/SRE is not identical to Network Architect"
+      ],
+      "remoteSamples": [
+        {
+          "sample": "GoFasti Cloud / DevOps (SRE) Engineer",
+          "geography": "LATAM",
+          "observedAt": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "security-engineer",
+      "name": "Security Engineer / Security-Focused Software Engineer",
+      "evidence": {
+        "demonstrated": 2,
+        "practiced": 3
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "COMPARABLE_WITH_DIRECT_SECURITY_PROXIES",
+      "macroSignals": [
+        "Networks and cybersecurity among WEF fastest-growing skill groups",
+        "Security-related roles/skills receive positive directional employer signal"
+      ],
+      "unresolved": [
+        "Direct threat-model/AppSec verification missing",
+        "No external security validation"
+      ],
+      "remoteSamples": [
+        {
+          "sample": "PROLIM Information Security Engineer",
+          "geography": "Americas + LATAM + South/Central America",
+          "observedAt": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "technical-founder-product-builder",
+      "name": "Technical Founder / Product Builder",
+      "evidence": {
+        "demonstrated": 7,
+        "practiced": 1
+      },
+      "personalVerificationStatus": "UNVERIFIED_CORE_SKILLS",
+      "comparisonStatus": "NOT_A_STANDARD_EMPLOYMENT_ROLE",
+      "macroSignals": [
+        "No single labor occupation appropriately represents founder/product-builder work"
+      ],
+      "unresolved": [
+        "Should be evaluated through business/project outcomes rather than vacancy projections",
+        "No forced BLS mapping"
+      ],
+      "remoteSamples": [
+        {
+          "sample": "AfterQuery SWE (LATM) description values end-to-end project ownership and builder evidence",
+          "geography": "LATAM",
+          "observedAt": "2026-09-18"
+        }
+      ]
+    }
+  ],
+  "skillSignals": [
+    {
+      "id": "SKILL-MACRO-001",
+      "label": "AI, datos, ciberseguridad y alfabetización tecnológica",
+      "signal": "WEF identifies AI and big data, networks and cybersecurity, and technological literacy as the top three fastest-growing skill groups in its employer survey.",
+      "geography": "GLOBAL_MACRO",
+      "period": "2025-2030",
+      "sourceLabel": "World Economic Forum — Future of Jobs Report 2025",
+      "sourceUrl": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/digest/"
+    },
+    {
+      "id": "SKILL-MACRO-002",
+      "label": "Verificación crítica de outputs de IA",
+      "signal": "The 2025 full Developer Survey found 46% distrusted AI-output accuracy versus 33% who trusted it, reinforcing verification as a meaningful professional capability.",
+      "geography": "GLOBAL_MACRO",
+      "period": "2025",
+      "sourceLabel": "Stack Overflow Developer Survey 2025 — AI",
+      "sourceUrl": "https://survey.stackoverflow.co/2025/ai"
+    },
+    {
+      "id": "SKILL-MACRO-003",
+      "label": "Uso profesional de IA con criterio de dominio",
+      "signal": "In Stack Overflow's February 2026 pulse survey, 58% reported using AI at work daily; lack of trust remained a major barrier and only 1% reported using AI alone for learning.",
+      "geography": "GLOBAL_MACRO",
+      "period": "2026-02",
+      "sourceLabel": "Stack Overflow — 2026 AI-assisted knowledge pulse survey",
+      "sourceUrl": "https://stackoverflow.blog/2026/03/16/domain-expertise-still-wanted-the-latest-trends-in-ai/"
+    }
+  ],
+  "seniorityContext": {
+    "geography": "Argentina",
+    "period": "2025-12 to 2026-02",
+    "levels": {
+      "Junior": "0 to <2 years",
+      "Semi-Senior": "2 to <5 years",
+      "Senior": "5+ years"
+    },
+    "sourceLabel": "OpenQube / Sysarmy — Encuesta de Sueldos 2026.01 Argentina",
+    "sourceUrl": "https://sueldos.openqube.io/encuesta-sueldos-2026.01/",
+    "note": "OpenQube marks some role/seniority medians as unreliable based on the width of the 95% confidence interval. Derived values below are not a replacement for that reliability label."
+  },
+  "commonGaps": [
+    "Job-board evidence is a current sample, not a census; total LATAM/international vacancy volume remains unknown.",
+    "Argentina OpenQube is workforce/salary evidence, not vacancy demand.",
+    "Argentina 2026.01 compensation values are aging for a precise September 2026 salary decision.",
+    "Personal core-skill evidence is artifact-grounded but direct personal verification remains unverified."
+  ]
+}

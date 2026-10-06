@@ -16,9 +16,12 @@ export const runtime = 'nodejs';
 export default async function ProfessionalToolsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; group?: string }>;
 }) {
-  const [{ filter }, offers] = await Promise.all([searchParams, getProfessionalToolsPageData()]);
+  const [{ filter, group }, offers] = await Promise.all([
+    searchParams,
+    getProfessionalToolsPageData(),
+  ]);
 
   return (
     <div className={pageStyles.page}>
@@ -29,7 +32,7 @@ export default async function ProfessionalToolsPage({
         domain="projects"
       />
       <ProfessionalNavigation current="herramientas" />
-      <ProfessionalTools data={offers} filter={filter} />
+      <ProfessionalTools data={offers} filter={filter} groupId={group} />
     </div>
   );
 }

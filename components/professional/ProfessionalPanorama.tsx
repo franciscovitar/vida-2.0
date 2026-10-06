@@ -9,6 +9,8 @@ import type {
 
 import styles from './ProfessionalV2.module.scss';
 
+type ProfessionalDecision = 'ACT' | 'TRY' | 'LEARN' | 'WATCH' | 'IGNORE' | 'NO_CHANGE';
+
 const CONFIDENCE_LABELS: Record<ProfessionalConfidence, string> = {
   LOW: 'baja',
   MEDIUM: 'media',
@@ -30,14 +32,22 @@ const ROUTE_LABELS: Record<string, string> = {
   DIRECT_VERIFICATION_PLUS_BOUNDED_LAB: 'Práctica + verificación',
 };
 
-const EVIDENCE_LABELS: Record<string, string> = {
-  PRACTICED: 'Practicado',
-  DEMONSTRATED: 'Demostrado',
-  EXTERNALLY_VALIDATED: 'Validado externamente',
-};
-
 function confidenceLabel(value: ProfessionalConfidence): string {
   return CONFIDENCE_LABELS[value];
+}
+
+function moveDecision(route: string): ProfessionalDecision {
+  if (route === 'PROJECT_EXPERIENCE') return 'ACT';
+  if (route === 'DIRECT_VERIFICATION_PLUS_BOUNDED_LAB') return 'LEARN';
+  return 'TRY';
+}
+
+function DecisionBadge({ value }: { value: ProfessionalDecision }) {
+  return (
+    <span className={styles['decision-badge']} data-decision={value}>
+      {value}
+    </span>
+  );
 }
 
 export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceData }) {
@@ -57,7 +67,7 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
   const snapshot = data.snapshot;
   const activePriority = snapshot.growth.items[0];
   const marketSignal = snapshot.market.globalSignals[0];
-  const strongestEvidence = snapshot.strongestEvidence[0];
+  const forecastSignal = snapshot.forecast.items[0];
   const currentMoves = snapshot.nowMoves.slice(0, 3);
 
   return (
@@ -91,55 +101,73 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
       <section className={styles['panorama-section']} aria-labelledby="professional-changes-title">
         <div className={styles['panorama-heading']}>
           <p className={styles.eyebrow}>Qué cambió / qué se confirma</p>
-          <h3 id="professional-changes-title">Lo material, sin llenar la portada</h3>
+          <h3 id="professional-changes-title">Tres cambios materiales, con decisión explícita</h3>
         </div>
 
         <div className={styles['panorama-list']}>
           {activePriority ? (
             <article className={styles['panorama-story']}>
-              <span className={styles['panorama-kicker']}>
-                Prioridad 1 · {GROWTH_STATUS_LABELS[activePriority.status]}
-              </span>
+              <div className={styles['panorama-story-head']}>
+                <span className={styles['panorama-kicker']}>
+                  Prioridad 1 · {GROWTH_STATUS_LABELS[activePriority.status]}
+                </span>
+                <DecisionBadge value="ACT" />
+              </div>
               <h3>{activePriority.capability}</h3>
-              <p>{activePriority.whyNow}</p>
+              <p>
+                <strong>Qué cambió / se confirma:</strong> {activePriority.whyNow}
+              </p>
+              <p>
+                <strong>Por qué importa:</strong> {activePriority.evidenceTarget}
+              </p>
               <p className={styles['panorama-action']}>
-                <strong>Ahora:</strong> {activePriority.practiceContract}
+                <strong>Para vos:</strong> {activePriority.practiceContract}
               </p>
             </article>
           ) : null}
 
           <article className={styles['panorama-story']}>
-            <span className={styles['panorama-kicker']}>Dirección profesional</span>
-            <h3>La base de software sigue siendo correcta</h3>
-            <p>{snapshot.forecast.direction}</p>
-            <div className={styles['panorama-meta']}>
-              <span>Confianza {confidenceLabel(snapshot.forecast.confidence)}</span>
-              <span>Sin necesidad de cambiar de rumbo por moda</span>
+            <div className={styles['panorama-story-head']}>
+              <span className={styles['panorama-kicker']}>Dirección profesional</span>
+              <DecisionBadge value="NO_CHANGE" />
             </div>
+            <h3>La base de software sigue siendo correcta</h3>
+            <p>
+              <strong>Qué se confirma:</strong> la evidencia actual no justifica abandonar
+              software/web.
+            </p>
+            <p>
+              <strong>Por qué importa:</strong> {snapshot.forecast.direction}
+            </p>
+            <p className={styles['panorama-action']}>
+              <strong>Para vos:</strong>{' '}
+              {forecastSignal?.aiInteraction ??
+                'Profundizá el criterio de sistema y operación antes de perseguir otra moda.'}
+            </p>
           </article>
 
           {marketSignal ? (
             <article className={styles['panorama-story']}>
-              <span className={styles['panorama-kicker']}>
-                Mercado · {marketSignal.geography} · {marketSignal.period}
-              </span>
+              <div className={styles['panorama-story-head']}>
+                <span className={styles['panorama-kicker']}>
+                  Mercado · {marketSignal.geography} · {marketSignal.period}
+                </span>
+                <DecisionBadge value="WATCH" />
+              </div>
               <h3>
                 {marketSignal.title} · {marketSignal.value}
               </h3>
-              <p>{marketSignal.explanation}</p>
-            </article>
-          ) : null}
-
-          {strongestEvidence ? (
-            <article className={styles['panorama-story']}>
-              <span className={styles['panorama-kicker']}>
-                Evidencia · {EVIDENCE_LABELS[strongestEvidence.state] ?? strongestEvidence.state}
-              </span>
-              <h3>{strongestEvidence.capability}</h3>
-              <p>{strongestEvidence.note}</p>
-              <div className={styles['panorama-meta']}>
-                <span>Confianza {confidenceLabel(strongestEvidence.confidence)}</span>
-              </div>
+              <p>
+                <strong>Qué cambió / se confirma:</strong> {marketSignal.explanation}
+              </p>
+              <p>
+                <strong>Por qué importa:</strong> es una señal estructural para decidir dónde
+                profundizar, no una predicción individual.
+              </p>
+              <p className={styles['panorama-action']}>
+                <strong>Para vos:</strong> seguí la señal en Mercado y mantené visibles su
+                geografía y período antes de cambiar el plan.
+              </p>
             </article>
           ) : null}
         </div>
@@ -156,9 +184,12 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
             <article className={styles['panorama-move']} key={move.id}>
               <span className={styles['panorama-move-index']}>{index + 1}</span>
               <div>
-                <div className={styles['panorama-meta']}>
-                  <span>{ROUTE_LABELS[move.route] ?? move.route}</span>
-                  <span>Confianza {confidenceLabel(move.confidence)}</span>
+                <div className={styles['panorama-move-head']}>
+                  <div className={styles['panorama-meta']}>
+                    <span>{ROUTE_LABELS[move.route] ?? move.route}</span>
+                    <span>Confianza {confidenceLabel(move.confidence)}</span>
+                  </div>
+                  <DecisionBadge value={moveDecision(move.route)} />
                 </div>
                 <h3>{move.title}</h3>
                 <p>{move.why}</p>
