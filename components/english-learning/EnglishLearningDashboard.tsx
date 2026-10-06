@@ -351,9 +351,7 @@ function AnkiReinforcement({ profile }: { profile: EnglishLearnerProfile }) {
                 <div key={target.id} className={styles['anki-target-row']}>
                   <div>
                     <strong>{target.label}</strong>
-                    <p>
-                      {target.types.map((type) => type.replaceAll('_', ' ')).join(' · ')}
-                    </p>
+                    <p>{target.types.map((type) => type.replaceAll('_', ' ')).join(' · ')}</p>
                   </div>
                   <span className={styles['anki-priority']}>{target.priority}</span>
                 </div>
