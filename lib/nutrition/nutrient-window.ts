@@ -11,12 +11,7 @@ import type {
 } from './types';
 
 export type NutritionNutrientAttentionKind =
-  | 'below-reference'
-  | 'below-target'
-  | 'above-limit'
-  | 'outside-range'
-  | 'mixed'
-  | 'none';
+  'below-reference' | 'below-target' | 'above-limit' | 'outside-range' | 'mixed' | 'none';
 
 export interface NutritionNutrientReference {
   decisionId: string | null;
@@ -140,11 +135,7 @@ function referenceFromRow(row: Row | null): NutritionNutrientReference | null {
 
 function targetStatusAllowed(row: Row, includeSuperseded: boolean): boolean {
   const status = stringValue(row.status)?.toLowerCase();
-  return (
-    status === null ||
-    status === 'active' ||
-    (includeSuperseded && status === 'superseded')
-  );
+  return status === null || status === 'active' || (includeSuperseded && status === 'superseded');
 }
 
 function targetCoversDate(row: Row, date: string): boolean {
@@ -162,10 +153,7 @@ function targetRowForDate(
   return (
     rows
       .filter((row) => targetStatusAllowed(row, includeSuperseded))
-      .filter(
-        (row) =>
-          stringValue(row.nutrientKey) === nutrientKey && targetCoversDate(row, date),
-      )
+      .filter((row) => stringValue(row.nutrientKey) === nutrientKey && targetCoversDate(row, date))
       .sort((a, b) =>
         (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''),
       )[0] ?? null
@@ -194,9 +182,7 @@ function referenceForSummaryDay(
     return referenceFromRow(exact);
   }
 
-  return referenceFromRow(
-    targetRowForDate(targetRows, nutrientKey, date, includeSuperseded),
-  );
+  return referenceFromRow(targetRowForDate(targetRows, nutrientKey, date, includeSuperseded));
 }
 
 function evaluateReference(
@@ -267,9 +253,7 @@ export function buildNutritionNutrientWindow(
     return Boolean(date && date >= startDate && date <= endDate);
   });
   const trackedDates = new Set(
-    rows
-      .map((row) => stringValue(row.date))
-      .filter((date): date is string => Boolean(date)),
+    rows.map((row) => stringValue(row.date)).filter((date): date is string => Boolean(date)),
   );
 
   const nutrients = NUTRIENT_CATALOG.map((catalog) => {
@@ -340,7 +324,9 @@ export function buildNutritionNutrientWindow(
       key: catalog.key,
       name: catalog.name,
       group: catalog.group,
-      unit: currentReference ? stringValue(currentTargetRow?.unit ?? null) ?? catalog.unit : catalog.unit,
+      unit: currentReference
+        ? (stringValue(currentTargetRow?.unit ?? null) ?? catalog.unit)
+        : catalog.unit,
       averageAmount,
       averageApproximate: completePoints.some((point) => point.approximate),
       daysWithData,

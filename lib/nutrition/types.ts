@@ -3,12 +3,7 @@ import type { SheetReadCode } from '@/lib/google/errors';
 export type NutritionCoverage = 'complete' | 'partial' | 'none' | 'unknown';
 export type NutritionEstimateQuality = 'high' | 'medium' | 'low' | 'mixed' | 'unknown';
 export type NutritionNutrientTargetSemantics =
-  | 'adequacy'
-  | 'range'
-  | 'upper-limit'
-  | 'point'
-  | 'none'
-  | 'unknown';
+  'adequacy' | 'range' | 'upper-limit' | 'point' | 'none' | 'unknown';
 export type NutritionFreshness = 'current' | 'stale' | 'historical' | 'unknown';
 export type NutritionInsightCategory =
   'antioxidants' | 'anti-inflammatory' | 'improvement' | 'pattern';

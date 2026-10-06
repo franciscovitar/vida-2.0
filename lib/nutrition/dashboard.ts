@@ -627,8 +627,7 @@ export async function loadNutritionDashboardData(
   );
   const unknownTodayContributionCount = todayRawFacts?.unknownContributionCount ?? 0;
   const sourceStatus =
-    (unknownTodayContributionCount > 0 ||
-      todayNutrientUniqueness.duplicateKeyCount > 0) &&
+    (unknownTodayContributionCount > 0 || todayNutrientUniqueness.duplicateKeyCount > 0) &&
     baseSourceStatus === 'ready'
       ? 'partial'
       : baseSourceStatus;
@@ -717,17 +716,16 @@ export async function loadNutritionDashboardData(
     todayItems,
     today,
   ).map((nutrient) => {
-      if (nutrient.key === 'fiber' && personalFiberTarget !== null) {
-        return {
-          ...nutrient,
-          target: personalFiberTarget,
-          targetBasis: 'personal-target',
-          targetSemantics: 'point' as const,
-        };
-      }
-      return nutrient;
-    },
-  );
+    if (nutrient.key === 'fiber' && personalFiberTarget !== null) {
+      return {
+        ...nutrient,
+        target: personalFiberTarget,
+        targetBasis: 'personal-target',
+        targetSemantics: 'point' as const,
+      };
+    }
+    return nutrient;
+  });
 
   return {
     source: {

@@ -1518,7 +1518,10 @@ test('Nutrientes no eleva una señal aislada si afecta menos de la mitad de los 
   assert.equal(magnesium.evaluatedDays, 10);
   assert.equal(magnesium.attentionDays, 2);
   assert.equal(magnesium.attentionRate, 0.2);
-  assert.equal(data.attention.some((nutrient) => nutrient.key === 'magnesium'), false);
+  assert.equal(
+    data.attention.some((nutrient) => nutrient.key === 'magnesium'),
+    false,
+  );
 });
 
 test('Nutrientes puede detectar un UL aun cuando la misma decisión también tiene RDA', () => {
@@ -1766,12 +1769,15 @@ test('Tendencias conserva por lineage el target histórico aunque la decisión e
     },
   ];
 
-  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'), {
-    decisionId: 'target-old',
-    energyKcal: 2500,
-    energyKcalLow: null,
-    energyKcalHigh: null,
-  });
+  assert.deepEqual(
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'),
+    {
+      decisionId: 'target-old',
+      energyKcal: 2500,
+      energyKcalLow: null,
+      energyKcalHigh: null,
+    },
+  );
 });
 
 test('Tendencias resuelve por fecha cuando Daily Summary todavía no trae targetDecisionId', () => {
@@ -1822,12 +1828,15 @@ test('Tendencias preserva el rango del target canónico y no lo colapsa al punto
     },
   ];
 
-  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'), {
-    decisionId: 'target-range',
-    energyKcal: null,
-    energyKcalLow: 2400,
-    energyKcalHigh: 2600,
-  });
+  assert.deepEqual(
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'),
+    {
+      decisionId: 'target-range',
+      energyKcal: null,
+      energyKcalLow: 2400,
+      energyKcalHigh: 2600,
+    },
+  );
 });
 
 test('Tendencias falla cerrada en lineage inválido y no sustituye otra decisión', () => {
@@ -1851,12 +1860,15 @@ test('Tendencias falla cerrada en lineage inválido y no sustituye otra decisió
     },
   ];
 
-  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'), {
-    decisionId: 'missing-decision',
-    energyKcal: 2450,
-    energyKcalLow: null,
-    energyKcalHigh: null,
-  });
+  assert.deepEqual(
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'),
+    {
+      decisionId: 'missing-decision',
+      energyKcal: 2450,
+      energyKcalLow: null,
+      energyKcalHigh: null,
+    },
+  );
 });
 
 test('el delta contra target rango mide al borde más cercano sin inventar midpoint', () => {
