@@ -87,7 +87,7 @@ test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada 
   assert.match(panorama, /snapshot\.market\.globalSignals\[0\]/);
   assert.match(panorama, /snapshot\.strongestEvidence\[0\]/);
   assert.doesNotMatch(panorama, /Math\.random|overall score|winner/i);
-  assert.doesNotMatch(panorama, /\/professional\/(crecimiento|biblioteca)/);
+  assert.doesNotMatch(panorama, /\/professional\/biblioteca/);
 });
 
 test('PRO-V2-06. Mercado tiene ruta propia y navegación primaria interna', () => {
@@ -127,5 +127,36 @@ test('PRO-V2-09. Panorama enlaza sólo a superficies V2 ya existentes', () => {
 
   assert.match(panorama, /href="\/professional\/mercado"/);
   assert.match(panorama, /href="\/professional\/herramientas"/);
-  assert.doesNotMatch(panorama, /\/professional\/(crecimiento|biblioteca)/);
+  assert.match(panorama, /href="\/professional\/crecimiento"/);
+  assert.doesNotMatch(panorama, /\/professional\/biblioteca/);
+});
+
+test('PRO-V2-10. Crecimiento tiene ruta propia y conserva la cola canónica', () => {
+  const nav = repoText('components/professional/ProfessionalNavigation.tsx');
+  const route = repoText('app/(app)/professional/crecimiento/page.tsx');
+  const growth = repoText('components/professional/ProfessionalGrowth.tsx');
+
+  assert.match(nav, /label: 'Crecimiento'/);
+  assert.match(route, /ProfessionalGrowth/);
+  assert.match(growth, /growth\.items\.map/);
+  assert.match(growth, /buildProfessionalLearningHandoffPrompt/);
+  assert.match(growth, /Completar esta cola no equivale/);
+});
+
+test('PRO-V2-11. Crecimiento separa evidencia, ownership y perfil', () => {
+  const growth = repoText('components/professional/ProfessionalGrowth.tsx');
+
+  assert.match(growth, /snapshot\.strongestEvidence\.map/);
+  assert.match(growth, /snapshot\.workSplit\.own\.map/);
+  assert.match(growth, /snapshot\.workSplit\.withAi\.map/);
+  assert.match(growth, /snapshot\.workSplit\.delegateToAi\.map/);
+  assert.match(growth, /snapshot\.delegationFrontier\.examples\.map/);
+  assert.match(growth, /snapshot\.profileFindings\.map/);
+});
+
+test('PRO-V2-12. Perfil no convierte evidencia en cambios públicos automáticos', () => {
+  const growth = repoText('components/professional/ProfessionalGrowth.tsx');
+
+  assert.match(growth, /No modifica automáticamente CV, LinkedIn ni perfiles/);
+  assert.doesNotMatch(growth, /employabilityScore|masteryScore|hireProbability/i);
 });
