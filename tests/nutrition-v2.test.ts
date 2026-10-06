@@ -282,7 +282,6 @@ test('un día histórico no se etiqueta como stale por su antigüedad', () => {
   );
 });
 
-
 test('Tendencias usa 28D por defecto y acepta sólo ventanas soportadas', () => {
   assert.equal(normalizeNutritionWindow(undefined), '28d');
   assert.equal(normalizeNutritionWindow('cualquier-cosa'), '28d');
@@ -290,7 +289,6 @@ test('Tendencias usa 28D por defecto y acepta sólo ventanas soportadas', () => 
   assert.equal(normalizeNutritionWindow('90d'), '90d');
   assert.equal(nutritionWindowDays('28d'), 28);
 });
-
 
 test('Nutrientes promedia sólo días completos y detecta una señal persistente de adecuación', () => {
   const summary = [
@@ -352,7 +350,6 @@ test('Nutrientes interpreta UL como días por encima del límite y no como meta 
   assert.equal(sodium.evaluatedDays, 3);
   assert.equal(data.attention[0]?.key, 'sodium');
 });
-
 
 test('Nutrientes no infiere semántica desde targetAmount del resumen si falta Nutrient Targets', () => {
   const summary = [
@@ -423,4 +420,97 @@ test('Nutrientes no eleva una señal aislada si afecta menos de la mitad de los 
   assert.equal(magnesium.attentionDays, 2);
   assert.equal(magnesium.attentionRate, 0.2);
   assert.equal(data.attention.some((nutrient) => nutrient.key === 'magnesium'), false);
+});
+
+
+test('Nutrientes puede detectar un UL aun cuando la misma decisión también tiene RDA', () => {
+  const summary = [
+    {
+      date: '2026-10-01',
+      nutrientKey: 'magnesium',
+      amount: 900,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-02',
+      nutrientKey: 'magnesium',
+      amount: 850,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-03',
+      nutrientKey: 'magnesium',
+      amount: 500,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+  ];
+  const targets = [
+    {
+      decisionId: 'mg-rda-ul',
+      effectiveFrom: '2026-01-01',
+      status: 'active',
+      nutrientKey: 'magnesium',
+      targetAmount: 400,
+      upperTarget: 800,
+      unit: 'mg',
+      basis: 'RDA / UL',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, targets, '2026-10-03', 7);
+  const magnesium = data.nutrients.find((nutrient) => nutrient.key === 'magnesium');
+
+  assert.ok(magnesium);
+  assert.equal(magnesium.evaluatedDays, 3);
+  assert.equal(magnesium.attentionDays, 2);
+  assert.equal(magnesium.attentionKind, 'above-limit');
+  assert.equal(data.attention[0]?.key, 'magnesium');
+});
+
+test('Nutrientes marca mixed si el mismo período cruza ambos extremos de una referencia', () => {
+  const summary = [
+    {
+      date: '2026-10-01',
+      nutrientKey: 'magnesium',
+      amount: 300,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-02',
+      nutrientKey: 'magnesium',
+      amount: 900,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+    {
+      date: '2026-10-03',
+      nutrientKey: 'magnesium',
+      amount: 950,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+  ];
+  const targets = [
+    {
+      decisionId: 'mg-rda-ul',
+      effectiveFrom: '2026-01-01',
+      status: 'active',
+      nutrientKey: 'magnesium',
+      targetAmount: 400,
+      upperTarget: 800,
+      unit: 'mg',
+      basis: 'RDA / UL',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, targets, '2026-10-03', 7);
+  const magnesium = data.nutrients.find((nutrient) => nutrient.key === 'magnesium');
+
+  assert.ok(magnesium);
+  assert.equal(magnesium.attentionDays, 3);
+  assert.equal(magnesium.attentionKind, 'mixed');
 });

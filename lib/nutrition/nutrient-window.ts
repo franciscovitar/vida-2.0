@@ -165,39 +165,60 @@ function referenceForDay(
   return referenceFromRow(targetRowForDate(targetRows, nutrientKey, date));
 }
 
-function attentionKindFor(
-  semantics: NutritionNutrientTargetSemantics,
-): NutritionNutrientAttentionKind {
-  if (semantics === 'adequacy') return 'below-reference';
-  if (semantics === 'point') return 'below-target';
-  if (semantics === 'upper-limit') return 'above-limit';
-  if (semantics === 'range') return 'outside-range';
-  return 'none';
-}
-
-function needsAttention(value: number, reference: NutritionNutrientReference): boolean | null {
+function evaluateReference(
+  value: number,
+  reference: NutritionNutrientReference,
+): { evaluable: boolean; attention: NutritionNutrientAttentionKind | null } {
   if (reference.semantics === 'adequacy') {
     const minimum = reference.target ?? reference.lowerTarget;
-    return minimum === null ? null : value < minimum;
+    if (minimum === null && reference.upperTarget === null) {
+      return { evaluable: false, attention: null };
+    }
+    if (minimum !== null && value < minimum) {
+      return { evaluable: true, attention: 'below-reference' };
+    }
+    if (reference.upperTarget !== null && value > reference.upperTarget) {
+      return { evaluable: true, attention: 'above-limit' };
+    }
+    return { evaluable: true, attention: null };
   }
 
   if (reference.semantics === 'point') {
-    return reference.target === null ? null : value < reference.target;
+    if (reference.target === null && reference.upperTarget === null) {
+      return { evaluable: false, attention: null };
+    }
+    if (reference.target !== null && value < reference.target) {
+      return { evaluable: true, attention: 'below-target' };
+    }
+    if (reference.upperTarget !== null && value > reference.upperTarget) {
+      return { evaluable: true, attention: 'above-limit' };
+    }
+    return { evaluable: true, attention: null };
   }
 
   if (reference.semantics === 'upper-limit') {
     const limit = reference.upperTarget ?? reference.target;
-    return limit === null ? null : value > limit;
+    if (limit === null) return { evaluable: false, attention: null };
+    return {
+      evaluable: true,
+      attention: value > limit ? 'above-limit' : null,
+    };
   }
 
   if (reference.semantics === 'range') {
-    if (reference.lowerTarget === null && reference.upperTarget === null) return null;
-    if (reference.lowerTarget !== null && value < reference.lowerTarget) return true;
-    if (reference.upperTarget !== null && value > reference.upperTarget) return true;
-    return false;
+    if (reference.lowerTarget === null && reference.upperTarget === null) {
+      return { evaluable: false, attention: null };
+    }
+    if (reference.lowerTarget !== null && value < reference.lowerTarget) {
+      return { evaluable: true, attention: 'outside-range' };
+    }
+    if (reference.upperTarget !== null && value > reference.upperTarget) {
+      return { evaluable: true, attention: 'outside-range' };
+    }
+    return { evaluable: true, attention: null };
   }
 
-  return null;
+  return { evaluable: false, attention: null };
 }
 
 export function buildNutritionNutrientWindow(
@@ -266,12 +287,13 @@ export function buildNutritionNutrientWindow(
 
     for (const point of completePoints) {
       if (!point.reference) continue;
-      const result = needsAttention(point.value, point.reference);
-      if (result === null) continue;
+      const evaluation = evaluateReference(point.value, point.reference);
+      if (!evaluation.evaluable) continue;
       evaluatedDays += 1;
-      if (result) attentionDays += 1;
-      const kind = attentionKindFor(point.reference.semantics);
-      if (kind !== 'none') kinds.add(kind);
+      if (evaluation.attention) {
+        attentionDays += 1;
+        kinds.add(evaluation.attention);
+      }
       if (point.reference.decisionId) targetDecisionIds.add(point.reference.decisionId);
     }
 
