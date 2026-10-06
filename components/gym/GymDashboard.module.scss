@@ -289,3 +289,22 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+.disclosure {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.disclosure > summary {
+  width: fit-content;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.disclosure[open] > summary {
+  color: var(--text);
+}
