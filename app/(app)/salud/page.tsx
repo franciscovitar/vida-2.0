@@ -137,7 +137,10 @@ export default async function SaludPage({
               <strong className="tabular">{health.completeDays}</strong>
               <small>importaciones</small>
             </div>
-            <div className={local['summary-item']} data-tone={health.partialDays > 0 ? 'watch' : 'neutral'}>
+            <div
+              className={local['summary-item']}
+              data-tone={health.partialDays > 0 ? 'watch' : 'neutral'}
+            >
               <span>Parciales</span>
               <strong className="tabular">{health.partialDays}</strong>
               <small>en reconciliación</small>
@@ -168,7 +171,13 @@ export default async function SaludPage({
                       <td className="tabular">{row.sleep}</td>
                       <td className="tabular">{row.steps}</td>
                       <td className="tabular">{row.restingHr}</td>
-                      <td>{row.importKind === 'partial' ? 'Parcial' : row.importKind === 'source-incomplete' ? 'Incompleta' : 'Completa'}</td>
+                      <td>
+                        {row.importKind === 'partial'
+                          ? 'Parcial'
+                          : row.importKind === 'source-incomplete'
+                            ? 'Incompleta'
+                            : 'Completa'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

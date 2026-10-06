@@ -4,10 +4,7 @@ import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import type { PersonalDeviationRadar } from '@/lib/health/deviation-radar';
 import type { RhythmFeaturesViewModel } from '@/lib/health/rhythm-features-sheet';
-import type {
-  HealthExplainableScore,
-  HealthMomentum,
-} from '@/lib/health/scores';
+import type { HealthExplainableScore, HealthMomentum } from '@/lib/health/scores';
 
 import styles from './HealthScoreCards.module.scss';
 
@@ -48,7 +45,9 @@ export function HealthReadinessSummary({ score }: { score: HealthExplainableScor
           {score.score === null ? null : <small>/100</small>}
         </div>
       </div>
-      <p className={styles.caveat}>Score de bienestar/readiness; no es diagnóstico ni aptitud médica.</p>
+      <p className={styles.caveat}>
+        Score de bienestar/readiness; no es diagnóstico ni aptitud médica.
+      </p>
       <details className={styles.details}>
         <summary>Ver evidencia del Readiness</summary>
         <div className={styles['contributor-grid']}>
@@ -177,7 +176,9 @@ export function HealthLongitudinalSummary({
                     : 'Sin evidencia suficiente'}
             </strong>
             <small>
-              {momentum.score === null ? momentum.detail : `${momentum.score}/100 · confianza ${momentum.confidence}%`}
+              {momentum.score === null
+                ? momentum.detail
+                : `${momentum.score}/100 · confianza ${momentum.confidence}%`}
             </small>
           </div>
         </article>
