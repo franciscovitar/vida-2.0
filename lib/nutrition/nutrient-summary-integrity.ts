@@ -2,7 +2,7 @@ import type { PlainCell } from '@/lib/data/plain';
 
 import type { NutritionCoverage } from './types';
 
-type Row = Readonly<Record<string, PlainCell | undefined>>;
+type Row = Readonly<Record<string, PlainCell>>;
 
 export interface NutritionNutrientSummaryIntegrityResult {
   rows: Row[];
