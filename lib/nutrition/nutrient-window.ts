@@ -304,7 +304,7 @@ export function buildNutritionNutrientWindow(
       key: catalog.key,
       name: catalog.name,
       group: catalog.group,
-      unit: currentReference ? stringValue(currentTargetRow?.unit) ?? catalog.unit : catalog.unit,
+      unit: currentReference ? stringValue(currentTargetRow?.unit ?? null) ?? catalog.unit : catalog.unit,
       averageAmount,
       averageApproximate: completePoints.some((point) => point.approximate),
       daysWithData,
