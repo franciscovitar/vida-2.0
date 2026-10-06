@@ -19,7 +19,10 @@ import {
   classifyNutritionTargetSemantics,
   nutritionProgressTarget,
 } from '@/lib/nutrition/target-semantics';
-import { resolveNutritionHistoricalEnergyTarget } from '@/lib/nutrition/target-history';
+import {
+  resolveNutritionHistoricalEnergyTarget,
+  selectNutritionTargetRowForDate,
+} from '@/lib/nutrition/target-history';
 import type { NutritionMacroProgress } from '@/lib/nutrition/types';
 import { normalizeNutritionWindow, nutritionWindowDays } from '@/lib/nutrition/window';
 
@@ -736,7 +739,6 @@ test('Tendencias falla cerrada en lineage inválido y no sustituye otra decisió
   });
 });
 
-
 test('el delta contra target rango mide al borde más cercano sin inventar midpoint', () => {
   assert.equal(nutritionDisplayDeltaToTarget(2500, null, null, null, 2400, 2600), 0);
   assert.equal(nutritionDisplayDeltaToTarget(2300, null, null, null, 2400, 2600), -100);
@@ -745,4 +747,46 @@ test('el delta contra target rango mide al borde más cercano sin inventar midpo
 
 test('un target puntual conserva prioridad sobre sus límites auxiliares', () => {
   assert.equal(nutritionDisplayDeltaToTarget(2600, null, null, 2500, 2400, 2700), 100);
+});
+
+
+test('Hoy histórico puede usar una decisión superseded vigente para esa fecha', () => {
+  const target = selectNutritionTargetRowForDate(
+    [
+      {
+        decisionId: 'old',
+        effectiveFrom: '2026-08-01',
+        effectiveTo: '2026-09-30',
+        status: 'superseded',
+      },
+      {
+        decisionId: 'current',
+        effectiveFrom: '2026-10-01',
+        status: 'active',
+      },
+    ],
+    '2026-09-15',
+  );
+
+  assert.equal(target?.decisionId, 'old');
+});
+
+test('si dos decisiones empiezan el mismo día, active prevalece sobre superseded', () => {
+  const target = selectNutritionTargetRowForDate(
+    [
+      {
+        decisionId: 'old-same-day',
+        effectiveFrom: '2026-10-01',
+        status: 'superseded',
+      },
+      {
+        decisionId: 'active-same-day',
+        effectiveFrom: '2026-10-01',
+        status: 'active',
+      },
+    ],
+    '2026-10-03',
+  );
+
+  assert.equal(target?.decisionId, 'active-same-day');
 });

@@ -8,7 +8,10 @@ import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
 import { classifyNutritionTargetSemantics } from './target-semantics';
 import { readNutritionTabValues } from './sheets-read';
-import { resolveNutritionHistoricalEnergyTarget } from './target-history';
+import {
+  resolveNutritionHistoricalEnergyTarget,
+  selectNutritionTargetRowForDate,
+} from './target-history';
 import type {
   NutritionAiInsight,
   NutritionCoverage,
@@ -138,17 +141,7 @@ function aggregateConfidence(
 }
 
 function chooseTarget(rows: readonly Row[], today: string): NutritionTarget | null {
-  const eligible = activeRows(rows)
-    .filter((row) => {
-      const from = stringValue(row.effectiveFrom);
-      const to = stringValue(row.effectiveTo);
-      return Boolean(from && from <= today && (!to || to >= today));
-    })
-    .sort((a, b) =>
-      (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''),
-    );
-
-  const row = eligible[0];
+  const row = selectNutritionTargetRowForDate(rows, today);
   if (!row) return null;
   return {
     decisionId: stringValue(row.decisionId) ?? 'target',

@@ -1,6 +1,6 @@
 import type { PlainCell } from '@/lib/data/plain';
 
-type HistoricalRow = Readonly<Record<string, PlainCell | undefined>>;
+export type NutritionTargetRow = Readonly<Record<string, PlainCell | undefined>>;
 
 export interface NutritionHistoricalEnergyTarget {
   decisionId: string | null;
@@ -27,13 +27,42 @@ function numberValue(value: PlainCell | undefined): number | null {
   return null;
 }
 
-function canRepresentHistoricalDecision(row: HistoricalRow): boolean {
+function canRepresentHistoricalDecision(row: NutritionTargetRow): boolean {
   const status = stringValue(row.status)?.toLowerCase();
   return status === null || status === 'active' || status === 'superseded';
 }
 
+function historicalStatusRank(row: NutritionTargetRow): number {
+  const status = stringValue(row.status)?.toLowerCase();
+  if (status === 'active' || status === null) return 2;
+  if (status === 'superseded') return 1;
+  return 0;
+}
+
+export function selectNutritionTargetRowForDate(
+  targetRows: readonly NutritionTargetRow[],
+  date: string,
+): NutritionTargetRow | null {
+  return (
+    targetRows
+      .filter(canRepresentHistoricalDecision)
+      .filter((row) => {
+        const from = stringValue(row.effectiveFrom);
+        const to = stringValue(row.effectiveTo);
+        return Boolean(from && from <= date && (!to || to >= date));
+      })
+      .sort((a, b) => {
+        const dateOrder = (stringValue(b.effectiveFrom) ?? '').localeCompare(
+          stringValue(a.effectiveFrom) ?? '',
+        );
+        if (dateOrder !== 0) return dateOrder;
+        return historicalStatusRank(b) - historicalStatusRank(a);
+      })[0] ?? null
+  );
+}
+
 function historicalTargetFromRow(
-  row: HistoricalRow,
+  row: NutritionTargetRow,
   fallbackDecisionId: string | null = null,
 ): NutritionHistoricalEnergyTarget {
   return {
@@ -45,7 +74,7 @@ function historicalTargetFromRow(
 }
 
 function summaryFallback(
-  summaryRow: HistoricalRow,
+  summaryRow: NutritionTargetRow,
   decisionId: string | null,
 ): NutritionHistoricalEnergyTarget {
   return {
@@ -57,8 +86,8 @@ function summaryFallback(
 }
 
 export function resolveNutritionHistoricalEnergyTarget(
-  summaryRow: HistoricalRow,
-  targetRows: readonly HistoricalRow[],
+  summaryRow: NutritionTargetRow,
+  targetRows: readonly NutritionTargetRow[],
   date: string,
 ): NutritionHistoricalEnergyTarget {
   const decisionId = stringValue(summaryRow.targetDecisionId);
@@ -71,16 +100,6 @@ export function resolveNutritionHistoricalEnergyTarget(
       : summaryFallback(summaryRow, decisionId);
   }
 
-  const effective =
-    usableTargets
-      .filter((row) => {
-        const from = stringValue(row.effectiveFrom);
-        const to = stringValue(row.effectiveTo);
-        return Boolean(from && from <= date && (!to || to >= date));
-      })
-      .sort((a, b) =>
-        (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''),
-      )[0] ?? null;
-
+  const effective = selectNutritionTargetRowForDate(usableTargets, date);
   return effective ? historicalTargetFromRow(effective) : summaryFallback(summaryRow, null);
 }
