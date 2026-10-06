@@ -38,7 +38,6 @@ test('Gym mantiene la carga compartida como lectura derivada y sin nueva escritu
   assert.equal(/create|update|delete|write/i.test(loader), false);
 });
 
-
 test('Gym Rutina acerca la última ejecución comparable al ejercicio prescripto', () => {
   const routine = source('components/gym/GymRoutineTabs.tsx');
   const dashboard = source('components/gym/GymDashboard.tsx');
