@@ -125,7 +125,6 @@ export function GymRoutineTabs({
     ? latestComparableSession({ dayLabel: day.label, sessions, summaries, today })
     : null;
 
-
   const mobilitySections = routine.supplementalSections.filter(
     (section) => section.kind === 'mobility' || section.kind === 'recovery',
   );
@@ -259,7 +258,9 @@ export function GymRoutineTabs({
                       <span>{SECTION_LABELS[section.kind]}</span>
                       <h3>{section.label}</h3>
                     </div>
-                    {section.description ? <p className={styles.body}>{section.description}</p> : null}
+                    {section.description ? (
+                      <p className={styles.body}>{section.description}</p>
+                    ) : null}
                     {section.items.length > 0 ? (
                       <ol className={styles['supplemental-items']}>
                         {section.items.map((item, index) => (
