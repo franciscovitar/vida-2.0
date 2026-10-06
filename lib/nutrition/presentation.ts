@@ -1,3 +1,5 @@
+import type { NutritionCoverage } from './types';
+
 export interface NutritionDisplayEstimate {
   value: number | null;
   approximate: boolean;
@@ -61,4 +63,15 @@ export function nutritionDisplayDeltaToTarget(
   if (upper !== null && display.value > upper) return display.value - upper;
   if (lower !== null || upper !== null) return 0;
   return null;
+}
+
+export function nutritionComparableProgressPercent(
+  amount: number | null,
+  target: number | null,
+  coverage: NutritionCoverage,
+): number | null {
+  if (coverage !== 'complete') return null;
+  if (amount === null || !Number.isFinite(amount)) return null;
+  if (target === null || !Number.isFinite(target) || target <= 0) return null;
+  return Math.max(0, Math.round((amount / target) * 100));
 }

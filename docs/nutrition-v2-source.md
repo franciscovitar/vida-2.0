@@ -37,6 +37,8 @@ La UI muestra proteína, carbohidratos, grasas y fibra.
 - con cobertura parcial: Vida suma únicamente valores conocidos y los etiqueta como `conocidos/parcial`;
 - Vida no infiere proteína, carbohidratos, grasas ni fibra desde calorías, nombre del alimento o una distribución heurística;
 - si un alimento material no tiene un macro cuantificado, ese valor permanece desconocido para ese alimento y el total diario no se presenta como completo;
+- un subtotal parcial puede mostrarse como cantidad conocida, pero no genera porcentaje de meta ni conclusión de adecuación;
+- energía parcial tampoco genera porcentaje o diferencia contra el objetivo;
 - desconocido nunca se convierte en cero.
 
 Los objetivos activos de `Targets` tienen prioridad para energía/macros. En particular, la meta personal activa de fibra prevalece visualmente sobre una referencia dietaria genérica de `Nutrient Targets`.

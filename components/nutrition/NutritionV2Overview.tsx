@@ -11,6 +11,7 @@ import {
 import type { CSSProperties, ReactNode } from 'react';
 
 import {
+  nutritionComparableProgressPercent,
   nutritionDisplayDeltaToTarget,
   nutritionDisplayPointEstimate,
 } from '@/lib/nutrition/presentation';
@@ -86,6 +87,7 @@ function energyDifferenceLabel(
   data: NutritionDashboardData['todayEnergy'],
   target: NutritionDashboardData['target'],
 ): string {
+  if (data.coverage !== 'complete') return 'No comparable';
   if (!target) return '—';
   const delta = nutritionDisplayDeltaToTarget(
     data.amount,
@@ -107,11 +109,6 @@ function energyDifferenceLabel(
     : `+${formatNumber(delta)} kcal sobre rango`;
 }
 
-function percentage(amount: number | null, target: number | null): number | null {
-  if (amount === null || target === null || target <= 0) return null;
-  return Math.max(0, Math.round((amount / target) * 100));
-}
-
 function coverageLabel(coverage: string): string {
   if (coverage === 'complete') return 'completo';
   if (coverage === 'partial') return 'parcial';
@@ -128,7 +125,11 @@ function qualityLabel(quality: string): string {
 }
 
 function MacroBar({ macro }: { macro: NutritionMacroProgress }) {
-  const progress = percentage(macro.amount, macro.target);
+  const progress = nutritionComparableProgressPercent(
+    macro.amount,
+    macro.target,
+    macro.coverage,
+  );
   const style = {
     '--macro-progress': `${Math.min(progress ?? 0, 100)}%`,
   } as CSSProperties;
@@ -269,7 +270,11 @@ export function NutritionV2Overview({
     data.todayEnergy.low,
     data.todayEnergy.high,
   );
-  const energyProgress = percentage(energyDisplay.value, targetEnergy);
+  const energyProgress = nutritionComparableProgressPercent(
+    energyDisplay.value,
+    targetEnergy,
+    data.todayEnergy.coverage,
+  );
   const targetEnergyLabel = formatEnergyTarget(data.target);
   const energyDifference = energyDifferenceLabel(data.todayEnergy, data.target);
   const ringStyle = {
@@ -352,11 +357,13 @@ export function NutritionV2Overview({
               <small>Consumidas</small>
               <strong>{formatEnergy(data.todayEnergy)}</strong>
               <span>
-                {energyProgress === null
-                  ? targetEnergyLabel === 'Pendiente'
-                    ? 'meta no registrada'
-                    : `objetivo ${targetEnergyLabel}`
-                  : `${energyProgress}% de ${formatNumber(targetEnergy)} kcal`}
+                {data.todayEnergy.coverage !== 'complete'
+                  ? `${coverageLabel(data.todayEnergy.coverage)} · sin comparar con meta`
+                  : energyProgress === null
+                    ? targetEnergyLabel === 'Pendiente'
+                      ? 'meta no registrada'
+                      : `objetivo ${targetEnergyLabel}`
+                    : `${energyProgress}% de ${formatNumber(targetEnergy)} kcal`}
               </span>
             </div>
           </div>

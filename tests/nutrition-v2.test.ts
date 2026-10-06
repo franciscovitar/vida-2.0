@@ -9,6 +9,7 @@ import { deriveNutritionFreshness } from '@/lib/nutrition/freshness';
 import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import {
+  nutritionComparableProgressPercent,
   nutritionDisplayDelta,
   nutritionDisplayDeltaToTarget,
   nutritionDisplayPointEstimate,
@@ -166,6 +167,13 @@ test('el delta energético conserva sobre-target y under-target sin clamp', () =
   assert.equal(nutritionDisplayDelta(2670, null, null, 2500), 170);
   assert.equal(nutritionDisplayDelta(2300, null, null, 2500), -200);
   assert.equal(nutritionDisplayDelta(null, 2400, 2600, 2500), 0);
+});
+
+test('los porcentajes contra meta requieren cobertura completa', () => {
+  assert.equal(nutritionComparableProgressPercent(80, 100, 'complete'), 80);
+  assert.equal(nutritionComparableProgressPercent(80, 100, 'partial'), null);
+  assert.equal(nutritionComparableProgressPercent(80, 100, 'none'), null);
+  assert.equal(nutritionComparableProgressPercent(null, 100, 'complete'), null);
 });
 
 test('RDA y AI se tratan como adecuación, no como upper limit', () => {
