@@ -405,6 +405,85 @@
   font-size: 0.77rem !important;
 }
 
+.anki-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.anki-stat {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 0.8rem;
+}
+
+.anki-stat span {
+  display: block;
+  color: var(--text-subtle);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.anki-stat strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.anki-target-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.anki-target-row {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 0.55rem 0;
+}
+
+.anki-target-row:last-child {
+  border-bottom: 0;
+}
+
+.anki-target-row strong {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.anki-target-row p {
+  margin-top: 0.12rem;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+}
+
+.anki-priority {
+  flex: 0 0 auto;
+  border: 1px solid var(--c-learning-border);
+  border-radius: var(--radius-full);
+  color: var(--c-learning);
+  background: var(--c-learning-soft);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.28rem 0.48rem;
+  text-transform: capitalize;
+}
+
+.anki-sync-note {
+  margin-top: 0.8rem;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+}
+
 @media (width >= 700px) {
   .hero-stats,
   .skill-grid,

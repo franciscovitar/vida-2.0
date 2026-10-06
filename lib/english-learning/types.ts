@@ -69,6 +69,23 @@ export interface EnglishActivity {
   practice_xp?: number;
 }
 
+export interface EnglishAnkiTargetSummary {
+  id: string;
+  label: string;
+  priority: 'critical' | 'high' | 'medium' | 'low' | 'retired';
+  lifecycle: string;
+  types: string[];
+}
+
+export interface EnglishAnkiSummary {
+  active_targets: number;
+  high_priority_targets: number;
+  retired_targets: number;
+  last_session_processed?: string;
+  local_sync_enabled: boolean;
+  current_targets: EnglishAnkiTargetSummary[];
+}
+
 export interface EnglishLearnerProfile {
   schema_version: number;
   project_id: string;
@@ -90,6 +107,7 @@ export interface EnglishLearnerProfile {
   };
   activity: EnglishActivity | null;
   evidence_notes?: string[];
+  anki_summary?: EnglishAnkiSummary;
 }
 
 export type EnglishProfileSourceState = 'ready' | 'unconfigured' | 'unavailable' | 'invalid';

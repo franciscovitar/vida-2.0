@@ -5,3 +5,4 @@ build
 node_modules
 package-lock.json
 data/generated/technology-library.json
+lib/english-learning/profile.snapshot.json

@@ -317,6 +317,70 @@ function ProgressEvidence({ profile }: { profile: EnglishLearnerProfile }) {
   );
 }
 
+function AnkiReinforcement({ profile }: { profile: EnglishLearnerProfile }) {
+  const anki = profile.anki_summary;
+
+  return (
+    <Card>
+      <SectionHeader
+        title="Adaptive Anki"
+        description="Targets chosen from real speaking evidence, not a generic vocabulary list."
+        icon={BookOpen}
+        domain="learning"
+      />
+      {anki ? (
+        <>
+          <div className={styles['anki-stats']}>
+            <div className={styles['anki-stat']}>
+              <span>Active targets</span>
+              <strong>{anki.active_targets}</strong>
+            </div>
+            <div className={styles['anki-stat']}>
+              <span>High priority</span>
+              <strong>{anki.high_priority_targets}</strong>
+            </div>
+            <div className={styles['anki-stat']}>
+              <span>Retired</span>
+              <strong>{anki.retired_targets}</strong>
+            </div>
+          </div>
+
+          {anki.current_targets.length ? (
+            <div className={styles['anki-target-list']}>
+              {anki.current_targets.map((target) => (
+                <div key={target.id} className={styles['anki-target-row']}>
+                  <div>
+                    <strong>{target.label}</strong>
+                    <p>{target.types.map((type) => type.replaceAll('_', ' ')).join(' · ')}</p>
+                  </div>
+                  <span className={styles['anki-priority']}>{target.priority}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="No active reinforcement targets"
+              body="New targets appear only when speaking evidence justifies them."
+            />
+          )}
+
+          <p className={styles['anki-sync-note']}>
+            {anki.local_sync_enabled
+              ? 'Local Anki write-back is connected.'
+              : 'Canonical deck state is connected. Local Anki write-back is still pending.'}
+            {anki.last_session_processed ? ` Last processed: ${anki.last_session_processed}.` : ''}
+          </p>
+        </>
+      ) : (
+        <EmptyState
+          title="Adaptive deck data not available yet"
+          body="The dashboard can still show the learner profile while Anki state is being connected."
+        />
+      )}
+    </Card>
+  );
+}
+
 function AchievementsAndCoverage({ profile }: { profile: EnglishLearnerProfile }) {
   return (
     <Card>
@@ -384,6 +448,7 @@ export function EnglishLearningDashboard({ result }: { result: EnglishProfileLoa
         <ProgressEvidence profile={result.profile} />
         <AchievementsAndCoverage profile={result.profile} />
       </div>
+      <AnkiReinforcement profile={result.profile} />
     </div>
   );
 }
