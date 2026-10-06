@@ -28,8 +28,36 @@ const COPY: Record<
   },
 };
 
-export function MonthlyReviewCard({ domain }: { domain: MonthlyReviewDomain }) {
+export function MonthlyReviewCard({
+  domain,
+  compact = false,
+}: {
+  domain: MonthlyReviewDomain;
+  compact?: boolean;
+}) {
   const copy = COPY[domain];
+
+  if (compact) {
+    return (
+      <Card compact>
+        <div className={styles['compact-layout']}>
+          <div className={styles['compact-copy']}>
+            <span className={styles.icon} aria-hidden="true">
+              <CalendarRange size={18} />
+            </span>
+            <div>
+              <strong>{copy.title}</strong>
+              <p>
+                Usá tus datos reales del período y cambiá sólo lo que tenga evidencia suficiente.
+              </p>
+            </div>
+          </div>
+          <CopyAnalysisButton text={copy.prompt} />
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card aria-labelledby={`monthly-review-${domain}`}>
       <SectionHeader

@@ -289,3 +289,197 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.disclosure {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.disclosure > summary {
+  width: fit-content;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.disclosure[open] > summary {
+  color: var(--text);
+}
+
+.previous-session {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 0.35rem 0.65rem;
+  align-items: baseline;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--c-health-border);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--c-health-soft) 28%, var(--surface));
+}
+
+.previous-session > span {
+  color: var(--c-health);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.previous-session > strong {
+  color: var(--text);
+  font-size: 0.75rem;
+}
+
+.previous-session > small {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+}
+
+.previous-performance {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+  margin-top: 0.55rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+}
+
+.previous-performance > span {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.previous-performance > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.previous-performance small {
+  padding: 0.16rem 0.34rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  font-size: 0.67rem;
+}
+
+@media (width <= 640px) {
+  .previous-session {
+    grid-template-columns: 1fr auto;
+  }
+
+  .previous-session > small {
+    grid-column: 1 / -1;
+  }
+}
+
+.context-disclosure,
+.supplemental-disclosure,
+.history-disclosure {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.context-disclosure > summary,
+.supplemental-disclosure > summary,
+.history-disclosure > summary {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.72rem 0.82rem;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.context-disclosure > summary::-webkit-details-marker,
+.supplemental-disclosure > summary::-webkit-details-marker,
+.history-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.context-disclosure > summary::after,
+.supplemental-disclosure > summary::after,
+.history-disclosure > summary::after {
+  color: var(--text-subtle);
+  content: '+';
+  font-size: 1rem;
+}
+
+.context-disclosure[open] > summary::after,
+.supplemental-disclosure[open] > summary::after,
+.history-disclosure[open] > summary::after {
+  content: '−';
+}
+
+.context-disclosure > summary span,
+.supplemental-disclosure > summary span {
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.context-disclosure > summary small,
+.supplemental-disclosure > summary small {
+  margin-left: auto;
+  color: var(--text-subtle);
+  font-size: 0.67rem;
+}
+
+.context-body {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0 0.82rem 0.82rem;
+}
+
+.supplemental-disclosure {
+  margin-top: 0.45rem;
+}
+
+.supplemental-disclosure .supplemental-grid {
+  margin: 0;
+  padding: 0 0.82rem 0.82rem;
+}
+
+.history-disclosure {
+  margin-top: 0.1rem;
+}
+
+.history-disclosure > summary {
+  justify-content: flex-start;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.history-list {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0 0.72rem 0.72rem;
+}
+
+@media (width <= 640px) {
+  .context-disclosure > summary,
+  .supplemental-disclosure > summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .context-disclosure > summary small,
+  .supplemental-disclosure > summary small {
+    grid-column: 1;
+    grid-row: 2;
+    margin-left: 0;
+  }
+
+  .context-disclosure > summary::after,
+  .supplemental-disclosure > summary::after {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}

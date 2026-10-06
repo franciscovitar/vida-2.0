@@ -153,3 +153,14 @@ Cardio y fútbol dejan de mostrarse como checks del Habit Tracker, pero sus colu
 - faltantes no se convierten en cero;
 - la UI distingue observación, estimación y benchmark;
 - la UI describe asociaciones/cambios, no causas ni diagnósticos.
+
+## Arquitectura de presentación V2.3
+
+Desde 2026-10-06, la interfaz de Gimnasio se organiza por tarea en cuatro superficies derivadas:
+
+- `/gimnasio` — **Resumen**: orientación operativa corta; semana, último registro, estado reciente y cambios útiles.
+- `/gimnasio/rutina` — **Rutina**: prescripción canónica desde Notion y reglas del plan mediante progressive disclosure.
+- `/gimnasio/progreso` — **Progreso**: analítica longitudinal, historial, distribución de trabajo y benchmark externo secundario.
+- `/gimnasio/cardio` — **Cardio**: pasos, bicicleta y fútbol contra el plan personal; MET-min permanece como equivalencia derivada.
+
+La separación es de presentación, no de autoridad. No crea nuevos stores, no modifica la rutina canónica, no habilita escrituras Gym y no convierte Salud/Nutrición en dependencias obligatorias del dashboard. El objetivo es reducir carga cognitiva y hacer que cada vista responda una pregunta concreta sin perder acceso al detalle.

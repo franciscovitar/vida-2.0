@@ -1,0 +1,280 @@
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.65fr);
+  gap: 1rem;
+  padding: clamp(1.05rem, 2vw, 1.45rem);
+  border: 1px solid var(--c-health-border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(in srgb, var(--c-health-soft) 74%, transparent),
+      transparent 44%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--c-health-soft) 78%, var(--surface)),
+      var(--surface) 66%
+    );
+  box-shadow: var(--shadow-sm);
+}
+
+.copy {
+  display: grid;
+  align-content: start;
+  gap: 0.42rem;
+}
+
+.eyebrow {
+  color: var(--c-health);
+  font-size: 0.7rem;
+  font-weight: 780;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.copy h2 {
+  margin: 0;
+  max-width: 18ch;
+  color: var(--text);
+  font-size: clamp(1.65rem, 4vw, 2.35rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.copy p:not(.eyebrow) {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.status {
+  display: flex;
+  gap: 0.72rem;
+  align-self: start;
+  align-items: flex-start;
+  padding: 0.9rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.status > svg {
+  flex: 0 0 auto;
+  margin-top: 1rem;
+  color: var(--c-health);
+}
+
+.status > span {
+  display: grid;
+  gap: 0.16rem;
+}
+
+.status small {
+  color: var(--text-subtle);
+  font-size: 0.67rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status strong {
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.status span span {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.status[data-tone='positive'] {
+  border-color: var(--c-habits-border);
+  background: color-mix(in srgb, var(--c-habits-soft) 70%, var(--surface));
+}
+
+.status[data-tone='positive'] > svg {
+  color: var(--c-habits);
+}
+
+.status[data-tone='watch'] {
+  border-color: var(--c-projects-border);
+  background: color-mix(in srgb, var(--c-projects-soft) 68%, var(--surface));
+}
+
+.metrics {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+}
+
+.metrics article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.68rem;
+  min-width: 0;
+  padding: 0.88rem;
+}
+
+.metrics article + article {
+  border-left: 1px solid var(--border);
+}
+
+.metrics svg {
+  margin-top: 0.15rem;
+  color: var(--c-health);
+}
+
+.metrics div {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.metrics span,
+.metrics small {
+  color: var(--text-muted);
+  font-size: 0.69rem;
+}
+
+.metrics strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 1.08rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.actions a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.68rem;
+  align-items: center;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: inherit;
+  background: var(--surface-2);
+  text-decoration: none;
+}
+
+.actions a:hover {
+  border-color: var(--c-health-border);
+  background: color-mix(in srgb, var(--c-health-soft) 34%, var(--surface-2));
+}
+
+.icon,
+.insight-icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.62rem;
+  color: var(--c-health);
+  background: var(--c-health-soft);
+}
+
+.actions a > span:last-child {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.actions strong {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.actions small {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.insights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.68rem;
+}
+
+.insights article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.62rem;
+  padding: 0.78rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.insights article[data-tone='positive'] {
+  border-color: var(--c-habits-border);
+  background: color-mix(in srgb, var(--c-habits-soft) 52%, var(--surface));
+}
+
+.insights article[data-tone='watch'] {
+  border-color: var(--c-projects-border);
+  background: color-mix(in srgb, var(--c-projects-soft) 52%, var(--surface));
+}
+
+.insights h3 {
+  margin: 0 0 0.12rem;
+  color: var(--text);
+  font-size: 0.84rem;
+}
+
+.insights p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.42;
+}
+
+.empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+@media (width <= 820px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics article + article {
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .actions,
+  .insights {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width <= 520px) {
+  .metrics strong {
+    white-space: normal;
+  }
+}
