@@ -2,13 +2,14 @@ import Link from 'next/link';
 
 import styles from './ProfessionalV2.module.scss';
 
-type ProfessionalSection = 'panorama' | 'mercado' | 'herramientas' | 'crecimiento';
+type ProfessionalSection = 'panorama' | 'mercado' | 'herramientas' | 'crecimiento' | 'biblioteca';
 
 const ITEMS: Array<{ id: ProfessionalSection; label: string; href: string }> = [
   { id: 'panorama', label: 'Panorama', href: '/professional' },
   { id: 'mercado', label: 'Mercado', href: '/professional/mercado' },
   { id: 'herramientas', label: 'Herramientas', href: '/professional/herramientas' },
   { id: 'crecimiento', label: 'Crecimiento', href: '/professional/crecimiento' },
+  { id: 'biblioteca', label: 'Biblioteca', href: '/professional/biblioteca' },
 ];
 
 export function ProfessionalNavigation({ current }: { current: ProfessionalSection }) {

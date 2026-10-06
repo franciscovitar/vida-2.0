@@ -45,3 +45,14 @@ export async function getProfessionalGrowthPageData() {
   await requireAuthorizedSession();
   return loadProfessionalSnapshot();
 }
+
+export async function getProfessionalLibraryPageData() {
+  await requireAuthorizedSession();
+
+  const [editorial, technologyLibrary] = await Promise.all([
+    loadIntelligenceEditorialSnapshot(),
+    loadTechnologyLibrary(),
+  ]);
+
+  return { editorial, technologyLibrary };
+}

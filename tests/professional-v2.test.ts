@@ -87,7 +87,7 @@ test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada 
   assert.match(panorama, /snapshot\.market\.globalSignals\[0\]/);
   assert.match(panorama, /snapshot\.strongestEvidence\[0\]/);
   assert.doesNotMatch(panorama, /Math\.random|overall score|winner/i);
-  assert.doesNotMatch(panorama, /\/professional\/biblioteca/);
+  assert.match(panorama, /href="\/professional\/biblioteca"/);
 });
 
 test('PRO-V2-06. Mercado tiene ruta propia y navegación primaria interna', () => {
@@ -128,7 +128,7 @@ test('PRO-V2-09. Panorama enlaza sólo a superficies V2 ya existentes', () => {
   assert.match(panorama, /href="\/professional\/mercado"/);
   assert.match(panorama, /href="\/professional\/herramientas"/);
   assert.match(panorama, /href="\/professional\/crecimiento"/);
-  assert.doesNotMatch(panorama, /\/professional\/biblioteca/);
+  assert.match(panorama, /href="\/professional\/biblioteca"/);
 });
 
 test('PRO-V2-10. Crecimiento tiene ruta propia y conserva la cola canónica', () => {
@@ -159,4 +159,39 @@ test('PRO-V2-12. Perfil no convierte evidencia en cambios públicos automáticos
 
   assert.match(growth, /No modifica automáticamente CV, LinkedIn ni perfiles/);
   assert.doesNotMatch(growth, /employabilityScore|masteryScore|hireProbability/i);
+});
+
+test('PRO-V2-13. Biblioteca completa las cinco superficies de Profesional V2', () => {
+  const nav = repoText('components/professional/ProfessionalNavigation.tsx');
+  const route = repoText('app/(app)/professional/biblioteca/page.tsx');
+  const source = repoText('lib/data/professional-intelligence-source.ts');
+
+  assert.match(nav, /label: 'Biblioteca'/);
+  assert.match(route, /ProfessionalLibrary/);
+  assert.match(route, /getProfessionalLibraryPageData/);
+  assert.match(source, /loadIntelligenceEditorialSnapshot/);
+  assert.match(source, /loadTechnologyLibrary/);
+});
+
+test('PRO-V2-14. Biblioteca mantiene archivo legacy y cero deuda de lectura', () => {
+  const library = repoText('components/professional/ProfessionalLibrary.tsx');
+  const legacyArchive = repoText('app/(app)/inteligencia/archivo/page.tsx');
+  const legacyRedirect = repoText('app/(app)/inteligencia/page.tsx');
+
+  assert.match(library, /article\.professionalRefs\.length > 0/);
+  assert.match(library, /intelligenceArticleHref/);
+  assert.match(library, /No hay backlog/);
+  assert.match(library, /artículos sin leer/);
+  assert.match(legacyArchive, /intelligenceArticleHref/);
+  assert.match(legacyRedirect, /redirect\('\/professional'\)/);
+});
+
+test('PRO-V2-15. Biblioteca tecnológica es referencia progresiva y no adopción automática', () => {
+  const library = repoText('components/professional/ProfessionalLibrary.tsx');
+
+  assert.match(library, /spotlightIds/);
+  assert.match(library, /slice\(0, 6\)/);
+  assert.match(library, /Explorar biblioteca completa/);
+  assert.match(library, /no implica instalarla, pagarla ni aprenderla/i);
+  assert.doesNotMatch(library, /unreadCount|streakCount|readingDebt|backlogCount/i);
 });
