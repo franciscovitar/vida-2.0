@@ -7,6 +7,10 @@ import {
   evaluateNutritionAiInsightFreshness,
   type NutritionAiInsightEvidence,
 } from './ai-insight-freshness';
+import {
+  auditNutritionAiInsightUniqueness,
+  nutritionAiInsightGroupKey,
+} from './ai-insight-integrity';
 import { deriveNutritionFreshness } from './freshness';
 import {
   buildNutritionRawDayFacts,
@@ -495,9 +499,10 @@ function parseAiInsights(
   result: ReadTabResult,
   today: string,
   evidence: NutritionAiInsightEvidence,
-): NutritionAiInsight[] {
-  if (!result.ok) return [];
-  const rows = activeRows(rowsFrom(result))
+): { insights: NutritionAiInsight[]; duplicateGroupCount: number } {
+  if (!result.ok) return { insights: [], duplicateGroupCount: 0 };
+
+  const eligibleRows = activeRows(rowsFrom(result))
     .filter((row) => {
       const date = stringValue(row.date);
       return !date || date <= today;
@@ -507,10 +512,11 @@ function parseAiInsights(
         stringValue(a.createdAt) ?? stringValue(a.date) ?? '',
       ),
     );
+  const uniqueness = auditNutritionAiInsightUniqueness(eligibleRows);
 
   const seen = new Set<string>();
   const insights: NutritionAiInsight[] = [];
-  for (const row of rows) {
+  for (const row of eligibleRows) {
     const rawCategory = stringValue(row.category)?.toLowerCase();
     const category =
       rawCategory === 'antioxidants' ||
@@ -521,7 +527,11 @@ function parseAiInsights(
         : null;
     if (!category || seen.has(category)) continue;
     seen.add(category);
+
+    const groupKey = nutritionAiInsightGroupKey(row);
+    if (groupKey && uniqueness.duplicateGroupKeys.has(groupKey)) continue;
     if (evaluateNutritionAiInsightFreshness(row, evidence, today).state !== 'current') continue;
+
     const title = stringValue(row.title);
     const detail = stringValue(row.detail);
     if (!title || !detail) continue;
@@ -540,7 +550,11 @@ function parseAiInsights(
       limitations: stringValue(row.limitations),
     });
   }
-  return insights;
+
+  return {
+    insights,
+    duplicateGroupCount: uniqueness.duplicateGroupCount,
+  };
 }
 
 function failurePriority(results: readonly ReadTabResult[]): SheetReadCode | null {
@@ -601,6 +615,15 @@ export async function loadNutritionDashboardData(
     today,
   );
   const currentDate = cordobaToday();
+  const aiInsightResult = parseAiInsights(insightsResult, today, {
+    meals: mealRows,
+    foodItems: itemRows,
+    foodNutrients: foodNutrientRows,
+    dailySummary: dailyRows,
+    nutrientSummary: nutrientSummaryRows,
+    targets: targetRows,
+    nutrientTargets: nutrientTargetRows,
+  });
   const target = chooseTarget(targetRows, today, currentDate);
   const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate).filter(
     (row) => row.date <= today,
@@ -628,7 +651,8 @@ export async function loadNutritionDashboardData(
   const unknownTodayContributionCount = todayRawFacts?.unknownContributionCount ?? 0;
   const sourceStatus =
     (unknownTodayContributionCount > 0 ||
-      todayNutrientUniqueness.duplicateKeyCount > 0) &&
+      todayNutrientUniqueness.duplicateKeyCount > 0 ||
+      aiInsightResult.duplicateGroupCount > 0) &&
     baseSourceStatus === 'ready'
       ? 'partial'
       : baseSourceStatus;
@@ -763,15 +787,7 @@ export async function loadNutritionDashboardData(
     history,
     meals: buildMeals(mealRows, itemPartition.valid, today),
     nutrients,
-    aiInsights: parseAiInsights(insightsResult, today, {
-      meals: mealRows,
-      foodItems: itemRows,
-      foodNutrients: foodNutrientRows,
-      dailySummary: dailyRows,
-      nutrientSummary: nutrientSummaryRows,
-      targets: targetRows,
-      nutrientTargets: nutrientTargetRows,
-    }),
+    aiInsights: aiInsightResult.insights,
     optionalSources: {
       nutrientTargets: optionalStatus(nutrientTargetsResult),
       nutrientSummary: optionalStatus(nutrientResult),

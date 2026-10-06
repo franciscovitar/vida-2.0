@@ -113,13 +113,16 @@ Vida no infiere por su cuenta potencial antioxidante, perfil antiinflamatorio, m
 
 Además, una conclusión persistida no se considera automáticamente vigente para siempre:
 
+- sólo puede existir una fila activa por `category + window`; si hay más de una, Vida considera ese grupo ambiguo y no elige entre versiones competidoras;
+- si el insight más reciente de una categoría pertenece a un grupo duplicado, la categoría queda sin insight actual: Vida no revive una interpretación anterior para ocultar la inconsistencia;
 - el insight debe tener `createdAt` parseable y una ventana auditable (`today-so-far`, `day-closed` o `Nd`);
 - Vida compara ese `createdAt` con mutaciones posteriores de Meals, Food Items, Food Nutrients, Daily Summary, Nutrient Summary, Targets y Nutrient Targets que intersecten la ventana;
 - si existe evidencia material más nueva, el insight queda `stale` y no se renderiza hasta que Nutrition Intelligence lo refresque;
-- si la vigencia no puede verificarse por ventana/timestamp contractual faltante, falla cerrado y tampoco se presenta como conclusión actual;
+- si `Nutrient Summary` contiene más de una fila activa para el mismo `date + nutrientKey` dentro de la ventana, la evidencia derivada es ambigua y el insight queda `unverifiable`;
+- si la vigencia no puede verificarse por ventana/timestamp contractual faltante o evidencia estructural ambigua, falla cerrado y tampoco se presenta como conclusión actual;
 - `sourceSummaryVersion` conserva lineage/versionado del contrato de derivación; no se usa como contador de frescura porque `summaryVersion` no representa el número de correcciones.
 
-Vida no regenera ni reescribe el insight al detectar staleness: sigue siendo una capa read-only.
+Vida no regenera, supersede ni reescribe el insight al detectar staleness/duplicidad: sigue siendo una capa read-only. Nutrition Intelligence debe reparar el materializado canónico.
 
 Contrato consumido:
 

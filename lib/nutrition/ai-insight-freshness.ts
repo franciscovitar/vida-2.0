@@ -1,5 +1,7 @@
 import type { PlainCell } from '@/lib/data/plain';
 
+import { sanitizeNutritionNutrientSummaryUniqueness } from './nutrient-summary-uniqueness';
+
 export type NutritionAiInsightFreshness = 'current' | 'stale' | 'unverifiable';
 
 type EvidenceRow = Readonly<Record<string, PlainCell | undefined>>;
@@ -136,7 +138,28 @@ export function evaluateNutritionAiInsightFreshness(
     };
   }
 
-  const rows = relevantEvidenceRows(evidence, window.start, window.end);
+  const nutrientSummaryUniqueness = sanitizeNutritionNutrientSummaryUniqueness(
+    evidence.nutrientSummary,
+    window.start,
+    window.end,
+  );
+  if (nutrientSummaryUniqueness.duplicateKeyCount > 0) {
+    return {
+      state: 'unverifiable',
+      windowStart: window.start,
+      windowEnd: window.end,
+      latestEvidenceAt: null,
+    };
+  }
+
+  const rows = relevantEvidenceRows(
+    {
+      ...evidence,
+      nutrientSummary: nutrientSummaryUniqueness.rows,
+    },
+    window.start,
+    window.end,
+  );
   if (rows.length === 0) {
     return {
       state: 'unverifiable',

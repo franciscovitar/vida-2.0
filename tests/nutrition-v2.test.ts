@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { evaluateNutritionAiInsightFreshness } from '@/lib/nutrition/ai-insight-freshness';
+import {
+  auditNutritionAiInsightUniqueness,
+  nutritionAiInsightGroupKey,
+} from '@/lib/nutrition/ai-insight-integrity';
 import { summarizeNutritionRawDayEnergy } from '@/lib/nutrition/day-energy';
 import {
   isNutritionFoodItemStructurallyValid,
@@ -40,6 +44,162 @@ const authEnv = {
   GOOGLE_SERVICE_ACCOUNT_EMAIL: 'nutrition-reader@example.iam.gserviceaccount.com',
   GOOGLE_PRIVATE_KEY: 'line1\\nline2',
 };
+
+test('AI Insights permite una fila activa por categoría + ventana', () => {
+  const result = auditNutritionAiInsightUniqueness([
+    {
+      insightId: 'a7',
+      category: 'antioxidants',
+      window: '7d',
+      status: 'active',
+    },
+    {
+      insightId: 'a28',
+      category: 'antioxidants',
+      window: '28d',
+      status: 'active',
+    },
+    {
+      insightId: 'p7',
+      category: 'pattern',
+      window: '7d',
+      status: 'active',
+    },
+  ]);
+
+  assert.equal(result.duplicateGroupCount, 0);
+  assert.equal(result.duplicateRowCount, 0);
+  assert.equal(result.rows.length, 3);
+});
+
+test('AI Insights duplicados en categoría + ventana quedan ambiguos', () => {
+  const rows = [
+    {
+      insightId: 'old',
+      category: 'improvement',
+      window: '7D',
+      status: 'active',
+    },
+    {
+      insightId: 'new',
+      category: 'improvement',
+      window: '7d',
+      status: 'active',
+    },
+    {
+      insightId: 'pattern',
+      category: 'pattern',
+      window: '7d',
+      status: 'active',
+    },
+  ];
+  const result = auditNutritionAiInsightUniqueness(rows);
+  const key = nutritionAiInsightGroupKey(rows[0]!);
+
+  assert.ok(key);
+  assert.equal(result.duplicateGroupCount, 1);
+  assert.equal(result.duplicateRowCount, 2);
+  assert.equal(result.duplicateGroupKeys.has(key), true);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0]?.insightId, 'pattern');
+});
+
+test('AI Insights superseded no compite con el insight activo de su ventana', () => {
+  const result = auditNutritionAiInsightUniqueness([
+    {
+      insightId: 'old',
+      category: 'anti-inflammatory',
+      window: '28d',
+      status: 'superseded',
+    },
+    {
+      insightId: 'current',
+      category: 'anti-inflammatory',
+      window: '28d',
+      status: 'active',
+    },
+  ]);
+
+  assert.equal(result.duplicateGroupCount, 0);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0]?.insightId, 'current');
+});
+
+test('Nutrient Summary duplicado dentro de la ventana vuelve no verificable al AI Insight', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '7d',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [
+        {
+          mealId: 'm1',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:00:00-03:00',
+        },
+      ],
+      foodItems: [],
+      dailySummary: [],
+      nutrientSummary: [
+        {
+          date: '2026-10-05',
+          nutrientKey: 'fiber',
+          updatedAt: '2026-10-05T21:00:00-03:00',
+        },
+        {
+          date: '2026-10-05',
+          nutrientKey: 'fiber',
+          updatedAt: '2026-10-05T21:01:00-03:00',
+        },
+      ],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'unverifiable');
+});
+
+test('Nutrient Summary duplicado fuera de la ventana no invalida el AI Insight', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '7d',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [
+        {
+          mealId: 'm1',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:00:00-03:00',
+        },
+      ],
+      foodItems: [],
+      dailySummary: [],
+      nutrientSummary: [
+        {
+          date: '2026-09-10',
+          nutrientKey: 'fiber',
+          updatedAt: '2026-10-06T13:00:00-03:00',
+        },
+        {
+          date: '2026-09-10',
+          nutrientKey: 'fiber',
+          updatedAt: '2026-10-06T13:01:00-03:00',
+        },
+      ],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'current');
+});
 
 test('AI Insight sigue vigente cuando toda la evidencia de su ventana es anterior', () => {
   const result = evaluateNutritionAiInsightFreshness(
