@@ -67,62 +67,9 @@ export function GymWeeklyCardio({
       <SectionHeader
         id="gym-cardio-week-title"
         title="Cardio semanal"
-        description="Tu plan base: 8.000 pasos por día + 120 min de bici + 1 partido. MET-min permite compararlos en una unidad común."
+        description="Primero, cuánto cumpliste de pasos, bicicleta y fútbol. La equivalencia MET-min queda como contexto secundario."
         domain="health"
       />
-
-      <div className={styles.layout} data-complete={equivalentGoalDone}>
-        <section className={styles.primary}>
-          <div className={styles['score-line']}>
-            <div>
-              <span>Carga equivalente esta semana</span>
-              <strong className="tabular">
-                {number(summary.totalMetMinutes)} / {number(summary.targetMetMinutes)}
-              </strong>
-              <small>MET-min equivalentes</small>
-            </div>
-            <div className={styles.badge} data-complete={equivalentGoalDone}>
-              <Gauge size={17} aria-hidden="true" />
-              <span>
-                {equivalentGoalDone ? 'Carga equivalente cubierta' : `${summary.progressPercent}%`}
-              </span>
-            </div>
-          </div>
-
-          <div className={styles.track} style={progressStyle} aria-hidden="true">
-            <span />
-          </div>
-
-          <div className={styles.meta}>
-            <span>
-              {equivalentGoalDone
-                ? `${number(summary.totalMetMinutes - summary.targetMetMinutes)} MET-min por encima de la referencia del plan`
-                : `Faltan ${number(summary.remainingMetMinutes)} MET-min equivalentes`}
-            </span>
-            <span>≈ {number(summary.moderateEquivalentMinutes)} min a 4 MET acumulados</span>
-          </div>
-        </section>
-
-        <div className={styles.groups}>
-          {groups.length > 0 ? (
-            groups.map((group) => (
-              <article key={group.kind} className={styles.group} data-kind={group.kind}>
-                <span className={styles.icon}>{group.icon}</span>
-                <div>
-                  <small>{group.label}</small>
-                  <strong className="tabular">{number(group.metMinutes)} MET-min</strong>
-                  <span>
-                    {group.sessions} aporte{group.sessions === 1 ? '' : 's'} computado
-                    {group.sessions === 1 ? '' : 's'}
-                  </span>
-                </div>
-              </article>
-            ))
-          ) : (
-            <p className={styles.empty}>Todavía no hay actividad computable esta semana.</p>
-          )}
-        </div>
-      </div>
 
       <section className={styles.plan} aria-label="Cumplimiento del plan semanal de cardio">
         <div className={styles['plan-heading']}>
@@ -186,6 +133,64 @@ export function GymWeeklyCardio({
           </article>
         </div>
       </section>
+
+      <div className={styles['secondary-heading']}>
+        <strong>Carga equivalente</strong>
+        <span>Comparación entre modalidades; no reemplaza tus tres objetivos del plan.</span>
+      </div>
+
+      <div className={styles.layout} data-complete={equivalentGoalDone}>
+        <section className={styles.primary}>
+          <div className={styles['score-line']}>
+            <div>
+              <span>Equivalencia acumulada</span>
+              <strong className="tabular">
+                {number(summary.totalMetMinutes)} / {number(summary.targetMetMinutes)}
+              </strong>
+              <small>MET-min equivalentes</small>
+            </div>
+            <div className={styles.badge} data-complete={equivalentGoalDone}>
+              <Gauge size={17} aria-hidden="true" />
+              <span>
+                {equivalentGoalDone ? 'Carga equivalente cubierta' : `${summary.progressPercent}%`}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.track} style={progressStyle} aria-hidden="true">
+            <span />
+          </div>
+
+          <div className={styles.meta}>
+            <span>
+              {equivalentGoalDone
+                ? `${number(summary.totalMetMinutes - summary.targetMetMinutes)} MET-min por encima de la referencia del plan`
+                : `Faltan ${number(summary.remainingMetMinutes)} MET-min equivalentes`}
+            </span>
+            <span>≈ {number(summary.moderateEquivalentMinutes)} min a 4 MET acumulados</span>
+          </div>
+        </section>
+
+        <div className={styles.groups}>
+          {groups.length > 0 ? (
+            groups.map((group) => (
+              <article key={group.kind} className={styles.group} data-kind={group.kind}>
+                <span className={styles.icon}>{group.icon}</span>
+                <div>
+                  <small>{group.label}</small>
+                  <strong className="tabular">{number(group.metMinutes)} MET-min</strong>
+                  <span>
+                    {group.sessions} aporte{group.sessions === 1 ? '' : 's'} computado
+                    {group.sessions === 1 ? '' : 's'}
+                  </span>
+                </div>
+              </article>
+            ))
+          ) : (
+            <p className={styles.empty}>Todavía no hay actividad computable esta semana.</p>
+          )}
+        </div>
+      </div>
 
       {!equivalentGoalDone ? (
         <section className={styles.equivalences} aria-label="Equivalencias de la carga restante">
