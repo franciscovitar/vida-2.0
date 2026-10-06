@@ -339,7 +339,8 @@ function exerciseBelongsToCurrentScope(
   return currentExerciseNames.some((currentName) => {
     const current = normalizeExerciseIdentityLabel(currentName);
     if (!current) return false;
-    if (observed === current || observed.includes(current) || current.includes(observed)) return true;
+    if (observed === current || observed.includes(current) || current.includes(observed))
+      return true;
 
     const observedTokens = new Set(observed.split(' ').filter((token) => token.length >= 3));
     const currentTokens = new Set(current.split(' ').filter((token) => token.length >= 3));
