@@ -396,7 +396,13 @@ function buildNutrients(
       basis: targetBasis,
     });
 
-    if (row) {
+    const rowHasDisplayValue =
+      row !== undefined &&
+      (numberValue(row.amount) !== null ||
+        numberValue(row.amountLow) !== null ||
+        numberValue(row.amountHigh) !== null);
+
+    if (row && (rowHasDisplayValue || (catalog.key !== 'sodium' && catalog.key !== 'fiber'))) {
       return {
         key: catalog.key,
         name: stringValue(row.nutrientName) ?? catalog.name,

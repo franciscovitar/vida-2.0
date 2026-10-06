@@ -407,12 +407,13 @@ test('AI Insight queda stale cuando cambia Food Nutrients dentro de su ventana',
   assert.equal(result.latestEvidenceAt, '2026-10-06T12:30:00-03:00');
 });
 
-test('complete micronutricional sobrevive si lower-level y contadores lo sostienen', () => {
+test('complete sobrevive aunque lower-level tenga rangos parciales si todos los items están cubiertos', () => {
   const result = sanitizeNutritionNutrientSummaryIntegrity(
     [
       {
         date: '2026-10-05',
         nutrientKey: 'fiber',
+        amount: 5,
         sourceCoverage: 'complete',
         sourceFoodItemCount: 2,
         unquantifiedRelevantItemCount: 0,
@@ -426,14 +427,16 @@ test('complete micronutricional sobrevive si lower-level y contadores lo sostien
     [
       {
         foodItemId: 'f1',
+        mealId: 'm1',
         date: '2026-10-05',
         nutrientKey: 'fiber',
         amount: 3,
-        coverage: 'complete',
+        coverage: 'partial',
         status: 'active',
       },
       {
         foodItemId: 'f2',
+        mealId: 'm1',
         date: '2026-10-05',
         nutrientKey: 'fiber',
         amount: 2,
@@ -446,18 +449,20 @@ test('complete micronutricional sobrevive si lower-level y contadores lo sostien
   );
 
   assert.equal(result.rows[0]?.sourceCoverage, 'complete');
+  assert.equal(result.rows[0]?.amount, 5);
   assert.equal(result.downgradedRowCount, 0);
 });
 
-test('complete se degrada si falta Food Nutrients para un alimento activo', () => {
+test('complete se degrada a partial si falta una fuente pero el subtotal conocido tiene lineage', () => {
   const result = sanitizeNutritionNutrientSummaryIntegrity(
     [
       {
         date: '2026-10-05',
         nutrientKey: 'fiber',
+        amount: 3,
         sourceCoverage: 'complete',
         sourceFoodItemCount: 1,
-        unquantifiedRelevantItemCount: 0,
+        unquantifiedRelevantItemCount: 1,
       },
     ],
     [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
@@ -468,6 +473,7 @@ test('complete se degrada si falta Food Nutrients para un alimento activo', () =
     [
       {
         foodItemId: 'f1',
+        mealId: 'm1',
         date: '2026-10-05',
         nutrientKey: 'fiber',
         amount: 3,
@@ -480,19 +486,21 @@ test('complete se degrada si falta Food Nutrients para un alimento activo', () =
   );
 
   assert.equal(result.rows[0]?.sourceCoverage, 'partial');
+  assert.equal(result.rows[0]?.amount, 3);
   assert.equal(result.downgradedRowCount, 1);
-  assert.equal(result.downgradedDateCount, 1);
+  assert.equal(result.suppressedSubtotalRowCount, 0);
 });
 
-test('complete se degrada si un Food Nutrient lower-level es parcial', () => {
+test('complete con contadores faltantes falla cerrado y suprime el subtotal', () => {
   const result = sanitizeNutritionNutrientSummaryIntegrity(
     [
       {
         date: '2026-10-05',
-        nutrientKey: 'vitamin-c',
+        nutrientKey: 'fiber',
+        amount: 3,
         sourceCoverage: 'complete',
-        sourceFoodItemCount: 1,
-        unquantifiedRelevantItemCount: 0,
+        sourceFoodItemCount: null,
+        unquantifiedRelevantItemCount: null,
       },
     ],
     [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
@@ -500,6 +508,84 @@ test('complete se degrada si un Food Nutrient lower-level es parcial', () => {
     [
       {
         foodItemId: 'f1',
+        mealId: 'm1',
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        coverage: 'complete',
+        status: 'active',
+      },
+    ],
+    '2026-10-05',
+    '2026-10-05',
+  );
+
+  assert.equal(result.rows[0]?.sourceCoverage, 'unknown');
+  assert.equal(result.rows[0]?.amount, null);
+  assert.equal(result.unverifiableRowCount, 1);
+  assert.equal(result.suppressedSubtotalRowCount, 1);
+});
+
+test('complete con Food Item activo sin identidad falla cerrado', () => {
+  const result = sanitizeNutritionNutrientSummaryIntegrity(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        sourceCoverage: 'complete',
+        sourceFoodItemCount: 1,
+        unquantifiedRelevantItemCount: 0,
+      },
+    ],
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [
+      { mealId: 'm1', foodItemId: 'f1', status: 'active' },
+      { mealId: 'm1', foodItemId: null, status: 'active' },
+    ],
+    [
+      {
+        foodItemId: 'f1',
+        mealId: 'm1',
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        coverage: 'complete',
+        status: 'active',
+      },
+    ],
+    '2026-10-05',
+    '2026-10-05',
+  );
+
+  assert.equal(result.rows[0]?.sourceCoverage, 'unknown');
+  assert.equal(result.rows[0]?.amount, null);
+  assert.equal(result.unverifiableRowCount, 1);
+});
+
+test('partial con lineage coherente conserva su subtotal aunque lower-level sea parcial', () => {
+  const result = sanitizeNutritionNutrientSummaryIntegrity(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'vitamin-c',
+        amount: 40,
+        amountLow: 30,
+        amountHigh: 50,
+        sourceCoverage: 'partial',
+        sourceFoodItemCount: 1,
+        unquantifiedRelevantItemCount: 3,
+      },
+    ],
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [
+      { mealId: 'm1', foodItemId: 'f1', status: 'active' },
+      { mealId: 'm1', foodItemId: 'f2', status: 'active' },
+    ],
+    [
+      {
+        foodItemId: 'f1',
+        mealId: 'm1',
         date: '2026-10-05',
         nutrientKey: 'vitamin-c',
         amount: 40,
@@ -514,15 +600,142 @@ test('complete se degrada si un Food Nutrient lower-level es parcial', () => {
   );
 
   assert.equal(result.rows[0]?.sourceCoverage, 'partial');
+  assert.equal(result.rows[0]?.amount, 40);
+  assert.equal(result.suppressedSubtotalRowCount, 0);
 });
 
-test('complete con contadores faltantes falla como cobertura desconocida', () => {
+test('partial con sourceFoodItemCount contradictorio se suprime como no verificable', () => {
+  const result = sanitizeNutritionNutrientSummaryIntegrity(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'sodium',
+        amount: 900,
+        sourceCoverage: 'partial',
+        sourceFoodItemCount: 2,
+        unquantifiedRelevantItemCount: 3,
+      },
+    ],
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [
+      { mealId: 'm1', foodItemId: 'f1', status: 'active' },
+      { mealId: 'm1', foodItemId: 'f2', status: 'active' },
+    ],
+    [
+      {
+        foodItemId: 'f1',
+        mealId: 'm1',
+        date: '2026-10-05',
+        nutrientKey: 'sodium',
+        amount: 400,
+        coverage: 'complete',
+        status: 'active',
+      },
+    ],
+    '2026-10-05',
+    '2026-10-05',
+  );
+
+  assert.equal(result.rows[0]?.sourceCoverage, 'unknown');
+  assert.equal(result.rows[0]?.amount, null);
+  assert.equal(result.unverifiableRowCount, 1);
+  assert.equal(result.suppressedSubtotalRowCount, 1);
+});
+
+test('partial con duplicado lower-level activo se suprime', () => {
   const result = sanitizeNutritionNutrientSummaryIntegrity(
     [
       {
         date: '2026-10-05',
         nutrientKey: 'fiber',
-        sourceCoverage: 'complete',
+        amount: 6,
+        sourceCoverage: 'partial',
+        sourceFoodItemCount: 1,
+        unquantifiedRelevantItemCount: 1,
+      },
+    ],
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [{ mealId: 'm1', foodItemId: 'f1', status: 'active' }],
+    [
+      {
+        foodItemId: 'f1',
+        mealId: 'm1',
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        coverage: 'complete',
+        status: 'active',
+      },
+      {
+        foodItemId: 'f1',
+        mealId: 'm1',
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        coverage: 'complete',
+        status: 'active',
+      },
+    ],
+    '2026-10-05',
+    '2026-10-05',
+  );
+
+  assert.equal(result.rows[0]?.sourceCoverage, 'unknown');
+  assert.equal(result.rows[0]?.amount, null);
+  assert.equal(result.suppressedSubtotalRowCount, 1);
+});
+
+test('partial con Food Nutrient orphan de la misma fecha se suprime', () => {
+  const result = sanitizeNutritionNutrientSummaryIntegrity(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        sourceCoverage: 'partial',
+        sourceFoodItemCount: 1,
+        unquantifiedRelevantItemCount: 1,
+      },
+    ],
+    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
+    [{ mealId: 'm1', foodItemId: 'f1', status: 'active' }],
+    [
+      {
+        foodItemId: 'f1',
+        mealId: 'm1',
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        coverage: 'complete',
+        status: 'active',
+      },
+      {
+        foodItemId: 'orphan',
+        mealId: 'missing-meal',
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 9,
+        coverage: 'complete',
+        status: 'active',
+      },
+    ],
+    '2026-10-05',
+    '2026-10-05',
+  );
+
+  assert.equal(result.rows[0]?.sourceCoverage, 'unknown');
+  assert.equal(result.rows[0]?.amount, null);
+  assert.equal(result.suppressedSubtotalRowCount, 1);
+});
+
+test('partial legacy sin sourceFoodItemCount no se oculta sin contradicción dura', () => {
+  const result = sanitizeNutritionNutrientSummaryIntegrity(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 3,
+        sourceCoverage: 'partial',
         sourceFoodItemCount: null,
         unquantifiedRelevantItemCount: null,
       },
@@ -532,6 +745,7 @@ test('complete con contadores faltantes falla como cobertura desconocida', () =>
     [
       {
         foodItemId: 'f1',
+        mealId: 'm1',
         date: '2026-10-05',
         nutrientKey: 'fiber',
         amount: 3,
@@ -543,42 +757,9 @@ test('complete con contadores faltantes falla como cobertura desconocida', () =>
     '2026-10-05',
   );
 
-  assert.equal(result.rows[0]?.sourceCoverage, 'unknown');
-  assert.equal(result.unverifiableRowCount, 1);
-});
-
-test('complete con Food Item activo sin identidad falla cerrado', () => {
-  const result = sanitizeNutritionNutrientSummaryIntegrity(
-    [
-      {
-        date: '2026-10-05',
-        nutrientKey: 'fiber',
-        sourceCoverage: 'complete',
-        sourceFoodItemCount: 1,
-        unquantifiedRelevantItemCount: 0,
-      },
-    ],
-    [{ mealId: 'm1', date: '2026-10-05', status: 'active' }],
-    [
-      { mealId: 'm1', foodItemId: 'f1', status: 'active' },
-      { mealId: 'm1', foodItemId: null, status: 'active' },
-    ],
-    [
-      {
-        foodItemId: 'f1',
-        date: '2026-10-05',
-        nutrientKey: 'fiber',
-        amount: 3,
-        coverage: 'complete',
-        status: 'active',
-      },
-    ],
-    '2026-10-05',
-    '2026-10-05',
-  );
-
-  assert.equal(result.rows[0]?.sourceCoverage, 'unknown');
-  assert.equal(result.unverifiableRowCount, 1);
+  assert.equal(result.rows[0]?.sourceCoverage, 'partial');
+  assert.equal(result.rows[0]?.amount, 3);
+  assert.equal(result.suppressedSubtotalRowCount, 0);
 });
 
 test('Vida nunca asciende un partial a complete por su cuenta', () => {
@@ -587,6 +768,7 @@ test('Vida nunca asciende un partial a complete por su cuenta', () => {
       {
         date: '2026-10-05',
         nutrientKey: 'fiber',
+        amount: 3,
         sourceCoverage: 'partial',
         sourceFoodItemCount: 1,
         unquantifiedRelevantItemCount: 0,
@@ -597,6 +779,7 @@ test('Vida nunca asciende un partial a complete por su cuenta', () => {
     [
       {
         foodItemId: 'f1',
+        mealId: 'm1',
         date: '2026-10-05',
         nutrientKey: 'fiber',
         amount: 3,

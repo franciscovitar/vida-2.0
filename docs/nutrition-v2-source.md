@@ -62,8 +62,10 @@ La vista principal de Nutrientes es longitudinal. Para cada ventana:
 - antes de usar una fecha, Vida compara `Nutrient Summary.updatedAt` contra mutaciones de Meals/Food Items y `Daily Summary.updatedAt` para ese día;
 - si una fila micronutricional quedó detrás de evidencia más nueva, la fecha completa se excluye de promedios/señales hasta que Nutrition Intelligence reconstruya `Nutrient Summary`;
 - si faltan timestamps contractuales o no pueden leerse las fuentes necesarias para auditar frescura, la fecha falla cerrada como no verificable en vez de mostrarse como actual;
-- `sourceCoverage = complete` no se acepta sólo porque el summary lo declare: Vida exige que cada Food Item activo del día tenga una fila `Food Nutrients` activa y defensible para ese nutriente, que esas filas lower-level también sean `complete`, que no haya duplicados activos y que `sourceFoodItemCount` / `unquantifiedRelevantItemCount` sean coherentes;
-- si esa prueba lower-level falla, Vida sólo degrada la cobertura a `partial | none | unknown`; nunca recalcula el nutriente ni asciende un `partial` a `complete`;
+- `sourceCoverage = complete` no se acepta sólo porque el summary lo declare: Vida exige lineage lower-level activa y defensible para todos los Food Items cubiertos, sin duplicados/orphans y con `sourceFoodItemCount` coherente; una fila lower-level puede conservar `coverage = partial` por incertidumbre de estimación sin convertir automáticamente al día en cobertura parcial, porque cobertura e incertidumbre son ejes distintos;
+- los subtotales `partial` también se auditan estructuralmente: si hay duplicados activos, orphan rows, identidad/fecha/meal incompatibles o un `sourceFoodItemCount` explícito que contradice las fuentes lower-level, Vida suprime el subtotal y lo trata como no verificable;
+- los `partial` históricos sin `sourceFoodItemCount` no se ocultan sólo por ausencia de ese metadato, porque ya están fuera de promedios comparables y el contrato legacy no siempre permite reconstruir `unquantifiedRelevantItemCount` de forma exacta;
+- si la prueba lower-level falla, Vida sólo degrada/suprime la presentación; nunca recalcula el nutriente ni asciende un `partial` a `complete`;
 - una señal de atención requiere al menos 3 días evaluables, al menos 2 días con la señal y presencia en al menos 50% de los días evaluables;
 - las referencias se resuelven por `Nutrient Summary.targetDecisionId` cuando existe y, si no existe lineage, por fecha desde `Nutrient Targets`; una decisión histórica `superseded` puede seguir describiendo sus días pasados, pero nunca revive como referencia actual;
 - una RDA/AI se interpreta como adecuación, un UL como límite superior y un rango como rango; una misma decisión puede contener adecuación + UL y ambos extremos se evalúan;
@@ -99,7 +101,7 @@ targetDecisionId
 
 Cuando una referencia activa existe en `Nutrient Targets`, Vida la usa directamente para target/límites y evita depender de una copia potencialmente vieja dentro de `Nutrient Summary`. Si todavía no existe cantidad, muestra `Sin dato` contra la referencia cargada.
 
-Mientras falten valores diarios, Vida solo deriva honestamente de `Food Items` los subtotales ya presentes allí (actualmente fibra y sodio cuando estén cuantificados) y deja el resto desconocido.
+Mientras falten valores diarios, o una fila de `Nutrient Summary` quede suprimida por una contradicción de lineage, Vida solo deriva honestamente de `Food Items` los subtotales ya presentes allí (actualmente fibra y sodio cuando estén cuantificados) y deja el resto desconocido.
 
 Claves visuales soportadas están en `lib/nutrition/nutrient-catalog.ts` y deben permanecer alineadas con el contrato de Nutrition Intelligence.
 

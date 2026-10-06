@@ -34,6 +34,7 @@ export interface NutritionNutrientWindowResult extends NutritionNutrientWindowDa
     unverifiableDateCount: number;
     integrityDowngradedDateCount: number;
     integrityUnverifiableRowCount: number;
+    integritySuppressedSubtotalRowCount: number;
   };
 }
 
@@ -139,6 +140,7 @@ export async function loadNutritionNutrientWindow(
         unverifiableDateCount: 0,
         integrityDowngradedDateCount: 0,
         integrityUnverifiableRowCount: 0,
+        integritySuppressedSubtotalRowCount: 0,
       },
     };
   }
@@ -160,6 +162,7 @@ export async function loadNutritionNutrientWindow(
       unverifiableDateCount,
       integrityDowngradedDateCount: integrity.downgradedDateCount,
       integrityUnverifiableRowCount: integrity.unverifiableRowCount,
+      integritySuppressedSubtotalRowCount: integrity.suppressedSubtotalRowCount,
     },
   };
 }

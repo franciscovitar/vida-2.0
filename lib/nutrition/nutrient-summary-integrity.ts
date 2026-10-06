@@ -9,6 +9,7 @@ export interface NutritionNutrientSummaryIntegrityResult {
   downgradedRowCount: number;
   downgradedDateCount: number;
   unverifiableRowCount: number;
+  suppressedSubtotalRowCount: number;
 }
 
 function stringValue(value: PlainCell | undefined): string | null {
@@ -67,44 +68,15 @@ function appendQualityFlag(value: PlainCell | undefined, flag: string): string {
   return flags.includes(flag) ? current : [...flags, flag].join(';');
 }
 
-function effectiveCoverageForCompleteClaim(input: {
-  activeItemCount: number;
-  sourceItemCount: number;
-  declaredSourceCount: number | null;
-  declaredUnquantifiedCount: number | null;
-  hasDuplicateSources: boolean;
-  hasInvalidItemIdentity: boolean;
-  allSourcesComplete: boolean;
-}): { coverage: NutritionCoverage; unverifiable: boolean } {
-  if (
-    input.declaredSourceCount === null ||
-    input.declaredUnquantifiedCount === null ||
-    input.hasDuplicateSources ||
-    input.hasInvalidItemIdentity
-  ) {
-    return { coverage: 'unknown', unverifiable: true };
-  }
-
-  if (
-    input.declaredSourceCount !== input.sourceItemCount ||
-    input.declaredSourceCount > input.activeItemCount
-  ) {
-    return { coverage: 'unknown', unverifiable: true };
-  }
-
-  if (
-    input.activeItemCount === 0 ||
-    input.declaredUnquantifiedCount > 0 ||
-    input.sourceItemCount < input.activeItemCount ||
-    !input.allSourcesComplete
-  ) {
-    return {
-      coverage: input.sourceItemCount > 0 ? 'partial' : 'none',
-      unverifiable: false,
-    };
-  }
-
-  return { coverage: 'complete', unverifiable: false };
+function suppressUnverifiableSubtotal(row: Row): Row {
+  return {
+    ...row,
+    amount: null,
+    amountLow: null,
+    amountHigh: null,
+    sourceCoverage: 'unknown',
+    qualityFlags: appendQualityFlag(row.qualityFlags, 'vida_integrity_unverifiable'),
+  };
 }
 
 export function sanitizeNutritionNutrientSummaryIntegrity(
@@ -118,9 +90,29 @@ export function sanitizeNutritionNutrientSummaryIntegrity(
   const activeMeals = mealRows.filter(isActive);
   const activeItems = foodItemRows.filter(isActive);
   const activeNutrients = foodNutrientRows.filter(isActive);
+  const mealsById = new Map<string, Row[]>();
+  const itemsById = new Map<string, Row[]>();
+
+  for (const meal of activeMeals) {
+    const mealId = stringValue(meal.mealId);
+    if (!mealId) continue;
+    const rows = mealsById.get(mealId) ?? [];
+    rows.push(meal);
+    mealsById.set(mealId, rows);
+  }
+
+  for (const item of activeItems) {
+    const foodItemId = stringValue(item.foodItemId);
+    if (!foodItemId) continue;
+    const rows = itemsById.get(foodItemId) ?? [];
+    rows.push(item);
+    itemsById.set(foodItemId, rows);
+  }
+
   const downgradedDates = new Set<string>();
   let downgradedRowCount = 0;
   let unverifiableRowCount = 0;
+  let suppressedSubtotalRowCount = 0;
 
   const rows = summaryRows.map((row) => {
     const date = stringValue(row.date);
@@ -132,67 +124,124 @@ export function sanitizeNutritionNutrientSummaryIntegrity(
       !nutrientKey ||
       date < startDate ||
       date > endDate ||
-      declaredCoverage !== 'complete'
+      (declaredCoverage !== 'complete' && declaredCoverage !== 'partial')
     ) {
       return row;
     }
 
-    const mealIds = new Set(
-      activeMeals
-        .filter((meal) => stringValue(meal.date) === date)
-        .map((meal) => stringValue(meal.mealId))
-        .filter((mealId): mealId is string => Boolean(mealId)),
-    );
+    const dayMeals = activeMeals.filter((meal) => stringValue(meal.date) === date);
+    const mealIds = dayMeals
+      .map((meal) => stringValue(meal.mealId))
+      .filter((mealId): mealId is string => Boolean(mealId));
+    const mealIdSet = new Set(mealIds);
+    const hasInvalidMealIdentity =
+      mealIds.length !== dayMeals.length || mealIdSet.size !== mealIds.length;
+
     const dayItems = activeItems.filter((item) => {
       const mealId = stringValue(item.mealId);
-      return Boolean(mealId && mealIds.has(mealId));
+      return Boolean(mealId && mealIdSet.has(mealId));
     });
-    const activeItemIds = new Set(
-      dayItems
-        .map((item) => stringValue(item.foodItemId))
-        .filter((foodItemId): foodItemId is string => Boolean(foodItemId)),
-    );
+    const itemIds = dayItems
+      .map((item) => stringValue(item.foodItemId))
+      .filter((foodItemId): foodItemId is string => Boolean(foodItemId));
+    const activeItemIds = new Set(itemIds);
+    const hasInvalidItemIdentity =
+      itemIds.length !== dayItems.length || activeItemIds.size !== itemIds.length;
 
-    const lowerRows = activeNutrients.filter((nutrient) => {
+    const candidates = activeNutrients.filter((nutrient) => {
       const foodItemId = stringValue(nutrient.foodItemId);
       return (
-        stringValue(nutrient.date) === date &&
         stringValue(nutrient.nutrientKey) === nutrientKey &&
-        Boolean(foodItemId && activeItemIds.has(foodItemId)) &&
-        hasDefensibleValue(nutrient)
+        (stringValue(nutrient.date) === date ||
+          Boolean(foodItemId && activeItemIds.has(foodItemId)))
       );
     });
-    const sourceIds = lowerRows
+
+    const validLowerRows: Row[] = [];
+    let invalidLowerRowCount = 0;
+
+    for (const nutrient of candidates) {
+      const foodItemId = stringValue(nutrient.foodItemId);
+      const mealId = stringValue(nutrient.mealId);
+      const linkedItems = foodItemId ? itemsById.get(foodItemId) ?? [] : [];
+      const linkedItem = linkedItems.length === 1 ? linkedItems[0]! : null;
+      const itemMealId = linkedItem ? stringValue(linkedItem.mealId) : null;
+      const linkedMeals = itemMealId ? mealsById.get(itemMealId) ?? [] : [];
+      const linkedMeal = linkedMeals.length === 1 ? linkedMeals[0]! : null;
+      const lowerCoverage = coverageValue(nutrient.coverage);
+
+      const valid =
+        Boolean(foodItemId && activeItemIds.has(foodItemId)) &&
+        Boolean(mealId && itemMealId === mealId) &&
+        stringValue(nutrient.date) === date &&
+        Boolean(linkedMeal && stringValue(linkedMeal.date) === date) &&
+        hasDefensibleValue(nutrient) &&
+        (lowerCoverage === 'complete' || lowerCoverage === 'partial');
+
+      if (valid) validLowerRows.push(nutrient);
+      else invalidLowerRowCount += 1;
+    }
+
+    const sourceIds = validLowerRows
       .map((nutrient) => stringValue(nutrient.foodItemId))
       .filter((foodItemId): foodItemId is string => Boolean(foodItemId));
     const uniqueSourceIds = new Set(sourceIds);
-    const result = effectiveCoverageForCompleteClaim({
-      activeItemCount: activeItemIds.size,
-      sourceItemCount: uniqueSourceIds.size,
-      declaredSourceCount: countValue(row.sourceFoodItemCount),
-      declaredUnquantifiedCount: countValue(row.unquantifiedRelevantItemCount),
-      hasDuplicateSources: uniqueSourceIds.size !== sourceIds.length,
-      hasInvalidItemIdentity: activeItemIds.size !== dayItems.length,
-      allSourcesComplete:
-        lowerRows.length > 0 &&
-        lowerRows.every((nutrient) => coverageValue(nutrient.coverage) === 'complete'),
-    });
+    const sourceItemCount = uniqueSourceIds.size;
+    const declaredSourceCount = countValue(row.sourceFoodItemCount);
+    const declaredUnquantifiedCount = countValue(row.unquantifiedRelevantItemCount);
+    const hasDuplicateSources = uniqueSourceIds.size !== sourceIds.length;
+    const hasHardLineageConflict =
+      hasInvalidMealIdentity ||
+      hasInvalidItemIdentity ||
+      invalidLowerRowCount > 0 ||
+      hasDuplicateSources;
 
-    if (result.coverage === 'complete') return row;
+    const suppress = () => {
+      downgradedRowCount += 1;
+      downgradedDates.add(date);
+      unverifiableRowCount += 1;
+      if (hasDefensibleValue(row)) suppressedSubtotalRowCount += 1;
+      return suppressUnverifiableSubtotal(row);
+    };
+
+    if (hasHardLineageConflict) return suppress();
+
+    if (declaredCoverage === 'partial') {
+      if (declaredSourceCount !== null && declaredSourceCount !== sourceItemCount) {
+        return suppress();
+      }
+      if (sourceItemCount === 0 && hasDefensibleValue(row)) {
+        return suppress();
+      }
+      return row;
+    }
+
+    if (
+      declaredSourceCount === null ||
+      declaredUnquantifiedCount === null ||
+      declaredSourceCount !== sourceItemCount ||
+      activeItemIds.size === 0
+    ) {
+      return suppress();
+    }
+
+    if (
+      sourceItemCount === activeItemIds.size &&
+      declaredUnquantifiedCount === 0
+    ) {
+      return row;
+    }
 
     downgradedRowCount += 1;
     downgradedDates.add(date);
-    if (result.unverifiable) unverifiableRowCount += 1;
 
     return {
       ...row,
-      sourceCoverage: result.coverage,
-      qualityFlags: appendQualityFlag(
-        row.qualityFlags,
-        result.unverifiable
-          ? 'vida_integrity_unverifiable'
-          : 'vida_complete_claim_downgraded',
-      ),
+      amount: sourceItemCount > 0 ? row.amount : null,
+      amountLow: sourceItemCount > 0 ? row.amountLow : null,
+      amountHigh: sourceItemCount > 0 ? row.amountHigh : null,
+      sourceCoverage: sourceItemCount > 0 ? 'partial' : 'none',
+      qualityFlags: appendQualityFlag(row.qualityFlags, 'vida_complete_claim_downgraded'),
     };
   });
 
@@ -201,5 +250,6 @@ export function sanitizeNutritionNutrientSummaryIntegrity(
     downgradedRowCount,
     downgradedDateCount: downgradedDates.size,
     unverifiableRowCount,
+    suppressedSubtotalRowCount,
   };
 }
