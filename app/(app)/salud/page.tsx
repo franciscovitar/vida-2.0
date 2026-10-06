@@ -108,7 +108,9 @@ export default async function SaludPage({
             <Activity size={16} aria-hidden="true" />
             <strong>Datos y cobertura</strong>
           </span>
-          <small>{health.availableDays}/{periodDays} días · {health.partialDays} parcial(es)</small>
+          <small>
+            {health.availableDays}/{periodDays} días · {health.partialDays} parcial(es)
+          </small>
         </summary>
         <div className={local['coverage-body']}>
           <div className={local['coverage-head']}>

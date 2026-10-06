@@ -243,17 +243,17 @@ test('HS10. Rhythm objetivo alimenta regularidad de Sleep Score sin inventar tim
   });
   assert.notEqual(rhythm.score, null);
 
-  const scores = buildExplainableHealthScores(
-    healthFor([...baselineRows(), todayRow()]),
-    rhythm,
-  );
+  const scores = buildExplainableHealthScores(healthFor([...baselineRows(), todayRow()]), rhythm);
   const sleep = scores.domains.find((score) => score.id === 'sleep');
 
   assert.ok(sleep);
   assert.notEqual(sleep.score, null);
   assert.notEqual(sleep.contributors.find((item) => item.id === 'regularity')?.score, null);
   assert.notEqual(sleep.contributors.find((item) => item.id === 'wake-consistency')?.score, null);
-  assert.equal(sleep.contributors.some((item) => item.label === 'Timing circadiano'), false);
+  assert.equal(
+    sleep.contributors.some((item) => item.label === 'Timing circadiano'),
+    false,
+  );
   assert.notEqual(scores.readiness.score, null);
 });
 
