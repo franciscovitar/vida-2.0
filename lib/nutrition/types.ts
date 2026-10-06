@@ -20,6 +20,8 @@ export interface NutritionTarget {
   effectiveFrom: string;
   goal: string | null;
   energyKcal: number | null;
+  energyKcalLow: number | null;
+  energyKcalHigh: number | null;
   proteinGrams: number | null;
   carbohydrateGrams: number | null;
   fatGrams: number | null;
@@ -44,6 +46,10 @@ export interface NutritionDailyPoint {
   energyKcal: number | null;
   energyKcalLow: number | null;
   energyKcalHigh: number | null;
+  targetDecisionId: string | null;
+  energyTargetKcal: number | null;
+  energyTargetKcalLow: number | null;
+  energyTargetKcalHigh: number | null;
   estimateQuality: NutritionEstimateQuality;
   energyCoverage: NutritionCoverage;
   macroCoverage: NutritionCoverage;

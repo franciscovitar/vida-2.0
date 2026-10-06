@@ -18,6 +18,7 @@ import {
   classifyNutritionTargetSemantics,
   nutritionProgressTarget,
 } from '@/lib/nutrition/target-semantics';
+import { resolveNutritionHistoricalEnergyTarget } from '@/lib/nutrition/target-history';
 import type { NutritionMacroProgress } from '@/lib/nutrition/types';
 import { normalizeNutritionWindow, nutritionWindowDays } from '@/lib/nutrition/window';
 
@@ -617,4 +618,120 @@ test('Nutrientes resuelve la decisión de target efectiva para cada fecha del pe
   assert.equal(magnesium.targetDecisionCount, 2);
   assert.equal(magnesium.currentReference?.decisionId, 'mg-new');
   assert.equal(data.attention[0]?.key, 'magnesium');
+});
+
+
+test('Tendencias conserva por lineage el target histórico aunque la decisión esté superseded', () => {
+  const summary = {
+    date: '2026-09-15',
+    energyTargetKcal: 2500,
+    targetDecisionId: 'target-old',
+  };
+  const targets = [
+    {
+      decisionId: 'target-old',
+      effectiveFrom: '2026-08-01',
+      effectiveTo: '2026-09-30',
+      status: 'superseded',
+      energyTargetKcal: 2500,
+    },
+    {
+      decisionId: 'target-current',
+      effectiveFrom: '2026-10-01',
+      status: 'active',
+      energyTargetKcal: 2700,
+    },
+  ];
+
+  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date), {
+    decisionId: 'target-old',
+    energyKcal: 2500,
+    energyKcalLow: null,
+    energyKcalHigh: null,
+  });
+});
+
+test('Tendencias resuelve por fecha cuando Daily Summary todavía no trae targetDecisionId', () => {
+  const summary = {
+    date: '2026-09-15',
+    energyTargetKcal: null,
+  };
+  const targets = [
+    {
+      decisionId: 'target-old',
+      effectiveFrom: '2026-08-01',
+      effectiveTo: '2026-09-30',
+      status: 'superseded',
+      energyTargetKcal: 2500,
+    },
+    {
+      decisionId: 'target-current',
+      effectiveFrom: '2026-10-01',
+      status: 'active',
+      energyTargetKcal: 2700,
+    },
+  ];
+
+  assert.equal(
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date).decisionId,
+    'target-old',
+  );
+  assert.equal(
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date).energyKcal,
+    2500,
+  );
+});
+
+test('Tendencias preserva el rango del target canónico y no lo colapsa al punto del resumen', () => {
+  const summary = {
+    date: '2026-10-03',
+    energyTargetKcal: 2500,
+    targetDecisionId: 'target-range',
+  };
+  const targets = [
+    {
+      decisionId: 'target-range',
+      effectiveFrom: '2026-10-01',
+      status: 'active',
+      energyTargetKcal: null,
+      energyTargetKcalLow: 2400,
+      energyTargetKcalHigh: 2600,
+    },
+  ];
+
+  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date), {
+    decisionId: 'target-range',
+    energyKcal: null,
+    energyKcalLow: 2400,
+    energyKcalHigh: 2600,
+  });
+});
+
+test('Tendencias falla cerrada en lineage inválido y no sustituye otra decisión', () => {
+  const summary = {
+    date: '2026-10-03',
+    energyTargetKcal: 2450,
+    targetDecisionId: 'missing-decision',
+  };
+  const targets = [
+    {
+      decisionId: 'target-other',
+      effectiveFrom: '2026-10-01',
+      status: 'active',
+      energyTargetKcal: 2700,
+    },
+    {
+      decisionId: 'target-void',
+      effectiveFrom: '2026-09-01',
+      status: 'void',
+      energyTargetKcal: 2300,
+    },
+  ];
+
+  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date), {
+    decisionId: 'missing-decision',
+    energyKcal: 2450,
+    energyKcalLow: null,
+    energyKcalHigh: null,
+  });
 });

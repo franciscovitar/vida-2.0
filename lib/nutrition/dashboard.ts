@@ -8,6 +8,7 @@ import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
 import { classifyNutritionTargetSemantics } from './target-semantics';
 import { readNutritionTabValues } from './sheets-read';
+import { resolveNutritionHistoricalEnergyTarget } from './target-history';
 import type {
   NutritionAiInsight,
   NutritionCoverage,
@@ -154,6 +155,8 @@ function chooseTarget(rows: readonly Row[], today: string): NutritionTarget | nu
     effectiveFrom: stringValue(row.effectiveFrom) ?? today,
     goal: stringValue(row.goal),
     energyKcal: numberValue(row.energyTargetKcal),
+    energyKcalLow: numberValue(row.energyTargetKcalLow),
+    energyKcalHigh: numberValue(row.energyTargetKcalHigh),
     proteinGrams: numberValue(row.proteinTargetGrams),
     carbohydrateGrams: numberValue(row.carbohydrateTargetGrams),
     fatGrams: numberValue(row.fatTargetGrams),
@@ -180,16 +183,24 @@ function chooseNutrientTargets(rows: readonly Row[], today: string): Map<string,
   return byKey;
 }
 
-function parseDailyRows(rows: readonly Row[]): NutritionDailyPoint[] {
+function parseDailyRows(
+  rows: readonly Row[],
+  targetRows: readonly Row[],
+): NutritionDailyPoint[] {
   return rows
     .map((row) => {
       const date = stringValue(row.date);
       if (!date) return null;
+      const historicalTarget = resolveNutritionHistoricalEnergyTarget(row, targetRows, date);
       return {
         date,
         energyKcal: numberValue(row.energyKcal),
         energyKcalLow: numberValue(row.energyKcalLow),
         energyKcalHigh: numberValue(row.energyKcalHigh),
+        targetDecisionId: historicalTarget.decisionId,
+        energyTargetKcal: historicalTarget.energyKcal,
+        energyTargetKcalLow: historicalTarget.energyKcalLow,
+        energyTargetKcalHigh: historicalTarget.energyKcalHigh,
         estimateQuality: qualityValue(row.estimateQuality),
         energyCoverage: coverageValue(row.energyCoverage),
         macroCoverage: coverageValue(row.macroCoverage),
@@ -546,7 +557,7 @@ export async function loadNutritionDashboardData(
   const itemPartition = partitionNutritionFoodItemRows(itemRows);
   const targetRows = rowsFrom(targetsResult);
   const target = chooseTarget(targetRows, today);
-  const history = parseDailyRows(dailyRows)
+  const history = parseDailyRows(dailyRows, targetRows)
     .filter((row) => row.date <= today)
     .slice(-90);
   const todayDaily = history.find((row) => row.date === today) ?? null;
