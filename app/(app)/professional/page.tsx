@@ -2,7 +2,7 @@ import { Brain } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
-import { ProfessionalDashboard } from '@/components/professional/ProfessionalDashboard';
+import { ProfessionalPanorama } from '@/components/professional/ProfessionalPanorama';
 import { ProfessionalNavigation } from '@/components/professional/ProfessionalNavigation';
 import { getProfessionalIntelligencePageData } from '@/lib/data/professional-intelligence-source';
 
@@ -27,12 +27,7 @@ export default async function ProfessionalPage() {
 
       <ProfessionalNavigation current="panorama" />
 
-      <ProfessionalDashboard
-        data={data.professional}
-        editorial={data.editorial}
-        technologyLibrary={data.technologyLibrary}
-        careerResilience={data.careerResilience}
-      />
+      <ProfessionalPanorama data={data.professional} />
     </div>
   );
 }
