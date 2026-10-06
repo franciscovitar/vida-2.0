@@ -140,8 +140,14 @@ function aggregateConfidence(
   return 'high';
 }
 
-function chooseTarget(rows: readonly Row[], today: string): NutritionTarget | null {
-  const row = selectNutritionTargetRowForDate(rows, today);
+function chooseTarget(
+  rows: readonly Row[],
+  today: string,
+  currentDate: string,
+): NutritionTarget | null {
+  const row = selectNutritionTargetRowForDate(rows, today, {
+    includeSuperseded: today < currentDate,
+  });
   if (!row) return null;
   return {
     decisionId: stringValue(row.decisionId) ?? 'target',
@@ -179,12 +185,18 @@ function chooseNutrientTargets(rows: readonly Row[], today: string): Map<string,
 function parseDailyRows(
   rows: readonly Row[],
   targetRows: readonly Row[],
+  currentDate: string,
 ): NutritionDailyPoint[] {
   return rows
     .map((row) => {
       const date = stringValue(row.date);
       if (!date) return null;
-      const historicalTarget = resolveNutritionHistoricalEnergyTarget(row, targetRows, date);
+      const historicalTarget = resolveNutritionHistoricalEnergyTarget(
+        row,
+        targetRows,
+        date,
+        currentDate,
+      );
       return {
         date,
         energyKcal: numberValue(row.energyKcal),
@@ -549,8 +561,9 @@ export async function loadNutritionDashboardData(
   const itemRows = rowsFrom(itemsResult);
   const itemPartition = partitionNutritionFoodItemRows(itemRows);
   const targetRows = rowsFrom(targetsResult);
-  const target = chooseTarget(targetRows, today);
-  const history = parseDailyRows(dailyRows, targetRows)
+  const currentDate = cordobaToday();
+  const target = chooseTarget(targetRows, today, currentDate);
+  const history = parseDailyRows(dailyRows, targetRows, currentDate)
     .filter((row) => row.date <= today)
     .slice(-90);
   const todayDaily = history.find((row) => row.date === today) ?? null;
@@ -576,7 +589,7 @@ export async function loadNutritionDashboardData(
   const summaryAsOf = todayDailyRow ? latestTimestamp([todayDailyRow], ['updatedAt']) : null;
   const freshness = deriveNutritionFreshness({
     dataDate: today,
-    currentDate: cordobaToday(),
+    currentDate,
     hasRawIntake: activeTodayMeals.length > 0 || todayItems.length > 0,
     rawAsOf,
     summaryAsOf,

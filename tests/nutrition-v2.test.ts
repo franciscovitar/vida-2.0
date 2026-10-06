@@ -646,7 +646,7 @@ test('Tendencias conserva por lineage el target histórico aunque la decisión e
     },
   ];
 
-  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date), {
+  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'), {
     decisionId: 'target-old',
     energyKcal: 2500,
     energyKcalLow: null,
@@ -676,11 +676,11 @@ test('Tendencias resuelve por fecha cuando Daily Summary todavía no trae target
   ];
 
   assert.equal(
-    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date).decisionId,
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06').decisionId,
     'target-old',
   );
   assert.equal(
-    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date).energyKcal,
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06').energyKcal,
     2500,
   );
 });
@@ -702,7 +702,7 @@ test('Tendencias preserva el rango del target canónico y no lo colapsa al punto
     },
   ];
 
-  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date), {
+  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'), {
     decisionId: 'target-range',
     energyKcal: null,
     energyKcalLow: 2400,
@@ -731,7 +731,7 @@ test('Tendencias falla cerrada en lineage inválido y no sustituye otra decisió
     },
   ];
 
-  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date), {
+  assert.deepEqual(resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'), {
     decisionId: 'missing-decision',
     energyKcal: 2450,
     energyKcalLow: null,
@@ -788,4 +788,72 @@ test('si dos decisiones empiezan el mismo día, active prevalece sobre supersede
   );
 
   assert.equal(target?.decisionId, 'active-same-day');
+});
+
+test('el target actual no revive una decisión superseded abierta', () => {
+  const target = selectNutritionTargetRowForDate(
+    [
+      {
+        decisionId: 'old-open',
+        effectiveFrom: '2026-09-01',
+        status: 'superseded',
+      },
+    ],
+    '2026-10-06',
+    { includeSuperseded: false },
+  );
+
+  assert.equal(target, null);
+});
+
+test('lineage con rango de vigencia incompatible falla cerrada al resumen', () => {
+  const summary = {
+    date: '2026-09-15',
+    energyTargetKcal: 2450,
+    targetDecisionId: 'future-target',
+  };
+  const targets = [
+    {
+      decisionId: 'future-target',
+      effectiveFrom: '2026-10-01',
+      status: 'active',
+      energyTargetKcal: 2700,
+    },
+  ];
+
+  assert.deepEqual(
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'),
+    {
+      decisionId: 'future-target',
+      energyKcal: 2450,
+      energyKcalLow: null,
+      energyKcalHigh: null,
+    },
+  );
+});
+
+test('lineage actual no acepta una decisión superseded como target vigente', () => {
+  const summary = {
+    date: '2026-10-06',
+    energyTargetKcal: 2500,
+    targetDecisionId: 'old-open',
+  };
+  const targets = [
+    {
+      decisionId: 'old-open',
+      effectiveFrom: '2026-09-01',
+      status: 'superseded',
+      energyTargetKcal: 2400,
+    },
+  ];
+
+  assert.deepEqual(
+    resolveNutritionHistoricalEnergyTarget(summary, targets, summary.date, '2026-10-06'),
+    {
+      decisionId: 'old-open',
+      energyKcal: 2500,
+      energyKcalLow: null,
+      energyKcalHigh: null,
+    },
+  );
 });
