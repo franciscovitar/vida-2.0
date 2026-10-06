@@ -24,8 +24,7 @@ function confidenceLabel(value: NutritionNutrientWindowRow['confidence']): strin
 
 function referenceLabel(reference: NutritionNutrientReference | null, unit: string): string {
   if (!reference) return 'Sin referencia activa';
-  const value = (amount: number) =>
-    `${formatNumber(amount, amount < 10 ? 1 : 0)} ${unit}`;
+  const value = (amount: number) => `${formatNumber(amount, amount < 10 ? 1 : 0)} ${unit}`;
 
   if (reference.semantics === 'adequacy') {
     const minimum = reference.target ?? reference.lowerTarget;
@@ -74,11 +73,7 @@ function averageLabel(nutrient: NutritionNutrientWindowRow): string {
   )} ${nutrient.unit}/día`;
 }
 
-export function NutritionNutrientTrends({
-  data,
-}: {
-  data: NutritionNutrientWindowResult;
-}) {
+export function NutritionNutrientTrends({ data }: { data: NutritionNutrientWindowResult }) {
   const groups = [
     ['vitamin', 'Vitaminas'],
     ['mineral', 'Minerales'],
@@ -157,7 +152,9 @@ export function NutritionNutrientTrends({
         <div className={styles.metrics}>
           <article>
             <span>Días con registro</span>
-            <strong>{data.trackedDateCount}/{data.windowDays}</strong>
+            <strong>
+              {data.trackedDateCount}/{data.windowDays}
+            </strong>
           </article>
           <article>
             <span>Con promedio comparable</span>

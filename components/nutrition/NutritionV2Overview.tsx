@@ -100,8 +100,7 @@ function energyDifferenceLabel(
   if (delta === null) return '—';
 
   const rangeTarget =
-    target.energyKcal === null &&
-    (target.energyKcalLow !== null || target.energyKcalHigh !== null);
+    target.energyKcal === null && (target.energyKcalLow !== null || target.energyKcalHigh !== null);
   if (delta === 0) return rangeTarget ? 'En rango' : 'En objetivo';
   if (!rangeTarget) return `${delta > 0 ? '+' : ''}${formatNumber(delta)} kcal`;
   return delta < 0
@@ -125,11 +124,7 @@ function qualityLabel(quality: string): string {
 }
 
 function MacroBar({ macro }: { macro: NutritionMacroProgress }) {
-  const progress = nutritionComparableProgressPercent(
-    macro.amount,
-    macro.target,
-    macro.coverage,
-  );
+  const progress = nutritionComparableProgressPercent(macro.amount, macro.target, macro.coverage);
   const style = {
     '--macro-progress': `${Math.min(progress ?? 0, 100)}%`,
   } as CSSProperties;
@@ -209,7 +204,9 @@ function InsightCard({
           {insight.window ? ` · ${insight.window}` : ''}
         </span>
         {insight.evidence ? <span className={styles.evidence}>{insight.evidence}</span> : null}
-        {insight.limitations ? <span className={styles.evidence}>{insight.limitations}</span> : null}
+        {insight.limitations ? (
+          <span className={styles.evidence}>{insight.limitations}</span>
+        ) : null}
       </div>
     </article>
   );
@@ -288,11 +285,7 @@ export function NutritionV2Overview({
   const comparableEnergy = recent
     .filter((point) => point.energyCoverage === 'complete')
     .map((point) =>
-      nutritionDisplayPointEstimate(
-        point.energyKcal,
-        point.energyKcalLow,
-        point.energyKcalHigh,
-      ),
+      nutritionDisplayPointEstimate(point.energyKcal, point.energyKcalLow, point.energyKcalHigh),
     )
     .filter(
       (
@@ -460,9 +453,7 @@ export function NutritionV2Overview({
                     title={`Objetivo histórico: ${targetLabel}`}
                   >
                     <div className={styles['chart-column']}>
-                      {hasTargetRange ? (
-                        <span className={styles['target-range-mark']} />
-                      ) : null}
+                      {hasTargetRange ? <span className={styles['target-range-mark']} /> : null}
                       {targetLine !== null ? <span className={styles['target-mark']} /> : null}
                       {low > 0 || high > 0 ? <span className={styles['range-mark']} /> : null}
                       {center !== null ? <span className={styles['center-mark']} /> : null}
@@ -472,7 +463,9 @@ export function NutritionV2Overview({
                         ? '—'
                         : `${centerDisplay.approximate ? '≈' : ''}${formatNumber(center)}`}
                     </strong>
-                    <span>{windowDays === 7 ? weekday(point.date) : shortTrendDate(point.date)}</span>
+                    <span>
+                      {windowDays === 7 ? weekday(point.date) : shortTrendDate(point.date)}
+                    </span>
                   </div>
                 );
               })
@@ -572,11 +565,7 @@ export function NutritionV2Overview({
                 </div>
                 <div className={styles['meal-energy']}>
                   <strong>
-                    {formatEnergyEstimate(
-                      meal.energyKcal,
-                      meal.energyKcalLow,
-                      meal.energyKcalHigh,
-                    )}
+                    {formatEnergyEstimate(meal.energyKcal, meal.energyKcalLow, meal.energyKcalHigh)}
                   </strong>
                   <span data-confidence={meal.confidence}>
                     {meal.energyKcal === null &&

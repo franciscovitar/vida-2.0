@@ -27,16 +27,9 @@ function numberValue(value: PlainCell | undefined): number | null {
   return null;
 }
 
-function canRepresentTargetDecision(
-  row: NutritionTargetRow,
-  includeSuperseded: boolean,
-): boolean {
+function canRepresentTargetDecision(row: NutritionTargetRow, includeSuperseded: boolean): boolean {
   const status = stringValue(row.status)?.toLowerCase();
-  return (
-    status === null ||
-    status === 'active' ||
-    (includeSuperseded && status === 'superseded')
-  );
+  return status === null || status === 'active' || (includeSuperseded && status === 'superseded');
 }
 
 function targetCoversDate(row: NutritionTargetRow, date: string): boolean {

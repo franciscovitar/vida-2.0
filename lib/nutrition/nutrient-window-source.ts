@@ -6,10 +6,7 @@ import type { SheetReadCode } from '@/lib/google/errors';
 import { auditNutritionNutrientSummaryFreshness } from './nutrient-summary-freshness';
 import { sanitizeNutritionNutrientSummaryIntegrity } from './nutrient-summary-integrity';
 import { sanitizeNutritionNutrientSummaryUniqueness } from './nutrient-summary-uniqueness';
-import {
-  buildNutritionNutrientWindow,
-  type NutritionNutrientWindowData,
-} from './nutrient-window';
+import { buildNutritionNutrientWindow, type NutritionNutrientWindowData } from './nutrient-window';
 import { readNutritionTabValues } from './sheets-read';
 
 type Row = Record<string, PlainCell>;
@@ -56,36 +53,24 @@ export async function loadNutritionNutrientWindow(
   endDate: string,
   windowDays: number,
 ): Promise<NutritionNutrientWindowResult> {
-  const [
-    summaryResult,
-    targetResult,
-    mealsResult,
-    itemsResult,
-    dailyResult,
-    foodNutrientsResult,
-  ] = await Promise.all([
-    readNutritionTabValues('Nutrient Summary'),
-    readNutritionTabValues('Nutrient Targets'),
-    readNutritionTabValues('Meals'),
-    readNutritionTabValues('Food Items'),
-    readNutritionTabValues('Daily Summary'),
-    readNutritionTabValues('Food Nutrients'),
-  ]);
+  const [summaryResult, targetResult, mealsResult, itemsResult, dailyResult, foodNutrientsResult] =
+    await Promise.all([
+      readNutritionTabValues('Nutrient Summary'),
+      readNutritionTabValues('Nutrient Targets'),
+      readNutritionTabValues('Meals'),
+      readNutritionTabValues('Food Items'),
+      readNutritionTabValues('Daily Summary'),
+      readNutritionTabValues('Food Nutrients'),
+    ]);
 
   const summaryRows = summaryResult.ok ? rowsFromValues(summaryResult.values) : [];
   const targetRows = targetResult.ok ? rowsFromValues(targetResult.values) : [];
   const mealRows = mealsResult.ok ? rowsFromValues(mealsResult.values) : [];
   const itemRows = itemsResult.ok ? rowsFromValues(itemsResult.values) : [];
   const dailyRows = dailyResult.ok ? rowsFromValues(dailyResult.values) : [];
-  const foodNutrientRows = foodNutrientsResult.ok
-    ? rowsFromValues(foodNutrientsResult.values)
-    : [];
+  const foodNutrientRows = foodNutrientsResult.ok ? rowsFromValues(foodNutrientsResult.values) : [];
   const startDate = windowStartDate(endDate, windowDays);
-  const uniqueness = sanitizeNutritionNutrientSummaryUniqueness(
-    summaryRows,
-    startDate,
-    endDate,
-  );
+  const uniqueness = sanitizeNutritionNutrientSummaryUniqueness(summaryRows, startDate, endDate);
   const auditSourcesReady =
     mealsResult.ok && itemsResult.ok && dailyResult.ok && foodNutrientsResult.ok;
 
@@ -111,9 +96,7 @@ export async function loadNutritionNutrientWindow(
         }));
 
   const rejectedDates = new Set(
-    freshness
-      .filter((entry) => entry.state !== 'current')
-      .map((entry) => entry.date),
+    freshness.filter((entry) => entry.state !== 'current').map((entry) => entry.date),
   );
   const usableSummaryRows = uniqueness.rows.filter(
     (row) => !rejectedDates.has(String(row.date ?? '').trim()),
@@ -127,15 +110,8 @@ export async function loadNutritionNutrientWindow(
     endDate,
   );
   const staleDateCount = freshness.filter((entry) => entry.state === 'stale').length;
-  const unverifiableDateCount = freshness.filter(
-    (entry) => entry.state === 'unverifiable',
-  ).length;
-  const data = buildNutritionNutrientWindow(
-    integrity.rows,
-    targetRows,
-    endDate,
-    windowDays,
-  );
+  const unverifiableDateCount = freshness.filter((entry) => entry.state === 'unverifiable').length;
+  const data = buildNutritionNutrientWindow(integrity.rows, targetRows, endDate, windowDays);
 
   if (!summaryResult.ok) {
     return {
@@ -164,10 +140,7 @@ export async function loadNutritionNutrientWindow(
     ...data,
     source: {
       status:
-        targetStatus === 'ready' &&
-        !freshnessIssue &&
-        !integrityIssue &&
-        !uniquenessIssue
+        targetStatus === 'ready' && !freshnessIssue && !integrityIssue && !uniquenessIssue
           ? 'ready'
           : 'partial',
       code: targetResult.ok ? null : targetResult.code,

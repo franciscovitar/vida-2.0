@@ -65,9 +65,13 @@ export function auditNutritionNutrientSummaryFreshness(
     const summaryTimestamps = summaryRows.map((row) => parseTimestamp(row.updatedAt));
     const earliestSummary =
       summaryTimestamps.length > 0 && summaryTimestamps.every((value) => value !== null)
-        ? summaryTimestamps.reduce((earliest, value) =>
-            earliest === null || (value !== null && value.time < earliest.time) ? value : earliest,
-          null as { raw: string; time: number } | null)
+        ? summaryTimestamps.reduce(
+            (earliest, value) =>
+              earliest === null || (value !== null && value.time < earliest.time)
+                ? value
+                : earliest,
+            null as { raw: string; time: number } | null,
+          )
         : null;
 
     const meals = mealRows.filter((row) => stringValue(row.date) === date);
