@@ -242,6 +242,26 @@ function InsightCard({
   );
 }
 
+function todayStatusCopy(status: NutritionDashboardData['todayEnergy']['dayStatus']): string {
+  if (status === 'open') return 'Registro abierto: este resumen puede seguir cambiando hoy.';
+  if (status === 'closed') return 'Día cerrado para registro; las correcciones posteriores siguen siendo posibles.';
+  return 'Resumen derivado de lo registrado para este día.';
+}
+
+function insightLabel(insight: NutritionAiInsight): string {
+  if (insight.category === 'improvement') return 'Mejora de mayor impacto';
+  if (insight.category === 'pattern') return 'Patrón observado';
+  if (insight.category === 'antioxidants') return 'Potencial antioxidante';
+  return 'Perfil antiinflamatorio';
+}
+
+function insightIcon(insight: NutritionAiInsight): ReactNode {
+  if (insight.category === 'improvement') return <Flame size={17} aria-hidden="true" />;
+  if (insight.category === 'pattern') return <BrainCircuit size={17} aria-hidden="true" />;
+  if (insight.category === 'antioxidants') return <Sparkles size={17} aria-hidden="true" />;
+  return <Leaf size={17} aria-hidden="true" />;
+}
+
 function weekday(date: string): string {
   const parsed = new Date(`${date}T12:00:00Z`);
   return new Intl.DateTimeFormat('es-AR', { weekday: 'short', timeZone: 'UTC' })
@@ -317,12 +337,13 @@ export function NutritionV2Overview({
           ? 'Pendientes'
           : 'No disponibles';
 
+  const improvement = data.aiInsights.find((insight) => insight.category === 'improvement');
+  const pattern = data.aiInsights.find((insight) => insight.category === 'pattern');
   const antioxidant = data.aiInsights.find((insight) => insight.category === 'antioxidants');
   const antiInflammatory = data.aiInsights.find(
     (insight) => insight.category === 'anti-inflammatory',
   );
-  const improvement = data.aiInsights.find((insight) => insight.category === 'improvement');
-  const pattern = data.aiInsights.find((insight) => insight.category === 'pattern');
+  const todayInsight = improvement ?? pattern ?? antioxidant ?? antiInflammatory;
 
   return (
     <div className={styles.stack}>
@@ -334,13 +355,9 @@ export function NutritionV2Overview({
         aria-labelledby="nutrition-v2-title"
       >
         <div className={styles['hero-copy']}>
-          <p className={styles.eyebrow}>NUTRICIÓN V2 · HOY</p>
-          <h2 id="nutrition-v2-title">Tu nutrición, de macros a micros</h2>
-          <p>
-            Lo registrado en Nutrition Intelligence se transforma en una vista diaria y
-            longitudinal. Valores desconocidos siguen siendo desconocidos: no se rellenan huecos con
-            ceros.
-          </p>
+          <p className={styles.eyebrow}>HOY</p>
+          <h2 id="nutrition-v2-title">Estado del día</h2>
+          <p>{todayStatusCopy(data.todayEnergy.dayStatus)}</p>
           <SourceStatus source={data.source} />
         </div>
 
@@ -578,7 +595,7 @@ export function NutritionV2Overview({
         </details>
       </section>
 
-      {mode === 'today' && data.aiInsights.length > 0 ? (
+      {mode === 'today' && todayInsight ? (
         <section className={styles.panel} aria-labelledby="nutrition-ai-title">
           <div className={styles['section-heading']}>
             <div>
@@ -592,34 +609,11 @@ export function NutritionV2Overview({
             <BrainCircuit size={21} aria-hidden="true" />
           </div>
           <div className={styles['insight-grid']}>
-            {antioxidant ? (
-              <InsightCard
-                icon={<Sparkles size={17} aria-hidden="true" />}
-                title="Potencial antioxidante"
-                insight={antioxidant}
-              />
-            ) : null}
-            {antiInflammatory ? (
-              <InsightCard
-                icon={<Leaf size={17} aria-hidden="true" />}
-                title="Perfil antiinflamatorio"
-                insight={antiInflammatory}
-              />
-            ) : null}
-            {improvement ? (
-              <InsightCard
-                icon={<Flame size={17} aria-hidden="true" />}
-                title="Mejora de mayor impacto"
-                insight={improvement}
-              />
-            ) : null}
-            {pattern ? (
-              <InsightCard
-                icon={<BrainCircuit size={17} aria-hidden="true" />}
-                title="Patrón observado"
-                insight={pattern}
-              />
-            ) : null}
+            <InsightCard
+              icon={insightIcon(todayInsight)}
+              title={insightLabel(todayInsight)}
+              insight={todayInsight}
+            />
           </div>
         </section>
       ) : null}

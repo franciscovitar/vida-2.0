@@ -72,9 +72,9 @@
 }
 
 .hero-copy h2 {
-  max-width: 18ch;
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  line-height: 1.03;
+  max-width: none;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  line-height: 1.15;
 }
 
 .hero-copy > p:not(.eyebrow) {
@@ -604,7 +604,7 @@
 
 .insight-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.68rem;
 }
 
