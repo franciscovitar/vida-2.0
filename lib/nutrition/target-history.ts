@@ -53,11 +53,11 @@ function historicalStatusRank(row: NutritionTargetRow): number {
   return 0;
 }
 
-export function selectNutritionTargetRowForDate(
-  targetRows: readonly NutritionTargetRow[],
+export function selectNutritionTargetRowForDate<T extends NutritionTargetRow>(
+  targetRows: readonly T[],
   date: string,
   options: { includeSuperseded?: boolean } = {},
-): NutritionTargetRow | null {
+): T | null {
   const includeSuperseded = options.includeSuperseded ?? true;
   return (
     targetRows
