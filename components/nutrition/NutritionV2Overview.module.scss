@@ -157,10 +157,6 @@
 .coverage-chip,
 .quality-grid span,
 .quality-grid small,
-.nutrient-summary span,
-.nutrient-summary small,
-.highlight span,
-.highlight small,
 .evidence,
 .meal-copy span,
 .meal-time small {
@@ -672,7 +668,6 @@
   .chart-column {
     min-height: 6.8rem;
   }
-
 
   .meal {
     grid-template-columns: 3.2rem minmax(0, 1fr);
