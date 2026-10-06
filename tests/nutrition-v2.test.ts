@@ -562,7 +562,6 @@ test('Nutrientes marca mixed si el mismo período cruza ambos extremos de una re
   assert.equal(magnesium.attentionKind, 'mixed');
 });
 
-
 test('Nutrientes resuelve la decisión de target efectiva para cada fecha del período', () => {
   const summary = [
     {
