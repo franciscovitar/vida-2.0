@@ -64,3 +64,28 @@ test('PRO-V2-03. Inteligencia queda absorbida por Profesional', () => {
   assert.equal(component.includes('Límite principal'), true);
   assert.equal(component.includes('Gratis'), true);
 });
+
+test('PRO-V2-04. Panorama reemplaza el dashboard largo sin borrar su implementación', () => {
+  const route = repoText('app/(app)/professional/page.tsx');
+  const panorama = repoText('components/professional/ProfessionalPanorama.tsx');
+  const legacyDashboard = repoText('components/professional/ProfessionalDashboard.tsx');
+
+  assert.match(route, /ProfessionalPanorama/);
+  assert.doesNotMatch(route, /<ProfessionalDashboard/);
+  assert.match(panorama, /Tu panorama profesional/);
+  assert.match(panorama, /Qué cambió \/ qué se confirma/);
+  assert.match(panorama, /Qué conviene hacer ahora/);
+  assert.match(legacyDashboard, /Crecimiento \/ Huecos a llenar/);
+});
+
+test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada acotada', () => {
+  const panorama = repoText('components/professional/ProfessionalPanorama.tsx');
+
+  assert.match(panorama, /snapshot\.nowMoves\.slice\(0, 3\)/);
+  assert.match(panorama, /snapshot\.growth\.items\[0\]/);
+  assert.match(panorama, /snapshot\.forecast\.direction/);
+  assert.match(panorama, /snapshot\.market\.globalSignals\[0\]/);
+  assert.match(panorama, /snapshot\.strongestEvidence\[0\]/);
+  assert.doesNotMatch(panorama, /Math\.random|overall score|winner/i);
+  assert.doesNotMatch(panorama, /\/professional\/(mercado|crecimiento|biblioteca)/);
+});
