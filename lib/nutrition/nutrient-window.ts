@@ -138,31 +138,65 @@ function referenceFromRow(row: Row | null): NutritionNutrientReference | null {
   };
 }
 
+function targetStatusAllowed(row: Row, includeSuperseded: boolean): boolean {
+  const status = stringValue(row.status)?.toLowerCase();
+  return (
+    status === null ||
+    status === 'active' ||
+    (includeSuperseded && status === 'superseded')
+  );
+}
+
+function targetCoversDate(row: Row, date: string): boolean {
+  const from = stringValue(row.effectiveFrom);
+  const to = stringValue(row.effectiveTo);
+  return Boolean(from && from <= date && (!to || to >= date));
+}
+
 function targetRowForDate(
   rows: readonly Row[],
   nutrientKey: string,
   date: string,
+  includeSuperseded: boolean,
 ): Row | null {
   return (
-    activeRows(rows)
-      .filter((row) => {
-        const key = stringValue(row.nutrientKey);
-        const from = stringValue(row.effectiveFrom);
-        const to = stringValue(row.effectiveTo);
-        return key === nutrientKey && Boolean(from && from <= date && (!to || to >= date));
-      })
+    rows
+      .filter((row) => targetStatusAllowed(row, includeSuperseded))
+      .filter(
+        (row) =>
+          stringValue(row.nutrientKey) === nutrientKey && targetCoversDate(row, date),
+      )
       .sort((a, b) =>
         (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''),
       )[0] ?? null
   );
 }
 
-function referenceForDay(
+function referenceForSummaryDay(
   targetRows: readonly Row[],
+  summaryRow: Row,
   nutrientKey: string,
   date: string,
+  endDate: string,
 ): NutritionNutrientReference | null {
-  return referenceFromRow(targetRowForDate(targetRows, nutrientKey, date));
+  const includeSuperseded = date < endDate;
+  const decisionId = stringValue(summaryRow.targetDecisionId);
+
+  if (decisionId) {
+    const exact =
+      targetRows.find(
+        (row) =>
+          targetStatusAllowed(row, includeSuperseded) &&
+          stringValue(row.nutrientKey) === nutrientKey &&
+          stringValue(row.decisionId) === decisionId &&
+          targetCoversDate(row, date),
+      ) ?? null;
+    return referenceFromRow(exact);
+  }
+
+  return referenceFromRow(
+    targetRowForDate(targetRows, nutrientKey, date, includeSuperseded),
+  );
 }
 
 function evaluateReference(
@@ -269,7 +303,9 @@ export function buildNutritionNutrientWindow(
         value: display.value,
         approximate: display.approximate,
         quality: qualityValue(row.confidence),
-        reference: date ? referenceForDay(targetRows, catalog.key, date) : null,
+        reference: date
+          ? referenceForSummaryDay(targetRows, row, catalog.key, date, endDate)
+          : null,
       });
     }
 
@@ -277,7 +313,7 @@ export function buildNutritionNutrientWindow(
       completePoints.length === 0
         ? null
         : completePoints.reduce((sum, point) => sum + point.value, 0) / completePoints.length;
-    const currentTargetRow = targetRowForDate(targetRows, catalog.key, endDate);
+    const currentTargetRow = targetRowForDate(targetRows, catalog.key, endDate, false);
     const currentReference = referenceFromRow(currentTargetRow);
 
     let evaluatedDays = 0;

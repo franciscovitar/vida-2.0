@@ -621,7 +621,7 @@ test('Nutrientes resuelve la decisión de target efectiva para cada fecha del pe
       decisionId: 'mg-old',
       effectiveFrom: '2026-01-01',
       effectiveTo: '2026-10-01',
-      status: 'active',
+      status: 'superseded',
       nutrientKey: 'magnesium',
       targetAmount: 400,
       unit: 'mg',
@@ -647,6 +647,78 @@ test('Nutrientes resuelve la decisión de target efectiva para cada fecha del pe
   assert.equal(magnesium.targetDecisionCount, 2);
   assert.equal(magnesium.currentReference?.decisionId, 'mg-new');
   assert.equal(data.attention[0]?.key, 'magnesium');
+});
+
+test('Nutrientes no revive una referencia superseded como referencia actual', () => {
+  const summary = [
+    {
+      date: '2026-10-06',
+      nutrientKey: 'magnesium',
+      amount: 420,
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+  ];
+  const targets = [
+    {
+      decisionId: 'mg-old-open',
+      effectiveFrom: '2026-09-01',
+      status: 'superseded',
+      nutrientKey: 'magnesium',
+      targetAmount: 400,
+      unit: 'mg',
+      basis: 'RDA',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, targets, '2026-10-06', 7);
+  const magnesium = data.nutrients.find((nutrient) => nutrient.key === 'magnesium');
+
+  assert.ok(magnesium);
+  assert.equal(magnesium.currentReference, null);
+  assert.equal(magnesium.evaluatedDays, 0);
+});
+
+test('Nutrientes falla cerrado si targetDecisionId no corresponde a la fecha', () => {
+  const summary = [
+    {
+      date: '2026-10-01',
+      nutrientKey: 'magnesium',
+      amount: 420,
+      targetDecisionId: 'future',
+      sourceCoverage: 'complete',
+      confidence: 'high',
+    },
+  ];
+  const targets = [
+    {
+      decisionId: 'old',
+      effectiveFrom: '2026-09-01',
+      effectiveTo: '2026-10-01',
+      status: 'superseded',
+      nutrientKey: 'magnesium',
+      targetAmount: 400,
+      unit: 'mg',
+      basis: 'RDA',
+    },
+    {
+      decisionId: 'future',
+      effectiveFrom: '2026-10-02',
+      status: 'active',
+      nutrientKey: 'magnesium',
+      targetAmount: 450,
+      unit: 'mg',
+      basis: 'RDA',
+    },
+  ];
+
+  const data = buildNutritionNutrientWindow(summary, targets, '2026-10-06', 7);
+  const magnesium = data.nutrients.find((nutrient) => nutrient.key === 'magnesium');
+
+  assert.ok(magnesium);
+  assert.equal(magnesium.completeDays, 1);
+  assert.equal(magnesium.evaluatedDays, 0);
+  assert.equal(magnesium.attentionDays, 0);
 });
 
 test('Tendencias conserva por lineage el target histórico aunque la decisión esté superseded', () => {

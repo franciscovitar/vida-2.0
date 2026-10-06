@@ -56,7 +56,7 @@ La vista principal de Nutrientes es longitudinal. Para cada ventana:
 - sólo los días con `sourceCoverage = complete` entran en promedios comparables;
 - los días parciales siguen visibles como cobertura, pero no reducen artificialmente el promedio;
 - una señal de atención requiere al menos 3 días evaluables, al menos 2 días con la señal y presencia en al menos 50% de los días evaluables;
-- las referencias se resuelven por fecha desde `Nutrient Targets`, por lo que un cambio de decisión dentro del período no reescribe retrospectivamente los días anteriores;
+- las referencias se resuelven por `Nutrient Summary.targetDecisionId` cuando existe y, si no existe lineage, por fecha desde `Nutrient Targets`; una decisión histórica `superseded` puede seguir describiendo sus días pasados, pero nunca revive como referencia actual;
 - una RDA/AI se interpreta como adecuación, un UL como límite superior y un rango como rango; una misma decisión puede contener adecuación + UL y ambos extremos se evalúan;
 - si `Nutrient Targets` no está disponible, Vida no adivina la semántica a partir de una copia de `targetAmount` en el resumen;
 - estas señales describen ingesta estimada repetida y nunca diagnostican deficiencia, toxicidad o estado clínico.
