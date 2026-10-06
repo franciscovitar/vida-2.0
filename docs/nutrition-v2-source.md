@@ -41,6 +41,8 @@ La UI muestra proteína, carbohidratos, grasas y fibra.
 
 Los objetivos activos de `Targets` tienen prioridad para energía/macros. En particular, la meta personal activa de fibra prevalece visualmente sobre una referencia dietaria genérica de `Nutrient Targets`.
 
+Para energía, Vida conserva `energyTargetKcalLow/High` cuando la decisión es un rango. Hoy no convierte ese rango en un midpoint artificial: muestra el rango y calcula la diferencia contra el borde aplicable. Tendencias resuelve cada día por `Daily Summary.targetDecisionId`; si esa lineage falta, usa la decisión de `Targets` vigente en esa fecha. Una decisión histórica `superseded` sigue siendo válida para sus fechas pasadas, mientras que `draft` y `void` no se usan. Un target actual nunca se aplica retrospectivamente a todo el gráfico.
+
 ## Micronutrientes
 
 La pantalla contiene un catálogo visual amplio de vitaminas, minerales y otros nutrientes. Ese catálogo define nombres/unidades de presentación, no cantidades personales ni recomendaciones.

@@ -11,6 +11,7 @@ import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import {
   nutritionDisplayDelta,
+  nutritionDisplayDeltaToTarget,
   nutritionDisplayPointEstimate,
 } from '@/lib/nutrition/presentation';
 import { getNutritionSheetsConfig, getNutritionSpreadsheetId } from '@/lib/nutrition/sheets-config';
@@ -620,7 +621,6 @@ test('Nutrientes resuelve la decisión de target efectiva para cada fecha del pe
   assert.equal(data.attention[0]?.key, 'magnesium');
 });
 
-
 test('Tendencias conserva por lineage el target histórico aunque la decisión esté superseded', () => {
   const summary = {
     date: '2026-09-15',
@@ -734,4 +734,15 @@ test('Tendencias falla cerrada en lineage inválido y no sustituye otra decisió
     energyKcalLow: null,
     energyKcalHigh: null,
   });
+});
+
+
+test('el delta contra target rango mide al borde más cercano sin inventar midpoint', () => {
+  assert.equal(nutritionDisplayDeltaToTarget(2500, null, null, null, 2400, 2600), 0);
+  assert.equal(nutritionDisplayDeltaToTarget(2300, null, null, null, 2400, 2600), -100);
+  assert.equal(nutritionDisplayDeltaToTarget(2700, null, null, null, 2400, 2600), 100);
+});
+
+test('un target puntual conserva prioridad sobre sus límites auxiliares', () => {
+  assert.equal(nutritionDisplayDeltaToTarget(2600, null, null, 2500, 2400, 2700), 100);
 });

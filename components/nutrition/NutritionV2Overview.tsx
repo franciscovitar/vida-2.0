@@ -11,11 +11,12 @@ import {
 import type { CSSProperties, ReactNode } from 'react';
 
 import {
-  nutritionDisplayDelta,
+  nutritionDisplayDeltaToTarget,
   nutritionDisplayPointEstimate,
 } from '@/lib/nutrition/presentation';
 import type {
   NutritionAiInsight,
+  NutritionDailyPoint,
   NutritionDashboardData,
   NutritionMacroProgress,
 } from '@/lib/nutrition/types';
@@ -42,6 +43,68 @@ function formatEnergyEstimate(
 
 function formatEnergy(data: NutritionDashboardData['todayEnergy']): string {
   return formatEnergyEstimate(data.amount, data.low, data.high);
+}
+
+function energyTargetLabel(
+  central: number | null,
+  low: number | null,
+  high: number | null,
+): string | null {
+  if (low !== null && high !== null && low > high) return null;
+  if (central !== null) {
+    if (low !== null && high !== null && (low !== central || high !== central)) {
+      return `${formatNumber(central)} kcal · rango ${formatNumber(low)}–${formatNumber(high)}`;
+    }
+    return `${formatNumber(central)} kcal`;
+  }
+  if (low !== null && high !== null) {
+    return `${formatNumber(low)}–${formatNumber(high)} kcal`;
+  }
+  if (low !== null) return `≥ ${formatNumber(low)} kcal`;
+  if (high !== null) return `≤ ${formatNumber(high)} kcal`;
+  return null;
+}
+
+function formatEnergyTarget(target: NutritionDashboardData['target']): string {
+  if (!target) return 'Pendiente';
+  return (
+    energyTargetLabel(target.energyKcal, target.energyKcalLow, target.energyKcalHigh) ?? 'Pendiente'
+  );
+}
+
+function historicalEnergyTargetLabel(point: NutritionDailyPoint): string {
+  return (
+    energyTargetLabel(
+      point.energyTargetKcal,
+      point.energyTargetKcalLow,
+      point.energyTargetKcalHigh,
+    ) ?? 'Sin objetivo registrado'
+  );
+}
+
+function energyDifferenceLabel(
+  data: NutritionDashboardData['todayEnergy'],
+  target: NutritionDashboardData['target'],
+): string {
+  if (!target) return '—';
+  const delta = nutritionDisplayDeltaToTarget(
+    data.amount,
+    data.low,
+    data.high,
+    target.energyKcal,
+    target.energyKcalLow,
+    target.energyKcalHigh,
+  );
+  if (delta === null) return '—';
+
+  const rangeTarget =
+    target.energyKcal === null &&
+    (target.energyKcalLow !== null || target.energyKcalHigh !== null);
+  if (delta === 0) return rangeTarget ? 'En rango' : 'En objetivo';
+  if (!rangeTarget) return `${delta > 0 ? '+' : ''}${formatNumber(delta)} kcal`;
+  return delta < 0
+    ? `${formatNumber(delta)} kcal hasta rango`
+    : `+${formatNumber(delta)} kcal sobre rango`;
 }
 
 function percentage(amount: number | null, target: number | null): number | null {
@@ -207,12 +270,8 @@ export function NutritionV2Overview({
     data.todayEnergy.high,
   );
   const energyProgress = percentage(energyDisplay.value, targetEnergy);
-  const energyDelta = nutritionDisplayDelta(
-    data.todayEnergy.amount,
-    data.todayEnergy.low,
-    data.todayEnergy.high,
-    targetEnergy,
-  );
+  const targetEnergyLabel = formatEnergyTarget(data.target);
+  const energyDifference = energyDifferenceLabel(data.todayEnergy, data.target);
   const ringStyle = {
     '--energy-progress': `${Math.min(energyProgress ?? 0, 100)}%`,
   } as CSSProperties;
@@ -244,10 +303,18 @@ export function NutritionV2Overview({
       : null;
   const averageEnergyApproximate = comparableEnergy.some((point) => point.approximate);
   const scaleMax = Math.max(
-    targetEnergy ?? 0,
     ...recent.map((point) => point.energyKcalHigh ?? point.energyKcal ?? point.energyKcalLow ?? 0),
+    ...recent.map(
+      (point) =>
+        point.energyTargetKcalHigh ?? point.energyTargetKcal ?? point.energyTargetKcalLow ?? 0,
+    ),
     1,
   );
+  const targetDecisionCount = new Set(
+    recent
+      .map((point) => point.targetDecisionId)
+      .filter((decisionId): decisionId is string => Boolean(decisionId)),
+  ).size;
   const energyCompleteDays = recent.filter((point) => point.energyCoverage === 'complete').length;
   const macroCompleteDays = recent.filter((point) => point.macroCoverage === 'complete').length;
   const lowConfidenceItems = recent.reduce((sum, point) => sum + point.lowConfidenceItemCount, 0);
@@ -286,7 +353,9 @@ export function NutritionV2Overview({
               <strong>{formatEnergy(data.todayEnergy)}</strong>
               <span>
                 {energyProgress === null
-                  ? 'meta no registrada'
+                  ? targetEnergyLabel === 'Pendiente'
+                    ? 'meta no registrada'
+                    : `objetivo ${targetEnergyLabel}`
                   : `${energyProgress}% de ${formatNumber(targetEnergy)} kcal`}
               </span>
             </div>
@@ -294,19 +363,11 @@ export function NutritionV2Overview({
           <div className={styles['energy-meta']}>
             <div>
               <span>Objetivo</span>
-              <strong>
-                {targetEnergy === null ? 'Pendiente' : `${formatNumber(targetEnergy)} kcal`}
-              </strong>
+              <strong>{targetEnergyLabel}</strong>
             </div>
             <div>
               <span>Diferencia</span>
-              <strong>
-                {energyDelta === null
-                  ? '—'
-                  : energyDelta === 0
-                    ? 'En objetivo'
-                    : `${energyDelta > 0 ? '+' : ''}${formatNumber(energyDelta)} kcal`}
-              </strong>
+              <strong>{energyDifference}</strong>
             </div>
             <div>
               <span>Calidad</span>
@@ -340,8 +401,11 @@ export function NutritionV2Overview({
             <p className={styles.eyebrow}>ÚLTIMOS {windowDays} DÍAS</p>
             <h2 id="nutrition-trend-title">Energía y calidad del registro</h2>
             <p>
-              La banda muestra el rango cuando existe; el punto representa el valor central
-              registrado.
+              La banda azul muestra el rango de ingesta; la referencia punteada o sombreada usa el
+              objetivo vigente de cada fecha.
+              {targetDecisionCount > 1
+                ? ` En este período hubo ${targetDecisionCount} decisiones de objetivo.`
+                : ''}
             </p>
           </div>
           <CircleGauge size={21} aria-hidden="true" />
@@ -361,16 +425,38 @@ export function NutritionV2Overview({
                   point.energyKcalHigh,
                 );
                 const center = centerDisplay.value;
+                const targetLow = point.energyTargetKcalLow;
+                const targetHigh = point.energyTargetKcalHigh;
+                const targetLine =
+                  point.energyTargetKcal ??
+                  (targetLow !== null && targetHigh === null
+                    ? targetLow
+                    : targetHigh !== null && targetLow === null
+                      ? targetHigh
+                      : null);
+                const hasTargetRange =
+                  targetLow !== null && targetHigh !== null && targetHigh > targetLow;
+                const targetLabel = historicalEnergyTargetLabel(point);
                 const chartStyle = {
                   '--range-low': `${Math.min((low / scaleMax) * 100, 100)}%`,
                   '--range-high': `${Math.min((high / scaleMax) * 100, 100)}%`,
                   '--center': `${Math.min(((center ?? 0) / scaleMax) * 100, 100)}%`,
-                  '--target': `${Math.min(((targetEnergy ?? 0) / scaleMax) * 100, 100)}%`,
+                  '--target': `${Math.min(((targetLine ?? 0) / scaleMax) * 100, 100)}%`,
+                  '--target-low': `${Math.min(((targetLow ?? 0) / scaleMax) * 100, 100)}%`,
+                  '--target-high': `${Math.min(((targetHigh ?? 0) / scaleMax) * 100, 100)}%`,
                 } as CSSProperties;
                 return (
-                  <div className={styles['chart-day']} key={point.date} style={chartStyle}>
+                  <div
+                    className={styles['chart-day']}
+                    key={point.date}
+                    style={chartStyle}
+                    title={`Objetivo histórico: ${targetLabel}`}
+                  >
                     <div className={styles['chart-column']}>
-                      {targetEnergy !== null ? <span className={styles['target-mark']} /> : null}
+                      {hasTargetRange ? (
+                        <span className={styles['target-range-mark']} />
+                      ) : null}
+                      {targetLine !== null ? <span className={styles['target-mark']} /> : null}
                       {low > 0 || high > 0 ? <span className={styles['range-mark']} /> : null}
                       {center !== null ? <span className={styles['center-mark']} /> : null}
                     </div>

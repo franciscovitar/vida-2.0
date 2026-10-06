@@ -37,3 +37,29 @@ export function nutritionDisplayDelta(
   const display = nutritionDisplayPointEstimate(amount, low, high);
   return display.value === null ? null : display.value - target;
 }
+
+
+export function nutritionDisplayDeltaToTarget(
+  amount: number | null,
+  low: number | null,
+  high: number | null,
+  target: number | null,
+  targetLow: number | null,
+  targetHigh: number | null,
+): number | null {
+  if (target !== null && Number.isFinite(target)) {
+    return nutritionDisplayDelta(amount, low, high, target);
+  }
+
+  const lower = targetLow !== null && Number.isFinite(targetLow) ? targetLow : null;
+  const upper = targetHigh !== null && Number.isFinite(targetHigh) ? targetHigh : null;
+  if (lower !== null && upper !== null && lower > upper) return null;
+
+  const display = nutritionDisplayPointEstimate(amount, low, high);
+  if (display.value === null) return null;
+
+  if (lower !== null && display.value < lower) return display.value - lower;
+  if (upper !== null && display.value > upper) return display.value - upper;
+  if (lower !== null || upper !== null) return 0;
+  return null;
+}

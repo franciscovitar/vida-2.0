@@ -373,6 +373,17 @@
   border-top: 1px dashed color-mix(in srgb, var(--text-subtle) 46%, transparent);
 }
 
+.target-range-mark {
+  position: absolute;
+  right: 5%;
+  bottom: var(--target-low);
+  left: 5%;
+  height: max(0.22rem, calc(var(--target-high) - var(--target-low)));
+  border-top: 1px dashed color-mix(in srgb, var(--text-subtle) 38%, transparent);
+  border-bottom: 1px dashed color-mix(in srgb, var(--text-subtle) 38%, transparent);
+  background: color-mix(in srgb, var(--text-subtle) 8%, transparent);
+}
+
 .range-mark {
   position: absolute;
   right: 24%;
