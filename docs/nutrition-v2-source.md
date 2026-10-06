@@ -59,6 +59,8 @@ La vista principal de Nutrientes es longitudinal. Para cada ventana:
 
 - sólo los días con `sourceCoverage = complete` entran en promedios comparables;
 - los días parciales siguen visibles como cobertura, pero no reducen artificialmente el promedio;
+- `Nutrient Summary` debe tener una sola fila activa por `date + nutrientKey`; si Vida detecta más de una, suprime todas las filas de esa clave ambigua en la ventana en vez de elegir la más nueva o sumar duplicados;
+- un duplicado afecta sólo esa clave fecha/nutriente: otras claves válidas del mismo día siguen disponibles y la fuente se marca como parcial;
 - antes de usar una fecha, Vida compara `Nutrient Summary.updatedAt` contra mutaciones de Meals/Food Items y `Daily Summary.updatedAt` para ese día;
 - si una fila micronutricional quedó detrás de evidencia más nueva, la fecha completa se excluye de promedios/señales hasta que Nutrition Intelligence reconstruya `Nutrient Summary`;
 - si faltan timestamps contractuales o no pueden leerse las fuentes necesarias para auditar frescura, la fecha falla cerrada como no verificable en vez de mostrarse como actual;
@@ -101,7 +103,7 @@ targetDecisionId
 
 Cuando una referencia activa existe en `Nutrient Targets`, Vida la usa directamente para target/límites y evita depender de una copia potencialmente vieja dentro de `Nutrient Summary`. Si todavía no existe cantidad, muestra `Sin dato` contra la referencia cargada.
 
-Mientras falten valores diarios, o una fila de `Nutrient Summary` quede suprimida por una contradicción de lineage, Vida solo deriva honestamente de `Food Items` los subtotales ya presentes allí (actualmente fibra y sodio cuando estén cuantificados) y deja el resto desconocido.
+Mientras falten valores diarios, o una fila de `Nutrient Summary` quede suprimida por una contradicción de lineage o por duplicidad de `date + nutrientKey`, Vida solo deriva honestamente de `Food Items` los subtotales ya presentes allí (actualmente fibra y sodio cuando estén cuantificados) y deja el resto desconocido.
 
 Claves visuales soportadas están en `lib/nutrition/nutrient-catalog.ts` y deben permanecer alineadas con el contrato de Nutrition Intelligence.
 

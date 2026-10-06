@@ -14,6 +14,7 @@ import {
 } from '@/lib/nutrition/history-reconciliation';
 import { auditNutritionNutrientSummaryFreshness } from '@/lib/nutrition/nutrient-summary-freshness';
 import { sanitizeNutritionNutrientSummaryIntegrity } from '@/lib/nutrition/nutrient-summary-integrity';
+import { sanitizeNutritionNutrientSummaryUniqueness } from '@/lib/nutrition/nutrient-summary-uniqueness';
 import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import {
@@ -228,6 +229,110 @@ test('evidencia contractual sin timestamp vuelve no verificable el AI Insight', 
   );
 
   assert.equal(result.state, 'unverifiable');
+});
+
+test('Nutrient Summary único conserva una sola fila por date + nutrientKey', () => {
+  const result = sanitizeNutritionNutrientSummaryUniqueness(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 10,
+      },
+      {
+        date: '2026-10-05',
+        nutrientKey: 'sodium',
+        amount: 900,
+      },
+    ],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result.duplicateKeyCount, 0);
+  assert.equal(result.duplicateRowCount, 0);
+  assert.equal(result.rows.length, 2);
+});
+
+test('Nutrient Summary duplicado suprime toda la clave ambigua y conserva las demás', () => {
+  const result = sanitizeNutritionNutrientSummaryUniqueness(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 10,
+      },
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 12,
+      },
+      {
+        date: '2026-10-05',
+        nutrientKey: 'sodium',
+        amount: 900,
+      },
+    ],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result.duplicateKeyCount, 1);
+  assert.equal(result.duplicateRowCount, 2);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0]?.nutrientKey, 'sodium');
+});
+
+test('una fila superseded no crea un duplicado activo de Nutrient Summary', () => {
+  const result = sanitizeNutritionNutrientSummaryUniqueness(
+    [
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 10,
+        status: 'active',
+      },
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 9,
+        status: 'superseded',
+      },
+    ],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result.duplicateKeyCount, 0);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0]?.amount, 10);
+});
+
+test('duplicados fuera de la ventana no contaminan la ventana consultada', () => {
+  const result = sanitizeNutritionNutrientSummaryUniqueness(
+    [
+      {
+        date: '2026-09-01',
+        nutrientKey: 'fiber',
+        amount: 10,
+      },
+      {
+        date: '2026-09-01',
+        nutrientKey: 'fiber',
+        amount: 12,
+      },
+      {
+        date: '2026-10-05',
+        nutrientKey: 'fiber',
+        amount: 11,
+      },
+    ],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result.duplicateKeyCount, 0);
+  assert.equal(result.rows.length, 3);
 });
 
 test('Nutrient Summary queda current cuando fue reconstruido después de la evidencia', () => {

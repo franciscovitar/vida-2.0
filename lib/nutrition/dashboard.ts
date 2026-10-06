@@ -16,6 +16,7 @@ import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
 import { auditNutritionNutrientSummaryFreshness } from './nutrient-summary-freshness';
 import { sanitizeNutritionNutrientSummaryIntegrity } from './nutrient-summary-integrity';
+import { sanitizeNutritionNutrientSummaryUniqueness } from './nutrient-summary-uniqueness';
 import { classifyNutritionTargetSemantics } from './target-semantics';
 import { readNutritionTabValues } from './sheets-read';
 import {
@@ -594,6 +595,11 @@ export async function loadNutritionDashboardData(
   const nutrientTargetRows = rowsFrom(nutrientTargetsResult);
   const nutrientSummaryRows = rowsFrom(nutrientResult);
   const foodNutrientRows = rowsFrom(foodNutrientsResult);
+  const todayNutrientUniqueness = sanitizeNutritionNutrientSummaryUniqueness(
+    nutrientSummaryRows,
+    today,
+    today,
+  );
   const currentDate = cordobaToday();
   const target = chooseTarget(targetRows, today, currentDate);
   const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate).filter(
@@ -621,7 +627,9 @@ export async function loadNutritionDashboardData(
   );
   const unknownTodayContributionCount = todayRawFacts?.unknownContributionCount ?? 0;
   const sourceStatus =
-    unknownTodayContributionCount > 0 && baseSourceStatus === 'ready'
+    (unknownTodayContributionCount > 0 ||
+      todayNutrientUniqueness.duplicateKeyCount > 0) &&
+    baseSourceStatus === 'ready'
       ? 'partial'
       : baseSourceStatus;
   const activeTodayMeals = activeRows(mealRows).filter((row) => stringValue(row.date) === today);
@@ -680,7 +688,7 @@ export async function loadNutritionDashboardData(
   const personalFiberTarget = target?.fiberGrams ?? null;
   const nutrientFreshness = foodNutrientsResult.ok
     ? auditNutritionNutrientSummaryFreshness(
-        nutrientSummaryRows,
+        todayNutrientUniqueness.rows,
         mealRows,
         itemRows,
         dailyRows,
@@ -693,7 +701,7 @@ export async function loadNutritionDashboardData(
     foodNutrientsResult.ok &&
     nutrientFreshness.some((entry) => entry.date === today && entry.state === 'current');
   const currentNutrientSummaryRows = todayNutrientSummaryIsCurrent
-    ? nutrientSummaryRows.filter((row) => stringValue(row.date) === today)
+    ? todayNutrientUniqueness.rows.filter((row) => stringValue(row.date) === today)
     : [];
   const nutrientIntegrity = sanitizeNutritionNutrientSummaryIntegrity(
     currentNutrientSummaryRows,

@@ -98,6 +98,15 @@ export function NutritionNutrientTrends({
         'timestamps/evidencia incompletos.',
     );
   }
+  if (data.source.duplicateSummaryKeyCount > 0) {
+    sourceMessages.push(
+      'Se ocultaron ' +
+        data.source.duplicateSummaryKeyCount +
+        ' clave(s) date + nutrientKey porque Nutrient Summary tenía ' +
+        data.source.duplicateSummaryRowCount +
+        ' filas activas duplicadas.',
+    );
+  }
   if (data.source.integrityDowngradedDateCount > 0) {
     sourceMessages.push(
       `Se ajustó la cobertura de ${data.source.integrityDowngradedDateCount} día(s) ` +

@@ -5,6 +5,7 @@ import type { SheetReadCode } from '@/lib/google/errors';
 
 import { auditNutritionNutrientSummaryFreshness } from './nutrient-summary-freshness';
 import { sanitizeNutritionNutrientSummaryIntegrity } from './nutrient-summary-integrity';
+import { sanitizeNutritionNutrientSummaryUniqueness } from './nutrient-summary-uniqueness';
 import {
   buildNutritionNutrientWindow,
   type NutritionNutrientWindowData,
@@ -35,6 +36,8 @@ export interface NutritionNutrientWindowResult extends NutritionNutrientWindowDa
     integrityDowngradedDateCount: number;
     integrityUnverifiableRowCount: number;
     integritySuppressedSubtotalRowCount: number;
+    duplicateSummaryKeyCount: number;
+    duplicateSummaryRowCount: number;
   };
 }
 
@@ -78,12 +81,17 @@ export async function loadNutritionNutrientWindow(
     ? rowsFromValues(foodNutrientsResult.values)
     : [];
   const startDate = windowStartDate(endDate, windowDays);
+  const uniqueness = sanitizeNutritionNutrientSummaryUniqueness(
+    summaryRows,
+    startDate,
+    endDate,
+  );
   const auditSourcesReady =
     mealsResult.ok && itemsResult.ok && dailyResult.ok && foodNutrientsResult.ok;
 
   const freshness = auditSourcesReady
     ? auditNutritionNutrientSummaryFreshness(
-        summaryRows,
+        uniqueness.rows,
         mealRows,
         itemRows,
         dailyRows,
@@ -91,7 +99,7 @@ export async function loadNutritionNutrientWindow(
         endDate,
         foodNutrientRows,
       )
-    : summaryRows
+    : uniqueness.rows
         .map((row) => String(row.date ?? '').trim())
         .filter((date) => date >= startDate && date <= endDate)
         .filter((date, index, values) => Boolean(date) && values.indexOf(date) === index)
@@ -107,7 +115,7 @@ export async function loadNutritionNutrientWindow(
       .filter((entry) => entry.state !== 'current')
       .map((entry) => entry.date),
   );
-  const usableSummaryRows = summaryRows.filter(
+  const usableSummaryRows = uniqueness.rows.filter(
     (row) => !rejectedDates.has(String(row.date ?? '').trim()),
   );
   const integrity = sanitizeNutritionNutrientSummaryIntegrity(
@@ -141,6 +149,8 @@ export async function loadNutritionNutrientWindow(
         integrityDowngradedDateCount: 0,
         integrityUnverifiableRowCount: 0,
         integritySuppressedSubtotalRowCount: 0,
+        duplicateSummaryKeyCount: 0,
+        duplicateSummaryRowCount: 0,
       },
     };
   }
@@ -148,12 +158,16 @@ export async function loadNutritionNutrientWindow(
   const targetStatus = optionalStatus(targetResult);
   const freshnessIssue = staleDateCount > 0 || unverifiableDateCount > 0;
   const integrityIssue = integrity.downgradedDateCount > 0;
+  const uniquenessIssue = uniqueness.duplicateKeyCount > 0;
 
   return {
     ...data,
     source: {
       status:
-        targetStatus === 'ready' && !freshnessIssue && !integrityIssue
+        targetStatus === 'ready' &&
+        !freshnessIssue &&
+        !integrityIssue &&
+        !uniquenessIssue
           ? 'ready'
           : 'partial',
       code: targetResult.ok ? null : targetResult.code,
@@ -163,6 +177,8 @@ export async function loadNutritionNutrientWindow(
       integrityDowngradedDateCount: integrity.downgradedDateCount,
       integrityUnverifiableRowCount: integrity.unverifiableRowCount,
       integritySuppressedSubtotalRowCount: integrity.suppressedSubtotalRowCount,
+      duplicateSummaryKeyCount: uniqueness.duplicateKeyCount,
+      duplicateSummaryRowCount: uniqueness.duplicateRowCount,
     },
   };
 }
