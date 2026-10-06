@@ -7,17 +7,30 @@ import {
   evaluateNutritionAiInsightFreshness,
   type NutritionAiInsightEvidence,
 } from './ai-insight-freshness';
+import {
+  auditNutritionAiInsightUniqueness,
+  nutritionAiInsightGroupKey,
+} from './ai-insight-integrity';
+import { sanitizeNutritionDailySummaryUniqueness } from './daily-summary-uniqueness';
 import { deriveNutritionFreshness } from './freshness';
 import {
   buildNutritionRawDayFacts,
   reconcileNutritionHistoryWithRaw,
 } from './history-reconciliation';
 import { partitionNutritionFoodItemRows } from './food-item-integrity';
+import {
+  nutritionRawIdentityHasConflictInWindow,
+  sanitizeNutritionRawIdentity,
+} from './raw-identity-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
 import { auditNutritionNutrientSummaryFreshness } from './nutrient-summary-freshness';
 import { sanitizeNutritionNutrientSummaryIntegrity } from './nutrient-summary-integrity';
 import { sanitizeNutritionNutrientSummaryUniqueness } from './nutrient-summary-uniqueness';
 import { classifyNutritionTargetSemantics } from './target-semantics';
+import {
+  auditNutritionNutrientTargetAmbiguity,
+  auditNutritionTargetAmbiguity,
+} from './target-integrity';
 import { readNutritionTabValues } from './sheets-read';
 import {
   resolveNutritionHistoricalEnergyTarget,
@@ -56,6 +69,12 @@ function cordobaToday(now = new Date()): string {
   const get = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((part) => part.type === type)?.value ?? '';
   return `${get('year')}-${get('month')}-${get('day')}`;
+}
+
+function shiftDate(date: string, days: number): string {
+  const parsed = new Date(`${date}T12:00:00Z`);
+  parsed.setUTCDate(parsed.getUTCDate() + days);
+  return parsed.toISOString().slice(0, 10);
 }
 
 function rowsFrom(result: ReadTabResult): Row[] {
@@ -180,20 +199,24 @@ function chooseTarget(
 }
 
 function chooseNutrientTargets(rows: readonly Row[], today: string): Map<string, Row> {
-  const eligible = activeRows(rows)
-    .filter((row) => {
-      const from = stringValue(row.effectiveFrom);
-      const to = stringValue(row.effectiveTo);
-      return Boolean(from && from <= today && (!to || to >= today));
-    })
-    .sort((a, b) =>
-      (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''),
-    );
+  const eligible = activeRows(rows).filter((row) => {
+    const from = stringValue(row.effectiveFrom);
+    const to = stringValue(row.effectiveTo);
+    return Boolean(from && from <= today && (!to || to >= today));
+  });
 
-  const byKey = new Map<string, Row>();
+  const candidatesByKey = new Map<string, Row[]>();
   for (const row of eligible) {
     const key = stringValue(row.nutrientKey);
-    if (key && !byKey.has(key)) byKey.set(key, row);
+    if (!key) continue;
+    const candidates = candidatesByKey.get(key) ?? [];
+    candidates.push(row);
+    candidatesByKey.set(key, candidates);
+  }
+
+  const byKey = new Map<string, Row>();
+  for (const [key, candidates] of candidatesByKey) {
+    if (candidates.length === 1) byKey.set(key, candidates[0]!);
   }
   return byKey;
 }
@@ -356,6 +379,7 @@ function buildNutrients(
   targetRows: readonly Row[],
   todayItems: readonly Row[],
   today: string,
+  ambiguousTargetKeys: ReadonlySet<string> = new Set(),
 ): NutritionNutrientValue[] {
   const rows = summaryRows.filter((row) => stringValue(row.date) === today);
   const byKey = new Map(rows.map((row) => [stringValue(row.nutrientKey) ?? '', row]));
@@ -380,16 +404,23 @@ function buildNutrients(
 
   return NUTRIENT_CATALOG.map((catalog) => {
     const row = byKey.get(catalog.key);
-    const targetRow = targetByKey.get(catalog.key);
+    const targetAmbiguous = ambiguousTargetKeys.has(catalog.key);
+    const targetRow = targetAmbiguous ? undefined : targetByKey.get(catalog.key);
     const targetAmount = numberValue(targetRow?.targetAmount ?? null);
     const lowerTarget = numberValue(targetRow?.lowerTarget ?? null);
     const upperTarget = numberValue(targetRow?.upperTarget ?? null);
     const targetUnit = stringValue(targetRow?.unit ?? null);
     const targetNotes = stringValue(targetRow?.notes ?? null);
     const targetBasis = stringValue(targetRow?.basis ?? null);
-    const resolvedTarget = targetAmount ?? numberValue(row?.targetAmount ?? row?.target ?? null);
-    const resolvedLowerTarget = lowerTarget ?? numberValue(row?.lowerTarget ?? null);
-    const resolvedUpperTarget = upperTarget ?? numberValue(row?.upperTarget ?? null);
+    const resolvedTarget = targetAmbiguous
+      ? null
+      : targetAmount ?? numberValue(row?.targetAmount ?? row?.target ?? null);
+    const resolvedLowerTarget = targetAmbiguous
+      ? null
+      : lowerTarget ?? numberValue(row?.lowerTarget ?? null);
+    const resolvedUpperTarget = targetAmbiguous
+      ? null
+      : upperTarget ?? numberValue(row?.upperTarget ?? null);
     const targetSemantics = classifyNutritionTargetSemantics({
       target: resolvedTarget,
       lowerTarget: resolvedLowerTarget,
@@ -495,8 +526,8 @@ function parseAiInsights(
   result: ReadTabResult,
   today: string,
   evidence: NutritionAiInsightEvidence,
-): NutritionAiInsight[] {
-  if (!result.ok) return [];
+): { insights: NutritionAiInsight[]; duplicateGroupCount: number } {
+  if (!result.ok) return { insights: [], duplicateGroupCount: 0 };
   const rows = activeRows(rowsFrom(result))
     .filter((row) => {
       const date = stringValue(row.date);
@@ -507,6 +538,7 @@ function parseAiInsights(
         stringValue(a.createdAt) ?? stringValue(a.date) ?? '',
       ),
     );
+  const uniqueness = auditNutritionAiInsightUniqueness(rows);
 
   const seen = new Set<string>();
   const insights: NutritionAiInsight[] = [];
@@ -521,6 +553,9 @@ function parseAiInsights(
         : null;
     if (!category || seen.has(category)) continue;
     seen.add(category);
+
+    const groupKey = nutritionAiInsightGroupKey(row);
+    if (groupKey && uniqueness.duplicateGroupKeys.has(groupKey)) continue;
     if (evaluateNutritionAiInsightFreshness(row, evidence, today).state !== 'current') continue;
     const title = stringValue(row.title);
     const detail = stringValue(row.detail);
@@ -540,7 +575,10 @@ function parseAiInsights(
       limitations: stringValue(row.limitations),
     });
   }
-  return insights;
+  return {
+    insights,
+    duplicateGroupCount: uniqueness.duplicateGroupCount,
+  };
 }
 
 function failurePriority(results: readonly ReadTabResult[]): SheetReadCode | null {
@@ -591,8 +629,36 @@ export async function loadNutritionDashboardData(
   const mealRows = rowsFrom(mealsResult);
   const itemRows = rowsFrom(itemsResult);
   const itemPartition = partitionNutritionFoodItemRows(itemRows);
+  const rawIdentity = sanitizeNutritionRawIdentity(mealRows, itemPartition.valid);
+  const usableMealRows = rawIdentity.mealRows;
+  const usableItemRows = rawIdentity.foodItemRows;
+  const rejectedItemRows = [
+    ...itemPartition.invalid,
+    ...rawIdentity.rejectedFoodItemRows,
+  ];
+  const historyStartDate = shiftDate(today, -89);
+  const dailyUniqueness = sanitizeNutritionDailySummaryUniqueness(
+    dailyRows,
+    historyStartDate,
+    today,
+  );
   const targetRows = rowsFrom(targetsResult);
   const nutrientTargetRows = rowsFrom(nutrientTargetsResult);
+  const targetWindowAmbiguity = auditNutritionTargetAmbiguity(
+    targetRows,
+    historyStartDate,
+    today,
+  );
+  const nutrientTargetWindowAmbiguity = auditNutritionNutrientTargetAmbiguity(
+    nutrientTargetRows,
+    historyStartDate,
+    today,
+  );
+  const currentNutrientTargetAmbiguity = auditNutritionNutrientTargetAmbiguity(
+    nutrientTargetRows,
+    today,
+    today,
+  );
   const nutrientSummaryRows = rowsFrom(nutrientResult);
   const foodNutrientRows = rowsFrom(foodNutrientsResult);
   const todayNutrientUniqueness = sanitizeNutritionNutrientSummaryUniqueness(
@@ -601,15 +667,27 @@ export async function loadNutritionDashboardData(
     today,
   );
   const currentDate = cordobaToday();
+  const aiInsightResult = parseAiInsights(insightsResult, today, {
+    meals: mealRows,
+    foodItems: itemRows,
+    foodNutrients: foodNutrientRows,
+    dailySummary: dailyRows,
+    nutrientSummary: nutrientSummaryRows,
+    targets: targetRows,
+    nutrientTargets: nutrientTargetRows,
+  });
   const target = chooseTarget(targetRows, today, currentDate);
-  const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate).filter(
-    (row) => row.date <= today,
-  );
+  const baseHistory = parseDailyRows(
+    dailyUniqueness.rows,
+    targetRows,
+    currentDate,
+  ).filter((row) => row.date <= today);
   const rawDays = buildNutritionRawDayFacts(
-    mealRows,
-    itemPartition.valid,
-    itemPartition.invalid,
+    usableMealRows,
+    usableItemRows,
+    rejectedItemRows,
     today,
+    rawIdentity.rejectedMealRows,
   );
   const history = reconcileNutritionHistoryWithRaw(
     baseHistory,
@@ -620,23 +698,38 @@ export async function loadNutritionDashboardData(
   );
   const todayRawFacts = rawDays.get(today) ?? null;
   const todayMealIds = new Set(
-    activeRows(mealRows)
+    activeRows(usableMealRows)
       .filter((row) => stringValue(row.date) === today)
       .map((row) => stringValue(row.mealId))
       .filter((id): id is string => Boolean(id)),
   );
   const unknownTodayContributionCount = todayRawFacts?.unknownContributionCount ?? 0;
+  const hasRecentRawIdentityConflict = nutritionRawIdentityHasConflictInWindow(
+    rawIdentity,
+    mealRows,
+    historyStartDate,
+    today,
+  );
   const sourceStatus =
-    (unknownTodayContributionCount > 0 || todayNutrientUniqueness.duplicateKeyCount > 0) &&
+    (unknownTodayContributionCount > 0 ||
+      hasRecentRawIdentityConflict ||
+      dailyUniqueness.duplicateDateCount > 0 ||
+      todayNutrientUniqueness.duplicateKeyCount > 0 ||
+      aiInsightResult.duplicateGroupCount > 0 ||
+      targetWindowAmbiguity.overlapPairCount > 0 ||
+      nutrientTargetWindowAmbiguity.overlapPairCount > 0) &&
     baseSourceStatus === 'ready'
       ? 'partial'
       : baseSourceStatus;
-  const activeTodayMeals = activeRows(mealRows).filter((row) => stringValue(row.date) === today);
-  const todayItems = activeRows(itemPartition.valid).filter((row) => {
+  const activeTodayMeals = activeRows(usableMealRows).filter(
+    (row) => stringValue(row.date) === today,
+  );
+  const todayItems = activeRows(usableItemRows).filter((row) => {
     const mealId = stringValue(row.mealId);
     return Boolean(mealId && todayMealIds.has(mealId));
   });
-  const todayDailyRow = dailyRows.find((row) => stringValue(row.date) === today) ?? null;
+  const todayDailyRow =
+    dailyUniqueness.rows.find((row) => stringValue(row.date) === today) ?? null;
   const rawAsOf = latestTimestamp([...activeTodayMeals, ...todayItems]);
   const summaryAsOf = todayDailyRow ? latestTimestamp([todayDailyRow], ['updatedAt']) : null;
   const freshness = deriveNutritionFreshness({
@@ -688,9 +781,9 @@ export async function loadNutritionDashboardData(
   const nutrientFreshness = foodNutrientsResult.ok
     ? auditNutritionNutrientSummaryFreshness(
         todayNutrientUniqueness.rows,
-        mealRows,
-        itemRows,
-        dailyRows,
+        usableMealRows,
+        usableItemRows,
+        dailyUniqueness.rows,
         today,
         today,
         foodNutrientRows,
@@ -704,8 +797,8 @@ export async function loadNutritionDashboardData(
     : [];
   const nutrientIntegrity = sanitizeNutritionNutrientSummaryIntegrity(
     currentNutrientSummaryRows,
-    mealRows,
-    itemRows,
+    usableMealRows,
+    usableItemRows,
     foodNutrientRows,
     today,
     today,
@@ -715,6 +808,7 @@ export async function loadNutritionDashboardData(
     nutrientTargetRows,
     todayItems,
     today,
+    currentNutrientTargetAmbiguity.ambiguousNutrientKeys,
   ).map((nutrient) => {
     if (nutrient.key === 'fiber' && personalFiberTarget !== null) {
       return {
@@ -759,17 +853,9 @@ export async function loadNutritionDashboardData(
     },
     macros,
     history,
-    meals: buildMeals(mealRows, itemPartition.valid, today),
+    meals: buildMeals(usableMealRows, usableItemRows, today),
     nutrients,
-    aiInsights: parseAiInsights(insightsResult, today, {
-      meals: mealRows,
-      foodItems: itemRows,
-      foodNutrients: foodNutrientRows,
-      dailySummary: dailyRows,
-      nutrientSummary: nutrientSummaryRows,
-      targets: targetRows,
-      nutrientTargets: nutrientTargetRows,
-    }),
+    aiInsights: aiInsightResult.insights,
     optionalSources: {
       nutrientTargets: optionalStatus(nutrientTargetsResult),
       nutrientSummary: optionalStatus(nutrientResult),

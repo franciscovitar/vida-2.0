@@ -3,6 +3,11 @@ import type { PlainCell } from '@/lib/data/plain';
 import { NUTRIENT_CATALOG } from './nutrient-catalog';
 import { nutritionDisplayPointEstimate } from './presentation';
 import { classifyNutritionTargetSemantics } from './target-semantics';
+import {
+  nutritionNutrientTargetHasActiveAmbiguityForDate,
+  nutritionTargetCoversDate,
+  nutritionTargetIsActiveLike,
+} from './target-integrity';
 import type {
   NutritionCoverage,
   NutritionEstimateQuality,
@@ -135,13 +140,7 @@ function referenceFromRow(row: Row | null): NutritionNutrientReference | null {
 
 function targetStatusAllowed(row: Row, includeSuperseded: boolean): boolean {
   const status = stringValue(row.status)?.toLowerCase();
-  return status === null || status === 'active' || (includeSuperseded && status === 'superseded');
-}
-
-function targetCoversDate(row: Row, date: string): boolean {
-  const from = stringValue(row.effectiveFrom);
-  const to = stringValue(row.effectiveTo);
-  return Boolean(from && from <= date && (!to || to >= date));
+  return nutritionTargetIsActiveLike(row) || (includeSuperseded && status === 'superseded');
 }
 
 function targetRowForDate(
@@ -150,10 +149,21 @@ function targetRowForDate(
   date: string,
   includeSuperseded: boolean,
 ): Row | null {
+  const candidates = rows
+    .filter((row) => targetStatusAllowed(row, includeSuperseded))
+    .filter(
+      (row) =>
+        stringValue(row.nutrientKey) === nutrientKey &&
+        nutritionTargetCoversDate(row, date),
+    );
+  const activeLike = candidates.filter(nutritionTargetIsActiveLike);
+  if (activeLike.length > 1) return null;
+  if (activeLike.length === 1) return activeLike[0]!;
+  if (!includeSuperseded) return null;
+
   return (
-    rows
-      .filter((row) => targetStatusAllowed(row, includeSuperseded))
-      .filter((row) => stringValue(row.nutrientKey) === nutrientKey && targetCoversDate(row, date))
+    candidates
+      .filter((row) => stringValue(row.status)?.toLowerCase() === 'superseded')
       .sort((a, b) =>
         (stringValue(b.effectiveFrom) ?? '').localeCompare(stringValue(a.effectiveFrom) ?? ''),
       )[0] ?? null
@@ -171,15 +181,18 @@ function referenceForSummaryDay(
   const decisionId = stringValue(summaryRow.targetDecisionId);
 
   if (decisionId) {
-    const exact =
-      targetRows.find(
-        (row) =>
-          targetStatusAllowed(row, includeSuperseded) &&
-          stringValue(row.nutrientKey) === nutrientKey &&
-          stringValue(row.decisionId) === decisionId &&
-          targetCoversDate(row, date),
-      ) ?? null;
-    return referenceFromRow(exact);
+    const exactMatches = targetRows.filter(
+      (row) =>
+        targetStatusAllowed(row, includeSuperseded) &&
+        stringValue(row.nutrientKey) === nutrientKey &&
+        stringValue(row.decisionId) === decisionId &&
+        nutritionTargetCoversDate(row, date),
+    );
+    return exactMatches.length === 1 ? referenceFromRow(exactMatches[0]!) : null;
+  }
+
+  if (nutritionNutrientTargetHasActiveAmbiguityForDate(targetRows, nutrientKey, date)) {
+    return null;
   }
 
   return referenceFromRow(targetRowForDate(targetRows, nutrientKey, date, includeSuperseded));

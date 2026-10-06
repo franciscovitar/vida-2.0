@@ -2,6 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { evaluateNutritionAiInsightFreshness } from '@/lib/nutrition/ai-insight-freshness';
+import {
+  auditNutritionAiInsightUniqueness,
+  nutritionAiInsightGroupKey,
+} from '@/lib/nutrition/ai-insight-integrity';
+import { sanitizeNutritionDailySummaryUniqueness } from '@/lib/nutrition/daily-summary-uniqueness';
 import { summarizeNutritionRawDayEnergy } from '@/lib/nutrition/day-energy';
 import {
   isNutritionFoodItemStructurallyValid,
@@ -18,6 +23,11 @@ import { sanitizeNutritionNutrientSummaryUniqueness } from '@/lib/nutrition/nutr
 import { buildNutritionNutrientWindow } from '@/lib/nutrition/nutrient-window';
 import { NUTRIENT_CATALOG } from '@/lib/nutrition/nutrient-catalog';
 import {
+  nutritionRawIdentityConflictDates,
+  nutritionRawIdentityHasConflictInWindow,
+  sanitizeNutritionRawIdentity,
+} from '@/lib/nutrition/raw-identity-integrity';
+import {
   nutritionComparableProgressPercent,
   nutritionDisplayDelta,
   nutritionDisplayDeltaToTarget,
@@ -29,12 +39,284 @@ import {
   nutritionProgressTarget,
 } from '@/lib/nutrition/target-semantics';
 import {
+  auditNutritionNutrientTargetAmbiguity,
+  auditNutritionTargetAmbiguity,
+  nutritionNutrientTargetHasActiveAmbiguityForDate,
+  nutritionTargetHasActiveAmbiguityForDate,
+} from '@/lib/nutrition/target-integrity';
+import {
   resolveNutritionHistoricalEnergyTarget,
   selectNutritionTargetRowForDate,
 } from '@/lib/nutrition/target-history';
 import { normalizeNutritionWindow, nutritionWindowDays } from '@/lib/nutrition/window';
 
 const FAKE_NUTRITION_ID = 'nutrition_sheet_example_1234567890';
+
+test('AI Insights falla cerrado ante category + window duplicado activo', () => {
+  const rows = [
+    { insightId: 'a', category: 'improvement', window: '7d', status: 'active' },
+    { insightId: 'b', category: 'improvement', window: '7D', status: 'active' },
+    { insightId: 'c', category: 'pattern', window: '7d', status: 'active' },
+  ];
+  const result = auditNutritionAiInsightUniqueness(rows);
+  const key = nutritionAiInsightGroupKey(rows[0]!);
+
+  assert.ok(key);
+  assert.equal(result.duplicateGroupCount, 1);
+  assert.equal(result.duplicateRowCount, 2);
+  assert.equal(result.duplicateGroupKeys.has(key), true);
+  assert.equal(result.rows.length, 1);
+});
+
+test('AI Insights superseded no compite con su reemplazo activo', () => {
+  const result = auditNutritionAiInsightUniqueness([
+    { insightId: 'old', category: 'pattern', window: '28d', status: 'superseded' },
+    { insightId: 'new', category: 'pattern', window: '28d', status: 'active' },
+  ]);
+
+  assert.equal(result.duplicateGroupCount, 0);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0]?.insightId, 'new');
+});
+
+test('identidad raw excluye mealId y foodItemId duplicados activos', () => {
+  const meals = [
+    { mealId: 'm1', date: '2026-10-05', status: 'active' },
+    { mealId: 'm1', date: '2026-10-05', status: 'active' },
+    { mealId: 'm2', date: '2026-10-05', status: 'active' },
+  ];
+  const result = sanitizeNutritionRawIdentity(meals, [
+    { mealId: 'm1', foodItemId: 'f1', status: 'active' },
+    { mealId: 'm2', foodItemId: 'f2', status: 'active' },
+    { mealId: 'm2', foodItemId: 'f2', status: 'active' },
+  ]);
+
+  assert.equal(result.duplicateMealIdCount, 1);
+  assert.equal(result.duplicateFoodItemIdCount, 1);
+  assert.equal(result.mealRows.length, 1);
+  assert.equal(result.foodItemRows.length, 0);
+  assert.equal(
+    nutritionRawIdentityConflictDates(result, meals).has('2026-10-05'),
+    true,
+  );
+});
+
+test('Food Item orphan se excluye sin inventar fecha', () => {
+  const meals = [{ mealId: 'm1', date: '2026-10-05', status: 'active' }];
+  const result = sanitizeNutritionRawIdentity(
+    meals,
+    [{ mealId: 'missing', foodItemId: 'f1', status: 'active' }],
+  );
+
+  assert.equal(result.foodItemRows.length, 0);
+  assert.equal(result.orphanFoodItemCount, 1);
+  assert.equal(nutritionRawIdentityConflictDates(result, meals).size, 0);
+});
+
+test('Daily Summary duplicado suprime todas las filas de esa fecha', () => {
+  const result = sanitizeNutritionDailySummaryUniqueness(
+    [
+      { date: '2026-10-05', energyKcal: 1000 },
+      { date: '2026-10-05', energyKcal: 1200 },
+      { date: '2026-10-04', energyKcal: 900 },
+    ],
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(result.duplicateDateCount, 1);
+  assert.equal(result.duplicateRowCount, 2);
+  assert.deepEqual(result.rows.map((row) => row.date), ['2026-10-04']);
+});
+
+test('AI Insight queda no verificable por ambigüedad raw dentro de su ventana', () => {
+  const meals = [
+    { mealId: 'm1', date: '2026-10-05', updatedAt: '2026-10-05T20:00:00-03:00' },
+    { mealId: 'm1', date: '2026-10-05', updatedAt: '2026-10-05T20:01:00-03:00' },
+  ];
+  const raw = sanitizeNutritionRawIdentity(meals, []);
+  assert.equal(
+    nutritionRawIdentityHasConflictInWindow(raw, meals, '2026-10-01', '2026-10-06'),
+    true,
+  );
+
+  const freshness = evaluateNutritionAiInsightFreshness(
+    { date: '2026-10-06', window: '7d', createdAt: '2026-10-06T12:00:00-03:00' },
+    {
+      meals,
+      foodItems: [],
+      dailySummary: [],
+      nutrientSummary: [],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+  assert.equal(freshness.state, 'unverifiable');
+});
+
+test('Targets activos solapados son ambiguos sólo donde sus intervalos se cruzan', () => {
+  const rows = [
+    {
+      decisionId: 'a',
+      effectiveFrom: '2026-10-01',
+      effectiveTo: '',
+      status: 'active',
+    },
+    {
+      decisionId: 'b',
+      effectiveFrom: '2026-10-05',
+      effectiveTo: '',
+      status: 'active',
+    },
+  ];
+
+  assert.equal(nutritionTargetHasActiveAmbiguityForDate(rows, '2026-10-04'), false);
+  assert.equal(nutritionTargetHasActiveAmbiguityForDate(rows, '2026-10-05'), true);
+  assert.equal(
+    auditNutritionTargetAmbiguity(rows, '2026-10-01', '2026-10-04').overlapPairCount,
+    0,
+  );
+  assert.equal(
+    auditNutritionTargetAmbiguity(rows, '2026-10-01', '2026-10-06').overlapPairCount,
+    1,
+  );
+});
+
+test('Nutrient Targets sólo marcan ambiguo el nutriente solapado', () => {
+  const rows = [
+    {
+      decisionId: 'mg-a',
+      nutrientKey: 'magnesium',
+      effectiveFrom: '2026-10-01',
+      effectiveTo: '',
+      status: 'active',
+    },
+    {
+      decisionId: 'mg-b',
+      nutrientKey: 'magnesium',
+      effectiveFrom: '2026-10-05',
+      effectiveTo: '',
+      status: 'active',
+    },
+    {
+      decisionId: 'ca-a',
+      nutrientKey: 'calcium',
+      effectiveFrom: '2026-10-01',
+      effectiveTo: '',
+      status: 'active',
+    },
+  ];
+  const audit = auditNutritionNutrientTargetAmbiguity(
+    rows,
+    '2026-10-01',
+    '2026-10-06',
+  );
+
+  assert.equal(audit.overlapPairCount, 1);
+  assert.deepEqual([...audit.ambiguousNutrientKeys], ['magnesium']);
+  assert.equal(
+    nutritionNutrientTargetHasActiveAmbiguityForDate(rows, 'magnesium', '2026-10-05'),
+    true,
+  );
+  assert.equal(
+    nutritionNutrientTargetHasActiveAmbiguityForDate(rows, 'calcium', '2026-10-05'),
+    false,
+  );
+});
+
+test('target histórico sin lineage falla cerrado si hay dos activos aplicables', () => {
+  const resolved = resolveNutritionHistoricalEnergyTarget(
+    { date: '2026-10-05', energyTargetKcal: 2500 },
+    [
+      {
+        decisionId: 'a',
+        effectiveFrom: '2026-10-01',
+        effectiveTo: '',
+        status: 'active',
+        energyTargetKcal: 2400,
+      },
+      {
+        decisionId: 'b',
+        effectiveFrom: '2026-10-05',
+        effectiveTo: '',
+        status: 'active',
+        energyTargetKcal: 2600,
+      },
+    ],
+    '2026-10-05',
+    '2026-10-06',
+  );
+
+  assert.equal(resolved.decisionId, null);
+  assert.equal(resolved.energyKcal, null);
+});
+
+test('target histórico con targetDecisionId exacto conserva lineage aunque haya overlap', () => {
+  const resolved = resolveNutritionHistoricalEnergyTarget(
+    {
+      date: '2026-10-05',
+      targetDecisionId: 'a',
+      energyTargetKcal: 2400,
+    },
+    [
+      {
+        decisionId: 'a',
+        effectiveFrom: '2026-10-01',
+        effectiveTo: '',
+        status: 'active',
+        energyTargetKcal: 2400,
+      },
+      {
+        decisionId: 'b',
+        effectiveFrom: '2026-10-05',
+        effectiveTo: '',
+        status: 'active',
+        energyTargetKcal: 2600,
+      },
+    ],
+    '2026-10-05',
+    '2026-10-06',
+  );
+
+  assert.equal(resolved.decisionId, 'a');
+  assert.equal(resolved.energyKcal, 2400);
+});
+
+test('AI Insight queda no verificable si Targets se solapan dentro de su ventana', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    { date: '2026-10-06', window: '7d', createdAt: '2026-10-06T12:00:00-03:00' },
+    {
+      meals: [
+        { mealId: 'm1', date: '2026-10-05', updatedAt: '2026-10-05T20:00:00-03:00' },
+      ],
+      foodItems: [],
+      dailySummary: [],
+      nutrientSummary: [],
+      targets: [
+        {
+          decisionId: 'a',
+          effectiveFrom: '2026-10-01',
+          effectiveTo: '',
+          status: 'active',
+          updatedAt: '2026-10-05T19:00:00-03:00',
+        },
+        {
+          decisionId: 'b',
+          effectiveFrom: '2026-10-05',
+          effectiveTo: '',
+          status: 'active',
+          updatedAt: '2026-10-05T19:01:00-03:00',
+        },
+      ],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'unverifiable');
+});
+
 
 const authEnv = {
   GOOGLE_SERVICE_ACCOUNT_EMAIL: 'nutrition-reader@example.iam.gserviceaccount.com',

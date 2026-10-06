@@ -59,6 +59,7 @@ export function buildNutritionRawDayFacts(
   validItemRows: readonly NutritionRawHistoryRow[],
   invalidItemRows: readonly NutritionRawHistoryRow[],
   endDate: string,
+  invalidMealRows: readonly NutritionRawHistoryRow[] = [],
 ): Map<string, NutritionRawDayFacts> {
   const relevantMeals = mealRows.filter((row) => {
     const date = stringValue(row.date);
@@ -69,9 +70,9 @@ export function buildNutritionRawDayFacts(
   const facts = new Map<string, NutritionRawDayFacts>();
 
   const dates = new Set(
-    relevantMeals
+    [...relevantMeals, ...invalidMealRows]
       .map((row) => stringValue(row.date))
-      .filter((date): date is string => Boolean(date)),
+      .filter((date): date is string => Boolean(date && date <= endDate)),
   );
 
   for (const date of dates) {
@@ -86,6 +87,7 @@ export function buildNutritionRawDayFacts(
       return Boolean(mealId && mealIds.has(mealId));
     });
     const invalidItems = invalidItemRows.filter((row) => {
+      if (!isActive(row)) return false;
       const mealId = stringValue(row.mealId);
       return Boolean(mealId && mealIds.has(mealId));
     });
@@ -98,7 +100,11 @@ export function buildNutritionRawDayFacts(
     const mealsWithoutItems = [...mealIds].filter(
       (mealId) => !representedMealIds.has(mealId),
     ).length;
-    const unknownContributionCount = invalidItems.length + mealsWithoutItems;
+    const invalidMealsOnDate = invalidMealRows.filter(
+      (row) => isActive(row) && stringValue(row.date) === date,
+    ).length;
+    const unknownContributionCount =
+      invalidItems.length + mealsWithoutItems + invalidMealsOnDate;
     const energy = summarizeNutritionRawDayEnergy(validItems, {
       additionalUnknownItemCount: unknownContributionCount,
     });

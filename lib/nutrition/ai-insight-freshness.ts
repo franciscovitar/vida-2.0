@@ -1,5 +1,16 @@
 import type { PlainCell } from '@/lib/data/plain';
 
+import { sanitizeNutritionDailySummaryUniqueness } from './daily-summary-uniqueness';
+import {
+  nutritionRawIdentityHasConflictInWindow,
+  sanitizeNutritionRawIdentity,
+} from './raw-identity-integrity';
+import {
+  auditNutritionNutrientTargetAmbiguity,
+  auditNutritionTargetAmbiguity,
+} from './target-integrity';
+import { sanitizeNutritionNutrientSummaryUniqueness } from './nutrient-summary-uniqueness';
+
 export type NutritionAiInsightFreshness = 'current' | 'stale' | 'unverifiable';
 
 type EvidenceRow = Readonly<Record<string, PlainCell | undefined>>;
@@ -131,7 +142,62 @@ export function evaluateNutritionAiInsightFreshness(
     };
   }
 
-  const rows = relevantEvidenceRows(evidence, window.start, window.end);
+  const rawIdentity = sanitizeNutritionRawIdentity(
+    evidence.meals,
+    evidence.foodItems,
+  );
+  const dailySummaryUniqueness = sanitizeNutritionDailySummaryUniqueness(
+    evidence.dailySummary,
+    window.start,
+    window.end,
+  );
+  const nutrientSummaryUniqueness = sanitizeNutritionNutrientSummaryUniqueness(
+    evidence.nutrientSummary,
+    window.start,
+    window.end,
+  );
+  const targetAmbiguity = auditNutritionTargetAmbiguity(
+    evidence.targets,
+    window.start,
+    window.end,
+  );
+  const nutrientTargetAmbiguity = auditNutritionNutrientTargetAmbiguity(
+    evidence.nutrientTargets,
+    window.start,
+    window.end,
+  );
+
+  if (
+    nutritionRawIdentityHasConflictInWindow(
+      rawIdentity,
+      evidence.meals,
+      window.start,
+      window.end,
+    ) ||
+    dailySummaryUniqueness.duplicateDateCount > 0 ||
+    nutrientSummaryUniqueness.duplicateKeyCount > 0 ||
+    targetAmbiguity.overlapPairCount > 0 ||
+    nutrientTargetAmbiguity.overlapPairCount > 0
+  ) {
+    return {
+      state: 'unverifiable',
+      windowStart: window.start,
+      windowEnd: window.end,
+      latestEvidenceAt: null,
+    };
+  }
+
+  const rows = relevantEvidenceRows(
+    {
+      ...evidence,
+      meals: rawIdentity.mealRows,
+      foodItems: rawIdentity.foodItemRows,
+      dailySummary: dailySummaryUniqueness.rows,
+      nutrientSummary: nutrientSummaryUniqueness.rows,
+    },
+    window.start,
+    window.end,
+  );
   if (rows.length === 0) {
     return {
       state: 'unverifiable',

@@ -1,5 +1,11 @@
 import type { PlainCell } from '@/lib/data/plain';
 
+import {
+  nutritionTargetCoversDate,
+  nutritionTargetHasActiveAmbiguityForDate,
+  nutritionTargetIsActiveLike,
+} from './target-integrity';
+
 export type NutritionTargetRow = Readonly<Record<string, PlainCell | undefined>>;
 
 export interface NutritionHistoricalEnergyTarget {
@@ -29,13 +35,7 @@ function numberValue(value: PlainCell | undefined): number | null {
 
 function canRepresentTargetDecision(row: NutritionTargetRow, includeSuperseded: boolean): boolean {
   const status = stringValue(row.status)?.toLowerCase();
-  return status === null || status === 'active' || (includeSuperseded && status === 'superseded');
-}
-
-function targetCoversDate(row: NutritionTargetRow, date: string): boolean {
-  const from = stringValue(row.effectiveFrom);
-  const to = stringValue(row.effectiveTo);
-  return Boolean(from && from <= date && (!to || to >= date));
+  return nutritionTargetIsActiveLike(row) || (includeSuperseded && status === 'superseded');
 }
 
 function historicalStatusRank(row: NutritionTargetRow): number {
@@ -52,10 +52,18 @@ export function selectNutritionTargetRowForDate<T extends NutritionTargetRow>(
   options: { includeSuperseded?: boolean } = {},
 ): T | null {
   const includeSuperseded = options.includeSuperseded ?? true;
+  const candidates = targetRows
+    .filter((row) => canRepresentTargetDecision(row, includeSuperseded))
+    .filter((row) => nutritionTargetCoversDate(row, date));
+
+  const activeLike = candidates.filter(nutritionTargetIsActiveLike);
+  if (activeLike.length > 1) return null;
+  if (activeLike.length === 1) return activeLike[0]!;
+
+  if (!includeSuperseded) return null;
   return (
-    targetRows
-      .filter((row) => canRepresentTargetDecision(row, includeSuperseded))
-      .filter((row) => targetCoversDate(row, date))
+    candidates
+      .filter((row) => stringValue(row.status)?.toLowerCase() === 'superseded')
       .sort((a, b) => {
         const dateOrder = (stringValue(b.effectiveFrom) ?? '').localeCompare(
           stringValue(a.effectiveFrom) ?? '',
@@ -103,12 +111,21 @@ export function resolveNutritionHistoricalEnergyTarget(
   );
 
   if (decisionId) {
-    const exact = usableTargets.find(
-      (row) => stringValue(row.decisionId) === decisionId && targetCoversDate(row, date),
+    const exactMatches = usableTargets.filter(
+      (row) => stringValue(row.decisionId) === decisionId && nutritionTargetCoversDate(row, date),
     );
-    return exact
-      ? historicalTargetFromRow(exact, decisionId)
+    return exactMatches.length === 1
+      ? historicalTargetFromRow(exactMatches[0]!, decisionId)
       : summaryFallback(summaryRow, decisionId);
+  }
+
+  if (nutritionTargetHasActiveAmbiguityForDate(usableTargets, date)) {
+    return {
+      decisionId: null,
+      energyKcal: null,
+      energyKcalLow: null,
+      energyKcalHigh: null,
+    };
   }
 
   const effective = selectNutritionTargetRowForDate(usableTargets, date, {

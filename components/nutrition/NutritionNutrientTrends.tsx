@@ -93,6 +93,31 @@ export function NutritionNutrientTrends({ data }: { data: NutritionNutrientWindo
         'timestamps/evidencia incompletos.',
     );
   }
+  if (data.source.rawIdentityConflictDateCount > 0) {
+    sourceMessages.push(
+      'Se omitieron ' +
+        data.source.rawIdentityConflictDateCount +
+        ' día(s) con identidad raw ambigua entre Meals/Food Items.',
+    );
+  }
+  if (data.source.duplicateDailySummaryDateCount > 0) {
+    sourceMessages.push(
+      'Daily Summary tenía ' +
+        data.source.duplicateDailySummaryDateCount +
+        ' fecha(s) duplicadas (' +
+        data.source.duplicateDailySummaryRowCount +
+        ' filas); se ignoró ese materializado.',
+    );
+  }
+  if (data.source.targetOverlapPairCount > 0) {
+    sourceMessages.push(
+      'Nutrient Targets tenía ' +
+        data.source.targetOverlapPairCount +
+        ' overlap(s) activo(s) que afectaban ' +
+        data.source.ambiguousTargetNutrientCount +
+        ' nutriente(s); esas referencias no se usan.',
+    );
+  }
   if (data.source.duplicateSummaryKeyCount > 0) {
     sourceMessages.push(
       'Se ocultaron ' +

@@ -41,15 +41,20 @@ La UI muestra proteína, carbohidratos, grasas y fibra.
 - un subtotal parcial puede mostrarse como cantidad conocida, pero no genera porcentaje de meta ni conclusión de adecuación;
 - energía parcial tampoco genera porcentaje o diferencia contra el objetivo;
 - cuando existen Meals/Food Items activos para una fecha, Vida recompone esa fecha desde los registros crudos y no deja que un Daily Summary atrasado los sobrescriba;
+- antes de agregar, Vida exige identidad raw no ambigua: un `mealId` activo duplicado, un `foodItemId` activo duplicado o un Food Item sin Meal activo padre se excluyen de agregaciones; si el conflicto puede atribuirse a una fecha, esa fecha degrada cobertura en vez de contar el dato dos veces;
+- la validación física de Food Items precede a la identidad/parentesco: una fila desalineada nunca se usa para energía/macros aunque sus IDs parezcan válidos;
 - la reconciliación aplica también a Tendencias: una corrección histórica o un día todavía no materializado puede aparecer desde autoridad cruda;
 - un `void`, supersession o reasignación retroactiva también puede limpiar el día anterior aunque el Daily Summary materializado todavía no se haya reconstruido;
 - una comida activa sin items o un item inválido ligado a esa comida degrada cobertura en vez de permitir un falso `complete`;
 - Daily Summary sigue siendo una vista materializada útil para fallback cuando no hay autoridad cruda disponible, no autoridad por encima de Food Items;
+- debe existir una sola fila de Daily Summary por fecha dentro de la ventana consultada; si hay dos o más, Vida suprime todas las filas materializadas de esa fecha y, cuando existe raw válido, reconstruye el día desde Meals/Food Items en vez de elegir una fila por orden;
 - desconocido nunca se convierte en cero.
 
 Los objetivos activos de `Targets` tienen prioridad para energía/macros. En particular, la meta personal activa de fibra prevalece visualmente sobre una referencia dietaria genérica de `Nutrient Targets`.
 
 Para energía, Vida conserva `energyTargetKcalLow/High` cuando la decisión es un rango. Hoy no convierte ese rango en un midpoint artificial: muestra el rango y calcula la diferencia contra el borde aplicable. Al abrir una fecha histórica, Today también permite decisiones `superseded` cuando eran las vigentes en ese día. Tendencias resuelve cada punto por `Daily Summary.targetDecisionId`; si esa lineage falta, usa la decisión de `Targets` vigente en esa fecha. `draft` y `void` no se usan. Un target actual nunca se aplica retrospectivamente a todo el gráfico.
+
+Si no existe lineage exacta y dos o más decisiones activas de `Targets` cubren la misma fecha, Vida no elige una por orden: la referencia de esa fecha queda sin meta verificable. En `Nutrient Targets`, el mismo fail-closed se aplica por `nutrientKey`; un overlap de magnesio, por ejemplo, no elimina una referencia válida de calcio.
 
 ## Micronutrientes
 
@@ -62,6 +67,8 @@ La vista principal de Nutrientes es longitudinal. Para cada ventana:
 - `Nutrient Summary` debe tener una sola fila activa por `date + nutrientKey`; si Vida detecta más de una, suprime todas las filas de esa clave ambigua en la ventana en vez de elegir la más nueva o sumar duplicados;
 - un duplicado afecta sólo esa clave fecha/nutriente: otras claves válidas del mismo día siguen disponibles y la fuente se marca como parcial;
 - antes de usar una fecha, Vida compara `Nutrient Summary.updatedAt` contra mutaciones de Meals/Food Items y `Daily Summary.updatedAt` para ese día;
+- la auditoría longitudinal usa Meals/Food Items saneados por identidad y Daily Summary deduplicado; un conflicto raw atribuible a una fecha vuelve ese día no verificable para patrones micronutricionales, mientras un Daily Summary duplicado se ignora como materializado porque la autoridad raw sigue disponible;
+- si más de un Nutrient Target activo cubre el mismo nutriente/fecha y no existe lineage exacta, esa referencia queda sin usar y la fuente se marca parcial;
 - si una fila micronutricional quedó detrás de evidencia más nueva, la fecha completa se excluye de promedios/señales hasta que Nutrition Intelligence reconstruya `Nutrient Summary`;
 - si faltan timestamps contractuales o no pueden leerse las fuentes necesarias para auditar frescura, la fecha falla cerrada como no verificable en vez de mostrarse como actual;
 - `sourceCoverage = complete` no se acepta sólo porque el summary lo declare: Vida exige lineage lower-level activa y defensible para todos los Food Items cubiertos, sin duplicados/orphans y con `sourceFoodItemCount` coherente; una fila lower-level puede conservar `coverage = partial` por incertidumbre de estimación sin convertir automáticamente al día en cobertura parcial, porque cobertura e incertidumbre son ejes distintos;
@@ -113,13 +120,17 @@ Vida no infiere por su cuenta potencial antioxidante, perfil antiinflamatorio, m
 
 Además, una conclusión persistida no se considera automáticamente vigente para siempre:
 
+- sólo puede existir una fila activa por `category + window`; si hay más de una, Vida considera ese grupo ambiguo y no elige entre versiones competidoras;
+- si el insight más reciente de una categoría pertenece a un grupo duplicado, la categoría queda sin insight actual: Vida no revive una interpretación anterior para ocultar la inconsistencia;
 - el insight debe tener `createdAt` parseable y una ventana auditable (`today-so-far`, `day-closed` o `Nd`);
 - Vida compara ese `createdAt` con mutaciones posteriores de Meals, Food Items, Food Nutrients, Daily Summary, Nutrient Summary, Targets y Nutrient Targets que intersecten la ventana;
 - si existe evidencia material más nueva, el insight queda `stale` y no se renderiza hasta que Nutrition Intelligence lo refresque;
-- si la vigencia no puede verificarse por ventana/timestamp contractual faltante, falla cerrado y tampoco se presenta como conclusión actual;
+- si la ventana contiene identidad raw ambigua, Daily Summary duplicado, Nutrient Summary duplicado, Targets activos solapados o Nutrient Targets activos solapados para el mismo nutriente, la evidencia queda `unverifiable`;
+- conflictos estructurales fuera de la ventana del insight no lo invalidan por sí solos;
+- si la vigencia no puede verificarse por ventana/timestamp contractual faltante o evidencia estructural ambigua, falla cerrado y tampoco se presenta como conclusión actual;
 - `sourceSummaryVersion` conserva lineage/versionado del contrato de derivación; no se usa como contador de frescura porque `summaryVersion` no representa el número de correcciones.
 
-Vida no regenera ni reescribe el insight al detectar staleness: sigue siendo una capa read-only.
+Vida no regenera, supersede ni reescribe el insight al detectar staleness o ambigüedad: sigue siendo una capa read-only. Nutrition Intelligence debe reparar el materializado canónico.
 
 Contrato consumido:
 
