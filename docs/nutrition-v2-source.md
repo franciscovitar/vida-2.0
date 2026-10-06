@@ -101,6 +101,16 @@ Claves visuales soportadas están en `lib/nutrition/nutrient-catalog.ts` y deben
 
 Vida no infiere por su cuenta potencial antioxidante, perfil antiinflamatorio, mejoras ni patrones. Solo muestra conclusiones persistidas por Nutrition Intelligence en `AI Insights`.
 
+Además, una conclusión persistida no se considera automáticamente vigente para siempre:
+
+- el insight debe tener `createdAt` parseable y una ventana auditable (`today-so-far`, `day-closed` o `Nd`);
+- Vida compara ese `createdAt` con mutaciones posteriores de Meals, Food Items, Daily Summary, Nutrient Summary, Targets y Nutrient Targets que intersecten la ventana;
+- si existe evidencia material más nueva, el insight queda `stale` y no se renderiza hasta que Nutrition Intelligence lo refresque;
+- si la vigencia no puede verificarse por ventana/timestamp contractual faltante, falla cerrado y tampoco se presenta como conclusión actual;
+- `sourceSummaryVersion` conserva lineage/versionado del contrato de derivación; no se usa como contador de frescura porque `summaryVersion` no representa el número de correcciones.
+
+Vida no regenera ni reescribe el insight al detectar staleness: sigue siendo una capa read-only.
+
 Contrato consumido:
 
 ```text

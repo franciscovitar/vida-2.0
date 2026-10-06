@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { evaluateNutritionAiInsightFreshness } from '@/lib/nutrition/ai-insight-freshness';
 import { summarizeNutritionRawDayEnergy } from '@/lib/nutrition/day-energy';
 import {
   isNutritionFoodItemStructurallyValid,
@@ -36,6 +37,196 @@ const authEnv = {
   GOOGLE_SERVICE_ACCOUNT_EMAIL: 'nutrition-reader@example.iam.gserviceaccount.com',
   GOOGLE_PRIVATE_KEY: 'line1\\nline2',
 };
+
+test('AI Insight sigue vigente cuando toda la evidencia de su ventana es anterior', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '7d',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [
+        {
+          mealId: 'm1',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:00:00-03:00',
+        },
+      ],
+      foodItems: [
+        {
+          mealId: 'm1',
+          updatedAt: '2026-10-05T20:05:00-03:00',
+        },
+      ],
+      dailySummary: [],
+      nutrientSummary: [],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'current');
+  assert.equal(result.windowStart, '2026-09-30');
+  assert.equal(result.windowEnd, '2026-10-06');
+});
+
+test('AI Insight queda stale si un Food Item de su ventana cambia después', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '7d',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [
+        {
+          mealId: 'm1',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:00:00-03:00',
+        },
+      ],
+      foodItems: [
+        {
+          mealId: 'm1',
+          updatedAt: '2026-10-06T12:30:00-03:00',
+        },
+      ],
+      dailySummary: [],
+      nutrientSummary: [],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'stale');
+  assert.equal(result.latestEvidenceAt, '2026-10-06T12:30:00-03:00');
+});
+
+test('una mutación fuera de la ventana no invalida un AI Insight actual', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '7d',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [
+        {
+          mealId: 'inside',
+          date: '2026-10-05',
+          updatedAt: '2026-10-05T20:00:00-03:00',
+        },
+        {
+          mealId: 'outside',
+          date: '2026-09-20',
+          updatedAt: '2026-10-06T13:00:00-03:00',
+        },
+      ],
+      foodItems: [
+        {
+          mealId: 'inside',
+          updatedAt: '2026-10-05T20:05:00-03:00',
+        },
+        {
+          mealId: 'outside',
+          updatedAt: '2026-10-06T13:00:00-03:00',
+        },
+      ],
+      dailySummary: [],
+      nutrientSummary: [],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'current');
+});
+
+test('un cambio de target que intersecta la ventana invalida el insight', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: '28d',
+      createdAt: '2026-10-06T10:00:00-03:00',
+    },
+    {
+      meals: [],
+      foodItems: [],
+      dailySummary: [],
+      nutrientSummary: [],
+      targets: [
+        {
+          effectiveFrom: '2026-10-01',
+          status: 'active',
+          updatedAt: '2026-10-06T11:00:00-03:00',
+        },
+      ],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'stale');
+});
+
+test('AI Insight sin ventana auditable o createdAt falla cerrado', () => {
+  const evidence = {
+    meals: [
+      {
+        mealId: 'm1',
+        date: '2026-10-06',
+        updatedAt: '2026-10-06T09:00:00-03:00',
+      },
+    ],
+    foodItems: [],
+    dailySummary: [],
+    nutrientSummary: [],
+    targets: [],
+    nutrientTargets: [],
+  };
+
+  assert.equal(
+    evaluateNutritionAiInsightFreshness(
+      { date: '2026-10-06', window: 'semana', createdAt: '2026-10-06T12:00:00-03:00' },
+      evidence,
+      '2026-10-06',
+    ).state,
+    'unverifiable',
+  );
+  assert.equal(
+    evaluateNutritionAiInsightFreshness(
+      { date: '2026-10-06', window: 'day-closed' },
+      evidence,
+      '2026-10-06',
+    ).state,
+    'unverifiable',
+  );
+});
+
+test('evidencia contractual sin timestamp vuelve no verificable el AI Insight', () => {
+  const result = evaluateNutritionAiInsightFreshness(
+    {
+      date: '2026-10-06',
+      window: 'day-closed',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+    {
+      meals: [{ mealId: 'm1', date: '2026-10-06', updatedAt: null }],
+      foodItems: [],
+      dailySummary: [],
+      nutrientSummary: [],
+      targets: [],
+      nutrientTargets: [],
+    },
+    '2026-10-06',
+  );
+
+  assert.equal(result.state, 'unverifiable');
+});
 
 test('Nutrition V2 exige un spreadsheet dedicado y no cae al Sheet general', () => {
   const env = {

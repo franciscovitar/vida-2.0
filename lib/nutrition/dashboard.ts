@@ -3,6 +3,10 @@ import 'server-only';
 import type { PlainCell } from '@/lib/data/plain';
 import type { ReadTabResult, SheetReadCode } from '@/lib/google/errors';
 
+import {
+  evaluateNutritionAiInsightFreshness,
+  type NutritionAiInsightEvidence,
+} from './ai-insight-freshness';
 import { deriveNutritionFreshness } from './freshness';
 import {
   buildNutritionRawDayFacts,
@@ -473,7 +477,11 @@ function buildNutrients(
   });
 }
 
-function parseAiInsights(result: ReadTabResult, today: string): NutritionAiInsight[] {
+function parseAiInsights(
+  result: ReadTabResult,
+  today: string,
+  evidence: NutritionAiInsightEvidence,
+): NutritionAiInsight[] {
   if (!result.ok) return [];
   const rows = activeRows(rowsFrom(result))
     .filter((row) => {
@@ -498,6 +506,8 @@ function parseAiInsights(result: ReadTabResult, today: string): NutritionAiInsig
         ? rawCategory
         : null;
     if (!category || seen.has(category)) continue;
+    seen.add(category);
+    if (evaluateNutritionAiInsightFreshness(row, evidence, today).state !== 'current') continue;
     const title = stringValue(row.title);
     const detail = stringValue(row.detail);
     if (!title || !detail) continue;
@@ -515,7 +525,6 @@ function parseAiInsights(result: ReadTabResult, today: string): NutritionAiInsig
       confidence: qualityValue(row.confidence),
       limitations: stringValue(row.limitations),
     });
-    seen.add(category);
   }
   return insights;
 }
@@ -567,6 +576,8 @@ export async function loadNutritionDashboardData(
   const itemRows = rowsFrom(itemsResult);
   const itemPartition = partitionNutritionFoodItemRows(itemRows);
   const targetRows = rowsFrom(targetsResult);
+  const nutrientTargetRows = rowsFrom(nutrientTargetsResult);
+  const nutrientSummaryRows = rowsFrom(nutrientResult);
   const currentDate = cordobaToday();
   const target = chooseTarget(targetRows, today, currentDate);
   const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate).filter(
@@ -699,7 +710,14 @@ export async function loadNutritionDashboardData(
     history,
     meals: buildMeals(mealRows, itemPartition.valid, today),
     nutrients,
-    aiInsights: parseAiInsights(insightsResult, today),
+    aiInsights: parseAiInsights(insightsResult, today, {
+      meals: mealRows,
+      foodItems: itemRows,
+      dailySummary: dailyRows,
+      nutrientSummary: nutrientSummaryRows,
+      targets: targetRows,
+      nutrientTargets: nutrientTargetRows,
+    }),
     optionalSources: {
       nutrientTargets: optionalStatus(nutrientTargetsResult),
       nutrientSummary: optionalStatus(nutrientResult),
