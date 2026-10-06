@@ -88,12 +88,14 @@ export function NutritionNutrientTrends({
   const sourceMessages: string[] = [];
   if (data.source.staleDateCount > 0) {
     sourceMessages.push(
-      `Se omitieron ${data.source.staleDateCount} día(s) cuyo Nutrient Summary quedó detrás de evidencia más nueva.`,
+      `Se omitieron ${data.source.staleDateCount} día(s) cuyo Nutrient Summary quedó detrás ` +
+        'de evidencia más nueva.',
     );
   }
   if (data.source.unverifiableDateCount > 0) {
     sourceMessages.push(
-      `No se pudieron validar ${data.source.unverifiableDateCount} día(s) por timestamps/evidencia incompletos.`,
+      `No se pudieron validar ${data.source.unverifiableDateCount} día(s) por ` +
+        'timestamps/evidencia incompletos.',
     );
   }
   if (data.source.targetStatus !== 'ready') {
