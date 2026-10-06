@@ -43,7 +43,7 @@ export default async function DietaPage({
     <div className={pageStyles.page}>
       <PageHeader
         title="Nutrición"
-        description="Cómo venís hoy, qué registraste y qué merece atención ahora."
+        description="Estado del día, registro real y señales que merecen atención."
         icon={UtensilsCrossed}
         domain="health"
       />

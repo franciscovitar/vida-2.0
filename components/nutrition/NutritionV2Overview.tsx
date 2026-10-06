@@ -288,6 +288,7 @@ export function NutritionV2Overview({
   mode?: NutritionOverviewMode;
   windowDays?: 7 | 28 | 90;
 }) {
+  const historicalDay = data.source.freshness === 'historical';
   const targetEnergy = data.target?.energyKcal ?? null;
   const energyDisplay = nutritionDisplayPointEstimate(
     data.todayEnergy.amount,
@@ -390,7 +391,7 @@ export function NutritionV2Overview({
         aria-labelledby="nutrition-v2-title"
       >
         <div className={styles['hero-copy']}>
-          <p className={styles.eyebrow}>HOY</p>
+          <p className={styles.eyebrow}>{historicalDay ? 'DÍA SELECCIONADO' : 'HOY'}</p>
           <h2 id="nutrition-v2-title">Estado del día</h2>
           <p>{todayStatusCopy(data.todayEnergy.dayStatus)}</p>
           <SourceStatus source={data.source} />
@@ -671,7 +672,7 @@ export function NutritionV2Overview({
       >
         <div className={styles['section-heading']}>
           <div>
-            <p className={styles.eyebrow}>REGISTRO DE HOY</p>
+            <p className={styles.eyebrow}>REGISTRO DEL DÍA</p>
             <h2 id="nutrition-meals-title">Comidas registradas</h2>
             <p>Resumen derivado de Meals + Food Items, preservando rangos y confianza.</p>
           </div>
@@ -681,7 +682,7 @@ export function NutritionV2Overview({
         {data.meals.length === 0 ? (
           <div className={styles['meal-empty']}>
             <Apple size={20} aria-hidden="true" />
-            <span>No hay comidas registradas para hoy.</span>
+            <span>No hay comidas registradas para este día.</span>
           </div>
         ) : (
           <div className={styles['meal-list']}>
