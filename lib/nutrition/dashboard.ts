@@ -14,6 +14,8 @@ import {
 } from './history-reconciliation';
 import { partitionNutritionFoodItemRows } from './food-item-integrity';
 import { NUTRIENT_CATALOG, nutrientCatalogEntry } from './nutrient-catalog';
+import { auditNutritionNutrientSummaryFreshness } from './nutrient-summary-freshness';
+import { sanitizeNutritionNutrientSummaryIntegrity } from './nutrient-summary-integrity';
 import { classifyNutritionTargetSemantics } from './target-semantics';
 import { readNutritionTabValues } from './sheets-read';
 import {
@@ -36,7 +38,12 @@ import type {
 type Row = Record<string, PlainCell>;
 
 const REQUIRED_TABS = ['Daily Summary', 'Meals', 'Food Items', 'Targets'] as const;
-const OPTIONAL_TABS = ['Nutrient Targets', 'Nutrient Summary', 'AI Insights'] as const;
+const OPTIONAL_TABS = [
+  'Nutrient Targets',
+  'Nutrient Summary',
+  'AI Insights',
+  'Food Nutrients',
+] as const;
 
 function cordobaToday(now = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -344,14 +351,14 @@ function nutrientGroup(value: PlainCell, fallback: NutrientGroup): NutrientGroup
 }
 
 function buildNutrients(
-  result: ReadTabResult,
-  targetResult: ReadTabResult,
+  summaryRows: readonly Row[],
+  targetRows: readonly Row[],
   todayItems: readonly Row[],
   today: string,
 ): NutritionNutrientValue[] {
-  const rows = rowsFrom(result).filter((row) => stringValue(row.date) === today);
+  const rows = summaryRows.filter((row) => stringValue(row.date) === today);
   const byKey = new Map(rows.map((row) => [stringValue(row.nutrientKey) ?? '', row]));
-  const targetByKey = chooseNutrientTargets(rowsFrom(targetResult), today);
+  const targetByKey = chooseNutrientTargets(targetRows, today);
 
   const activeItems = activeRows(todayItems);
   const derivedKnown = (column: string) => {
@@ -556,6 +563,7 @@ export async function loadNutritionDashboardData(
     nutrientTargetsResult,
     nutrientResult,
     insightsResult,
+    foodNutrientsResult,
   ] = await Promise.all([
     readNutritionTabValues(REQUIRED_TABS[0]),
     readNutritionTabValues(REQUIRED_TABS[1]),
@@ -564,6 +572,7 @@ export async function loadNutritionDashboardData(
     readNutritionTabValues(OPTIONAL_TABS[0]),
     readNutritionTabValues(OPTIONAL_TABS[1]),
     readNutritionTabValues(OPTIONAL_TABS[2]),
+    readNutritionTabValues(OPTIONAL_TABS[3]),
   ]);
 
   const required = [dailyResult, mealsResult, itemsResult, targetsResult];
@@ -578,6 +587,7 @@ export async function loadNutritionDashboardData(
   const targetRows = rowsFrom(targetsResult);
   const nutrientTargetRows = rowsFrom(nutrientTargetsResult);
   const nutrientSummaryRows = rowsFrom(nutrientResult);
+  const foodNutrientRows = rowsFrom(foodNutrientsResult);
   const currentDate = cordobaToday();
   const target = chooseTarget(targetRows, today, currentDate);
   const baseHistory = parseDailyRows(dailyRows, targetRows, currentDate).filter(
@@ -662,8 +672,37 @@ export async function loadNutritionDashboardData(
   const todayDaily = history.find((row) => row.date === today) ?? null;
 
   const personalFiberTarget = target?.fiberGrams ?? null;
-  const nutrients = buildNutrients(nutrientResult, nutrientTargetsResult, todayItems, today).map(
-    (nutrient) => {
+  const nutrientFreshness = foodNutrientsResult.ok
+    ? auditNutritionNutrientSummaryFreshness(
+        nutrientSummaryRows,
+        mealRows,
+        itemRows,
+        dailyRows,
+        today,
+        today,
+        foodNutrientRows,
+      )
+    : [];
+  const todayNutrientSummaryIsCurrent =
+    foodNutrientsResult.ok &&
+    nutrientFreshness.some((entry) => entry.date === today && entry.state === 'current');
+  const currentNutrientSummaryRows = todayNutrientSummaryIsCurrent
+    ? nutrientSummaryRows.filter((row) => stringValue(row.date) === today)
+    : [];
+  const nutrientIntegrity = sanitizeNutritionNutrientSummaryIntegrity(
+    currentNutrientSummaryRows,
+    mealRows,
+    itemRows,
+    foodNutrientRows,
+    today,
+    today,
+  );
+  const nutrients = buildNutrients(
+    nutrientIntegrity.rows,
+    nutrientTargetRows,
+    todayItems,
+    today,
+  ).map((nutrient) => {
       if (nutrient.key === 'fiber' && personalFiberTarget !== null) {
         return {
           ...nutrient,
@@ -713,6 +752,7 @@ export async function loadNutritionDashboardData(
     aiInsights: parseAiInsights(insightsResult, today, {
       meals: mealRows,
       foodItems: itemRows,
+      foodNutrients: foodNutrientRows,
       dailySummary: dailyRows,
       nutrientSummary: nutrientSummaryRows,
       targets: targetRows,

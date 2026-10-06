@@ -23,11 +23,12 @@ El spreadsheet se resuelve solo en servidor con `GOOGLE_NUTRITION_SPREADSHEET_ID
 - `Targets`
 - `Nutrient Targets`
 - `Nutrient Summary`
+- `Food Nutrients` — sólo para auditoría de frescura/integridad lower-level
 - `AI Insights`
 
 `Meals` + `Food Items` son autoridad de ingesta. `Daily Summary` y `Nutrient Summary` son vistas materializadas derivadas. `Targets` contiene decisiones fechadas de energía/macros. `Nutrient Targets` contiene referencias fechadas por nutriente. `AI Insights` contiene interpretación persistida por Nutrition Intelligence.
 
-`Food Catalog`, `Food Catalog Nutrients` y `Food Nutrients` pertenecen al runtime/store de Nutrition Intelligence. Vida no necesita leer el catálogo reusable: consume sus resultados materializados sin convertir la web en otra base de datos.
+`Food Catalog` y `Food Catalog Nutrients` pertenecen al runtime/store de Nutrition Intelligence y Vida no los lee. `Food Nutrients` también pertenece a Nutrition Intelligence, pero Vida puede leerlo en modo auditoría para comprobar que un `Nutrient Summary` fresco realmente conserva lineage lower-level suficiente. Vida no recalcula cantidades micronutricionales desde esas filas ni convierte la web en otra base de datos.
 
 ## Macros
 
@@ -61,6 +62,8 @@ La vista principal de Nutrientes es longitudinal. Para cada ventana:
 - antes de usar una fecha, Vida compara `Nutrient Summary.updatedAt` contra mutaciones de Meals/Food Items y `Daily Summary.updatedAt` para ese día;
 - si una fila micronutricional quedó detrás de evidencia más nueva, la fecha completa se excluye de promedios/señales hasta que Nutrition Intelligence reconstruya `Nutrient Summary`;
 - si faltan timestamps contractuales o no pueden leerse las fuentes necesarias para auditar frescura, la fecha falla cerrada como no verificable en vez de mostrarse como actual;
+- `sourceCoverage = complete` no se acepta sólo porque el summary lo declare: Vida exige que cada Food Item activo del día tenga una fila `Food Nutrients` activa y defensible para ese nutriente, que esas filas lower-level también sean `complete`, que no haya duplicados activos y que `sourceFoodItemCount` / `unquantifiedRelevantItemCount` sean coherentes;
+- si esa prueba lower-level falla, Vida sólo degrada la cobertura a `partial | none | unknown`; nunca recalcula el nutriente ni asciende un `partial` a `complete`;
 - una señal de atención requiere al menos 3 días evaluables, al menos 2 días con la señal y presencia en al menos 50% de los días evaluables;
 - las referencias se resuelven por `Nutrient Summary.targetDecisionId` cuando existe y, si no existe lineage, por fecha desde `Nutrient Targets`; una decisión histórica `superseded` puede seguir describiendo sus días pasados, pero nunca revive como referencia actual;
 - una RDA/AI se interpreta como adecuación, un UL como límite superior y un rango como rango; una misma decisión puede contener adecuación + UL y ambos extremos se evalúan;
@@ -107,7 +110,7 @@ Vida no infiere por su cuenta potencial antioxidante, perfil antiinflamatorio, m
 Además, una conclusión persistida no se considera automáticamente vigente para siempre:
 
 - el insight debe tener `createdAt` parseable y una ventana auditable (`today-so-far`, `day-closed` o `Nd`);
-- Vida compara ese `createdAt` con mutaciones posteriores de Meals, Food Items, Daily Summary, Nutrient Summary, Targets y Nutrient Targets que intersecten la ventana;
+- Vida compara ese `createdAt` con mutaciones posteriores de Meals, Food Items, Food Nutrients, Daily Summary, Nutrient Summary, Targets y Nutrient Targets que intersecten la ventana;
 - si existe evidencia material más nueva, el insight queda `stale` y no se renderiza hasta que Nutrition Intelligence lo refresque;
 - si la vigencia no puede verificarse por ventana/timestamp contractual faltante, falla cerrado y tampoco se presenta como conclusión actual;
 - `sourceSummaryVersion` conserva lineage/versionado del contrato de derivación; no se usa como contador de frescura porque `summaryVersion` no representa el número de correcciones.

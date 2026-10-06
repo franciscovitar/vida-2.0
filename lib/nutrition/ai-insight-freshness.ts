@@ -7,6 +7,7 @@ type EvidenceRow = Readonly<Record<string, PlainCell | undefined>>;
 export interface NutritionAiInsightEvidence {
   meals: readonly EvidenceRow[];
   foodItems: readonly EvidenceRow[];
+  foodNutrients?: readonly EvidenceRow[];
   dailySummary: readonly EvidenceRow[];
   nutrientSummary: readonly EvidenceRow[];
   targets: readonly EvidenceRow[];
@@ -93,6 +94,9 @@ function relevantEvidenceRows(
     const mealId = stringValue(row.mealId);
     return Boolean(mealId && mealIds.has(mealId));
   });
+  const foodNutrients = (evidence.foodNutrients ?? []).filter((row) =>
+    dateInRange(row.date, start, end),
+  );
   const dailySummary = evidence.dailySummary.filter((row) =>
     dateInRange(row.date, start, end),
   );
@@ -107,6 +111,7 @@ function relevantEvidenceRows(
   return [
     ...meals,
     ...foodItems,
+    ...foodNutrients,
     ...dailySummary,
     ...nutrientSummary,
     ...targets,

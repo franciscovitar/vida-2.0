@@ -4,6 +4,7 @@ import type { PlainCell } from '@/lib/data/plain';
 import type { SheetReadCode } from '@/lib/google/errors';
 
 import { auditNutritionNutrientSummaryFreshness } from './nutrient-summary-freshness';
+import { sanitizeNutritionNutrientSummaryIntegrity } from './nutrient-summary-integrity';
 import {
   buildNutritionNutrientWindow,
   type NutritionNutrientWindowData,
@@ -31,6 +32,8 @@ export interface NutritionNutrientWindowResult extends NutritionNutrientWindowDa
     targetStatus: 'ready' | 'missing' | 'unavailable';
     staleDateCount: number;
     unverifiableDateCount: number;
+    integrityDowngradedDateCount: number;
+    integrityUnverifiableRowCount: number;
   };
 }
 
@@ -49,27 +52,43 @@ export async function loadNutritionNutrientWindow(
   endDate: string,
   windowDays: number,
 ): Promise<NutritionNutrientWindowResult> {
-  const [summaryResult, targetResult, mealsResult, itemsResult, dailyResult] = await Promise.all([
+  const [
+    summaryResult,
+    targetResult,
+    mealsResult,
+    itemsResult,
+    dailyResult,
+    foodNutrientsResult,
+  ] = await Promise.all([
     readNutritionTabValues('Nutrient Summary'),
     readNutritionTabValues('Nutrient Targets'),
     readNutritionTabValues('Meals'),
     readNutritionTabValues('Food Items'),
     readNutritionTabValues('Daily Summary'),
+    readNutritionTabValues('Food Nutrients'),
   ]);
 
   const summaryRows = summaryResult.ok ? rowsFromValues(summaryResult.values) : [];
   const targetRows = targetResult.ok ? rowsFromValues(targetResult.values) : [];
+  const mealRows = mealsResult.ok ? rowsFromValues(mealsResult.values) : [];
+  const itemRows = itemsResult.ok ? rowsFromValues(itemsResult.values) : [];
+  const dailyRows = dailyResult.ok ? rowsFromValues(dailyResult.values) : [];
+  const foodNutrientRows = foodNutrientsResult.ok
+    ? rowsFromValues(foodNutrientsResult.values)
+    : [];
   const startDate = windowStartDate(endDate, windowDays);
-  const auditSourcesReady = mealsResult.ok && itemsResult.ok && dailyResult.ok;
+  const auditSourcesReady =
+    mealsResult.ok && itemsResult.ok && dailyResult.ok && foodNutrientsResult.ok;
 
   const freshness = auditSourcesReady
     ? auditNutritionNutrientSummaryFreshness(
         summaryRows,
-        rowsFromValues(mealsResult.values),
-        rowsFromValues(itemsResult.values),
-        rowsFromValues(dailyResult.values),
+        mealRows,
+        itemRows,
+        dailyRows,
         startDate,
         endDate,
+        foodNutrientRows,
       )
     : summaryRows
         .map((row) => String(row.date ?? '').trim())
@@ -90,12 +109,20 @@ export async function loadNutritionNutrientWindow(
   const usableSummaryRows = summaryRows.filter(
     (row) => !rejectedDates.has(String(row.date ?? '').trim()),
   );
+  const integrity = sanitizeNutritionNutrientSummaryIntegrity(
+    usableSummaryRows,
+    mealRows,
+    itemRows,
+    foodNutrientRows,
+    startDate,
+    endDate,
+  );
   const staleDateCount = freshness.filter((entry) => entry.state === 'stale').length;
   const unverifiableDateCount = freshness.filter(
     (entry) => entry.state === 'unverifiable',
   ).length;
   const data = buildNutritionNutrientWindow(
-    usableSummaryRows,
+    integrity.rows,
     targetRows,
     endDate,
     windowDays,
@@ -110,21 +137,29 @@ export async function loadNutritionNutrientWindow(
         targetStatus: optionalStatus(targetResult),
         staleDateCount: 0,
         unverifiableDateCount: 0,
+        integrityDowngradedDateCount: 0,
+        integrityUnverifiableRowCount: 0,
       },
     };
   }
 
   const targetStatus = optionalStatus(targetResult);
   const freshnessIssue = staleDateCount > 0 || unverifiableDateCount > 0;
+  const integrityIssue = integrity.downgradedDateCount > 0;
 
   return {
     ...data,
     source: {
-      status: targetStatus === 'ready' && !freshnessIssue ? 'ready' : 'partial',
+      status:
+        targetStatus === 'ready' && !freshnessIssue && !integrityIssue
+          ? 'ready'
+          : 'partial',
       code: targetResult.ok ? null : targetResult.code,
       targetStatus,
       staleDateCount,
       unverifiableDateCount,
+      integrityDowngradedDateCount: integrity.downgradedDateCount,
+      integrityUnverifiableRowCount: integrity.unverifiableRowCount,
     },
   };
 }

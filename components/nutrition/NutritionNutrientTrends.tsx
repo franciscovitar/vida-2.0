@@ -98,6 +98,16 @@ export function NutritionNutrientTrends({
         'timestamps/evidencia incompletos.',
     );
   }
+  if (data.source.integrityDowngradedDateCount > 0) {
+    sourceMessages.push(
+      `Se degradó la cobertura declarada de ${data.source.integrityDowngradedDateCount} día(s) porque Food Nutrients no sostuvo un complete reproducible.`,
+    );
+  }
+  if (data.source.integrityUnverifiableRowCount > 0) {
+    sourceMessages.push(
+      `${data.source.integrityUnverifiableRowCount} fila(s) complete no pudieron verificarse estructuralmente y no entran como días comparables.`,
+    );
+  }
   if (data.source.targetStatus !== 'ready') {
     sourceMessages.push(
       'Las referencias de objetivos no pudieron leerse completamente; no se inventan metas.',

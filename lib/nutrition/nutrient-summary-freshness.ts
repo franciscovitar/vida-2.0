@@ -50,6 +50,7 @@ export function auditNutritionNutrientSummaryFreshness(
   dailySummaryRows: readonly Row[],
   startDate: string,
   endDate: string,
+  foodNutrientRows: readonly Row[] = [],
 ): NutritionNutrientSummaryFreshnessRow[] {
   const summaryDates = new Set(
     nutrientSummaryRows
@@ -80,11 +81,13 @@ export function auditNutritionNutrientSummaryFreshness(
       return Boolean(mealId && mealIds.has(mealId));
     });
     const dailyRows = dailySummaryRows.filter((row) => stringValue(row.date) === date);
+    const nutrientRows = foodNutrientRows.filter((row) => stringValue(row.date) === date);
 
     const evidenceRows: Array<{ row: Row; fields: readonly string[] }> = [
       ...meals.map((row) => ({ row, fields: ['updatedAt', 'createdAt'] as const })),
       ...items.map((row) => ({ row, fields: ['updatedAt'] as const })),
       ...dailyRows.map((row) => ({ row, fields: ['updatedAt'] as const })),
+      ...nutrientRows.map((row) => ({ row, fields: ['updatedAt'] as const })),
     ];
 
     if (!earliestSummary || evidenceRows.length === 0) {
