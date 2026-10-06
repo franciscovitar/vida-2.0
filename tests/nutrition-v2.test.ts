@@ -1651,6 +1651,7 @@ test('Nutrientes resuelve la decisión de target efectiva para cada fecha del pe
     {
       decisionId: 'mg-new',
       effectiveFrom: '2026-10-02',
+      effectiveTo: '',
       status: 'active',
       nutrientKey: 'magnesium',
       targetAmount: 450,
@@ -1725,6 +1726,7 @@ test('Nutrientes falla cerrado si targetDecisionId no corresponde a la fecha', (
     {
       decisionId: 'future',
       effectiveFrom: '2026-10-02',
+      effectiveTo: '',
       status: 'active',
       nutrientKey: 'magnesium',
       targetAmount: 450,
