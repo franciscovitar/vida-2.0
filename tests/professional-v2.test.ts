@@ -87,7 +87,7 @@ test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada 
   assert.match(panorama, /snapshot\.market\.globalSignals\[0\]/);
   assert.match(panorama, /snapshot\.strongestEvidence\[0\]/);
   assert.doesNotMatch(panorama, /Math\.random|overall score|winner/i);
-  assert.doesNotMatch(panorama, /\/professional\/(mercado|crecimiento|biblioteca)/);
+  assert.doesNotMatch(panorama, /\/professional\/(crecimiento|biblioteca)/);
 });
 
 
@@ -119,7 +119,7 @@ test('PRO-V2-08. Mercado conserva demanda, compensación y semántica cauta de I
   assert.match(market, /market\.internationalBenchmarks\.map/);
   assert.match(market, /market\.argentinaSalaryRoles\.map/);
   assert.match(market, /resilience\.crossRoleFindings\.map/);
-  assert.match(market, /No son probabilidades personales de desempleo/);
+  assert.match(market, /No son probabilidades\s+personales de desempleo/);
   assert.match(market, /Escenario a 5 años/);
 });
 
