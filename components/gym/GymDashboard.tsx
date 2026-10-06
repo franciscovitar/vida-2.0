@@ -7,9 +7,42 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ContentPageView } from '@/components/web-catalog/ContentPageView';
-import type { GymDashboardData } from '@/types/gym';
+import type {
+  GymDashboardData,
+  GymDataSourceKind,
+  GymDataSourceState,
+  GymModuleStatus,
+} from '@/types/gym';
 
 import styles from './GymDashboard.module.scss';
+
+const MODULE_STATUS_LABELS: Record<GymModuleStatus, string> = {
+  ready: 'Lista',
+  'flag-disabled': 'No habilitada',
+  'not-configured': 'Sin configurar',
+  empty: 'Sin rutina',
+  ambiguous: 'Revisar rutina',
+  forbidden: 'Rutina no disponible',
+  partial: 'Disponible parcialmente',
+  error: 'Temporalmente no disponible',
+};
+
+const SOURCE_KIND_LABELS: Record<GymDataSourceKind, string> = {
+  notion: 'Rutina',
+  sheets: 'Hábitos y métricas',
+  calendar: 'Agenda',
+  sessions: 'Registro de gimnasio',
+};
+
+const SOURCE_STATE_LABELS: Record<GymDataSourceState, string> = {
+  ready: 'Disponible',
+  mock: 'Simulada',
+  unavailable: 'No disponible',
+  error: 'Revisar',
+  'not-applicable': 'No aplica',
+  empty: 'Sin registros',
+  disabled: 'Desactivada',
+};
 
 function publicWarningSubject(subject: string | null): string | null {
   if (!subject) return null;
@@ -41,6 +74,20 @@ function WarningCard({ data }: { data: GymDashboardData }) {
           );
         })}
       </ul>
+      <details className={styles.disclosure}>
+        <summary>Ver estado de fuentes</summary>
+        <p className={styles.body}>Estado del módulo: {MODULE_STATUS_LABELS[data.moduleStatus]}</p>
+        <ul className={styles.sources}>
+          {data.sources.map((source) => (
+            <li key={source.kind}>
+              <span className={styles['source-kind']}>{SOURCE_KIND_LABELS[source.kind]}</span>
+              <Badge domain="neutral" variant="outline">
+                {SOURCE_STATE_LABELS[source.state]}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      </details>
     </Card>
   );
 }
