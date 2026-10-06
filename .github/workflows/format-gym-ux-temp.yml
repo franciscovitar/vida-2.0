@@ -1,0 +1,41 @@
+name: Temp format Gym UX
+
+on:
+  push:
+    branches:
+      - tmp/gym-ux-format-20261006
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: tmp/gym-ux-format-20261006
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Format Gym UX files
+        run: >
+          npx prettier --write
+          components/gym/GymDashboard.module.scss
+          components/gym/GymDashboard.tsx
+          components/gym/GymSummaryOverview.tsx
+          docs/gym-v2-source.md
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/gym/GymDashboard.module.scss components/gym/GymDashboard.tsx components/gym/GymSummaryOverview.tsx docs/gym-v2-source.md
+          git commit -m "Format Gym UX files"
+          git push origin HEAD:tmp/gym-ux-format-20261006
