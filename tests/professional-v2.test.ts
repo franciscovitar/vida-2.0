@@ -131,7 +131,6 @@ test('PRO-V2-09. Panorama enlaza sólo a superficies V2 ya existentes', () => {
   assert.doesNotMatch(panorama, /\/professional\/biblioteca/);
 });
 
-
 test('PRO-V2-10. Crecimiento tiene ruta propia y conserva la cola canónica', () => {
   const nav = repoText('components/professional/ProfessionalNavigation.tsx');
   const route = repoText('app/(app)/professional/crecimiento/page.tsx');

@@ -81,7 +81,9 @@ export function ProfessionalGrowth({ data }: { data: ProfessionalIntelligenceDat
       ) : null}
 
       <section className={styles['growth-hero']} aria-labelledby="professional-growth-title">
-        <p className={styles.eyebrow}>Perfil & crecimiento · observado {snapshot.source.observedAt}</p>
+        <p className={styles.eyebrow}>
+          Perfil & crecimiento · observado {snapshot.source.observedAt}
+        </p>
         <h2 id="professional-growth-title">Crecer sobre evidencia, no sobre títulos</h2>
         <p>{snapshot.profileSummary}</p>
         <div className={styles['growth-meta']}>
@@ -238,7 +240,9 @@ export function ProfessionalGrowth({ data }: { data: ProfessionalIntelligenceDat
                   <span>{OWNERSHIP_LABELS[item.currentLane]}</span>
                 </div>
                 <p>{item.reason}</p>
-                <small>{DISPOSITION_LABELS[item.learningDisposition] ?? item.learningDisposition}</small>
+                <small>
+                  {DISPOSITION_LABELS[item.learningDisposition] ?? item.learningDisposition}
+                </small>
               </article>
             ))}
           </div>
