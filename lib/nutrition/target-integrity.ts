@@ -25,10 +25,7 @@ export function nutritionTargetIsActiveLike(row: NutritionTargetIntegrityRow): b
   return status === null || status === 'active';
 }
 
-export function nutritionTargetCoversDate(
-  row: NutritionTargetIntegrityRow,
-  date: string,
-): boolean {
+export function nutritionTargetCoversDate(row: NutritionTargetIntegrityRow, date: string): boolean {
   const from = nutritionTargetString(row.effectiveFrom);
   const to = nutritionTargetString(row.effectiveTo);
   return Boolean(from && from <= date && (!to || to >= date));
@@ -57,9 +54,10 @@ export function nutritionTargetHasActiveAmbiguityForDate(
   rows: readonly NutritionTargetIntegrityRow[],
   date: string,
 ): boolean {
-  return rows.filter(
-    (row) => nutritionTargetIsActiveLike(row) && nutritionTargetCoversDate(row, date),
-  ).length > 1;
+  return (
+    rows.filter((row) => nutritionTargetIsActiveLike(row) && nutritionTargetCoversDate(row, date))
+      .length > 1
+  );
 }
 
 export function nutritionNutrientTargetHasActiveAmbiguityForDate(
@@ -67,12 +65,14 @@ export function nutritionNutrientTargetHasActiveAmbiguityForDate(
   nutrientKey: string,
   date: string,
 ): boolean {
-  return rows.filter(
-    (row) =>
-      nutritionTargetString(row.nutrientKey) === nutrientKey &&
-      nutritionTargetIsActiveLike(row) &&
-      nutritionTargetCoversDate(row, date),
-  ).length > 1;
+  return (
+    rows.filter(
+      (row) =>
+        nutritionTargetString(row.nutrientKey) === nutrientKey &&
+        nutritionTargetIsActiveLike(row) &&
+        nutritionTargetCoversDate(row, date),
+    ).length > 1
+  );
 }
 
 export function auditNutritionTargetAmbiguity(

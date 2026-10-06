@@ -152,9 +152,7 @@ function targetRowForDate(
   const candidates = rows
     .filter((row) => targetStatusAllowed(row, includeSuperseded))
     .filter(
-      (row) =>
-        stringValue(row.nutrientKey) === nutrientKey &&
-        nutritionTargetCoversDate(row, date),
+      (row) => stringValue(row.nutrientKey) === nutrientKey && nutritionTargetCoversDate(row, date),
     );
   const activeLike = candidates.filter(nutritionTargetIsActiveLike);
   if (activeLike.length > 1) return null;

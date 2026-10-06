@@ -85,12 +85,15 @@ export async function loadNutritionNutrientWindow(
   const uniqueness = sanitizeNutritionNutrientSummaryUniqueness(summaryRows, startDate, endDate);
   const itemPartition = partitionNutritionFoodItemRows(itemRows);
   const rawIdentity = sanitizeNutritionRawIdentity(mealRows, itemPartition.valid);
-  const rawConflictDates = new Set(
-    nutritionRawIdentityConflictDates(rawIdentity, mealRows),
-  );
+  const rawConflictDates = new Set(nutritionRawIdentityConflictDates(rawIdentity, mealRows));
   const mealDatesById = new Map<string, Set<string>>();
   for (const meal of mealRows) {
-    if (String(meal.status ?? 'active').trim().toLowerCase() !== 'active') continue;
+    if (
+      String(meal.status ?? 'active')
+        .trim()
+        .toLowerCase() !== 'active'
+    )
+      continue;
     const mealId = String(meal.mealId ?? '').trim();
     const date = String(meal.date ?? '').trim();
     if (!mealId || !date) continue;
@@ -99,21 +102,18 @@ export async function loadNutritionNutrientWindow(
     mealDatesById.set(mealId, dates);
   }
   for (const row of itemPartition.invalid) {
-    if (String(row.status ?? 'active').trim().toLowerCase() !== 'active') continue;
+    if (
+      String(row.status ?? 'active')
+        .trim()
+        .toLowerCase() !== 'active'
+    )
+      continue;
     const mealId = String(row.mealId ?? '').trim();
     if (!mealId) continue;
     for (const date of mealDatesById.get(mealId) ?? []) rawConflictDates.add(date);
   }
-  const dailyUniqueness = sanitizeNutritionDailySummaryUniqueness(
-    dailyRows,
-    startDate,
-    endDate,
-  );
-  const targetAmbiguity = auditNutritionNutrientTargetAmbiguity(
-    targetRows,
-    startDate,
-    endDate,
-  );
+  const dailyUniqueness = sanitizeNutritionDailySummaryUniqueness(dailyRows, startDate, endDate);
+  const targetAmbiguity = auditNutritionNutrientTargetAmbiguity(targetRows, startDate, endDate);
   const auditSourcesReady =
     mealsResult.ok && itemsResult.ok && dailyResult.ok && foodNutrientsResult.ok;
 
@@ -139,14 +139,10 @@ export async function loadNutritionNutrientWindow(
         }));
 
   const auditedFreshness = freshness.map((entry) =>
-    rawConflictDates.has(entry.date)
-      ? { ...entry, state: 'unverifiable' as const }
-      : entry,
+    rawConflictDates.has(entry.date) ? { ...entry, state: 'unverifiable' as const } : entry,
   );
   const rejectedDates = new Set(
-    auditedFreshness
-      .filter((entry) => entry.state !== 'current')
-      .map((entry) => entry.date),
+    auditedFreshness.filter((entry) => entry.state !== 'current').map((entry) => entry.date),
   );
   const usableSummaryRows = uniqueness.rows.filter(
     (row) => !rejectedDates.has(String(row.date ?? '').trim()),

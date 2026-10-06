@@ -2,11 +2,11 @@ import type { PlainCell } from '@/lib/data/plain';
 
 type Row = Readonly<Record<string, PlainCell | undefined>>;
 
-export interface NutritionRawIdentityIntegrityResult<T extends Row> {
-  mealRows: T[];
-  foodItemRows: T[];
-  rejectedMealRows: T[];
-  rejectedFoodItemRows: T[];
+export interface NutritionRawIdentityIntegrityResult<MealRow extends Row, FoodItemRow extends Row> {
+  mealRows: MealRow[];
+  foodItemRows: FoodItemRow[];
+  rejectedMealRows: MealRow[];
+  rejectedFoodItemRows: FoodItemRow[];
   duplicateMealIdCount: number;
   duplicateFoodItemIdCount: number;
   missingMealIdCount: number;
@@ -32,10 +32,7 @@ function dateInRange(row: Row, startDate: string, endDate: string): boolean {
   return Boolean(date && date >= startDate && date <= endDate);
 }
 
-function duplicateKeys<T extends Row>(
-  rows: readonly T[],
-  field: string,
-): ReadonlySet<string> {
+function duplicateKeys<T extends Row>(rows: readonly T[], field: string): ReadonlySet<string> {
   const counts = new Map<string, number>();
   for (const row of rows) {
     if (!isActive(row)) continue;
@@ -43,21 +40,17 @@ function duplicateKeys<T extends Row>(
     if (!key) continue;
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
-  return new Set(
-    [...counts.entries()]
-      .filter(([, count]) => count > 1)
-      .map(([key]) => key),
-  );
+  return new Set([...counts.entries()].filter(([, count]) => count > 1).map(([key]) => key));
 }
 
-export function sanitizeNutritionRawIdentity<T extends Row>(
-  mealRows: readonly T[],
-  foodItemRows: readonly T[],
-): NutritionRawIdentityIntegrityResult<T> {
+export function sanitizeNutritionRawIdentity<MealRow extends Row, FoodItemRow extends Row>(
+  mealRows: readonly MealRow[],
+  foodItemRows: readonly FoodItemRow[],
+): NutritionRawIdentityIntegrityResult<MealRow, FoodItemRow> {
   const duplicateMealIds = duplicateKeys(mealRows, 'mealId');
   const duplicateFoodItemIds = duplicateKeys(foodItemRows, 'foodItemId');
 
-  const rejectedMealRows: T[] = [];
+  const rejectedMealRows: MealRow[] = [];
   const usableMeals = mealRows.filter((row) => {
     if (!isActive(row)) return true;
     const mealId = stringValue(row.mealId);
@@ -73,7 +66,7 @@ export function sanitizeNutritionRawIdentity<T extends Row>(
       .filter((mealId): mealId is string => Boolean(mealId)),
   );
 
-  const rejectedFoodItemRows: T[] = [];
+  const rejectedFoodItemRows: FoodItemRow[] = [];
   let missingFoodItemIdCount = 0;
   let orphanFoodItemCount = 0;
 
@@ -106,9 +99,9 @@ export function sanitizeNutritionRawIdentity<T extends Row>(
   };
 }
 
-export function nutritionRawIdentityConflictDates<T extends Row>(
-  result: NutritionRawIdentityIntegrityResult<T>,
-  originalMealRows: readonly T[],
+export function nutritionRawIdentityConflictDates<MealRow extends Row, FoodItemRow extends Row>(
+  result: NutritionRawIdentityIntegrityResult<MealRow, FoodItemRow>,
+  originalMealRows: readonly MealRow[],
 ): ReadonlySet<string> {
   const dates = new Set<string>();
 
@@ -141,9 +134,12 @@ export function nutritionRawIdentityConflictDates<T extends Row>(
   return dates;
 }
 
-export function nutritionRawIdentityHasConflictInWindow<T extends Row>(
-  result: NutritionRawIdentityIntegrityResult<T>,
-  originalMealRows: readonly T[],
+export function nutritionRawIdentityHasConflictInWindow<
+  MealRow extends Row,
+  FoodItemRow extends Row,
+>(
+  result: NutritionRawIdentityIntegrityResult<MealRow, FoodItemRow>,
+  originalMealRows: readonly MealRow[],
   startDate: string,
   endDate: string,
 ): boolean {
