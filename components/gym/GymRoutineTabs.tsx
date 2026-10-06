@@ -210,24 +210,30 @@ export function GymRoutineTabs({
       )}
 
       {routine.supplementalSections.length > 0 ? (
-        <div className={styles['supplemental-grid']}>
-          {routine.supplementalSections.map((section) => (
-            <section key={section.key} className={styles.supplemental}>
-              <div className={styles['supplemental-heading']}>
-                <span>{SECTION_LABELS[section.kind]}</span>
-                <h3>{section.label}</h3>
-              </div>
-              {section.description ? <p className={styles.body}>{section.description}</p> : null}
-              {section.items.length > 0 ? (
-                <ol className={styles['supplemental-items']}>
-                  {section.items.map((item, index) => (
-                    <li key={`${index}-${item}`}>{item}</li>
-                  ))}
-                </ol>
-              ) : null}
-            </section>
-          ))}
-        </div>
+        <details className={styles['supplemental-disclosure']}>
+          <summary>
+            <span>Movilidad, recuperación y complementos</span>
+            <small>{routine.supplementalSections.length} bloque(s)</small>
+          </summary>
+          <div className={styles['supplemental-grid']}>
+            {routine.supplementalSections.map((section) => (
+              <section key={section.key} className={styles.supplemental}>
+                <div className={styles['supplemental-heading']}>
+                  <span>{SECTION_LABELS[section.kind]}</span>
+                  <h3>{section.label}</h3>
+                </div>
+                {section.description ? <p className={styles.body}>{section.description}</p> : null}
+                {section.items.length > 0 ? (
+                  <ol className={styles['supplemental-items']}>
+                    {section.items.map((item, index) => (
+                      <li key={`${index}-${item}`}>{item}</li>
+                    ))}
+                  </ol>
+                ) : null}
+              </section>
+            ))}
+          </div>
+        </details>
       ) : null}
     </div>
   );

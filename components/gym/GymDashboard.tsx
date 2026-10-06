@@ -94,10 +94,7 @@ function WarningCard({ data }: { data: GymDashboardData }) {
 
 export function GymDashboardView({ data }: { data: GymDashboardData }) {
   const hasUsefulContext = Boolean(
-    data.readiness.sleep ||
-    data.readiness.energy ||
-    data.readiness.recentExercise ||
-    data.readiness.commitments.length > 0,
+    data.readiness.sleep || data.readiness.energy || data.readiness.commitments.length > 0,
   );
 
   return (
@@ -110,31 +107,27 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
       />
 
       {hasUsefulContext ? (
-        <Card>
-          <SectionHeader
-            title="Contexto útil de hoy"
-            description="Contexto de Salud y agenda; no es un readiness score ni decide si entrenar."
-            domain="health"
-          />
-          <div className={styles.metrics}>
-            {data.readiness.sleep ? <span>Sueño: {data.readiness.sleep}</span> : null}
-            {data.readiness.energy ? <span>Señal fisiológica: {data.readiness.energy}</span> : null}
-            {data.readiness.recentExercise ? (
-              <span>Actividad reciente: {data.readiness.recentExercise}</span>
-            ) : null}
-          </div>
-
-          {data.readiness.commitments.length > 0 ? (
-            <details className={styles.disclosure}>
-              <summary>Ver compromisos relacionados</summary>
+        <details className={styles['context-disclosure']}>
+          <summary>
+            <span>Contexto de Salud y agenda</span>
+            <small>Opcional; no decide por vos ni modifica el plan.</small>
+          </summary>
+          <div className={styles['context-body']}>
+            <div className={styles.metrics}>
+              {data.readiness.sleep ? <span>Sueño: {data.readiness.sleep}</span> : null}
+              {data.readiness.energy ? (
+                <span>Señal fisiológica: {data.readiness.energy}</span>
+              ) : null}
+            </div>
+            {data.readiness.commitments.length > 0 ? (
               <ul className={styles.notes}>
                 {data.readiness.commitments.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-            </details>
-          ) : null}
-        </Card>
+            ) : null}
+          </div>
+        </details>
       ) : null}
 
       <WarningCard data={data} />
@@ -199,6 +192,9 @@ export function GymRoutineDashboardView({ data }: { data: GymDashboardData }) {
 }
 
 export function GymProgressDashboardView({ data }: { data: GymDashboardData }) {
+  const visibleSessions = data.sessionSummaries.slice(0, 6);
+  const olderSessions = data.sessionSummaries.slice(6, 12);
+
   return (
     <div className={styles.stack}>
       <GymV2Overview
@@ -208,19 +204,17 @@ export function GymProgressDashboardView({ data }: { data: GymDashboardData }) {
         today={data.targetDate}
       />
 
-      <MonthlyReviewCard domain="gym" />
-
       <Card>
         <SectionHeader
           title="Historial de sesiones"
           description={data.sessionsPendingNotice}
           domain="health"
         />
-        {data.sessionSummaries.length === 0 ? (
+        {visibleSessions.length === 0 ? (
           <p className={styles.body}>Sin sesiones registradas todavía.</p>
         ) : (
           <div className={styles['session-list']}>
-            {data.sessionSummaries.slice(0, 12).map((session) => (
+            {visibleSessions.map((session) => (
               <article key={session.key} className={styles.session}>
                 <div>
                   <strong>{session.label ?? 'Entrenamiento'}</strong>
@@ -240,10 +234,39 @@ export function GymProgressDashboardView({ data }: { data: GymDashboardData }) {
                 </div>
               </article>
             ))}
+
+            {olderSessions.length > 0 ? (
+              <details className={styles['history-disclosure']}>
+                <summary>Ver sesiones anteriores</summary>
+                <div className={styles['history-list']}>
+                  {olderSessions.map((session) => (
+                    <article key={session.key} className={styles.session}>
+                      <div>
+                        <strong>{session.label ?? 'Entrenamiento'}</strong>
+                        <span>{session.date}</span>
+                      </div>
+                      <div className={styles['session-meta']}>
+                        {session.durationMinutes !== null ? (
+                          <span>{session.durationMinutes} min</span>
+                        ) : null}
+                        <Badge domain="health" variant="outline">
+                          {session.completed === true
+                            ? 'completa'
+                            : session.completed === false
+                              ? 'incompleta'
+                              : 'sin estado'}
+                        </Badge>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </details>
+            ) : null}
           </div>
         )}
       </Card>
 
+      <MonthlyReviewCard domain="gym" compact />
       <WarningCard data={data} />
     </div>
   );

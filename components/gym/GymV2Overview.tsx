@@ -232,7 +232,18 @@ export function GymV2Overview({
       </Card>
 
       {benchmark.status === 'ready' ? (
-        <Card aria-labelledby="gym-v2-benchmark-title">
+        <details className={styles['benchmark-disclosure']}>
+          <summary>
+            <span>
+              <strong>Referencia externa</strong>
+              <small>
+                {benchmark.label} · {benchmark.confidenceLabel}
+              </small>
+            </span>
+            <span>Ver benchmark</span>
+          </summary>
+          <div className={styles['benchmark-content']}>
+            <Card aria-labelledby="gym-v2-benchmark-title">
           <SectionHeader
             id="gym-v2-benchmark-title"
             title="Tu rango de fuerza"
@@ -421,7 +432,9 @@ export function GymV2Overview({
               personal.
             </p>
           </div>
-        </Card>
+            </Card>
+          </div>
+        </details>
       ) : (
         <aside className={styles['benchmark-strip']}>
           <Gauge size={19} aria-hidden="true" />

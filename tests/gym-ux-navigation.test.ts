@@ -67,3 +67,26 @@ test('Gym Cardio prioriza el plan real antes de la equivalencia MET-min', () => 
   assert.ok(equivalentIndex >= 0);
   assert.ok(planIndex < equivalentIndex);
 });
+
+
+test('Gym jerarquiza detalle secundario mediante progressive disclosure', () => {
+  const dashboard = source('components/gym/GymDashboard.tsx');
+  const routine = source('components/gym/GymRoutineTabs.tsx');
+  const progress = source('components/gym/GymV2Overview.tsx');
+
+  assert.match(dashboard, /Contexto de Salud y agenda/);
+  assert.doesNotMatch(dashboard, /Actividad reciente:/);
+  assert.match(routine, /Movilidad, recuperación y complementos/);
+  assert.match(progress, /Referencia externa/);
+  assert.match(progress, /benchmark-disclosure/);
+});
+
+test('Gym mantiene revisión mensual e historial como acciones secundarias', () => {
+  const dashboard = source('components/gym/GymDashboard.tsx');
+  const review = source('components/domain/MonthlyReviewCard.tsx');
+
+  assert.match(dashboard, /slice\(0, 6\)/);
+  assert.match(dashboard, /Ver sesiones anteriores/);
+  assert.match(dashboard, /MonthlyReviewCard domain="gym" compact/);
+  assert.match(review, /compact\?: boolean/);
+});
