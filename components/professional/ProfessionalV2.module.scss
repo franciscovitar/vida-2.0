@@ -1061,3 +1061,244 @@
     border-top-width: 2px;
   }
 }
+
+.library {
+  display: grid;
+  gap: 1.15rem;
+  min-width: 0;
+}
+
+.library-hero {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1.45rem 0 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.library-hero h2,
+.library-heading h3,
+.library-article h4,
+.library-row-head h4 {
+  margin: 0;
+  color: var(--text);
+}
+
+.library-hero h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 4.8vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+.library-hero > p:not(.eyebrow) {
+  max-width: 70ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.62;
+}
+
+.library-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  color: var(--text-subtle);
+  font-size: 0.69rem;
+}
+
+.library-section {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.5rem 0 0.35rem;
+}
+
+.library-heading {
+  display: grid;
+  gap: 0.18rem;
+  max-width: 70ch;
+}
+
+.library-heading h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.35rem, 2.8vw, 1.8rem);
+  line-height: 1.15;
+}
+
+.library-heading > p:not(.eyebrow) {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.58;
+}
+
+.library-article-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--border);
+}
+
+.library-article {
+  display: grid;
+  gap: 0.42rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.library-article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.8rem;
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.library-article h4,
+.library-row-head h4 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.05rem;
+  line-height: 1.28;
+}
+
+.library-article p,
+.library-tech-entry > p {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.58;
+}
+
+.library-article a,
+.library-details-body a {
+  width: fit-content;
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.library-article a:hover,
+.library-details-body a:hover {
+  text-decoration: underline;
+}
+
+.library-tech-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.library-tech-entry {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.95rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.library-row-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.3rem 0.8rem;
+}
+
+.library-row-head > span {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+}
+
+.library-details {
+  border-top: 1px solid var(--border);
+}
+
+.library-details > summary,
+.library-all > summary,
+.library-category > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.library-details > summary {
+  width: fit-content;
+  padding-top: 0.55rem;
+}
+
+.library-details-body {
+  display: grid;
+  gap: 0.38rem;
+  padding-top: 0.55rem;
+}
+
+.library-details-body p {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.library-details-body strong {
+  color: var(--text);
+}
+
+.library-details-body a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.library-all {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.library-all > summary {
+  padding: 0.8rem 0;
+}
+
+.library-category-list {
+  display: grid;
+  padding-bottom: 0.8rem;
+}
+
+.library-category {
+  border-top: 1px solid var(--border);
+}
+
+.library-category > summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.7rem 0;
+}
+
+.library-category > summary span:last-child {
+  color: var(--text-subtle);
+  font-size: 0.65rem;
+}
+
+.library-category .library-tech-grid {
+  padding-bottom: 0.7rem;
+}
+
+.library-provenance {
+  padding: 0.15rem 0;
+  color: var(--text-subtle);
+  font-size: 0.67rem;
+}
+
+.library-provenance code {
+  font-size: inherit;
+}
+
+@media (width >= 760px) {
+  .library-tech-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.4rem;
+  }
+}

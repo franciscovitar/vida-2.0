@@ -331,8 +331,14 @@ test('PI-V7. Terminados y cancelados quedan separados además del historial comp
   const cancelled = project({ id: 'proj-cancelled', status: 'Cancelado' });
   const view = buildProjectsIntelligenceView(dataFixture([done, cancelled]));
 
-  assert.deepEqual(view.completed.map((card) => card.id), ['proj-done']);
-  assert.deepEqual(view.cancelled.map((card) => card.id), ['proj-cancelled']);
+  assert.deepEqual(
+    view.completed.map((card) => card.id),
+    ['proj-done'],
+  );
+  assert.deepEqual(
+    view.cancelled.map((card) => card.id),
+    ['proj-cancelled'],
+  );
   assert.deepEqual(view.history.map((card) => card.id).sort(), ['proj-cancelled', 'proj-done']);
   assert.equal(view.focus.length, 0);
   assert.equal(view.waiting.length, 0);
@@ -364,7 +370,10 @@ test('PI-V8. Calidad del portfolio: conteos explícitos y mensaje calmo cuando t
 
 test('PI-V9. Evitar por ahora solo incluye recomendaciones persistidas Esperar/Cancelar propuesto', () => {
   const wait = project({ id: 'proj-wait', piRecommendation: 'Esperar' });
-  const cancelProposed = project({ id: 'proj-cancel', piRecommendation: 'Cancelar propuesto' });
+  const cancelProposed = project({
+    id: 'proj-cancel',
+    piRecommendation: 'Cancelar propuesto',
+  });
   const keepActive = project({ id: 'proj-keep', piRecommendation: 'Mantener activo' });
   const view = buildProjectsIntelligenceView(dataFixture([wait, cancelProposed, keepActive]));
 

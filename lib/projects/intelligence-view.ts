@@ -279,14 +279,11 @@ export function buildProjectsIntelligenceView(
     focus: cards.filter((card) => card.status === 'Activo'),
     upcoming: cards.filter(
       (card) =>
-        card.status === 'En espera' &&
-        card.progress.measurable &&
-        card.progress.percent === 0,
+        card.status === 'En espera' && card.progress.measurable && card.progress.percent === 0,
     ),
     waiting: cards.filter(
       (card) =>
-        card.status === 'En espera' &&
-        !(card.progress.measurable && card.progress.percent === 0),
+        card.status === 'En espera' && !(card.progress.measurable && card.progress.percent === 0),
     ),
     blocked: cards.filter((card) => card.status === 'Bloqueado'),
     completed: cards.filter((card) => card.status === 'Completado'),
