@@ -28,6 +28,7 @@ export default async function ProfessionalMarketPage() {
       <ProfessionalMarket
         professional={data.professional}
         careerResilience={data.careerResilience}
+        marketDetail={data.marketDetail}
       />
     </div>
   );

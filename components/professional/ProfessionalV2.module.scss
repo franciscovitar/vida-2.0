@@ -1302,3 +1302,165 @@
     column-gap: 1.4rem;
   }
 }
+
+.panorama-story-head,
+.panorama-move-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 0.8rem;
+}
+
+.decision-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.18rem 0.42rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+}
+
+.task-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.7rem;
+  padding-bottom: 0.2rem;
+}
+
+.task-selector a {
+  padding: 0.42rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.task-selector a[aria-current='page'] {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.comparison-status {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-status > div {
+  display: grid;
+  gap: 0.14rem;
+}
+
+.comparison-status strong {
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.comparison-status span {
+  max-width: 72ch;
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  line-height: 1.5;
+}
+
+.limit-block small {
+  color: var(--text-subtle);
+  font-size: 0.64rem;
+  line-height: 1.45;
+}
+
+.market-role-fit-grid,
+.market-skill-grid,
+.market-seniority-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.market-role-fit,
+.market-skill,
+.market-seniority-grid > article {
+  display: grid;
+  gap: 0.42rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.market-role-fit > p,
+.market-skill > p,
+.market-seniority-grid p {
+  max-width: 70ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.56;
+}
+
+.market-role-fit h4,
+.market-skill h4,
+.market-seniority-grid h4 {
+  margin: 0;
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.market-skill a,
+.market-seniority-grid a {
+  width: fit-content;
+  color: var(--text);
+  font-size: 0.69rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.market-skill a:hover,
+.market-seniority-grid a:hover {
+  text-decoration: underline;
+}
+
+.market-seniority-levels {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.market-seniority-levels > div {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 0.6rem;
+  padding: 0.38rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.market-seniority-levels dt {
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.market-seniority-levels dd {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+@media (width >= 760px) {
+  .market-role-fit-grid,
+  .market-skill-grid,
+  .market-seniority-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.4rem;
+  }
+}
