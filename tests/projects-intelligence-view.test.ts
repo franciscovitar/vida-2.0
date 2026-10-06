@@ -331,87 +331,81 @@ test('PI-V7. Terminados y cancelados quedan separados además del historial comp
   const cancelled = project({ id: 'proj-cancelled', status: 'Cancelado' });
   const view = buildProjectsIntelligenceView(dataFixture([done, cancelled]));
 
-  assert.deepEqual(view.completed.map((card) => card.id), ['proj-done']);
-  assert.deepEqual(view.cancelled.map((card) => card.id), ['proj-cancelled']);
+  assert.deepEqual(
+    view.completed.map((card) => card.id),
+    ['proj-done'],
+  );
+  assert.deepEqual(
+    view.cancelled.map((card) => card.id),
+    ['proj-cancelled'],
+  );
   assert.deepEqual(view.history.map((card) => card.id).sort(), ['proj-cancelled', 'proj-done']);
   assert.equal(view.focus.length, 0);
   assert.equal(view.waiting.length, 0);
 });
 
-test(
-  'PI-V8. Calidad del portfolio: conteos explícitos y mensaje calmo cuando todo está en cero',
-  () => {
-    const withIssues = dataFixture([project()], {
-      quality: {
-        missingDefinitionOfDone: 2,
-        missingNextAction: 1,
-        blocked: 0,
-        staleReview: 3,
-        stalePiSnapshot: 1,
-        invalidMilestones: 0,
-        multipleNextActionCandidates: 1,
-      },
-    });
-    const view = buildProjectsIntelligenceView(withIssues);
-    assert.equal(view.qualityAllClear, false);
-    const rowsByKey = Object.fromEntries(view.qualityRows.map((row) => [row.key, row.count]));
-    assert.equal(rowsByKey.missingDefinitionOfDone, 2);
-    assert.equal(rowsByKey.staleReview, 3);
-    // El conteo de bloqueados no se repite en la sección de calidad.
-    assert.ok(!('blocked' in rowsByKey));
+test('PI-V8. Calidad del portfolio: conteos explícitos y mensaje calmo cuando todo está en cero', () => {
+  const withIssues = dataFixture([project()], {
+    quality: {
+      missingDefinitionOfDone: 2,
+      missingNextAction: 1,
+      blocked: 0,
+      staleReview: 3,
+      stalePiSnapshot: 1,
+      invalidMilestones: 0,
+      multipleNextActionCandidates: 1,
+    },
+  });
+  const view = buildProjectsIntelligenceView(withIssues);
+  assert.equal(view.qualityAllClear, false);
+  const rowsByKey = Object.fromEntries(view.qualityRows.map((row) => [row.key, row.count]));
+  assert.equal(rowsByKey.missingDefinitionOfDone, 2);
+  assert.equal(rowsByKey.staleReview, 3);
+  // El conteo de bloqueados no se repite en la sección de calidad.
+  assert.ok(!('blocked' in rowsByKey));
 
-    const clean = buildProjectsIntelligenceView(dataFixture([project()]));
-    assert.equal(clean.qualityAllClear, true);
-  },
-);
+  const clean = buildProjectsIntelligenceView(dataFixture([project()]));
+  assert.equal(clean.qualityAllClear, true);
+});
 
-test(
-  'PI-V9. Evitar por ahora solo incluye recomendaciones persistidas Esperar/Cancelar propuesto',
-  () => {
-    const wait = project({ id: 'proj-wait', piRecommendation: 'Esperar' });
-    const cancelProposed = project({
-      id: 'proj-cancel',
-      piRecommendation: 'Cancelar propuesto',
-    });
-    const keepActive = project({ id: 'proj-keep', piRecommendation: 'Mantener activo' });
-    const view = buildProjectsIntelligenceView(dataFixture([wait, cancelProposed, keepActive]));
+test('PI-V9. Evitar por ahora solo incluye recomendaciones persistidas Esperar/Cancelar propuesto', () => {
+  const wait = project({ id: 'proj-wait', piRecommendation: 'Esperar' });
+  const cancelProposed = project({
+    id: 'proj-cancel',
+    piRecommendation: 'Cancelar propuesto',
+  });
+  const keepActive = project({ id: 'proj-keep', piRecommendation: 'Mantener activo' });
+  const view = buildProjectsIntelligenceView(dataFixture([wait, cancelProposed, keepActive]));
 
-    assert.deepEqual(view.avoidForNow.map((card) => card.id).sort(), [
-      'proj-cancel',
-      'proj-wait',
-    ]);
-  },
-);
+  assert.deepEqual(view.avoidForNow.map((card) => card.id).sort(), ['proj-cancel', 'proj-wait']);
+});
 
-test(
-  'PI-V10. Hitos: orden ascendente solo si todos declaran `order`, si no orden de origen',
-  () => {
-    const partialOrder = [
-      milestone({ id: 'm1', name: 'Primero en origen', order: null }),
-      milestone({ id: 'm2', name: 'Segundo en origen', order: 1 }),
-    ];
-    const fullOrder = [
-      milestone({ id: 'm3', name: 'Va segundo', order: 2 }),
-      milestone({ id: 'm4', name: 'Va primero', order: 1 }),
-    ];
+test('PI-V10. Hitos: orden ascendente solo si todos declaran `order`, si no orden de origen', () => {
+  const partialOrder = [
+    milestone({ id: 'm1', name: 'Primero en origen', order: null }),
+    milestone({ id: 'm2', name: 'Segundo en origen', order: 1 }),
+  ];
+  const fullOrder = [
+    milestone({ id: 'm3', name: 'Va segundo', order: 2 }),
+    milestone({ id: 'm4', name: 'Va primero', order: 1 }),
+  ];
 
-    const withPartial = project({ id: 'proj-partial', milestones: partialOrder });
-    const withFull = project({ id: 'proj-full', milestones: fullOrder });
-    const view = buildProjectsIntelligenceView(dataFixture([withPartial, withFull]));
+  const withPartial = project({ id: 'proj-partial', milestones: partialOrder });
+  const withFull = project({ id: 'proj-full', milestones: fullOrder });
+  const view = buildProjectsIntelligenceView(dataFixture([withPartial, withFull]));
 
-    const partialCard = view.focus.find((card) => card.id === 'proj-partial');
-    assert.deepEqual(
-      partialCard?.milestones.map((m) => m.id),
-      ['m1', 'm2'],
-    );
+  const partialCard = view.focus.find((card) => card.id === 'proj-partial');
+  assert.deepEqual(
+    partialCard?.milestones.map((m) => m.id),
+    ['m1', 'm2'],
+  );
 
-    const fullCard = view.focus.find((card) => card.id === 'proj-full');
-    assert.deepEqual(
-      fullCard?.milestones.map((m) => m.id),
-      ['m4', 'm3'],
-    );
-  },
-);
+  const fullCard = view.focus.find((card) => card.id === 'proj-full');
+  assert.deepEqual(
+    fullCard?.milestones.map((m) => m.id),
+    ['m4', 'm3'],
+  );
+});
 
 test('PI-V11. La card compacta prioriza Resultado esperado sin perder el DoD de detalle', () => {
   const card = buildProjectCardView(
