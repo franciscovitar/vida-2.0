@@ -43,9 +43,7 @@ export function sanitizeNutritionNutrientSummaryUniqueness<Row extends SummaryRo
   }
 
   const duplicateKeys = new Set(
-    [...counts.entries()]
-      .filter(([, count]) => count > 1)
-      .map(([key]) => key),
+    [...counts.entries()].filter(([, count]) => count > 1).map(([key]) => key),
   );
 
   let duplicateRowCount = 0;

@@ -95,7 +95,9 @@ export function buildNutritionRawDayFacts(
         .map((row) => stringValue(row.mealId))
         .filter((mealId): mealId is string => Boolean(mealId)),
     );
-    const mealsWithoutItems = [...mealIds].filter((mealId) => !representedMealIds.has(mealId)).length;
+    const mealsWithoutItems = [...mealIds].filter(
+      (mealId) => !representedMealIds.has(mealId),
+    ).length;
     const unknownContributionCount = invalidItems.length + mealsWithoutItems;
     const energy = summarizeNutritionRawDayEnergy(validItems, {
       additionalUnknownItemCount: unknownContributionCount,
@@ -160,7 +162,5 @@ export function reconcileNutritionHistoryWithRaw(
     });
   }
 
-  return [...byDate.values()]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(-maxDays);
+  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date)).slice(-maxDays);
 }

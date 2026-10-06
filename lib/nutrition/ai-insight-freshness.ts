@@ -48,10 +48,7 @@ function shiftDate(date: string, days: number): string | null {
   return parsed.toISOString().slice(0, 10);
 }
 
-function insightWindow(
-  row: EvidenceRow,
-  asOfDate: string,
-): { start: string; end: string } | null {
+function insightWindow(row: EvidenceRow, asOfDate: string): { start: string; end: string } | null {
   const end = stringValue(row.date) ?? asOfDate;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(end) || end > asOfDate) return null;
 
@@ -97,9 +94,7 @@ function relevantEvidenceRows(
   const foodNutrients = (evidence.foodNutrients ?? []).filter((row) =>
     dateInRange(row.date, start, end),
   );
-  const dailySummary = evidence.dailySummary.filter((row) =>
-    dateInRange(row.date, start, end),
-  );
+  const dailySummary = evidence.dailySummary.filter((row) => dateInRange(row.date, start, end));
   const nutrientSummary = evidence.nutrientSummary.filter((row) =>
     dateInRange(row.date, start, end),
   );

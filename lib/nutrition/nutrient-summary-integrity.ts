@@ -163,10 +163,10 @@ export function sanitizeNutritionNutrientSummaryIntegrity(
     for (const nutrient of candidates) {
       const foodItemId = stringValue(nutrient.foodItemId);
       const mealId = stringValue(nutrient.mealId);
-      const linkedItems = foodItemId ? itemsById.get(foodItemId) ?? [] : [];
+      const linkedItems = foodItemId ? (itemsById.get(foodItemId) ?? []) : [];
       const linkedItem = linkedItems.length === 1 ? linkedItems[0]! : null;
       const itemMealId = linkedItem ? stringValue(linkedItem.mealId) : null;
-      const linkedMeals = itemMealId ? mealsById.get(itemMealId) ?? [] : [];
+      const linkedMeals = itemMealId ? (mealsById.get(itemMealId) ?? []) : [];
       const linkedMeal = linkedMeals.length === 1 ? linkedMeals[0]! : null;
       const lowerCoverage = coverageValue(nutrient.coverage);
 
@@ -225,10 +225,7 @@ export function sanitizeNutritionNutrientSummaryIntegrity(
       return suppress();
     }
 
-    if (
-      sourceItemCount === activeItemIds.size &&
-      declaredUnquantifiedCount === 0
-    ) {
+    if (sourceItemCount === activeItemIds.size && declaredUnquantifiedCount === 0) {
       return row;
     }
 
