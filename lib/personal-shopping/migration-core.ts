@@ -98,9 +98,7 @@ export function buildLegacyPersonalShoppingMigrationPlan(input: {
   return { sourceCounts, toCreate, skippedSourceRefs };
 }
 
-export function assertLegacyPersonalShoppingSourceShape(
-  plan: PersonalShoppingMigrationPlan,
-): void {
+export function assertLegacyPersonalShoppingSourceShape(plan: PersonalShoppingMigrationPlan): void {
   if (
     plan.sourceCounts.BUY !== 12 ||
     plan.sourceCounts.REPLENISH !== 0 ||

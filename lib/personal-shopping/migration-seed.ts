@@ -59,7 +59,8 @@ export const LEGACY_PERSONAL_PURCHASE_SEED: readonly LegacyPersonalPurchaseSeed[
   },
   {
     sourceRef: source('research', 16),
-    title: 'Soporte o solución para elevar notebook/pantalla y evitar mirar constantemente hacia abajo.',
+    title:
+      'Soporte o solución para elevar notebook/pantalla y evitar mirar constantemente hacia abajo.',
     state: 'RESEARCH',
   },
   {

@@ -97,8 +97,9 @@ test('legacy Notion migration dry-run preserves expected 12 / 0 / 19 shape', () 
   assert.equal(plan.toCreate.length, 31);
   assert.equal(plan.skippedSourceRefs.length, 0);
   assert.equal(
-    plan.toCreate.find((entry) => entry.item.title.startsWith('Solución para neutralizar'))?.item
-      .notes?.includes('Spray neutralizador'),
+    plan.toCreate
+      .find((entry) => entry.item.title.startsWith('Solución para neutralizar'))
+      ?.item.notes?.includes('Spray neutralizador'),
     true,
   );
 });

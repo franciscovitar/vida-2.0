@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  GoogleSheetsPersonalShoppingRepository,
-} from '@/lib/personal-shopping/google-sheets-store';
+import { GoogleSheetsPersonalShoppingRepository } from '@/lib/personal-shopping/google-sheets-store';
 import { buildLegacyPersonalShoppingMigrationPlan } from '@/lib/personal-shopping/migration-core';
 import {
   hasPersonalShoppingHeaders,

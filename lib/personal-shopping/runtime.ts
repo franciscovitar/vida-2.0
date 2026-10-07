@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { GoogleSheetsPersonalShoppingRepository } from './google-sheets-store';
-import type { PersonalShoppingRepository } from './repository';
+import { PersonalShoppingService } from './service';
 import { resolvePersonalShoppingStoreConfig } from './sheets-config';
 
 export type PersonalShoppingRuntime =
@@ -9,7 +9,7 @@ export type PersonalShoppingRuntime =
   | { state: 'not-configured'; notice: string }
   | {
       state: 'ready';
-      repository: PersonalShoppingRepository;
+      service: PersonalShoppingService;
       writesEnabled: boolean;
     };
 
@@ -32,9 +32,10 @@ export function getPersonalShoppingRuntime(
     };
   }
 
+  const repository = new GoogleSheetsPersonalShoppingRepository(config);
   return {
     state: 'ready',
-    repository: new GoogleSheetsPersonalShoppingRepository(config),
+    service: new PersonalShoppingService(repository),
     writesEnabled: config.writesEnabled,
   };
 }
