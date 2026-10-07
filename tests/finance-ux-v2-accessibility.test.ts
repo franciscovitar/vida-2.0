@@ -95,12 +95,14 @@ test('FIN-UX-E8. el responsive evita columnas rígidas para importes largos en m
   assert.match(planStyles, /@media \(width <= 480px\)/);
 });
 
-
 test('FIN-UX-E9. Plan muestra una sola moneda operativa por vez y conserva selector explícito', () => {
   assert.match(planPage, /selectedCurrency/);
   assert.match(planPage, /selectedPlanning/);
   assert.match(planPage, /Planificar en/);
-  assert.match(planPage, /aria-current=\{selectedCurrency === item\.currency \? 'page' : undefined\}/);
+  assert.match(
+    planPage,
+    /aria-current=\{selectedCurrency === item\.currency \? 'page' : undefined\}/,
+  );
 });
 
 test('FIN-UX-E10. la planificación temporal se presenta como simulación, no como configuración persistente', () => {
@@ -123,7 +125,6 @@ test('FIN-UX-E12. Movimientos oculta jerga técnica del escaneo sin perderla del
   assert.match(movements, /Descripción de origen/);
   assert.equal(movementStyles.includes('text-transform: capitalize'), false);
 });
-
 
 test('FIN-UX-E13. Datos y fuentes explica el motivo de revisión donde aparece la alerta', () => {
   assert.match(dataPage, /Integridad del registro/);
