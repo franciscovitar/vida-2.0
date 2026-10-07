@@ -221,7 +221,7 @@ export class PersonalShoppingService {
       return { ok: true, code: 'idempotent', snapshot: await this.snapshot() };
     }
     if (!canTransitionPersonalPurchase(item.state, input.toState)) {
-      return { ok: false, code: 'invalid-input', message: 'Ese cambio de estado no está permitido.' };
+      return {\n        ok: false,\n        code: 'invalid-input',\n        message: 'Ese cambio de estado no está permitido.',\n      };
     }
 
     const mutation = buildPersonalPurchaseTransition({
@@ -234,7 +234,7 @@ export class PersonalShoppingService {
     return this.persist(mutation);
   }
 
-  private async persist(mutation: PersonalPurchaseMutation): Promise<PersonalShoppingMutationResult> {
+  private async persist(\n    mutation: PersonalPurchaseMutation,\n  ): Promise<PersonalShoppingMutationResult> {
     try {
       await this.repository.saveItemsWithEvents([mutation]);
       return { ok: true, code: 'applied', snapshot: await this.snapshot() };

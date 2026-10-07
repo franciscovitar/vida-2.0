@@ -202,7 +202,7 @@ function PersonalShoppingDetail({
         return;
       }
       onSnapshot(result.snapshot);
-      setNotice(result.code === 'idempotent' ? 'No había cambios para guardar.' : 'Detalles guardados.');
+      setNotice(\n        result.code === 'idempotent' ? 'No había cambios para guardar.' : 'Detalles guardados.',\n      );
     } catch {
       setNotice('No se pudo conectar con Compras. Probá de nuevo.');
     } finally {
@@ -365,7 +365,7 @@ function PersonalShoppingDetail({
       <div className={styles['lifecycle-section']}>
         <div>
           <span className={styles.eyebrow}>Lifecycle</span>
-          <strong>{item.state === 'PURCHASED' || item.state === 'DISCARDED' ? 'Restaurar' : 'Decidir'}</strong>
+          <strong>\n            {item.state === 'PURCHASED' || item.state === 'DISCARDED' ? 'Restaurar' : 'Decidir'}\n          </strong>
         </div>
         <div className={styles['transition-actions']}>
           {TRANSITION_OPTIONS[item.state].map((option) => (
@@ -386,7 +386,7 @@ function PersonalShoppingDetail({
         {created ? <span>Creado: {created}</span> : null}
         {updated ? <span>Actualizado: {updated}</span> : null}
         {closed ? (
-          <span>{item.state === 'PURCHASED' ? 'Comprado' : 'Descartado'}: {closed}</span>
+          <span>\n            {item.state === 'PURCHASED' ? 'Comprado' : 'Descartado'}: {closed}\n          </span>
         ) : null}
       </div>
 
@@ -472,7 +472,7 @@ export function PersonalShoppingWorkspace({
     }
   }
 
-  function applyTransition(nextSnapshot: PersonalShoppingSnapshot, nextState: PersonalPurchaseState) {
+  function applyTransition(\n    nextSnapshot: PersonalShoppingSnapshot,\n    nextState: PersonalPurchaseState,\n  ) {
     setSnapshot(nextSnapshot);
     setOpenItemId(null);
     if (nextState === 'PURCHASED' || nextState === 'DISCARDED') {
