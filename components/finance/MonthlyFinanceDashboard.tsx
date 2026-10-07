@@ -1,7 +1,11 @@
-import { Pencil, Sparkles, WalletCards } from 'lucide-react';
+import Link from 'next/link';
+import { Sparkles, WalletCards } from 'lucide-react';
 
 import { Card } from '@/components/ui/Card';
-import type { FinanceMonthlyDashboard } from '@/lib/finance/monthly-dashboard-core';
+import type {
+  FinanceMonthlyDashboard,
+  FinanceMonthlyMovement,
+} from '@/lib/finance/monthly-dashboard-core';
 
 import styles from './MonthlyFinanceDashboard.module.scss';
 
@@ -14,11 +18,15 @@ function formatMinor(value: number, currency: string): string {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: currency === 'ARS' ? 0 : 2,
+      maximumFractionDigits: currency === 'ARS' ? 0 : 2,
     }).format(value / 100);
   } catch {
-    return `${currency} ${Math.round(value / 100).toLocaleString('es-AR')}`;
+    const digits = currency === 'ARS' ? 0 : 2;
+    return `${currency} ${(value / 100).toLocaleString('es-AR', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    })}`;
   }
 }
 
@@ -40,6 +48,16 @@ function monthLabel(month: string): string {
   }).format(new Date(Date.UTC(year, monthNumber - 1, 1)));
 }
 
+function movementDateLabel(occurredAt: string): string {
+  const parsed = new Date(occurredAt);
+  if (!Number.isFinite(parsed.getTime())) return occurredAt.slice(0, 10);
+  return new Intl.DateTimeFormat('es-AR', {
+    day: '2-digit',
+    month: 'short',
+    timeZone: 'America/Argentina/Cordoba',
+  }).format(parsed);
+}
+
 function snapshotDateLabel(asOf: string): string {
   const parsed = new Date(asOf);
   if (!Number.isFinite(parsed.getTime())) return asOf;
@@ -50,22 +68,20 @@ function snapshotDateLabel(asOf: string): string {
   }).format(parsed);
 }
 
-function cushionBaseCopy(model: FinanceMonthlyDashboard): string {
-  const cushion = model.liquidityCushion;
-  if (!cushion) return '';
-  const date = snapshotDateLabel(cushion.asOf);
-  const base = formatMinor(cushion.baseTotalMinor, model.currency);
-  return `Base informada el ${date}: ${base} · se actualiza con los movimientos posteriores`;
+function categoryLabel(category: string): string {
+  const normalized = category.replaceAll('_', ' ').replaceAll('/', ' / ').trim();
+  if (!normalized) return 'Movimiento';
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
 function paceCopy(model: FinanceMonthlyDashboard): string {
   if (!model.target) return 'Todavía no hay un objetivo de gasto para este mes.';
   if (model.pace === 'over-target') return 'Superaste el objetivo de gasto activo del mes.';
   if (model.pace === 'accelerated') {
-    return 'Ojo: venís gastando bastante más rápido de lo que avanzó el mes.';
+    return 'Venís gastando bastante más rápido de lo que avanzó el mes.';
   }
   if (model.pace === 'watch') return 'Vas un poco por encima del ritmo esperado para este punto.';
-  return 'Ritmo tranquilo por ahora.';
+  return 'El ritmo de gasto está alineado con este punto del mes.';
 }
 
 function paceLabel(model: FinanceMonthlyDashboard): string {
@@ -74,6 +90,11 @@ function paceLabel(model: FinanceMonthlyDashboard): string {
   if (model.pace === 'accelerated') return 'Ritmo alto';
   if (model.pace === 'watch') return 'Atención';
   return 'En ritmo';
+}
+
+function movementAmount(movement: FinanceMonthlyMovement): string {
+  const value = formatMinor(movement.amountMinor, movement.currency);
+  return movement.direction === 'income' ? `+${value}` : `-${value}`;
 }
 
 export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps) {
@@ -86,87 +107,32 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
     target.suggestedTargetMinor !== target.activeTargetMinor;
 
   return (
-    <Card className={styles.dashboard} aria-labelledby="finance-month-now-title">
+    <section className={styles.dashboard} aria-labelledby="finance-month-now-title">
       <div className={styles.header}>
         <div>
           <p className={styles.eyebrow}>Este mes</p>
-          <h2 id="finance-month-now-title">{monthLabel(model.month)} · tu mes</h2>
-          <p>Lo que registrás en Finance Logger aparece acá como tablero visual.</p>
+          <h2 id="finance-month-now-title">{monthLabel(model.month)}</h2>
+          <p>Tu situación actual, con lo que registraste hasta hoy.</p>
         </div>
-        <span className={styles.sync}>Finance Logger · sincronizado</span>
+        <span className={styles.capture}>
+          {model.activeCaptureCount} {model.activeCaptureCount === 1 ? 'registro activo' : 'registros activos'}
+        </span>
       </div>
-
-      <div className={styles.metrics}>
-        <div>
-          <span>Ingresos</span>
-          <strong data-tone="positive">{formatMinor(model.incomeMinor, model.currency)}</strong>
-        </div>
-        <div>
-          <span>Gastos</span>
-          <strong data-tone="negative">{formatMinor(model.expenseMinor, model.currency)}</strong>
-        </div>
-        <div>
-          <span>Balance</span>
-          <strong data-tone={model.balanceMinor >= 0 ? 'positive' : 'negative'}>
-            {formatMinor(model.balanceMinor, model.currency)}
-          </strong>
-        </div>
-        <div>
-          <span>Objetivo de gasto</span>
-          <strong>
-            {target ? formatMinor(target.activeTargetMinor, model.currency) : 'Pendiente'}
-          </strong>
-          <small>
-            <Pencil size={12} aria-hidden="true" />
-            editable desde Finance Logger
-          </small>
-        </div>
-      </div>
-
-      {model.liquidityCushion ? (
-        <div className={styles.cushion}>
-          <div className={styles['cushion-top']}>
-            <span className={styles['cushion-icon']} aria-hidden="true">
-              <WalletCards size={18} />
-            </span>
-            <div className={styles['cushion-summary']}>
-              <span>Colchón líquido actual</span>
-              <strong>{formatMinor(model.liquidityCushion.totalMinor, model.currency)}</strong>
-              <small>{cushionBaseCopy(model)}</small>
-            </div>
-          </div>
-
-          <div className={styles['cushion-sources']}>
-            {model.liquidityCushion.sources.map((source) => (
-              <div key={source.key} className={styles['cushion-source']}>
-                <span>{source.label}</span>
-                <strong>{formatMinor(source.amountMinor, model.currency)}</strong>
-              </div>
-            ))}
-          </div>
-
-          <div className={styles['cushion-opening']}>
-            <span>Movimientos posteriores a la base</span>
-            <strong>
-              {formatMinor(model.liquidityCushion.movementDeltaMinor, model.currency)}
-            </strong>
-          </div>
-        </div>
-      ) : null}
 
       {target ? (
-        <div className={styles.goal}>
-          <div className={styles['goal-row']}>
+        <Card className={styles.target}>
+          <div className={styles['target-top']}>
             <div>
-              <strong>
-                Gastaste {formatMinor(model.expenseMinor, model.currency)} de{' '}
-                {formatMinor(target.activeTargetMinor, model.currency)}
-              </strong>
-              <span>
-                {formatPercent(model.targetUsedRatio)} usado ·{' '}
+              <span className={styles['target-label']}>Margen del objetivo</span>
+              <strong className={styles['target-value']}>
                 {model.remainingTargetMinor !== null
-                  ? `${formatMinor(model.remainingTargetMinor, model.currency)} dentro del objetivo`
-                  : 'sin saldo objetivo'}
+                  ? `${formatMinor(model.remainingTargetMinor, model.currency)} restantes`
+                  : 'Sin dato'}
+              </strong>
+              <span className={styles['target-copy']}>
+                Gastaste {formatMinor(model.expenseMinor, model.currency)} de{' '}
+                {formatMinor(target.activeTargetMinor, model.currency)} ·{' '}
+                {formatPercent(model.targetUsedRatio)} usado
               </span>
             </div>
             <span className={styles.pace} data-pace={model.pace}>
@@ -189,27 +155,126 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
               aria-hidden="true"
             />
           </div>
+
           <div className={styles['track-caption']}>
             <span>{paceCopy(model)}</span>
-            <span>Marca vertical = avance del mes ({formatPercent(model.monthElapsedRatio)})</span>
+            <span>Marca vertical: avance del mes ({formatPercent(model.monthElapsedRatio)})</span>
           </div>
+        </Card>
+      ) : (
+        <Card className={styles.target}>
+          <span className={styles['target-label']}>Objetivo mensual</span>
+          <strong className={styles['target-value']}>Todavía no está definido</strong>
+          <span className={styles['target-copy']}>
+            Finance Logger puede registrar un objetivo cuando quieras usar ritmo mensual.
+          </span>
+        </Card>
+      )}
+
+      <div className={styles.metrics} aria-label="Resumen del mes">
+        <div>
+          <span>Ingresos</span>
+          <strong data-tone="positive">{formatMinor(model.incomeMinor, model.currency)}</strong>
         </div>
-      ) : null}
+        <div>
+          <span>Gastos</span>
+          <strong data-tone="negative">{formatMinor(model.expenseMinor, model.currency)}</strong>
+        </div>
+        <div>
+          <span>Balance</span>
+          <strong data-tone={model.balanceMinor >= 0 ? 'positive' : 'negative'}>
+            {model.balanceMinor >= 0 ? '+' : ''}
+            {formatMinor(model.balanceMinor, model.currency)}
+          </strong>
+        </div>
+      </div>
+
+      <div className={styles.supporting}>
+        {model.liquidityCushion ? (
+          <Card className={styles.liquidity} aria-labelledby="finance-liquidity-title">
+            <div className={styles['section-heading']}>
+              <span className={styles.icon} aria-hidden="true">
+                <WalletCards size={17} />
+              </span>
+              <div>
+                <span>Liquidez actual</span>
+                <strong id="finance-liquidity-title">
+                  {formatMinor(model.liquidityCushion.totalMinor, model.currency)}
+                </strong>
+              </div>
+            </div>
+
+            <div className={styles['liquidity-sources']}>
+              {model.liquidityCushion.sources.map((source) => (
+                <div key={source.key}>
+                  <span>{source.label}</span>
+                  <strong>{formatMinor(source.amountMinor, model.currency)}</strong>
+                </div>
+              ))}
+            </div>
+
+            <details className={styles.explain}>
+              <summary>Cómo se calcula</summary>
+              <p>
+                Base informada el {snapshotDateLabel(model.liquidityCushion.asOf)}:{' '}
+                {formatMinor(model.liquidityCushion.baseTotalMinor, model.currency)}. Movimientos
+                posteriores:{' '}
+                {formatMinor(model.liquidityCushion.movementDeltaMinor, model.currency)}.
+              </p>
+            </details>
+          </Card>
+        ) : null}
+
+        <Card className={styles.insight} aria-labelledby="finance-look-title">
+          <div className={styles['section-heading']}>
+            <span className={styles.icon} aria-hidden="true">
+              <Sparkles size={17} />
+            </span>
+            <div>
+              <span>Para mirar</span>
+              <strong id="finance-look-title">{paceLabel(model)}</strong>
+            </div>
+          </div>
+
+          {hasPendingSuggestion && target?.suggestedTargetMinor !== null ? (
+            <>
+              <p>
+                Finance Logger sugiere revisar el objetivo a{' '}
+                <strong>{formatMinor(target.suggestedTargetMinor, model.currency)}</strong>.
+              </p>
+              <small>{target.suggestionReason || 'El contexto del mes cambió materialmente.'}</small>
+              <span className={styles.notice}>
+                No se aplica solo: el objetivo actual sigue siendo{' '}
+                {formatMinor(target.activeTargetMinor, model.currency)}.
+              </span>
+            </>
+          ) : (
+            <>
+              <p>{paceCopy(model)}</p>
+              <small>
+                El objetivo puede revisarse si cambian de forma material tus ingresos reales o el
+                ritmo de gasto.
+              </small>
+            </>
+          )}
+        </Card>
+      </div>
 
       <div className={styles.lower}>
-        <div className={styles.categories}>
-          <div className={styles['section-title']}>
-            <strong>En qué se está yendo</strong>
-            <span>{model.activeCaptureCount} registros activos</span>
+        <Card className={styles.categories} aria-labelledby="finance-categories-title">
+          <div className={styles['list-heading']}>
+            <strong id="finance-categories-title">En qué se está yendo</strong>
+            <Link href="/finanzas/analisis">Ver análisis →</Link>
           </div>
+
           {model.categories.length > 0 ? (
             model.categories.slice(0, 5).map((item) => (
               <div key={item.category} className={styles.category}>
                 <div className={styles['category-row']}>
-                  <span>{item.category}</span>
+                  <span>{categoryLabel(item.category)}</span>
                   <strong>{formatMinor(item.amountMinor, model.currency)}</strong>
                 </div>
-                <div className={styles['category-track']}>
+                <div className={styles['category-track']} aria-hidden="true">
                   <span style={{ width: `${Math.max(4, item.share * 100)}%` }} />
                 </div>
               </div>
@@ -217,39 +282,34 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
           ) : (
             <p className={styles.empty}>Todavía no registraste gastos este mes.</p>
           )}
-        </div>
+        </Card>
 
-        <div className={styles.intelligence}>
-          <div className={styles['section-title']}>
-            <strong>Inteligencia del mes</strong>
-            <Sparkles size={15} aria-hidden="true" />
+        <Card className={styles.movements} aria-labelledby="finance-recent-title">
+          <div className={styles['list-heading']}>
+            <strong id="finance-recent-title">Últimos registros</strong>
+            <Link href="/finanzas/movimientos">Ver todos →</Link>
           </div>
-          {hasPendingSuggestion && target?.suggestedTargetMinor !== null ? (
-            <>
-              <p>
-                ChatGPT sugiere mover el objetivo a{' '}
-                <strong>{formatMinor(target.suggestedTargetMinor, model.currency)}</strong>.
-              </p>
-              <small>{target.suggestionReason || 'Ajuste sugerido por el contexto del mes.'}</small>
-              <span className={styles.notice}>
-                No se aplica solo: el objetivo actual sigue siendo{' '}
-                {formatMinor(target.activeTargetMinor, model.currency)} hasta que lo aceptes.
-              </span>
-            </>
+
+          {model.recentMovements.length > 0 ? (
+            <div className={styles['movement-list']}>
+              {model.recentMovements.map((movement) => (
+                <div className={styles.movement} key={movement.id}>
+                  <time dateTime={movement.occurredAt}>{movementDateLabel(movement.occurredAt)}</time>
+                  <div>
+                    <strong>{categoryLabel(movement.category)}</strong>
+                    <span>{movement.liquiditySourceLabel}</span>
+                  </div>
+                  <strong data-tone={movement.direction}>
+                    {movementAmount(movement)}
+                  </strong>
+                </div>
+              ))}
+            </div>
           ) : (
-            <>
-              <p>{paceCopy(model)}</p>
-              <small>
-                Finance Logger puede sugerir subir o bajar el objetivo si cambian materialmente tus
-                ingresos reales o el ritmo de gasto.
-              </small>
-              <span className={styles.notice}>
-                Una entrada grande no aumenta el objetivo peso por peso.
-              </span>
-            </>
+            <p className={styles.empty}>Todavía no hay registros activos este mes.</p>
           )}
-        </div>
+        </Card>
       </div>
-    </Card>
+    </section>
   );
 }
