@@ -56,7 +56,10 @@ export async function GET() {
 export async function POST(request: Request) {
   const access = await verifySession();
   if (!access.ok) {
-    return NextResponse.json({ ok: false, error: access.reason }, { status: authStatus(access.reason) });
+    return NextResponse.json(
+      { ok: false, error: access.reason },
+      { status: authStatus(access.reason) },
+    );
   }
 
   const shopping = getPersonalShoppingRuntime();
