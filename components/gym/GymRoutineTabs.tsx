@@ -69,7 +69,7 @@ function latestComparableSession(input: {
     input.sessions
       .filter(
         (session) =>
-          session.date <= input.today &&
+          session.date < input.today &&
           completed.has(session.key) &&
           dayKind(session.dayLabel) === targetKind,
       )
@@ -278,7 +278,7 @@ export function GymRoutineTabs({
                     <span>Última sesión comparable</span>
                     <strong>{previousSession.date}</strong>
                     <small>
-                      Anterior: lo que hiciste realmente la última vez en este día, separado de la
+                      Anterior: lo que hiciste realmente en la exposición previa a este día, separado de la
                       prescripción fija.
                     </small>
                   </div>
