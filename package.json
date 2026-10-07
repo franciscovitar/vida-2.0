@@ -23,9 +23,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "node -e \"console.log('targeted Personal Shopping prettier diagnostic')\"",
+    "test": "node --import tsx --test \"tests/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
-    "verify": "prettier --write \"lib/personal-shopping/**/*.ts\" \"components/personal-shopping/**/*.{ts,tsx,scss}\" \"app/(app)/compras/page.tsx\" \"app/api/personal-shopping/route.ts\" \"tests/personal-shopping-*.test.ts\" && git diff -- lib/personal-shopping components/personal-shopping \"app/(app)/compras/page.tsx\" app/api/personal-shopping tests && exit 1",
+    "verify": "npm run check && npm run build",
     "preview:check": "tsx scripts/preview-preflight.ts",
     "qa:block1": "tsx scripts/block-1-final-qa.ts"
   },
