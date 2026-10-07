@@ -39,7 +39,16 @@ const DOMAINS: readonly DailyOrientationDomain[] = [
   'personal',
   'other',
 ];
-const ATTENTION_DOMAINS = DOMAINS.filter((domain) => domain !== 'nutrition');
+const ATTENTION_DOMAINS: readonly Exclude<DailyOrientationDomain, 'nutrition'>[] = [
+  'university',
+  'projects',
+  'professional',
+  'tasks',
+  'gym',
+  'health',
+  'personal',
+  'other',
+];
 const EVIDENCE_STATES: readonly DailyOrientationEvidenceState[] = [
   'VERIFIED',
   'SUPPORTED',
