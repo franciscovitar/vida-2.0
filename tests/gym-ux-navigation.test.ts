@@ -44,7 +44,7 @@ test('Gym Rutina acerca la última ejecución comparable al ejercicio prescripto
 
   assert.match(routine, /Última sesión comparable/);
   assert.match(routine, /Anterior/);
-  assert.match(routine, /completed === true/);
+  assert.match(routine, /completed === true/);\n  assert.match(routine, /session\\.date <= input\\.today/);
   assert.match(dashboard, /sessions=\{data\.sessions \?\? \[\]\}/);
   assert.match(dashboard, /summaries=\{data\.sessionSummaries\}/);
 });
