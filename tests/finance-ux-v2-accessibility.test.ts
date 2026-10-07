@@ -18,7 +18,9 @@ const movementStyles = source('components', 'finance', 'FinanceMovementsBrowser.
 const chart = source('components', 'finance', 'FinanceCashFlowChart.tsx');
 const analysisPage = source('app', '(app)', 'finanzas', 'analisis', 'page.tsx');
 const analysisStyles = source('app', '(app)', 'finanzas', 'analisis', 'page.module.scss');
+const planPage = source('app', '(app)', 'finanzas', 'plan', 'page.tsx');
 const planStyles = source('app', '(app)', 'finanzas', 'plan', 'page.module.scss');
+const planningDraft = source('components', 'finance', 'PlanningDraftSandbox.tsx');
 const dataPage = source('app', '(app)', 'finanzas', 'datos', 'page.tsx');
 const dataStyles = source('app', '(app)', 'finanzas', 'datos', 'page.module.scss');
 const irregularStyles = source('components', 'finance', 'IrregularIncomePlanner.module.scss');
@@ -91,4 +93,33 @@ test('FIN-UX-E8. el responsive evita columnas rígidas para importes largos en m
   assert.match(dashboardStyles, /@media \(width <= 420px\)/);
   assert.match(movementStyles, /@media \(width <= 420px\)/);
   assert.match(planStyles, /@media \(width <= 480px\)/);
+});
+
+
+test('FIN-UX-E9. Plan muestra una sola moneda operativa por vez y conserva selector explícito', () => {
+  assert.match(planPage, /selectedCurrency/);
+  assert.match(planPage, /selectedPlanning/);
+  assert.match(planPage, /Planificar en/);
+  assert.match(planPage, /aria-current=\{selectedCurrency === item\.currency \? 'page' : undefined\}/);
+});
+
+test('FIN-UX-E10. la planificación temporal se presenta como simulación, no como configuración persistente', () => {
+  assert.match(planPage, /Simular planificación/);
+  assert.match(planningDraft, /Simulación local/);
+  assert.match(planningDraft, />\s*Simular\s*</);
+  assert.match(planningDraft, /Esta simulación es temporal/);
+});
+
+test('FIN-UX-E11. Resumen diferencia saldo líquido registrado de liquidez elegible para Plan', () => {
+  assert.match(dashboard, /Saldo líquido registrado/);
+  assert.match(dashboard, /Para decisiones usá Plan/);
+  assert.match(dashboard, /elegibilidad y calidad de evidencia/);
+});
+
+test('FIN-UX-E12. Movimientos oculta jerga técnica del escaneo sin perderla del detalle', () => {
+  assert.match(movements, /function movementTitle/);
+  assert.match(movements, /economic_role/);
+  assert.match(movements, /movementTitle\(movement\)/);
+  assert.match(movements, /Descripción de origen/);
+  assert.equal(movementStyles.includes('text-transform: capitalize'), false);
 });
