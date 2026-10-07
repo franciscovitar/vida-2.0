@@ -178,8 +178,8 @@ function canonicalMovements(input: {
       .sort()
       .join('|');
 
-    const categoryKey =
-      owned.map((posting) => text(posting[5])).find(Boolean) || role || 'sin-categoria';
+    const explicitCategory = owned.map((posting) => text(posting[5])).find(Boolean) || '';
+    const categoryKey = explicitCategory || role || 'sin-categoria';
     const reviewState = text(row[5]);
     const description = text(row[2]) || roleLabel(role);
 
@@ -192,7 +192,7 @@ function canonicalMovements(input: {
       signedAmountMinor,
       kind,
       category: categoryKey,
-      categoryLabel: categoryLabel(categoryKey),
+      categoryLabel: explicitCategory ? categoryLabel(explicitCategory) : roleLabel(role),
       sourceKey,
       sourceLabel,
       origin: 'ledger',

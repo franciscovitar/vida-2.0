@@ -50,7 +50,19 @@ function monthLabel(month: string): string {
 }
 
 function dayKey(value: string): string {
-  return value.slice(0, 10);
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) return value.slice(0, 10);
+
+  const parts = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: 'America/Argentina/Cordoba',
+  }).formatToParts(parsed);
+  const year = parts.find((part) => part.type === 'year')?.value;
+  const month = parts.find((part) => part.type === 'month')?.value;
+  const day = parts.find((part) => part.type === 'day')?.value;
+  return year && month && day ? `${year}-${month}-${day}` : value.slice(0, 10);
 }
 
 function dayLabel(value: string): string {
