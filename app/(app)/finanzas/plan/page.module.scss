@@ -222,3 +222,49 @@
     text-align: left;
   }
 }
+
+.currency-selector {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.currency-selector > span {
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.currency-selector > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.currency-selector a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.48rem 0.72rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+}
+
+.currency-selector a:hover,
+.currency-selector a[aria-current='page'] {
+  color: var(--text);
+  border-color: var(--c-finance-border);
+  background: var(--c-finance-soft);
+}
+
+.currency-selector a:focus-visible {
+  outline: 2px solid var(--c-finance);
+  outline-offset: 2px;
+}
