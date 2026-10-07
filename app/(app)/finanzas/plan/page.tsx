@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { buildFinanceIrregularIncomeProfile } from '@/lib/finance/irregular-income-core';
 import { getFinancePlanningStoreSnapshot } from '@/lib/finance/planning-store';
+import type { FinancePlanningCurrencyModel } from '@/lib/finance/planning-store-core';
 import { getFinanceCashFlowSnapshot } from '@/lib/finance/reporting/cash-flow';
 import { getFinanceStoreReadinessSnapshot } from '@/lib/finance/store/readiness';
 
@@ -34,10 +35,182 @@ function formatMinor(value: number, currency: string): string {
   }
 }
 
-function qualityLabel(value: 'verified' | 'partial' | null): string {
+function qualityLabel(value: FinancePlanningCurrencyModel['liquidityQuality']): string {
   if (value === 'verified') return 'Saldo verificado';
   if (value === 'partial') return 'Cobertura parcial';
   return 'Sin saldo elegible';
+}
+
+function overviewCopy(item: FinancePlanningCurrencyModel): string {
+  if (item.status === 'invalid') {
+    return 'Hay datos de planificación que necesitan revisión.';
+  }
+  if (item.missing.includes('eligible-liquidity')) {
+    return 'Falta una base de liquidez elegible para calcular capacidad.';
+  }
+  if (item.missing.includes('reserve-policy')) {
+    return 'Falta definir una reserva explícita para habilitar Safe-to-Spend.';
+  }
+  return `${item.commitmentCount} compromiso(s) activos incluidos en el cálculo.`;
+}
+
+function CurrencyOverview({ item }: { item: FinancePlanningCurrencyModel }) {
+  const snapshot = item.snapshot;
+  const primaryValue = snapshot
+    ? snapshot.safeToSpend.safeToSpendMinor
+    : item.eligibleLiquidityMinor;
+
+  return (
+    <article className={styles.currency}>
+      <div className={styles['currency-heading']}>
+        <strong>{item.currency}</strong>
+        <span data-state={item.status}>{qualityLabel(item.liquidityQuality)}</span>
+      </div>
+
+      <div className={styles['currency-value']}>
+        <span>{snapshot ? 'Safe-to-Spend' : 'Liquidez elegible'}</span>
+        <strong>{formatMinor(primaryValue, item.currency)}</strong>
+      </div>
+
+      <p>{overviewCopy(item)}</p>
+    </article>
+  );
+}
+
+function PlanningCurrencySection({
+  item,
+  obligationHorizonDays,
+}: {
+  item: FinancePlanningCurrencyModel;
+  obligationHorizonDays: number;
+}) {
+  const snapshot = item.snapshot;
+
+  if (snapshot) {
+    return (
+      <Card
+        aria-labelledby={`finance-safe-to-spend-${item.currency}`}
+        key={`safe-${item.currency}`}
+      >
+        <SectionHeader
+          id={`finance-safe-to-spend-${item.currency}`}
+          title={`Safe-to-Spend · ${item.currency}`}
+          description="Disponible no comprometido después de restar reservas y compromisos explícitos."
+          icon={ShieldCheck}
+          domain="finance"
+        />
+
+        <div className={styles['safe-layout']}>
+          <div className={styles['safe-hero']}>
+            <span>Disponible no comprometido</span>
+            <strong>{formatMinor(snapshot.safeToSpend.safeToSpendMinor, snapshot.currency)}</strong>
+            <small>Es una lectura descriptiva de capacidad, no una recomendación de gastar.</small>
+          </div>
+
+          <dl className={styles.metrics}>
+            <div>
+              <dt>Liquidez elegible</dt>
+              <dd>
+                {formatMinor(snapshot.safeToSpend.eligibleLiquidityMinor, snapshot.currency)}
+              </dd>
+            </div>
+            <div>
+              <dt>Reserva protegida</dt>
+              <dd>− {formatMinor(snapshot.commitments.protectedReserveMinor, snapshot.currency)}</dd>
+            </div>
+            <div>
+              <dt>Obligaciones próximas</dt>
+              <dd>
+                − {formatMinor(snapshot.commitments.upcomingObligationsMinor, snapshot.currency)}
+              </dd>
+            </div>
+            <div>
+              <dt>Metas comprometidas</dt>
+              <dd>
+                − {formatMinor(snapshot.commitments.committedGoalFundingMinor, snapshot.currency)}
+              </dd>
+            </div>
+            <div>
+              <dt>Otros compromisos</dt>
+              <dd>
+                − {formatMinor(snapshot.commitments.otherCommitmentsMinor, snapshot.currency)}
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <details className={styles.disclosure}>
+          <summary>Cómo se calcula</summary>
+          <PlanningSubtractionTrace snapshot={snapshot} />
+        </details>
+      </Card>
+    );
+  }
+
+  if (item.status === 'invalid') {
+    return (
+      <Card
+        aria-labelledby={`finance-plan-review-${item.currency}`}
+        key={`review-${item.currency}`}
+      >
+        <SectionHeader
+          id={`finance-plan-review-${item.currency}`}
+          title={`Planificación · ${item.currency}`}
+          description="Hay información que debe revisarse antes de calcular Safe-to-Spend."
+          icon={ShieldCheck}
+          domain="finance"
+        />
+        <p className={styles.empty}>
+          No reemplazamos datos inválidos con supuestos. Revisá “Datos y fuentes” antes de usar esta
+          moneda para decisiones.
+        </p>
+      </Card>
+    );
+  }
+
+  const needsLiquidity = item.missing.includes('eligible-liquidity');
+  const missingTitle = item.missing.includes('reserve-policy')
+    ? 'Falta definir tu reserva'
+    : 'Falta liquidez elegible';
+  const missingCopy = needsLiquidity
+    ? 'Primero necesitamos una conciliación reciente y confiable de una cuenta personal inmediata.'
+    : 'Una reserva de cero también es válida, pero tiene que ser una decisión explícita.';
+
+  return (
+    <Card
+      aria-labelledby={`finance-plan-config-${item.currency}`}
+      key={`config-${item.currency}`}
+    >
+      <SectionHeader
+        id={`finance-plan-config-${item.currency}`}
+        title={`Safe-to-Spend · ${item.currency}`}
+        description="El cálculo permanece deshabilitado hasta que existan los datos mínimos explícitos."
+        icon={ShieldCheck}
+        domain="finance"
+      />
+
+      <div className={styles.missing}>
+        <div>
+          <span>{missingTitle}</span>
+          <strong>{formatMinor(item.eligibleLiquidityMinor, item.currency)}</strong>
+          <small>Liquidez elegible actual</small>
+        </div>
+        <p>{missingCopy}</p>
+      </div>
+
+      {!needsLiquidity && item.eligibleLiquidityMinor > 0 ? (
+        <details className={styles.disclosure}>
+          <summary>Configurar planificación</summary>
+          <PlanningDraftSandbox
+            currency={item.currency}
+            eligibleLiquidityMinor={item.eligibleLiquidityMinor}
+            obligationHorizonDays={obligationHorizonDays}
+            liquidityQuality={item.liquidityQuality}
+          />
+        </details>
+      ) : null}
+    </Card>
+  );
 }
 
 export default async function FinancePlanPage() {
@@ -77,42 +250,9 @@ export default async function FinancePlanPage() {
 
             {model.currencies.length > 0 ? (
               <div className={styles['currency-grid']}>
-                {model.currencies.map((item) => {
-                  const snapshot = item.snapshot;
-                  const needsReserve = item.missing.includes('reserve-policy');
-                  const needsLiquidity = item.missing.includes('eligible-liquidity');
-
-                  return (
-                    <article className={styles.currency} key={item.currency}>
-                      <div className={styles['currency-heading']}>
-                        <strong>{item.currency}</strong>
-                        <span data-state={item.status}>{qualityLabel(item.liquidityQuality)}</span>
-                      </div>
-
-                      <div className={styles['currency-value']}>
-                        <span>{snapshot ? 'Safe-to-Spend' : 'Liquidez elegible'}</span>
-                        <strong>
-                          {formatMinor(
-                            snapshot
-                              ? snapshot.safeToSpend.safeToSpendMinor
-                              : item.eligibleLiquidityMinor,
-                            item.currency,
-                          )}
-                        </strong>
-                      </div>
-
-                      <p>
-                        {item.status === 'invalid'
-                          ? 'Hay datos de planificación que necesitan revisión.'
-                          : needsLiquidity
-                            ? 'Falta una base de liquidez elegible para calcular capacidad.'
-                            : needsReserve
-                              ? 'Falta definir una reserva explícita para habilitar Safe-to-Spend.'
-                              : `${item.commitmentCount} compromiso(s) activos incluidos en el cálculo.`}
-                      </p>
-                    </article>
-                  );
-                })}
+                {model.currencies.map((item) => (
+                  <CurrencyOverview item={item} key={item.currency} />
+                ))}
               </div>
             ) : (
               <p className={styles.empty}>
@@ -121,154 +261,13 @@ export default async function FinancePlanPage() {
             )}
           </Card>
 
-          {model.currencies.map((item) => {
-            const snapshot = item.snapshot;
-            const needsReserve = item.missing.includes('reserve-policy');
-            const needsLiquidity = item.missing.includes('eligible-liquidity');
-
-            if (snapshot) {
-              return (
-                <Card
-                  aria-labelledby={`finance-safe-to-spend-${item.currency}`}
-                  key={`safe-${item.currency}`}
-                >
-                  <SectionHeader
-                    id={`finance-safe-to-spend-${item.currency}`}
-                    title={`Safe-to-Spend · ${item.currency}`}
-                    description="Disponible no comprometido después de restar reservas y compromisos explícitos."
-                    icon={ShieldCheck}
-                    domain="finance"
-                  />
-
-                  <div className={styles['safe-layout']}>
-                    <div className={styles['safe-hero']}>
-                      <span>Disponible no comprometido</span>
-                      <strong>
-                        {formatMinor(snapshot.safeToSpend.safeToSpendMinor, snapshot.currency)}
-                      </strong>
-                      <small>
-                        Es una lectura descriptiva de capacidad, no una recomendación de gastar.
-                      </small>
-                    </div>
-
-                    <dl className={styles.metrics}>
-                      <div>
-                        <dt>Liquidez elegible</dt>
-                        <dd>
-                          {formatMinor(
-                            snapshot.safeToSpend.eligibleLiquidityMinor,
-                            snapshot.currency,
-                          )}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Reserva protegida</dt>
-                        <dd>
-                          − {formatMinor(snapshot.commitments.protectedReserveMinor, snapshot.currency)}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Obligaciones próximas</dt>
-                        <dd>
-                          −{' '}
-                          {formatMinor(
-                            snapshot.commitments.upcomingObligationsMinor,
-                            snapshot.currency,
-                          )}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Metas comprometidas</dt>
-                        <dd>
-                          −{' '}
-                          {formatMinor(
-                            snapshot.commitments.committedGoalFundingMinor,
-                            snapshot.currency,
-                          )}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Otros compromisos</dt>
-                        <dd>
-                          −{' '}
-                          {formatMinor(
-                            snapshot.commitments.otherCommitmentsMinor,
-                            snapshot.currency,
-                          )}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <details className={styles.disclosure}>
-                    <summary>Cómo se calcula</summary>
-                    <PlanningSubtractionTrace snapshot={snapshot} />
-                  </details>
-                </Card>
-              );
-            }
-
-            if (item.status === 'invalid') {
-              return (
-                <Card
-                  aria-labelledby={`finance-plan-review-${item.currency}`}
-                  key={`review-${item.currency}`}
-                >
-                  <SectionHeader
-                    id={`finance-plan-review-${item.currency}`}
-                    title={`Planificación · ${item.currency}`}
-                    description="Hay información que debe revisarse antes de calcular Safe-to-Spend."
-                    icon={ShieldCheck}
-                    domain="finance"
-                  />
-                  <p className={styles.empty}>
-                    No reemplazamos datos inválidos con supuestos. Revisá “Datos y fuentes” antes de
-                    usar esta moneda para decisiones.
-                  </p>
-                </Card>
-              );
-            }
-
-            return (
-              <Card
-                aria-labelledby={`finance-plan-config-${item.currency}`}
-                key={`config-${item.currency}`}
-              >
-                <SectionHeader
-                  id={`finance-plan-config-${item.currency}`}
-                  title={`Safe-to-Spend · ${item.currency}`}
-                  description="El cálculo permanece deshabilitado hasta que existan los datos mínimos explícitos."
-                  icon={ShieldCheck}
-                  domain="finance"
-                />
-
-                <div className={styles.missing}>
-                  <div>
-                    <span>{needsReserve ? 'Falta definir tu reserva' : 'Falta liquidez elegible'}</span>
-                    <strong>{formatMinor(item.eligibleLiquidityMinor, item.currency)}</strong>
-                    <small>Liquidez elegible actual</small>
-                  </div>
-                  <p>
-                    {needsLiquidity
-                      ? 'Primero necesitamos una conciliación reciente y confiable de una cuenta personal inmediata.'
-                      : 'Una reserva de cero también es válida, pero tiene que ser una decisión explícita.'}
-                  </p>
-                </div>
-
-                {!needsLiquidity && item.eligibleLiquidityMinor > 0 ? (
-                  <details className={styles.disclosure}>
-                    <summary>Configurar planificación</summary>
-                    <PlanningDraftSandbox
-                      currency={item.currency}
-                      eligibleLiquidityMinor={item.eligibleLiquidityMinor}
-                      obligationHorizonDays={model.obligationHorizonDays}
-                      liquidityQuality={item.liquidityQuality}
-                    />
-                  </details>
-                ) : null}
-              </Card>
-            );
-          })}
+          {model.currencies.map((item) => (
+            <PlanningCurrencySection
+              item={item}
+              key={item.currency}
+              obligationHorizonDays={model.obligationHorizonDays}
+            />
+          ))}
 
           <Card aria-labelledby="finance-purchase-title">
             <SectionHeader

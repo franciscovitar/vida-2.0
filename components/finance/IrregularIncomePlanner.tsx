@@ -112,9 +112,7 @@ export function IrregularIncomePlanner({
         <div>
           <span>Ayuda familiar típica</span>
           <strong>
-            {typicalSupport === null
-              ? 'Sin datos'
-              : formatMinor(typicalSupport, profile.currency)}
+            {typicalSupport === null ? 'Sin datos' : formatMinor(typicalSupport, profile.currency)}
           </strong>
         </div>
         <div>
@@ -148,9 +146,7 @@ export function IrregularIncomePlanner({
         </strong>
         . El puente mensual histórico sin contar trabajo freelance fue típicamente{' '}
         <strong>
-          {typicalBridge === null
-            ? 'no disponible'
-            : formatMinor(typicalBridge, profile.currency)}
+          {typicalBridge === null ? 'no disponible' : formatMinor(typicalBridge, profile.currency)}
         </strong>
         .
       </p>
