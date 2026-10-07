@@ -1,0 +1,222 @@
+.stack {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.notice,
+.empty,
+.muted {
+  margin: 0.7rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.notice {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.empty strong,
+.empty p {
+  display: block;
+  margin: 0;
+}
+
+.empty p {
+  margin-top: 0.2rem;
+}
+
+.headline {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.headline span,
+.label {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.headline strong {
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.items,
+.signals,
+.uncertainties,
+.attention,
+.compact {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.items li,
+.compact li {
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.items li:first-child,
+.compact li:first-child {
+  border-top: 0;
+}
+
+.item-top {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.item-top strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.item-top span {
+  flex: 0 0 auto;
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+  font-weight: 650;
+}
+
+.items p,
+.attention p {
+  margin: 0.18rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.items small,
+.attention small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.label {
+  margin: 0 0 0.4rem;
+}
+
+.signals {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.signals li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.signals span,
+.signals strong,
+.signals small {
+  display: block;
+}
+
+.signals strong {
+  color: var(--text);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.signals small {
+  margin-top: 0.1rem;
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+}
+
+.uncertainties {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.attention {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.7rem;
+}
+
+.attention li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.65rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.attention-index {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.attention b {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.compact strong,
+.compact span {
+  display: block;
+}
+
+.compact strong {
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.compact span {
+  margin-top: 0.12rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+@media (width >= 760px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
