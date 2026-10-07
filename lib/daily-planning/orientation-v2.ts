@@ -244,8 +244,9 @@ function parseLifeSignal(value: unknown): DailyOrientationLifeSignal | null {
   if (
     !isObject(value) ||
     !exactKeys(value, ['kind', 'level', 'summary', 'confidence'])
-  )
+  ) {
     return null;
+  }
   const kind = enumValue(value.kind, LIFE_KINDS);
   const level = enumValue(value.level, LIFE_LEVELS);
   const summary = boundedString(value.summary);
