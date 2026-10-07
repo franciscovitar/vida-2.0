@@ -43,8 +43,9 @@ test('Gym Rutina acerca la última ejecución comparable al ejercicio prescripto
   const dashboard = source('components/gym/GymDashboard.tsx');
 
   assert.match(routine, /Última sesión comparable/);
-  assert.match(routine, /Anterior/);
-  assert.match(routine, /completed === true/);\n  assert.match(routine, /session\\.date <= input\\.today/);
+  assert.match(routine, /Último entrenamiento completado/);
+  assert.match(routine, /completed === true/);
+  assert.ok(routine.includes('session.date <= input.today'));
   assert.match(dashboard, /sessions=\{data\.sessions \?\? \[\]\}/);
   assert.match(dashboard, /summaries=\{data\.sessionSummaries\}/);
 });
