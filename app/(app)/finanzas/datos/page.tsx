@@ -1,4 +1,4 @@
-import { Database, WalletCards } from 'lucide-react';
+import { ShieldCheck, WalletCards } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import pageStyles from '@/app/(app)/page.module.scss';
@@ -23,7 +23,7 @@ export default function FinanceDataPage() {
         <SectionHeader
           title="Datos y fuentes"
           description="Calidad, cobertura, conciliación y metodología quedan agrupadas acá."
-          icon={Database}
+          icon={ShieldCheck}
           domain="finance"
         />
         <p>Esta vista se completa cuando migremos la información técnica que salió del Resumen.</p>

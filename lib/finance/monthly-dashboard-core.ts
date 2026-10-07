@@ -312,13 +312,14 @@ export function buildFinanceMonthlyDashboard(input: {
     .flatMap((row, index) => {
       const direction = text(row[4]);
       if (direction !== 'income' && direction !== 'expense') return [];
+      const normalizedDirection: FinanceMonthlyMovement['direction'] = direction;
 
       const sourceKey = text(row[14]) || defaultLiquiditySourceKey(currency) || '';
       return [
         {
           id: text(row[0]) || `${text(row[1])}-${index}`,
           occurredAt: text(row[1]),
-          direction,
+          direction: normalizedDirection,
           amountMinor: Math.abs(number(row[5])),
           currency,
           category: text(row[7]) || (direction === 'income' ? 'ingreso' : 'otros'),

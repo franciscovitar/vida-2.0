@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, WalletCards } from 'lucide-react';
+import { CircleGauge, WalletCards } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import pageStyles from '@/app/(app)/page.module.scss';
@@ -23,7 +23,7 @@ export default function FinanceAnalysisPage() {
         <SectionHeader
           title="Análisis"
           description="Cash flow, composición y salud financiera se van a leer acá con períodos explícitos."
-          icon={ChartNoAxesCombined}
+          icon={CircleGauge}
           domain="finance"
         />
         <p>El histórico actual se migra en un checkpoint posterior y seguirá usando los mismos datos.</p>
