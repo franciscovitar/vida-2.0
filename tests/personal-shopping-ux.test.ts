@@ -33,6 +33,30 @@ test('shopping capture remains low friction and details are not mandatory', () =
   assert.match(workspace, /crypto\.randomUUID\(\)/);
 });
 
+test('shopping detail progressively exposes decision fields and lifecycle actions', () => {
+  for (const label of [
+    'Necesidad / qué resuelve',
+    'Precio estimado',
+    'Precio objetivo',
+    'Compro si…',
+    'Notas',
+    'Links candidatos · uno por línea',
+    'Marcar comprado',
+    'Descartar',
+    'Restaurar a Comprar',
+  ]) {
+    assert.ok(workspace.includes(label), `missing ${label}`);
+  }
+  assert.match(api, /update-details/);
+  assert.match(api, /transition/);
+});
+
+test('shopping scan view keeps internal metadata out of the UI', () => {
+  for (const internalField of ['sourceRef', 'financeMovementId', 'recordStatus', 'operationId']) {
+    assert.equal(workspace.includes(`item.${internalField}`), false);
+  }
+});
+
 test('shopping touch targets and focus states are explicit', () => {
   assert.match(styles, /min-height: 44px/);
   assert.match(styles, /:focus-visible/);

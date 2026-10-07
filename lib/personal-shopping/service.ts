@@ -1,8 +1,16 @@
 import { randomUUID } from 'node:crypto';
 
-import { normalizePersonalPurchaseTitle, validatePersonalPurchaseItem } from './core';
+import {
+  buildPersonalPurchaseDetailUpdate,
+  buildPersonalPurchaseTransition,
+  canTransitionPersonalPurchase,
+  isPersonalPurchaseState,
+  normalizePersonalPurchaseTitle,
+  validatePersonalPurchaseItem,
+} from './core';
 import type { PersonalShoppingRepository } from './repository';
 import type {
+  PersonalPurchaseDetailPatch,
   PersonalPurchaseEvent,
   PersonalPurchaseItem,
   PersonalPurchaseMutation,
@@ -21,7 +29,7 @@ export interface PersonalShoppingSnapshot {
 
 export type PersonalShoppingMutationResult =
   | { ok: true; code: 'applied' | 'idempotent' | 'existing'; snapshot: PersonalShoppingSnapshot }
-  | { ok: false; code: 'invalid-input' | 'storage-error'; message: string };
+  | { ok: false; code: 'invalid-input' | 'not-found' | 'storage-error'; message: string };
 
 type ServiceDeps = {
   now?: () => Date;
@@ -30,6 +38,14 @@ type ServiceDeps = {
 
 function activeState(value: string): value is PersonalShoppingActiveState {
   return value === 'BUY' || value === 'RESEARCH' || value === 'REPLENISH';
+}
+
+function validOperationId(value: string): boolean {
+  return value.trim().length >= 8 && value.trim().length <= 120;
+}
+
+function validItemId(value: string): boolean {
+  return value.trim().length >= 3 && value.trim().length <= 180;
 }
 
 function emptyCounts(): Record<PersonalPurchaseState, number> {
@@ -82,7 +98,7 @@ export class PersonalShoppingService {
       };
     }
 
-    if (input.operationId.length < 8 || input.operationId.length > 120) {
+    if (!validOperationId(input.operationId)) {
       return { ok: false, code: 'invalid-input', message: 'La operación no es válida.' };
     }
 
@@ -138,6 +154,93 @@ export class PersonalShoppingService {
     };
     const mutation: PersonalPurchaseMutation = { item, event };
 
+    return this.persist(mutation);
+  }
+
+  async updateDetails(input: {
+    itemId: string;
+    operationId: string;
+    patch: PersonalPurchaseDetailPatch;
+  }): Promise<PersonalShoppingMutationResult> {
+    if (!validItemId(input.itemId) || !validOperationId(input.operationId)) {
+      return { ok: false, code: 'invalid-input', message: 'La operación no es válida.' };
+    }
+    if (await this.repository.hasOperation(input.operationId)) {
+      return { ok: true, code: 'idempotent', snapshot: await this.snapshot() };
+    }
+
+    const item = await this.repository.getItem(input.itemId);
+    if (!item || item.recordStatus !== 'active') {
+      return { ok: false, code: 'not-found', message: 'No encontramos ese ítem.' };
+    }
+
+    let mutation: PersonalPurchaseMutation | null;
+    try {
+      mutation = buildPersonalPurchaseDetailUpdate({
+        item,
+        patch: input.patch,
+        occurredAt: this.now().toISOString(),
+        eventId: `pse_${this.id()}`,
+        operationId: input.operationId,
+      });
+    } catch {
+      return {
+        ok: false,
+        code: 'invalid-input',
+        message: 'Revisá los detalles: precios, moneda, textos y links deben ser válidos.',
+      };
+    }
+
+    if (!mutation) {
+      return { ok: true, code: 'idempotent', snapshot: await this.snapshot() };
+    }
+    return this.persist(mutation);
+  }
+
+  async transition(input: {
+    itemId: string;
+    toState: string;
+    operationId: string;
+  }): Promise<PersonalShoppingMutationResult> {
+    if (
+      !validItemId(input.itemId) ||
+      !validOperationId(input.operationId) ||
+      !isPersonalPurchaseState(input.toState)
+    ) {
+      return { ok: false, code: 'invalid-input', message: 'La transición no es válida.' };
+    }
+    if (await this.repository.hasOperation(input.operationId)) {
+      return { ok: true, code: 'idempotent', snapshot: await this.snapshot() };
+    }
+
+    const item = await this.repository.getItem(input.itemId);
+    if (!item || item.recordStatus !== 'active') {
+      return { ok: false, code: 'not-found', message: 'No encontramos ese ítem.' };
+    }
+    if (item.state === input.toState) {
+      return { ok: true, code: 'idempotent', snapshot: await this.snapshot() };
+    }
+    if (!canTransitionPersonalPurchase(item.state, input.toState)) {
+      return {
+        ok: false,
+        code: 'invalid-input',
+        message: 'Ese cambio de estado no está permitido.',
+      };
+    }
+
+    const mutation = buildPersonalPurchaseTransition({
+      item,
+      toState: input.toState,
+      occurredAt: this.now().toISOString(),
+      eventId: `pse_${this.id()}`,
+      operationId: input.operationId,
+    });
+    return this.persist(mutation);
+  }
+
+  private async persist(
+    mutation: PersonalPurchaseMutation,
+  ): Promise<PersonalShoppingMutationResult> {
     try {
       await this.repository.saveItemsWithEvents([mutation]);
       return { ok: true, code: 'applied', snapshot: await this.snapshot() };
@@ -145,7 +248,7 @@ export class PersonalShoppingService {
       return {
         ok: false,
         code: 'storage-error',
-        message: 'No se pudo guardar la compra. Probá de nuevo.',
+        message: 'No se pudo guardar el cambio. Probá de nuevo.',
       };
     }
   }

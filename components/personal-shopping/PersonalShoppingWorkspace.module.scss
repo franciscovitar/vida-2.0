@@ -18,7 +18,9 @@
 }
 
 .capture > div:first-child,
-.list-header > div:first-child {
+.list-header > div:first-child,
+.detail-heading > div,
+.lifecycle-section > div:first-child {
   display: grid;
   gap: 0.2rem;
 }
@@ -49,7 +51,9 @@
 
 .title-field input,
 .state-field select,
-.search input {
+.search input,
+.detail-form input:not([type='checkbox']),
+.detail-form textarea {
   width: 100%;
   min-width: 0;
   min-height: 44px;
@@ -61,27 +65,34 @@
 }
 
 .title-field input,
-.state-field select {
+.state-field select,
+.detail-form input:not([type='checkbox']),
+.detail-form textarea {
   padding: 0.65rem 0.75rem;
 }
 
 .title-field input:focus,
 .state-field select:focus,
-.search input:focus {
+.search input:focus,
+.detail-form input:focus,
+.detail-form textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
 .add-button,
 .tabs button,
-.detail-button {
+.detail-button,
+.detail-actions button,
+.transition-actions button {
   min-height: 44px;
   font: inherit;
   cursor: pointer;
   border-radius: var(--radius);
 }
 
-.add-button {
+.add-button,
+.detail-actions button {
   display: inline-flex;
   gap: 0.4rem;
   align-items: center;
@@ -96,13 +107,18 @@
 
 .add-button:disabled,
 .title-field input:disabled,
-.state-field select:disabled {
+.state-field select:disabled,
+.detail-form input:disabled,
+.detail-form textarea:disabled,
+.detail-actions button:disabled,
+.transition-actions button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
 .notice {
   padding: 0.65rem 0.75rem;
+  color: var(--text-muted);
   background: var(--surface-2);
   border-radius: var(--radius);
 }
@@ -149,7 +165,9 @@
 
 .tabs button:focus-visible,
 .add-button:focus-visible,
-.detail-button:focus-visible {
+.detail-button:focus-visible,
+.detail-actions button:focus-visible,
+.transition-actions button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -190,11 +208,14 @@
   border-top: 1px solid var(--border);
 }
 
-.items li {
-  display: grid;
-  gap: 0.7rem;
+.items > li {
   padding: 0.9rem 0;
   border-bottom: 1px solid var(--border);
+}
+
+.item-row {
+  display: grid;
+  gap: 0.7rem;
 }
 
 .item-main {
@@ -215,7 +236,8 @@
   overflow-wrap: anywhere;
 }
 
-.item-title span {
+.item-title span,
+.state-badge {
   padding: 0.18rem 0.45rem;
   color: var(--text-muted);
   font-size: 0.68rem;
@@ -243,9 +265,93 @@
   border: 1px solid var(--border);
 }
 
-.detail-button:disabled {
-  cursor: default;
-  opacity: 0.55;
+.item-detail {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  margin-top: 0.9rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.detail-heading,
+.lifecycle-section {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.detail-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.detail-form label {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.detail-form textarea {
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.detail-form .focus-field {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  min-height: 44px;
+}
+
+.focus-field input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.detail-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.lifecycle-section {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.transition-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.transition-actions button {
+  padding: 0.55rem 0.75rem;
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 700;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.transition-actions button[data-tone='danger'] {
+  color: var(--danger, var(--text));
+}
+
+.detail-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+  color: var(--text-subtle);
+  font-size: 0.7rem;
 }
 
 .empty {
@@ -293,12 +399,22 @@
     align-items: end;
   }
 
-  .items li {
+  .item-row {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
   }
 
   .detail-button {
     justify-self: end;
+  }
+
+  .detail-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wide-field,
+  .focus-field,
+  .detail-actions {
+    grid-column: 1 / -1;
   }
 }

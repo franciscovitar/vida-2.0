@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  buildPersonalPurchaseDetailUpdate,
   buildPersonalPurchaseTransition,
   canTransitionPersonalPurchase,
   transitionPersonalPurchaseItem,
@@ -77,6 +78,94 @@ test('transition event remains explicit and idempotency-ready', () => {
   assert.equal(mutation.event.fromState, 'BUY');
   assert.equal(mutation.event.toState, 'DISCARDED');
   assert.equal(mutation.item.discardedAt, '2026-10-07T11:00:00.000Z');
+});
+
+test('detail update normalizes optional decision fields without copying internal metadata', () => {
+  const mutation = buildPersonalPurchaseDetailUpdate({
+    item: item({ financeMovementId: 'finance-existing', financeLinkState: 'linked' }),
+    patch: {
+      need: '  trabajar más cómodo  ',
+      quantityText: ' 1 ',
+      category: ' Oficina ',
+      currency: 'ars',
+      estimatedPriceMinor: 15000000,
+      targetPriceMinor: 12500000,
+      purchaseCondition: ' si entra en el escritorio ',
+      notes: ' comparar materiales ',
+      candidateLinks: ['https://example.com/a', 'https://example.com/a'],
+      focus: true,
+    },
+    occurredAt: '2026-10-07T11:30:00.000Z',
+    eventId: 'event-detail-1',
+    operationId: 'operation-detail-1',
+  });
+
+  assert.ok(mutation);
+  assert.equal(mutation.item.need, 'trabajar más cómodo');
+  assert.equal(mutation.item.currency, 'ARS');
+  assert.deepEqual(mutation.item.candidateLinks, ['https://example.com/a']);
+  assert.equal(mutation.item.financeMovementId, 'finance-existing');
+  assert.equal(mutation.item.financeLinkState, 'linked');
+  assert.equal(mutation.event.eventType, 'DETAIL_UPDATED');
+  assert.deepEqual(mutation.event.changedFields, {
+    fields: [
+      'need',
+      'quantityText',
+      'category',
+      'currency',
+      'estimatedPriceMinor',
+      'targetPriceMinor',
+      'purchaseCondition',
+      'notes',
+      'candidateLinks',
+      'focus',
+    ],
+  });
+});
+
+test('detail update rejects unsafe candidate links and no-op updates emit no event', () => {
+  assert.throws(
+    () =>
+      buildPersonalPurchaseDetailUpdate({
+        item: item(),
+        patch: {
+          need: null,
+          quantityText: null,
+          category: null,
+          currency: null,
+          estimatedPriceMinor: null,
+          targetPriceMinor: null,
+          purchaseCondition: null,
+          notes: null,
+          candidateLinks: ['javascript:alert(1)'],
+          focus: false,
+        },
+        occurredAt: '2026-10-07T11:30:00.000Z',
+        eventId: 'event-detail-2',
+        operationId: 'operation-detail-2',
+      }),
+    RangeError,
+  );
+
+  const noop = buildPersonalPurchaseDetailUpdate({
+    item: item(),
+    patch: {
+      need: null,
+      quantityText: null,
+      category: null,
+      currency: null,
+      estimatedPriceMinor: null,
+      targetPriceMinor: null,
+      purchaseCondition: null,
+      notes: null,
+      candidateLinks: [],
+      focus: false,
+    },
+    occurredAt: '2026-10-07T11:30:00.000Z',
+    eventId: 'event-detail-3',
+    operationId: 'operation-detail-3',
+  });
+  assert.equal(noop, null);
 });
 
 test('money fields require integer minor units', () => {
