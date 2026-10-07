@@ -11,7 +11,11 @@ function shortDate(value: string): string {
   return match ? `${match[3]}/${match[2]}` : value;
 }
 
-export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOrientationView }) {
+export function DailyRealityReviewPanel({
+  orientation,
+}: {
+  orientation: DailyOrientationView;
+}) {
   const review = orientation.review;
 
   return (
@@ -64,7 +68,9 @@ export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOri
               ))}
             </ul>
           ) : (
-            <p className={styles.muted}>Sin cambios relevantes persistidos para el día revisado.</p>
+            <p className={styles.muted}>
+              Sin cambios relevantes persistidos para el día revisado.
+            </p>
           )}
 
           {orientation.lifeSignals.length > 0 ? (
