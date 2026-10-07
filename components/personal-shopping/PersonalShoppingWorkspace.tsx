@@ -333,7 +333,7 @@ function PersonalShoppingDetail({
   const closed = formatDate(item.purchasedAt ?? item.discardedAt);
 
   return (
-    <div className={styles['item-detail']}>
+    <div className={styles['item-detail']} id={`personal-shopping-detail-${item.id}`}>
       <div className={styles['detail-heading']}>
         <div>
           <span className={styles.eyebrow}>Detalle</span>
@@ -600,7 +600,7 @@ export function PersonalShoppingWorkspace({
 
         <form className={styles['capture-form']} onSubmit={submit}>
           <label className={styles['title-field']}>
-            <span className="sr-only">Compra o necesidad</span>
+            <span className="visually-hidden">Compra o necesidad</span>
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
@@ -611,7 +611,7 @@ export function PersonalShoppingWorkspace({
             />
           </label>
           <label className={styles['state-field']}>
-            <span className="sr-only">Estado inicial</span>
+            <span className="visually-hidden">Estado inicial</span>
             <select
               value={addState}
               onChange={(event) => setAddState(event.target.value as PersonalShoppingActiveState)}
@@ -643,12 +643,19 @@ export function PersonalShoppingWorkspace({
         ) : null}
       </section>
 
-      <nav className={styles.tabs} aria-label="Estados de compras personales">
+      <nav
+        className={styles.tabs}
+        aria-label="Estados de compras personales"
+        role="tablist"
+      >
         {TABS.map((item) => (
           <button
             key={item.value}
+            id={`personal-shopping-tab-${item.value.toLowerCase()}`}
             type="button"
-            aria-current={tab === item.value ? 'page' : undefined}
+            role="tab"
+            aria-selected={tab === item.value}
+            aria-controls="personal-shopping-list-panel"
             onClick={() => chooseTab(item.value)}
           >
             <span>{item.label}</span>
@@ -657,7 +664,12 @@ export function PersonalShoppingWorkspace({
         ))}
       </nav>
 
-      <section className={styles.list} aria-labelledby="personal-shopping-list-title">
+      <section
+        className={styles.list}
+        id="personal-shopping-list-panel"
+        role="tabpanel"
+        aria-labelledby={`personal-shopping-tab-${tab.toLowerCase()}`}
+      >
         <div className={styles['list-header']}>
           <div>
             <span className={styles.eyebrow}>Mis compras</span>
@@ -667,7 +679,7 @@ export function PersonalShoppingWorkspace({
           </div>
           <label className={styles.search}>
             <Search size={16} aria-hidden="true" />
-            <span className="sr-only">Buscar en mis compras</span>
+            <span className="visually-hidden">Buscar en mis compras</span>
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -714,6 +726,7 @@ export function PersonalShoppingWorkspace({
                       type="button"
                       className={styles['detail-button']}
                       aria-expanded={isOpen}
+                      aria-controls={isOpen ? `personal-shopping-detail-${item.id}` : undefined}
                       onClick={() => setOpenItemId(isOpen ? null : item.id)}
                     >
                       {isOpen ? 'Cerrar detalle' : 'Ver detalle'}

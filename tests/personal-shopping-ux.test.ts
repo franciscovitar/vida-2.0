@@ -59,10 +59,24 @@ test('shopping scan view keeps internal metadata out of the UI', () => {
   }
 });
 
-test('shopping touch targets and focus states are explicit', () => {
+test('shopping touch targets, focus states and responsive safeguards are explicit', () => {
   assert.match(styles, /min-height: 44px/);
   assert.match(styles, /:focus-visible/);
   assert.match(styles, /overflow-x: auto/);
+  assert.match(styles, /@media \(width >= 720px\)/);
+  assert.match(styles, /white-space: normal/);
+});
+
+test('shopping exposes accessible labels, tab semantics and disclosure relationships', () => {
+  assert.equal(workspace.includes('className="sr-only"'), false);
+  assert.match(workspace, /className="visually-hidden"/);
+  assert.match(workspace, /role="tablist"/);
+  assert.match(workspace, /role="tab"/);
+  assert.match(workspace, /aria-selected=/);
+  assert.match(workspace, /role="tabpanel"/);
+  assert.match(workspace, /aria-controls="personal-shopping-list-panel"/);
+  assert.match(workspace, /aria-expanded=/);
+  assert.match(workspace, /personal-shopping-detail-/);
 });
 
 test('shopping mutation API authenticates and has no Finance write dependency', () => {
