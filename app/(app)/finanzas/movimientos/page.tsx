@@ -26,7 +26,9 @@ export default function FinanceMovementsPage() {
           icon={ListChecks}
           domain="finance"
         />
-        <p>La lista completa se incorpora en el siguiente checkpoint sin cambiar la fuente de verdad.</p>
+        <p>
+          La lista completa se incorpora en el siguiente checkpoint sin cambiar la fuente de verdad.
+        </p>
       </Card>
     </div>
   );

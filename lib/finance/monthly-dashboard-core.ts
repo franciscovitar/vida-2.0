@@ -323,9 +323,7 @@ export function buildFinanceMonthlyDashboard(input: {
           amountMinor: Math.abs(number(row[5])),
           currency,
           category: text(row[7]) || (direction === 'income' ? 'ingreso' : 'otros'),
-          liquiditySourceLabel: sourceKey
-            ? fallbackLiquiditySourceLabel(sourceKey)
-            : 'Sin fuente',
+          liquiditySourceLabel: sourceKey ? fallbackLiquiditySourceLabel(sourceKey) : 'Sin fuente',
         },
       ];
     })

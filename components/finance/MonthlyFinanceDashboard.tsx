@@ -115,7 +115,8 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
           <p>Tu situación actual, con lo que registraste hasta hoy.</p>
         </div>
         <span className={styles.capture}>
-          {model.activeCaptureCount} {model.activeCaptureCount === 1 ? 'registro activo' : 'registros activos'}
+          {model.activeCaptureCount}{' '}
+          {model.activeCaptureCount === 1 ? 'registro activo' : 'registros activos'}
         </span>
       </div>
 
@@ -242,7 +243,9 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
                 Finance Logger sugiere revisar el objetivo a{' '}
                 <strong>{formatMinor(target.suggestedTargetMinor, model.currency)}</strong>.
               </p>
-              <small>{target.suggestionReason || 'El contexto del mes cambió materialmente.'}</small>
+              <small>
+                {target.suggestionReason || 'El contexto del mes cambió materialmente.'}
+              </small>
               <span className={styles.notice}>
                 No se aplica solo: el objetivo actual sigue siendo{' '}
                 {formatMinor(target.activeTargetMinor, model.currency)}.
@@ -294,7 +297,9 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
             <div className={styles['movement-list']}>
               {model.recentMovements.map((movement) => (
                 <div className={styles.movement} key={movement.id}>
-                  <time dateTime={movement.occurredAt}>{movementDateLabel(movement.occurredAt)}</time>
+                  <time dateTime={movement.occurredAt}>
+                    {movementDateLabel(movement.occurredAt)}
+                  </time>
                   <div>
                     <strong>{categoryLabel(movement.category)}</strong>
                     <span>{movement.liquiditySourceLabel}</span>

@@ -26,7 +26,9 @@ export default function FinanceAnalysisPage() {
           icon={CircleGauge}
           domain="finance"
         />
-        <p>El histórico actual se migra en un checkpoint posterior y seguirá usando los mismos datos.</p>
+        <p>
+          El histórico actual se migra en un checkpoint posterior y seguirá usando los mismos datos.
+        </p>
       </Card>
     </div>
   );

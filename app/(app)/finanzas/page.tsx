@@ -42,7 +42,10 @@ export default async function FinanzasPage() {
   const store = await getFinanceStoreReadinessSnapshot();
   const connected = store.status === 'connected';
   const reads = connected
-    ? await Promise.all([getFinanceMonthlyDashboardSnapshot(), getFinanceCashFlowSnapshot()])
+    ? await Promise.all([
+        getFinanceMonthlyDashboardSnapshot(),
+        getFinanceCashFlowSnapshot(),
+      ])
     : null;
   const monthlyDashboard = reads?.[0] ?? null;
   const cashFlow = reads?.[1] ?? null;

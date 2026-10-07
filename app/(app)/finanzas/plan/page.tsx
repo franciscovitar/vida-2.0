@@ -26,7 +26,9 @@ export default function FinancePlanPage() {
           icon={CircleGauge}
           domain="finance"
         />
-        <p>La funcionalidad existente se migra acá en el checkpoint de Plan, sin cambiar sus cálculos.</p>
+        <p>
+          La funcionalidad existente se migra acá en el checkpoint de Plan, sin cambiar sus cálculos.
+        </p>
       </Card>
     </div>
   );
