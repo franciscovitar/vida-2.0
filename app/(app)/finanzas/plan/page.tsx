@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { CircleGauge, ShieldCheck, WalletCards } from 'lucide-react';
 import type { Metadata } from 'next';
 
@@ -36,6 +37,15 @@ function formatMinor(value: number, currency: string): string {
   }
 }
 
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function planHref(currency: string): string {
+  const params = new URLSearchParams({ currency });
+  return `/finanzas/plan?${params.toString()}`;
+}
+
 function qualityLabel(value: FinancePlanningCurrencyModel['liquidityQuality']): string {
   if (value === 'verified') return 'Saldo verificado';
   if (value === 'partial') return 'Cobertura parcial';
@@ -50,7 +60,7 @@ function overviewCopy(item: FinancePlanningCurrencyModel): string {
     return 'Falta una base de liquidez elegible para calcular capacidad.';
   }
   if (item.missing.includes('reserve-policy')) {
-    return 'Falta definir una reserva explícita para habilitar Safe-to-Spend.';
+    return 'Safe-to-Spend está pendiente porque todavía no hay una reserva guardada.';
   }
   return `${item.commitmentCount} compromiso(s) activos incluidos en el cálculo.`;
 }
@@ -89,10 +99,7 @@ function PlanningCurrencySection({
 
   if (snapshot) {
     return (
-      <Card
-        aria-labelledby={`finance-safe-to-spend-${item.currency}`}
-        key={`safe-${item.currency}`}
-      >
+      <Card aria-labelledby={`finance-safe-to-spend-${item.currency}`}>
         <SectionHeader
           id={`finance-safe-to-spend-${item.currency}`}
           title={`Safe-to-Spend · ${item.currency}`}
@@ -115,9 +122,7 @@ function PlanningCurrencySection({
             </div>
             <div>
               <dt>Reserva protegida</dt>
-              <dd>
-                − {formatMinor(snapshot.commitments.protectedReserveMinor, snapshot.currency)}
-              </dd>
+              <dd>− {formatMinor(snapshot.commitments.protectedReserveMinor, snapshot.currency)}</dd>
             </div>
             <div>
               <dt>Obligaciones próximas</dt>
@@ -133,9 +138,7 @@ function PlanningCurrencySection({
             </div>
             <div>
               <dt>Otros compromisos</dt>
-              <dd>
-                − {formatMinor(snapshot.commitments.otherCommitmentsMinor, snapshot.currency)}
-              </dd>
+              <dd>− {formatMinor(snapshot.commitments.otherCommitmentsMinor, snapshot.currency)}</dd>
             </div>
           </dl>
         </div>
@@ -150,10 +153,7 @@ function PlanningCurrencySection({
 
   if (item.status === 'invalid') {
     return (
-      <Card
-        aria-labelledby={`finance-plan-review-${item.currency}`}
-        key={`review-${item.currency}`}
-      >
+      <Card aria-labelledby={`finance-plan-review-${item.currency}`}>
         <SectionHeader
           id={`finance-plan-review-${item.currency}`}
           title={`Planificación · ${item.currency}`}
@@ -171,18 +171,18 @@ function PlanningCurrencySection({
 
   const needsLiquidity = item.missing.includes('eligible-liquidity');
   const missingTitle = item.missing.includes('reserve-policy')
-    ? 'Falta definir tu reserva'
+    ? 'Falta una reserva guardada'
     : 'Falta liquidez elegible';
   const missingCopy = needsLiquidity
     ? 'Primero necesitamos una conciliación reciente y confiable de una cuenta personal inmediata.'
-    : 'Una reserva de cero también es válida, pero tiene que ser una decisión explícita.';
+    : 'Podés probar una reserva abajo para ver el efecto. La simulación no modifica tus datos ni activa Safe-to-Spend.';
 
   return (
-    <Card aria-labelledby={`finance-plan-config-${item.currency}`} key={`config-${item.currency}`}>
+    <Card aria-labelledby={`finance-plan-config-${item.currency}`}>
       <SectionHeader
         id={`finance-plan-config-${item.currency}`}
         title={`Safe-to-Spend · ${item.currency}`}
-        description="El cálculo permanece deshabilitado hasta que existan los datos mínimos explícitos."
+        description="El cálculo real permanece pendiente hasta que existan los datos mínimos persistidos."
         icon={ShieldCheck}
         domain="finance"
       />
@@ -198,7 +198,7 @@ function PlanningCurrencySection({
 
       {!needsLiquidity && item.eligibleLiquidityMinor > 0 ? (
         <details className={styles.disclosure}>
-          <summary>Configurar planificación</summary>
+          <summary>Simular planificación</summary>
           <PlanningDraftSandbox
             currency={item.currency}
             eligibleLiquidityMinor={item.eligibleLiquidityMinor}
@@ -211,7 +211,12 @@ function PlanningCurrencySection({
   );
 }
 
-export default async function FinancePlanPage() {
+export default async function FinancePlanPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ currency?: string | string[] }>;
+}) {
+  const params = await searchParams;
   const store = await getFinanceStoreReadinessSnapshot();
   const connected = store.status === 'connected';
   const reads = connected
@@ -224,6 +229,14 @@ export default async function FinancePlanPage() {
   const arsPlanning = model?.currencies.find((item) => item.currency === 'ARS') ?? null;
   const irregularIncome = report ? buildFinanceIrregularIncomeProfile(report, 'ARS') : null;
   const dataState = resolveFinanceDataState({ connected, report });
+  const requestedCurrency = firstParam(params.currency)?.trim().toUpperCase();
+  const selectedCurrency =
+    model?.currencies.find((item) => item.currency === requestedCurrency)?.currency ??
+    model?.currencies.find((item) => item.currency === 'ARS')?.currency ??
+    model?.currencies[0]?.currency ??
+    'ARS';
+  const selectedPlanning =
+    model?.currencies.find((item) => item.currency === selectedCurrency) ?? null;
 
   return (
     <div className={pageStyles.page}>
@@ -248,11 +261,31 @@ export default async function FinancePlanPage() {
             />
 
             {model.currencies.length > 0 ? (
-              <div className={styles['currency-grid']}>
-                {model.currencies.map((item) => (
-                  <CurrencyOverview item={item} key={item.currency} />
-                ))}
-              </div>
+              <>
+                <div className={styles['currency-grid']}>
+                  {model.currencies.map((item) => (
+                    <CurrencyOverview item={item} key={item.currency} />
+                  ))}
+                </div>
+
+                {model.currencies.length > 1 ? (
+                  <div className={styles['currency-selector']} aria-label="Moneda para planificar">
+                    <span>Planificar en</span>
+                    <div>
+                      {model.currencies.map((item) => (
+                        <Link
+                          aria-current={selectedCurrency === item.currency ? 'page' : undefined}
+                          href={planHref(item.currency)}
+                          key={item.currency}
+                          scroll={false}
+                        >
+                          {item.currency}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </>
             ) : (
               <p className={styles.empty}>
                 No hay una base de liquidez personal inmediata disponible para construir el plan.
@@ -260,13 +293,12 @@ export default async function FinancePlanPage() {
             )}
           </Card>
 
-          {model.currencies.map((item) => (
+          {selectedPlanning ? (
             <PlanningCurrencySection
-              item={item}
-              key={item.currency}
+              item={selectedPlanning}
               obligationHorizonDays={model.obligationHorizonDays}
             />
-          ))}
+          ) : null}
 
           <Card aria-labelledby="finance-purchase-title">
             <SectionHeader
@@ -277,28 +309,17 @@ export default async function FinancePlanPage() {
               domain="finance"
             />
 
-            {model.currencies.some((item) => item.snapshot) ? (
-              <div className={styles['scenario-list']}>
-                {model.currencies.map((item) => {
-                  const snapshot = item.snapshot;
-                  if (!snapshot) return null;
-
-                  return (
-                    <div key={`purchase-${item.currency}`}>
-                      <PurchaseScenarioCalculator
-                        source={{
-                          currency: item.currency,
-                          safeToSpend: snapshot.safeToSpend,
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
+            {selectedPlanning?.snapshot ? (
+              <PurchaseScenarioCalculator
+                source={{
+                  currency: selectedPlanning.currency,
+                  safeToSpend: selectedPlanning.snapshot.safeToSpend,
+                }}
+              />
             ) : (
               <p className={styles.empty}>
-                La evaluación de compras se habilita cuando Safe-to-Spend está configurado para una
-                moneda.
+                La evaluación de compras se habilita cuando Safe-to-Spend está configurado para{' '}
+                {selectedCurrency}.
               </p>
             )}
           </Card>
