@@ -20,7 +20,7 @@ const SECTION_LABELS: Record<GymRoutineSectionKind, string> = {
 };
 
 type DayKind = 'torso-a' | 'torso-b' | 'pierna';
-type RoutineView = 'plan' | 'previous';
+type RoutineView = 'plan' | 'previous' | 'mobility';
 type MobilityItemKind = 'posture' | 'flexibility' | 'criteria' | 'other';
 
 function dayKind(value: string | null | undefined): DayKind | null {
@@ -135,6 +135,84 @@ function MobilityItems({ items }: { items: readonly string[] }) {
   );
 }
 
+function MobilityProtocol({
+  sections,
+}: {
+  sections: GymRoutine['supplementalSections'];
+}) {
+  if (sections.length === 0) {
+    return <p className={styles.body}>No hay un protocolo de movilidad/postura disponible.</p>;
+  }
+
+  return (
+    <div className={styles['guide-content']}>
+      {sections.map((section) => {
+        const parsedDescription = mobilityDescription(section.description);
+        const parsedItems = section.items.map(mobilityItem);
+        const posture = parsedItems
+          .filter((item) => item.kind === 'posture')
+          .map((item) => item.text);
+        const flexibility = parsedItems
+          .filter((item) => item.kind === 'flexibility')
+          .map((item) => item.text);
+        const criteria = parsedItems
+          .filter((item) => item.kind === 'criteria')
+          .map((item) => item.text);
+        const other = parsedItems
+          .filter((item) => item.kind === 'other')
+          .map((item) => item.text);
+
+        return (
+          <section key={section.key} className={styles.supplemental}>
+            <div className={styles['supplemental-heading']}>
+              <span>EN EL GIMNASIO</span>
+              <h3>{parsedDescription.schedule ?? section.label}</h3>
+            </div>
+
+            {parsedDescription.objective ? (
+              <p className={styles.body}>
+                {parsedDescription.objective.replace(/^objetivo:\s*/i, '')}
+              </p>
+            ) : null}
+            {parsedDescription.detail ? (
+              <p className={styles.body}>{parsedDescription.detail}</p>
+            ) : null}
+
+            {posture.length > 0 ? (
+              <div className={styles.supplemental}>
+                <div className={styles['supplemental-heading']}>
+                  <span>BLOQUE A · ~10 MIN</span>
+                  <h3>Postura / control</h3>
+                </div>
+                <MobilityItems items={posture} />
+              </div>
+            ) : null}
+
+            {flexibility.length > 0 ? (
+              <div className={styles.supplemental}>
+                <div className={styles['supplemental-heading']}>
+                  <span>BLOQUE B · ~6–7 MIN</span>
+                  <h3>Flexibilidad específica</h3>
+                </div>
+                <MobilityItems items={flexibility} />
+              </div>
+            ) : null}
+
+            {other.length > 0 ? <MobilityItems items={other} /> : null}
+
+            {criteria.length > 0 ? (
+              <details className={styles.disclosure}>
+                <summary>Cómo usar este protocolo</summary>
+                <MobilityItems items={criteria} />
+              </details>
+            ) : null}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 export function GymRoutineTabs({
   routine,
   sessions,
@@ -165,12 +243,6 @@ export function GymRoutineTabs({
   );
 
   const guideGroups = [
-    {
-      key: 'mobility',
-      title: 'Movilidad / postura',
-      description: 'Tu bloque post-gym, separado en postura/control y flexibilidad específica.',
-      sections: mobilitySections,
-    },
     {
       key: 'planning',
       title: 'Progresión y descarga',
@@ -228,6 +300,16 @@ export function GymRoutineTabs({
                 >
                   Última sesión
                 </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={view === 'mobility'}
+                  className={styles.tab}
+                  data-active={view === 'mobility' ? 'true' : 'false'}
+                  onClick={() => setView('mobility')}
+                >
+                  Movilidad / postura
+                </button>
               </div>
 
               {view === 'plan' ? (
@@ -272,8 +354,10 @@ export function GymRoutineTabs({
                     ))}
                   </ol>
                 </>
-              ) : previousSession ? (
-                <>
+
+              ) : view === 'previous' ? (
+                previousSession ? (
+<>
                   <div className={styles['previous-session']}>
                     <span>Última sesión comparable</span>
                     <strong>{previousSession.date}</strong>
@@ -305,10 +389,13 @@ export function GymRoutineTabs({
                     ))}
                   </ol>
                 </>
+
+                ) : (
+                  <p className={styles.body}>Todavía no hay una sesión comparable registrada.</p>
+                )
               ) : (
-                <p className={styles.body}>Todavía no hay una sesión comparable registrada.</p>
-              )}
-            </div>
+                <MobilityProtocol sections={mobilitySections} />
+              )}            </div>
           ) : null}
         </>
       ) : (
