@@ -1,9 +1,11 @@
 import Link from 'next/link';
 
+import type { FinanceDataState } from '@/lib/finance/data-state';
+
 import styles from './FinanceNavigation.module.scss';
 
 export type FinanceSection = 'summary' | 'movements' | 'plan' | 'analysis' | 'data';
-export type FinanceDataState = 'ready' | 'review' | 'partial' | 'unavailable';
+export type { FinanceDataState } from '@/lib/finance/data-state';
 
 const ITEMS: Array<{ id: FinanceSection; label: string; href: string }> = [
   { id: 'summary', label: 'Resumen', href: '/finanzas' },

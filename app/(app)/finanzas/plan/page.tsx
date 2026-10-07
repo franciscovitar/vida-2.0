@@ -10,6 +10,7 @@ import { PurchaseScenarioCalculator } from '@/components/finance/PurchaseScenari
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { resolveFinanceDataState } from '@/lib/finance/data-state';
 import { buildFinanceIrregularIncomeProfile } from '@/lib/finance/irregular-income-core';
 import { getFinancePlanningStoreSnapshot } from '@/lib/finance/planning-store';
 import type { FinancePlanningCurrencyModel } from '@/lib/finance/planning-store-core';
@@ -222,6 +223,7 @@ export default async function FinancePlanPage() {
   const report = cashFlow?.ok ? cashFlow.report : null;
   const arsPlanning = model?.currencies.find((item) => item.currency === 'ARS') ?? null;
   const irregularIncome = report ? buildFinanceIrregularIncomeProfile(report, 'ARS') : null;
+  const dataState = resolveFinanceDataState({ connected, report });
 
   return (
     <div className={pageStyles.page}>
@@ -232,7 +234,7 @@ export default async function FinancePlanPage() {
         domain="finance"
       />
 
-      <FinanceNavigation current="plan" />
+      <FinanceNavigation current="plan" dataState={dataState} />
 
       {model ? (
         <>

@@ -1,10 +1,11 @@
 import { WalletCards } from 'lucide-react';
 import type { Metadata } from 'next';
 
-import { FinanceNavigation, type FinanceDataState } from '@/components/finance/FinanceNavigation';
+import { FinanceNavigation } from '@/components/finance/FinanceNavigation';
 import { MonthlyFinanceDashboard } from '@/components/finance/MonthlyFinanceDashboard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
+import { resolveFinanceDataState } from '@/lib/finance/data-state';
 import { getFinanceMonthlyDashboardSnapshot } from '@/lib/finance/monthly-dashboard-store';
 import { getFinanceCashFlowSnapshot } from '@/lib/finance/reporting/cash-flow';
 import { getFinanceStoreReadinessSnapshot } from '@/lib/finance/store/readiness';
@@ -14,34 +15,6 @@ import pageStyles from '../page.module.scss';
 export const metadata: Metadata = { title: 'Finanzas' };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-interface FinanceDataReport {
-  reviewRequiredTransactions: number;
-  unbalancedTransactions: number;
-  reconciliation: {
-    conflict: number;
-    partial: number;
-  };
-}
-
-function resolveDataState(input: {
-  connected: boolean;
-  report: FinanceDataReport | null;
-}): FinanceDataState {
-  if (!input.connected) return 'unavailable';
-  if (!input.report) return 'partial';
-
-  if (
-    input.report.reviewRequiredTransactions > 0 ||
-    input.report.unbalancedTransactions > 0 ||
-    input.report.reconciliation.conflict > 0
-  ) {
-    return 'review';
-  }
-
-  if (input.report.reconciliation.partial > 0) return 'partial';
-  return 'ready';
-}
 
 async function readFinanceSummary() {
   return Promise.all([getFinanceMonthlyDashboardSnapshot(), getFinanceCashFlowSnapshot()]);
@@ -55,7 +28,7 @@ export default async function FinanzasPage() {
   const cashFlow = reads?.[1] ?? null;
   const monthlyDashboardModel = monthlyDashboard?.ok ? monthlyDashboard.model : null;
   const report = cashFlow?.ok ? cashFlow.report : null;
-  const dataState = resolveDataState({ connected, report });
+  const dataState = resolveFinanceDataState({ connected, report });
 
   return (
     <div className={pageStyles.page}>

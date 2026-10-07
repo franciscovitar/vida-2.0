@@ -1,0 +1,269 @@
+.status {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.status[data-state='review'] {
+  border-color: var(--c-danger);
+}
+
+.status[data-state='partial'],
+.status[data-state='ready'] {
+  border-color: var(--c-finance-border);
+}
+
+.status > div {
+  display: grid;
+  gap: 0.14rem;
+}
+
+.status span,
+.issue-grid span,
+.reconciliation-grid span {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+}
+
+.status strong {
+  font-size: 1.05rem;
+}
+
+.status p,
+.status small,
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.issue-grid,
+.reconciliation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.issue-grid > div,
+.reconciliation-grid > div {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.issue-grid strong,
+.reconciliation-grid strong {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.issue-grid strong[data-state='review'],
+.reconciliation-grid strong[data-state='review'] {
+  color: var(--c-danger);
+}
+
+.issue-grid strong[data-state='ready'],
+.reconciliation-grid strong[data-state='ready'] {
+  color: var(--c-finance);
+}
+
+.reconciliation-grid + .note {
+  margin-top: 0.8rem;
+}
+
+.coverage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.65rem;
+}
+
+.coverage {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.coverage > div {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.coverage strong {
+  font-size: 0.8rem;
+}
+
+.coverage > div span {
+  color: var(--c-finance);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.coverage p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
+.coverage small {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+}
+
+.planning-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.55rem;
+}
+
+.planning-grid > div {
+  display: grid;
+  gap: 0.28rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.planning-grid > div > div {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.planning-grid strong {
+  font-size: 0.8rem;
+}
+
+.planning-grid span {
+  color: var(--c-finance);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.planning-grid p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.planning-grid small {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.planning-grid + .note {
+  margin-top: 0.8rem;
+}
+
+.disclosure {
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+.disclosure > summary {
+  width: fit-content;
+  min-height: 44px;
+  padding: 0.65rem 0;
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.disclosure > summary:focus-visible {
+  outline: 2px solid var(--c-finance);
+  outline-offset: 2px;
+}
+
+.excluded-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.excluded-list > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.18rem 0.7rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.excluded-list > div:last-child {
+  border-bottom: 0;
+}
+
+.excluded-list strong {
+  font-size: 0.76rem;
+}
+
+.excluded-list span {
+  color: var(--c-finance);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.excluded-list small {
+  grid-column: 1 / -1;
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+}
+
+.principles {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.principles li {
+  position: relative;
+  padding-left: 1rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.principles li::before {
+  position: absolute;
+  top: 0.58em;
+  left: 0;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: var(--radius-full);
+  background: var(--c-finance);
+  content: '';
+}
+
+@media (width >= 760px) {
+  .issue-grid,
+  .reconciliation-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .coverage-grid,
+  .planning-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 1040px) {
+  .coverage-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

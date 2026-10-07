@@ -1,0 +1,113 @@
+.chart {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.legend span {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.legend span::before {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: var(--radius-full);
+  content: '';
+}
+
+.legend span[data-series='income']::before,
+.bar[data-series='income'] {
+  background: var(--c-finance);
+}
+
+.legend span[data-series='expense']::before,
+.bar[data-series='expense'] {
+  background: var(--c-danger);
+}
+
+.rows {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.month {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.month-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.month-heading > strong {
+  font-size: 0.78rem;
+  text-transform: capitalize;
+}
+
+.month-heading > span {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.month-heading > span[data-tone='negative'] {
+  color: var(--c-danger);
+}
+
+.series {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(5rem, 1fr) minmax(6.8rem, auto);
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.series > span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.series > strong {
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.track {
+  position: relative;
+  height: 0.55rem;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+}
+
+.bar {
+  min-width: 2px;
+  height: 100%;
+  border-radius: inherit;
+}
+
+@media (width < 560px) {
+  .series {
+    grid-template-columns: 3.9rem minmax(3rem, 1fr);
+  }
+
+  .series > strong {
+    grid-column: 2;
+    text-align: left;
+  }
+}
