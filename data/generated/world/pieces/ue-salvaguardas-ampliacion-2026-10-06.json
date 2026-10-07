@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
+  "mode": "NOW",
+  "briefId": "WORLD-2026-10-06-EU-ENLARGEMENT-SAFEGUARDS",
+  "slug": "ue-salvaguardas-ampliacion-2026-10-06",
+  "primaryDomain": "POLITICS_GEOPOLITICS",
+  "secondaryDomains": [],
+  "headline": "🇪🇺 La UE quiere blindarse contra retrocesos democráticos antes de sumar nuevos miembros",
+  "deck": "La Comisión Europea propuso herramientas más fuertes —como recortar fondos o restringir derechos de voto— si un futuro miembro se aleja del Estado de derecho después de entrar al bloque.",
+  "readingSeconds": 120,
+  "publishedAt": "2026-10-07T20:05:00-03:00",
+  "editorialDraftSha256": "4133f64bfbe896b03c12aa0caf46c9d5fa7819918e50af22382bcff441cddf63",
+  "backgroundNotes": [
+    {
+      "backgroundRef": "SRC-EU-COMMISSION-2026-10-06",
+      "term": "Comisión Europea",
+      "plainLanguageDefinition": "Órgano ejecutivo de la Unión Europea; el 6 de octubre presentó propuestas para preparar una Unión más amplia.",
+      "sourceId": "SRC-EU-COMMISSION",
+      "sourceRole": "PRIMARY_OFFICIAL",
+      "sourceUrl": "https://cyprus.representation.ec.europa.eu/news/preparing-wider-union-2026-10-06_en"
+    },
+    {
+      "backgroundRef": "SRC-EU-REUTERS-2026-10-06",
+      "term": "Reuters",
+      "plainLanguageDefinition": "Cobertura independiente sobre las salvaguardas propuestas frente a retrocesos democráticos en futuros miembros.",
+      "sourceId": "SRC-REUTERS",
+      "sourceRole": "REPUTABLE_MEDIA",
+      "sourceUrl": "https://www.reuters.com/world/europe/eu-commission-floats-safeguard-against-democratic-backsliding-by-new-members-2026-10-06/"
+    }
+  ],
+  "sections": [
+    {
+      "id": "body",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "Entrar a la Unión Europea no es solo acceder a un mercado común: también implica aceptar reglas compartidas sobre democracia, instituciones y Estado de derecho. La pregunta difícil aparece después de la adhesión: qué hacer si un país cambia de rumbo una vez que ya es miembro.",
+          "claimRefs": [
+            "EU-1"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "El 6 de octubre, la Comisión Europea presentó su revisión para preparar una Unión más amplia y propuso reforzar las salvaguardas frente a retrocesos posteriores a la adhesión. Entre las opciones mencionó reducir financiación o restringir derechos de voto si un nuevo miembro se aparta de los valores y reglas del bloque.",
+          "claimRefs": [
+            "EU-1",
+            "EU-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "INTERPRETIVE",
+          "material": true,
+          "text": "La importancia del planteo está en que la ampliación vuelve a poner en primer plano una tensión básica de la UE: crecer geopolíticamente sin debilitar sus reglas internas. Las salvaguardas intentan hacer que el compromiso democrático no termine el día de la entrada, sino que siga siendo exigible después.",
+          "claimRefs": [
+            "EU-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "Todavía no es una regla definitiva. Son propuestas que deberán ser discutidas por los actuales Estados miembros y pueden cambiar antes de convertirse en mecanismos aplicables.",
+          "claimRefs": [
+            "EU-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-EU-COMMISSION",
+      "role": "PRIMARY_OFFICIAL",
+      "publisher": "European Commission"
+    },
+    {
+      "sourceId": "SRC-REUTERS",
+      "role": "REPUTABLE_MEDIA",
+      "publisher": "Reuters"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "020c381f49756885f47a999994013ed53fe588f9",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_EU_2026-10-06.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_NOW_EU_2026-10-06.json",
+    "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_EU_2026-10-06.json"
+  }
+}

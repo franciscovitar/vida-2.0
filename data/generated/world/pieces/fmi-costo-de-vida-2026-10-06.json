@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
+  "mode": "NOW",
+  "briefId": "WORLD-2026-10-06-IMF-COST-OF-LIVING",
+  "slug": "fmi-costo-de-vida-2026-10-06",
+  "primaryDomain": "ECONOMICS",
+  "secondaryDomains": [],
+  "headline": "💸 El FMI advierte que las crisis de costo de vida dejan cicatrices incluso cuando baja la inflación",
+  "deck": "Un nuevo análisis del Fondo sostiene que los saltos de alimentos y energía pueden mantener elevadas las expectativas de inflación y empujar a más hogares a la pobreza durante años.",
+  "readingSeconds": 120,
+  "publishedAt": "2026-10-07T20:05:00-03:00",
+  "editorialDraftSha256": "46c34c1cecf09850636efb2a4b9816db9c45f0879773c3116d6c4b2b6ec1193d",
+  "backgroundNotes": [
+    {
+      "backgroundRef": "SRC-IMF-WEO-2026-10",
+      "term": "FMI",
+      "plainLanguageDefinition": "El Fondo Monetario Internacional publicó análisis para su World Economic Outlook de octubre de 2026 sobre crisis de costo de vida, inflación y pobreza.",
+      "sourceId": "SRC-IMF",
+      "sourceRole": "PRIMARY_OFFICIAL",
+      "sourceUrl": "https://www.elibrary.imf.org/browse?language=en&t_5=urn%3A11%2FBO&t_6=urn%3A10%2FBUS000000&t_8=urn%3Aeng"
+    },
+    {
+      "backgroundRef": "SRC-IMF-REUTERS-2026-10-06",
+      "term": "Reuters",
+      "plainLanguageDefinition": "Cobertura del estudio del FMI sobre los efectos persistentes de los shocks de alimentos y energía.",
+      "sourceId": "SRC-REUTERS",
+      "sourceRole": "REPUTABLE_MEDIA",
+      "sourceUrl": "https://www.reuters.com/world/asia-pacific/cost-of-living-crises-have-lasting-impact-inflation-expectations-poverty-imf-2026-10-06/"
+    }
+  ],
+  "sections": [
+    {
+      "id": "body",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "Que la inflación baje no significa que los precios vuelvan atrás. Después de un salto fuerte en alimentos, energía o alquileres, los hogares pueden quedar comprando con un nivel de precios permanentemente más alto, y esa experiencia también cambia lo que esperan que ocurra con la inflación futura.",
+          "claimRefs": [
+            "IMF-1"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "Un análisis del FMI difundido el 6 de octubre concluyó que las crisis de costo de vida pueden dejar efectos persistentes sobre las expectativas de inflación y la pobreza. El Fondo estimó además que entre 2021 y 2024 unas 23 millones de personas adicionales terminaron en pobreza extrema frente a estimaciones previas.",
+          "claimRefs": [
+            "IMF-1",
+            "IMF-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "INTERPRETIVE",
+          "material": true,
+          "text": "La lectura útil es que estabilizar la tasa de inflación resuelve solo una parte del problema. El daño distributivo puede durar más porque los hogares de menores ingresos gastan una proporción mayor en necesidades básicas y tienen menos margen para absorber nuevos shocks.",
+          "claimRefs": [
+            "IMF-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "El FMI recomienda apoyo focalizado, como transferencias de efectivo, antes que subsidios generales o controles amplios de precios. Esa es una recomendación de política del Fondo, no una conclusión universal sobre qué medida funciona mejor en todos los países.",
+          "claimRefs": [
+            "IMF-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-IMF",
+      "role": "PRIMARY_OFFICIAL",
+      "publisher": "International Monetary Fund"
+    },
+    {
+      "sourceId": "SRC-REUTERS",
+      "role": "REPUTABLE_MEDIA",
+      "publisher": "Reuters"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "020c381f49756885f47a999994013ed53fe588f9",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_IMF_2026-10-06.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_NOW_IMF_2026-10-06.json",
+    "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_IMF_2026-10-06.json"
+  }
+}

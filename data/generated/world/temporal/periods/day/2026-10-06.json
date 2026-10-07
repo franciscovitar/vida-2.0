@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "DAY",
+  "periodKey": "2026-10-06",
+  "state": "CLOSED",
+  "label": "6 de octubre de 2026",
+  "window": {
+    "start": "2026-10-06T00:00:00-03:00",
+    "end": "2026-10-06T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "020c381f49756885f47a999994013ed53fe588f9",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/DAY_2026-10-06_V1.json",
+    "generatedAt": "2026-10-07T20:05:00-03:00",
+    "observedAt": "2026-10-07T19:45:00-03:00"
+  },
+  "readingDebt": false,
+  "transitionNote": "Cierre del 6 de octubre publicado mediante un retry acotado del mismo ciclo diario después de que la primera ejecución quedara bloqueada únicamente en el transporte de escritura. La cobertura sigue marcada como parcial y no se fabricaron resultados para los dominios sin evidencia suficiente.",
+  "topStoryBriefIds": [
+    "WORLD-2026-10-06-EU-ENLARGEMENT-SAFEGUARDS",
+    "WORLD-2026-10-06-IMF-COST-OF-LIVING",
+    "WORLD-2026-10-06-NOBEL-PHYSICS-ICECUBE"
+  ],
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261006-POL-1",
+          "headline": "La Comisión Europea propuso nuevas salvaguardas para futuras ampliaciones",
+          "summary": "Bruselas planteó poder recortar fondos o restringir derechos de voto si un nuevo miembro retrocede en Estado de derecho después de entrar. La propuesta busca que la próxima ampliación refuerce a la UE sin volver irreversibles los compromisos democráticos asumidos durante la adhesión.",
+          "sourceRefs": [
+            "https://cyprus.representation.ec.europa.eu/news/preparing-wider-union-2026-10-06_en",
+            "https://www.reuters.com/world/europe/eu-commission-floats-safeguard-against-democratic-backsliding-by-new-members-2026-10-06/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [
+        "WORLD-2026-10-06-EU-ENLARGEMENT-SAFEGUARDS"
+      ],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261006-ECO-1",
+          "headline": "El FMI puso el foco en las cicatrices de las crisis de costo de vida",
+          "summary": "El Fondo señaló que los saltos de alimentos y energía pueden dejar expectativas de inflación más altas y pobreza persistente aun después de que la inflación se modere. La conclusión importante es que bajar la tasa de inflación no revierte automáticamente la pérdida de poder de compra acumulada.",
+          "sourceRefs": [
+            "https://www.reuters.com/world/asia-pacific/cost-of-living-crises-have-lasting-impact-inflation-expectations-poverty-imf-2026-10-06/",
+            "https://www.elibrary.imf.org/browse?language=en&t_5=urn%3A11%2FBO&t_6=urn%3A10%2FBUS000000&t_8=urn%3Aeng"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [
+        "WORLD-2026-10-06-IMF-COST-OF-LIVING"
+      ],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261006-SCI-1",
+          "headline": "Francis Halzen ganó el Nobel de Física por IceCube y los neutrinos cósmicos",
+          "summary": "El premio reconoció el observatorio antártico que detecta partículas de alta energía capaces de viajar desde algunos de los entornos más extremos del universo. IceCube amplió la astronomía más allá de la luz y convirtió a los neutrinos en una nueva vía para rastrear fenómenos cósmicos.",
+          "sourceRefs": [
+            "https://www.reuters.com/science/francis-halzen-wins-2026-nobel-prize-physics-2026-10-06/",
+            "https://www.nature.com/articles/d41586-026-03092-1"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [
+        "WORLD-2026-10-06-NOBEL-PHYSICS-ICECUBE"
+      ],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261006-TECH-1",
+          "headline": "Anthropic amplió el acceso a capacidades avanzadas de ciberseguridad",
+          "summary": "La empresa relanzó su Cyber Verification Program para dar a profesionales verificados acceso a modelos y capacidades con menos bloqueos en tareas autorizadas de defensa, red teaming y sistemas críticos. Es una señal de que los laboratorios están probando controles diferenciados según contexto y responsabilidad.",
+          "sourceRefs": [
+            "https://www.anthropic.com/news",
+            "https://www.reuters.com/legal/litigation/anthropic-opens-its-most-powerful-ai-models-more-security-teams-2026-10-06/"
+          ]
+        },
+        {
+          "itemId": "D20261006-TECH-2",
+          "headline": "Mistral lanzó Large 4 en preview y mantuvo la apuesta por pesos abiertos",
+          "summary": "Mistral presentó un modelo multimodal Mixture-of-Experts con ventana de contexto de un millón de tokens y anunció que publicará los pesos a fin de mes. El lanzamiento refuerza una vía europea de modelos de frontera que también pueden desplegarse fuera de infraestructura propietaria.",
+          "sourceRefs": [
+            "https://mistral.ai/news/mistral-large-4/",
+            "https://docs.mistral.ai/resources/changelogs",
+            "https://www.reuters.com/world/china/mistral-ceo-says-new-ai-model-beats-chinese-ones-some-areas-2026-10-06/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261006-HIST-1",
+          "headline": "Un lago de Wisconsin preservó una canoa indígena de unos mil años",
+          "summary": "La datación por radiocarbono situó una canoa de roble blanco hallada en Pewaukee Lake entre aproximadamente 992 y 1049 d.C. El hallazgo aporta otra evidencia material de la larga historia indígena de navegación en la región y será conservado en el lugar bajo el agua.",
+          "sourceRefs": [
+            "https://www.smithsonianmag.com/smart-news/a-diver-volunteered-to-clean-up-trash-from-a-wisconsin-lake-he-discovered-a-1000-year-old-dugout-canoe-at-the-bottom-instead-180989622/",
+            "https://www.wpr.org/news/diver-discovers-1000-year-old-dugout-canoe-southeastern-wisconsin-lake"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

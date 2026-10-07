@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
+  "mode": "NOW",
+  "briefId": "WORLD-2026-10-06-NOBEL-PHYSICS-ICECUBE",
+  "slug": "nobel-fisica-icecube-2026-10-06",
+  "primaryDomain": "SCIENCE",
+  "secondaryDomains": [],
+  "headline": "👻 Nobel de Física 2026: Francis Halzen ganó por convertir el hielo antártico en un telescopio de neutrinos",
+  "deck": "El premio reconoció su papel decisivo en IceCube y en la detección de neutrinos cósmicos de alta energía, partículas casi invisibles que permiten rastrear fenómenos extremos del universo.",
+  "readingSeconds": 120,
+  "publishedAt": "2026-10-07T20:05:00-03:00",
+  "editorialDraftSha256": "de2697f322040127fd42f8b557e0d483c094807ebd7753ed8549f3e2c561251b",
+  "backgroundNotes": [
+    {
+      "backgroundRef": "SRC-NOBEL-REUTERS-2026-10-06",
+      "term": "Reuters",
+      "plainLanguageDefinition": "Cobertura factual del Nobel de Física 2026 y del trabajo de Francis Halzen con IceCube.",
+      "sourceId": "SRC-REUTERS",
+      "sourceRole": "REPUTABLE_MEDIA",
+      "sourceUrl": "https://www.reuters.com/science/francis-halzen-wins-2026-nobel-prize-physics-2026-10-06/"
+    },
+    {
+      "backgroundRef": "SRC-NOBEL-NATURE-2026-10-06",
+      "term": "Nature",
+      "plainLanguageDefinition": "Explicación científica del premio y de por qué los neutrinos de alta energía abren otra forma de observar el cosmos.",
+      "sourceId": "SRC-NATURE",
+      "sourceRole": "SPECIALIST_ANALYSIS",
+      "sourceUrl": "https://www.nature.com/articles/d41586-026-03092-1"
+    }
+  ],
+  "sections": [
+    {
+      "id": "body",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "Los neutrinos son partículas que casi no interactúan con la materia. Eso los vuelve extremadamente difíciles de detectar, pero también muy valiosos: pueden atravesar enormes distancias casi sin desviarse y conservar información sobre el lugar del que salieron.",
+          "claimRefs": [
+            "NPH-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "Francis Halzen recibió el Nobel de Física 2026 por contribuciones decisivas al observatorio IceCube y por el descubrimiento de neutrinos astrofísicos de alta energía. IceCube usa un volumen gigantesco de hielo del Polo Sur instrumentado con miles de sensores para detectar los pequeños destellos producidos cuando un neutrino interactúa.",
+          "claimRefs": [
+            "NPH-1",
+            "NPH-2"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "INTERPRETIVE",
+          "material": true,
+          "text": "El salto conceptual es que la astronomía ya no depende solo de mirar luz. Si un neutrino llega desde una supernova, un agujero negro activo u otro entorno extremo, su dirección puede ayudar a reconstruir de dónde vino y combinar esa señal con telescopios tradicionales: es parte de la llamada astronomía multimensajero.",
+          "claimRefs": [
+            "NPH-2",
+            "NPH-3"
+          ],
+          "backgroundRefs": []
+        },
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "Los neutrinos de energía extrema siguen siendo muy raros y muchas fuentes todavía no están identificadas con precisión. El premio reconoce una herramienta y una línea de descubrimientos que siguen abiertas, no un mapa completo del universo de neutrinos.",
+          "claimRefs": [
+            "NPH-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-REUTERS",
+      "role": "REPUTABLE_MEDIA",
+      "publisher": "Reuters"
+    },
+    {
+      "sourceId": "SRC-NATURE",
+      "role": "SPECIALIST_ANALYSIS",
+      "publisher": "Nature"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "020c381f49756885f47a999994013ed53fe588f9",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_2026-10-06.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_NOW_NOBEL_2026-10-06.json",
+    "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_2026-10-06.json"
+  }
+}
