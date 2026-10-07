@@ -104,10 +104,7 @@ function movementAmount(movement: FinanceMovement): string {
   return formatMinor(movement.signedAmountMinor, movement.currency, true);
 }
 
-function queryHref(
-  filters: FinanceMovementFilters & { month: string },
-  kind: string,
-): string {
+function queryHref(filters: FinanceMovementFilters & { month: string }, kind: string): string {
   const params = new URLSearchParams();
   params.set('month', filters.month);
   if (filters.query) params.set('q', filters.query);
@@ -162,9 +159,7 @@ export function FinanceMovementsBrowser({
         <div className={styles.chips} aria-label="Filtrar por tipo">
           {KIND_OPTIONS.map((option) => (
             <Link
-              aria-current={
-                (filters.kind ?? 'all') === option.value ? 'true' : undefined
-              }
+              aria-current={(filters.kind ?? 'all') === option.value ? 'true' : undefined}
               href={queryHref(filters, option.value)}
               key={option.value}
             >
@@ -210,9 +205,7 @@ export function FinanceMovementsBrowser({
           </label>
 
           <button type="submit">Aplicar</button>
-          {hasActiveFilters ? (
-            <Link href="/finanzas/movimientos">Limpiar</Link>
-          ) : null}
+          {hasActiveFilters ? <Link href="/finanzas/movimientos">Limpiar</Link> : null}
         </div>
       </form>
 
@@ -228,11 +221,7 @@ export function FinanceMovementsBrowser({
       ) : (
         <div className={styles.groups}>
           {[...grouped.entries()].map(([date, rows]) => (
-            <section
-              className={styles.group}
-              key={date}
-              aria-labelledby={`day-${date}`}
-            >
+            <section className={styles.group} key={date} aria-labelledby={`day-${date}`}>
               <h3 id={`day-${date}`}>{dayLabel(rows[0].occurredAt)}</h3>
 
               <div className={styles.list}>
@@ -245,10 +234,7 @@ export function FinanceMovementsBrowser({
                           {movement.sourceLabel} · {movement.categoryLabel}
                         </span>
                       </div>
-                      <strong
-                        className={styles.amount}
-                        data-tone={amountTone(movement)}
-                      >
+                      <strong className={styles.amount} data-tone={amountTone(movement)}>
                         {movementAmount(movement)}
                       </strong>
                     </summary>
@@ -294,10 +280,8 @@ export function FinanceMovementsBrowser({
                         <summary>Detalle técnico</summary>
                         <p>
                           Origen:{' '}
-                          {movement.origin === 'ledger'
-                            ? 'ledger canónico'
-                            : 'Finance Logger'}
-                          . Rol: {movement.economicRole || 'sin rol explícito'}.
+                          {movement.origin === 'ledger' ? 'ledger canónico' : 'Finance Logger'}.
+                          Rol: {movement.economicRole || 'sin rol explícito'}.
                         </p>
                       </details>
                     </div>

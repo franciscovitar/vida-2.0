@@ -4,11 +4,7 @@ type SheetRows = readonly (readonly unknown[])[];
 
 export type FinanceMovementKind = 'income' | 'expense' | 'transfer' | 'other';
 export type FinanceMovementOrigin = 'ledger' | 'manual';
-export type FinanceMovementState =
-  | 'resolved'
-  | 'review'
-  | 'captured'
-  | 'link-missing';
+export type FinanceMovementState = 'resolved' | 'review' | 'captured' | 'link-missing';
 
 export interface FinanceMovement {
   id: string;
@@ -46,9 +42,7 @@ export interface FinanceMovementFilters {
 }
 
 function dataRows(rows: SheetRows): readonly (readonly unknown[])[] {
-  return rows
-    .slice(1)
-    .filter((row) => row.some((value) => String(value ?? '').trim() !== ''));
+  return rows.slice(1).filter((row) => row.some((value) => String(value ?? '').trim() !== ''));
 }
 
 function text(value: unknown): string {
@@ -121,10 +115,7 @@ function canonicalMovements(input: {
   transactions: SheetRows;
   postings: SheetRows;
 }): FinanceMovement[] {
-  const accountById = new Map<
-    string,
-    { label: string; ownership: string; currency: string }
-  >();
+  const accountById = new Map<string, { label: string; ownership: string; currency: string }>();
 
   for (const row of dataRows(input.accounts)) {
     const id = text(row[0]);
@@ -137,10 +128,7 @@ function canonicalMovements(input: {
     });
   }
 
-  const postingsByTransaction = new Map<
-    string,
-    readonly (readonly unknown[])[]
-  >();
+  const postingsByTransaction = new Map<string, readonly (readonly unknown[])[]>();
 
   for (const row of dataRows(input.postings)) {
     const transactionId = text(row[0]);
@@ -171,30 +159,19 @@ function canonicalMovements(input: {
       text(owned[0]?.[6]) ||
       'unknown_review';
     const kind = movementKind(role);
-    const currency =
-      text(owned[0]?.[4]) ||
-      accountById.get(text(owned[0]?.[2]))?.currency ||
-      '';
-    const netOwnedMinor = owned.reduce(
-      (total, posting) => total + amount(posting[3]),
-      0,
-    );
+    const currency = text(owned[0]?.[4]) || accountById.get(text(owned[0]?.[2]))?.currency || '';
+    const netOwnedMinor = owned.reduce((total, posting) => total + amount(posting[3]), 0);
     const maxAbsoluteMinor = owned.reduce(
       (maximum, posting) => Math.max(maximum, Math.abs(amount(posting[3]))),
       0,
     );
     const signedAmountMinor = kind === 'transfer' ? 0 : netOwnedMinor;
-    const amountMinor =
-      kind === 'transfer' ? maxAbsoluteMinor : Math.abs(netOwnedMinor);
+    const amountMinor = kind === 'transfer' ? maxAbsoluteMinor : Math.abs(netOwnedMinor);
 
     const negativeOwned = owned.find((posting) => amount(posting[3]) < 0);
     const positiveOwned = owned.find((posting) => amount(posting[3]) > 0);
     const ownedLabels = [
-      ...new Set(
-        owned
-          .map((posting) => accountById.get(text(posting[2]))?.label)
-          .filter(Boolean),
-      ),
+      ...new Set(owned.map((posting) => accountById.get(text(posting[2]))?.label).filter(Boolean)),
     ] as string[];
     const sourceLabel =
       kind === 'transfer' && negativeOwned && positiveOwned
@@ -205,8 +182,7 @@ function canonicalMovements(input: {
       .sort()
       .join('|');
 
-    const explicitCategory =
-      owned.map((posting) => text(posting[5])).find(Boolean) || '';
+    const explicitCategory = owned.map((posting) => text(posting[5])).find(Boolean) || '';
     const categoryKey = explicitCategory || role || 'sin-categoria';
     const reviewState = text(row[5]);
     const description = text(row[2]) || roleLabel(role);
@@ -220,9 +196,7 @@ function canonicalMovements(input: {
       signedAmountMinor,
       kind,
       category: categoryKey,
-      categoryLabel: explicitCategory
-        ? categoryLabel(explicitCategory)
-        : roleLabel(role),
+      categoryLabel: explicitCategory ? categoryLabel(explicitCategory) : roleLabel(role),
       sourceKey,
       sourceLabel,
       origin: 'ledger',
@@ -237,10 +211,7 @@ function canonicalMovements(input: {
   return movements;
 }
 
-function manualMovements(
-  rows: SheetRows,
-  canonicalIds: ReadonlySet<string>,
-): FinanceMovement[] {
+function manualMovements(rows: SheetRows, canonicalIds: ReadonlySet<string>): FinanceMovement[] {
   const movements: FinanceMovement[] = [];
 
   for (const row of dataRows(rows)) {
@@ -259,8 +230,7 @@ function manualMovements(
     if (!id || !occurredAt) continue;
 
     const role = text(row[8]) as FinanceEconomicRole;
-    const categoryKey =
-      text(row[7]) || role || (direction === 'income' ? 'ingreso' : 'otros');
+    const categoryKey = text(row[7]) || role || (direction === 'income' ? 'ingreso' : 'otros');
     const sourceKey = text(row[14]) || text(row[12]) || 'finance-logger';
     const note = text(row[9]);
     const rawText = text(row[3]);
@@ -272,9 +242,7 @@ function manualMovements(
       amountMinor: Math.abs(amount(row[5])),
       currency: text(row[6]).toUpperCase(),
       signedAmountMinor:
-        direction === 'income'
-          ? Math.abs(amount(row[5]))
-          : -Math.abs(amount(row[5])),
+        direction === 'income' ? Math.abs(amount(row[5])) : -Math.abs(amount(row[5])),
       kind: direction,
       category: categoryKey,
       categoryLabel: categoryLabel(categoryKey),
@@ -307,16 +275,11 @@ export function buildFinanceMovementsModel(input: {
   const manual = manualMovements(input.manualIntake, canonicalIds);
   const movements = [...canonical, ...manual].sort(
     (left, right) =>
-      timestamp(right.occurredAt) - timestamp(left.occurredAt) ||
-      right.id.localeCompare(left.id),
+      timestamp(right.occurredAt) - timestamp(left.occurredAt) || right.id.localeCompare(left.id),
   );
 
   const months = [
-    ...new Set(
-      movements
-        .map((movement) => monthKey(movement.occurredAt))
-        .filter(Boolean),
-    ),
+    ...new Set(movements.map((movement) => monthKey(movement.occurredAt)).filter(Boolean)),
   ]
     .sort()
     .reverse();
@@ -366,10 +329,7 @@ export function filterFinanceMovements(
     if (filters.category && movement.category !== filters.category) {
       return false;
     }
-    if (
-      filters.source &&
-      !movement.sourceKey.split('|').includes(filters.source)
-    ) {
+    if (filters.source && !movement.sourceKey.split('|').includes(filters.source)) {
       return false;
     }
 

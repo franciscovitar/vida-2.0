@@ -22,12 +22,7 @@ function scalar(value: string | string[] | undefined): string {
 }
 
 function kind(value: string): 'all' | FinanceMovementKind {
-  if (
-    value === 'income' ||
-    value === 'expense' ||
-    value === 'transfer' ||
-    value === 'other'
-  ) {
+  if (value === 'income' || value === 'expense' || value === 'transfer' || value === 'other') {
     return value;
   }
   return 'all';
@@ -62,12 +57,10 @@ export default async function FinanceMovementsPage({
           const requestedMonth = scalar(params.month);
           const month = snapshot.model.months.includes(requestedMonth)
             ? requestedMonth
-            : snapshot.model.months[0] ?? '';
+            : (snapshot.model.months[0] ?? '');
 
           const requestedCategory = scalar(params.category);
-          const category = snapshot.model.categories.some(
-            (item) => item.key === requestedCategory,
-          )
+          const category = snapshot.model.categories.some((item) => item.key === requestedCategory)
             ? requestedCategory
             : '';
 

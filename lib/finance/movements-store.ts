@@ -4,14 +4,10 @@ import {
   buildFinanceMovementsModel,
   type FinanceMovementsModel,
 } from '@/lib/finance/movements-core';
-import {
-  readFinanceSheet,
-  type FinanceStoreFailureCode,
-} from '@/lib/finance/store/client';
+import { readFinanceSheet, type FinanceStoreFailureCode } from '@/lib/finance/store/client';
 
 export type FinanceMovementsSnapshot =
-  | { ok: true; model: FinanceMovementsModel }
-  | { ok: false; code: FinanceStoreFailureCode };
+  { ok: true; model: FinanceMovementsModel } | { ok: false; code: FinanceStoreFailureCode };
 
 export async function getFinanceMovementsSnapshot(): Promise<FinanceMovementsSnapshot> {
   const [accounts, transactions, postings, manualIntake] = await Promise.all([

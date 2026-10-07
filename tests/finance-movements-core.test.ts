@@ -1,21 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  buildFinanceMovementsModel,
-  filterFinanceMovements,
-} from '@/lib/finance/movements-core';
+import { buildFinanceMovementsModel, filterFinanceMovements } from '@/lib/finance/movements-core';
 import { FINANCE_SHEETS } from '@/lib/finance/store/schema';
 
 function rows(headers: readonly string[], data: readonly (readonly unknown[])[]) {
   return [headers, ...data];
 }
 
-function account(
-  id: string,
-  label: string,
-  ownership: 'owned' | 'clearing' = 'owned',
-) {
+function account(id: string, label: string, ownership: 'owned' | 'clearing' = 'owned') {
   return [
     id,
     label,
@@ -32,11 +25,7 @@ function account(
   ];
 }
 
-function transaction(
-  id: string,
-  occurredAt: string,
-  description: string,
-) {
+function transaction(id: string, occurredAt: string, description: string) {
   return [id, occurredAt, description, 'posted', 1, 'resolved', '', ''];
 }
 
@@ -48,17 +37,7 @@ function posting(
   category: string | null,
   role: string,
 ) {
-  return [
-    transactionId,
-    line,
-    accountId,
-    amountMinor,
-    'ARS',
-    category,
-    role,
-    'source',
-    '',
-  ];
+  return [transactionId, line, accountId, amountMinor, 'ARS', category, role, 'source', ''];
 }
 
 function manual(input: {
@@ -105,45 +84,13 @@ test('movements combines canonical ledger and active manual captures without dup
     accounts,
     transactions: rows(FINANCE_SHEETS.transactions.headers, [
       transaction('t-expense', '2026-09-05T15:00:00Z', 'Supermercado'),
-      transaction(
-        't-transfer',
-        '2026-09-06T15:00:00Z',
-        'Transferencia propia',
-      ),
+      transaction('t-transfer', '2026-09-06T15:00:00Z', 'Transferencia propia'),
     ]),
     postings: rows(FINANCE_SHEETS.postings.headers, [
-      posting(
-        't-expense',
-        1,
-        'naranja',
-        -500000,
-        'comida',
-        'expense_personal',
-      ),
-      posting(
-        't-expense',
-        2,
-        'clear',
-        500000,
-        'comida',
-        'expense_personal',
-      ),
-      posting(
-        't-transfer',
-        1,
-        'naranja',
-        -200000,
-        null,
-        'internal_transfer',
-      ),
-      posting(
-        't-transfer',
-        2,
-        'mp',
-        200000,
-        null,
-        'internal_transfer',
-      ),
+      posting('t-expense', 1, 'naranja', -500000, 'comida', 'expense_personal'),
+      posting('t-expense', 2, 'clear', 500000, 'comida', 'expense_personal'),
+      posting('t-transfer', 1, 'naranja', -200000, null, 'internal_transfer'),
+      posting('t-transfer', 2, 'mp', 200000, null, 'internal_transfer'),
     ]),
     manualIntake: rows(FINANCE_SHEETS.manualIntake.headers, [
       manual({
@@ -196,9 +143,7 @@ test('movements combines canonical ledger and active manual captures without dup
   assert.equal(expense?.sourceLabel, 'Naranja X');
   assert.equal(expense?.categoryLabel, 'Comida');
 
-  const transfer = model.movements.find(
-    (movement) => movement.id === 't-transfer',
-  );
+  const transfer = model.movements.find((movement) => movement.id === 't-transfer');
   assert.equal(transfer?.kind, 'transfer');
   assert.equal(transfer?.sourceLabel, 'Naranja X → Mercado Pago');
   assert.equal(transfer?.amountMinor, 200000);
