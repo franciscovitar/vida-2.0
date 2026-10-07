@@ -4,7 +4,10 @@ import {
   buildFinanceMovementsModel,
   type FinanceMovementsModel,
 } from '@/lib/finance/movements-core';
-import { readFinanceSheet, type FinanceStoreFailureCode } from '@/lib/finance/store/client';
+import {
+  readFinanceSheet,
+  type FinanceStoreFailureCode,
+} from '@/lib/finance/store/client';
 
 export type FinanceMovementsSnapshot =
   | { ok: true; model: FinanceMovementsModel }

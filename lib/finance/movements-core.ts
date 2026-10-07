@@ -4,7 +4,11 @@ type SheetRows = readonly (readonly unknown[])[];
 
 export type FinanceMovementKind = 'income' | 'expense' | 'transfer' | 'other';
 export type FinanceMovementOrigin = 'ledger' | 'manual';
-export type FinanceMovementState = 'resolved' | 'review' | 'captured' | 'link-missing';
+export type FinanceMovementState =
+  | 'resolved'
+  | 'review'
+  | 'captured'
+  | 'link-missing';
 
 export interface FinanceMovement {
   id: string;
@@ -42,7 +46,9 @@ export interface FinanceMovementFilters {
 }
 
 function dataRows(rows: SheetRows): readonly (readonly unknown[])[] {
-  return rows.slice(1).filter((row) => row.some((value) => String(value ?? '').trim() !== ''));
+  return rows
+    .slice(1)
+    .filter((row) => row.some((value) => String(value ?? '').trim() !== ''));
 }
 
 function text(value: unknown): string {
@@ -93,7 +99,9 @@ function roleLabel(role: string): string {
 function movementKind(role: string): FinanceMovementKind {
   if (role === 'internal_transfer') return 'transfer';
   if (role.startsWith('income_')) return 'income';
-  if (role === 'expense_personal' || role === 'expense_professional') return 'expense';
+  if (role === 'expense_personal' || role === 'expense_professional') {
+    return 'expense';
+  }
   return 'other';
 }
 
@@ -121,6 +129,7 @@ function canonicalMovements(input: {
   for (const row of dataRows(input.accounts)) {
     const id = text(row[0]);
     if (!id) continue;
+
     accountById.set(id, {
       label: text(row[2]) || id,
       ownership: text(row[5]),
@@ -128,10 +137,15 @@ function canonicalMovements(input: {
     });
   }
 
-  const postingsByTransaction = new Map<string, readonly (readonly unknown[])[]>();
+  const postingsByTransaction = new Map<
+    string,
+    readonly (readonly unknown[])[]
+  >();
+
   for (const row of dataRows(input.postings)) {
     const transactionId = text(row[0]);
     if (!transactionId) continue;
+
     const current = postingsByTransaction.get(transactionId) ?? [];
     postingsByTransaction.set(transactionId, [...current, row]);
   }
@@ -157,18 +171,31 @@ function canonicalMovements(input: {
       text(owned[0]?.[6]) ||
       'unknown_review';
     const kind = movementKind(role);
-    const currency = text(owned[0]?.[4]) || accountById.get(text(owned[0]?.[2]))?.currency || '';
-    const netOwnedMinor = owned.reduce((total, posting) => total + amount(posting[3]), 0);
+    const currency =
+      text(owned[0]?.[4]) ||
+      accountById.get(text(owned[0]?.[2]))?.currency ||
+      '';
+    const netOwnedMinor = owned.reduce(
+      (total, posting) => total + amount(posting[3]),
+      0,
+    );
     const maxAbsoluteMinor = owned.reduce(
       (maximum, posting) => Math.max(maximum, Math.abs(amount(posting[3]))),
       0,
     );
     const signedAmountMinor = kind === 'transfer' ? 0 : netOwnedMinor;
-    const amountMinor = kind === 'transfer' ? maxAbsoluteMinor : Math.abs(netOwnedMinor);
+    const amountMinor =
+      kind === 'transfer' ? maxAbsoluteMinor : Math.abs(netOwnedMinor);
 
     const negativeOwned = owned.find((posting) => amount(posting[3]) < 0);
     const positiveOwned = owned.find((posting) => amount(posting[3]) > 0);
-    const ownedLabels = [...new Set(owned.map((posting) => accountById.get(text(posting[2]))?.label).filter(Boolean))] as string[];
+    const ownedLabels = [
+      ...new Set(
+        owned
+          .map((posting) => accountById.get(text(posting[2]))?.label)
+          .filter(Boolean),
+      ),
+    ] as string[];
     const sourceLabel =
       kind === 'transfer' && negativeOwned && positiveOwned
         ? `${accountById.get(text(negativeOwned[2]))?.label ?? text(negativeOwned[2])} → ${accountById.get(text(positiveOwned[2]))?.label ?? text(positiveOwned[2])}`
@@ -178,7 +205,8 @@ function canonicalMovements(input: {
       .sort()
       .join('|');
 
-    const explicitCategory = owned.map((posting) => text(posting[5])).find(Boolean) || '';
+    const explicitCategory =
+      owned.map((posting) => text(posting[5])).find(Boolean) || '';
     const categoryKey = explicitCategory || role || 'sin-categoria';
     const reviewState = text(row[5]);
     const description = text(row[2]) || roleLabel(role);
@@ -192,7 +220,9 @@ function canonicalMovements(input: {
       signedAmountMinor,
       kind,
       category: categoryKey,
-      categoryLabel: explicitCategory ? categoryLabel(explicitCategory) : roleLabel(role),
+      categoryLabel: explicitCategory
+        ? categoryLabel(explicitCategory)
+        : roleLabel(role),
       sourceKey,
       sourceLabel,
       origin: 'ledger',
@@ -220,14 +250,17 @@ function manualMovements(
     if (direction !== 'income' && direction !== 'expense') continue;
 
     const reconciledTransactionId = text(row[13]);
-    if (reconciledTransactionId && canonicalIds.has(reconciledTransactionId)) continue;
+    if (reconciledTransactionId && canonicalIds.has(reconciledTransactionId)) {
+      continue;
+    }
 
     const id = text(row[0]);
     const occurredAt = text(row[1]);
     if (!id || !occurredAt) continue;
 
     const role = text(row[8]) as FinanceEconomicRole;
-    const categoryKey = text(row[7]) || role || (direction === 'income' ? 'ingreso' : 'otros');
+    const categoryKey =
+      text(row[7]) || role || (direction === 'income' ? 'ingreso' : 'otros');
     const sourceKey = text(row[14]) || text(row[12]) || 'finance-logger';
     const note = text(row[9]);
     const rawText = text(row[3]);
@@ -239,7 +272,9 @@ function manualMovements(
       amountMinor: Math.abs(amount(row[5])),
       currency: text(row[6]).toUpperCase(),
       signedAmountMinor:
-        direction === 'income' ? Math.abs(amount(row[5])) : -Math.abs(amount(row[5])),
+        direction === 'income'
+          ? Math.abs(amount(row[5]))
+          : -Math.abs(amount(row[5])),
       kind: direction,
       category: categoryKey,
       categoryLabel: categoryLabel(categoryKey),
@@ -247,7 +282,11 @@ function manualMovements(
       sourceLabel: manualSourceLabel(sourceKey),
       origin: 'manual',
       state: reconciledTransactionId ? 'link-missing' : 'captured',
-      stateLabel: reconciledTransactionId ? 'Enlace para revisar' : 'Registrado en Finance Logger',
+      stateLabel: reconciledTransactionId
+        ? 'Enlace para revisar'
+        : text(row[11])
+          ? 'Corrección vigente'
+          : 'Registrado en Finance Logger',
       economicRole: role,
       note,
       rawText,
@@ -272,15 +311,32 @@ export function buildFinanceMovementsModel(input: {
       right.id.localeCompare(left.id),
   );
 
-  const months = [...new Set(movements.map((movement) => monthKey(movement.occurredAt)).filter(Boolean))]
+  const months = [
+    ...new Set(
+      movements
+        .map((movement) => monthKey(movement.occurredAt))
+        .filter(Boolean),
+    ),
+  ]
     .sort()
     .reverse();
 
   const categoryMap = new Map<string, string>();
   const sourceMap = new Map<string, string>();
+
+  for (const row of dataRows(input.accounts)) {
+    if (text(row[5]) !== 'owned') continue;
+
+    const key = text(row[0]);
+    if (!key) continue;
+    sourceMap.set(key, text(row[2]) || key);
+  }
+
   for (const movement of movements) {
     categoryMap.set(movement.category, movement.categoryLabel);
-    sourceMap.set(movement.sourceKey, movement.sourceLabel);
+    if (movement.origin === 'manual' && !sourceMap.has(movement.sourceKey)) {
+      sourceMap.set(movement.sourceKey, movement.sourceLabel);
+    }
   }
 
   return {
@@ -303,10 +359,19 @@ export function filterFinanceMovements(
   const kind = filters.kind ?? 'all';
 
   return movements.filter((movement) => {
-    if (filters.month && monthKey(movement.occurredAt) !== filters.month) return false;
+    if (filters.month && monthKey(movement.occurredAt) !== filters.month) {
+      return false;
+    }
     if (kind !== 'all' && movement.kind !== kind) return false;
-    if (filters.category && movement.category !== filters.category) return false;
-    if (filters.source && movement.sourceKey !== filters.source) return false;
+    if (filters.category && movement.category !== filters.category) {
+      return false;
+    }
+    if (
+      filters.source &&
+      !movement.sourceKey.split('|').includes(filters.source)
+    ) {
+      return false;
+    }
 
     if (query) {
       const haystack = normalize(

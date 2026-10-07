@@ -22,7 +22,12 @@ function scalar(value: string | string[] | undefined): string {
 }
 
 function kind(value: string): 'all' | FinanceMovementKind {
-  if (value === 'income' || value === 'expense' || value === 'transfer' || value === 'other') {
+  if (
+    value === 'income' ||
+    value === 'expense' ||
+    value === 'transfer' ||
+    value === 'other'
+  ) {
     return value;
   }
   return 'all';
@@ -59,12 +64,24 @@ export default async function FinanceMovementsPage({
             ? requestedMonth
             : snapshot.model.months[0] ?? '';
 
+          const requestedCategory = scalar(params.category);
+          const category = snapshot.model.categories.some(
+            (item) => item.key === requestedCategory,
+          )
+            ? requestedCategory
+            : '';
+
+          const requestedSource = scalar(params.source);
+          const source = snapshot.model.sources.some((item) => item.key === requestedSource)
+            ? requestedSource
+            : '';
+
           const filters: FinanceMovementFilters & { month: string } = {
             month,
             query: scalar(params.q),
             kind: kind(scalar(params.type)),
-            category: scalar(params.category),
-            source: scalar(params.source),
+            category,
+            source,
           };
           const movements = filterFinanceMovements(snapshot.model.movements, filters);
 
