@@ -24,7 +24,7 @@
 .field input {
   width: 100%;
   min-width: 0;
-  height: 38px;
+  min-height: 44px;
   padding: 0 0.75rem;
   font: inherit;
   color: var(--text);
@@ -39,9 +39,13 @@
   box-shadow: 0 0 0 3px var(--ring);
 }
 
+.form button {
+  min-height: 44px;
+}
+
 .privacy {
   color: var(--text-subtle);
-  font-size: 0.67rem;
+  font-size: 0.72rem;
   line-height: 1.45;
 }
 
@@ -67,7 +71,7 @@
 
 .result span {
   color: var(--text-subtle);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
 }
 
 .result strong {

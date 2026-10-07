@@ -258,11 +258,19 @@
 }
 
 .explain summary {
+  display: inline-flex;
+  align-items: center;
   width: fit-content;
+  min-height: 44px;
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.explain summary:focus-visible {
+  outline: 2px solid var(--c-finance);
+  outline-offset: 2px;
 }
 
 .explain p {
@@ -312,6 +320,9 @@
 }
 
 .list-heading a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--c-finance);
   font-size: 0.72rem;
   font-weight: 700;
@@ -447,5 +458,21 @@
 
   .pace {
     width: fit-content;
+  }
+}
+
+@media (width <= 420px) {
+  .movement {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .movement > strong {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .movement > div strong,
+  .movement > div span {
+    white-space: normal;
   }
 }

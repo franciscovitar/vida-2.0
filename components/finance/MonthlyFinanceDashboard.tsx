@@ -169,6 +169,9 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(targetUsed * 100)}
+            aria-valuetext={`${Math.round(targetUsed * 100)}% del objetivo usado; ${Math.round(
+              elapsed * 100,
+            )}% del mes transcurrido`}
           >
             <span className={styles.fill} style={{ width: `${targetUsed * 100}%` }} />
             <span

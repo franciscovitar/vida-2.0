@@ -211,3 +211,14 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+@media (width <= 480px) {
+  .metrics > div {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .metrics dd {
+    text-align: left;
+  }
+}

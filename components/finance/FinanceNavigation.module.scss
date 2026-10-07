@@ -14,7 +14,10 @@
 }
 
 .link {
+  display: inline-flex;
   flex: 0 0 auto;
+  align-items: center;
+  min-height: 44px;
   padding: 0.72rem 0.85rem;
   border-bottom: 2px solid transparent;
   color: var(--text-muted);
@@ -37,9 +40,10 @@
   gap: 0.38rem;
   align-items: center;
   justify-self: start;
-  padding: 0.38rem 0.58rem;
+  min-height: 44px;
+  padding: 0.5rem 0.7rem;
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-decoration: none;
   border: 1px solid var(--border);
@@ -76,6 +80,6 @@
 
   .data {
     justify-self: end;
-    margin-bottom: 0.42rem;
+    margin-bottom: 0.2rem;
   }
 }

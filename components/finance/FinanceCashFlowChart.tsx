@@ -37,7 +37,11 @@ export function FinanceCashFlowChart({ currency, monthly }: FinanceCashFlowChart
   );
 
   return (
-    <div className={styles.chart} aria-label={`Cash flow mensual en ${currency}`}>
+    <div
+      className={styles.chart}
+      role="group"
+      aria-label={`Cash flow mensual en ${currency}; valores exactos visibles por mes`}
+    >
       <div className={styles.legend} aria-hidden="true">
         <span data-series="income">Ingresos</span>
         <span data-series="expense">Gastos</span>

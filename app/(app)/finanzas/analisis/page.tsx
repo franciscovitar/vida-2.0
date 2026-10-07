@@ -258,7 +258,11 @@ export default async function FinanceAnalysisPage({
 
             <details className={styles.disclosure}>
               <summary>Ver tabla exacta</summary>
-              <div className={styles['table-wrap']}>
+              <div
+                className={styles['table-wrap']}
+                tabIndex={0}
+                aria-label={`Tabla exacta de cash flow en ${currency}; desplazable horizontalmente si hace falta`}
+              >
                 <table className={styles.table}>
                   <thead>
                     <tr>

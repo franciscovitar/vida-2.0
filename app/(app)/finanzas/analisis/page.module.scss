@@ -12,7 +12,7 @@
 
 .control-group > span {
   color: var(--text-subtle);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
@@ -23,7 +23,7 @@
 }
 
 .control-group a {
-  min-height: 36px;
+  min-height: 44px;
   padding: 0.48rem 0.65rem;
   color: var(--text-muted);
   font-size: 0.72rem;
@@ -118,6 +118,12 @@
 .table-wrap {
   overflow-x: auto;
   margin-top: 0.4rem;
+  border-radius: var(--radius);
+}
+
+.table-wrap:focus-visible {
+  outline: 2px solid var(--c-finance);
+  outline-offset: 2px;
 }
 
 .table {
@@ -143,7 +149,7 @@
 
 .table thead th {
   color: var(--text-subtle);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   font-weight: 750;
   letter-spacing: 0.03em;
   text-transform: uppercase;

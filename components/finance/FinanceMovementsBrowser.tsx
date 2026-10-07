@@ -21,7 +21,7 @@ const KIND_OPTIONS = [
   { value: 'transfer', label: 'Transferencias' },
 ] as const;
 
-function formatMinor(value: number, currency: string, signed = false): string {
+function formatMinor(value: number, currency: string, signed = false, exact = false): string {
   const absolute = Math.abs(value) / 100;
   let formatted: string;
 
@@ -29,8 +29,8 @@ function formatMinor(value: number, currency: string, signed = false): string {
     formatted = new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency,
-      minimumFractionDigits: currency === 'ARS' ? 0 : 2,
-      maximumFractionDigits: currency === 'ARS' ? 0 : 2,
+      minimumFractionDigits: exact ? 2 : currency === 'ARS' ? 0 : 2,
+      maximumFractionDigits: exact ? 2 : currency === 'ARS' ? 0 : 2,
     }).format(absolute);
   } catch {
     formatted = `${currency} ${absolute.toLocaleString('es-AR')}`;
@@ -97,11 +97,11 @@ function amountTone(movement: FinanceMovement): string {
   return 'neutral';
 }
 
-function movementAmount(movement: FinanceMovement): string {
+function movementAmount(movement: FinanceMovement, exact = false): string {
   if (movement.kind === 'transfer') {
-    return formatMinor(movement.amountMinor, movement.currency);
+    return formatMinor(movement.amountMinor, movement.currency, false, exact);
   }
-  return formatMinor(movement.signedAmountMinor, movement.currency, true);
+  return formatMinor(movement.signedAmountMinor, movement.currency, true, exact);
 }
 
 function queryHref(filters: FinanceMovementFilters & { month: string }, kind: string): string {
@@ -247,7 +247,7 @@ export function FinanceMovementsBrowser({
                         </div>
                         <div>
                           <dt>Importe</dt>
-                          <dd>{movementAmount(movement)}</dd>
+                          <dd>{movementAmount(movement, true)}</dd>
                         </div>
                         <div>
                           <dt>Categoría</dt>
