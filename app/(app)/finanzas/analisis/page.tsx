@@ -314,10 +314,7 @@ export default async function FinanceAnalysisPage({
                         </strong>
                       </div>
                       <div className={styles['composition-track']} aria-hidden="true">
-                        <div
-                          data-tone={tone(row.totalMinor)}
-                          style={{ width: `${width}%` }}
-                        />
+                        <div data-tone={tone(row.totalMinor)} style={{ width: `${width}%` }} />
                       </div>
                     </div>
                   );

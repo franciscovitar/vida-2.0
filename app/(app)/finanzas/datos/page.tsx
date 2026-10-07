@@ -6,10 +6,7 @@ import { FinanceNavigation } from '@/components/finance/FinanceNavigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import {
-  resolveFinanceDataState,
-  type FinanceDataState,
-} from '@/lib/finance/data-state';
+import { resolveFinanceDataState, type FinanceDataState } from '@/lib/finance/data-state';
 import { getFinancePlanningStoreSnapshot } from '@/lib/finance/planning-store';
 import type { FinanceLiquidityExclusionReason } from '@/lib/finance/planning-store-core';
 import { getFinanceCashFlowSnapshot } from '@/lib/finance/reporting/cash-flow';

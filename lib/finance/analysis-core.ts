@@ -79,8 +79,7 @@ function aggregateRoles(rows: readonly FinanceMonthlyRoleTotal[]): FinanceRoleTo
 
   return [...byRole.values()].sort(
     (left, right) =>
-      Math.abs(right.totalMinor) - Math.abs(left.totalMinor) ||
-      left.role.localeCompare(right.role),
+      Math.abs(right.totalMinor) - Math.abs(left.totalMinor) || left.role.localeCompare(right.role),
   );
 }
 

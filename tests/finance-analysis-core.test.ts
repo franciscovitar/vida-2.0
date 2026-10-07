@@ -187,5 +187,8 @@ test('analysis keeps currencies separate', () => {
     adjustmentMinor: 0,
     netMinor: 8_000,
   });
-  assert.deepEqual(view.monthly.map((row) => row.currency), ['USD']);
+  assert.deepEqual(
+    view.monthly.map((row) => row.currency),
+    ['USD'],
+  );
 });

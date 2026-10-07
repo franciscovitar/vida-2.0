@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  resolveFinanceDataState,
-  type FinanceDataStateReport,
-} from '@/lib/finance/data-state';
+import { resolveFinanceDataState, type FinanceDataStateReport } from '@/lib/finance/data-state';
 
 function report(overrides: Partial<FinanceDataStateReport> = {}): FinanceDataStateReport {
   return {
