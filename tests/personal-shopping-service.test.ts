@@ -230,7 +230,9 @@ test('personal shopping lifecycle moves closed items to history and restore is e
 
 test('personal shopping transition is replay-safe and never mutates Finance linkage', async () => {
   const repository = new MemoryPersonalShoppingRepository({
-    items: [\n      item({ state: 'BUY', financeMovementId: 'finance-existing', financeLinkState: 'linked' }),\n    ],
+    items: [
+      item({ state: 'BUY', financeMovementId: 'finance-existing', financeLinkState: 'linked' }),
+    ],
   });
   let nextId = 0;
   const service = new PersonalShoppingService(repository, {
