@@ -123,3 +123,12 @@ test('FIN-UX-E12. Movimientos oculta jerga técnica del escaneo sin perderla del
   assert.match(movements, /Descripción de origen/);
   assert.equal(movementStyles.includes('text-transform: capitalize'), false);
 });
+
+
+test('FIN-UX-E13. Datos y fuentes explica el motivo de revisión donde aparece la alerta', () => {
+  assert.match(dataPage, /Integridad del registro/);
+  assert.match(dataPage, /El estado requiere revisión por/);
+  assert.match(dataPage, /conciliación/);
+  assert.match(dataPage, /Ver conciliación ↓/);
+  assert.match(dataStyles, /\.status-link/);
+});
