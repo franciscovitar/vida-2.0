@@ -14,9 +14,7 @@ import {
 } from '@/lib/personal-shopping/finance-context-core';
 import type { PersonalPurchaseItem } from '@/lib/personal-shopping/types';
 
-function shoppingItem(
-  overrides: Partial<PersonalPurchaseItem> = {},
-): PersonalPurchaseItem {
+function shoppingItem(overrides: Partial<PersonalPurchaseItem> = {}): PersonalPurchaseItem {
   return {
     id: 'ps_item-1',
     title: 'Auriculares',
@@ -73,9 +71,7 @@ function monthlyDashboard(): FinanceMonthlyDashboard {
   };
 }
 
-function planningModel(
-  status: 'ready' | 'configuration-required',
-): FinancePlanningReadModel {
+function planningModel(status: 'ready' | 'configuration-required'): FinancePlanningReadModel {
   const snapshot =
     status === 'ready'
       ? buildFinancePlanningSnapshot({

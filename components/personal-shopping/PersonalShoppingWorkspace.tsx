@@ -156,9 +156,7 @@ function monthlyTargetHeadline(
   return `${formatMinor(impact.postRemainingTargetMinor, impact.currency)} de margen después`;
 }
 
-function safeToSpendHeadline(
-  impact: NonNullable<PersonalShoppingFinanceImpact['safeToSpend']>,
-) {
+function safeToSpendHeadline(impact: NonNullable<PersonalShoppingFinanceImpact['safeToSpend']>) {
   const { scenario } = impact;
   if (scenario.capacityState === 'exceeds-liquidity') {
     return `${formatMinor(
@@ -175,11 +173,7 @@ function safeToSpendHeadline(
   return `${formatMinor(scenario.postSafeToSpendMinor, scenario.currency)} de capacidad después`;
 }
 
-function PersonalShoppingFinanceImpactPanel({
-  impact,
-}: {
-  impact: PersonalShoppingFinanceImpact;
-}) {
+function PersonalShoppingFinanceImpactPanel({ impact }: { impact: PersonalShoppingFinanceImpact }) {
   const monthly = impact.monthlyTarget;
   const safe = impact.safeToSpend;
 
@@ -188,9 +182,7 @@ function PersonalShoppingFinanceImpactPanel({
       <div className={styles['finance-impact-heading']}>
         <div>
           <span className={styles.eyebrow}>Finanzas · solo lectura</span>
-          <strong>
-            Impacto de {formatMinor(impact.purchaseAmountMinor, impact.currency)}
-          </strong>
+          <strong>Impacto de {formatMinor(impact.purchaseAmountMinor, impact.currency)}</strong>
         </div>
         <span className={styles['finance-read-only-badge']}>No registra gastos</span>
       </div>
@@ -215,9 +207,7 @@ function PersonalShoppingFinanceImpactPanel({
               <small>
                 Capacidad actual:{' '}
                 {formatMinor(safe.scenario.preSafeToSpendMinor, safe.scenario.currency)} ·{' '}
-                {safe.liquidityQuality === 'verified'
-                  ? 'liquidez verificada'
-                  : 'cobertura parcial'}
+                {safe.liquidityQuality === 'verified' ? 'liquidez verificada' : 'cobertura parcial'}
               </small>
             </article>
           ) : null}
@@ -467,9 +457,7 @@ function PersonalShoppingDetail({
         </div>
       </form>
 
-      {financeImpact ? (
-        <PersonalShoppingFinanceImpactPanel impact={financeImpact} />
-      ) : null}
+      {financeImpact ? <PersonalShoppingFinanceImpactPanel impact={financeImpact} /> : null}
 
       <div className={styles['lifecycle-section']}>
         <div>
