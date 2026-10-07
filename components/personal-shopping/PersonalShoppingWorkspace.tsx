@@ -643,11 +643,7 @@ export function PersonalShoppingWorkspace({
         ) : null}
       </section>
 
-      <nav
-        className={styles.tabs}
-        aria-label="Estados de compras personales"
-        role="tablist"
-      >
+      <nav className={styles.tabs} aria-label="Estados de compras personales" role="tablist">
         {TABS.map((item) => (
           <button
             key={item.value}
