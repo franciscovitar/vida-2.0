@@ -76,7 +76,11 @@ test('Gym jerarquiza detalle secundario mediante progressive disclosure', () => 
   assert.match(dashboard, /Contexto de Salud y agenda/);
   assert.doesNotMatch(dashboard, /Actividad reciente:/);
   assert.match(routine, /Movilidad \/ postura/);
+  assert.match(routine, /setView\('mobility'\)/);
+  assert.match(routine, /Rutina fija/);
+  assert.match(routine, /Última sesión/);
   assert.match(routine, /Progresión y descarga/);
+  assert.doesNotMatch(routine, /key: 'mobility',\s*title: 'Movilidad \/ postura'/);
   assert.match(progress, /Referencia externa/);
   assert.match(progress, /benchmark-disclosure/);
 });
