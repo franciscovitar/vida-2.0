@@ -91,6 +91,13 @@ function dateTimeLabel(value: string): string {
   }).format(parsed);
 }
 
+function movementTitle(movement: FinanceMovement): string {
+  const technical = /\beconomic_role\b|end-to-end|primera prueba end-to-end/i.test(
+    movement.description,
+  );
+  return technical ? movement.categoryLabel : movement.description;
+}
+
 function amountTone(movement: FinanceMovement): string {
   if (movement.kind === 'income') return 'income';
   if (movement.kind === 'expense') return 'expense';
@@ -229,7 +236,7 @@ export function FinanceMovementsBrowser({
                   <details className={styles.movement} key={movement.id}>
                     <summary>
                       <div className={styles['movement-main']}>
-                        <strong>{movement.description}</strong>
+                        <strong>{movementTitle(movement)}</strong>
                         <span>
                           {movement.sourceLabel} · {movement.categoryLabel}
                         </span>
@@ -282,6 +289,9 @@ export function FinanceMovementsBrowser({
                           Origen:{' '}
                           {movement.origin === 'ledger' ? 'ledger canónico' : 'Finance Logger'}.
                           Rol: {movement.economicRole || 'sin rol explícito'}.
+                          {movementTitle(movement) !== movement.description
+                            ? ` Descripción de origen: ${movement.description}`
+                            : ''}
                         </p>
                       </details>
                     </div>
