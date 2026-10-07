@@ -1,0 +1,98 @@
+name: World Vida Sync Bridge
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: world-vida-sync-bridge
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: startsWith(github.event.issue.title, '[WORLD_VIDA_SYNC]') && github.event.issue.user.login == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Apply bounded World derivative envelope
+        id: apply
+        run: |
+          python scripts/world_sync_issue_bridge.py --event "$GITHUB_EVENT_PATH" --repo-root "$GITHUB_WORKSPACE" > /tmp/world-vida-bridge-result.json
+          cat /tmp/world-vida-bridge-result.json
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          p = json.load(open("/tmp/world-vida-bridge-result.json", encoding="utf-8"))
+          print(f"transaction_id={p['transaction_id']}")
+          print(f"dry_run={'true' if p['dry_run'] else 'false'}")
+          PY
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate World derivative contract
+        run: node --import tsx --test tests/world-intelligence.test.ts
+
+      - name: Dry-run receipt
+        if: steps.apply.outputs.dry_run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          TX: ${{ steps.apply.outputs.transaction_id }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "WORLD_VIDA_SYNC_BRIDGE_DRY_RUN_PASS transaction=$TX"
+          gh issue close "$ISSUE_NUMBER"
+
+      - name: Commit coherent Vida World derivative
+        if: steps.apply.outputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          TX: ${{ steps.apply.outputs.transaction_id }}
+        run: |
+          git fetch origin main
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+            echo "main moved during bridge execution; fail closed"
+            exit 1
+          fi
+          if git diff --quiet; then
+            gh issue comment "$ISSUE_NUMBER" --body "WORLD_VIDA_SYNC_BRIDGE_NO_CHANGE transaction=$TX"
+            gh issue close "$ISSUE_NUMBER"
+            exit 0
+          fi
+          git config user.name "world-vida-sync-bridge[bot]"
+          git config user.email "world-vida-sync-bridge[bot]@users.noreply.github.com"
+          git add data/generated/world
+          git commit -m "World: sync scheduled derivative $TX"
+          git push origin HEAD:main
+          SHA="$(git rev-parse HEAD)"
+          gh issue comment "$ISSUE_NUMBER" --body "WORLD_VIDA_SYNC_BRIDGE_PASS transaction=$TX commit=$SHA"
+          gh issue close "$ISSUE_NUMBER"
+
+      - name: Failure receipt
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          TX: ${{ steps.apply.outputs.transaction_id }}
+        run: gh issue comment "$ISSUE_NUMBER" --body "WORLD_VIDA_SYNC_BRIDGE_FAIL transaction=${TX:-unknown}. The bridge failed closed; no successful Vida sync is claimed."

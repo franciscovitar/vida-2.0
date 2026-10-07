@@ -2,8 +2,12 @@ name: Quality
 
 on:
   pull_request:
+    paths-ignore:
+      - 'data/generated/world/**'
   push:
     branches: [main]
+    paths-ignore:
+      - 'data/generated/world/**'
 
 permissions:
   contents: read
