@@ -122,7 +122,9 @@ function PlanningCurrencySection({
             </div>
             <div>
               <dt>Reserva protegida</dt>
-              <dd>− {formatMinor(snapshot.commitments.protectedReserveMinor, snapshot.currency)}</dd>
+              <dd>
+                − {formatMinor(snapshot.commitments.protectedReserveMinor, snapshot.currency)}
+              </dd>
             </div>
             <div>
               <dt>Obligaciones próximas</dt>
@@ -138,7 +140,9 @@ function PlanningCurrencySection({
             </div>
             <div>
               <dt>Otros compromisos</dt>
-              <dd>− {formatMinor(snapshot.commitments.otherCommitmentsMinor, snapshot.currency)}</dd>
+              <dd>
+                − {formatMinor(snapshot.commitments.otherCommitmentsMinor, snapshot.currency)}
+              </dd>
             </div>
           </dl>
         </div>
