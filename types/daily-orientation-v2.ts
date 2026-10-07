@@ -64,6 +64,7 @@ export interface DailyOrientationAttentionItem {
 }
 
 export type DailyOrientationUpcomingKind = 'calendar' | 'task' | 'assessment' | 'project';
+
 export type DailyOrientationDateType =
   | 'deadline'
   | 'target'
