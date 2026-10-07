@@ -222,7 +222,7 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
                 <WalletCards size={17} />
               </span>
               <div>
-                <span>Liquidez actual</span>
+                <span>Saldo líquido registrado</span>
                 <strong id="finance-liquidity-title">
                   {formatMinor(model.liquidityCushion.totalMinor, model.currency)}
                 </strong>
@@ -237,6 +237,10 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
                 </div>
               ))}
             </div>
+
+            <p className={styles['liquidity-note']}>
+              Para decisiones usá Plan: ahí se aplica elegibilidad y calidad de evidencia.
+            </p>
 
             <details className={styles.explain}>
               <summary>Cómo se calcula</summary>

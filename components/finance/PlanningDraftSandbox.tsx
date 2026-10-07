@@ -128,7 +128,7 @@ export function PlanningDraftSandbox({
     <div className={styles.shell}>
       <div className={styles.heading}>
         <div>
-          <strong>Configuración local · {currency}</strong>
+          <strong>Simulación local · {currency}</strong>
           <small>
             Probá supuestos sin guardarlos. La liquidez base conserva la evidencia disponible
             {liquidityQuality === 'partial' ? ' con cobertura parcial.' : '.'}
@@ -215,7 +215,7 @@ export function PlanningDraftSandbox({
 
         <div className={styles.actions}>
           <Button type="submit" variant="primary">
-            Calcular planificación
+            Simular
           </Button>
           <Button type="button" variant="ghost" onClick={reset}>
             Limpiar
@@ -224,7 +224,7 @@ export function PlanningDraftSandbox({
       </form>
 
       <small className={styles.privacy}>
-        Esta configuración es temporal: no se guarda, sincroniza ni escribe en el Finance Sheet.
+        Esta simulación es temporal: no se guarda, sincroniza ni escribe en el Finance Sheet.
       </small>
 
       {error ? (

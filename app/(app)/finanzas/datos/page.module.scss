@@ -267,3 +267,23 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.status-link {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 44px;
+  color: var(--c-finance);
+  font-size: 0.74rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.status-link:hover {
+  text-decoration: underline;
+}
+
+.status-link:focus-visible {
+  outline: 2px solid var(--c-finance);
+  outline-offset: 2px;
+}

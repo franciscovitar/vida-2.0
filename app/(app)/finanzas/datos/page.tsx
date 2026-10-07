@@ -34,9 +34,42 @@ const EXCLUSION_LABELS: Record<FinanceLiquidityExclusionReason, string> = {
   'negative-balance': 'Saldo negativo',
 };
 
-function statusDescription(state: FinanceDataState): string {
+interface FinanceStatusReport {
+  reviewRequiredTransactions: number;
+  unknownRoleTransactions: number;
+  unbalancedTransactions: number;
+  reconciliation: { conflict: number };
+}
+
+function statusDescription(state: FinanceDataState, report: FinanceStatusReport | null): string {
   if (state === 'ready') {
     return 'No hay incidencias de calidad que bloqueen la lectura actual.';
+  }
+  if (state === 'review' && report) {
+    const reasons: string[] = [];
+    if (report.reconciliation.conflict > 0) {
+      reasons.push(
+        `${report.reconciliation.conflict} conciliación${report.reconciliation.conflict === 1 ? '' : 'es'} en conflicto`,
+      );
+    }
+    if (report.reviewRequiredTransactions > 0) {
+      reasons.push(
+        `${report.reviewRequiredTransactions} transacción${report.reviewRequiredTransactions === 1 ? '' : 'es'} pendiente${report.reviewRequiredTransactions === 1 ? '' : 's'} de revisión`,
+      );
+    }
+    if (report.unknownRoleTransactions > 0) {
+      reasons.push(
+        `${report.unknownRoleTransactions} rol${report.unknownRoleTransactions === 1 ? '' : 'es'} sin clasificar`,
+      );
+    }
+    if (report.unbalancedTransactions > 0) {
+      reasons.push(
+        `${report.unbalancedTransactions} desbalance${report.unbalancedTransactions === 1 ? '' : 's'}`,
+      );
+    }
+    if (reasons.length > 0) {
+      return `El estado requiere revisión por ${reasons.join(', ')}. No se corrigen ni ocultan automáticamente.`;
+    }
   }
   if (state === 'review') {
     return 'Hay conflictos o incidencias explícitas. Permanecen visibles en vez de corregirse en silencio.';
@@ -101,7 +134,12 @@ export default async function FinanceDataPage() {
             <span>Estado actual</span>
             <strong>{STATUS_LABELS[dataState]}</strong>
           </div>
-          <p>{statusDescription(dataState)}</p>
+          <p>{statusDescription(dataState, report)}</p>
+          {report && report.reconciliation.conflict > 0 ? (
+            <a className={styles['status-link']} href="#finance-reconciliation-title">
+              Ver conciliación ↓
+            </a>
+          ) : null}
           <small>{connected ? 'Fuente financiera conectada · solo lectura' : store.label}</small>
         </div>
       </Card>
@@ -111,8 +149,8 @@ export default async function FinanceDataPage() {
           <Card aria-labelledby="finance-data-issues-title">
             <SectionHeader
               id="finance-data-issues-title"
-              title="Qué necesita atención"
-              description="Controles de integridad y clasificación del registro financiero."
+              title="Integridad del registro"
+              description="Controles básicos del ledger y de la clasificación financiera."
               icon={ShieldCheck}
               domain="finance"
             />
