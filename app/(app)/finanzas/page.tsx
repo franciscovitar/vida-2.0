@@ -74,8 +74,8 @@ export default async function FinanzasPage() {
         <Card>
           <h2>Tu resumen no está disponible ahora</h2>
           <p>
-            No mostramos números parciales ni simulados cuando la fuente financiera no puede
-            leerse. Podés revisar el estado de los datos desde “Datos y fuentes”.
+            No mostramos números parciales ni simulados cuando la fuente financiera no puede leerse.
+            Podés revisar el estado de los datos desde “Datos y fuentes”.
           </p>
         </Card>
       )}

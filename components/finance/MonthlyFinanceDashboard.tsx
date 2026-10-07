@@ -126,9 +126,7 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
     : '';
 
   const liquidityDetail = model.liquidityCushion
-    ? `Base informada el ${snapshotDateLabel(
-        model.liquidityCushion.asOf,
-      )}: ${formatMinor(
+    ? `Base informada el ${snapshotDateLabel(model.liquidityCushion.asOf)}: ${formatMinor(
         model.liquidityCushion.baseTotalMinor,
         model.currency,
       )}. Movimientos posteriores: ${formatMinor(
@@ -322,9 +320,7 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
                     <strong>{categoryLabel(movement.category)}</strong>
                     <span>{movement.liquiditySourceLabel}</span>
                   </div>
-                  <strong data-tone={movement.direction}>
-                    {movementAmount(movement)}
-                  </strong>
+                  <strong data-tone={movement.direction}>{movementAmount(movement)}</strong>
                 </div>
               ))}
             </div>
