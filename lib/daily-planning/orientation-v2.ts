@@ -153,11 +153,13 @@ function parseReviewItem(value: unknown): DailyOrientationReviewItem | null {
   ) {
     return null;
   }
+
   const domain = enumValue(value.domain, DOMAINS);
   const activity = boundedString(value.activity, MAX_TITLE);
   const evidenceState = enumValue(value.evidenceState, EVIDENCE_STATES);
   const progressEffect = enumValue(value.progressEffect, PROGRESS_EFFECTS);
   const summary = boundedString(value.summary);
+
   if (!domain || !activity || !evidenceState || !progressEffect || !summary) return null;
   return { domain, activity, evidenceState, progressEffect, summary };
 }
@@ -166,19 +168,23 @@ function parseReview(value: unknown): DailyOrientationReview | null {
   if (!isObject(value) || !exactKeys(value, ['date', 'headline', 'items', 'uncertainties'])) {
     return null;
   }
+
   const date = boundedString(value.date, 10);
   const headline = boundedString(value.headline);
   const uncertainties = parseStringArray(value.uncertainties, 10);
+
   if (!date || !YMD.test(date) || !headline || !Array.isArray(value.items) || !uncertainties) {
     return null;
   }
   if (value.items.length > 12) return null;
+
   const items: DailyOrientationReviewItem[] = [];
   for (const item of value.items) {
     const parsed = parseReviewItem(item);
     if (!parsed) return null;
     items.push(parsed);
   }
+
   return { date, headline, items, uncertainties };
 }
 
@@ -198,6 +204,7 @@ function parseAttention(value: unknown): DailyOrientationAttentionItem | null {
   ) {
     return null;
   }
+
   const domain = enumValue(value.domain, ATTENTION_DOMAINS);
   const targetKind = enumValue(value.targetKind, TARGET_KINDS);
   const ref = nullableRef(value.ref);
@@ -206,6 +213,7 @@ function parseAttention(value: unknown): DailyOrientationAttentionItem | null {
   const why = boundedString(value.why);
   const confidence = enumValue(value.confidence, CONFIDENCE);
   const nextAction = nullableString(value.nextAction);
+
   if (
     !domain ||
     !targetKind ||
@@ -218,6 +226,7 @@ function parseAttention(value: unknown): DailyOrientationAttentionItem | null {
   ) {
     return null;
   }
+
   return { domain, targetKind, ref, title, recommendation, why, confidence, nextAction };
 }
 
@@ -228,39 +237,43 @@ function parseUpcoming(value: unknown): DailyOrientationUpcomingItem | null {
   ) {
     return null;
   }
+
   const kind = enumValue(value.kind, UPCOMING_KINDS);
   const ref = nullableRef(value.ref);
   const title = boundedString(value.title, MAX_TITLE);
   const date = boundedString(value.date, 10);
   const dateType = enumValue(value.dateType, DATE_TYPES);
   const reason = boundedString(value.reason);
+
   if (!kind || ref === undefined || !title || !date || !YMD.test(date) || !dateType || !reason) {
     return null;
   }
+
   return { kind, ref, title, date, dateType, reason };
 }
 
 function parseLifeSignal(value: unknown): DailyOrientationLifeSignal | null {
-  if (
-    !isObject(value) ||
-    !exactKeys(value, ['kind', 'level', 'summary', 'confidence'])
-  ) {
+  if (!isObject(value) || !exactKeys(value, ['kind', 'level', 'summary', 'confidence'])) {
     return null;
   }
+
   const kind = enumValue(value.kind, LIFE_KINDS);
   const level = enumValue(value.level, LIFE_LEVELS);
   const summary = boundedString(value.summary);
   const confidence = enumValue(value.confidence, CONFIDENCE);
+
   if (!kind || !level || !summary || !confidence) return null;
   return { kind, level, summary, confidence };
 }
 
 function parseFocus(value: unknown): DailyOrientationFocusItem | null {
   if (!isObject(value) || !exactKeys(value, ['domain', 'title', 'why', 'ref'])) return null;
+
   const domain = enumValue(value.domain, DOMAINS);
   const title = boundedString(value.title, MAX_TITLE);
   const why = boundedString(value.why);
   const ref = nullableRef(value.ref);
+
   if (!domain || !title || !why || ref === undefined) return null;
   return { domain, title, why, ref };
 }
@@ -272,11 +285,13 @@ function parseArray<T>(
 ): T[] | null {
   if (!Array.isArray(value) || value.length > maxItems) return null;
   const result: T[] = [];
+
   for (const entry of value) {
     const parsed = parser(entry);
     if (!parsed) return null;
     result.push(parsed);
   }
+
   return result;
 }
 
@@ -308,6 +323,7 @@ function parseRow(row: readonly unknown[], targetDate: string): DailyOrientation
   const id = boundedString(idRaw, 360);
   const planDate = boundedString(dateRaw, 10);
   const generatedAt = boundedString(generatedRaw, 80);
+
   if (
     !id ||
     !id.startsWith(`${PREFIX}${targetDate}:`) ||
@@ -329,6 +345,7 @@ function parseRow(row: readonly unknown[], targetDate: string): DailyOrientation
   } catch {
     return null;
   }
+
   const payload = parseDailyOrientationPayload(decoded);
   return payload ? { id, planDate, generatedAt, payload } : null;
 }
@@ -345,6 +362,7 @@ export function selectLatestDailyOrientationSnapshot(
       invalidRows: 0,
     };
   }
+
   if (values.length === 0 || !validHeader(values[0] ?? [])) {
     return {
       status: 'unavailable',
@@ -379,6 +397,7 @@ export function selectLatestDailyOrientationSnapshot(
   }
 
   candidates.sort((a, b) => Date.parse(b.generatedAt) - Date.parse(a.generatedAt));
+
   return {
     status: invalidRows > 0 ? 'invalid' : 'ready',
     snapshot: candidates[0],
