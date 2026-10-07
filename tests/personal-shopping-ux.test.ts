@@ -72,7 +72,6 @@ test('shopping mutation API authenticates and has no Finance write dependency', 
   assert.equal(api.includes('FinanceLogger'), false);
 });
 
-
 test('shopping Finance synergy stays read-only and fails closed', () => {
   assert.match(page, /getPersonalShoppingFinanceContext/);
   assert.match(workspace, /Finanzas · solo lectura/);

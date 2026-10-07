@@ -73,7 +73,9 @@ function monthlyDashboard(): FinanceMonthlyDashboard {
   };
 }
 
-function planningModel(status: 'ready' | 'configuration-required'): FinancePlanningReadModel {
+function planningModel(
+  status: 'ready' | 'configuration-required',
+): FinancePlanningReadModel {
   const snapshot =
     status === 'ready'
       ? buildFinancePlanningSnapshot({

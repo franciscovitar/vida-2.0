@@ -146,7 +146,9 @@ async function postMutation(body: MutationBody): Promise<MutationResponse> {
   return result;
 }
 
-function monthlyTargetHeadline(impact: NonNullable<PersonalShoppingFinanceImpact['monthlyTarget']>) {
+function monthlyTargetHeadline(
+  impact: NonNullable<PersonalShoppingFinanceImpact['monthlyTarget']>,
+) {
   if (impact.projectedOverTargetMinor > 0) {
     return `${formatMinor(impact.projectedOverTargetMinor, impact.currency)} por encima del objetivo`;
   }
@@ -154,7 +156,9 @@ function monthlyTargetHeadline(impact: NonNullable<PersonalShoppingFinanceImpact
   return `${formatMinor(impact.postRemainingTargetMinor, impact.currency)} de margen después`;
 }
 
-function safeToSpendHeadline(impact: NonNullable<PersonalShoppingFinanceImpact['safeToSpend']>) {
+function safeToSpendHeadline(
+  impact: NonNullable<PersonalShoppingFinanceImpact['safeToSpend']>,
+) {
   const { scenario } = impact;
   if (scenario.capacityState === 'exceeds-liquidity') {
     return `${formatMinor(
@@ -184,7 +188,9 @@ function PersonalShoppingFinanceImpactPanel({
       <div className={styles['finance-impact-heading']}>
         <div>
           <span className={styles.eyebrow}>Finanzas · solo lectura</span>
-          <strong>Impacto de {formatMinor(impact.purchaseAmountMinor, impact.currency)}</strong>
+          <strong>
+            Impacto de {formatMinor(impact.purchaseAmountMinor, impact.currency)}
+          </strong>
         </div>
         <span className={styles['finance-read-only-badge']}>No registra gastos</span>
       </div>
@@ -209,7 +215,9 @@ function PersonalShoppingFinanceImpactPanel({
               <small>
                 Capacidad actual:{' '}
                 {formatMinor(safe.scenario.preSafeToSpendMinor, safe.scenario.currency)} ·{' '}
-                {safe.liquidityQuality === 'verified' ? 'liquidez verificada' : 'cobertura parcial'}
+                {safe.liquidityQuality === 'verified'
+                  ? 'liquidez verificada'
+                  : 'cobertura parcial'}
               </small>
             </article>
           ) : null}
@@ -459,7 +467,9 @@ function PersonalShoppingDetail({
         </div>
       </form>
 
-      {financeImpact ? <PersonalShoppingFinanceImpactPanel impact={financeImpact} /> : null}
+      {financeImpact ? (
+        <PersonalShoppingFinanceImpactPanel impact={financeImpact} />
+      ) : null}
 
       <div className={styles['lifecycle-section']}>
         <div>

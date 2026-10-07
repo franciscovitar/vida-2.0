@@ -28,7 +28,8 @@ export interface PersonalShoppingFinanceContext {
   safeToSpend: PersonalShoppingSafeToSpendSource[];
 }
 
-export interface PersonalShoppingMonthlyTargetImpact extends PersonalShoppingMonthlyTargetSource {
+export interface PersonalShoppingMonthlyTargetImpact
+  extends PersonalShoppingMonthlyTargetSource {
   purchaseAmountMinor: number;
   projectedExpenseMinor: number;
   postRemainingTargetMinor: number;
@@ -105,8 +106,10 @@ export function evaluatePersonalShoppingFinanceImpact(
 
   const currency = normalizeCurrency(item.currency);
   const purchaseAmountMinor = item.estimatedPriceMinor;
-  const monthlySource = context.monthlyTargets.find((source) => source.currency === currency) ?? null;
-  const safeSource = context.safeToSpend.find((source) => source.currency === currency) ?? null;
+  const monthlySource =
+    context.monthlyTargets.find((source) => source.currency === currency) ?? null;
+  const safeSource =
+    context.safeToSpend.find((source) => source.currency === currency) ?? null;
 
   const monthlyTarget = monthlySource
     ? {
