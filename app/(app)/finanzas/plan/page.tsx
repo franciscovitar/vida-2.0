@@ -22,13 +22,11 @@ export default function FinancePlanPage() {
       <Card>
         <SectionHeader
           title="Plan"
-          description="Safe-to-Spend, ingresos variables y escenarios de compra van a quedar juntos en esta vista."
+          description="Safe-to-Spend, ingresos variables y escenarios de compra, en un solo lugar."
           icon={CircleGauge}
           domain="finance"
         />
-        <p>
-          La funcionalidad existente se migra acá en el checkpoint de Plan, sin cambiar sus cálculos.
-        </p>
+        <p>La funcionalidad existente se migra acá sin cambiar sus cálculos.</p>
       </Card>
     </div>
   );

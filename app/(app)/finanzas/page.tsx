@@ -15,18 +15,22 @@ export const metadata: Metadata = { title: 'Finanzas' };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+interface FinanceDataReport {
+  reviewRequiredTransactions: number;
+  unbalancedTransactions: number;
+  reconciliation: {
+    conflict: number;
+    partial: number;
+  };
+}
+
 function resolveDataState(input: {
   connected: boolean;
-  report:
-    | {
-        reviewRequiredTransactions: number;
-        unbalancedTransactions: number;
-        reconciliation: { conflict: number; partial: number };
-      }
-    | null;
+  report: FinanceDataReport | null;
 }): FinanceDataState {
   if (!input.connected) return 'unavailable';
   if (!input.report) return 'partial';
+
   if (
     input.report.reviewRequiredTransactions > 0 ||
     input.report.unbalancedTransactions > 0 ||
@@ -34,19 +38,19 @@ function resolveDataState(input: {
   ) {
     return 'review';
   }
+
   if (input.report.reconciliation.partial > 0) return 'partial';
   return 'ready';
+}
+
+async function readFinanceSummary() {
+  return Promise.all([getFinanceMonthlyDashboardSnapshot(), getFinanceCashFlowSnapshot()]);
 }
 
 export default async function FinanzasPage() {
   const store = await getFinanceStoreReadinessSnapshot();
   const connected = store.status === 'connected';
-  const reads = connected
-    ? await Promise.all([
-        getFinanceMonthlyDashboardSnapshot(),
-        getFinanceCashFlowSnapshot(),
-      ])
-    : null;
+  const reads = connected ? await readFinanceSummary() : null;
   const monthlyDashboard = reads?.[0] ?? null;
   const cashFlow = reads?.[1] ?? null;
   const monthlyDashboardModel = monthlyDashboard?.ok ? monthlyDashboard.model : null;

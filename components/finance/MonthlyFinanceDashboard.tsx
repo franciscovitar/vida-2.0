@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { Sparkles, WalletCards } from 'lucide-react';
+import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import type {
@@ -22,16 +22,13 @@ function formatMinor(value: number, currency: string): string {
       maximumFractionDigits: currency === 'ARS' ? 0 : 2,
     }).format(value / 100);
   } catch {
-    const digits = currency === 'ARS' ? 0 : 2;
-    return `${currency} ${(value / 100).toLocaleString('es-AR', {
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits,
-    })}`;
+    return `${currency} ${Math.round(value / 100).toLocaleString('es-AR')}`;
   }
 }
 
 function formatPercent(value: number | null): string {
   if (value === null) return '—';
+
   return new Intl.NumberFormat('es-AR', {
     style: 'percent',
     maximumFractionDigits: 0,
@@ -41,6 +38,7 @@ function formatPercent(value: number | null): string {
 function monthLabel(month: string): string {
   const [year, monthNumber] = month.split('-').map(Number);
   if (!year || !monthNumber) return month;
+
   return new Intl.DateTimeFormat('es-AR', {
     month: 'long',
     year: 'numeric',
@@ -51,6 +49,7 @@ function monthLabel(month: string): string {
 function movementDateLabel(occurredAt: string): string {
   const parsed = new Date(occurredAt);
   if (!Number.isFinite(parsed.getTime())) return occurredAt.slice(0, 10);
+
   return new Intl.DateTimeFormat('es-AR', {
     day: '2-digit',
     month: 'short',
@@ -61,6 +60,7 @@ function movementDateLabel(occurredAt: string): string {
 function snapshotDateLabel(asOf: string): string {
   const parsed = new Date(asOf);
   if (!Number.isFinite(parsed.getTime())) return asOf;
+
   return new Intl.DateTimeFormat('es-AR', {
     day: 'numeric',
     month: 'short',
@@ -71,16 +71,22 @@ function snapshotDateLabel(asOf: string): string {
 function categoryLabel(category: string): string {
   const normalized = category.replaceAll('_', ' ').replaceAll('/', ' / ').trim();
   if (!normalized) return 'Movimiento';
+
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
 function paceCopy(model: FinanceMonthlyDashboard): string {
   if (!model.target) return 'Todavía no hay un objetivo de gasto para este mes.';
   if (model.pace === 'over-target') return 'Superaste el objetivo de gasto activo del mes.';
+
   if (model.pace === 'accelerated') {
     return 'Venís gastando bastante más rápido de lo que avanzó el mes.';
   }
-  if (model.pace === 'watch') return 'Vas un poco por encima del ritmo esperado para este punto.';
+
+  if (model.pace === 'watch') {
+    return 'Vas un poco por encima del ritmo esperado para este punto.';
+  }
+
   return 'El ritmo de gasto está alineado con este punto del mes.';
 }
 
@@ -89,12 +95,13 @@ function paceLabel(model: FinanceMonthlyDashboard): string {
   if (model.pace === 'over-target') return 'Objetivo superado';
   if (model.pace === 'accelerated') return 'Ritmo alto';
   if (model.pace === 'watch') return 'Atención';
+
   return 'En ritmo';
 }
 
 function movementAmount(movement: FinanceMonthlyMovement): string {
-  const value = formatMinor(movement.amountMinor, movement.currency);
-  return movement.direction === 'income' ? `+${value}` : `-${value}`;
+  const amount = formatMinor(movement.amountMinor, movement.currency);
+  return movement.direction === 'income' ? `+${amount}` : `-${amount}`;
 }
 
 export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps) {
@@ -105,6 +112,30 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
     target?.suggestionStatus === 'pending' &&
     target.suggestedTargetMinor !== null &&
     target.suggestedTargetMinor !== target.activeTargetMinor;
+
+  const targetValue =
+    model.remainingTargetMinor === null
+      ? 'Sin dato'
+      : `${formatMinor(model.remainingTargetMinor, model.currency)} restantes`;
+
+  const targetSummary = target
+    ? `Gastaste ${formatMinor(model.expenseMinor, model.currency)} de ${formatMinor(
+        target.activeTargetMinor,
+        model.currency,
+      )} · ${formatPercent(model.targetUsedRatio)} usado`
+    : '';
+
+  const liquidityDetail = model.liquidityCushion
+    ? `Base informada el ${snapshotDateLabel(
+        model.liquidityCushion.asOf,
+      )}: ${formatMinor(
+        model.liquidityCushion.baseTotalMinor,
+        model.currency,
+      )}. Movimientos posteriores: ${formatMinor(
+        model.liquidityCushion.movementDeltaMinor,
+        model.currency,
+      )}.`
+    : '';
 
   return (
     <section className={styles.dashboard} aria-labelledby="finance-month-now-title">
@@ -125,16 +156,8 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
           <div className={styles['target-top']}>
             <div>
               <span className={styles['target-label']}>Margen del objetivo</span>
-              <strong className={styles['target-value']}>
-                {model.remainingTargetMinor !== null
-                  ? `${formatMinor(model.remainingTargetMinor, model.currency)} restantes`
-                  : 'Sin dato'}
-              </strong>
-              <span className={styles['target-copy']}>
-                Gastaste {formatMinor(model.expenseMinor, model.currency)} de{' '}
-                {formatMinor(target.activeTargetMinor, model.currency)} ·{' '}
-                {formatPercent(model.targetUsedRatio)} usado
-              </span>
+              <strong className={styles['target-value']}>{targetValue}</strong>
+              <span className={styles['target-copy']}>{targetSummary}</span>
             </div>
             <span className={styles.pace} data-pace={model.pace}>
               {paceLabel(model)}
@@ -216,12 +239,7 @@ export function MonthlyFinanceDashboard({ model }: MonthlyFinanceDashboardProps)
 
             <details className={styles.explain}>
               <summary>Cómo se calcula</summary>
-              <p>
-                Base informada el {snapshotDateLabel(model.liquidityCushion.asOf)}:{' '}
-                {formatMinor(model.liquidityCushion.baseTotalMinor, model.currency)}. Movimientos
-                posteriores:{' '}
-                {formatMinor(model.liquidityCushion.movementDeltaMinor, model.currency)}.
-              </p>
+              <p>{liquidityDetail}</p>
             </details>
           </Card>
         ) : null}
