@@ -162,14 +162,20 @@ export function PersonalShoppingWorkspace({
               <option value="REPLENISH">Reponer</option>
             </select>
           </label>
-          <button className={styles['add-button']} type="submit" disabled={!writesEnabled || saving}>
+          <button
+            className={styles['add-button']}
+            type="submit"
+            disabled={!writesEnabled || saving}
+          >
             <Plus size={17} aria-hidden="true" />
             <span>{saving ? 'Guardando…' : 'Agregar'}</span>
           </button>
         </form>
 
         {!writesEnabled ? (
-          <p className={styles.notice}>La lista está en modo lectura mientras se habilita el nuevo store.</p>
+          <p className={styles.notice}>
+            La lista está en modo lectura mientras se habilita el nuevo store.
+          </p>
         ) : notice ? (
           <p className={styles.notice} role="status">
             {notice}

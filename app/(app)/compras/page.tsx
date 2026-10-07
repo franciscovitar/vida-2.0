@@ -15,8 +15,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 async function readShoppingSnapshot(): Promise<
-  | { ok: true; snapshot: PersonalShoppingSnapshot }
-  | { ok: false }
+  { ok: true; snapshot: PersonalShoppingSnapshot } | { ok: false }
 > {
   const shopping = getPersonalShoppingRuntime();
   if (shopping.state !== 'ready') return { ok: false };
@@ -45,7 +44,9 @@ export default async function ComprasPage() {
     content = (
       <Card>
         <strong>No pudimos leer tus compras personales.</strong>
-        <p>La lista no fue reemplazada por datos inventados. Probá de nuevo en unos minutos.</p>
+        <p>
+          La lista no fue reemplazada por datos inventados. Probá de nuevo en unos minutos.
+        </p>
       </Card>
     );
   } else {

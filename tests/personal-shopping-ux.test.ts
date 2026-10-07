@@ -7,16 +7,8 @@ const root = process.cwd();
 const source = (...parts: string[]) => readFileSync(path.join(root, ...parts), 'utf8');
 
 const page = source('app', '(app)', 'compras', 'page.tsx');
-const workspace = source(
-  'components',
-  'personal-shopping',
-  'PersonalShoppingWorkspace.tsx',
-);
-const styles = source(
-  'components',
-  'personal-shopping',
-  'PersonalShoppingWorkspace.module.scss',
-);
+const workspace = source('components', 'personal-shopping', 'PersonalShoppingWorkspace.tsx');
+const styles = source('components', 'personal-shopping', 'PersonalShoppingWorkspace.module.scss');
 const api = source('app', 'api', 'personal-shopping', 'route.ts');
 
 test('shopping personal route is functional and links to the isolated household app', () => {
