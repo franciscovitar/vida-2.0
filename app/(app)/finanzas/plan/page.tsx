@@ -110,13 +110,13 @@ function PlanningCurrencySection({
           <dl className={styles.metrics}>
             <div>
               <dt>Liquidez elegible</dt>
-              <dd>
-                {formatMinor(snapshot.safeToSpend.eligibleLiquidityMinor, snapshot.currency)}
-              </dd>
+              <dd>{formatMinor(snapshot.safeToSpend.eligibleLiquidityMinor, snapshot.currency)}</dd>
             </div>
             <div>
               <dt>Reserva protegida</dt>
-              <dd>− {formatMinor(snapshot.commitments.protectedReserveMinor, snapshot.currency)}</dd>
+              <dd>
+                − {formatMinor(snapshot.commitments.protectedReserveMinor, snapshot.currency)}
+              </dd>
             </div>
             <div>
               <dt>Obligaciones próximas</dt>
@@ -177,10 +177,7 @@ function PlanningCurrencySection({
     : 'Una reserva de cero también es válida, pero tiene que ser una decisión explícita.';
 
   return (
-    <Card
-      aria-labelledby={`finance-plan-config-${item.currency}`}
-      key={`config-${item.currency}`}
-    >
+    <Card aria-labelledby={`finance-plan-config-${item.currency}`} key={`config-${item.currency}`}>
       <SectionHeader
         id={`finance-plan-config-${item.currency}`}
         title={`Safe-to-Spend · ${item.currency}`}
