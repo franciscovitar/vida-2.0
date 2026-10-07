@@ -53,9 +53,7 @@ export default async function PlanificacionPage({
 
   const [dailyPlan, orientation, notion, assessments, projects] = await Promise.all([
     getDailyPlanningView(),
-    v2Enabled
-      ? getDailyOrientationV2View()
-      : Promise.resolve<DailyOrientationView | null>(null),
+    v2Enabled ? getDailyOrientationV2View() : Promise.resolve<DailyOrientationView | null>(null),
     getNotionDashboard(),
     getAssessmentProgress(),
     getProjectsIntelligence(),

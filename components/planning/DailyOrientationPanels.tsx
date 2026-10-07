@@ -116,7 +116,9 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
         {orientation.attention.length === 0 ? (
           <div className={styles.empty}>
             <strong>
-              {orientation.review ? 'No hay un ajuste importante persistido para hoy.' : 'Sin orientación V2 persistida.'}
+              {orientation.review
+                ? 'No hay un ajuste importante persistido para hoy.'
+                : 'Sin orientación V2 persistida.'}
             </strong>
             <p>No se fabrica una prioridad sólo para llenar la pantalla.</p>
           </div>

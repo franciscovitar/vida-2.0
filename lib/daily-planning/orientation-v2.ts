@@ -222,7 +222,10 @@ function parseAttention(value: unknown): DailyOrientationAttentionItem | null {
 }
 
 function parseUpcoming(value: unknown): DailyOrientationUpcomingItem | null {
-  if (!isObject(value) || !exactKeys(value, ['kind', 'ref', 'title', 'date', 'dateType', 'reason'])) {
+  if (
+    !isObject(value) ||
+    !exactKeys(value, ['kind', 'ref', 'title', 'date', 'dateType', 'reason'])
+  ) {
     return null;
   }
   const kind = enumValue(value.kind, UPCOMING_KINDS);
@@ -238,7 +241,11 @@ function parseUpcoming(value: unknown): DailyOrientationUpcomingItem | null {
 }
 
 function parseLifeSignal(value: unknown): DailyOrientationLifeSignal | null {
-  if (!isObject(value) || !exactKeys(value, ['kind', 'level', 'summary', 'confidence'])) return null;
+  if (
+    !isObject(value) ||
+    !exactKeys(value, ['kind', 'level', 'summary', 'confidence'])
+  )
+    return null;
   const kind = enumValue(value.kind, LIFE_KINDS);
   const level = enumValue(value.level, LIFE_LEVELS);
   const summary = boundedString(value.summary);

@@ -90,11 +90,7 @@ export type DailyOrientationLifeSignalKind =
   | 'capacity'
   | 'other';
 
-export type DailyOrientationLifeSignalLevel =
-  | 'normal'
-  | 'notice'
-  | 'candidate-pattern'
-  | 'unknown';
+export type DailyOrientationLifeSignalLevel = 'normal' | 'notice' | 'candidate-pattern' | 'unknown';
 
 export interface DailyOrientationLifeSignal {
   kind: DailyOrientationLifeSignalKind;
