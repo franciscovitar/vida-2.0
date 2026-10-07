@@ -415,94 +415,26 @@ export function GymRoutineTabs({
                 <span>Ver</span>
               </summary>
 
-              {group.key === 'mobility' ? (
-                <div className={styles['guide-content']}>
-                  {group.sections.map((section) => {
-                    const parsedDescription = mobilityDescription(section.description);
-                    const parsedItems = section.items.map(mobilityItem);
-                    const posture = parsedItems
-                      .filter((item) => item.kind === 'posture')
-                      .map((item) => item.text);
-                    const flexibility = parsedItems
-                      .filter((item) => item.kind === 'flexibility')
-                      .map((item) => item.text);
-                    const criteria = parsedItems
-                      .filter((item) => item.kind === 'criteria')
-                      .map((item) => item.text);
-                    const other = parsedItems
-                      .filter((item) => item.kind === 'other')
-                      .map((item) => item.text);
-
-                    return (
-                      <section key={section.key} className={styles.supplemental}>
-                        <div className={styles['supplemental-heading']}>
-                          <span>EN EL GIMNASIO</span>
-                          <h3>{parsedDescription.schedule ?? section.label}</h3>
-                        </div>
-
-                        {parsedDescription.objective ? (
-                          <p className={styles.body}>
-                            {parsedDescription.objective.replace(/^objetivo:\s*/i, '')}
-                          </p>
-                        ) : null}
-                        {parsedDescription.detail ? (
-                          <p className={styles.body}>{parsedDescription.detail}</p>
-                        ) : null}
-
-                        {posture.length > 0 ? (
-                          <div className={styles.supplemental}>
-                            <div className={styles['supplemental-heading']}>
-                              <span>BLOQUE A · ~10 MIN</span>
-                              <h3>Postura / control</h3>
-                            </div>
-                            <MobilityItems items={posture} />
-                          </div>
-                        ) : null}
-
-                        {flexibility.length > 0 ? (
-                          <div className={styles.supplemental}>
-                            <div className={styles['supplemental-heading']}>
-                              <span>BLOQUE B · ~6–7 MIN</span>
-                              <h3>Flexibilidad específica</h3>
-                            </div>
-                            <MobilityItems items={flexibility} />
-                          </div>
-                        ) : null}
-
-                        {other.length > 0 ? <MobilityItems items={other} /> : null}
-
-                        {criteria.length > 0 ? (
-                          <details className={styles.disclosure}>
-                            <summary>Cómo usar este protocolo</summary>
-                            <MobilityItems items={criteria} />
-                          </details>
-                        ) : null}
-                      </section>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className={styles['guide-content']}>
-                  {group.sections.map((section) => (
-                    <section key={section.key} className={styles.supplemental}>
-                      <div className={styles['supplemental-heading']}>
-                        <span>{SECTION_LABELS[section.kind]}</span>
-                        <h3>{section.label}</h3>
-                      </div>
-                      {section.description ? (
-                        <p className={styles.body}>{section.description}</p>
-                      ) : null}
-                      {section.items.length > 0 ? (
-                        <ol className={styles['supplemental-items']}>
-                          {section.items.map((item, index) => (
-                            <li key={`${index}-${item}`}>{item}</li>
-                          ))}
-                        </ol>
-                      ) : null}
-                    </section>
-                  ))}
-                </div>
-              )}
+              <div className={styles['guide-content']}>
+                {group.sections.map((section) => (
+                  <section key={section.key} className={styles.supplemental}>
+                    <div className={styles['supplemental-heading']}>
+                      <span>{SECTION_LABELS[section.kind]}</span>
+                      <h3>{section.label}</h3>
+                    </div>
+                    {section.description ? (
+                      <p className={styles.body}>{section.description}</p>
+                    ) : null}
+                    {section.items.length > 0 ? (
+                      <ol className={styles['supplemental-items']}>
+                        {section.items.map((item, index) => (
+                          <li key={`${index}-${item}`}>{item}</li>
+                        ))}
+                      </ol>
+                    ) : null}
+                  </section>
+                ))}
+              </div>
             </details>
           ))}
         </div>
