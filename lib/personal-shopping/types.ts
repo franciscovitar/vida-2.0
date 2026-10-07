@@ -13,6 +13,19 @@ export type PersonalPurchaseEventType =
   | 'RESTORED'
   | 'FINANCE_LINKED';
 
+export interface PersonalPurchaseDetailPatch {
+  need: string | null;
+  quantityText: string | null;
+  category: string | null;
+  currency: string | null;
+  estimatedPriceMinor: number | null;
+  targetPriceMinor: number | null;
+  purchaseCondition: string | null;
+  notes: string | null;
+  candidateLinks: string[];
+  focus: boolean;
+}
+
 export interface PersonalPurchaseItem {
   id: string;
   title: string;
