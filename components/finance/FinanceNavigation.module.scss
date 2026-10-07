@@ -1,0 +1,85 @@
+.navigation {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.links {
+  display: flex;
+  min-width: 0;
+  gap: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  -webkit-overflow-scrolling: touch;
+}
+
+.link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.72rem 0.85rem;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--text);
+}
+
+.link[aria-current='page'] {
+  border-bottom-color: var(--c-finance);
+  color: var(--text);
+}
+
+.data {
+  display: inline-flex;
+  gap: 0.38rem;
+  align-items: center;
+  justify-self: start;
+  min-height: 44px;
+  padding: 0.5rem 0.7rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+}
+
+.data:hover,
+.data[aria-current='page'] {
+  color: var(--text);
+  border-color: var(--c-finance-border);
+}
+
+.data[data-state='ready'] {
+  color: var(--c-finance);
+}
+
+.data[data-state='review'] {
+  color: var(--c-danger);
+}
+
+.link:focus-visible,
+.data:focus-visible {
+  outline: 2px solid var(--c-finance);
+  outline-offset: 2px;
+}
+
+@media (width >= 760px) {
+  .navigation {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .data {
+    justify-self: end;
+    margin-bottom: 0.2rem;
+  }
+}

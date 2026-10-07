@@ -28,7 +28,7 @@
 .heading small,
 .privacy {
   color: var(--text-subtle);
-  font-size: 0.67rem;
+  font-size: 0.72rem;
   line-height: 1.45;
 }
 
@@ -56,7 +56,7 @@
 .form input[type='number'] {
   width: 100%;
   min-width: 0;
-  height: 38px;
+  min-height: 44px;
   padding: 0 0.75rem;
   font: inherit;
   color: var(--text);
@@ -75,7 +75,8 @@
   display: flex;
   grid-column: 1 / -1;
   gap: 0.55rem;
-  align-items: start;
+  align-items: center;
+  min-height: 44px;
   color: var(--text-muted);
   font-size: 0.72rem;
   line-height: 1.45;
@@ -90,6 +91,10 @@
   grid-column: 1 / -1;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.actions button {
+  min-height: 44px;
 }
 
 .error {
@@ -119,7 +124,7 @@
 
 .metrics span {
   color: var(--text-subtle);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
 }
 
 .metrics strong {

@@ -121,6 +121,10 @@ test('monthly dashboard counts only active current-month captures and groups exp
   assert.equal(model.categories[0].category, 'nafta');
   assert.equal(model.categories[0].amountMinor, 5_000_000);
   assert.equal(model.categories[1].category, 'cafe/salidas');
+  assert.equal(model.recentMovements.length, 3);
+  assert.equal(model.recentMovements[0]?.id, 'fuel');
+  assert.equal(model.recentMovements[0]?.liquiditySourceLabel, 'Naranja X');
+  assert.equal(model.recentMovements[2]?.direction, 'income');
 });
 
 test('monthly dashboard never applies a pending suggestion as the active target', () => {

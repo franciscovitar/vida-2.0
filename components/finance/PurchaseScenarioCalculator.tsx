@@ -16,8 +16,8 @@ interface PurchaseScenarioCalculatorProps {
 }
 
 const CAPACITY_LABELS: Record<FinancePurchaseScenario['capacityState'], string> = {
-  'within-safe-capacity': 'Dentro de la capacidad calculada',
-  'uses-protected-capacity': 'Usa capacidad protegida',
+  'within-safe-capacity': 'Dentro del disponible no comprometido',
+  'uses-protected-capacity': 'Requiere usar dinero protegido',
   'exceeds-liquidity': 'Supera la liquidez elegible',
 };
 
@@ -72,7 +72,7 @@ export function PurchaseScenarioCalculator({ source }: PurchaseScenarioCalculato
     <div className={styles.shell}>
       <form className={styles.form} onSubmit={submit}>
         <label className={styles.field}>
-          <span>Simular compra · {source.currency}</span>
+          <span>Monto de la compra · {source.currency}</span>
           <input
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
@@ -85,29 +85,32 @@ export function PurchaseScenarioCalculator({ source }: PurchaseScenarioCalculato
           />
         </label>
         <Button type="submit" variant="secondary">
-          Simular
+          Calcular impacto
         </Button>
       </form>
+
       <small className={styles.privacy}>
         El monto vive solo en esta pantalla: no se guarda ni se envía al Finance Sheet.
       </small>
+
       {error ? (
         <p className={styles.error} role="alert">
           {error}
         </p>
       ) : null}
+
       {scenario ? (
         <div className={styles.result} aria-live="polite">
           <div>
-            <span>Estado descriptivo</span>
+            <span>Resultado</span>
             <strong>{CAPACITY_LABELS[scenario.capacityState]}</strong>
           </div>
           <div>
-            <span>Safe-to-Spend después</span>
+            <span>Disponible no comprometido después</span>
             <strong>{formatMinor(scenario.postSafeToSpendMinor, scenario.currency)}</strong>
           </div>
           <div>
-            <span>Capacidad protegida usada</span>
+            <span>Dinero protegido que habría que usar</span>
             <strong>{formatMinor(scenario.beyondSafeCapacityMinor, scenario.currency)}</strong>
           </div>
           <div>

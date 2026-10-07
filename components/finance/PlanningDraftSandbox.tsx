@@ -128,10 +128,10 @@ export function PlanningDraftSandbox({
     <div className={styles.shell}>
       <div className={styles.heading}>
         <div>
-          <strong>Borrador local · {currency}</strong>
+          <strong>Configuración local · {currency}</strong>
           <small>
-            Probá una política antes de guardarla. La liquidez base viene del ledger real
-            {liquidityQuality === 'partial' ? ' con evidencia parcial.' : '.'}
+            Probá supuestos sin guardarlos. La liquidez base conserva la evidencia disponible
+            {liquidityQuality === 'partial' ? ' con cobertura parcial.' : '.'}
           </small>
         </div>
         <span>{formatMinor(eligibleLiquidityMinor, currency)} elegibles</span>
@@ -215,7 +215,7 @@ export function PlanningDraftSandbox({
 
         <div className={styles.actions}>
           <Button type="submit" variant="primary">
-            Calcular borrador
+            Calcular planificación
           </Button>
           <Button type="button" variant="ghost" onClick={reset}>
             Limpiar
@@ -224,7 +224,7 @@ export function PlanningDraftSandbox({
       </form>
 
       <small className={styles.privacy}>
-        Nada de este borrador se guarda, sincroniza o escribe en el Finance Sheet.
+        Esta configuración es temporal: no se guarda, sincroniza ni escribe en el Finance Sheet.
       </small>
 
       {error ? (
@@ -237,11 +237,11 @@ export function PlanningDraftSandbox({
         <div className={styles.output}>
           <div className={styles.metrics}>
             <div>
-              <span>Safe-to-Spend del borrador</span>
+              <span>Disponible no comprometido</span>
               <strong>{formatMinor(snapshot.safeToSpend.safeToSpendMinor, currency)}</strong>
             </div>
             <div>
-              <span>Shortfall</span>
+              <span>Faltante</span>
               <strong>{formatMinor(snapshot.safeToSpend.shortfallMinor, currency)}</strong>
             </div>
             <div>

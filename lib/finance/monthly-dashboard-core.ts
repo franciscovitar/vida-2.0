@@ -8,6 +8,16 @@ export interface FinanceMonthlyCategory {
   share: number;
 }
 
+export interface FinanceMonthlyMovement {
+  id: string;
+  occurredAt: string;
+  direction: 'income' | 'expense';
+  amountMinor: number;
+  currency: string;
+  category: string;
+  liquiditySourceLabel: string;
+}
+
 export interface FinanceMonthlyTarget {
   month: string;
   currency: string;
@@ -52,6 +62,7 @@ export interface FinanceMonthlyDashboard {
   monthElapsedRatio: number;
   pace: FinanceMonthlyPace;
   categories: FinanceMonthlyCategory[];
+  recentMovements: FinanceMonthlyMovement[];
 }
 
 function dataRows(rows: SheetRows): readonly (readonly unknown[])[] {
@@ -297,6 +308,34 @@ export function buildFinanceMonthlyDashboard(input: {
     }))
     .sort((left, right) => right.amountMinor - left.amountMinor);
 
+  const recentMovements: FinanceMonthlyMovement[] = captures
+    .flatMap((row, index) => {
+      const direction = text(row[4]);
+      if (direction !== 'income' && direction !== 'expense') return [];
+      const normalizedDirection: FinanceMonthlyMovement['direction'] = direction;
+
+      const sourceKey = text(row[14]) || defaultLiquiditySourceKey(currency) || '';
+      return [
+        {
+          id: text(row[0]) || `${text(row[1])}-${index}`,
+          occurredAt: text(row[1]),
+          direction: normalizedDirection,
+          amountMinor: Math.abs(number(row[5])),
+          currency,
+          category: text(row[7]) || (direction === 'income' ? 'ingreso' : 'otros'),
+          liquiditySourceLabel: sourceKey ? fallbackLiquiditySourceLabel(sourceKey) : 'Sin fuente',
+        },
+      ];
+    })
+    .sort((left, right) => {
+      const leftTime = Date.parse(left.occurredAt);
+      const rightTime = Date.parse(right.occurredAt);
+      const normalizedLeft = Number.isFinite(leftTime) ? leftTime : 0;
+      const normalizedRight = Number.isFinite(rightTime) ? rightTime : 0;
+      return normalizedRight - normalizedLeft || right.id.localeCompare(left.id);
+    })
+    .slice(0, 5);
+
   return {
     month: input.month,
     currency,
@@ -311,5 +350,6 @@ export function buildFinanceMonthlyDashboard(input: {
     monthElapsedRatio: elapsed,
     pace: resolvePace(targetUsedRatio, elapsed),
     categories,
+    recentMovements,
   };
 }

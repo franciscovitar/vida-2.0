@@ -38,7 +38,7 @@ function formatPercent(value: number | null): string {
 }
 
 function formatMonths(value: number | null): string {
-  if (value === null) return 'No consume buffer en este escenario';
+  if (value === null) return 'No consume liquidez en este escenario';
   return `${value.toLocaleString('es-AR', {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
@@ -153,7 +153,7 @@ export function IrregularIncomePlanner({
 
       <form className={styles.form} onSubmit={submit}>
         <label>
-          <span>Mes austero objetivo</span>
+          <span>Escenario de mes austero</span>
           <input
             value={leanBurn}
             onChange={(event) => setLeanBurn(event.target.value)}
@@ -161,7 +161,7 @@ export function IrregularIncomePlanner({
             inputMode="decimal"
             min="0.01"
             step="0.01"
-            placeholder="Definí cuánto necesitás para un mes flaco"
+            placeholder="Cuánto necesitás para un mes austero"
             autoComplete="off"
           />
         </label>
@@ -182,7 +182,7 @@ export function IrregularIncomePlanner({
           </small>
         </label>
         <Button type="submit" variant="secondary">
-          Calcular runway
+          Calcular escenario
         </Button>
       </form>
 
@@ -199,11 +199,11 @@ export function IrregularIncomePlanner({
             <strong>{formatMinor(scenario.monthlyBridgeMinor, scenario.currency)}</strong>
           </div>
           <div>
-            <span>Runway sin ningún ingreso nuevo</span>
+            <span>Cobertura sin ingresos nuevos</span>
             <strong>{formatMonths(scenario.noNewIncomeRunwayMonths)}</strong>
           </div>
           <div>
-            <span>Runway con el escenario de ayuda</span>
+            <span>Cobertura con el escenario de ayuda</span>
             <strong>{formatMonths(scenario.supportAdjustedRunwayMonths)}</strong>
           </div>
           <div>
