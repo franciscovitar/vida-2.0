@@ -321,6 +321,68 @@
   justify-content: flex-end;
 }
 
+.finance-impact {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.finance-impact-heading {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.finance-read-only-badge {
+  padding: 0.18rem 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 750;
+  white-space: nowrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+}
+
+.finance-impact-grid {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.finance-impact-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.finance-impact-card span {
+  color: var(--text-subtle);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.finance-impact-card strong {
+  font-size: 0.86rem;
+}
+
+.finance-impact-card small,
+.finance-impact-note,
+.finance-unavailable {
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.finance-impact-note,
+.finance-unavailable {
+  margin: 0;
+}
+
 .lifecycle-section {
   padding-top: 1rem;
   border-top: 1px solid var(--border);
@@ -408,7 +470,8 @@
     justify-self: end;
   }
 
-  .detail-form {
+  .detail-form,
+  .finance-impact-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

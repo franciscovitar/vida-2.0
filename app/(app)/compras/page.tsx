@@ -7,6 +7,7 @@ import { PersonalShoppingWorkspace } from '@/components/personal-shopping/Person
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
+import { getPersonalShoppingFinanceContext } from '@/lib/personal-shopping/finance-context';
 import { getPersonalShoppingRuntime } from '@/lib/personal-shopping/runtime';
 import type { PersonalShoppingSnapshot } from '@/lib/personal-shopping/service';
 
@@ -30,7 +31,12 @@ async function readShoppingSnapshot(): Promise<
 export default async function ComprasPage() {
   await requireAuthorizedSession();
   const shopping = getPersonalShoppingRuntime();
-  const snapshotResult = shopping.state === 'ready' ? await readShoppingSnapshot() : null;
+  const reads =
+    shopping.state === 'ready'
+      ? await Promise.all([readShoppingSnapshot(), getPersonalShoppingFinanceContext()])
+      : null;
+  const snapshotResult = reads?.[0] ?? null;
+  const financeContext = reads?.[1] ?? { monthlyTargets: [], safeToSpend: [] };
 
   let content;
   if (shopping.state !== 'ready') {
@@ -52,6 +58,7 @@ export default async function ComprasPage() {
       <PersonalShoppingWorkspace
         initialSnapshot={snapshotResult.snapshot}
         writesEnabled={shopping.writesEnabled}
+        financeContext={financeContext}
       />
     );
   }
