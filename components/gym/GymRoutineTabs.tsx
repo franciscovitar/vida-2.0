@@ -354,48 +354,49 @@ export function GymRoutineTabs({
                     ))}
                   </ol>
                 </>
-
               ) : view === 'previous' ? (
                 previousSession ? (
-<>
-                  <div className={styles['previous-session']}>
-                    <span>Última sesión comparable</span>
-                    <strong>{previousSession.date}</strong>
-                    <small>
-                      Anterior: lo que hiciste realmente en la exposición previa a este día, separado de la
-                      prescripción fija.
-                    </small>
-                  </div>
+                  <>
+                    <div className={styles['previous-session']}>
+                      <span>Última sesión comparable</span>
+                      <strong>{previousSession.date}</strong>
+                      <small>
+                        Anterior: lo que hiciste realmente en la exposición previa a este día,
+                        separado de la prescripción fija.
+                      </small>
+                    </div>
 
-                  <ol className={styles.exercises}>
-                    {previousSession.exercises.map((exercise, index) => (
-                      <li key={exercise.key} className={styles.exercise}>
-                        <div className={styles['exercise-top']}>
-                          <span className={styles['exercise-name']}>{exercise.exerciseName}</span>
-                          <span className={styles.order}>{index + 1}</span>
-                        </div>
-                        <div className={styles['previous-performance']}>
-                          <span>Series</span>
-                          <div>
-                            {exercise.sets.map((set) => (
-                              <small key={set.key}>{formatSet(set.load, set.reps)}</small>
-                            ))}
+                    <ol className={styles.exercises}>
+                      {previousSession.exercises.map((exercise, index) => (
+                        <li key={exercise.key} className={styles.exercise}>
+                          <div className={styles['exercise-top']}>
+                            <span className={styles['exercise-name']}>
+                              {exercise.exerciseName}
+                            </span>
+                            <span className={styles.order}>{index + 1}</span>
                           </div>
-                        </div>
-                        {exercise.note ? (
-                          <p className={styles['exercise-note']}>{exercise.note}</p>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ol>
-                </>
-
+                          <div className={styles['previous-performance']}>
+                            <span>Series</span>
+                            <div>
+                              {exercise.sets.map((set) => (
+                                <small key={set.key}>{formatSet(set.load, set.reps)}</small>
+                              ))}
+                            </div>
+                          </div>
+                          {exercise.note ? (
+                            <p className={styles['exercise-note']}>{exercise.note}</p>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                  </>
                 ) : (
                   <p className={styles.body}>Todavía no hay una sesión comparable registrada.</p>
                 )
               ) : (
                 <MobilityProtocol sections={mobilitySections} />
-              )}            </div>
+              )}
+            </div>
           ) : null}
         </>
       ) : (
