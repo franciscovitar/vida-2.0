@@ -1,7 +1,6 @@
 import type { PersonalPurchaseState } from './types';
 
-export const LEGACY_PERSONAL_SHOPPING_NOTION_PAGE_ID =
-  '39808627-4b6f-8151-a7c9-c77bb4be1307';
+export const LEGACY_PERSONAL_SHOPPING_NOTION_PAGE_ID = '39808627-4b6f-8151-a7c9-c77bb4be1307';
 
 export interface LegacyPersonalPurchaseSeed {
   sourceRef: string;

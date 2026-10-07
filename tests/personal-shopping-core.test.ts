@@ -81,7 +81,10 @@ test('transition event remains explicit and idempotency-ready', () => {
 
 test('money fields require integer minor units', () => {
   assert.doesNotThrow(() => validatePersonalPurchaseItem(item({ estimatedPriceMinor: 12345 })));
-  assert.throws(() => validatePersonalPurchaseItem(item({ estimatedPriceMinor: 12.5 })), RangeError);
+  assert.throws(
+    () => validatePersonalPurchaseItem(item({ estimatedPriceMinor: 12.5 })),
+    RangeError,
+  );
 });
 
 test('legacy Notion migration dry-run preserves expected 12 / 0 / 19 shape', () => {

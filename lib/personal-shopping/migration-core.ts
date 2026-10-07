@@ -106,6 +106,8 @@ export function assertLegacyPersonalShoppingSourceShape(
     plan.sourceCounts.REPLENISH !== 0 ||
     plan.sourceCounts.RESEARCH !== 19
   ) {
-    throw new Error('Legacy Personal Shopping source shape changed; review migration before writing');
+    throw new Error(
+      'Legacy Personal Shopping source shape changed; review migration before writing',
+    );
   }
 }

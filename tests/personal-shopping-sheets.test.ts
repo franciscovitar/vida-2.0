@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { GoogleSheetsPersonalShoppingRepository } from '@/lib/personal-shopping/google-sheets-store';
+import {
+  GoogleSheetsPersonalShoppingRepository,
+} from '@/lib/personal-shopping/google-sheets-store';
 import { buildLegacyPersonalShoppingMigrationPlan } from '@/lib/personal-shopping/migration-core';
 import {
   hasPersonalShoppingHeaders,
@@ -23,7 +25,9 @@ function tabFromUrl(input: string | URL | Request): string | null {
   const marker = '/values/';
   const index = url.indexOf(marker);
   if (index < 0) return null;
-  return decodeURIComponent(url.slice(index + marker.length).split('?')[0] ?? '').split('!')[0] ?? null;
+  return (
+    decodeURIComponent(url.slice(index + marker.length).split('?')[0] ?? '').split('!')[0] ?? null
+  );
 }
 
 const READY_ENV = {

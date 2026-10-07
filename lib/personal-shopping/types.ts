@@ -1,9 +1,4 @@
-export type PersonalPurchaseState =
-  | 'BUY'
-  | 'RESEARCH'
-  | 'REPLENISH'
-  | 'PURCHASED'
-  | 'DISCARDED';
+export type PersonalPurchaseState = 'BUY' | 'RESEARCH' | 'REPLENISH' | 'PURCHASED' | 'DISCARDED';
 
 export type PersonalPurchaseFinanceLinkState = 'none' | 'suggested' | 'linked';
 export type PersonalPurchaseRecordStatus = 'active' | 'superseded';
