@@ -10,6 +10,8 @@ const page = source('app', '(app)', 'compras', 'page.tsx');
 const workspace = source('components', 'personal-shopping', 'PersonalShoppingWorkspace.tsx');
 const styles = source('components', 'personal-shopping', 'PersonalShoppingWorkspace.module.scss');
 const api = source('app', 'api', 'personal-shopping', 'route.ts');
+const financeContext = source('lib', 'personal-shopping', 'finance-context.ts');
+const financeContextCore = source('lib', 'personal-shopping', 'finance-context-core.ts');
 
 test('shopping personal route is functional and links to the isolated household app', () => {
   assert.equal(page.includes('DocumentaryStableKeyPage'), false);
@@ -68,4 +70,25 @@ test('shopping mutation API authenticates and has no Finance write dependency', 
   assert.match(api, /getPersonalShoppingRuntime/);
   assert.equal(api.includes('finance/store'), false);
   assert.equal(api.includes('FinanceLogger'), false);
+});
+
+
+test('shopping Finance synergy stays read-only and fails closed', () => {
+  assert.match(page, /getPersonalShoppingFinanceContext/);
+  assert.match(workspace, /Finanzas · solo lectura/);
+  assert.match(workspace, /No registra gastos/);
+  assert.match(workspace, /Marcar Comprado no crea ni modifica movimientos de/);
+  assert.match(financeContext, /getFinanceMonthlyDashboardSnapshot/);
+  assert.match(financeContext, /getFinancePlanningStoreSnapshot/);
+  assert.match(financeContextCore, /evaluateFinancePurchaseScenario/);
+
+  for (const forbidden of [
+    'writeFinanceSheet',
+    'FINANCE_WRITES_ENABLED',
+    'FinanceLogger',
+    'household-replenishment',
+  ]) {
+    assert.equal(financeContext.includes(forbidden), false);
+    assert.equal(financeContextCore.includes(forbidden), false);
+  }
 });

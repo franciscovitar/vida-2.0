@@ -3,6 +3,11 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { CheckCircle2, Plus, Search } from 'lucide-react';
 
+import {
+  evaluatePersonalShoppingFinanceImpact,
+  type PersonalShoppingFinanceContext,
+  type PersonalShoppingFinanceImpact,
+} from '@/lib/personal-shopping/finance-context-core';
 import type {
   PersonalShoppingActiveState,
   PersonalShoppingSnapshot,
@@ -76,18 +81,22 @@ function belongsToTab(item: PersonalPurchaseItem, tab: ShoppingTab): boolean {
   return item.state === tab;
 }
 
-function formatPrice(item: PersonalPurchaseItem): string | null {
-  if (item.estimatedPriceMinor == null || !item.currency) return null;
+function formatMinor(value: number, currency: string): string {
   try {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: item.currency,
-      minimumFractionDigits: item.currency === 'ARS' ? 0 : 2,
-      maximumFractionDigits: item.currency === 'ARS' ? 0 : 2,
-    }).format(item.estimatedPriceMinor / 100);
+      currency,
+      minimumFractionDigits: currency === 'ARS' ? 0 : 2,
+      maximumFractionDigits: currency === 'ARS' ? 0 : 2,
+    }).format(value / 100);
   } catch {
-    return `${item.currency} ${(item.estimatedPriceMinor / 100).toLocaleString('es-AR')}`;
+    return `${currency} ${(value / 100).toLocaleString('es-AR')}`;
   }
+}
+
+function formatPrice(item: PersonalPurchaseItem): string | null {
+  if (item.estimatedPriceMinor == null || !item.currency) return null;
+  return formatMinor(item.estimatedPriceMinor, item.currency);
 }
 
 function minorToInput(value: number | null): string {
@@ -137,14 +146,99 @@ async function postMutation(body: MutationBody): Promise<MutationResponse> {
   return result;
 }
 
+function monthlyTargetHeadline(impact: NonNullable<PersonalShoppingFinanceImpact['monthlyTarget']>) {
+  if (impact.projectedOverTargetMinor > 0) {
+    return `${formatMinor(impact.projectedOverTargetMinor, impact.currency)} por encima del objetivo`;
+  }
+  if (impact.postRemainingTargetMinor === 0) return 'Sin margen del objetivo después';
+  return `${formatMinor(impact.postRemainingTargetMinor, impact.currency)} de margen después`;
+}
+
+function safeToSpendHeadline(impact: NonNullable<PersonalShoppingFinanceImpact['safeToSpend']>) {
+  const { scenario } = impact;
+  if (scenario.capacityState === 'exceeds-liquidity') {
+    return `${formatMinor(
+      scenario.exceedsEligibleLiquidityByMinor,
+      scenario.currency,
+    )} por encima de la liquidez elegible`;
+  }
+  if (scenario.capacityState === 'uses-protected-capacity') {
+    return `${formatMinor(
+      scenario.beyondSafeCapacityMinor,
+      scenario.currency,
+    )} por encima de Safe-to-Spend`;
+  }
+  return `${formatMinor(scenario.postSafeToSpendMinor, scenario.currency)} de capacidad después`;
+}
+
+function PersonalShoppingFinanceImpactPanel({
+  impact,
+}: {
+  impact: PersonalShoppingFinanceImpact;
+}) {
+  const monthly = impact.monthlyTarget;
+  const safe = impact.safeToSpend;
+
+  return (
+    <section className={styles['finance-impact']} aria-label="Impacto financiero estimado">
+      <div className={styles['finance-impact-heading']}>
+        <div>
+          <span className={styles.eyebrow}>Finanzas · solo lectura</span>
+          <strong>Impacto de {formatMinor(impact.purchaseAmountMinor, impact.currency)}</strong>
+        </div>
+        <span className={styles['finance-read-only-badge']}>No registra gastos</span>
+      </div>
+
+      {monthly || safe ? (
+        <div className={styles['finance-impact-grid']}>
+          {monthly ? (
+            <article className={styles['finance-impact-card']}>
+              <span>Objetivo mensual</span>
+              <strong>{monthlyTargetHeadline(monthly)}</strong>
+              <small>
+                Margen actual: {formatMinor(monthly.remainingTargetMinor, monthly.currency)} ·
+                objetivo activo: {formatMinor(monthly.activeTargetMinor, monthly.currency)}
+              </small>
+            </article>
+          ) : null}
+
+          {safe ? (
+            <article className={styles['finance-impact-card']}>
+              <span>Safe-to-Spend</span>
+              <strong>{safeToSpendHeadline(safe)}</strong>
+              <small>
+                Capacidad actual:{' '}
+                {formatMinor(safe.scenario.preSafeToSpendMinor, safe.scenario.currency)} ·{' '}
+                {safe.liquidityQuality === 'verified' ? 'liquidez verificada' : 'cobertura parcial'}
+              </small>
+            </article>
+          ) : null}
+        </div>
+      ) : (
+        <p className={styles['finance-unavailable']}>
+          Finance no tiene evidencia suficiente para calcular esta moneda. No completamos el dato
+          con supuestos.
+        </p>
+      )}
+
+      <p className={styles['finance-impact-note']}>
+        Es contexto estimado para decidir. Marcar Comprado no crea ni modifica movimientos de
+        Finance.
+      </p>
+    </section>
+  );
+}
+
 function PersonalShoppingDetail({
   item,
   writesEnabled,
+  financeContext,
   onSnapshot,
   onTransition,
 }: {
   item: PersonalPurchaseItem;
   writesEnabled: boolean;
+  financeContext: PersonalShoppingFinanceContext;
   onSnapshot: (snapshot: PersonalShoppingSnapshot) => void;
   onTransition: (snapshot: PersonalShoppingSnapshot, state: PersonalPurchaseState) => void;
 }) {
@@ -235,6 +329,7 @@ function PersonalShoppingDetail({
     }
   }
 
+  const financeImpact = evaluatePersonalShoppingFinanceImpact(item, financeContext);
   const created = formatDate(item.createdAt);
   const updated = formatDate(item.updatedAt);
   const closed = formatDate(item.purchasedAt ?? item.discardedAt);
@@ -364,6 +459,8 @@ function PersonalShoppingDetail({
         </div>
       </form>
 
+      {financeImpact ? <PersonalShoppingFinanceImpactPanel impact={financeImpact} /> : null}
+
       <div className={styles['lifecycle-section']}>
         <div>
           <span className={styles.eyebrow}>Lifecycle</span>
@@ -408,9 +505,11 @@ function PersonalShoppingDetail({
 export function PersonalShoppingWorkspace({
   initialSnapshot,
   writesEnabled,
+  financeContext,
 }: {
   initialSnapshot: PersonalShoppingSnapshot;
   writesEnabled: boolean;
+  financeContext: PersonalShoppingFinanceContext;
 }) {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [tab, setTab] = useState<ShoppingTab>('BUY');
@@ -626,6 +725,7 @@ export function PersonalShoppingWorkspace({
                     <PersonalShoppingDetail
                       item={item}
                       writesEnabled={writesEnabled}
+                      financeContext={financeContext}
                       onSnapshot={setSnapshot}
                       onTransition={applyTransition}
                     />
