@@ -21,12 +21,12 @@ const DATA_STATE: Record<FinanceDataState, { symbol: string; label: string }> = 
 
 export function FinanceNavigation({
   current,
-  dataState = 'partial',
+  dataState,
 }: {
   current: FinanceSection;
   dataState?: FinanceDataState;
 }) {
-  const data = DATA_STATE[dataState];
+  const data = dataState ? DATA_STATE[dataState] : null;
 
   return (
     <nav className={styles.navigation} aria-label="Secciones de Finanzas">
@@ -49,8 +49,8 @@ export function FinanceNavigation({
         data-state={dataState}
         href="/finanzas/datos"
       >
-        <span aria-hidden="true">{data.symbol}</span>
-        {data.label}
+        {data ? <span aria-hidden="true">{data.symbol}</span> : null}
+        {data?.label ?? 'Datos y fuentes'}
       </Link>
     </nav>
   );
