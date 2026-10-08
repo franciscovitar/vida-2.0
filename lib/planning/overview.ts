@@ -1,11 +1,11 @@
+import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
 import type { AssessmentProgressSnapshot } from '@/types/assessment-progress';
 import type { NotionProject, NotionTask } from '@/types/notion';
 import type { ProjectsIntelligenceProject } from '@/types/projects-intelligence';
 
 function dateValue(value: string | null): number {
   if (!value) return Number.POSITIVE_INFINITY;
-  const parsed = Date.parse(`${value}T12:00:00Z`);
-  return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+  return parsePlanningCivilDay(value) ?? Number.POSITIVE_INFINITY;
 }
 
 function closedProjectIds(projects: readonly NotionProject[]): Set<string> {
@@ -81,15 +81,16 @@ export function selectWeekTasks(
   targetDate: string,
   horizonDays = 7,
 ): NotionTask[] {
-  const start = Date.parse(`${targetDate}T12:00:00Z`);
+  const start = parsePlanningCivilDay(targetDate);
+  if (start === null) return [];
   const end = start + horizonDays * 86_400_000;
   const closedProjects = closedProjectIds(projects);
 
   return tasks
     .filter((task) => {
       if (!taskCompetesForPlanning(task, closedProjects) || !task.date) return false;
-      const date = Date.parse(`${task.date}T12:00:00Z`);
-      return Number.isFinite(date) && date >= start && date < end;
+      const date = parsePlanningCivilDay(task.date);
+      return date !== null && date >= start && date < end;
     })
     .sort((a, b) => dateValue(a.date) - dateValue(b.date));
 }

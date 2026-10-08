@@ -99,3 +99,36 @@ test('E7. orientation outside seven-day window does not become a weekly commitme
     ['unknown'],
   );
 });
+
+test('F-DATE-1. Invalid Gregorian days cannot roll into another weekly assessment date', () => {
+  const result = classifyWeekAssessments(
+    [assessment('impossible', '2026-02-30'), assessment('valid', '2026-03-02')],
+    '2026-03-02',
+  );
+
+  assert.deepEqual(result.week.map((item) => item.assessmentId), ['valid']);
+  assert.deepEqual(result.undated.map((item) => item.assessmentId), ['impossible']);
+});
+
+test('F-DATE-2. Invalid upcoming date is unknown rather than a fabricated week item', () => {
+  const result = classifyWeekUpcoming(
+    [
+      { date: '2025-02-29', title: 'impossible' },
+      { date: '2024-02-29', title: 'real leap day' },
+    ],
+    '2024-02-29',
+  );
+
+  assert.deepEqual(result.week.map((item) => item.title), ['real leap day']);
+  assert.deepEqual(result.unknown.map((item) => item.title), ['impossible']);
+});
+
+test('F-DATE-3. Invalid reference day never creates a fabricated weekly commitment', () => {
+  const assessments = classifyWeekAssessments([assessment('exam', '2026-03-02')], '2026-02-30');
+  const upcoming = classifyWeekUpcoming([{ date: '2026-03-02', title: 'task' }], '2026-02-30');
+
+  assert.equal(assessments.week.length, 0);
+  assert.equal(assessments.undated.length, 1);
+  assert.equal(upcoming.week.length, 0);
+  assert.equal(upcoming.unknown.length, 1);
+});
