@@ -246,3 +246,96 @@ test('V2-O5 an empty valid attention array is allowed: no-change is first class'
   assert.equal(view.status, 'ready');
   assert.deepEqual(view.attention, []);
 });
+
+function v2Row(encodedPayload: string, targetDate = TODAY): unknown[] {
+  return [
+    `vida2:tasks-daily-planning:v2:orientation:${targetDate}:fixture`,
+    targetDate,
+    '2026-10-07T08:00:00-03:00',
+    encodedPayload,
+    'chatgpt_project',
+    'daily-orientation-v2',
+  ];
+}
+
+test('F-OR1. Impossible target date is invalid before inspecting source rows', () => {
+  const read = selectLatestDailyOrientationSnapshot([HEADER], '2026-02-30');
+  assert.equal(read.status, 'invalid');
+  assert.equal(read.snapshot, null);
+});
+
+test('F-OR2. Impossible review date invalidates the orientation row', () => {
+  const decoded = JSON.parse(payload()) as { review: { date: string } };
+  decoded.review.date = '2026-02-30';
+  const read = selectLatestDailyOrientationSnapshot(
+    [HEADER, v2Row(JSON.stringify(decoded))],
+    TODAY,
+  );
+  assert.equal(read.status, 'invalid');
+  assert.equal(read.invalidRows, 1);
+  assert.equal(read.snapshot, null);
+});
+
+test('F-OR3. Impossible upcoming date never becomes a verified commitment', () => {
+  const decoded = JSON.parse(payload()) as { upcoming: Array<{ date: string }> };
+  decoded.upcoming[0]!.date = '2025-02-29';
+  const read = selectLatestDailyOrientationSnapshot(
+    [HEADER, v2Row(JSON.stringify(decoded))],
+    TODAY,
+  );
+  assert.equal(read.status, 'invalid');
+  assert.equal(read.snapshot, null);
+});
+
+test('F-OR4. Actual leap days remain valid in both review and upcoming', () => {
+  const decoded = JSON.parse(payload()) as {
+    review: { date: string };
+    upcoming: Array<{ date: string }>;
+  };
+  decoded.review.date = '2024-02-29';
+  decoded.upcoming[0]!.date = '2024-02-29';
+  const read = selectLatestDailyOrientationSnapshot(
+    [HEADER, v2Row(JSON.stringify(decoded))],
+    TODAY,
+  );
+  assert.equal(read.status, 'ready');
+  assert.equal(read.snapshot?.payload.review.date, '2024-02-29');
+  assert.equal(read.snapshot?.payload.upcoming[0]?.date, '2024-02-29');
+});
+
+test('F-OR5. Unexpected raw Journal fields are rejected at the review boundary', () => {
+  const decoded = JSON.parse(payload()) as { review: Record<string, unknown> };
+  decoded.review.journalRawBody = 'fixture-private-journal-text';
+  const read = selectLatestDailyOrientationSnapshot(
+    [HEADER, v2Row(JSON.stringify(decoded))],
+    TODAY,
+  );
+  assert.equal(read.status, 'invalid');
+  assert.equal(read.snapshot, null);
+});
+
+test('F-OR6. Degraded sources cannot expose stale referenced advice in the browser DTO', () => {
+  const read = selectLatestDailyOrientationSnapshot([HEADER, v2Row(payload())], TODAY);
+  const degraded = context();
+  degraded.status = 'degraded';
+  degraded.sources.tasks = {
+    status: 'network-error',
+    available: false,
+    notice: 'Tareas no disponibles.',
+  };
+  degraded.sources.projects = {
+    status: 'network-error',
+    available: false,
+    notice: 'Proyectos no disponibles.',
+  };
+  degraded.tasks = [];
+  degraded.projects = [];
+  const view = buildDailyOrientationV2View(degraded, read);
+  const serialized = JSON.stringify(view);
+
+  assert.equal(view.status, 'degraded');
+  assert.deepEqual(view.attention, []);
+  assert.deepEqual(view.upcoming, []);
+  assert.equal(view.quality.unresolvedRefs, 2);
+  assert.doesNotMatch(serialized, /task-1|project-1|fixture-private-journal-text/);
+});
