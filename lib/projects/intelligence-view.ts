@@ -193,7 +193,10 @@ export function buildProjectTrajectoryView(
     .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
 
   const active = milestones.filter((item) => item.status === 'En progreso');
-  const fullyOrdered = milestones.every((item) => item.order !== null);
+  const orderedPositions = milestones.map((item) => item.order);
+  const fullyOrdered =
+    orderedPositions.every((order) => order !== null) &&
+    new Set(orderedPositions).size === orderedPositions.length;
   const pending = fullyOrdered
     ? milestones
         .filter((item) => item.status === 'Pendiente')

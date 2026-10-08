@@ -484,3 +484,11 @@ test('PI-E6. Hito siguiente solo si orden canónico o único en progreso', () =>
   ]);
   assert.equal(ambiguous.nextMilestone, null);
 });
+
+test('PI-E6. El orden duplicado no permite inventar un próximo hito', () => {
+  const ambiguous = buildProjectTrajectoryView([
+    milestone({ id: 'duplicate-a', name: 'Opción A', status: 'Pendiente', order: 2 }),
+    milestone({ id: 'duplicate-b', name: 'Opción B', status: 'Pendiente', order: 2 }),
+  ]);
+  assert.equal(ambiguous.nextMilestone, null);
+});
