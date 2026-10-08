@@ -9,154 +9,21 @@ import { isHabitsV2WritesEnabled } from '@/lib/habits/v2-config';
 import { HABIT_LOG_V2_TAB, HABIT_REGISTRY_TAB } from '@/lib/habits/v2-contract';
 import type { HabitV2SheetPort } from '@/lib/habits/v2-write-core';
 
+function sameRowRange(rangeA1: string, pattern: RegExp): boolean {
+  const match = pattern.exec(rangeA1);
+  if (!match) return false;
+  const start = Number(match[1]);
+  const end = Number(match[2]);
+  return Number.isInteger(start) && start >= 2 && start === end;
+}
+
 function allowedWriteRange(rangeA1: string): boolean {
   if (rangeA1.includes('append') || rangeA1.includes('clear')) return false;
-
-  const registry = new RegExp(
-    '^' + HABIT_REGISTRY_TAB.replace(/[.*+?^$\\{\\}()|[\\]\\\\]/g, '\\function allowedWriteRange(rangeA1: string): boolean {
-  if (rangeA1.includes('append') || rangeA1.includes('clear')) return false;
   return (
-    rangeA1.startsWith(`${HABIT_REGISTRY_TAB}!`) ||
-    rangeA1.startsWith(`${HABIT_LOG_V2_TAB}!`)
+    sameRowRange(rangeA1, /^Habit Registry!A(\d+):M(\d+)$/) ||
+    sameRowRange(rangeA1, /^Habit Registry!D(\d+):J(\d+)$/) ||
+    sameRowRange(rangeA1, /^Habit Log V2!A(\d+):H(\d+)$/)
   );
-}') +
-      '!(?:A\\\\d+:M\\\\d+|D\\\\d+:J\\\\d+)
-
-export function createGoogleHabitsV2Port(
-  env: SpreadsheetTargetEnv = process.env,
-): HabitV2SheetPort {
-  return {
-    async readRegistry() {
-      const result = await readTabValues(HABIT_REGISTRY_TAB);
-      return result.ok ? { ok: true, values: result.values } : { ok: false };
-    },
-
-    async readLog() {
-      const result = await readTabValues(HABIT_LOG_V2_TAB);
-      return result.ok ? { ok: true, values: result.values } : { ok: false };
-    },
-
-    async readLegacy() {
-      const result = await readTabValues(REGISTRO_DIARIO_TAB);
-      return result.ok ? { ok: true, values: result.values } : { ok: false };
-    },
-
-    async putValues(rangeA1, values) {
-      if (!allowedWriteRange(rangeA1) || !isHabitsV2WritesEnabled(env)) return { ok: false };
-
-      const config = getGoogleConfig(env);
-      if (!config.ok || !config.config.writesAllowed) return { ok: false };
-
-      const token = await fetchAccessToken(
-        config.config.clientEmail,
-        config.config.privateKey,
-        SPREADSHEETS_SCOPE,
-      );
-      if (!token.ok) return { ok: false };
-
-      const url =
-        `${SHEETS_BASE}/${encodeURIComponent(config.config.spreadsheetId)}/values/${encodeURIComponent(rangeA1)}` +
-        '?valueInputOption=USER_ENTERED';
-
-      try {
-        const response = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token.token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            range: rangeA1,
-            majorDimension: 'ROWS',
-            values,
-          }),
-          cache: 'no-store',
-        });
-        await response.text();
-        return response.ok ? { ok: true } : { ok: false };
-      } catch {
-        return { ok: false };
-      }
-    },
-  };
-}
-
-export { allowedWriteRange as isAllowedHabitsV2WriteRange };
-,
-  );
-  const log = new RegExp(
-    '^' + HABIT_LOG_V2_TAB.replace(/[.*+?^$\\{\\}()|[\\]\\\\]/g, '\\function allowedWriteRange(rangeA1: string): boolean {
-  if (rangeA1.includes('append') || rangeA1.includes('clear')) return false;
-  return (
-    rangeA1.startsWith(`${HABIT_REGISTRY_TAB}!`) ||
-    rangeA1.startsWith(`${HABIT_LOG_V2_TAB}!`)
-  );
-}') +
-      '!A\\\\d+:H\\\\d+
-
-export function createGoogleHabitsV2Port(
-  env: SpreadsheetTargetEnv = process.env,
-): HabitV2SheetPort {
-  return {
-    async readRegistry() {
-      const result = await readTabValues(HABIT_REGISTRY_TAB);
-      return result.ok ? { ok: true, values: result.values } : { ok: false };
-    },
-
-    async readLog() {
-      const result = await readTabValues(HABIT_LOG_V2_TAB);
-      return result.ok ? { ok: true, values: result.values } : { ok: false };
-    },
-
-    async readLegacy() {
-      const result = await readTabValues(REGISTRO_DIARIO_TAB);
-      return result.ok ? { ok: true, values: result.values } : { ok: false };
-    },
-
-    async putValues(rangeA1, values) {
-      if (!allowedWriteRange(rangeA1) || !isHabitsV2WritesEnabled(env)) return { ok: false };
-
-      const config = getGoogleConfig(env);
-      if (!config.ok || !config.config.writesAllowed) return { ok: false };
-
-      const token = await fetchAccessToken(
-        config.config.clientEmail,
-        config.config.privateKey,
-        SPREADSHEETS_SCOPE,
-      );
-      if (!token.ok) return { ok: false };
-
-      const url =
-        `${SHEETS_BASE}/${encodeURIComponent(config.config.spreadsheetId)}/values/${encodeURIComponent(rangeA1)}` +
-        '?valueInputOption=USER_ENTERED';
-
-      try {
-        const response = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token.token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            range: rangeA1,
-            majorDimension: 'ROWS',
-            values,
-          }),
-          cache: 'no-store',
-        });
-        await response.text();
-        return response.ok ? { ok: true } : { ok: false };
-      } catch {
-        return { ok: false };
-      }
-    },
-  };
-}
-
-export { allowedWriteRange as isAllowedHabitsV2WriteRange };
-,
-  );
-  return registry.test(rangeA1) || log.test(rangeA1);
 }
 
 export function createGoogleHabitsV2Port(
