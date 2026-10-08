@@ -39,38 +39,28 @@
           "kind": "EXPLANATION",
           "material": true,
           "text": "Los neutrinos son partículas que casi no interactúan con la materia. Eso los vuelve extremadamente difíciles de detectar, pero también muy valiosos: pueden atravesar enormes distancias casi sin desviarse y conservar información sobre el lugar del que salieron.",
-          "claimRefs": [
-            "NPH-2"
-          ],
+          "claimRefs": ["NPH-2"],
           "backgroundRefs": []
         },
         {
           "kind": "FACTUAL",
           "material": true,
           "text": "Francis Halzen recibió el Nobel de Física 2026 por contribuciones decisivas al observatorio IceCube y por el descubrimiento de neutrinos astrofísicos de alta energía. IceCube usa un volumen gigantesco de hielo del Polo Sur instrumentado con miles de sensores para detectar los pequeños destellos producidos cuando un neutrino interactúa.",
-          "claimRefs": [
-            "NPH-1",
-            "NPH-2"
-          ],
+          "claimRefs": ["NPH-1", "NPH-2"],
           "backgroundRefs": []
         },
         {
           "kind": "INTERPRETIVE",
           "material": true,
           "text": "El salto conceptual es que la astronomía ya no depende solo de mirar luz. Si un neutrino llega desde una supernova, un agujero negro activo u otro entorno extremo, su dirección puede ayudar a reconstruir de dónde vino y combinar esa señal con telescopios tradicionales: es parte de la llamada astronomía multimensajero.",
-          "claimRefs": [
-            "NPH-2",
-            "NPH-3"
-          ],
+          "claimRefs": ["NPH-2", "NPH-3"],
           "backgroundRefs": []
         },
         {
           "kind": "LIMIT",
           "material": true,
           "text": "Los neutrinos de energía extrema siguen siendo muy raros y muchas fuentes todavía no están identificadas con precisión. El premio reconoce una herramienta y una línea de descubrimientos que siguen abiertas, no un mapa completo del universo de neutrinos.",
-          "claimRefs": [
-            "NPH-3"
-          ],
+          "claimRefs": ["NPH-3"],
           "backgroundRefs": []
         }
       ]
