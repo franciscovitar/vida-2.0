@@ -116,7 +116,7 @@ export function HabitsV2Board({ view }: { view: HabitsV2View }) {
               type="button"
               className={styles.addButton}
               onClick={() => setShowAdd((value) => !value)}
-              disabled={!view.writable || pending}
+              disabled={!view.writable || pending || view.targetDate !== view.today}
             >
               <Plus size={14} aria-hidden="true" />
               Nuevo hábito

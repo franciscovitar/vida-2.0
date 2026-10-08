@@ -46,8 +46,8 @@
 }
 
 .navigator input,
-.add-form input,
-.add-form select {
+.addForm input,
+.addForm select {
   min-height: 2rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -70,7 +70,7 @@
   line-height: 1.45;
 }
 
-.add-form {
+.addForm {
   display: grid;
   gap: 0.65rem;
   margin-top: 0.9rem;
@@ -80,15 +80,15 @@
   background: var(--surface-2);
 }
 
-.add-form label {
+.addForm label {
   display: grid;
   gap: 0.25rem;
   color: var(--text-muted);
   font-size: 0.68rem;
 }
 
-.add-form input,
-.add-form select {
+.addForm input,
+.addForm select {
   padding: 0.35rem 0.5rem;
 }
 
@@ -178,7 +178,7 @@
 }
 
 @media (width >= 760px) {
-  .add-form {
+  .addForm {
     grid-template-columns: minmax(0, 2fr) 0.7fr 1fr 0.7fr 1fr;
   }
 
