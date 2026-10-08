@@ -147,3 +147,27 @@ test('DP-G3. excepción inesperada en Hitos queda localizada y no derriba Tasks,
   assert.equal(data.projects[0]?.milestoneCount, null);
   assert.deepEqual(data.calendarEvents, []);
 });
+
+test('DP-G1b. fecha legacy sin Tipo de fecha queda unspecified, no deadline', async () => {
+  const legacy: NotionRawPage = {
+    id: 'task-legacy-date-v2',
+    properties: {
+      Tarea: { title: [{ plain_text: 'Tarea con fecha legacy' }] },
+      Estado: { select: { name: 'Pendiente' } },
+      Fecha: { date: { start: '2026-10-10' } },
+    },
+  };
+
+  const data = await loadDailyPlanningContextUncached(
+    baseDeps(
+      portWith({
+        'ds-tasks': { ok: true, pages: [legacy] },
+        'ds-projects': { ok: true, pages: [PROJECT] },
+        'ds-milestones': { ok: true, pages: [] },
+      }),
+    ),
+  );
+
+  assert.equal(data.tasks[0]?.dateSemantics, 'unspecified');
+  assert.equal(data.quality.tasksWithAmbiguousDate, 1);
+});

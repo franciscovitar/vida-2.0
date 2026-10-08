@@ -185,7 +185,7 @@ test('DP-R1. contexto completo preserva Fecha como ambigua y progreso verificabl
   assert.equal(data.status, 'ready');
   assert.equal(data.horizonEnd, '2026-10-05');
   assert.equal(data.tasks.length, 1);
-  assert.equal(data.tasks[0]?.dateSemantics, 'relevant-date-unspecified');
+  assert.equal(data.tasks[0]?.dateSemantics, 'unspecified');
   assert.equal(data.quality.tasksWithAmbiguousDate, 1);
   assert.equal(data.projects.length, 1);
   assert.deepEqual(data.projects[0]?.progress, {

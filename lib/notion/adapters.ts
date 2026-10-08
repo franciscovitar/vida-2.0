@@ -6,6 +6,7 @@ import {
   AREA_STATUSES,
   PROJECT_PROPS,
   PROJECT_STATUSES,
+  TASK_DATE_TYPES,
   TASK_DURATIONS,
   TASK_ENERGIES,
   TASK_PRIORITIES,
@@ -13,6 +14,11 @@ import {
   TASK_STATUSES,
 } from '@/lib/notion/constants';
 import { projectDateKind, taskDateKind } from '@/lib/notion/classify';
+import {
+  deriveTaskDateAttention,
+  deriveTaskDateSemantics,
+  deriveTaskDateState,
+} from '@/lib/notion/task-date-semantics';
 import {
   dateStart,
   inList,
@@ -29,6 +35,7 @@ import type {
   NotionProjectStatus,
   NotionRelation,
   NotionTask,
+  NotionTaskDateType,
   NotionTaskDuration,
   NotionTaskEnergy,
   NotionTaskPriority,
@@ -121,6 +128,12 @@ export function adaptTask(
     inList(selectName(props[TASK_PROPS.status]), TASK_STATUSES) ??
     ('Pendiente' as NotionTaskStatus);
   const date = dateStart(props[TASK_PROPS.date]);
+  const dateType = inList(
+    selectName(props[TASK_PROPS.dateType]),
+    TASK_DATE_TYPES,
+  ) as NotionTaskDateType | null;
+  const dateSemantics = deriveTaskDateSemantics(date, dateType);
+  const dateState = deriveTaskDateState(date, today);
   const projectIds = relationIds(props[TASK_PROPS.project]);
   const areaIds = relationIds(props[TASK_PROPS.area]);
   const projectAreaIds = relationIds(props[TASK_PROPS.projectArea]);
@@ -131,6 +144,10 @@ export function adaptTask(
     status,
     date,
     dateKind: taskDateKind(status, date, today),
+    dateType,
+    dateSemantics,
+    dateState,
+    dateAttention: deriveTaskDateAttention(status, dateSemantics, dateState),
     priority: inList(
       selectName(props[TASK_PROPS.priority]),
       TASK_PRIORITIES,
