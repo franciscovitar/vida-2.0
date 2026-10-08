@@ -1,3 +1,5 @@
+import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
+
 import type {
   AssessmentLifecycleStatus,
   AssessmentProgressConfidence,
@@ -148,6 +150,17 @@ export function parseAssessmentProgressPayload(value: unknown): AssessmentProgre
     return null;
   }
 
+  // A measurable percentage requires the assessment's complete official scope.
+  // With no evidence, 0% is meaningful only when that scope is known.
+  if (
+    (progressPercent !== null && !scopeComplete) ||
+    (progressPercent !== null && progressPercent > 0 && evidenceCount === 0) ||
+    (band === 'exam-ready' &&
+      (progressPercent === null || progressPercent === 0 || !scopeComplete || evidenceCount === 0))
+  ) {
+    return null;
+  }
+
   return {
     name,
     type,
@@ -198,6 +211,7 @@ function parseRow(row: readonly unknown[]): AssessmentProgressSnapshot | null {
     !assessmentId ||
     !subjectId ||
     assessmentDate === undefined ||
+    (assessmentDate !== null && parsePlanningCivilDay(assessmentDate) === null) ||
     !generatedAt ||
     Number.isNaN(Date.parse(generatedAt)) ||
     sourceRaw !== SOURCE ||
