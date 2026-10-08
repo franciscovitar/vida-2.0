@@ -167,6 +167,61 @@ export function buildPiSnapshotView(
   };
 }
 
+/**
+ * Bounded evidence only: a documented closure is stronger than a generic
+ * last-advance date. One closure must never become a claimed project pace.
+ */
+export interface ProjectTrajectoryView {
+  lastDocumentedClosure: {
+    milestone: string;
+    dateLabel: string;
+  } | null;
+  nextMilestone: {
+    name: string;
+    status: 'En progreso' | 'Pendiente';
+  } | null;
+}
+
+export function buildProjectTrajectoryView(
+  milestones: readonly ProjectsIntelligenceMilestone[],
+): ProjectTrajectoryView {
+  const documented = milestones
+    .filter(
+      (item) =>
+        item.status === 'Hecho' &&
+        item.completedAt !== null &&
+        Boolean(item.evidence?.trim()),
+    )
+    .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
+
+  const active = milestones.filter((item) => item.status === 'En progreso');
+  const fullyOrdered = milestones.every((item) => item.order !== null);
+  const pending = fullyOrdered
+    ? milestones
+        .filter((item) => item.status === 'Pendiente')
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    : [];
+  const next =
+    active.length === 1
+      ? active[0]
+      : active.length === 0 && fullyOrdered
+        ? pending[0]
+        : null;
+
+  return {
+    lastDocumentedClosure: documented[0]?.completedAt
+      ? {
+          milestone: documented[0].name,
+          dateLabel: formatShortDay(documented[0].completedAt),
+        }
+      : null,
+    nextMilestone:
+      next?.status === 'En progreso' || next?.status === 'Pendiente'
+        ? { name: next.name, status: next.status }
+        : null,
+  };
+}
+
 export interface ProjectCardView {
   id: string;
   name: string;
@@ -183,6 +238,7 @@ export interface ProjectCardView {
   dueDateLabel: string | null;
   reviewDateLabel: string | null;
   milestones: MilestoneView[];
+  trajectory: ProjectTrajectoryView;
   pi: PiSnapshotView;
   quality: ProjectsIntelligenceProjectQuality;
 }
@@ -203,6 +259,7 @@ export function buildProjectCardView(project: ProjectsIntelligenceProject): Proj
     dueDateLabel: project.dueDate ? formatShortDay(project.dueDate) : null,
     reviewDateLabel: project.reviewDate ? formatShortDay(project.reviewDate) : null,
     milestones: buildMilestoneViews(project.milestones),
+    trajectory: buildProjectTrajectoryView(project.milestones),
     pi: buildPiSnapshotView(project, project.quality.stalePiSnapshot),
     quality: project.quality,
   };
