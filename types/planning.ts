@@ -6,6 +6,7 @@ import type {
 } from '@/types/notion';
 
 export type PlanningView = 'resumen' | 'semana' | 'tareas' | 'proyectos';
+export type PlanningViewV2 = 'revision' | 'prioridades' | 'semana' | 'acciones';
 
 export interface PlanningTaskRelationOption {
   key: string;
