@@ -13,3 +13,9 @@ export function isTodayCockpitV2UiEnabled(
 ): boolean {
   return env.TODAY_COCKPIT_V2_UI_ENABLED === 'true';
 }
+
+export function isTaskDateSemanticsV2Enabled(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.TASK_DATE_SEMANTICS_V2_ENABLED === 'true';
+}

@@ -1,4 +1,5 @@
 import type {
+  NotionTaskDateType,
   NotionTaskDuration,
   NotionTaskEnergy,
   NotionTaskPriority,
@@ -18,6 +19,8 @@ export interface PlanningTaskEditableSnapshot {
   title: string;
   status: NotionTaskStatus;
   date: string | null;
+  /** Present only when staged V2 date semantics are enabled. */
+  dateType?: NotionTaskDateType | null;
   priority: NotionTaskPriority | null;
   duration: NotionTaskDuration | null;
   energy: NotionTaskEnergy | null;
@@ -46,6 +49,8 @@ export interface PlanningTaskCreateInput {
   areaKey: string;
   projectKey: string | null;
   date: string | null;
+  /** Present only when staged V2 date semantics are enabled. */
+  dateType?: NotionTaskDateType | null;
   duration: NotionTaskDuration | null;
   energy: NotionTaskEnergy | null;
   note: string | null;

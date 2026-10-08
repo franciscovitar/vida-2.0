@@ -122,6 +122,7 @@ function editable(input: Partial<PlanningTaskEditableSnapshot> = {}): PlanningTa
     title: 'Revisar presupuesto',
     status: 'Pendiente',
     date: null,
+    dateType: undefined,
     priority: 'Media',
     duration: null,
     energy: null,
@@ -262,4 +263,92 @@ test('Task Web CRUD: archive requires exact confirmation context and removes act
 
   assert.equal(result.ok, true);
   assert.equal(fake.tasks.size, 0);
+});
+
+test('Task Web CRUD V2: dated create requires explicit date type only when V2 gate is enabled', async () => {
+  const fake = fakeClient();
+  const service = createPlanningTaskCrudService({
+    client: fake.client,
+    tasksDataSourceId: fake.ids.tasks,
+    projectsDataSourceId: fake.ids.projects,
+    areasDataSourceId: fake.ids.areas,
+    dateSemanticsV2: true,
+  });
+
+  const base = {
+    title: 'Entregar informe',
+    priority: 'Alta' as const,
+    areaKey: opaqueKey('area', fake.area.id),
+    projectKey: opaqueKey('proj', fake.project.id),
+    date: '2026-10-20',
+    duration: null,
+    energy: null,
+    note: null,
+  };
+
+  const missingType = await service.create({
+    ...base,
+    operationId: 'op-date-missing',
+    dateType: null,
+  });
+  assert.equal(missingType.ok, false);
+  if (!missingType.ok) assert.equal(missingType.code, 'invalid');
+
+  const created = await service.create({
+    ...base,
+    operationId: 'op-date-deadline',
+    dateType: 'Deadline',
+  });
+  assert.equal(created.ok, true);
+
+  const task = [...fake.tasks.values()][0]!;
+  assert.equal(
+    (task.properties[TASK_PROPS.dateType] as { select: { name: string } }).select.name,
+    'Deadline',
+  );
+});
+
+test('Task Web CRUD V2: legacy untyped date may receive unrelated edit without forced migration', async () => {
+  const fake = fakeClient();
+  const task: NotionRawPage = {
+    id: 'task-legacy-date',
+    properties: {
+      [TASK_PROPS.title]: title('Tarea legacy'),
+      [TASK_PROPS.status]: select('Pendiente'),
+      [TASK_PROPS.priority]: select('Media'),
+      [TASK_PROPS.date]: { date: { start: '2026-10-20' } },
+      [TASK_PROPS.area]: relation([fake.area.id]),
+      [TASK_PROPS.project]: relation([fake.project.id]),
+      [TASK_PROPS.projectArea]: relation([fake.area.id]),
+    },
+  };
+  fake.tasks.set(task.id, task);
+
+  const service = createPlanningTaskCrudService({
+    client: fake.client,
+    tasksDataSourceId: fake.ids.tasks,
+    projectsDataSourceId: fake.ids.projects,
+    areasDataSourceId: fake.ids.areas,
+    dateSemanticsV2: true,
+  });
+
+  const expected = editable({
+    title: 'Tarea legacy',
+    date: '2026-10-20',
+    dateType: null,
+  });
+  const next = editable({
+    title: 'Tarea legacy',
+    date: '2026-10-20',
+    dateType: null,
+    priority: 'Alta',
+  });
+
+  const result = await service.update({
+    taskKey: opaqueKey('task', task.id),
+    expected,
+    next,
+  });
+
+  assert.equal(result.ok, true);
 });
