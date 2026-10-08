@@ -188,9 +188,7 @@ export function buildProjectTrajectoryView(
   const documented = milestones
     .filter(
       (item) =>
-        item.status === 'Hecho' &&
-        item.completedAt !== null &&
-        Boolean(item.evidence?.trim()),
+        item.status === 'Hecho' && item.completedAt !== null && Boolean(item.evidence?.trim()),
     )
     .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
 
@@ -202,11 +200,7 @@ export function buildProjectTrajectoryView(
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     : [];
   const next =
-    active.length === 1
-      ? active[0]
-      : active.length === 0 && fullyOrdered
-        ? pending[0]
-        : null;
+    active.length === 1 ? active[0] : active.length === 0 && fullyOrdered ? pending[0] : null;
 
   return {
     lastDocumentedClosure: documented[0]?.completedAt

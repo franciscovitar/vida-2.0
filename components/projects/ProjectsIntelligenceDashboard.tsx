@@ -413,7 +413,12 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
           />
           <div className={styles['project-grid']}>
             {view.upcoming.map((project) => (
-              <ProjectCard key={project.id} project={project} statusLabel="Próximo" signalsEnabled={signalsEnabled} />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                statusLabel="Próximo"
+                signalsEnabled={signalsEnabled}
+              />
             ))}
           </div>
         </section>
@@ -431,7 +436,12 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
             </p>
             <div className={styles['project-grid']}>
               {view.waiting.map((project) => (
-                <ProjectCard key={project.id} project={project} statusLabel="En revisión" signalsEnabled={signalsEnabled} />
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  statusLabel="En revisión"
+                  signalsEnabled={signalsEnabled}
+                />
               ))}
             </div>
           </div>

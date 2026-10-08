@@ -445,7 +445,12 @@ test('PI-V12. Fallback de resumen: PI antes que DoD cuando no hay Resultado espe
 test('PI-E6. Un cierre documentado exige Hecho, fecha y evidencia', () => {
   const view = buildProjectTrajectoryView([
     milestone({ id: 'a', status: 'Hecho', completedAt: '2026-10-02', evidence: null }),
-    milestone({ id: 'b', status: 'Hecho', completedAt: '2026-10-06', evidence: 'PR y QA verificados' }),
+    milestone({
+      id: 'b',
+      status: 'Hecho',
+      completedAt: '2026-10-06',
+      evidence: 'PR y QA verificados',
+    }),
     milestone({ id: 'c', status: 'Hecho', completedAt: null, evidence: 'Evidencia sin fecha' }),
   ]);
   assert.equal(view.lastDocumentedClosure?.milestone, 'Hito');
