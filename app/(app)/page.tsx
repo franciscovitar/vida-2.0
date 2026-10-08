@@ -13,6 +13,7 @@ import { WeeklyProgress } from '@/components/dashboard/WeeklyProgress';
 import { getDailyOrientationV2View } from '@/lib/data/daily-orientation-v2-source';
 import { getDailyPlanningView } from '@/lib/data/daily-planning-view-source';
 import { getTodayData } from '@/lib/data/source';
+import { shouldRenderStagedDailyOrientationV2 } from '@/lib/daily-planning/orientation-rollout';
 import { isTodayCockpitV2UiEnabled } from '@/lib/daily-planning/v2-config';
 
 import styles from './page.module.scss';
@@ -37,7 +38,7 @@ export default async function TodayPage() {
 
       {today.notice ? <IntegrationNotice status={today.status} message={today.notice} /> : null}
 
-      {v2Enabled && orientation ? (
+      {shouldRenderStagedDailyOrientationV2(v2Enabled, orientation) ? (
         <TodayCockpitV2 today={today} orientation={orientation} />
       ) : (
         <>

@@ -14,6 +14,7 @@ import {
   isDailyPlanningV2UiEnabled,
   isTaskDateSemanticsV2Enabled,
 } from '@/lib/daily-planning/v2-config';
+import { shouldRenderStagedDailyOrientationV2 } from '@/lib/daily-planning/orientation-rollout';
 import { buildPlanningTaskCatalog } from '@/lib/planning/task-catalog';
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 import type { PlanningView, PlanningViewV2 } from '@/types/planning';
@@ -78,7 +79,7 @@ export default async function PlanificacionPage({
         domain="productivity"
       />
 
-      {v2Enabled && orientation ? (
+      {shouldRenderStagedDailyOrientationV2(v2Enabled, orientation) ? (
         <PlanningWorkspaceV2
           view={resolveV2View(params.view)}
           orientation={orientation}
