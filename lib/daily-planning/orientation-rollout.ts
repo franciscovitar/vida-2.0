@@ -1,20 +1,15 @@
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 
 /**
- * During the staged migration, only switch to V2 when an actual orientation
- * snapshot exists. An empty/unavailable V2 view does not certify a persisted
- * daily orientation.
+ * During staged migration only a *confirmed empty* V2 read can use V1.
+ * Auth/permission/network/schema/invalid-row failures must be visible in V2,
+ * not silently masked as "no orientation yet".
  *
- * This is deliberately not an after-cutover rule: removing V1 fallback needs
- * a separate authorized rollout checkpoint.
+ * This is NOT an after-cutover rollback authorization; it does not activate
+ * any flags or fallback in Production by itself.
  */
 export function shouldRenderStagedDailyOrientationV2<
-  T extends Pick<DailyOrientationView, 'generatedAt' | 'review'>,
+  T extends Pick<DailyOrientationView, 'readStatus' | 'generatedAt' | 'review'>,
 >(flagEnabled: boolean, orientation: T | null): orientation is T {
-  return (
-    flagEnabled &&
-    orientation !== null &&
-    orientation.generatedAt !== null &&
-    orientation.review !== null
-  );
+  return flagEnabled && orientation !== null && orientation.readStatus !== 'empty';
 }

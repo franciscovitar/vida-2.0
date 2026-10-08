@@ -1,6 +1,7 @@
 import type { DailyPlanningContext } from '@/types/daily-planning-intelligence';
 import type {
   DailyOrientationFocusItem,
+  DailyOrientationUpcomingItem,
   DailyOrientationSnapshotRead,
   DailyOrientationView,
 } from '@/types/daily-orientation-v2';
@@ -58,6 +59,73 @@ function upcomingRefExists(
   }
 }
 
+/**
+ * A reference still existing is not enough to establish that the date in a
+ * persisted orientation remains current. Prefer the live source's date.
+ * Unreferenced suggestions retain their explicitly unverified transport
+ * semantics; no date authority is inferred from a null ref.
+ */
+function upcomingDateAgrees(
+  context: DailyPlanningContext,
+  item: DailyOrientationUpcomingItem,
+): boolean {
+  if (!item.ref) return true;
+
+  switch (item.kind) {
+    case 'calendar': {
+      // Calendar proves that an event exists, not that it is an official deadline.
+      if (item.dateType !== 'event' && item.dateType !== 'unknown') return false;
+      const event = context.calendarEvents.find((candidate) => candidate.id === item.ref);
+      return (
+        event !== undefined &&
+        event.status !== 'cancelled' &&
+        item.date >= event.startDate &&
+        item.date <= event.endDate
+      );
+    }
+    case 'assessment': {
+      if (item.dateType !== 'assessment' && item.dateType !== 'unknown') return false;
+      // Subject-level aliases are acceptable only when they uniquely resolve.
+      const assessments = (context.assessments ?? []).filter(
+        (candidate) => candidate.assessmentId === item.ref || candidate.subjectId === item.ref,
+      );
+      return assessments.length === 1 && assessments[0]?.assessmentDate === item.date;
+    }
+    case 'task': {
+      const task = context.tasks.find((candidate) => candidate.id === item.ref);
+      if (!task || !task.date || task.date !== item.date) return false;
+
+      const expected =
+        item.dateType === 'deadline'
+          ? 'deadline'
+          : item.dateType === 'target'
+            ? 'target'
+            : item.dateType === 'review'
+              ? 'review'
+              : null;
+      // A legacy date with no semantics cannot certify a deadline.
+      return (
+        (expected === null && item.dateType === 'unknown') ||
+        (expected !== null && task.dateSemantics === expected)
+      );
+    }
+    case 'project': {
+      const project = context.projects.find((candidate) => candidate.id === item.ref);
+      if (!project) return false;
+      if (item.dateType === 'review') return project.reviewDate === item.date;
+      if (item.dateType === 'deadline' || item.dateType === 'target') {
+        return project.dueDate === item.date;
+      }
+      return (
+        item.dateType === 'unknown' &&
+        (project.reviewDate === item.date || project.dueDate === item.date)
+      );
+    }
+    default:
+      return false;
+  }
+}
+
 function focusRefExists(context: DailyPlanningContext, item: DailyOrientationFocusItem): boolean {
   if (!item.ref) return true;
   switch (item.domain) {
@@ -82,6 +150,7 @@ export function buildDailyOrientationV2View(
 ): DailyOrientationView {
   const snapshot = read.snapshot;
   let unresolvedRefs = 0;
+  let dateConflicts = 0;
 
   const attention =
     snapshot?.payload.attention.flatMap((item) => {
@@ -106,6 +175,10 @@ export function buildDailyOrientationV2View(
     snapshot?.payload.upcoming.flatMap((item) => {
       if (!upcomingRefExists(context, item.kind, item.ref)) {
         unresolvedRefs += 1;
+        return [];
+      }
+      if (!upcomingDateAgrees(context, item)) {
+        dateConflicts += 1;
         return [];
       }
       return [
@@ -136,7 +209,12 @@ export function buildDailyOrientationV2View(
         : read.status === 'empty'
           ? 'empty'
           : 'degraded';
-  } else if (context.status !== 'ready' || read.status !== 'ready' || unresolvedRefs > 0) {
+  } else if (
+    context.status !== 'ready' ||
+    read.status !== 'ready' ||
+    unresolvedRefs > 0 ||
+    dateConflicts > 0
+  ) {
     status = 'degraded';
   } else {
     status = 'ready';
@@ -145,12 +223,17 @@ export function buildDailyOrientationV2View(
   let notice = read.notice;
   if (unresolvedRefs > 0) {
     notice = `${notice ? `${notice} ` : ''}${unresolvedRefs} referencia(s) V2 ya no pudieron resolverse contra las fuentes actuales.`;
-  } else if (context.status === 'degraded' && !notice) {
+  }
+  if (dateConflicts > 0) {
+    notice = `${notice ? `${notice} ` : ''}${dateConflicts} fecha(s) V2 ya no coinciden con la fuente actual y se ocultaron para evitar urgencias incorrectas.`;
+  }
+  if (context.status === 'degraded' && !notice) {
     notice = 'La orientación V2 se muestra con fuentes actuales parcialmente degradadas.';
   }
 
   return {
     status,
+    readStatus: read.status,
     notice,
     targetDate: context.targetDate,
     generatedAt: snapshot?.generatedAt ?? null,
@@ -162,6 +245,7 @@ export function buildDailyOrientationV2View(
     notNow: snapshot ? resolveFocus(snapshot.payload.notNow) : [],
     quality: {
       unresolvedRefs,
+      dateConflicts,
       invalidRows: read.invalidRows,
     },
   };
