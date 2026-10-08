@@ -10,19 +10,17 @@ The regression tests cover invalid and valid leap days, invalid target dates, da
 
 ## Phase F coverage map
 
-| Area | Gate | Evidence currently available | Remaining evidence before closure |
-| --- | --- | --- | --- |
-| V1 fallback and flags | All V2 UI flags exact-true, independently fail closed | Existing component tests + Phase F cross-module regression | Verify effective deployed env values; authenticated V1 rollback |
-| Date semantics | Only real Deadline becomes overdue; legacy stays ambiguous | Existing Task Date tests + Phase F mixed-date regression | Production Notion schema migration approval and actual date-type read/write E2E |
-| Week and assessments | Past/undated/future separate, invalid civil dates never normalized | E7 pure tests + new Gregorian read-side regression | Authenticated responsive week UX on current canonical academic evidence |
-| Academic mastery | No readiness from elapsed hours alone | Orientation and Assessment Progress contracts/tests | Fresh multi-subject diagnosis, professor-specific evidence and live reconciliation |
-| Project evidence | No percentage, closure or next milestone invented | #205 projection tests; duplicate milestone order fails closed | Live Projects/Milestones source permission/degraded-state QA |
-| Source failures | Missing Notion/Calendar/Gym/assessment states fail closed | Existing degraded-source and V2 orientation tests | End-to-end fault injection, unavailable-vs-empty distinctions, retry observation |
-| Journal privacy | D-1 scope and revocation; no raw text leakage | PAS runtime contract; V2 browser ref stripping tests | Authorized bounded D-1 access / revoke-path E2E and browser/store payload audit |
-| Whole-life reasoning | No life score; no screen-time moralization | PAS runtime contract | Realistic non-displacement/leisure and exhausted-day scenarios |
-| Habits | Registry/Log lineage, derived Gym and historical edits | PR #204 isolated tests only (unmerged draft) | Serialized/fenced authority, cross-instance write races, ambiguous failure, crash/replay QA, schema authorization |
-| Responsive/accessibility | Collapsible details and mobile focus/navigation | Isolated page components, build and previews | Actual authenticated desktop/mobile keyboard and screen-reader checks |
-| Deployment/rollback | V1 remains public until owner-approved V2 rollout | Post-merge Vercel Production builds canceled, old READY aliased | Phase G explicit flags, migrations, E2E, rollback rehearsal and consent |
+- **V1 fallback and flags:** exact-true independently fail-closed tests exist; effective deployed environment and authenticated V1 rollback remain unobserved.
+- **Date semantics:** legacy tasks remain ambiguous and only true Deadlines are overdue; real Notion Date Type migration and web mutations remain separate approvals.
+- **Week and assessments:** past/undated/future are distinguished; this delta rejects impossible Gregorian day rollovers. Authenticated responsive weekly UX is still unobserved.
+- **Academic mastery:** Assessment Progress owns mastery; elapsed hours do not prove readiness. Multi-subject fresh-diagnosis QA is still pending.
+- **Project evidence:** #205 evidence-only trajectory and duplicate-order tests passed; live permission and degraded-state QA remain pending.
+- **Source failures:** orientation and planning context have isolated degraded-source tests; actual integration fault injection remains pending.
+- **Journal privacy:** PAS defines D-1 scoped read, revocation and no raw text persistence; actual authorized revoke-path E2E and browser/store audit remain pending.
+- **Whole-life reasoning:** canonical contract disallows a life score or moralizing leisure; representative transfer scenarios remain pending.
+- **Habits:** #204 code tests passed but draft remains unmerged and non-atomic Google Sheets writes are not concurrent-write certified.
+- **Accessibility and UI:** actual authenticated desktop/mobile, keyboard and screen-reader behavior remain to be observed.
+- **Deployment:** V1 is published while V2 Production auto-builds are canceled. Phase G flag cutover and rollback rehearsal require separate authorization.
 
 ## Release boundaries
 
