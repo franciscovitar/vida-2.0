@@ -173,8 +173,8 @@ export function LearningHubV2({
           />
           <div className={styles.feature}>
             <p>
-              Mantené separado el progreso oral de Facultad. La evidencia fuerte sigue siendo el
-              uso espontáneo correcto y la transferencia a contextos nuevos.
+              Mantené separado el progreso oral de Facultad. La evidencia fuerte sigue siendo el uso
+              espontáneo correcto y la transferencia a contextos nuevos.
             </p>
             <Link href="/aprendizaje/ingles" className={styles.featureLink}>
               Abrir English Speaking
