@@ -43,7 +43,7 @@ export function adaptDailyPlanningTask(
       ...base,
       title,
       status,
-      dateSemantics: base.date === null ? 'none' : 'relevant-date-unspecified',
+      dateSemantics: base.dateSemantics ?? (base.date === null ? 'none' : 'unspecified'),
       relationUnavailable: projectRelationUnavailable,
     },
   };

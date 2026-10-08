@@ -1,10 +1,17 @@
 import { BookOpen, Brain, MessageCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 
+import { LearningHubV2 } from '@/components/learning/LearningHubV2';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { DocumentaryStableKeyPage } from '@/components/web-catalog/DocumentaryStableKeyPage';
-import { WEB_CATALOG_FIXED_ROUTES } from '@/lib/web-catalog/section-labels';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
+import { getAssessmentProgress } from '@/lib/data/assessment-progress-source';
+import { isLearningHubV2Enabled } from '@/lib/learning/v2-config';
+import { getUniversityStudyCatalog } from '@/lib/study-engine/catalog-source';
+import { WEB_CATALOG_FIXED_ROUTES } from '@/lib/web-catalog/section-labels';
+
+import pageStyles from '../page.module.scss';
 
 export const metadata: Metadata = { title: 'Aprendizaje' };
 export const dynamic = 'force-dynamic';
@@ -12,6 +19,26 @@ export const runtime = 'nodejs';
 
 export default async function AprendizajePage() {
   await requireAuthorizedSession();
+  const v2Enabled = isLearningHubV2Enabled();
+
+  if (v2Enabled) {
+    const [catalog, assessmentProgress] = await Promise.all([
+      getUniversityStudyCatalog(),
+      getAssessmentProgress(),
+    ]);
+
+    return (
+      <div className={pageStyles.page}>
+        <PageHeader
+          title="Aprendizaje"
+          description="Facultad, práctica y capacidades en un solo lugar, sin convertir lo opcional en deuda."
+          icon={BookOpen}
+          domain="learning"
+        />
+        <LearningHubV2 catalog={catalog} assessmentProgress={assessmentProgress} />
+      </div>
+    );
+  }
 
   return (
     <DocumentaryStableKeyPage

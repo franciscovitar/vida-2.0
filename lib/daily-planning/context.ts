@@ -325,9 +325,7 @@ function buildQuality(
   assessments: readonly AssessmentProgressSnapshot[],
 ) {
   return {
-    tasksWithAmbiguousDate: tasks.filter(
-      (task) => task.dateSemantics === 'relevant-date-unspecified',
-    ).length,
+    tasksWithAmbiguousDate: tasks.filter((task) => task.dateSemantics === 'unspecified').length,
     tasksMissingDuration: tasks.filter((task) => task.duration === null).length,
     tasksMissingPriority: tasks.filter((task) => task.priority === null).length,
     blockedTasksWithoutDetail: tasks.filter(
