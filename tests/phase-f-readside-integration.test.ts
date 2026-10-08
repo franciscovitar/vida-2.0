@@ -1,9 +1,17 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { isDailyPlanningV2UiEnabled, isTaskDateSemanticsV2Enabled, isTodayCockpitV2UiEnabled } from '@/lib/daily-planning/v2-config';
+import {
+  isDailyPlanningV2UiEnabled,
+  isTaskDateSemanticsV2Enabled,
+  isTodayCockpitV2UiEnabled,
+} from '@/lib/daily-planning/v2-config';
 import { isLearningHubV2Enabled } from '@/lib/learning/v2-config';
-import { deriveTaskDateAttention, deriveTaskDateSemantics, deriveTaskDateState } from '@/lib/notion/task-date-semantics';
+import {
+  deriveTaskDateAttention,
+  deriveTaskDateSemantics,
+  deriveTaskDateState,
+} from '@/lib/notion/task-date-semantics';
 import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
 import { selectWeekTasks } from '@/lib/planning/overview';
 import { isProjectsV2SignalsEnabled } from '@/lib/projects/v2-config';
@@ -41,12 +49,21 @@ test('F-INTEGRATION-1. Each staged presentation and date flag fails closed indep
 test('F-INTEGRATION-2. An old legacy task date does not gain deadline pressure', () => {
   const state = deriveTaskDateState('2026-03-01', '2026-03-02');
 
-  assert.equal(deriveTaskDateAttention('Pendiente', deriveTaskDateSemantics('2026-03-01', null), state), 'ambiguous');
-  assert.equal(deriveTaskDateAttention('Pendiente', deriveTaskDateSemantics('2026-03-01', 'Deadline'), state), 'overdue');
-  assert.equal(deriveTaskDateAttention('Pendiente', deriveTaskDateSemantics('2026-03-01', 'Objetivo'), state), 'review-needed');
+  assert.equal(
+    deriveTaskDateAttention('Pendiente', deriveTaskDateSemantics('2026-03-01', null), state),
+    'ambiguous',
+  );
+  assert.equal(
+    deriveTaskDateAttention('Pendiente', deriveTaskDateSemantics('2026-03-01', 'Deadline'), state),
+    'overdue',
+  );
+  assert.equal(
+    deriveTaskDateAttention('Pendiente', deriveTaskDateSemantics('2026-03-01', 'Objetivo'), state),
+    'review-needed',
+  );
 });
 
-test('F-INTEGRATION-3. Weekly task selection rejects impossible dates and invalid reference days', () => {
+test('F-INTEGRATION-3. Invalid civil dates never enter the task week', () => {
   const values = [task('impossible-day', '2026-02-30'), task('real-day', '2026-03-02')];
 
   assert.deepEqual(selectWeekTasks(values, [], '2026-03-02').map((item) => item.id), ['real-day']);
