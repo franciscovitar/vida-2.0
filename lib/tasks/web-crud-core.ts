@@ -287,12 +287,7 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
       const page = findOpaque(canonical.tasks, 'task', input.taskKey);
       if (!page) return { ok: false, code: 'not-found', message: 'Tarea no encontrada.' };
-      const current = snapshot(
-        page,
-        canonical.projects,
-        canonical.areas,
-        deps.dateSemanticsV2,
-      );
+      const current = snapshot(page, canonical.projects, canonical.areas, deps.dateSemanticsV2);
       if (equalSnapshot(current, input.next)) {
         return { ok: true, code: 'idempotent', message: 'El cambio ya estaba aplicado.' };
       }
