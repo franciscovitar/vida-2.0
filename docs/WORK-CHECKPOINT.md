@@ -407,3 +407,39 @@ Verificación requerida después del deployment:
 **Decisión de gate:** Phase 10 = `PASS`. No repetir schema, smoke, Production E2E ni provocar una
 caída del datastore salvo evidencia de regresión. El siguiente trabajo de World pertenece a
 **Phase 11 — prospective evaluation**.
+
+## Tasks + Daily Planning V2 — local Phase F checkpoint (2026-10-08)
+
+**Phase F = OPEN. Phase G = preparation only.** This checkpoint preserves the prior V1
+certifications; it does not authorize deployment, schemas, writes or protected merges.
+
+- Verified Vida source baseline: `499a5c1784c99ccb3d9ed78a9259466580d00fa4`.
+- Recovered the complete seven-file off-ref candidate
+  `1a5b5c1457190085c082e4a1bed24adfed2a1ced` through authenticated Git reads. Applied the reviewed
+  four-anchor typed AssessmentProgressSnapshot fixture correction from the owner's ZIP.
+- Full local test suite: **1,911 PASS / 0 FAIL / 0 SKIP**. A first Windows-only source-inspection
+  failure was resolved by restoring canonical LF checkout bytes; no unrelated code/test fix.
+- Local semantic TypeScript, ESLint, Stylelint, full-repository Prettier and Next build: PASS.
+  ESLint retains the existing unused `dateInRange` Nutrition warning. The final source SHA is
+  recorded separately in the canonical staged PAS #484 execution evidence after publication.
+- The original publication safety control must decide whether a single coherent Draft PR can be
+  created. Never switch to a different publication channel after rejection.
+- Vercel read-only inspection reconfirmed V1 Production READY on the prior release with its three
+  existing aliases. No Preview, Production deployment, Sandbox or paid test runner was initiated.
+- Actual authenticated exact-candidate source/recovery and academic freshness checks are NOT RUN.
+  The isolated checkout has no local source/auth environment; an existing V1 Production browser
+  session cannot certify this candidate. Never export its cookies or manufacture authorization.
+- Journal positive-path, D-1 scope/revocation and raw-leak audit are NOT RUN; zero Journal reads.
+  This engineering request is not a Daily Reality Review trigger. Request separate bounded consent
+  only when the authorized QA environment is ready, without loading raw history into reports.
+- Authenticated V2 mobile/keyboard/accessibility and effective post-cutover rollback are NOT RUN.
+  Retained V1 availability and deterministic flag tests are not an observed rollback rehearsal.
+- Habits #204 remains Draft: genuinely serialized/fenced cross-worker Sheets writes and
+  crash/retry/ambiguous-response evidence are still required. Writes stay disabled.
+- Billing lookup returned `404 Plan not found`; remaining spend/credit is unknown. The documented
+  USD 1 team alert is not a hard stop. Do not raise budgets or repeat metered diagnostics.
+
+Next gate: permitted reviewed candidate publication, then authenticated dev/Preview readiness and
+bounded real QA. Only after all required gates pass, request specific protected merge and
+Production cutover authorizations. Store/schema migration and write activation remain separate
+approval scopes. Preserve V1 and record exact outcomes in PAS PR #484 without duplicate state PRs.

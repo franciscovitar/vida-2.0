@@ -132,6 +132,8 @@ export interface DailyOrientationViewFocusItem {
 
 export interface DailyOrientationView {
   status: DailyPlanningStatus;
+  /** Exact transport-read outcome: empty is not the same as invalid/unavailable. */
+  readStatus: DailyOrientationReadStatus;
   notice: string | null;
   targetDate: string;
   generatedAt: string | null;
@@ -143,6 +145,8 @@ export interface DailyOrientationView {
   notNow: DailyOrientationViewFocusItem[];
   quality: {
     unresolvedRefs: number;
+    /** Date was contradicted or unsupported by its present canonical record. */
+    dateConflicts: number;
     invalidRows: number;
   };
 }

@@ -6,9 +6,10 @@ import { shouldRenderStagedDailyOrientationV2 } from '@/lib/daily-planning/orien
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 
 function orientation(
-  overrides: Partial<Pick<DailyOrientationView, 'generatedAt' | 'review'>> = {},
-): Pick<DailyOrientationView, 'generatedAt' | 'review'> {
+  overrides: Partial<Pick<DailyOrientationView, 'readStatus' | 'generatedAt' | 'review'>> = {},
+): Pick<DailyOrientationView, 'readStatus' | 'generatedAt' | 'review'> {
   return {
+    readStatus: 'ready',
     generatedAt: '2026-10-08T08:00:00-03:00',
     review: {
       date: '2026-10-07',
@@ -28,17 +29,26 @@ test('F-ROLL1. Flag off keeps certified V1 even with a valid V2 snapshot', () =>
 test('F-ROLL2. Flag on with no V2 row stays on V1 during staged migration', () => {
   assert.equal(shouldRenderStagedDailyOrientationV2(true, null), false);
   assert.equal(
-    shouldRenderStagedDailyOrientationV2(true, orientation({ generatedAt: null, review: null })),
+    shouldRenderStagedDailyOrientationV2(
+      true,
+      orientation({ readStatus: 'empty', generatedAt: null, review: null }),
+    ),
     false,
   );
 });
 
-test('F-ROLL3. V2 loader returning no persisted review cannot displace V1', () => {
+test('F-ROLL3. Confirmed empty read without persisted fields cannot displace V1', () => {
   assert.equal(
-    shouldRenderStagedDailyOrientationV2(true, orientation({ generatedAt: null })),
+    shouldRenderStagedDailyOrientationV2(
+      true,
+      orientation({ readStatus: 'empty', generatedAt: null }),
+    ),
     false,
   );
-  assert.equal(shouldRenderStagedDailyOrientationV2(true, orientation({ review: null })), false);
+  assert.equal(
+    shouldRenderStagedDailyOrientationV2(true, orientation({ readStatus: 'empty', review: null })),
+    false,
+  );
 });
 
 test('F-ROLL4. Flag on and persisted daily review can switch the view to V2', () => {
@@ -52,4 +62,42 @@ test('F-ROLL5. Both Hoy and Planificacion routes actually use the staged selecto
     assert.match(content, /shouldRenderStagedDailyOrientationV2\(v2Enabled, orientation\)/);
     assert.doesNotMatch(content, /\{v2Enabled && orientation \?/);
   }
+});
+
+test('F-ROLL6. Read failure does not silently switch to V1', () => {
+  for (const readStatus of ['invalid', 'unavailable'] as const) {
+    assert.equal(
+      shouldRenderStagedDailyOrientationV2(
+        true,
+        orientation({ readStatus, generatedAt: null, review: null }),
+      ),
+      true,
+    );
+  }
+});
+
+test('F-ROLL7. Invalid rows with a valid newest snapshot remain visible as degraded V2', () => {
+  assert.equal(
+    shouldRenderStagedDailyOrientationV2(true, orientation({ readStatus: 'invalid' })),
+    true,
+  );
+});
+
+test('F-ROLL8. Flag off keeps V1, including during source failure', () => {
+  assert.equal(
+    shouldRenderStagedDailyOrientationV2(
+      false,
+      orientation({ readStatus: 'unavailable', generatedAt: null, review: null }),
+    ),
+    false,
+  );
+});
+
+test('F-ROLL9. New read after source recovery selects V2; confirmed empty selects V1', () => {
+  const error = orientation({ readStatus: 'unavailable', generatedAt: null, review: null });
+  const refreshed = orientation({ readStatus: 'ready' });
+  const empty = orientation({ readStatus: 'empty', generatedAt: null, review: null });
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, error), true);
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, refreshed), true);
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, empty), false);
 });

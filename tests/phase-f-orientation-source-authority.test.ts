@@ -88,7 +88,7 @@ function context(available: boolean): DailyPlanningContext {
     // Deliberately retain stale objects in memory during an outage.
     tasks: [{ id: 'task-stale' }],
     projects: [{ id: 'project-stale' }],
-    calendarEvents: [{ id: 'calendar-stale' }],
+    calendarEvents: [{ id: 'calendar-stale', startDate: '2026-10-09', endDate: '2026-10-09' }],
     assessments: [{ assessmentId: 'assessment-stale', subjectId: 'subject-stale' }],
     quality: {
       tasksWithAmbiguousDate: 0,
