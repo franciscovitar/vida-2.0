@@ -206,7 +206,12 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         return { ok: false, code: 'conflict', message: 'Ownership duplicado; no se escribió.' };
       }
       if (owned.length === 1) {
-        const current = snapshot(owned[0]!, canonical.projects, canonical.areas, deps.dateSemanticsV2);
+        const current = snapshot(
+          owned[0]!,
+          canonical.projects,
+          canonical.areas,
+          deps.dateSemanticsV2,
+        );
         if (equalSnapshot(current, proposed)) {
           return {
             ok: true,
@@ -255,7 +260,12 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
           message: 'No pude verificar la creación.',
         };
       }
-      const after = snapshot(readBack.page, canonical.projects, canonical.areas, deps.dateSemanticsV2);
+      const after = snapshot(
+        readBack.page,
+        canonical.projects,
+        canonical.areas,
+        deps.dateSemanticsV2,
+      );
       if (
         !equalSnapshot(after, proposed) ||
         readRichText(readBack.page.properties[TASK_PROPS.ownership]) !== ownership
@@ -361,7 +371,12 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
           message: 'No pude verificar la actualización.',
         };
       }
-      const after = snapshot(readBack.page, canonical.projects, canonical.areas, deps.dateSemanticsV2);
+      const after = snapshot(
+        readBack.page,
+        canonical.projects,
+        canonical.areas,
+        deps.dateSemanticsV2,
+      );
       if (!equalSnapshot(after, next)) {
         return {
           ok: false,
