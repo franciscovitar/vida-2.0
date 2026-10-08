@@ -21,7 +21,9 @@ import {
   weekDatesThrough,
   type HabitLogV2Record,
   type HabitRegistryRecord,
+  type HabitV2DayState,
   type HabitV2Item,
+  type HabitV2ValueOrigin,
   type HabitsV2View,
 } from '@/lib/habits/v2-contract';
 

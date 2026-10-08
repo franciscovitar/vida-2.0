@@ -3,9 +3,9 @@
   gap: 1.25rem;
 }
 
-.add-button,
+.addButton,
 .navigator button,
-.form-actions button,
+.formActions button,
 .remove button {
   display: inline-flex;
   gap: 0.3rem;
@@ -22,17 +22,17 @@
   cursor: pointer;
 }
 
-.add-button:hover,
+.addButton:hover,
 .navigator button:hover:not(:disabled),
-.form-actions button:hover:not(:disabled),
+.formActions button:hover:not(:disabled),
 .remove button:hover:not(:disabled) {
   color: var(--text);
   background: var(--surface-3);
 }
 
-.add-button:disabled,
+.addButton:disabled,
 .navigator button:disabled,
-.form-actions button:disabled,
+.formActions button:disabled,
 .remove button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
@@ -92,7 +92,7 @@
   padding: 0.35rem 0.5rem;
 }
 
-.form-actions {
+.formActions {
   display: flex;
   gap: 0.45rem;
   justify-content: flex-end;
@@ -123,7 +123,7 @@
   width: 1.7rem;
 }
 
-.auto-icon {
+.autoIcon {
   display: grid;
   place-items: center;
   width: 1.7rem;
@@ -138,19 +138,19 @@
   min-width: 0;
 }
 
-.title-row,
+.titleRow,
 .meta,
 .remove {
   display: flex;
   align-items: center;
 }
 
-.title-row {
+.titleRow {
   justify-content: space-between;
   gap: 0.6rem;
 }
 
-.title-row strong {
+.titleRow strong {
   color: var(--text);
   font-size: 0.82rem;
 }
@@ -182,7 +182,7 @@
     grid-template-columns: minmax(0, 2fr) 0.7fr 1fr 0.7fr 1fr;
   }
 
-  .form-actions {
+  .formActions {
     grid-column: 1 / -1;
   }
 }
@@ -197,7 +197,7 @@
     justify-content: flex-start;
   }
 
-  .title-row {
+  .titleRow {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.2rem;
