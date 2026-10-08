@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { classifyWeekAssessments } from '@/lib/planning/week-v2';
+import { classifyWeekAssessments, classifyWeekUpcoming } from '@/lib/planning/week-v2';
 import type { AssessmentProgressSnapshot } from '@/types/assessment-progress';
 
 function assessment(
@@ -57,4 +57,21 @@ test('E7. no evidence remains empty; unknown is never converted into 0%', () => 
   assert.deepEqual(result, { week: [], past: [], undated: [], later: [] });
   const unknown = classifyWeekAssessments([assessment('unknown', null)], '2026-10-08');
   assert.equal(unknown.undated[0]?.payload.progressPercent, null);
+});
+
+test('E7. orientation outside seven-day window does not become a weekly commitment', () => {
+  const result = classifyWeekUpcoming(
+    [
+      { date: '2026-10-07', title: 'past' },
+      { date: '2026-10-08', title: 'today' },
+      { date: '2026-10-14', title: 'last' },
+      { date: '2026-10-15', title: 'later' },
+      { date: 'unknown', title: 'unknown' },
+    ],
+    '2026-10-08',
+  );
+  assert.deepEqual(result.week.map((item) => item.title), ['today', 'last']);
+  assert.deepEqual(result.past.map((item) => item.title), ['past']);
+  assert.deepEqual(result.later.map((item) => item.title), ['later']);
+  assert.deepEqual(result.unknown.map((item) => item.title), ['unknown']);
 });

@@ -9,7 +9,7 @@ import { TaskManager } from '@/components/planning/TaskManager';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { selectPlanningProjects, selectWeekTasks } from '@/lib/planning/overview';
-import { classifyWeekAssessments } from '@/lib/planning/week-v2';
+import { classifyWeekAssessments, classifyWeekUpcoming } from '@/lib/planning/week-v2';
 import type { AssessmentProgressRead } from '@/types/assessment-progress';
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 import type { DailyPlanningView } from '@/types/daily-planning-view';
@@ -42,12 +42,19 @@ function WeekView({
   const weekTasks = selectWeekTasks(notion.tasks, notion.projects, dailyPlan.targetDate);
   const academic = classifyWeekAssessments(assessments.snapshots, dailyPlan.targetDate);
   const activeProjects =
-    projects.status === 'ready' ? selectPlanningProjects(projects.projects) : [];
+    projects.status === 'ready' && projects.source === 'notion'
+      ? selectPlanningProjects(projects.projects)
+      : [];
   const assessmentUnavailable =
     assessments.status === 'unavailable' || assessments.status === 'invalid';
-  const projectsUnavailable = projects.status !== 'ready' && projects.status !== 'empty';
-  const topDates = orientation.upcoming.slice(0, 3);
-  const extraDates = orientation.upcoming.slice(3);
+  const projectsUnavailable =
+    projects.source !== 'notion' ||
+    (projects.status !== 'ready' && projects.status !== 'empty');
+  const tasksUnavailable =
+    notion.source !== 'notion' || (notion.status !== 'ready' && notion.status !== 'empty');
+  const upcoming = classifyWeekUpcoming(orientation.upcoming, dailyPlan.targetDate);
+  const topDates = upcoming.week.slice(0, 3);
+  const extraDates = [...upcoming.week.slice(3), ...upcoming.later];
 
   return (
     <div className={styles.stack}>
@@ -170,7 +177,9 @@ function WeekView({
           domain="tasks"
           action={<Link href="/planificacion?view=acciones">Ver acciones →</Link>}
         />
-        {weekTasks.length === 0 ? (
+        {tasksUnavailable ? (
+          <p className={styles.empty}>La fuente de tareas no está disponible; no se infiere una semana libre.</p>
+        ) : weekTasks.length === 0 ? (
           <p className={styles.empty}>Sin tareas fechadas verificables en los próximos siete días.</p>
         ) : (
           <ul className={styles.rows}>

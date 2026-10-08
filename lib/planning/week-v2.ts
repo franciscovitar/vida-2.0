@@ -39,3 +39,26 @@ export function classifyWeekAssessments(
 
   return buckets;
 }
+
+/** Sanitized orientation dates; keep dates outside the weekly window off the primary surface. */
+export function classifyWeekUpcoming<T extends { date: string }>(
+  items: readonly T[],
+  targetDate: string,
+): { week: T[]; past: T[]; later: T[]; unknown: T[] } {
+  const result: { week: T[]; past: T[]; later: T[]; unknown: T[] } = {
+    week: [],
+    past: [],
+    later: [],
+    unknown: [],
+  };
+  const from = Date.parse(`${targetDate}T12:00:00Z`);
+  const until = from + 7 * 86_400_000;
+  for (const item of items) {
+    const date = Date.parse(`${item.date}T12:00:00Z`);
+    if (!Number.isFinite(from) || !Number.isFinite(date)) result.unknown.push(item);
+    else if (date < from) result.past.push(item);
+    else if (date < until) result.week.push(item);
+    else result.later.push(item);
+  }
+  return result;
+}
