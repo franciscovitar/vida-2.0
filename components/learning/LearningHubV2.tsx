@@ -65,7 +65,12 @@ export function LearningHubV2({
               El speaking conserva su sistema propio: errores observados, uso espontáneo y
               transferencia pesan más que repetir tarjetas conocidas.
             </p>
-            <Button href="/aprendizaje/ingles" variant="secondary" size="sm" iconLeft={MessageCircle}>
+            <Button
+              href="/aprendizaje/ingles"
+              variant="secondary"
+              size="sm"
+              iconLeft={MessageCircle}
+            >
               Abrir English Speaking
             </Button>
           </div>
@@ -86,8 +91,8 @@ export function LearningHubV2({
             <div className={styles.dormant}>
               <strong>Disponible cuando quieras activarla</strong>
               <span>
-                La selección futura mostrará pocos candidatos relevantes, con beneficios,
-                esfuerzo, mantenimiento y complementariedad visibles.
+                La selección futura mostrará pocos candidatos relevantes, con beneficios, esfuerzo,
+                mantenimiento y complementariedad visibles.
               </span>
             </div>
           </div>
