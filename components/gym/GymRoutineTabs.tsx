@@ -2,12 +2,7 @@
 
 import { useState } from 'react';
 
-import type {
-  GymRoutine,
-  GymRoutineSectionKind,
-  GymSession,
-  GymSessionSummary,
-} from '@/types/gym';
+import type { GymRoutine, GymRoutineSectionKind, GymSession, GymSessionSummary } from '@/types/gym';
 
 import styles from './GymDashboard.module.scss';
 
@@ -135,11 +130,7 @@ function MobilityItems({ items }: { items: readonly string[] }) {
   );
 }
 
-function MobilityProtocol({
-  sections,
-}: {
-  sections: GymRoutine['supplementalSections'];
-}) {
+function MobilityProtocol({ sections }: { sections: GymRoutine['supplementalSections'] }) {
   if (sections.length === 0) {
     return <p className={styles.body}>No hay un protocolo de movilidad/postura disponible.</p>;
   }
@@ -158,9 +149,7 @@ function MobilityProtocol({
         const criteria = parsedItems
           .filter((item) => item.kind === 'criteria')
           .map((item) => item.text);
-        const other = parsedItems
-          .filter((item) => item.kind === 'other')
-          .map((item) => item.text);
+        const other = parsedItems.filter((item) => item.kind === 'other').map((item) => item.text);
 
         return (
           <section key={section.key} className={styles.supplemental}>
@@ -315,8 +304,8 @@ export function GymRoutineTabs({
               {view === 'plan' ? (
                 <>
                   <p className={styles.body}>
-                    Esto es lo que está prescripto para este día. Las cargas que usaste la última vez
-                    están separadas en “Última sesión”.
+                    Esto es lo que está prescripto para este día. Las cargas que usaste la última
+                    vez están separadas en “Última sesión”.
                   </p>
 
                   {day.notes.length > 0 ? (
@@ -370,9 +359,7 @@ export function GymRoutineTabs({
                       {previousSession.exercises.map((exercise, index) => (
                         <li key={exercise.key} className={styles.exercise}>
                           <div className={styles['exercise-top']}>
-                            <span className={styles['exercise-name']}>
-                              {exercise.exerciseName}
-                            </span>
+                            <span className={styles['exercise-name']}>{exercise.exerciseName}</span>
                             <span className={styles.order}>{index + 1}</span>
                           </div>
                           <div className={styles['previous-performance']}>
