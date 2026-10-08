@@ -174,8 +174,7 @@ async function loadHabitsV2View(targetDateInput?: string | null): Promise<Habits
     gym.state === 'error';
 
   const google = getGoogleConfig();
-  const writable =
-    isHabitsV2WritesEnabled() && google.ok && google.config.writesAllowed;
+  const writable = isHabitsV2WritesEnabled() && google.ok && google.config.writesAllowed;
 
   return {
     status: visible.length === 0 ? 'empty' : 'ready',

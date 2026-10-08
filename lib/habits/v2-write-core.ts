@@ -87,9 +87,7 @@ function habitIdFor(payload: AddHabitV2Input): string {
     .slice(0, 12)}`;
 }
 
-async function load(
-  port: HabitV2SheetPort,
-): Promise<
+async function load(port: HabitV2SheetPort): Promise<
   | {
       ok: true;
       registryValues: Cell[][];
@@ -141,7 +139,8 @@ export function createHabitsV2WriteService(input: {
 
   return {
     async toggle(payload: ToggleHabitV2Input): Promise<HabitV2MutationResult> {
-      if (!input.writesEnabled) return failure('disabled', 'Escrituras de Hábitos V2 desactivadas.');
+      if (!input.writesEnabled)
+        return failure('disabled', 'Escrituras de Hábitos V2 desactivadas.');
       if (
         !validYmd(payload.targetDate) ||
         payload.targetDate > input.today ||
@@ -165,8 +164,7 @@ export function createHabitsV2WriteService(input: {
         return failure('invalid', 'El hábito no estaba activo para esa fecha.');
       }
 
-      const entryId =
-        `vida2:habit:v2:${habit.habitId}:${payload.targetDate}:${payload.operationId}`;
+      const entryId = `vida2:habit:v2:${habit.habitId}:${payload.targetDate}:${payload.operationId}`;
       const replay = loaded.log.find((row) => row.entryId === entryId);
       if (replay) {
         if (
@@ -202,7 +200,11 @@ export function createHabitsV2WriteService(input: {
       const fresh = await load(input.port);
       if (!fresh.ok) return fresh.result;
       const freshHabit = fresh.registry.find((row) => row.habitId === habit.habitId);
-      if (!freshHabit || freshHabit.mode !== 'manual' || !habitAppliesOnDate(freshHabit, payload.targetDate)) {
+      if (
+        !freshHabit ||
+        freshHabit.mode !== 'manual' ||
+        !habitAppliesOnDate(freshHabit, payload.targetDate)
+      ) {
         return failure('conflict', 'La configuración del hábito cambió. Actualizá.');
       }
       if (fresh.log.some((row) => row.entryId === entryId)) {
@@ -262,7 +264,8 @@ export function createHabitsV2WriteService(input: {
     },
 
     async addManual(payload: AddHabitV2Input): Promise<HabitV2MutationResult> {
-      if (!input.writesEnabled) return failure('disabled', 'Escrituras de Hábitos V2 desactivadas.');
+      if (!input.writesEnabled)
+        return failure('disabled', 'Escrituras de Hábitos V2 desactivadas.');
       const name = payload.name.trim();
       const unit = payload.unit.trim() || 'vez';
       if (
@@ -305,9 +308,11 @@ export function createHabitsV2WriteService(input: {
       if (!fresh.ok) return fresh.result;
       if (
         firstFreeRow(fresh.registryValues) !== firstFreeRow(loaded.registryValues) ||
-        fresh.registry.some((row) =>
-          row.habitId === habitId ||
-          (row.active && row.name.trim().toLocaleLowerCase('es') === name.toLocaleLowerCase('es'))
+        fresh.registry.some(
+          (row) =>
+            row.habitId === habitId ||
+            (row.active &&
+              row.name.trim().toLocaleLowerCase('es') === name.toLocaleLowerCase('es')),
         )
       ) {
         return failure('conflict', 'El registro de hábitos cambió. Actualizá.');
@@ -347,7 +352,8 @@ export function createHabitsV2WriteService(input: {
     },
 
     async deactivate(payload: DeactivateHabitV2Input): Promise<HabitV2MutationResult> {
-      if (!input.writesEnabled) return failure('disabled', 'Escrituras de Hábitos V2 desactivadas.');
+      if (!input.writesEnabled)
+        return failure('disabled', 'Escrituras de Hábitos V2 desactivadas.');
       if (!payload.habitId.trim() || !operationIdValid(payload.operationId)) {
         return failure('invalid', 'Desactivación inválida.');
       }
@@ -396,14 +402,16 @@ export function createHabitsV2WriteService(input: {
         return failure('verification-failed', 'No se pudo verificar la desactivación.');
       }
       const verified = parseHabitRegistryTable(verifyRead.values);
-      const after = verified.ok
-        ? verified.rows.find((row) => row.habitId === habit.habitId)
-        : null;
+      const after = verified.ok ? verified.rows.find((row) => row.habitId === habit.habitId) : null;
       if (!after || after.active || after.validTo !== input.today) {
         return failure('verification-failed', 'La desactivación no pudo verificarse.');
       }
 
-      return { ok: true, code: 'applied', message: 'Hábito desactivado; el historial se conserva.' };
+      return {
+        ok: true,
+        code: 'applied',
+        message: 'Hábito desactivado; el historial se conserva.',
+      };
     },
   };
 }

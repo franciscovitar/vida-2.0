@@ -1,6 +1,14 @@
 'use client';
 
-import { CalendarDays, Check, ChevronLeft, ChevronRight, Plus, Sparkles, Trash2 } from 'lucide-react';
+import {
+  CalendarDays,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Sparkles,
+  Trash2,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
@@ -161,7 +169,11 @@ export function HabitsV2Board({ view }: { view: HabitsV2View }) {
           <div className={styles['add-form']}>
             <label>
               <span>Nombre</span>
-              <input value={name} onChange={(event) => setName(event.target.value)} maxLength={80} />
+              <input
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                maxLength={80}
+              />
             </label>
             <label>
               <span>Icono</span>
@@ -189,7 +201,11 @@ export function HabitsV2Board({ view }: { view: HabitsV2View }) {
             </label>
             <label>
               <span>Unidad</span>
-              <input value={unit} onChange={(event) => setUnit(event.target.value)} maxLength={30} />
+              <input
+                value={unit}
+                onChange={(event) => setUnit(event.target.value)}
+                maxLength={30}
+              />
             </label>
             <div className={styles['form-actions']}>
               <button type="button" onClick={() => setShowAdd(false)}>

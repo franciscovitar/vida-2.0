@@ -66,12 +66,9 @@ export interface HabitLogV2Record {
 }
 
 export type ParsedRegistry =
-  | { ok: true; rows: HabitRegistryRecord[] }
-  | { ok: false; reason: string };
+  { ok: true; rows: HabitRegistryRecord[] } | { ok: false; reason: string };
 
-export type ParsedHabitLog =
-  | { ok: true; rows: HabitLogV2Record[] }
-  | { ok: false; reason: string };
+export type ParsedHabitLog = { ok: true; rows: HabitLogV2Record[] } | { ok: false; reason: string };
 
 export interface HabitManualEffectiveValue {
   ok: boolean;
@@ -111,7 +108,8 @@ export type HabitV2MutationResult =
   | { ok: true; code: 'applied' | 'idempotent'; message: string }
   | {
       ok: false;
-      code: 'disabled' | 'invalid' | 'conflict' | 'unavailable' | 'not-found' | 'verification-failed';
+      code:
+        'disabled' | 'invalid' | 'conflict' | 'unavailable' | 'not-found' | 'verification-failed';
       message: string;
     };
 
@@ -166,17 +164,12 @@ export function validYmd(value: string | null): value is string {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
 }
 
-function headersMatch(
-  values: readonly (readonly Cell[])[],
-  expected: readonly string[],
-): boolean {
+function headersMatch(values: readonly (readonly Cell[])[], expected: readonly string[]): boolean {
   const header = values[0] ?? [];
   return expected.every((name, index) => textCell(header[index]) === name);
 }
 
-export function parseHabitRegistryTable(
-  values: readonly (readonly Cell[])[],
-): ParsedRegistry {
+export function parseHabitRegistryTable(values: readonly (readonly Cell[])[]): ParsedRegistry {
   if (!headersMatch(values, HABIT_REGISTRY_HEADERS)) {
     return { ok: false, reason: 'Habit Registry no coincide con el contrato V2.' };
   }
@@ -239,9 +232,7 @@ export function parseHabitRegistryTable(
   return { ok: true, rows };
 }
 
-export function parseHabitLogV2Table(
-  values: readonly (readonly Cell[])[],
-): ParsedHabitLog {
+export function parseHabitLogV2Table(values: readonly (readonly Cell[])[]): ParsedHabitLog {
   if (!headersMatch(values, HABIT_LOG_V2_HEADERS)) {
     return { ok: false, reason: 'Habit Log V2 no coincide con el contrato V2.' };
   }
@@ -301,9 +292,7 @@ export function resolveHabitLogHead(
   rows: readonly HabitLogV2Record[],
   habitId: string,
   date: string,
-):
-  | { ok: true; row: HabitLogV2Record | null }
-  | { ok: false; reason: string } {
+): { ok: true; row: HabitLogV2Record | null } | { ok: false; reason: string } {
   const candidates = rows.filter((row) => row.habitId === habitId && row.date === date);
   if (candidates.length === 0) return { ok: true, row: null };
 
@@ -362,9 +351,7 @@ function findLegacyValue(
   const habitIndex = header.findIndex((value) => textCell(value) === legacyHeader);
   if (dateIndex < 0 || habitIndex < 0) return { ok: false, value: null };
 
-  const matches = values
-    .slice(1)
-    .filter((row) => textCell(row[dateIndex])?.slice(0, 10) === date);
+  const matches = values.slice(1).filter((row) => textCell(row[dateIndex])?.slice(0, 10) === date);
   if (matches.length > 1) return { ok: false, value: null };
   if (matches.length === 0) return { ok: true, value: null };
   return { ok: true, value: booleanCell(matches[0]?.[habitIndex]) };
@@ -492,7 +479,11 @@ export function weekDatesThrough(date: string): string[] {
   start.setUTCDate(start.getUTCDate() - mondayOffset);
 
   const dates: string[] = [];
-  for (let cursor = new Date(start); cursor <= current; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
+  for (
+    let cursor = new Date(start);
+    cursor <= current;
+    cursor.setUTCDate(cursor.getUTCDate() + 1)
+  ) {
     dates.push(cursor.toISOString().slice(0, 10));
   }
   return dates;

@@ -9,10 +9,7 @@ import {
   parseHabitLogV2Table,
   parseHabitRegistryTable,
 } from '@/lib/habits/v2-contract';
-import {
-  createHabitsV2WriteService,
-  type HabitV2SheetPort,
-} from '@/lib/habits/v2-write-core';
+import { createHabitsV2WriteService, type HabitV2SheetPort } from '@/lib/habits/v2-write-core';
 
 type Cell = string | number | boolean | null;
 

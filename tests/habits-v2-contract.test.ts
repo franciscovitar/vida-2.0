@@ -171,11 +171,7 @@ test('derived Gym state is done only from canonical completed session', () => {
   );
   assert.deepEqual(done, { state: 'done', value: true, origin: 'gym-session' });
 
-  const absent = deriveGymHabitValue(
-    { state: 'empty', summaries: [] },
-    '2026-10-07',
-    '2026-10-08',
-  );
+  const absent = deriveGymHabitValue({ state: 'empty', summaries: [] }, '2026-10-07', '2026-10-08');
   assert.deepEqual(absent, { state: 'missed', value: false, origin: 'gym-session' });
 
   const unavailable = deriveGymHabitValue(
