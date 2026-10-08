@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { isDailyPlanningV2UiEnabled } from '@/lib/daily-planning/v2-config';
+import {
+  isDailyPlanningV2UiEnabled,
+  isTodayCockpitV2UiEnabled,
+} from '@/lib/daily-planning/v2-config';
 
 test('Daily Planning V2 UI is fail-closed by default', () => {
   assert.equal(isDailyPlanningV2UiEnabled({}), false);
@@ -11,4 +14,11 @@ test('Daily Planning V2 UI is fail-closed by default', () => {
 test('Daily Planning V2 UI requires exact true', () => {
   assert.equal(isDailyPlanningV2UiEnabled({ DAILY_PLANNING_V2_UI_ENABLED: 'true' }), true);
   assert.equal(isDailyPlanningV2UiEnabled({ DAILY_PLANNING_V2_UI_ENABLED: 'TRUE' }), false);
+});
+
+test('Today cockpit V2 is independently fail-closed', () => {
+  assert.equal(isTodayCockpitV2UiEnabled({}), false);
+  assert.equal(isTodayCockpitV2UiEnabled({ TODAY_COCKPIT_V2_UI_ENABLED: 'false' }), false);
+  assert.equal(isTodayCockpitV2UiEnabled({ TODAY_COCKPIT_V2_UI_ENABLED: 'true' }), true);
+  assert.equal(isTodayCockpitV2UiEnabled({ TODAY_COCKPIT_V2_UI_ENABLED: 'TRUE' }), false);
 });
