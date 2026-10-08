@@ -378,8 +378,7 @@ export function TaskManager({
                       setCreateDraft((draft) => ({
                         ...draft,
                         date: event.target.value || null,
-                        dateType:
-                          dateSemanticsV2 && !event.target.value ? null : draft.dateType,
+                        dateType: dateSemanticsV2 && !event.target.value ? null : draft.dateType,
                       }))
                     }
                   />
@@ -684,9 +683,9 @@ export function TaskManager({
                       editDraft.title.trim().length < 3 ||
                       Boolean(
                         dateSemanticsV2 &&
-                          editDraft.date &&
-                          !editDraft.dateType &&
-                          editDraft.date !== editor.task.date,
+                        editDraft.date &&
+                        !editDraft.dateType &&
+                        editDraft.date !== editor.task.date,
                       )
                     }
                   >
