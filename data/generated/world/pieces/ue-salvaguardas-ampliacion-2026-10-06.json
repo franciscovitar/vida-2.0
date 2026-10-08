@@ -39,37 +39,28 @@
           "kind": "EXPLANATION",
           "material": true,
           "text": "Entrar a la Unión Europea no es solo acceder a un mercado común: también implica aceptar reglas compartidas sobre democracia, instituciones y Estado de derecho. La pregunta difícil aparece después de la adhesión: qué hacer si un país cambia de rumbo una vez que ya es miembro.",
-          "claimRefs": [
-            "EU-1"
-          ],
+          "claimRefs": ["EU-1"],
           "backgroundRefs": []
         },
         {
           "kind": "FACTUAL",
           "material": true,
           "text": "El 6 de octubre, la Comisión Europea presentó su revisión para preparar una Unión más amplia y propuso reforzar las salvaguardas frente a retrocesos posteriores a la adhesión. Entre las opciones mencionó reducir financiación o restringir derechos de voto si un nuevo miembro se aparta de los valores y reglas del bloque.",
-          "claimRefs": [
-            "EU-1",
-            "EU-2"
-          ],
+          "claimRefs": ["EU-1", "EU-2"],
           "backgroundRefs": []
         },
         {
           "kind": "INTERPRETIVE",
           "material": true,
           "text": "La importancia del planteo está en que la ampliación vuelve a poner en primer plano una tensión básica de la UE: crecer geopolíticamente sin debilitar sus reglas internas. Las salvaguardas intentan hacer que el compromiso democrático no termine el día de la entrada, sino que siga siendo exigible después.",
-          "claimRefs": [
-            "EU-2"
-          ],
+          "claimRefs": ["EU-2"],
           "backgroundRefs": []
         },
         {
           "kind": "LIMIT",
           "material": true,
           "text": "Todavía no es una regla definitiva. Son propuestas que deberán ser discutidas por los actuales Estados miembros y pueden cambiar antes de convertirse en mecanismos aplicables.",
-          "claimRefs": [
-            "EU-3"
-          ],
+          "claimRefs": ["EU-3"],
           "backgroundRefs": []
         }
       ]
