@@ -27,6 +27,8 @@ export type NotionTaskDuration = '5-15 min' | '30 min' | '1 h' | '2 h+';
 
 export type NotionTaskEnergy = 'Baja' | 'Media' | 'Alta';
 
+export type NotionTaskDateType = 'Deadline' | 'Objetivo' | 'Revisión';
+
 export type NotionProjectStatus = 'Activo' | 'En espera' | 'Bloqueado' | 'Completado' | 'Cancelado';
 
 export type NotionAreaStatus = 'Activa' | 'En pausa' | 'Inactiva';
@@ -45,6 +47,8 @@ export interface NotionTask {
   status: NotionTaskStatus;
   date: string | null;
   dateKind: NotionDateKind;
+  /** V2 semantic meaning of Fecha; null/absent remains legacy unspecified. */
+  dateType?: NotionTaskDateType | null;
   priority: NotionTaskPriority | null;
   duration: NotionTaskDuration | null;
   energy: NotionTaskEnergy | null;

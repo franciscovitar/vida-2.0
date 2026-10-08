@@ -8,6 +8,7 @@ import {
   PROJECT_STATUSES,
   TASK_DURATIONS,
   TASK_ENERGIES,
+  TASK_DATE_TYPES,
   TASK_PRIORITIES,
   TASK_PROPS,
   TASK_STATUSES,
@@ -29,6 +30,7 @@ import type {
   NotionProjectStatus,
   NotionRelation,
   NotionTask,
+  NotionTaskDateType,
   NotionTaskDuration,
   NotionTaskEnergy,
   NotionTaskPriority,
@@ -131,6 +133,10 @@ export function adaptTask(
     status,
     date,
     dateKind: taskDateKind(status, date, today),
+    dateType: inList(
+      selectName(props[TASK_PROPS.dateType]),
+      TASK_DATE_TYPES,
+    ) as NotionTaskDateType | null,
     priority: inList(
       selectName(props[TASK_PROPS.priority]),
       TASK_PRIORITIES,
