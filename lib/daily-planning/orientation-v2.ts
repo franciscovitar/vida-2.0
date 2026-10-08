@@ -19,11 +19,12 @@ import type {
   DailyOrientationUpcomingKind,
 } from '@/types/daily-orientation-v2';
 
+import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
+
 const HEADERS = ['Snapshot ID', 'Fecha', 'Generado en', 'Payload JSON', 'Fuente', 'Versión'];
 const SOURCE = 'chatgpt_project';
 const VERSION = 'daily-orientation-v2';
 const PREFIX = 'vida2:tasks-daily-planning:v2:orientation:';
-const YMD = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_PAYLOAD_BYTES = 20 * 1024;
 const MAX_TEXT = 500;
 const MAX_TITLE = 200;
@@ -173,7 +174,13 @@ function parseReview(value: unknown): DailyOrientationReview | null {
   const headline = boundedString(value.headline);
   const uncertainties = parseStringArray(value.uncertainties, 10);
 
-  if (!date || !YMD.test(date) || !headline || !Array.isArray(value.items) || !uncertainties) {
+  if (
+    !date ||
+    parsePlanningCivilDay(date) === null ||
+    !headline ||
+    !Array.isArray(value.items) ||
+    !uncertainties
+  ) {
     return null;
   }
   if (value.items.length > 12) return null;
@@ -245,7 +252,15 @@ function parseUpcoming(value: unknown): DailyOrientationUpcomingItem | null {
   const dateType = enumValue(value.dateType, DATE_TYPES);
   const reason = boundedString(value.reason);
 
-  if (!kind || ref === undefined || !title || !date || !YMD.test(date) || !dateType || !reason) {
+  if (
+    !kind ||
+    ref === undefined ||
+    !title ||
+    !date ||
+    parsePlanningCivilDay(date) === null ||
+    !dateType ||
+    !reason
+  ) {
     return null;
   }
 
@@ -328,7 +343,7 @@ function parseRow(row: readonly unknown[], targetDate: string): DailyOrientation
     !id ||
     !id.startsWith(`${PREFIX}${targetDate}:`) ||
     planDate !== targetDate ||
-    !YMD.test(planDate) ||
+    parsePlanningCivilDay(planDate) === null ||
     !generatedAt ||
     Number.isNaN(Date.parse(generatedAt)) ||
     sourceRaw !== SOURCE ||
@@ -354,7 +369,7 @@ export function selectLatestDailyOrientationSnapshot(
   values: readonly (readonly unknown[])[],
   targetDate: string,
 ): DailyOrientationSnapshotRead {
-  if (!YMD.test(targetDate)) {
+  if (parsePlanningCivilDay(targetDate) === null) {
     return {
       status: 'invalid',
       snapshot: null,
