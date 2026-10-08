@@ -10,7 +10,10 @@ import { getDailyOrientationV2View } from '@/lib/data/daily-orientation-v2-sourc
 import { getDailyPlanningView } from '@/lib/data/daily-planning-view-source';
 import { getNotionDashboard } from '@/lib/data/notion-source';
 import { getProjectsIntelligence } from '@/lib/data/projects-intelligence-source';
-import { isDailyPlanningV2UiEnabled } from '@/lib/daily-planning/v2-config';
+import {
+  isDailyPlanningV2UiEnabled,
+  isTaskDateSemanticsV2Enabled,
+} from '@/lib/daily-planning/v2-config';
 import { buildPlanningTaskCatalog } from '@/lib/planning/task-catalog';
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 import type { PlanningView, PlanningViewV2 } from '@/types/planning';
@@ -50,6 +53,7 @@ export default async function PlanificacionPage({
 }) {
   const params = await searchParams;
   const v2Enabled = isDailyPlanningV2UiEnabled();
+  const taskDateSemanticsV2 = isTaskDateSemanticsV2Enabled();
 
   const [dailyPlan, orientation, notion, assessments, projects] = await Promise.all([
     getDailyPlanningView(),
@@ -84,6 +88,7 @@ export default async function PlanificacionPage({
           projects={projects}
           taskCatalog={taskCatalog}
           writable={isWriteActionsEnabled()}
+          dateSemanticsV2={taskDateSemanticsV2}
         />
       ) : (
         <PlanningWorkspace

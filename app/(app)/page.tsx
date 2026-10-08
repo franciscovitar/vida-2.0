@@ -8,9 +8,12 @@ import { HoyNotionPanel } from '@/components/dashboard/HoyNotion';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
 import { ProductivityToday } from '@/components/dashboard/ProductivityToday';
 import { TodayAgenda } from '@/components/dashboard/TodayAgenda';
+import { TodayCockpitV2 } from '@/components/dashboard/TodayCockpitV2';
 import { WeeklyProgress } from '@/components/dashboard/WeeklyProgress';
+import { getDailyOrientationV2View } from '@/lib/data/daily-orientation-v2-source';
 import { getDailyPlanningView } from '@/lib/data/daily-planning-view-source';
 import { getTodayData } from '@/lib/data/source';
+import { isTodayCockpitV2UiEnabled } from '@/lib/daily-planning/v2-config';
 
 import styles from './page.module.scss';
 
@@ -20,7 +23,13 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function TodayPage() {
-  const [today, dailyPlan] = await Promise.all([getTodayData(), getDailyPlanningView()]);
+  const v2Enabled = isTodayCockpitV2UiEnabled();
+
+  const [today, dailyPlan, orientation] = await Promise.all([
+    getTodayData(),
+    getDailyPlanningView(),
+    v2Enabled ? getDailyOrientationV2View() : Promise.resolve(null),
+  ]);
 
   return (
     <div className={styles.page}>
@@ -28,30 +37,40 @@ export default async function TodayPage() {
 
       {today.notice ? <IntegrationNotice status={today.status} message={today.notice} /> : null}
 
-      <div className={styles.top}>
-        <FocusCard calendar={today.calendar} />
-        <DailySummary summary={today.summary} />
-      </div>
+      {v2Enabled && orientation ? (
+        <TodayCockpitV2 today={today} orientation={orientation} />
+      ) : (
+        <>
+          <div className={styles.top}>
+            <FocusCard calendar={today.calendar} />
+            <DailySummary summary={today.summary} />
+          </div>
 
-      <div className={styles.columns}>
-        <div className={styles.main}>
-          <DailyPlanningPanel plan={dailyPlan} />
-          <HoyNotionPanel notion={today.notion} sources={today.sources} calendar={today.calendar} />
-          <TodayAgenda calendar={today.calendar} />
-          <HabitsToday
-            habits={today.habits}
-            weekly={today.weekly}
-            targetDate={today.targetDate}
-            writable={today.writable}
-            rowExists={today.rowExists}
-          />
-          <ProductivityToday productivity={today.productivity} />
-        </div>
-        <div className={styles.side}>
-          <HealthSleep health={today.health} />
-          <WeeklyProgress goals={today.weekly} />
-        </div>
-      </div>
+          <div className={styles.columns}>
+            <div className={styles.main}>
+              <DailyPlanningPanel plan={dailyPlan} />
+              <HoyNotionPanel
+                notion={today.notion}
+                sources={today.sources}
+                calendar={today.calendar}
+              />
+              <TodayAgenda calendar={today.calendar} />
+              <HabitsToday
+                habits={today.habits}
+                weekly={today.weekly}
+                targetDate={today.targetDate}
+                writable={today.writable}
+                rowExists={today.rowExists}
+              />
+              <ProductivityToday productivity={today.productivity} />
+            </div>
+            <div className={styles.side}>
+              <HealthSleep health={today.health} />
+              <WeeklyProgress goals={today.weekly} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

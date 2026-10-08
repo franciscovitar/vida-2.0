@@ -26,6 +26,7 @@ export function buildPlanningTaskCatalog(data: NotionDashboardData): PlanningTas
       title: task.title,
       status: task.status,
       date: task.date,
+      dateType: task.dateType ?? null,
       priority: task.priority,
       duration: task.duration,
       energy: task.energy,

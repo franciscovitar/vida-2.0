@@ -16,6 +16,7 @@ import {
 import { opaqueKey } from '@/lib/actions/opaque';
 import {
   PROJECT_PROPS,
+  TASK_DATE_TYPES,
   TASK_DURATIONS,
   TASK_ENERGIES,
   TASK_PRIORITIES,
@@ -58,6 +59,7 @@ function snapshot(
   page: NotionRawPage,
   projects: readonly NotionRawPage[],
   areas: readonly NotionRawPage[],
+  dateSemanticsV2 = false,
 ): PlanningTaskEditableSnapshot {
   const areaId = readRelationIds(page.properties[TASK_PROPS.area])[0] ?? null;
   const projectId = readRelationIds(page.properties[TASK_PROPS.project])[0] ?? null;
@@ -68,6 +70,11 @@ function snapshot(
         page.properties[TASK_PROPS.status],
       ) as PlanningTaskEditableSnapshot['status']) ?? 'Pendiente',
     date: readDateStart(page.properties[TASK_PROPS.date]),
+    dateType: dateSemanticsV2
+      ? (readSelectName(
+          page.properties[TASK_PROPS.dateType],
+        ) as PlanningTaskEditableSnapshot['dateType'])
+      : undefined,
     priority: readSelectName(
       page.properties[TASK_PROPS.priority],
     ) as PlanningTaskEditableSnapshot['priority'],
@@ -106,6 +113,10 @@ function validateSnapshot(value: PlanningTaskEditableSnapshot): string | null {
     return 'Energía inválida.';
   }
   if (value.date && !/^\d{4}-\d{2}-\d{2}$/.test(value.date)) return 'Fecha inválida.';
+  if (value.dateType && !(TASK_DATE_TYPES as readonly string[]).includes(value.dateType)) {
+    return 'Tipo de fecha inválido.';
+  }
+  if (!value.date && value.dateType) return 'Una tarea sin fecha no puede tener Tipo de fecha.';
   return null;
 }
 
@@ -114,6 +125,8 @@ type CrudDeps = {
   tasksDataSourceId: string;
   projectsDataSourceId: string;
   areasDataSourceId: string;
+  /** Staged V2 flag. False preserves the certified V1 task-write contract. */
+  dateSemanticsV2?: boolean;
 };
 
 async function loadCanonical(deps: CrudDeps) {
@@ -163,6 +176,7 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         title: input.title.trim(),
         status: 'Pendiente',
         date: input.date,
+        dateType: deps.dateSemanticsV2 ? (input.dateType ?? null) : undefined,
         priority: input.priority,
         duration: input.duration,
         energy: input.energy,
@@ -173,6 +187,13 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       };
       const validation = validateSnapshot(proposed);
       if (validation) return { ok: false, code: 'invalid', message: validation };
+      if (deps.dateSemanticsV2 && proposed.date && !proposed.dateType) {
+        return {
+          ok: false,
+          code: 'invalid',
+          message: 'Elegí si la fecha es Deadline, Objetivo o Revisión.',
+        };
+      }
 
       const canonical = await loadCanonical(deps);
       if (!canonical)
@@ -185,7 +206,12 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         return { ok: false, code: 'conflict', message: 'Ownership duplicado; no se escribió.' };
       }
       if (owned.length === 1) {
-        const current = snapshot(owned[0]!, canonical.projects, canonical.areas);
+        const current = snapshot(
+          owned[0]!,
+          canonical.projects,
+          canonical.areas,
+          deps.dateSemanticsV2,
+        );
         if (equalSnapshot(current, proposed)) {
           return {
             ok: true,
@@ -208,6 +234,9 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         [TASK_PROPS.ownership]: richTextProp(ownership),
       };
       if (proposed.date) properties[TASK_PROPS.date] = dateProp(proposed.date);
+      if (deps.dateSemanticsV2 && proposed.dateType) {
+        properties[TASK_PROPS.dateType] = selectProp(proposed.dateType);
+      }
       if (proposed.duration) properties[TASK_PROPS.duration] = selectProp(proposed.duration);
       if (proposed.energy) properties[TASK_PROPS.energy] = selectProp(proposed.energy);
       if (proposed.note) properties[TASK_PROPS.note] = richTextProp(proposed.note);
@@ -231,7 +260,12 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
           message: 'No pude verificar la creación.',
         };
       }
-      const after = snapshot(readBack.page, canonical.projects, canonical.areas);
+      const after = snapshot(
+        readBack.page,
+        canonical.projects,
+        canonical.areas,
+        deps.dateSemanticsV2,
+      );
       if (
         !equalSnapshot(after, proposed) ||
         readRichText(readBack.page.properties[TASK_PROPS.ownership]) !== ownership
@@ -253,7 +287,7 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
         return { ok: false, code: 'unavailable', message: 'No se pudo verificar Tareas.' };
       const page = findOpaque(canonical.tasks, 'task', input.taskKey);
       if (!page) return { ok: false, code: 'not-found', message: 'Tarea no encontrada.' };
-      const current = snapshot(page, canonical.projects, canonical.areas);
+      const current = snapshot(page, canonical.projects, canonical.areas, deps.dateSemanticsV2);
       if (equalSnapshot(current, input.next)) {
         return { ok: true, code: 'idempotent', message: 'El cambio ya estaba aplicado.' };
       }
@@ -263,6 +297,17 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
           code: 'conflict',
           message: 'La tarea cambió desde que abriste el editor. Recargá antes de guardar.',
         };
+      }
+      if (deps.dateSemanticsV2 && input.next.date && !input.next.dateType) {
+        const unchangedLegacyDate =
+          current.date === input.next.date && !current.dateType && !input.next.dateType;
+        if (!unchangedLegacyDate) {
+          return {
+            ok: false,
+            code: 'invalid',
+            message: 'Elegí si la fecha es Deadline, Objetivo o Revisión.',
+          };
+        }
       }
 
       const relations = resolveRelations(canonical, input.next.areaKey, input.next.projectKey);
@@ -274,6 +319,9 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
       if (next.title !== before.title) properties[TASK_PROPS.title] = titleProp(next.title.trim());
       if (next.status !== before.status) properties[TASK_PROPS.status] = selectProp(next.status);
       if (next.date !== before.date) properties[TASK_PROPS.date] = dateProp(next.date);
+      if (deps.dateSemanticsV2 && next.dateType !== before.dateType) {
+        properties[TASK_PROPS.dateType] = next.dateType ? selectProp(next.dateType) : clearSelect();
+      }
       if (next.priority !== before.priority) {
         properties[TASK_PROPS.priority] = next.priority ? selectProp(next.priority) : clearSelect();
       }
@@ -318,7 +366,12 @@ export function createPlanningTaskCrudService(deps: CrudDeps) {
           message: 'No pude verificar la actualización.',
         };
       }
-      const after = snapshot(readBack.page, canonical.projects, canonical.areas);
+      const after = snapshot(
+        readBack.page,
+        canonical.projects,
+        canonical.areas,
+        deps.dateSemanticsV2,
+      );
       if (!equalSnapshot(after, next)) {
         return {
           ok: false,
