@@ -1,3 +1,4 @@
+import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
 import { selectPlanningAssessments } from '@/lib/planning/overview';
 import type { AssessmentProgressSnapshot } from '@/types/assessment-progress';
 
@@ -17,16 +18,16 @@ export function classifyWeekAssessments(
   targetDate: string,
 ): WeekAssessmentBuckets {
   const buckets: WeekAssessmentBuckets = { week: [], past: [], undated: [], later: [] };
-  const from = Date.parse(`${targetDate}T12:00:00Z`);
-  const until = from + 7 * 86_400_000;
+  const from = parsePlanningCivilDay(targetDate);
+  const until = from === null ? null : from + 7 * 86_400_000;
 
   for (const snapshot of selectPlanningAssessments(snapshots)) {
     if (!snapshot.assessmentDate) {
       buckets.undated.push(snapshot);
       continue;
     }
-    const date = Date.parse(`${snapshot.assessmentDate}T12:00:00Z`);
-    if (!Number.isFinite(from) || !Number.isFinite(date)) {
+    const date = parsePlanningCivilDay(snapshot.assessmentDate);
+    if (from === null || until === null || date === null) {
       buckets.undated.push(snapshot);
     } else if (date < from) {
       buckets.past.push(snapshot);
@@ -51,11 +52,11 @@ export function classifyWeekUpcoming<T extends { date: string }>(
     later: [],
     unknown: [],
   };
-  const from = Date.parse(`${targetDate}T12:00:00Z`);
-  const until = from + 7 * 86_400_000;
+  const from = parsePlanningCivilDay(targetDate);
+  const until = from === null ? null : from + 7 * 86_400_000;
   for (const item of items) {
-    const date = Date.parse(`${item.date}T12:00:00Z`);
-    if (!Number.isFinite(from) || !Number.isFinite(date)) result.unknown.push(item);
+    const date = parsePlanningCivilDay(item.date);
+    if (from === null || until === null || date === null) result.unknown.push(item);
     else if (date < from) result.past.push(item);
     else if (date < until) result.week.push(item);
     else result.later.push(item);
