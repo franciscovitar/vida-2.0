@@ -123,6 +123,7 @@ test('N5. estados de tareas se adaptan correctamente', () => {
       [TASK_PROPS.title]: titleProp('Probar estado'),
       [TASK_PROPS.status]: statusProp('En progreso'),
       [TASK_PROPS.date]: dateProp(TODAY),
+      [TASK_PROPS.dateType]: selectProp('Deadline'),
       [TASK_PROPS.priority]: selectProp('Alta'),
       [TASK_PROPS.duration]: selectProp('30 min'),
       [TASK_PROPS.energy]: selectProp('Media'),
@@ -137,6 +138,7 @@ test('N5. estados de tareas se adaptan correctamente', () => {
   assert.equal(task.status, 'En progreso');
   assert.equal(task.priority, 'Alta');
   assert.equal(task.duration, '30 min');
+  assert.equal(task.dateType, 'Deadline');
 });
 
 test('N6. estados de proyectos se adaptan correctamente', () => {
