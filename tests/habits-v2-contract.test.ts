@@ -7,6 +7,7 @@ import {
   deriveGymHabitValue,
   parseHabitLogV2Table,
   parseHabitRegistryTable,
+  validYmd,
   resolveHabitLogHead,
   resolveManualHabitValue,
   weekDatesThrough,
@@ -190,4 +191,30 @@ test('weekly date window starts Monday and ends on selected date', () => {
     '2026-10-07',
     '2026-10-08',
   ]);
+});
+
+test('Habit date validation rejects impossible calendar days', () => {
+  assert.equal(validYmd('2026-10-08'), true);
+  assert.equal(validYmd('2024-02-29'), true);
+  assert.equal(validYmd('2026-02-29'), false);
+  assert.equal(validYmd('2026-13-01'), false);
+  assert.equal(validYmd('2026-10-32'), false);
+  assert.equal(validYmd('2026-00-01'), false);
+});
+
+test('partial Sheet rows with blank ID fail closed instead of being skipped', () => {
+  const registry = parseHabitRegistryTable([
+    [...HABIT_REGISTRY_HEADERS],
+    ['', 'Unclaimed nonempty row', '', true],
+  ]);
+  assert.equal(registry.ok, false);
+
+  const log = parseHabitLogV2Table([
+    [...HABIT_LOG_V2_HEADERS],
+    ['', '2026-10-08', 'journaling', true],
+  ]);
+  assert.equal(log.ok, false);
+
+  const genuinelyEmpty = parseHabitLogV2Table([[...HABIT_LOG_V2_HEADERS], []]);
+  assert.equal(genuinelyEmpty.ok, true);
 });

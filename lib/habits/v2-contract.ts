@@ -161,7 +161,14 @@ function positiveInteger(value: Cell): number | null {
 }
 
 export function validYmd(value: string | null): value is string {
-  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(Date.UTC(year!, month! - 1, day!));
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month! - 1 &&
+    parsed.getUTCDate() === day
+  );
 }
 
 function headersMatch(values: readonly (readonly Cell[])[], expected: readonly string[]): boolean {
@@ -180,7 +187,12 @@ export function parseHabitRegistryTable(values: readonly (readonly Cell[])[]): P
   for (let index = 1; index < values.length; index += 1) {
     const row = values[index] ?? [];
     const habitId = textCell(row[0]);
-    if (!habitId) continue;
+    if (!habitId) {
+      if (row.some((cell) => textCell(cell) !== null)) {
+        return { ok: false, reason: 'Habit Registry contiene una fila parcial sin Habit ID.' };
+      }
+      continue;
+    }
 
     const name = textCell(row[1]);
     const active = booleanCell(row[3]);
@@ -243,7 +255,12 @@ export function parseHabitLogV2Table(values: readonly (readonly Cell[])[]): Pars
   for (let index = 1; index < values.length; index += 1) {
     const row = values[index] ?? [];
     const entryId = textCell(row[0]);
-    if (!entryId) continue;
+    if (!entryId) {
+      if (row.some((cell) => textCell(cell) !== null)) {
+        return { ok: false, reason: 'Habit Log V2 contiene una fila parcial sin Entry ID.' };
+      }
+      continue;
+    }
 
     const date = textCell(row[1]);
     const habitId = textCell(row[2]);

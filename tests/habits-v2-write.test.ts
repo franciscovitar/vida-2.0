@@ -318,3 +318,46 @@ test('concurrent Registry row allocation is detected before adding', async () =>
   if (!result.ok) assert.equal(result.code, 'conflict');
   assert.equal(fake.writes.length, 0);
 });
+
+test('partial Registry row fails closed without attempting habit creation', async () => {
+  const fake = fakePort();
+  fake.registry.push(['', 'partial data belongs to someone']);
+  const result = await service(fake).addManual({
+    name: 'Caminar',
+    icon: null,
+    cadence: 'daily',
+    target: 1,
+    unit: 'vez',
+    operationId: 'operation-partial-registry',
+  });
+  assert.equal(result.ok, false);
+  assert.equal(fake.writes.length, 0);
+});
+
+test('partial Log row fails closed without overwriting historical cells', async () => {
+  const fake = fakePort();
+  fake.log.push(['', '2026-10-07', 'journaling', true]);
+  const result = await service(fake).toggle({
+    targetDate: '2026-10-07',
+    habitId: 'journaling',
+    nextValue: true,
+    expectedPreviousValue: false,
+    operationId: 'operation-partial-log',
+  });
+  assert.equal(result.ok, false);
+  assert.equal(fake.writes.length, 0);
+});
+
+test('future invalid civil date cannot be used for a correction', async () => {
+  const fake = fakePort();
+  const result = await service(fake).toggle({
+    targetDate: '2026-02-30',
+    habitId: 'journaling',
+    nextValue: true,
+    expectedPreviousValue: false,
+    operationId: 'operation-impossible-date',
+  });
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, 'invalid');
+  assert.equal(fake.writes.length, 0);
+});

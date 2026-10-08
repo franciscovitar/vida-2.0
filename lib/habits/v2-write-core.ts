@@ -40,7 +40,10 @@ function failure(
 
 function firstFreeRow(values: readonly (readonly Cell[])[]): number {
   for (let index = 1; index < values.length; index += 1) {
-    if (!String(values[index]?.[0] ?? '').trim()) return index + 1;
+    const row = values[index] ?? [];
+    if (row.every((cell) => cell === null || cell === '' || cell === undefined)) {
+      return index + 1;
+    }
   }
   return Math.max(2, values.length + 1);
 }
