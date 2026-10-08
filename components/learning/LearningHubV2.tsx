@@ -42,7 +42,7 @@ export function LearningHubV2({
             icon={Layers3}
             domain="learning"
           />
-          <div className={styles.cardBody}>
+          <div className={styles['card-body']}>
             <p>
               Modo estudio reúne sesiones por materia, práctica fresca y los sets disponibles.
               Atomic Study y Anki siguen siendo herramientas de práctica, no un score de mastery.
@@ -60,17 +60,12 @@ export function LearningHubV2({
             icon={MessageCircle}
             domain="learning"
           />
-          <div className={styles.cardBody}>
+          <div className={styles['card-body']}>
             <p>
               El speaking conserva su sistema propio: errores observados, uso espontáneo y
               transferencia pesan más que repetir tarjetas conocidas.
             </p>
-            <Button
-              href="/aprendizaje/ingles"
-              variant="secondary"
-              size="sm"
-              iconLeft={MessageCircle}
-            >
+            <Button href="/aprendizaje/ingles" variant="secondary" size="sm" iconLeft={MessageCircle}>
               Abrir English Speaking
             </Button>
           </div>
@@ -83,7 +78,7 @@ export function LearningHubV2({
             icon={Sparkles}
             domain="neutral"
           />
-          <div className={styles.cardBody}>
+          <div className={styles['card-body']}>
             <p>
               Esta capa permanece deliberadamente liviana mientras Facultad tenga prioridad. No
               existe “aprendido / 245” ni deuda por lo que todavía no exploraste.
