@@ -66,7 +66,10 @@ test('F-INTEGRATION-2. An old legacy task date does not gain deadline pressure',
 test('F-INTEGRATION-3. Invalid civil dates never enter the task week', () => {
   const values = [task('impossible-day', '2026-02-30'), task('real-day', '2026-03-02')];
 
-  assert.deepEqual(selectWeekTasks(values, [], '2026-03-02').map((item) => item.id), ['real-day']);
+  assert.deepEqual(
+    selectWeekTasks(values, [], '2026-03-02').map((item) => item.id),
+    ['real-day'],
+  );
   assert.deepEqual(selectWeekTasks(values, [], '2026-02-30'), []);
   assert.equal(parsePlanningCivilDay('2026-02-30'), null);
   assert.equal(parsePlanningCivilDay('2025-02-29'), null);

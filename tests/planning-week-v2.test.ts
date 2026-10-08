@@ -106,8 +106,14 @@ test('F-DATE-1. Invalid Gregorian days cannot roll into another weekly assessmen
     '2026-03-02',
   );
 
-  assert.deepEqual(result.week.map((item) => item.assessmentId), ['valid']);
-  assert.deepEqual(result.undated.map((item) => item.assessmentId), ['impossible']);
+  assert.deepEqual(
+    result.week.map((item) => item.assessmentId),
+    ['valid'],
+  );
+  assert.deepEqual(
+    result.undated.map((item) => item.assessmentId),
+    ['impossible'],
+  );
 });
 
 test('F-DATE-2. Invalid upcoming date is unknown rather than a fabricated week item', () => {
@@ -119,8 +125,14 @@ test('F-DATE-2. Invalid upcoming date is unknown rather than a fabricated week i
     '2024-02-29',
   );
 
-  assert.deepEqual(result.week.map((item) => item.title), ['real leap day']);
-  assert.deepEqual(result.unknown.map((item) => item.title), ['impossible']);
+  assert.deepEqual(
+    result.week.map((item) => item.title),
+    ['real leap day'],
+  );
+  assert.deepEqual(
+    result.unknown.map((item) => item.title),
+    ['impossible'],
+  );
 });
 
 test('F-DATE-3. Invalid reference day never creates a fabricated weekly commitment', () => {
