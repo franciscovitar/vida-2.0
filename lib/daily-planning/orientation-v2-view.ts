@@ -6,6 +6,7 @@ import type {
 } from '@/types/daily-orientation-v2';
 
 function assessmentRefExists(context: DailyPlanningContext, ref: string): boolean {
+  if (context.sources.assessments?.available !== true) return false;
   return (context.assessments ?? []).some(
     (assessment) => assessment.assessmentId === ref || assessment.subjectId === ref,
   );
@@ -19,9 +20,11 @@ function attentionRefExists(
   if (!ref) return true;
   switch (targetKind) {
     case 'task':
-      return context.tasks.some((task) => task.id === ref);
+      return context.sources.tasks.available && context.tasks.some((task) => task.id === ref);
     case 'project':
-      return context.projects.some((project) => project.id === ref);
+      return (
+        context.sources.projects.available && context.projects.some((project) => project.id === ref)
+      );
     case 'assessment':
     case 'subject':
       return assessmentRefExists(context, ref);
@@ -38,13 +41,18 @@ function upcomingRefExists(
   if (!ref) return true;
   switch (kind) {
     case 'task':
-      return context.tasks.some((task) => task.id === ref);
+      return context.sources.tasks.available && context.tasks.some((task) => task.id === ref);
     case 'project':
-      return context.projects.some((project) => project.id === ref);
+      return (
+        context.sources.projects.available && context.projects.some((project) => project.id === ref)
+      );
     case 'assessment':
       return assessmentRefExists(context, ref);
     case 'calendar':
-      return context.calendarEvents.some((event) => event.id === ref);
+      return (
+        context.sources.calendar.available &&
+        context.calendarEvents.some((event) => event.id === ref)
+      );
     default:
       return false;
   }
@@ -54,10 +62,13 @@ function focusRefExists(context: DailyPlanningContext, item: DailyOrientationFoc
   if (!item.ref) return true;
   switch (item.domain) {
     case 'tasks':
-      return context.tasks.some((task) => task.id === item.ref);
+      return context.sources.tasks.available && context.tasks.some((task) => task.id === item.ref);
     case 'projects':
     case 'professional':
-      return context.projects.some((project) => project.id === item.ref);
+      return (
+        context.sources.projects.available &&
+        context.projects.some((project) => project.id === item.ref)
+      );
     case 'university':
       return assessmentRefExists(context, item.ref);
     default:
