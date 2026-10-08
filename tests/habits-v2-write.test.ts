@@ -261,3 +261,63 @@ test('Google Habits V2 port never authorizes legacy Registro diario writes or ap
   assert.doesNotMatch(source, /values:append|insertDimension|deleteDimension|batchClear/i);
   assert.doesNotMatch(source, /startsWith\([^)]*REGISTRO_DIARIO_TAB/);
 });
+
+test('concurrent legacy correction is detected on immediate pre-write reread', async () => {
+  const fake = fakePort();
+  let legacyReads = 0;
+  const original = fake.port.readLegacy.bind(fake.port);
+  fake.port.readLegacy = async () => {
+    legacyReads += 1;
+    if (legacyReads === 2) fake.legacy[1]![1] = true;
+    return original();
+  };
+
+  const result = await service(fake).toggle({
+    targetDate: '2026-10-07',
+    habitId: 'journaling',
+    nextValue: true,
+    expectedPreviousValue: false,
+    operationId: 'operation-race',
+  });
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, 'conflict');
+  assert.equal(fake.writes.length, 0);
+});
+
+test('concurrent Registry row allocation is detected before adding', async () => {
+  const fake = fakePort();
+  let registryReads = 0;
+  const original = fake.port.readRegistry.bind(fake.port);
+  fake.port.readRegistry = async () => {
+    registryReads += 1;
+    if (registryReads === 2) {
+      fake.registry.push([
+        'newly-inserted',
+        'Concurrent',
+        '',
+        true,
+        'manual',
+        'daily',
+        1,
+        'vez',
+        '2026-10-08',
+        '',
+        '',
+        '',
+        'habit-registry-v2',
+      ]);
+    }
+    return original();
+  };
+  const result = await service(fake).addManual({
+    name: 'Lectura',
+    icon: null,
+    cadence: 'daily',
+    target: 1,
+    unit: 'vez',
+    operationId: 'operation-race-two',
+  });
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, 'conflict');
+  assert.equal(fake.writes.length, 0);
+});

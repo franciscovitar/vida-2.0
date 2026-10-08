@@ -196,6 +196,34 @@ export function createHabitsV2WriteService(input: {
         return { ok: true, code: 'idempotent', message: 'No había cambio para guardar.' };
       }
 
+      // Re-read immediately before the bounded write: never choose a row or
+      // correction parent using a stale snapshot. This is optimistic detection,
+      // NOT an atomic Sheets transaction (Production still requires serialization).
+      const fresh = await load(input.port);
+      if (!fresh.ok) return fresh.result;
+      const freshHabit = fresh.registry.find((row) => row.habitId === habit.habitId);
+      if (!freshHabit || freshHabit.mode !== 'manual' || !habitAppliesOnDate(freshHabit, payload.targetDate)) {
+        return failure('conflict', 'La configuración del hábito cambió. Actualizá.');
+      }
+      if (fresh.log.some((row) => row.entryId === entryId)) {
+        return failure('conflict', 'La operación apareció mientras se verificaba. Actualizá.');
+      }
+      const freshValue = resolveManualHabitValue({
+        habit: freshHabit,
+        date: payload.targetDate,
+        today: input.today,
+        logRows: fresh.log,
+        legacyValues: fresh.legacyValues,
+      });
+      if (
+        !freshValue.ok ||
+        freshValue.value !== current.value ||
+        freshValue.entryId !== current.entryId ||
+        firstFreeRow(fresh.logValues) !== firstFreeRow(loaded.logValues)
+      ) {
+        return failure('conflict', 'El historial cambió antes de guardar. Actualizá.');
+      }
+
       const source = current.origin === 'none' ? 'manual' : 'manual-correction';
       const record: HabitLogV2Record = {
         rowNumber: firstFreeRow(loaded.logValues),
@@ -272,7 +300,20 @@ export function createHabitsV2WriteService(input: {
       );
       if (duplicateName) return failure('conflict', 'Ya existe un hábito activo con ese nombre.');
 
-      const rowNumber = firstFreeRow(loaded.registryValues);
+      // The Registry may have changed while the form was open; re-read before PUT.
+      const fresh = await load(input.port);
+      if (!fresh.ok) return fresh.result;
+      if (
+        firstFreeRow(fresh.registryValues) !== firstFreeRow(loaded.registryValues) ||
+        fresh.registry.some((row) =>
+          row.habitId === habitId ||
+          (row.active && row.name.trim().toLocaleLowerCase('es') === name.toLocaleLowerCase('es'))
+        )
+      ) {
+        return failure('conflict', 'El registro de hábitos cambió. Actualizá.');
+      }
+
+      const rowNumber = firstFreeRow(fresh.registryValues);
       const record: HabitRegistryRecord = {
         rowNumber,
         habitId,
@@ -319,6 +360,19 @@ export function createHabitsV2WriteService(input: {
         return { ok: true, code: 'idempotent', message: 'El hábito ya estaba desactivado.' };
       }
       if (payload.expectedActive !== habit.active) {
+        return failure('conflict', 'El hábito cambió antes de desactivarse. Actualizá.');
+      }
+
+      const fresh = await load(input.port);
+      if (!fresh.ok) return fresh.result;
+      const freshHabit = fresh.registry.find((row) => row.habitId === habit.habitId);
+      if (
+        !freshHabit ||
+        freshHabit.rowNumber !== habit.rowNumber ||
+        !freshHabit.active ||
+        freshHabit.validTo !== habit.validTo ||
+        freshHabit.validFrom !== habit.validFrom
+      ) {
         return failure('conflict', 'El hábito cambió antes de desactivarse. Actualizá.');
       }
 

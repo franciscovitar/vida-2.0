@@ -285,18 +285,9 @@ export function parseHabitLogV2Table(
       version: HABIT_LOG_V2_VERSION,
     };
 
-    const duplicate = ids.get(entryId);
-    if (duplicate) {
-      const same =
-        duplicate.date === mapped.date &&
-        duplicate.habitId === mapped.habitId &&
-        duplicate.value === mapped.value &&
-        duplicate.source === mapped.source &&
-        duplicate.replacesEntryId === mapped.replacesEntryId;
-      if (!same) {
-        return { ok: false, reason: 'Habit Log V2 contiene Entry ID conflictivo.' };
-      }
-      continue;
+    if (ids.has(entryId)) {
+      // One operation must map to exactly one physical row.
+      return { ok: false, reason: 'Habit Log V2 contiene Entry ID duplicado.' };
     }
 
     ids.set(entryId, mapped);
