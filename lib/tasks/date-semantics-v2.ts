@@ -10,7 +10,10 @@ export interface TaskDateClassificationV2 {
   attention: TaskDateAttentionV2;
 }
 
-function semanticsOf(date: string | null, dateType?: NotionTaskDateType | null): TaskDateSemanticsV2 {
+function semanticsOf(
+  date: string | null,
+  dateType?: NotionTaskDateType | null,
+): TaskDateSemanticsV2 {
   if (!date) return 'none';
   if (dateType === 'Deadline') return 'deadline';
   if (dateType === 'Objetivo') return 'target';
