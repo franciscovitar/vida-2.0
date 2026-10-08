@@ -156,10 +156,7 @@ export function parseAssessmentProgressPayload(value: unknown): AssessmentProgre
     (progressPercent !== null && !scopeComplete) ||
     (progressPercent !== null && progressPercent > 0 && evidenceCount === 0) ||
     (band === 'exam-ready' &&
-      (progressPercent === null ||
-        progressPercent === 0 ||
-        !scopeComplete ||
-        evidenceCount === 0))
+      (progressPercent === null || progressPercent === 0 || !scopeComplete || evidenceCount === 0))
   ) {
     return null;
   }

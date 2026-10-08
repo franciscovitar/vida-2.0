@@ -160,9 +160,18 @@ test('F-ACA6. Materias independientes conservan su propia evidencia, fechas e in
   assert.equal(bySubject.get('IOP')?.payload.progressPercent, null);
   assert.equal(bySubject.get('Redes')?.assessmentDate, null);
   const weekly = classifyWeekAssessments(read.snapshots, '2026-10-22');
-  assert.deepEqual(weekly.week.map((item) => item.subjectId), ['IOP']);
-  assert.deepEqual(weekly.later.map((item) => item.subjectId), ['DSI']);
-  assert.deepEqual(weekly.undated.map((item) => item.subjectId), ['Redes']);
+  assert.deepEqual(
+    weekly.week.map((item) => item.subjectId),
+    ['IOP'],
+  );
+  assert.deepEqual(
+    weekly.later.map((item) => item.subjectId),
+    ['DSI'],
+  );
+  assert.deepEqual(
+    weekly.undated.map((item) => item.subjectId),
+    ['Redes'],
+  );
 });
 
 test('F-ACA7. La última reconciliación sin medición reemplaza un porcentaje viejo', () => {
