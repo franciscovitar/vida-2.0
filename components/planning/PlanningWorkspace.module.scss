@@ -227,3 +227,28 @@
     position: static;
   }
 }
+
+/* Phase E7: secondary weekly evidence remains collapsed by default. */
+.week-more {
+  margin-top: 0.55rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.week-more > summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.week-source-note {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
