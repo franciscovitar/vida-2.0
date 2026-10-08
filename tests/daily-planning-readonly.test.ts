@@ -356,7 +356,7 @@ test('DP-R9. tarea abierta de proyecto completado no compite en el contexto diar
   );
 });
 
-test('DP-R10. una excepción inesperada de Notion queda aislada a la fuente que falló', async () => {
+test('DP-R10. una excepción de Notion queda aislada a la fuente que falló', async () => {
   const port: NotionReadPort = {
     async queryDataSource(dataSourceId: string): Promise<PortResult> {
       if (dataSourceId === 'ds-tasks') throw new Error('simulated Notion transport failure');
@@ -402,7 +402,7 @@ test('DP-R11. una excepción del loader de Calendar degrada solo Calendar', asyn
   assert.equal(data.sources.assessments?.status, 'empty');
 });
 
-test('DP-R12. una excepción de Assessment Progress no inventa dominio ni preparación', async () => {
+test('DP-R12. fallo de Assessment Progress no inventa dominio ni preparación', async () => {
   const deps = baseDeps(goodPort(), { ok: true, events: [CALENDAR_EVENT] });
   const data = await loadDailyPlanningContextUncached({
     ...deps,
@@ -422,7 +422,7 @@ test('DP-R12. una excepción de Assessment Progress no inventa dominio ni prepar
   assert.equal(data.calendarEvents.length, 1);
 });
 
-test('DP-R13. una excepción de Salud no fabrica capacidad ni derriba fuentes válidas', async () => {
+test('DP-R13. fallo de Salud no fabrica capacidad ni derriba fuentes válidas', async () => {
   const deps = baseDeps(goodPort(), { ok: true, events: [CALENDAR_EVENT] });
   const data = await loadDailyPlanningContextUncached({
     ...deps,
