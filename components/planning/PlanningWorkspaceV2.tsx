@@ -48,8 +48,7 @@ function WeekView({
   const assessmentUnavailable =
     assessments.status === 'unavailable' || assessments.status === 'invalid';
   const projectsUnavailable =
-    projects.source !== 'notion' ||
-    (projects.status !== 'ready' && projects.status !== 'empty');
+    projects.source !== 'notion' || (projects.status !== 'ready' && projects.status !== 'empty');
   const tasksUnavailable =
     notion.source !== 'notion' || (notion.status !== 'ready' && notion.status !== 'empty');
   const upcoming = classifyWeekUpcoming(orientation.upcoming, dailyPlan.targetDate);
@@ -178,16 +177,22 @@ function WeekView({
           action={<Link href="/planificacion?view=acciones">Ver acciones →</Link>}
         />
         {tasksUnavailable ? (
-          <p className={styles.empty}>La fuente de tareas no está disponible; no se infiere una semana libre.</p>
+          <p className={styles.empty}>
+            La fuente de tareas no está disponible; no se infiere una semana libre.
+          </p>
         ) : weekTasks.length === 0 ? (
-          <p className={styles.empty}>Sin tareas fechadas verificables en los próximos siete días.</p>
+          <p className={styles.empty}>
+            Sin tareas fechadas verificables en los próximos siete días.
+          </p>
         ) : (
           <ul className={styles.rows}>
             {weekTasks.slice(0, 3).map((task) => (
               <li key={task.id}>
                 <div>
                   <strong>{task.title}</strong>
-                  <span>{task.status} · {task.dateType ?? 'Fecha sin tipo'}</span>
+                  <span>
+                    {task.status} · {task.dateType ?? 'Fecha sin tipo'}
+                  </span>
                 </div>
                 <span>{task.date}</span>
               </li>
@@ -202,7 +207,9 @@ function WeekView({
                 <li key={task.id}>
                   <div>
                     <strong>{task.title}</strong>
-                    <span>{task.status} · {task.dateType ?? 'Fecha sin tipo'}</span>
+                    <span>
+                      {task.status} · {task.dateType ?? 'Fecha sin tipo'}
+                    </span>
                   </div>
                   <span>{task.date}</span>
                 </li>
@@ -221,7 +228,9 @@ function WeekView({
           action={<Link href="/proyectos">Ver portfolio →</Link>}
         />
         {projectsUnavailable ? (
-          <p className={styles.empty}>Projects Intelligence no está disponible; no se infiere ritmo.</p>
+          <p className={styles.empty}>
+            Projects Intelligence no está disponible; no se infiere ritmo.
+          </p>
         ) : activeProjects.length === 0 ? (
           <p className={styles.empty}>No hay proyectos activos o bloqueados verificables.</p>
         ) : (

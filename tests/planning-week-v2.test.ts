@@ -46,10 +46,22 @@ test('E7. past active assessment is a reconciliation item, not an upcoming exam'
     '2026-10-08',
   );
 
-  assert.deepEqual(result.past.map((item) => item.assessmentId), ['past']);
-  assert.deepEqual(result.week.map((item) => item.assessmentId), ['today', 'last']);
-  assert.deepEqual(result.later.map((item) => item.assessmentId), ['later']);
-  assert.deepEqual(result.undated.map((item) => item.assessmentId), ['undated']);
+  assert.deepEqual(
+    result.past.map((item) => item.assessmentId),
+    ['past'],
+  );
+  assert.deepEqual(
+    result.week.map((item) => item.assessmentId),
+    ['today', 'last'],
+  );
+  assert.deepEqual(
+    result.later.map((item) => item.assessmentId),
+    ['later'],
+  );
+  assert.deepEqual(
+    result.undated.map((item) => item.assessmentId),
+    ['undated'],
+  );
 });
 
 test('E7. no evidence remains empty; unknown is never converted into 0%', () => {
@@ -70,8 +82,20 @@ test('E7. orientation outside seven-day window does not become a weekly commitme
     ],
     '2026-10-08',
   );
-  assert.deepEqual(result.week.map((item) => item.title), ['today', 'last']);
-  assert.deepEqual(result.past.map((item) => item.title), ['past']);
-  assert.deepEqual(result.later.map((item) => item.title), ['later']);
-  assert.deepEqual(result.unknown.map((item) => item.title), ['unknown']);
+  assert.deepEqual(
+    result.week.map((item) => item.title),
+    ['today', 'last'],
+  );
+  assert.deepEqual(
+    result.past.map((item) => item.title),
+    ['past'],
+  );
+  assert.deepEqual(
+    result.later.map((item) => item.title),
+    ['later'],
+  );
+  assert.deepEqual(
+    result.unknown.map((item) => item.title),
+    ['unknown'],
+  );
 });
