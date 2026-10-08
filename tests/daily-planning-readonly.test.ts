@@ -355,3 +355,88 @@ test('DP-R9. tarea abierta de proyecto completado no compite en el contexto diar
     ['proj-a'],
   );
 });
+
+test('DP-R10. una excepción inesperada de Notion queda aislada a la fuente que falló', async () => {
+  const port: NotionReadPort = {
+    async queryDataSource(dataSourceId: string): Promise<PortResult> {
+      if (dataSourceId === 'ds-tasks') throw new Error('simulated Notion transport failure');
+      if (dataSourceId === 'ds-projects') return { ok: true, pages: [PROJECT] };
+      if (dataSourceId === 'ds-milestones') return { ok: true, pages: MILESTONES };
+      return { ok: true, pages: [] };
+    },
+  };
+
+  const data = await loadDailyPlanningContextUncached(
+    baseDeps(port, { ok: true, events: [CALENDAR_EVENT] }),
+  );
+
+  assert.equal(data.status, 'degraded');
+  assert.equal(data.sources.tasks.status, 'read-error');
+  assert.equal(data.sources.tasks.available, false);
+  assert.deepEqual(data.tasks, []);
+  assert.equal(data.projects.length, 1);
+  assert.deepEqual(data.projects[0]?.progress, {
+    measurable: true,
+    percent: 25,
+    completedWeight: 25,
+    totalWeight: 100,
+  });
+  assert.equal(data.calendarEvents.length, 1);
+});
+
+test('DP-R11. una excepción del loader de Calendar degrada solo Calendar', async () => {
+  const deps = baseDeps(goodPort(), { ok: true, events: [CALENDAR_EVENT] });
+  const data = await loadDailyPlanningContextUncached({
+    ...deps,
+    loadCalendar: async () => {
+      throw new Error('simulated Calendar transport failure');
+    },
+  });
+
+  assert.equal(data.status, 'degraded');
+  assert.equal(data.sources.calendar.status, 'read-error');
+  assert.equal(data.sources.calendar.available, false);
+  assert.deepEqual(data.calendarEvents, []);
+  assert.equal(data.tasks.length, 1);
+  assert.equal(data.projects.length, 1);
+  assert.equal(data.sources.assessments?.status, 'empty');
+});
+
+test('DP-R12. una excepción de Assessment Progress no inventa dominio ni preparación', async () => {
+  const deps = baseDeps(goodPort(), { ok: true, events: [CALENDAR_EVENT] });
+  const data = await loadDailyPlanningContextUncached({
+    ...deps,
+    loadAssessments: async () => {
+      throw new Error('simulated assessment source failure');
+    },
+  });
+
+  assert.equal(data.status, 'degraded');
+  assert.equal(data.sources.assessments?.status, 'unavailable');
+  assert.equal(data.sources.assessments?.available, false);
+  assert.deepEqual(data.assessments, []);
+  assert.equal(data.quality.assessmentsWithoutDate, 0);
+  assert.equal(data.quality.assessmentsWithoutMeasuredProgress, 0);
+  assert.equal(data.tasks.length, 1);
+  assert.equal(data.projects.length, 1);
+  assert.equal(data.calendarEvents.length, 1);
+});
+
+test('DP-R13. una excepción de Salud no fabrica capacidad ni derriba fuentes válidas', async () => {
+  const deps = baseDeps(goodPort(), { ok: true, events: [CALENDAR_EVENT] });
+  const data = await loadDailyPlanningContextUncached({
+    ...deps,
+    loadHealth: async () => {
+      throw new Error('simulated health source failure');
+    },
+  });
+
+  assert.equal(data.status, 'ready');
+  assert.equal(data.sources.health?.status, 'unavailable');
+  assert.equal(data.sources.health?.available, false);
+  assert.equal(data.health, null);
+  assert.equal(data.tasks.length, 1);
+  assert.equal(data.projects.length, 1);
+  assert.equal(data.calendarEvents.length, 1);
+});
+
