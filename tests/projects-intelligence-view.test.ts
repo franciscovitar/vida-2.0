@@ -10,6 +10,7 @@ import { test } from 'node:test';
 import {
   buildNextActionView,
   buildProjectCardView,
+  buildProjectTrajectoryView,
   buildProjectsIntelligenceView,
   NEXT_ACTION_MISSING_LABEL,
   NEXT_ACTION_UNRESOLVED_LABEL,
@@ -439,4 +440,55 @@ test('PI-V12. Fallback de resumen: PI antes que DoD cuando no hay Resultado espe
     }),
   );
   assert.equal(dodCard.summary, 'DoD como último fallback.');
+});
+
+test('PI-E6. Un cierre documentado exige Hecho, fecha y evidencia', () => {
+  const view = buildProjectTrajectoryView([
+    milestone({ id: 'a', status: 'Hecho', completedAt: '2026-10-02', evidence: null }),
+    milestone({
+      id: 'b',
+      status: 'Hecho',
+      completedAt: '2026-10-06',
+      evidence: 'PR y QA verificados',
+    }),
+    milestone({ id: 'c', status: 'Hecho', completedAt: null, evidence: 'Evidencia sin fecha' }),
+  ]);
+  assert.equal(view.lastDocumentedClosure?.milestone, 'Hito');
+  assert.ok(view.lastDocumentedClosure?.dateLabel);
+  assert.equal(buildProjectTrajectoryView([]).lastDocumentedClosure, null);
+});
+
+test('PI-E6. Hito siguiente solo si orden canónico o único en progreso', () => {
+  const ordered = buildProjectTrajectoryView([
+    milestone({ id: 'a', name: 'Cerrado', status: 'Hecho', order: 1 }),
+    milestone({ id: 'b', name: 'Siguiente', status: 'Pendiente', order: 2 }),
+    milestone({ id: 'c', name: 'Después', status: 'Pendiente', order: 3 }),
+  ]);
+  assert.equal(ordered.nextMilestone?.name, 'Siguiente');
+
+  const unknown = buildProjectTrajectoryView([
+    milestone({ id: 'a', name: 'Candidato A', status: 'Pendiente', order: null }),
+    milestone({ id: 'b', name: 'Candidato B', status: 'Pendiente', order: null }),
+  ]);
+  assert.equal(unknown.nextMilestone, null);
+
+  const inProgress = buildProjectTrajectoryView([
+    milestone({ id: 'a', name: 'Activo', status: 'En progreso', order: null }),
+    milestone({ id: 'b', name: 'Pendiente', status: 'Pendiente', order: null }),
+  ]);
+  assert.equal(inProgress.nextMilestone?.name, 'Activo');
+
+  const ambiguous = buildProjectTrajectoryView([
+    milestone({ id: 'a', status: 'En progreso' }),
+    milestone({ id: 'b', status: 'En progreso' }),
+  ]);
+  assert.equal(ambiguous.nextMilestone, null);
+});
+
+test('PI-E6. El orden duplicado no permite inventar un próximo hito', () => {
+  const ambiguous = buildProjectTrajectoryView([
+    milestone({ id: 'duplicate-a', name: 'Opción A', status: 'Pendiente', order: 2 }),
+    milestone({ id: 'duplicate-b', name: 'Opción B', status: 'Pendiente', order: 2 }),
+  ]);
+  assert.equal(ambiguous.nextMilestone, null);
 });

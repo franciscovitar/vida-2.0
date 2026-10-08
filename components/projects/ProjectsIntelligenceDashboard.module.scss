@@ -536,3 +536,32 @@
     text-align: left;
   }
 }
+
+/* Optional E6 evidence/trajectory hints; no velocity score or unsupported ETA. */
+.trajectory-summary {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+}
+
+.trajectory-summary p,
+.trajectory-summary strong,
+.trajectory-summary span {
+  display: block;
+  margin: 0;
+}
+
+.trajectory-summary strong {
+  color: var(--text-subtle);
+  font-size: 0.65rem;
+}
+
+.trajectory-summary span {
+  margin-top: 0.1rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}

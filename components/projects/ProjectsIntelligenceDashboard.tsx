@@ -8,6 +8,7 @@
 import { CircleAlert, Info } from 'lucide-react';
 
 import { Badge } from '@/components/ui/Badge';
+import { isProjectsV2SignalsEnabled } from '@/lib/projects/v2-config';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -199,10 +200,12 @@ function ProjectCard({
   project,
   emphasis = false,
   statusLabel,
+  signalsEnabled = false,
 }: {
   project: ProjectCardView;
   emphasis?: boolean;
   statusLabel?: string;
+  signalsEnabled?: boolean;
 }) {
   return (
     <article
@@ -233,6 +236,29 @@ function ProjectCard({
           <span>Ahora</span>
           {project.nextAction.label}
         </p>
+      ) : null}
+
+      {signalsEnabled &&
+      (project.trajectory.lastDocumentedClosure || project.trajectory.nextMilestone) ? (
+        <div className={styles['trajectory-summary']}>
+          {project.trajectory.lastDocumentedClosure ? (
+            <p>
+              <strong>Último cierre con evidencia</strong>
+              <span>
+                {project.trajectory.lastDocumentedClosure.milestone} ·{' '}
+                {project.trajectory.lastDocumentedClosure.dateLabel}
+              </span>
+            </p>
+          ) : null}
+          {project.trajectory.nextMilestone ? (
+            <p>
+              <strong>Siguiente hito identificable</strong>
+              <span>
+                {project.trajectory.nextMilestone.name} · {project.trajectory.nextMilestone.status}
+              </span>
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {project.blocker ? (
@@ -292,6 +318,7 @@ function CompletedRow({
 
 export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntelligenceData }) {
   const view = buildProjectsIntelligenceView(data);
+  const signalsEnabled = isProjectsV2SignalsEnabled();
   const focusProjects = [...view.focus, ...view.blocked];
 
   if (!view.ready) {
@@ -369,6 +396,7 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
                 key={project.id}
                 project={project}
                 emphasis={focusProjects.length === 1}
+                signalsEnabled={signalsEnabled}
               />
             ))}
           </div>
@@ -385,7 +413,12 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
           />
           <div className={styles['project-grid']}>
             {view.upcoming.map((project) => (
-              <ProjectCard key={project.id} project={project} statusLabel="Próximo" />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                statusLabel="Próximo"
+                signalsEnabled={signalsEnabled}
+              />
             ))}
           </div>
         </section>
@@ -403,7 +436,12 @@ export function ProjectsIntelligenceDashboard({ data }: { data: ProjectsIntellig
             </p>
             <div className={styles['project-grid']}>
               {view.waiting.map((project) => (
-                <ProjectCard key={project.id} project={project} statusLabel="En revisión" />
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  statusLabel="En revisión"
+                  signalsEnabled={signalsEnabled}
+                />
               ))}
             </div>
           </div>
