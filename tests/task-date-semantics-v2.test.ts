@@ -34,10 +34,7 @@ test('Revisión becomes review-needed when reached', () => {
 });
 
 test('completed task does not create date pressure', () => {
-  assert.equal(
-    classifyTaskDateV2('Hecha', '2026-10-01', TODAY, 'Deadline').attention,
-    'normal',
-  );
+  assert.equal(classifyTaskDateV2('Hecha', '2026-10-01', TODAY, 'Deadline').attention, 'normal');
 });
 
 test('task without date has no date semantics even if a stray type exists', () => {
