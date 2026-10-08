@@ -27,6 +27,11 @@ export type NotionTaskDuration = '5-15 min' | '30 min' | '1 h' | '2 h+';
 
 export type NotionTaskEnergy = 'Baja' | 'Media' | 'Alta';
 
+export type NotionTaskDateType = 'Deadline' | 'Objetivo' | 'Revisión';
+export type NotionTaskDateSemantics = 'none' | 'deadline' | 'target' | 'review' | 'unspecified';
+export type NotionTaskDateState = 'future' | 'today' | 'past' | 'none';
+export type NotionTaskDateAttention = 'normal' | 'overdue' | 'review-needed' | 'ambiguous';
+
 export type NotionProjectStatus = 'Activo' | 'En espera' | 'Bloqueado' | 'Completado' | 'Cancelado';
 
 export type NotionAreaStatus = 'Activa' | 'En pausa' | 'Inactiva';
@@ -45,6 +50,11 @@ export interface NotionTask {
   status: NotionTaskStatus;
   date: string | null;
   dateKind: NotionDateKind;
+  /** V2 date semantics. Optional for backward-compatible fixtures/readers. */
+  dateType?: NotionTaskDateType | null;
+  dateSemantics?: NotionTaskDateSemantics;
+  dateState?: NotionTaskDateState;
+  dateAttention?: NotionTaskDateAttention;
   priority: NotionTaskPriority | null;
   duration: NotionTaskDuration | null;
   energy: NotionTaskEnergy | null;

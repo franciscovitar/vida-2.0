@@ -26,6 +26,7 @@ export const TASK_PROPS = {
   title: 'Tarea',
   status: 'Estado',
   date: 'Fecha',
+  dateType: 'Tipo de fecha',
   priority: 'Prioridad',
   duration: 'Duración estimada',
   energy: 'Energía requerida',
@@ -71,6 +72,8 @@ export const TASK_PRIORITIES = ['Alta', 'Media', 'Baja'] as const;
 export const TASK_DURATIONS = ['5-15 min', '30 min', '1 h', '2 h+'] as const;
 
 export const TASK_ENERGIES = ['Baja', 'Media', 'Alta'] as const;
+
+export const TASK_DATE_TYPES = ['Deadline', 'Objetivo', 'Revisión'] as const;
 
 export const PROJECT_STATUSES = [
   'Activo',

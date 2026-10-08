@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { archivePlanningTask, createPlanningTask, updatePlanningTask } from '@/app/actions/tasks';
 import {
+  TASK_DATE_TYPES,
   TASK_DURATIONS,
   TASK_ENERGIES,
   TASK_PRIORITIES,
@@ -25,7 +26,10 @@ type EditorState =
   | { mode: 'create'; operationId: string }
   | { mode: 'edit'; task: PlanningTaskItem };
 
-function emptyCreate(catalog: PlanningTaskCatalog): PlanningTaskCreateInput {
+function emptyCreate(
+  catalog: PlanningTaskCatalog,
+  dateSemanticsV2 = false,
+): PlanningTaskCreateInput {
   return {
     operationId: crypto.randomUUID(),
     title: '',
@@ -33,17 +37,22 @@ function emptyCreate(catalog: PlanningTaskCatalog): PlanningTaskCreateInput {
     areaKey: catalog.areas[0]?.key ?? '',
     projectKey: null,
     date: null,
+    dateType: dateSemanticsV2 ? null : undefined,
     duration: null,
     energy: null,
     note: null,
   };
 }
 
-function taskSnapshot(task: PlanningTaskItem): PlanningTaskEditableSnapshot {
+function taskSnapshot(
+  task: PlanningTaskItem,
+  dateSemanticsV2 = false,
+): PlanningTaskEditableSnapshot {
   return {
     title: task.title,
     status: task.status,
     date: task.date,
+    dateType: dateSemanticsV2 ? (task.dateType ?? null) : undefined,
     priority: task.priority,
     duration: task.duration,
     energy: task.energy,
@@ -61,15 +70,17 @@ function nullable(value: string): string | null {
 export function TaskManager({
   catalog,
   writable,
+  dateSemanticsV2 = false,
 }: {
   catalog: PlanningTaskCatalog;
   writable: boolean;
+  dateSemanticsV2?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [editor, setEditor] = useState<EditorState>({ mode: 'closed' });
   const [createDraft, setCreateDraft] = useState<PlanningTaskCreateInput>(() => ({
-    ...emptyCreate(catalog),
+    ...emptyCreate(catalog, dateSemanticsV2),
     operationId: '',
   }));
   const [editDraft, setEditDraft] = useState<PlanningTaskEditableSnapshot | null>(null);
@@ -95,14 +106,14 @@ export function TaskManager({
   }, [catalog.tasks, query, statusFilter]);
 
   const openCreate = () => {
-    const next = emptyCreate(catalog);
+    const next = emptyCreate(catalog, dateSemanticsV2);
     setCreateDraft(next);
     setEditor({ mode: 'create', operationId: next.operationId });
     setMessage(null);
   };
 
   const openEdit = (task: PlanningTaskItem) => {
-    setEditDraft(taskSnapshot(task));
+    setEditDraft(taskSnapshot(task, dateSemanticsV2));
     setEditor({ mode: 'edit', task });
     setMessage(null);
   };
@@ -119,7 +130,7 @@ export function TaskManager({
       setMessage(result.message);
       if (result.ok) {
         closeEditor();
-        setCreateDraft(emptyCreate(catalog));
+        setCreateDraft(emptyCreate(catalog, dateSemanticsV2));
         router.refresh();
       }
     });
@@ -127,7 +138,7 @@ export function TaskManager({
 
   const submitEdit = () => {
     if (editor.mode !== 'edit' || !editDraft) return;
-    const original = taskSnapshot(editor.task);
+    const original = taskSnapshot(editor.task, dateSemanticsV2);
     setMessage(null);
     startTransition(async () => {
       const result = await updatePlanningTask({
@@ -228,7 +239,12 @@ export function TaskManager({
                 {task.priority ? <span>Prioridad {task.priority}</span> : null}
                 {task.duration ? <span>{task.duration}</span> : null}
                 {task.energy ? <span>Energía {task.energy}</span> : null}
-                {task.date ? <span>Fecha {task.date}</span> : null}
+                {task.date ? (
+                  <span>
+                    Fecha {task.date}
+                    {dateSemanticsV2 ? ` · ${task.dateType ?? 'Sin tipo'}` : ''}
+                  </span>
+                ) : null}
               </div>
               <div className={styles.meta}>
                 {task.areaName ? <span>{task.areaName}</span> : null}
@@ -354,15 +370,41 @@ export function TaskManager({
                   </select>
                 </label>
                 <label>
-                  <span>Fecha relevante</span>
+                  <span>{dateSemanticsV2 ? 'Fecha' : 'Fecha relevante'}</span>
                   <input
                     type="date"
                     value={createDraft.date ?? ''}
                     onChange={(event) =>
-                      setCreateDraft((draft) => ({ ...draft, date: event.target.value || null }))
+                      setCreateDraft((draft) => ({
+                        ...draft,
+                        date: event.target.value || null,
+                        dateType:
+                          dateSemanticsV2 && !event.target.value ? null : draft.dateType,
+                      }))
                     }
                   />
                 </label>
+                {dateSemanticsV2 ? (
+                  <label>
+                    <span>Tipo de fecha</span>
+                    <select
+                      value={createDraft.dateType ?? ''}
+                      disabled={!createDraft.date}
+                      onChange={(event) =>
+                        setCreateDraft((draft) => ({
+                          ...draft,
+                          dateType: (event.target.value ||
+                            null) as PlanningTaskCreateInput['dateType'],
+                        }))
+                      }
+                    >
+                      <option value="">Elegí tipo</option>
+                      {TASK_DATE_TYPES.map((value) => (
+                        <option key={value}>{value}</option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 <label>
                   <span>Duración</span>
                   <select
@@ -415,7 +457,12 @@ export function TaskManager({
                     type="button"
                     className={styles.primary}
                     onClick={submitCreate}
-                    disabled={pending || !createDraft.title.trim() || !createDraft.areaKey}
+                    disabled={
+                      pending ||
+                      !createDraft.title.trim() ||
+                      !createDraft.areaKey ||
+                      Boolean(dateSemanticsV2 && createDraft.date && !createDraft.dateType)
+                    }
                   >
                     Crear tarea
                   </button>
@@ -515,17 +562,49 @@ export function TaskManager({
                   </select>
                 </label>
                 <label>
-                  <span>Fecha relevante</span>
+                  <span>{dateSemanticsV2 ? 'Fecha' : 'Fecha relevante'}</span>
                   <input
                     type="date"
                     value={editDraft.date ?? ''}
                     onChange={(event) =>
                       setEditDraft((draft) =>
-                        draft ? { ...draft, date: event.target.value || null } : draft,
+                        draft
+                          ? {
+                              ...draft,
+                              date: event.target.value || null,
+                              dateType:
+                                dateSemanticsV2 && !event.target.value ? null : draft.dateType,
+                            }
+                          : draft,
                       )
                     }
                   />
                 </label>
+                {dateSemanticsV2 ? (
+                  <label>
+                    <span>Tipo de fecha</span>
+                    <select
+                      value={editDraft.dateType ?? ''}
+                      disabled={!editDraft.date}
+                      onChange={(event) =>
+                        setEditDraft((draft) =>
+                          draft
+                            ? {
+                                ...draft,
+                                dateType: (event.target.value ||
+                                  null) as PlanningTaskEditableSnapshot['dateType'],
+                              }
+                            : draft,
+                        )
+                      }
+                    >
+                      <option value="">Sin tipo (legacy)</option>
+                      {TASK_DATE_TYPES.map((value) => (
+                        <option key={value}>{value}</option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 <label>
                   <span>Duración</span>
                   <select
@@ -600,7 +679,16 @@ export function TaskManager({
                     type="button"
                     className={styles.primary}
                     onClick={submitEdit}
-                    disabled={pending || editDraft.title.trim().length < 3}
+                    disabled={
+                      pending ||
+                      editDraft.title.trim().length < 3 ||
+                      Boolean(
+                        dateSemanticsV2 &&
+                          editDraft.date &&
+                          !editDraft.dateType &&
+                          editDraft.date !== editor.task.date,
+                      )
+                    }
                   >
                     Guardar cambios
                   </button>

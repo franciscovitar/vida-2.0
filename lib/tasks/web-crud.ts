@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { createNotionActionsClient } from '@/lib/actions/notion-client';
+import { isTaskDateSemanticsV2Enabled } from '@/lib/daily-planning/v2-config';
 import { getNotionConfig } from '@/lib/notion/config';
 import { createPlanningTaskCrudService } from '@/lib/tasks/web-crud-core';
 
@@ -14,5 +15,6 @@ export function planningTaskCrudFromEnv() {
     tasksDataSourceId: config.config.tasksDataSourceId,
     projectsDataSourceId: config.config.projectsDataSourceId,
     areasDataSourceId: config.config.areasDataSourceId,
+    dateSemanticsV2: isTaskDateSemanticsV2Enabled(),
   });
 }

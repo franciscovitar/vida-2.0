@@ -3,7 +3,7 @@ import type {
   CalendarIntegrationStatus,
   CalendarDataSourceMode,
 } from '@/types/calendar';
-import type { NotionRelation, NotionTask } from '@/types/notion';
+import type { NotionRelation, NotionTask, NotionTaskDateSemantics } from '@/types/notion';
 import type {
   ProjectIntelligenceSourceStatus,
   ProjectProgress,
@@ -42,12 +42,12 @@ export interface DailyPlanningSourceState<Status extends string> {
   notice: string | null;
 }
 
-export type DailyPlanningTaskDateSemantics = 'none' | 'relevant-date-unspecified';
+export type DailyPlanningTaskDateSemantics = NotionTaskDateSemantics;
 
 export interface DailyPlanningTask extends NotionTask {
   /**
-   * `Fecha` no distingue deadline vs día planeado en el schema actual.
-   * Nunca se eleva a deadline duro por el nombre del campo.
+   * Semántica explícita cuando `Tipo de fecha` existe.
+   * Una fecha legacy sin tipo queda `unspecified`, nunca Deadline por inferencia.
    */
   dateSemantics: DailyPlanningTaskDateSemantics;
   relationUnavailable: boolean;

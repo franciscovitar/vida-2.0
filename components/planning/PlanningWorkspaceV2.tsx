@@ -112,7 +112,10 @@ function WeekView({
               <li key={task.id}>
                 <div>
                   <strong>{task.title}</strong>
-                  <span>{task.status}</span>
+                  <span>
+                    {task.status}
+                    {task.date ? ` · ${task.dateType ?? 'Fecha sin tipo'}` : ''}
+                  </span>
                 </div>
                 <span>{task.date}</span>
               </li>
@@ -164,6 +167,7 @@ export function PlanningWorkspaceV2({
   projects,
   taskCatalog,
   writable,
+  dateSemanticsV2,
 }: {
   view: PlanningViewV2;
   orientation: DailyOrientationView;
@@ -173,6 +177,7 @@ export function PlanningWorkspaceV2({
   projects: ProjectsIntelligenceData;
   taskCatalog: PlanningTaskCatalog;
   writable: boolean;
+  dateSemanticsV2: boolean;
 }) {
   return (
     <div className={styles.workspace}>
@@ -207,7 +212,11 @@ export function PlanningWorkspaceV2({
             icon={ListChecks}
             domain="tasks"
           />
-          <TaskManager catalog={taskCatalog} writable={writable} />
+          <TaskManager
+            catalog={taskCatalog}
+            writable={writable}
+            dateSemanticsV2={dateSemanticsV2}
+          />
         </Card>
       ) : null}
     </div>

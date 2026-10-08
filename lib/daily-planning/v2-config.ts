@@ -7,3 +7,9 @@ export function isDailyPlanningV2UiEnabled(
 ): boolean {
   return env.DAILY_PLANNING_V2_UI_ENABLED === 'true';
 }
+
+export function isTaskDateSemanticsV2Enabled(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.TASK_DATE_SEMANTICS_V2_ENABLED === 'true';
+}
