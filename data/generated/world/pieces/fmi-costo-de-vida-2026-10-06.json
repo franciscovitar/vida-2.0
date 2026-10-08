@@ -39,37 +39,28 @@
           "kind": "EXPLANATION",
           "material": true,
           "text": "Que la inflación baje no significa que los precios vuelvan atrás. Después de un salto fuerte en alimentos, energía o alquileres, los hogares pueden quedar comprando con un nivel de precios permanentemente más alto, y esa experiencia también cambia lo que esperan que ocurra con la inflación futura.",
-          "claimRefs": [
-            "IMF-1"
-          ],
+          "claimRefs": ["IMF-1"],
           "backgroundRefs": []
         },
         {
           "kind": "FACTUAL",
           "material": true,
           "text": "Un análisis del FMI difundido el 6 de octubre concluyó que las crisis de costo de vida pueden dejar efectos persistentes sobre las expectativas de inflación y la pobreza. El Fondo estimó además que entre 2021 y 2024 unas 23 millones de personas adicionales terminaron en pobreza extrema frente a estimaciones previas.",
-          "claimRefs": [
-            "IMF-1",
-            "IMF-2"
-          ],
+          "claimRefs": ["IMF-1", "IMF-2"],
           "backgroundRefs": []
         },
         {
           "kind": "INTERPRETIVE",
           "material": true,
           "text": "La lectura útil es que estabilizar la tasa de inflación resuelve solo una parte del problema. El daño distributivo puede durar más porque los hogares de menores ingresos gastan una proporción mayor en necesidades básicas y tienen menos margen para absorber nuevos shocks.",
-          "claimRefs": [
-            "IMF-2"
-          ],
+          "claimRefs": ["IMF-2"],
           "backgroundRefs": []
         },
         {
           "kind": "LIMIT",
           "material": true,
           "text": "El FMI recomienda apoyo focalizado, como transferencias de efectivo, antes que subsidios generales o controles amplios de precios. Esa es una recomendación de política del Fondo, no una conclusión universal sobre qué medida funciona mejor en todos los países.",
-          "claimRefs": [
-            "IMF-3"
-          ],
+          "claimRefs": ["IMF-3"],
           "backgroundRefs": []
         }
       ]
