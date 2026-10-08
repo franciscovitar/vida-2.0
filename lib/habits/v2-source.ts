@@ -3,6 +3,7 @@ import 'server-only';
 import { cache } from 'react';
 
 import { todayInBuenosAires } from '@/lib/adapters/dates';
+import { getGoogleConfig } from '@/lib/data/config';
 import { loadGymSessionsSnapshot, type GymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
 import { REGISTRO_DIARIO_TAB } from '@/lib/google/constants';
 import { readTabValues } from '@/lib/google/sheets-read';
@@ -11,6 +12,7 @@ import {
   HABIT_LOG_V2_TAB,
   HABIT_REGISTRY_TAB,
   dayStateFromValue,
+  deriveGymHabitValue,
   habitAppliesOnDate,
   parseHabitLogV2Table,
   parseHabitRegistryTable,
@@ -19,39 +21,13 @@ import {
   weekDatesThrough,
   type HabitLogV2Record,
   type HabitRegistryRecord,
-  type HabitV2DayState,
   type HabitV2Item,
-  type HabitV2ValueOrigin,
   type HabitsV2View,
 } from '@/lib/habits/v2-contract';
 
 function boundedTargetDate(requested: string | null | undefined, today: string): string {
   if (!requested || !validYmd(requested)) return today;
   return requested > today ? today : requested;
-}
-
-function derivedGymValue(
-  snapshot: GymSessionsSnapshot,
-  date: string,
-  today: string,
-): { state: HabitV2DayState; value: boolean | null; origin: HabitV2ValueOrigin } {
-  if (snapshot.state === 'unavailable' || snapshot.state === 'error') {
-    return { state: 'unavailable', value: null, origin: 'unavailable' };
-  }
-
-  const matches = snapshot.summaries.filter((summary) => summary.date === date);
-  if (matches.some((summary) => summary.completed === true)) {
-    return { state: 'done', value: true, origin: 'gym-session' };
-  }
-  if (matches.some((summary) => summary.completed === null)) {
-    return { state: 'unavailable', value: null, origin: 'unavailable' };
-  }
-
-  return {
-    state: date < today ? 'missed' : 'pending',
-    value: false,
-    origin: 'gym-session',
-  };
 }
 
 function buildItem(input: {
@@ -74,7 +50,7 @@ function buildItem(input: {
       value = null;
       origin = 'unavailable';
     } else {
-      const derived = derivedGymValue(input.gym, date, today);
+      const derived = deriveGymHabitValue(input.gym, date, today);
       state = derived.state;
       value = derived.value;
       origin = derived.origin;
@@ -102,7 +78,7 @@ function buildItem(input: {
       if (habit.mode === 'derived') {
         const derived =
           habit.derivedSource === 'gym-session'
-            ? derivedGymValue(input.gym, weekDate, today)
+            ? deriveGymHabitValue(input.gym, weekDate, today)
             : { state: 'unavailable' as const, value: null, origin: 'unavailable' as const };
         if (derived.value === true) weeklyCompleted += 1;
         if (derived.value === null) weeklyCoverageComplete = false;
@@ -195,6 +171,10 @@ async function loadHabitsV2View(targetDateInput?: string | null): Promise<Habits
     gym.state === 'unavailable' ||
     gym.state === 'error';
 
+  const google = getGoogleConfig();
+  const writable =
+    isHabitsV2WritesEnabled() && google.ok && google.config.writesAllowed;
+
   return {
     status: visible.length === 0 ? 'empty' : 'ready',
     notice: degraded
@@ -202,7 +182,7 @@ async function loadHabitsV2View(targetDateInput?: string | null): Promise<Habits
       : null,
     targetDate,
     today,
-    writable: isHabitsV2WritesEnabled(),
+    writable,
     items: visible,
   };
 }

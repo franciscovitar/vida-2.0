@@ -464,6 +464,33 @@ export function dayStateFromValue(
   return date < today ? 'missed' : 'pending';
 }
 
+export function deriveGymHabitValue(
+  snapshot: {
+    state: 'ready' | 'empty' | 'unavailable' | 'error';
+    summaries: readonly { date: string; completed: boolean | null }[];
+  },
+  date: string,
+  today: string,
+): { state: HabitV2DayState; value: boolean | null; origin: HabitV2ValueOrigin } {
+  if (snapshot.state === 'unavailable' || snapshot.state === 'error') {
+    return { state: 'unavailable', value: null, origin: 'unavailable' };
+  }
+
+  const matches = snapshot.summaries.filter((summary) => summary.date === date);
+  if (matches.some((summary) => summary.completed === true)) {
+    return { state: 'done', value: true, origin: 'gym-session' };
+  }
+  if (matches.some((summary) => summary.completed === null)) {
+    return { state: 'unavailable', value: null, origin: 'unavailable' };
+  }
+
+  return {
+    state: date < today ? 'missed' : 'pending',
+    value: false,
+    origin: 'gym-session',
+  };
+}
+
 export function weekDatesThrough(date: string): string[] {
   if (!validYmd(date)) return [];
   const [year, month, day] = date.split('-').map(Number);
