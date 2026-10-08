@@ -287,16 +287,54 @@ export function buildStudyCatalogSubject(input: StudyCatalogSubjectInput): Study
   };
 }
 
+function snapshotDay(value: string | null): string | null {
+  const day = value?.slice(0, 10);
+  return day && /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
+}
+
+/**
+ * PAS owns the active exam identity and official scope. Snapshot generation time
+ * does not prove fresh, independent mastery.
+ */
 export function matchSubjectProgress(
   subject: StudyCatalogSubject,
   snapshots: readonly AssessmentProgressSnapshot[],
 ): StudySubjectWithProgress {
-  const assessmentId = subject.assessment?.id;
-  const progress = assessmentId
+  const assessment = subject.assessment;
+  const snapshot = assessment
     ? (snapshots.find(
-        (snapshot) => snapshot.subjectId === subject.id && snapshot.assessmentId === assessmentId,
+        (item) => item.subjectId === subject.id && item.assessmentId === assessment.id,
       ) ?? null)
     : null;
 
-  return { ...subject, progress };
+  if (!snapshot) return { ...subject, progress: null, evidenceNotice: null };
+  if (snapshot.payload.status !== 'active' && snapshot.payload.status !== 'planned') {
+    return { ...subject, progress: null, evidenceNotice: null };
+  }
+
+  if (!assessment?.scopeComplete && snapshot.payload.scopeComplete) {
+    return {
+      ...subject,
+      progress: null,
+      evidenceNotice:
+        'El alcance del examen difiere entre el catálogo canónico y el resumen académico. Preparación sin medir hasta reconciliarlo.',
+    };
+  }
+
+  const updatedDay = snapshotDay(subject.updated);
+  const generatedDay = snapshotDay(snapshot.generatedAt);
+  if (updatedDay && generatedDay && updatedDay > generatedDay) {
+    return {
+      ...subject,
+      progress: null,
+      evidenceNotice:
+        'La materia cambió después del último resumen académico. Preparación pendiente de actualización.',
+    };
+  }
+  return { ...subject, progress: snapshot, evidenceNotice: null };
+}
+
+/** A general subject-level hint is not proof of readiness for a concrete exam. */
+export function effectiveAssessmentReadiness(subject: StudySubjectWithProgress): string {
+  return subject.progress?.payload.readinessBand ?? 'unknown';
 }
