@@ -26,7 +26,9 @@ export function TodayCockpitV2({
   orientation: DailyOrientationView;
 }) {
   const review = orientation.review;
-  const nextEvent = isCalendarHoyUnavailable(today.calendar.status) ? null : today.calendar.nextEvent;
+  const nextEvent = isCalendarHoyUnavailable(today.calendar.status)
+    ? null
+    : today.calendar.nextEvent;
 
   return (
     <div className={styles.stack}>
