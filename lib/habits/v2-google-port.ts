@@ -60,7 +60,7 @@ export function createGoogleHabitsV2Port(
 
       const url =
         `${SHEETS_BASE}/${encodeURIComponent(config.config.spreadsheetId)}/values/${encodeURIComponent(rangeA1)}` +
-        '?valueInputOption=USER_ENTERED';
+        '?valueInputOption=RAW';
 
       try {
         const response = await fetch(url, {

@@ -255,6 +255,8 @@ test('Google Habits V2 port never authorizes legacy Registro diario writes or ap
   const source = readFileSync(join(process.cwd(), 'lib', 'habits', 'v2-google-port.ts'), 'utf8');
   assert.match(source, /HABITS_V2_WRITES_ENABLED|isHabitsV2WritesEnabled/);
   assert.match(source, /method: 'PUT'/);
+  assert.match(source, /valueInputOption=RAW/);
+  assert.doesNotMatch(source, /valueInputOption=USER_ENTERED/);
   assert.doesNotMatch(source, /values:append|insertDimension|deleteDimension|batchClear/i);
   assert.doesNotMatch(source, /startsWith\([^)]*REGISTRO_DIARIO_TAB/);
 });
