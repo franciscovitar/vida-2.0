@@ -63,4 +63,6 @@ export interface StudyCatalogRead {
 
 export interface StudySubjectWithProgress extends StudyCatalogSubject {
   progress: AssessmentProgressSnapshot | null;
+  /** Derived conflict/age hint, separate from underlying evidence freshness. */
+  evidenceNotice: string | null;
 }

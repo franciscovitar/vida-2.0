@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { matchSubjectProgress } from '@/lib/study-engine/catalog';
+import { effectiveAssessmentReadiness, matchSubjectProgress } from '@/lib/study-engine/catalog';
 import type { AssessmentProgressRead } from '@/types/assessment-progress';
 import type { StudyCatalogRead, StudySubjectWithProgress } from '@/types/study-catalog';
 
@@ -95,8 +95,7 @@ export function LearningHubV2({
             {subjects.map((subject) => {
               const progress = subject.progress;
               const progressPercent = progress?.payload.progressPercent ?? null;
-              const readiness =
-                progress?.payload.readinessBand ?? subject.readinessBand ?? 'unknown';
+              const readiness = effectiveAssessmentReadiness(subject);
               const next = progress?.payload.nextBestActivity ?? null;
               const setCount = subject.topics.reduce(
                 (total, topic) => total + topic.studySets.length,
@@ -129,6 +128,18 @@ export function LearningHubV2({
                     <div className={styles.track} aria-hidden="true">
                       <span style={{ width: `${progressPercent}%` }} />
                     </div>
+                  ) : null}
+
+                  {subject.evidenceNotice ? (
+                    <p className={styles.current}>{subject.evidenceNotice}</p>
+                  ) : null}
+
+                  {progress ? (
+                    <p className={styles.current}>
+                      Fuente: Assessment Progress · resumen generado{' '}
+                      {progress.generatedAt.slice(0, 10)}. Esta fecha no demuestra práctica
+                      independiente reciente.
+                    </p>
                   ) : null}
 
                   {subject.currentUnit ? (
