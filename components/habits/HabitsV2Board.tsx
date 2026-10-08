@@ -114,7 +114,7 @@ export function HabitsV2Board({ view }: { view: HabitsV2View }) {
           action={
             <button
               type="button"
-              className={styles.addButton}
+              className={styles['add-button']}
               onClick={() => setShowAdd((value) => !value)}
               disabled={!view.writable || pending || view.targetDate !== view.today}
             >
@@ -158,7 +158,7 @@ export function HabitsV2Board({ view }: { view: HabitsV2View }) {
         ) : null}
 
         {showAdd ? (
-          <div className={styles.addForm}>
+          <div className={styles['add-form']}>
             <label>
               <span>Nombre</span>
               <input value={name} onChange={(event) => setName(event.target.value)} maxLength={80} />
@@ -191,7 +191,7 @@ export function HabitsV2Board({ view }: { view: HabitsV2View }) {
               <span>Unidad</span>
               <input value={unit} onChange={(event) => setUnit(event.target.value)} maxLength={30} />
             </label>
-            <div className={styles.formActions}>
+            <div className={styles['form-actions']}>
               <button type="button" onClick={() => setShowAdd(false)}>
                 Cancelar
               </button>
@@ -221,7 +221,7 @@ export function HabitsV2Board({ view }: { view: HabitsV2View }) {
                 <li key={habit.habitId} className={styles.item} data-state={habit.state}>
                   <div className={styles.check}>
                     {automatic ? (
-                      <span className={styles.autoIcon} aria-label="Automático">
+                      <span className={styles['auto-icon']} aria-label="Automático">
                         <Sparkles size={15} aria-hidden="true" />
                       </span>
                     ) : (
@@ -235,7 +235,7 @@ export function HabitsV2Board({ view }: { view: HabitsV2View }) {
                   </div>
 
                   <div className={styles.main}>
-                    <div className={styles.titleRow}>
+                    <div className={styles['title-row']}>
                       <strong>
                         {habit.icon ? <span aria-hidden="true">{habit.icon} </span> : null}
                         {habit.name}
