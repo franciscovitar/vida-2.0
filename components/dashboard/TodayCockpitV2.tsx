@@ -1,11 +1,4 @@
-import {
-  ArrowRight,
-  CalendarClock,
-  Compass,
-  HeartPulse,
-  History,
-  Sparkles,
-} from 'lucide-react';
+import { ArrowRight, CalendarClock, Compass, HeartPulse, History, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 import { Card } from '@/components/ui/Card';
@@ -33,9 +26,7 @@ export function TodayCockpitV2({
   orientation: DailyOrientationView;
 }) {
   const review = orientation.review;
-  const nextEvent = isCalendarHoyUnavailable(today.calendar.status)
-    ? null
-    : today.calendar.nextEvent;
+  const nextEvent = isCalendarHoyUnavailable(today.calendar.status) ? null : today.calendar.nextEvent;
 
   return (
     <div className={styles.stack}>
@@ -67,9 +58,7 @@ export function TodayCockpitV2({
                 ? 'No cambiaría nada importante sólo para llenar el día.'
                 : 'Todavía no hay una orientación V2 persistida para hoy.'}
             </strong>
-            <p>
-              El cockpit evita fabricar prioridades cuando la evidencia no justifica un ajuste.
-            </p>
+            <p>El cockpit evita fabricar prioridades cuando la evidencia no justifica un ajuste.</p>
           </div>
         ) : (
           <ol className={styles.attention}>
