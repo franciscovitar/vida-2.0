@@ -49,7 +49,7 @@
 }
 
 .empty p,
-.emptyText {
+.empty-text {
   margin: 0.2rem 0 0;
   color: var(--text-muted);
   font-size: 0.74rem;
@@ -94,11 +94,11 @@
 }
 
 .row strong,
-.reviewHeadline strong,
-.reviewItems strong,
-.nextEvent strong,
-.upcomingList strong,
-.lifeSignals strong {
+.review-headline strong,
+.review-items strong,
+.next-event strong,
+.upcoming-list strong,
+.life-signals strong {
   color: var(--text);
 }
 
@@ -140,8 +140,8 @@
   margin-top: 0.75rem;
 }
 
-.reviewHeadline,
-.nextEvent {
+.review-headline,
+.next-event {
   display: grid;
   gap: 0.15rem;
   padding: 0.7rem;
@@ -150,8 +150,8 @@
   background: var(--surface-2);
 }
 
-.reviewHeadline span,
-.nextEvent span,
+.review-headline span,
+.next-event span,
 .metrics span {
   color: var(--text-subtle);
   font-size: 0.66rem;
@@ -160,78 +160,78 @@
   text-transform: uppercase;
 }
 
-.reviewHeadline strong,
-.nextEvent strong {
+.review-headline strong,
+.next-event strong {
   font-size: 0.82rem;
   line-height: 1.4;
 }
 
-.nextEvent small {
+.next-event small {
   color: var(--text-muted);
   font-size: 0.7rem;
 }
 
-.reviewItems,
-.upcomingList,
+.review-items,
+.upcoming-list,
 .metrics,
-.lifeSignals {
+.life-signals {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.reviewItems,
-.upcomingList {
+.review-items,
+.upcoming-list {
   display: grid;
   gap: 0.5rem;
 }
 
-.reviewItems li,
-.upcomingList li {
+.review-items li,
+.upcoming-list li {
   padding-top: 0.5rem;
   border-top: 1px solid var(--border);
 }
 
-.reviewItems li:first-child,
-.upcomingList li:first-child {
+.review-items li:first-child,
+.upcoming-list li:first-child {
   padding-top: 0;
   border-top: 0;
 }
 
-.reviewItems strong,
-.reviewItems span {
+.review-items strong,
+.review-items span {
   display: block;
 }
 
-.reviewItems strong {
+.review-items strong {
   font-size: 0.76rem;
 }
 
-.reviewItems span,
-.upcomingList span {
+.review-items span,
+.upcoming-list span {
   margin-top: 0.1rem;
   color: var(--text-muted);
   font-size: 0.7rem;
   line-height: 1.4;
 }
 
-.upcomingList li {
+.upcoming-list li {
   display: flex;
   gap: 0.7rem;
   align-items: flex-start;
   justify-content: space-between;
 }
 
-.upcomingList div {
+.upcoming-list div {
   min-width: 0;
 }
 
-.upcomingList strong {
+.upcoming-list strong {
   display: block;
   font-size: 0.76rem;
 }
 
-.upcomingList small {
+.upcoming-list small {
   flex: 0 0 auto;
   color: var(--text-subtle);
   font-size: 0.68rem;
@@ -263,12 +263,12 @@
   line-height: 1.35;
 }
 
-.lifeSignals {
+.life-signals {
   display: grid;
   gap: 0.45rem;
 }
 
-.lifeSignals li {
+.life-signals li {
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;
@@ -277,30 +277,30 @@
   border-radius: var(--radius-md);
 }
 
-.lifeSignals span,
-.lifeSignals strong,
-.lifeSignals small {
+.life-signals span,
+.life-signals strong,
+.life-signals small {
   display: block;
 }
 
-.lifeSignals strong {
+.life-signals strong {
   font-size: 0.75rem;
   line-height: 1.4;
 }
 
-.lifeSignals small {
+.life-signals small {
   margin-top: 0.1rem;
   color: var(--text-subtle);
   font-size: 0.65rem;
 }
 
-.quickLinks {
+.quick-links {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
 }
 
-.quickLinks a {
+.quick-links a {
   padding: 0.45rem 0.65rem;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -310,7 +310,7 @@
   text-decoration: none;
 }
 
-.quickLinks a:hover {
+.quick-links a:hover {
   border-color: var(--border-strong);
   color: var(--text);
 }

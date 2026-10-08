@@ -110,17 +110,17 @@ export function TodayCockpitV2({
           />
 
           {!review ? (
-            <p className={styles.emptyText}>
+            <p className={styles['empty-text']}>
               Sin revisión V2 persistida. No se reconstruye ayer desde suposiciones.
             </p>
           ) : (
             <div className={styles.review}>
-              <div className={styles.reviewHeadline}>
+              <div className={styles['review-headline']}>
                 <span>{shortDate(review.date)}</span>
                 <strong>{review.headline}</strong>
               </div>
               {review.items.length > 0 ? (
-                <ul className={styles.reviewItems}>
+                <ul className={styles['review-items']}>
                   {review.items.slice(0, 4).map((item, index) => (
                     <li key={`${item.domain}-${item.activity}-${index}`}>
                       <strong>{item.activity}</strong>
@@ -129,7 +129,7 @@ export function TodayCockpitV2({
                   ))}
                 </ul>
               ) : (
-                <p className={styles.emptyText}>Sin cambios relevantes persistidos.</p>
+                <p className={styles['empty-text']}>Sin cambios relevantes persistidos.</p>
               )}
             </div>
           )}
@@ -146,7 +146,7 @@ export function TodayCockpitV2({
 
           <div className={styles.upcoming}>
             {nextEvent ? (
-              <div className={styles.nextEvent}>
+              <div className={styles['next-event']}>
                 <span>Hoy</span>
                 <strong>{nextEvent.title}</strong>
                 <small>
@@ -160,7 +160,7 @@ export function TodayCockpitV2({
             ) : null}
 
             {orientation.upcoming.length > 0 ? (
-              <ul className={styles.upcomingList}>
+              <ul className={styles['upcoming-list']}>
                 {orientation.upcoming.slice(0, 4).map((item, index) => (
                   <li key={`${item.kind}-${item.title}-${index}`}>
                     <div>
@@ -172,7 +172,7 @@ export function TodayCockpitV2({
                 ))}
               </ul>
             ) : nextEvent ? null : (
-              <p className={styles.emptyText}>
+              <p className={styles['empty-text']}>
                 No hay una fecha próxima V2 que necesite ocupar este espacio.
               </p>
             )}
@@ -215,7 +215,7 @@ export function TodayCockpitV2({
           </ul>
 
           {orientation.lifeSignals.length > 0 ? (
-            <ul className={styles.lifeSignals}>
+            <ul className={styles['life-signals']}>
               {orientation.lifeSignals.slice(0, 4).map((signal, index) => (
                 <li key={`${signal.kind}-${index}`} data-level={signal.level}>
                   <Sparkles size={14} aria-hidden="true" />
@@ -229,14 +229,14 @@ export function TodayCockpitV2({
               ))}
             </ul>
           ) : (
-            <p className={styles.emptyText}>
+            <p className={styles['empty-text']}>
               Sin señal adicional de recuperación, ocio o capacidad que requiera atención.
             </p>
           )}
         </div>
       </Card>
 
-      <nav className={styles.quickLinks} aria-label="Accesos rápidos desde Hoy">
+      <nav className={styles['quick-links']} aria-label="Accesos rápidos desde Hoy">
         <Link href="/planificacion">Planificación</Link>
         <Link href="/aprendizaje">Aprendizaje</Link>
         <Link href="/proyectos">Proyectos</Link>
