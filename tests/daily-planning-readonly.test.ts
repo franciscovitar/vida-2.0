@@ -439,4 +439,3 @@ test('DP-R13. fallo de Salud no fabrica capacidad ni derriba fuentes válidas', 
   assert.equal(data.projects.length, 1);
   assert.equal(data.calendarEvents.length, 1);
 });
-
