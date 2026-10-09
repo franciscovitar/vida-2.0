@@ -3,6 +3,7 @@
  * No consulta red, no lee archivos y nunca devuelve valores de entorno.
  */
 import { getWriteRuntimeStatus } from '@/lib/actions/config';
+import { PREVIEW_AUTH_REDIRECT_PROXY_URL } from '@/lib/auth/authorize';
 import { resolveCalendarConfig, resolveCalendarDataSource } from '@/lib/calendar/config-resolve';
 import { getGoogleConfig } from '@/lib/data/config';
 import { getNotionConfig, getNotionDataSource } from '@/lib/notion/config';
@@ -81,6 +82,26 @@ export function buildPreviewPreflight(env: Env): DeploymentPreflightResult {
         issue(`auth-missing-${name.toLowerCase()}`, 'error', `Falta configurar ${name}.`),
       );
     }
+  }
+
+  if (env.AUTH_REDIRECT_PROXY_URL?.trim() !== PREVIEW_AUTH_REDIRECT_PROXY_URL) {
+    issues.push(
+      issue(
+        'auth-preview-proxy-not-stable',
+        'error',
+        'AUTH_REDIRECT_PROXY_URL debe apuntar al endpoint Auth.js del alias QA estable.',
+      ),
+    );
+  }
+
+  if (env.AUTH_URL?.trim() || env.NEXTAUTH_URL?.trim()) {
+    issues.push(
+      issue(
+        'auth-preview-fixed-base-url',
+        'error',
+        'AUTH_URL y NEXTAUTH_URL deben quedar vacías en Preview para derivar el host de cada deployment.',
+      ),
+    );
   }
 
   if (env.DATA_SOURCE !== 'google') {

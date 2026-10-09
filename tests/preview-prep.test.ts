@@ -3,7 +3,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { resolveAuthProxyDecision, isPublicAuthPath } from '@/lib/auth/authorize';
+import {
+  isPublicAuthPath,
+  PREVIEW_AUTH_REDIRECT_PROXY_URL,
+  resolveAuthProxyDecision,
+  resolveAuthRedirectProxyUrl,
+} from '@/lib/auth/authorize';
 import { unauthorizedSessionFailure, verifySessionCore } from '@/lib/auth/session-core';
 import { isCalendarOAuthAllowed } from '@/lib/calendar/oauth-flow';
 import {
@@ -119,6 +124,37 @@ test('P10. AUTH_TRUST_HOST activa trustHost (Preview/local)', () => {
   assert.doesNotMatch(authTs, /AUTH_URL|NEXTAUTH_URL/);
 });
 
+test('P10A. el proxy OAuth estable se limita al alias QA y al entorno Preview', () => {
+  assert.equal(
+    resolveAuthRedirectProxyUrl({
+      VERCEL_ENV: 'preview',
+      AUTH_REDIRECT_PROXY_URL: PREVIEW_AUTH_REDIRECT_PROXY_URL,
+    }),
+    PREVIEW_AUTH_REDIRECT_PROXY_URL,
+  );
+  assert.equal(
+    resolveAuthRedirectProxyUrl({
+      VERCEL_ENV: 'preview',
+      AUTH_REDIRECT_PROXY_URL: 'https://attacker.example/api/auth',
+    }),
+    '',
+  );
+  assert.equal(
+    resolveAuthRedirectProxyUrl({
+      VERCEL_ENV: 'production',
+      AUTH_REDIRECT_PROXY_URL: PREVIEW_AUTH_REDIRECT_PROXY_URL,
+    }),
+    '',
+  );
+  assert.equal(
+    resolveAuthRedirectProxyUrl({
+      VERCEL_ENV: 'development',
+      AUTH_REDIRECT_PROXY_URL: PREVIEW_AUTH_REDIRECT_PROXY_URL,
+    }),
+    '',
+  );
+});
+
 test('P11–P12. sin callbacks localhost hardcodeados en auth de login', () => {
   const authTs = readFileSync(join(process.cwd(), 'auth.ts'), 'utf8');
   assert.doesNotMatch(authTs, /localhost:3000/);
@@ -141,6 +177,8 @@ test('P13. sin rutas absolutas de Windows en código de app/lib', () => {
 test('P14. .env.example documenta Preview y no incluye AUTH_URL inventada', () => {
   const example = readFileSync(join(process.cwd(), '.env.example'), 'utf8');
   assert.match(example, /AUTH_ALLOWED_EMAILS=/);
+  assert.match(example, /AUTH_REDIRECT_PROXY_URL=/);
+  assert.match(example, /No inventar AUTH_URL \/ NEXTAUTH_URL/i);
   assert.match(example, /AUTH_TRUST_HOST=true/);
   assert.match(example, /NO configurar en Vercel|no configurar en Vercel/i);
   assert.match(example, /GOOGLE_CALENDAR_REDIRECT_URI=/);
