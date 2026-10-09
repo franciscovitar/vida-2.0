@@ -1,18 +1,21 @@
 /**
  * Intercambio del code OAuth por tokens (solo servidor, fetch).
- * Nunca registra ni devuelve access_token, id_token ni la respuesta cruda.
+ * Nunca registra ni devuelve tokens ni la respuesta cruda.
  */
 import 'server-only';
 
 import type { CalendarOAuthSetupConfig } from '@/lib/calendar/config-resolve';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
+const CALENDAR_EVENTS_URL =
+  'https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=1&fields=kind';
 
 export type ExchangeCodeResult =
-  { ok: true; refreshToken: string } | { ok: false; reason: 'no-refresh-token' | 'exchange-error' };
+  | { ok: true }
+  | { ok: false; reason: 'no-refresh-token' | 'exchange-error' | 'calendar-read-error' };
 
 /**
- * Intercambia el authorization code. Solo expone refresh_token si existe.
+ * Intercambia el authorization code y descarta tokens dentro del módulo servidor.
  */
 export async function exchangeCalendarAuthorizationCode(
   setup: CalendarOAuthSetupConfig,
@@ -40,7 +43,7 @@ export async function exchangeCalendarAuthorizationCode(
     const bodyText = await response.text();
     if (!response.ok) return { ok: false, reason: 'exchange-error' };
 
-    let parsed: { refresh_token?: unknown };
+    let parsed: { refresh_token?: unknown; access_token?: unknown };
     try {
       parsed = JSON.parse(bodyText) as { refresh_token?: unknown };
     } catch {
@@ -50,7 +53,29 @@ export async function exchangeCalendarAuthorizationCode(
     const refreshToken =
       typeof parsed.refresh_token === 'string' ? parsed.refresh_token.trim() : '';
     if (!refreshToken) return { ok: false, reason: 'no-refresh-token' };
-    return { ok: true, refreshToken };
+
+    const accessToken = typeof parsed.access_token === 'string' ? parsed.access_token.trim() : '';
+    if (!accessToken) return { ok: false, reason: 'exchange-error' };
+
+    let calendarResponse: Response;
+    try {
+      calendarResponse = await fetch(CALENDAR_EVENTS_URL, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch {
+      return { ok: false, reason: 'calendar-read-error' };
+    }
+    try {
+      await calendarResponse.body?.cancel();
+    } catch {
+      // The response body is intentionally discarded; status alone proves the read gate.
+    }
+    if (!calendarResponse.ok) return { ok: false, reason: 'calendar-read-error' };
+
+    return { ok: true };
   } catch {
     return { ok: false, reason: 'exchange-error' };
   }
