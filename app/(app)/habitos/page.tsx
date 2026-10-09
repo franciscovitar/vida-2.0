@@ -9,6 +9,7 @@ import { PeriodSelector } from '@/components/domain/PeriodSelector';
 import { SparkBars } from '@/components/domain/SparkBars';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
 import { HabitsBoard } from '@/components/habits/HabitsBoard';
+import { HabitsV2Board } from '@/components/habits/HabitsV2Board';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -16,6 +17,8 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { getDomainPages } from '@/lib/data/domain-pages';
 import { periodLabel, parsePeriodParam } from '@/lib/periods';
 import { AUTHORIZED_HABIT_META } from '@/lib/habits/authorized';
+import { isHabitsV2UiEnabled } from '@/lib/habits/v2-config';
+import { getHabitsV2View } from '@/lib/habits/v2-source';
 
 import pageStyles from '../page.module.scss';
 
@@ -32,9 +35,27 @@ function rateLabel(rate: number | null, completed: number, available: number): s
 export default async function HabitosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string | string[] }>;
+  searchParams: Promise<{ period?: string | string[]; date?: string | string[] }>;
 }) {
   const params = await searchParams;
+
+  if (isHabitsV2UiEnabled()) {
+    const rawDate = Array.isArray(params.date) ? params.date[0] : params.date;
+    const view = await getHabitsV2View(rawDate ?? null);
+
+    return (
+      <div className={pageStyles.page}>
+        <PageHeader
+          title="Hábitos"
+          description="Seguimiento liviano, editable por fecha y conectado a evidencia real cuando existe."
+          icon={CalendarCheck}
+          domain="habits"
+        />
+        <HabitsV2Board view={view} />
+      </div>
+    );
+  }
+
   const periodDays = parsePeriodParam(params.period);
   const data = await getDomainPages(periodDays);
   const habitIds = AUTHORIZED_HABIT_META.map((item) => item.header);
