@@ -126,6 +126,10 @@ test('P10. AUTH_TRUST_HOST activa trustHost (Preview/local)', () => {
 
 test('P10A. el proxy OAuth estable se limita al alias QA y al entorno Preview', () => {
   assert.equal(
+    PREVIEW_AUTH_REDIRECT_PROXY_URL,
+    'https://vida-2-0-git-vida-qa-genova.vercel.app/api/auth',
+  );
+  assert.equal(
     resolveAuthRedirectProxyUrl({
       VERCEL_ENV: 'preview',
       AUTH_REDIRECT_PROXY_URL: PREVIEW_AUTH_REDIRECT_PROXY_URL,

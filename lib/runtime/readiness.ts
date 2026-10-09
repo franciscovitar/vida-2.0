@@ -89,7 +89,7 @@ export function buildPreviewPreflight(env: Env): DeploymentPreflightResult {
       issue(
         'auth-preview-proxy-not-stable',
         'error',
-        'AUTH_REDIRECT_PROXY_URL debe apuntar al endpoint Auth.js del alias QA estable.',
+        'AUTH_REDIRECT_PROXY_URL debe apuntar al endpoint Auth.js del alias estable vida-qa.',
       ),
     );
   }

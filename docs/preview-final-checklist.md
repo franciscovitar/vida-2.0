@@ -17,10 +17,10 @@ apagadas. El preflight comprueba configuración, no conectividad externa ni cali
 - `AUTH_GOOGLE_SECRET`
 - `AUTH_ALLOWED_EMAILS`
 - `AUTH_TRUST_HOST=true`
-- `AUTH_REDIRECT_PROXY_URL=https://vida-2-0-git-qa-genova.vercel.app/api/auth`
+- `AUTH_REDIRECT_PROXY_URL=https://vida-2-0-git-vida-qa-genova.vercel.app/api/auth`
 
-`AUTH_REDIRECT_PROXY_URL` va únicamente en el entorno Preview. La rama persistente `qa` debe
-mantener el alias `https://vida-2-0-git-qa-genova.vercel.app`; ese deployment sirve como proxy
+`AUTH_REDIRECT_PROXY_URL` va únicamente en el entorno Preview. La rama persistente `vida-qa` debe
+mantener el alias `https://vida-2-0-git-vida-qa-genova.vercel.app`; ese deployment sirve como proxy
 Auth.js para el propio QA y para los previews de PR. Todos los deployments Preview ya comparten
 `AUTH_SECRET`, condición necesaria para validar el `state` entre el preview de origen y el proxy.
 No fijar `AUTH_URL` ni `NEXTAUTH_URL`: el host inicial se deriva de la petición.
@@ -30,7 +30,7 @@ certificación porque puede fijar el callback al host equivocado.
 Registrar una sola vez en el cliente Google Web usado por `AUTH_GOOGLE_ID` esta URI exacta:
 
 ```text
-https://vida-2-0-git-qa-genova.vercel.app/api/auth/callback/google
+https://vida-2-0-git-vida-qa-genova.vercel.app/api/auth/callback/google
 ```
 
 No registrar callback URLs por deployment y no reutilizar el cliente independiente de Calendar.
