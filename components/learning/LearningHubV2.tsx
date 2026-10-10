@@ -71,6 +71,12 @@ export function LearningHubV2({
           <span>{catalog.notice}</span>
         </div>
       ) : null}
+      {assessmentProgress.notice ? (
+        <div className={styles.notice} role="status">
+          <CircleAlert size={16} aria-hidden="true" />
+          <span>{assessmentProgress.notice}</span>
+        </div>
+      ) : null}
 
       <Card>
         <SectionHeader

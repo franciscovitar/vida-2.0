@@ -321,6 +321,27 @@ export function matchSubjectProgress(
     };
   }
 
+  if (assessment?.date && snapshot.assessmentDate && assessment.date !== snapshot.assessmentDate) {
+    return {
+      ...subject,
+      progress: null,
+      evidenceNotice:
+        'La fecha del examen difiere entre el catálogo canónico y el resumen académico. Preparación sin medir hasta reconciliarla.',
+    };
+  }
+
+  if (
+    !snapshot.payload.scopeComplete &&
+    (snapshot.payload.progressPercent !== null || snapshot.payload.readinessBand !== 'unknown')
+  ) {
+    return {
+      ...subject,
+      progress: null,
+      evidenceNotice:
+        'El resumen académico declara preparación medible sin alcance de examen completo. Preparación sin medir hasta reconciliar la evidencia.',
+    };
+  }
+
   const updatedDay = snapshotDay(subject.updated);
   const generatedDay = snapshotDay(snapshot.generatedAt);
   if (updatedDay && generatedDay && updatedDay > generatedDay) {
