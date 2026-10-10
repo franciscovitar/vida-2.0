@@ -30,7 +30,7 @@ export default async function ProfessionalMarketPage() {
       />
       <ProfessionalNavigation current="mercado" />
       <ProfessionalMarketCharts data={data.visualizations} />
-      <ProfessionalSkillDemand data={data.skillDemand} />
+      <ProfessionalSkillDemand data={data.skillDemand} observed={data.observedJobs} />
       <ProfessionalHorizonComparison data={data.horizonForecast} />
       <ProfessionalResilienceComparison data={data.careerResilience} />
       <ProfessionalMarket

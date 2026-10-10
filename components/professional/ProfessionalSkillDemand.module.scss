@@ -180,3 +180,104 @@
     padding: 1rem;
   }
 }
+
+.source-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.9rem 0;
+}
+
+.source-options button {
+  min-height: 2.5rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.83rem;
+  cursor: pointer;
+}
+
+.source-options button[aria-pressed='true'] {
+  border-color: var(--c-projects);
+  box-shadow: inset 0 0 0 1px var(--c-projects);
+  font-weight: 700;
+}
+
+.source-options button:focus-visible {
+  outline: 2px solid var(--c-projects);
+  outline-offset: 2px;
+}
+
+.sub-heading {
+  margin: 1.2rem 0 0.75rem;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.method-note {
+  margin: 0.65rem 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.sample-panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.sample-panel {
+  min-width: 0;
+}
+
+.sample-panel h3 {
+  margin: 0 0 0.4rem;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.sample-panel > p {
+  color: var(--text-muted);
+  font-size: 0.83rem;
+  line-height: 1.55;
+}
+
+.sample-panel .chart {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0.9rem;
+}
+
+.sample-sources {
+  margin-top: 1rem;
+  color: var(--text);
+  font-size: 0.83rem;
+}
+
+.sample-sources summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.sample-sources ul {
+  display: grid;
+  gap: 0.35rem;
+  padding-left: 1.3rem;
+  line-height: 1.45;
+}
+
+.sample-sources a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (width <= 760px) {
+  .sample-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
