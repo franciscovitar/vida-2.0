@@ -162,3 +162,45 @@ test('F-AR10. Modo estudio no atribuye readiness general al examen activo', () =
   assert.match(source, /effectiveAssessmentReadiness\(subject\)/);
   assert.doesNotMatch(source, /progress\?\.payload\.readinessBand\s*\?\?\s*subject\.readinessBand/);
 });
+
+test('F-AR11. fecha oficial y fecha de snapshot divergentes invalidan el progreso', () => {
+  const matched = matchSubjectProgress(subject(), [snapshot({ assessmentDate: '2026-11-08' })]);
+  assert.equal(matched.progress, null);
+  assert.equal(effectiveAssessmentReadiness(matched), 'unknown');
+  assert.match(matched.evidenceNotice ?? '', /fecha del examen/);
+});
+
+test('F-AR12. fecha oficial desconocida no inventa un conflicto de fechas', () => {
+  const original = subject();
+  const matched = matchSubjectProgress(
+    subject({ assessment: { ...original.assessment!, date: null } }),
+    [snapshot()],
+  );
+  assert.equal(matched.progress?.payload.progressPercent, 62);
+});
+
+test('F-AR13. scope incompleto con porcentaje no certifica preparación de examen', () => {
+  const original = snapshot();
+  const matched = matchSubjectProgress(subject(), [
+    snapshot({ payload: { ...original.payload, scopeComplete: false } }),
+  ]);
+  assert.equal(matched.progress, null);
+  assert.equal(effectiveAssessmentReadiness(matched), 'unknown');
+  assert.match(matched.evidenceNotice ?? '', /alcance de examen completo/);
+});
+
+test('F-AR14. scope incompleto tampoco permite readiness positiva sin porcentaje', () => {
+  const original = snapshot();
+  const matched = matchSubjectProgress(subject(), [
+    snapshot({
+      payload: {
+        ...original.payload,
+        scopeComplete: false,
+        progressPercent: null,
+        readinessBand: 'developing',
+      },
+    }),
+  ]);
+  assert.equal(matched.progress, null);
+  assert.equal(effectiveAssessmentReadiness(matched), 'unknown');
+});
