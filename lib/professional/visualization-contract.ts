@@ -30,10 +30,7 @@ export type VisualPanelState =
   | 'INSUFFICIENT_EVIDENCE'
   | 'HELD';
 export type VisualMetricKind =
-  | 'EMPLOYMENT_GROWTH_PERCENT'
-  | 'NET_NEW_JOBS'
-  | 'ANNUAL_OPENINGS'
-  | 'MEDIAN_GROSS_MONTHLY_SALARY';
+  'EMPLOYMENT_GROWTH_PERCENT' | 'NET_NEW_JOBS' | 'ANNUAL_OPENINGS' | 'MEDIAN_GROSS_MONTHLY_SALARY';
 export type VisualGeography =
   | 'US_BENCHMARK'
   | 'ARGENTINA_LOCAL'
@@ -276,10 +273,8 @@ export function parseProfessionalVisualizationSnapshot(
       const source = sources.find((item) => record(item) && item.id === metric.sourceId);
       if (!record(source)) return null;
       if (
-        (metric.kind === 'MEDIAN_GROSS_MONTHLY_SALARY' &&
-          source.kind !== 'WORKFORCE_SURVEY') ||
-        (metric.kind !== 'MEDIAN_GROSS_MONTHLY_SALARY' &&
-          source.kind !== 'OFFICIAL_STATISTICS')
+        (metric.kind === 'MEDIAN_GROSS_MONTHLY_SALARY' && source.kind !== 'WORKFORCE_SURVEY') ||
+        (metric.kind !== 'MEDIAN_GROSS_MONTHLY_SALARY' && source.kind !== 'OFFICIAL_STATISTICS')
       ) {
         return null;
       }
