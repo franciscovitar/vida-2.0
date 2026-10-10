@@ -4,6 +4,7 @@ import { AlertTriangle, CheckSquare, FolderKanban, ListChecks, Sparkles } from '
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { isCalendarHoyUnavailable } from '@/lib/calendar/errors';
 import { formatDuration } from '@/lib/format';
 import type { CalendarTodayPreview } from '@/types/calendar';
 import type { HoyNotionView, HoyProjectView, HoyTaskView } from '@/types/notion';
@@ -106,6 +107,7 @@ export function HoyNotionPanel({
   calendar: CalendarTodayPreview;
 }) {
   const s = notion.summary;
+  const calendarUnavailable = isCalendarHoyUnavailable(calendar.status);
 
   return (
     <div className={styles.stack}>
@@ -127,15 +129,21 @@ export function HoyNotionPanel({
         />
         <ul className={styles.summary}>
           <li>
-            <strong className="tabular">{calendar.todayEvents.length}</strong>
+            <strong className="tabular">
+              {calendarUnavailable ? '—' : calendar.todayEvents.length}
+            </strong>
             <span>Eventos</span>
           </li>
           <li>
-            <strong className="tabular">{formatDuration(calendar.occupiedMinutes)}</strong>
+            <strong className="tabular">
+              {calendarUnavailable ? '—' : formatDuration(calendar.occupiedMinutes)}
+            </strong>
             <span>Ocupadas</span>
           </li>
           <li>
-            <strong className="tabular">{calendar.conflicts.length}</strong>
+            <strong className="tabular">
+              {calendarUnavailable ? '—' : calendar.conflicts.length}
+            </strong>
             <span>Conflictos</span>
           </li>
           <li>

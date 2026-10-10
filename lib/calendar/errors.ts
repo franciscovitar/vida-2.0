@@ -53,6 +53,17 @@ export function isCalendarHoyUnavailable(status: string): boolean {
   return status !== 'ready' && status !== 'empty' && status !== 'mock';
 }
 
+/**
+ * OAuth refresh failures: credential errors and provider outages are distinct.
+ * Never inspect or persist Google's error body: it may contain private details.
+ */
+export function mapCalendarTokenHttpStatus(status: number): CalendarReadCode {
+  if (status === 400 || status === 401) return 'auth-error';
+  if (status === 403) return 'permission-error';
+  if (status === 429) return 'rate-limited';
+  return 'read-error';
+}
+
 /** Mapea status HTTP de Calendar REST a código plano. */
 export function mapCalendarHttpStatus(status: number, bodyText = ''): CalendarReadCode {
   const lower = bodyText.toLowerCase();
