@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_temporal_period",
+  "granularity": "DAY",
+  "periodKey": "2026-10-09",
+  "state": "CLOSED",
+  "label": "9 de octubre de 2026",
+  "window": {
+    "start": "2026-10-09T00:00:00-03:00",
+    "end": "2026-10-09T23:59:59-03:00",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "190e50e9f6e2091a91c13b87dd655bbe41446715",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/temporal/DAY_2026-10-09_V1.json",
+    "generatedAt": "2026-10-10T15:25:26.549Z",
+    "observedAt": "2026-10-10T15:25:26.549Z"
+  },
+  "readingDebt": false,
+  "topStoryBriefIds": [
+    "WORLD-2026-10-09-NOBEL-PEACE",
+    "WORLD-2026-10-09-DIESEL",
+    "WORLD-2026-10-09-PANAMA"
+  ],
+  "transitionNote": "Day 2026-10-09 published after conditional interactive human approval; coverage remains PARTIAL, Panama magnitude corrected to reviewed USGS 7.6, and weakly substantiated absence claims are avoided.",
+  "domains": [
+    {
+      "domain": "POLITICS_GEOPOLITICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261009-PILLAY",
+          "headline": "Navi Pillay recibe el Premio Nobel de la Paz 2026",
+          "summary": "El Comité Noruego del Nobel reconoció a la jurista sudafricana Navi Pillay por su contribución a la paz y al derecho internacional, tras una carrera en tribunales internacionales y derechos humanos. El reconocimiento destaca el papel de instituciones legales frente a violaciones graves; no constituye una resolución judicial sobre conflictos actuales.",
+          "sourceRefs": [
+            "https://www.nobelpeaceprize.org/press/press-releases/nobel-peace-prize-for-2026",
+            "https://www.reuters.com/world/navanethem-navi-pillay-wins-2026-nobel-peace-prize-2026-10-09/"
+          ]
+        },
+        {
+          "itemId": "D20261009-ARG-LANDS",
+          "headline": "Argentina: medidas judiciales restablecen provisionalmente restricciones sobre tierras rurales",
+          "summary": "La Corte Suprema adoptó una decisión que restablece provisionalmente límites a la tenencia de tierras rurales por extranjeros ligados a la Ley de Tierras y el DNU 70/2023. No es todavía una sentencia definitiva sobre el fondo. Esta síntesis descansa en cobertura periodística; se requiere el fallo primario para una explicación jurídica exhaustiva.",
+          "sourceRefs": [
+            "https://www1.folha.uol.com.br/mercado/2026/10/justica-argentina-restabelece-limites-para-a-venda-de-terras-a-estrangeiros.shtml",
+            "https://elpais.com/argentina/2026-10-09/"
+          ]
+        },
+        {
+          "itemId": "D20261009-PANAMA-EARTHQUAKE",
+          "headline": "Dos fuertes sismos provocan evacuaciones y daños en Panamá",
+          "summary": "Un terremoto principal registrado por el USGS con magnitud revisada 7,6 —informado inicialmente por algunos medios como 7,7— y otro de 6,6 sacudieron Panamá el 9 de octubre. Hubo heridos, evacuaciones y daños materiales. Las primeras evaluaciones no confirmaban fallecidos; las estimaciones son provisionales. El Canal de Panamá seguía operando.",
+          "sourceRefs": [
+            "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u18k",
+            "https://apnews.com/article/e4e5dc85829714db88a74de3b7019d55"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [
+        "WORLD-2026-10-09-NOBEL-PEACE",
+        "WORLD-2026-10-09-PANAMA"
+      ],
+      "followUps": []
+    },
+    {
+      "domain": "ECONOMICS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261009-RUSSIAN-DIESEL",
+          "headline": "Estados Unidos flexibiliza restricciones al diésel ruso",
+          "summary": "Donald Trump anunció un acuerdo para facilitar suministros rusos de diésel y un alivio temporal de sanciones, con el objetivo declarado de reducir precios. Ucrania criticó la medida y analistas cuestionaron su efecto real sobre la oferta y los costos.",
+          "sourceRefs": [
+            "https://www.reuters.com/business/energy/trump-big-announcement-coming-up-diesel-2026-10-09/",
+            "https://www.washingtonpost.com/politics/2026/10/09/trump-says-putin-will-export-diesel-bid-lower-prices/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [
+        "WORLD-2026-10-09-DIESEL"
+      ],
+      "followUps": []
+    },
+    {
+      "domain": "SCIENCE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261009-THAILAND-FLOODS",
+          "headline": "Imágenes de la NASA documentan inundaciones extensas en Tailandia",
+          "summary": "NASA Earth Observatory publicó el 9 de octubre imágenes Landsat que muestran zonas agrícolas anegadas por lluvias intensas. Las fotografías comparan áreas de 2025 y 2026 y ayudan a dimensionar un evento que ya estaba en marcha; no son evidencia de que las inundaciones comenzaran ese día.",
+          "sourceRefs": [
+            "https://science.nasa.gov/earth/earth-observatory/floodwaters-overwhelm-thailand/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PSYCHOLOGY_BEHAVIOR",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261009-WHO-MENTAL",
+          "headline": "La OMS impulsa la transición hacia atención comunitaria de salud mental",
+          "summary": "La OMS presentó una guía para sustituir estadías psiquiátricas institucionales prolongadas por alternativas de atención comunitaria, derechos y apoyos continuados. Según la organización, solo el 9% de los países informantes completaron la transición. La recomendación requiere recursos y no equivale a cerrar servicios sin reemplazo.",
+          "sourceRefs": [
+            "https://www.who.int/singapore/news/detail-global/09-10-2026-who-urges-shift-from-institutional-to-community-based-mental-health-care"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HEALTH",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261009-SLEEP-ECG",
+          "headline": "Un modelo de IA extrae señales cardíacas de estudios del sueño",
+          "summary": "Una investigación financiada por NIH combinó electrocardiogramas nocturnos y fases del sueño para estimar riesgos cardiovasculares a largo plazo. La utilidad clínica aún debe validarse y el modelo no sustituye un diagnóstico médico.",
+          "sourceRefs": [
+            "https://www.nih.gov/news-events/news-releases/deep-learning-model-using-ecgs-during-sleep-studies-can-predict-cardiovascular-outcomes",
+            "https://academic.oup.com/sleep/advance-article/doi/10.1093/sleep/zsag229/8885715"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "TECH_AI",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261009-GITHUB-CODEQL",
+          "headline": "GitHub actualiza CodeQL y los controles de Copilot",
+          "summary": "El changelog de GitHub del 9 de octubre documentó mejoras de análisis de seguridad de CodeQL para varios lenguajes y más controles de acceso/entorno para Copilot. Estas mejoras no prueban que el plan Copilot Free funcione como runner dentro de GitHub Actions.",
+          "sourceRefs": [
+            "https://github.blog/changelog/month/10-2026/"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "HISTORY_CULTURE",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "HAS_MATERIAL_ITEMS",
+      "summaryItems": [
+        {
+          "itemId": "D20261009-FNA-ARTTECH",
+          "headline": "Argentina abre convocatoria nacional de arte y tecnología",
+          "summary": "El Fondo Nacional de las Artes abrió el 9 de octubre un concurso para proyectos que integren inteligencia artificial, realidad virtual, robótica y otras técnicas digitales. La convocatoria cierra el 5 de noviembre de 2026. Es una señal de experimentación cultural, no una evaluación de la calidad artística de esas herramientas.",
+          "sourceRefs": [
+            "https://www.argentina.gob.ar/noticias/el-fondo-nacional-de-las-artes-abre-la-convocatoria-al-concurso-de-arte-y-tecnologia-2026"
+          ]
+        }
+      ],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    },
+    {
+      "domain": "PRODUCTIVITY_HABITS",
+      "coverageState": "COVERAGE_PARTIAL",
+      "outcome": "COVERAGE_PARTIAL",
+      "summaryItems": [],
+      "deepDiveBriefIds": [],
+      "followUps": []
+    }
+  ]
+}

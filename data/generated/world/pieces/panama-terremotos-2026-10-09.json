@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "HUMAN_APPROVED",
+  "mode": "NOW",
+  "briefId": "WORLD-2026-10-09-PANAMA",
+  "slug": "panama-terremotos-2026-10-09",
+  "primaryDomain": "POLITICS_GEOPOLITICS",
+  "secondaryDomains": [],
+  "headline": "🌎 Panamá sufre fuertes terremotos; la cifra de magnitud fue revisada",
+  "deck": "El USGS registra 7,6 para el movimiento principal, mientras que reportes iniciales citaron 7,7. Las autoridades seguían evaluando daños y réplicas.",
+  "readingSeconds": 120,
+  "publishedAt": "2026-10-10T15:25:26.549Z",
+  "editorialDraftSha256": "bdd3e303a1c234fd51d5825b152360a1beac3732f3c4e46019819f8a63ba78be",
+  "backgroundNotes": [],
+  "sections": [
+    {
+      "id": "plain_language_setup",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "La magnitud mide la energía liberada por un terremoto. Puede modificarse cuando los sismólogos procesan nuevas observaciones después de los informes iniciales.",
+          "claimRefs": [
+            "PZ-1"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "what_happened",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "El 9 de octubre, un terremoto fuerte sacudió Panamá y fue seguido por otro de magnitud cercana a 6,6 y múltiples réplicas. Hubo evacuaciones, heridos y daños en varios edificios; el Canal de Panamá continuó operando según los reportes iniciales.",
+          "claimRefs": [
+            "PZ-2"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "why_it_matters",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "INTERPRETIVE",
+          "material": true,
+          "text": "La combinación de temblores, réplicas y daños recuerda por qué las evaluaciones iniciales deben actualizarse y por qué la resiliencia de infraestructura esencial importa para la región.",
+          "claimRefs": [
+            "PZ-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "what_is_uncertain",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "La ficha principal revisada del USGS muestra magnitud 7,6, mientras que AP y otros reportes tempranos hablaron de 7,7. Tampoco deben tratarse como definitivas las primeras cifras de víctimas o daños.",
+          "claimRefs": [
+            "PZ-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-USGS",
+      "role": "PRIMARY_DATA",
+      "publisher": "USGS"
+    },
+    {
+      "sourceId": "SRC-AP",
+      "role": "INDEPENDENT_REPORTING",
+      "publisher": "Associated Press"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "190e50e9f6e2091a91c13b87dd655bbe41446715",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_PANAMA_2026-10-09.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_NOW_PANAMA_2026-10-09.json",
+    "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_PANAMA_2026-10-09.json"
+  }
+}

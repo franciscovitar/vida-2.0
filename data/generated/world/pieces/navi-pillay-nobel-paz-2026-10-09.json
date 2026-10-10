@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "HUMAN_APPROVED",
+  "mode": "NOW",
+  "briefId": "WORLD-2026-10-09-NOBEL-PEACE",
+  "slug": "navi-pillay-nobel-paz-2026-10-09",
+  "primaryDomain": "POLITICS_GEOPOLITICS",
+  "secondaryDomains": [],
+  "headline": "⚖️ Navi Pillay gana el Nobel de la Paz por defender el derecho internacional",
+  "deck": "La jurista sudafricana fue reconocida por su trabajo para que los crímenes más graves puedan juzgarse mediante instituciones internacionales.",
+  "readingSeconds": 120,
+  "publishedAt": "2026-10-10T15:25:26.549Z",
+  "editorialDraftSha256": "f20d7b84d2c4f9cd099bbb37bcd8922622213882aa370878c13900f26b9fe93b",
+  "backgroundNotes": [],
+  "sections": [
+    {
+      "id": "plain_language_setup",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "Las reglas internacionales buscan que delitos como los crímenes de guerra y los crímenes contra la humanidad puedan ser investigados incluso cuando involucran a dirigentes con poder.",
+          "claimRefs": [
+            "NP-1"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "what_happened",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "El Comité Noruego del Nobel anunció el 9 de octubre que Navanethem «Navi» Pillay recibe el Premio Nobel de la Paz 2026. La jurista sudafricana participó en tribunales internacionales y fue alta comisionada de la ONU para los Derechos Humanos.",
+          "claimRefs": [
+            "NP-2"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "why_it_matters",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "INTERPRETIVE",
+          "material": true,
+          "text": "El reconocimiento pone el foco en la responsabilidad de los Estados y en la capacidad de las instituciones judiciales para examinar violaciones graves de derechos humanos.",
+          "claimRefs": [
+            "NP-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "what_is_uncertain",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "El premio reconoce una trayectoria; no significa que un tribunal haya resuelto de manera definitiva cada conflicto o denuncia relacionada con ella.",
+          "claimRefs": [
+            "NP-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-NOBEL-PEACE",
+      "role": "PRIMARY_OFFICIAL",
+      "publisher": "Norwegian Nobel Committee"
+    },
+    {
+      "sourceId": "SRC-REUTERS",
+      "role": "INDEPENDENT_REPORTING",
+      "publisher": "Reuters"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "190e50e9f6e2091a91c13b87dd655bbe41446715",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_PEACE_2026-10-09.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_NOW_NOBEL_PEACE_2026-10-09.json",
+    "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_PEACE_2026-10-09.json"
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "world_published_piece",
+  "publicationState": "HUMAN_APPROVED",
+  "mode": "NOW",
+  "briefId": "WORLD-2026-10-09-DIESEL",
+  "slug": "eeuu-diesel-ruso-2026-10-09",
+  "primaryDomain": "ECONOMICS",
+  "secondaryDomains": [],
+  "headline": "⛽ Estados Unidos suaviza sanciones para facilitar diésel ruso",
+  "deck": "El gobierno estadounidense anunció una excepción temporal a restricciones energéticas para intentar aliviar el precio del combustible, pese a las críticas ucranianas.",
+  "readingSeconds": 120,
+  "publishedAt": "2026-10-10T15:25:26.549Z",
+  "editorialDraftSha256": "babd3011b574f487c3c525ba36a0ebd13c2afed5cb4bf2f4f579ddc10ba76a14",
+  "backgroundNotes": [],
+  "sections": [
+    {
+      "id": "plain_language_setup",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "EXPLANATION",
+          "material": true,
+          "text": "El diésel mueve camiones, maquinaria y parte del transporte mundial. Cuando su precio sube, también puede encarecer la distribución de bienes y alimentos.",
+          "claimRefs": [
+            "DS-1"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "what_happened",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "FACTUAL",
+          "material": true,
+          "text": "El 9 de octubre, Donald Trump anunció un acuerdo para que Rusia suministre más diésel a Estados Unidos y otros mercados. La administración estadounidense anunció un alivio temporal de sanciones sobre ese combustible.",
+          "claimRefs": [
+            "DS-2"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "why_it_matters",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "INTERPRETIVE",
+          "material": true,
+          "text": "La medida muestra una tensión entre la estrategia de sanciones por la guerra en Ucrania y el objetivo de abaratar combustibles. Ucrania cuestionó que la flexibilización proporcione ingresos a Rusia.",
+          "claimRefs": [
+            "DS-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    },
+    {
+      "id": "what_is_uncertain",
+      "title": "",
+      "blocks": [
+        {
+          "kind": "LIMIT",
+          "material": true,
+          "text": "El efecto sobre los precios no está demostrado. Analistas energéticos consideran que los volúmenes adicionales podrían ser modestos frente al mercado global.",
+          "claimRefs": [
+            "DS-3"
+          ],
+          "backgroundRefs": []
+        }
+      ]
+    }
+  ],
+  "sourceNotes": [
+    {
+      "sourceId": "SRC-REUTERS",
+      "role": "INDEPENDENT_REPORTING",
+      "publisher": "Reuters"
+    },
+    {
+      "sourceId": "SRC-WAPO",
+      "role": "INDEPENDENT_REPORTING",
+      "publisher": "The Washington Post"
+    }
+  ],
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "190e50e9f6e2091a91c13b87dd655bbe41446715",
+    "canonicalRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_DIESEL_2026-10-09.json",
+    "editorialDraftRef": "AI/projects/world-intelligence/fixtures/EDITORIAL_DRAFT_NOW_DIESEL_2026-10-09.json",
+    "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_DIESEL_2026-10-09.json"
+  }
+}
