@@ -110,8 +110,9 @@ function profile(value: unknown): value is ForecastProfile {
     return false;
   }
 
+  const horizons = value.horizons as Record<string, unknown>;
   return FORECAST_HORIZONS.every((key) => {
-    const phase = value.horizons[key];
+    const phase = horizons[key];
     return (
       object(phase) &&
       Object.keys(phase).length === 4 &&
