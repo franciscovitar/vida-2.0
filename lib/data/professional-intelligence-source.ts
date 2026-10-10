@@ -8,6 +8,7 @@ import { loadProfessionalMarketDetail } from '@/lib/professional/market-detail';
 import { loadProfessionalOfferVariants } from '@/lib/professional/offer-variants';
 import { loadProfessionalSnapshot } from '@/lib/professional/snapshot';
 import { loadProfessionalSkillsMatrix } from '@/lib/professional/skills-matrix';
+import { loadSkillDemandBaseline } from '@/lib/professional/skill-demand';
 import { loadProfessionalVisualization } from '@/lib/professional/visualization';
 import { loadTechnologyLibrary } from '@/lib/professional/technology-library';
 
@@ -29,16 +30,30 @@ export async function getProfessionalToolsPageData() {
 export async function getProfessionalMarketPageData() {
   await requireAuthorizedSession();
 
-  const [professional, careerResilience, marketDetail, visualizations, horizonForecast] =
-    await Promise.all([
-      loadProfessionalSnapshot(),
-      loadCareerResilience(),
-      loadProfessionalMarketDetail(),
-      loadProfessionalVisualization(),
-      loadProfessionalHorizonForecast(),
-    ]);
+  const [
+    professional,
+    careerResilience,
+    marketDetail,
+    visualizations,
+    horizonForecast,
+    skillDemand,
+  ] = await Promise.all([
+    loadProfessionalSnapshot(),
+    loadCareerResilience(),
+    loadProfessionalMarketDetail(),
+    loadProfessionalVisualization(),
+    loadProfessionalHorizonForecast(),
+    loadSkillDemandBaseline(),
+  ]);
 
-  return { professional, careerResilience, marketDetail, visualizations, horizonForecast };
+  return {
+    professional,
+    careerResilience,
+    marketDetail,
+    visualizations,
+    horizonForecast,
+    skillDemand,
+  };
 }
 
 export async function getProfessionalGrowthPageData() {

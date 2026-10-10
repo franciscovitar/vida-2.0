@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "kind": "professional_skill_mentions_purposive_baseline",
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "commit": "08ae01c509111438cb77f0f9582b9966013ae4a2",
+    "canonicalRef": "AI/projects/professional-profile-v1/MARKET_FIT_QA_CURRENT_V1.json",
+    "evidenceDocumentRef": "AI/projects/professional-profile-v1/MARKET_FIT_QA_2026-10-02.md",
+    "observedAt": "2026-10-02",
+    "generatedAt": "2026-10-10",
+    "sourceSpreadsheetId": "1JzpLjmMO1TK15KlNSzgJbSoq3a5PT0BBsUa0kMCAX0k"
+  },
+  "sample": {
+    "n": 20,
+    "method": "PURPOSIVE_REPRESENTATIVE_NOT_CENSUS",
+    "roleFamilies": ["Software Engineer", "Full-Stack Product Engineer"],
+    "geographies": ["CORDOBA", "ARGENTINA", "LATAM_REMOTE"],
+    "attribution": "PAS Market-fit QA 2026-10-02",
+    "scope": "Purposefully selected junior-to-senior full-stack/software/product postings, mixed Córdoba/Argentina/LATAM; not representative and cannot be subgrouped"
+  },
+  "semantics": "COUNTS_OF_MENTIONS_IN_PURPOSIVE_POSTING_SAMPLE_NOT_VACANCY_RATE",
+  "freshness": {
+    "maxAgeDays": 30
+  },
+  "currentCollection": {
+    "source": "Job Search Market Evidence V1",
+    "status": "HEADERS_ONLY_NO_OBSERVATIONS",
+    "observedAt": "2026-10-10",
+    "repeatedComparableWindows": 0,
+    "skillFrequencyByGeography": "HELD",
+    "skillTrend": "HELD"
+  },
+  "entries": [
+    {
+      "id": "typescript_javascript",
+      "label": "TypeScript / JavaScript",
+      "kind": "stack",
+      "mentions": 20
+    },
+    {
+      "id": "react_nextjs",
+      "label": "React / Next.js",
+      "kind": "stack",
+      "mentions": 19
+    },
+    {
+      "id": "postgresql_sql",
+      "label": "PostgreSQL / SQL",
+      "kind": "stack",
+      "mentions": 16
+    },
+    {
+      "id": "production_reliability_failure_handling",
+      "label": "Producción, confiabilidad y fallos",
+      "kind": "professional",
+      "mentions": 13
+    },
+    {
+      "id": "cloud_aws_or_cloud_operations",
+      "label": "Cloud / AWS y operación",
+      "kind": "stack",
+      "mentions": 12
+    },
+    {
+      "id": "ai_assisted_engineering",
+      "label": "Desarrollo asistido por IA",
+      "kind": "professional",
+      "mentions": 12
+    },
+    {
+      "id": "node_backend_javascript",
+      "label": "Node.js y backend JavaScript",
+      "kind": "stack",
+      "mentions": 12
+    },
+    {
+      "id": "testing_qa",
+      "label": "Testing / QA",
+      "kind": "professional",
+      "mentions": 11
+    },
+    {
+      "id": "api_integrations",
+      "label": "APIs e integraciones",
+      "kind": "professional",
+      "mentions": 10
+    },
+    {
+      "id": "product_cross_functional_ownership",
+      "label": "Producto y trabajo entre áreas",
+      "kind": "professional",
+      "mentions": 10
+    },
+    {
+      "id": "ci_cd",
+      "label": "CI/CD",
+      "kind": "professional",
+      "mentions": 8
+    },
+    {
+      "id": "security_auth_permissions",
+      "label": "Seguridad, autenticación y permisos",
+      "kind": "professional",
+      "mentions": 8
+    },
+    {
+      "id": "docker_containers",
+      "label": "Docker y contenedores",
+      "kind": "stack",
+      "mentions": 7
+    },
+    {
+      "id": "architecture_system_design",
+      "label": "Arquitectura y diseño de sistemas",
+      "kind": "professional",
+      "mentions": 7
+    },
+    {
+      "id": "english_explicit",
+      "label": "Inglés explícitamente solicitado",
+      "kind": "professional",
+      "mentions": 5
+    },
+    {
+      "id": "observability_explicit",
+      "label": "Observabilidad explícita",
+      "kind": "professional",
+      "mentions": 4
+    },
+    {
+      "id": "playwright_explicit",
+      "label": "Playwright explícito",
+      "kind": "stack",
+      "mentions": 4
+    }
+  ]
+}
