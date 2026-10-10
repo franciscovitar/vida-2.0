@@ -94,7 +94,9 @@ export function AgendaBoard({ data }: { data: CalendarAgendaData }) {
         </h2>
         {data.timelineToday.length === 0 ? (
           <p className={styles.empty}>
-            {unavailable ? 'No se pudieron consultar los eventos de hoy.' : 'No hay eventos para hoy.'}
+            {unavailable
+              ? 'No se pudieron consultar los eventos de hoy.'
+              : 'No hay eventos para hoy.'}
           </p>
         ) : (
           <>

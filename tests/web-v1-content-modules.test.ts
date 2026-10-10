@@ -328,7 +328,12 @@ test('10B-2. la rama de error de Agenda no llama al generador mock', () => {
 });
 
 test('10B-3. fallo Calendar no certifica capacidad libre en Agenda ni Hoy', () => {
-  for (const status of ['auth-error', 'permission-error', 'network-error', 'rate-limited'] as const) {
+  for (const status of [
+    'auth-error',
+    'permission-error',
+    'network-error',
+    'rate-limited',
+  ] as const) {
     const agenda = buildUnavailableAgendaData({
       view: 'today',
       today: '2026-10-10',
