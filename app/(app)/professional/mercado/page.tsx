@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { ProfessionalMarket } from '@/components/professional/ProfessionalMarket';
 import { ProfessionalMarketCharts } from '@/components/professional/ProfessionalMarketCharts';
 import { ProfessionalHorizonComparison } from '@/components/professional/ProfessionalHorizonComparison';
+import { ProfessionalResilienceComparison } from '@/components/professional/ProfessionalResilienceComparison';
 import { ProfessionalNavigation } from '@/components/professional/ProfessionalNavigation';
 import { getProfessionalMarketPageData } from '@/lib/data/professional-intelligence-source';
 
@@ -29,6 +30,7 @@ export default async function ProfessionalMarketPage() {
       <ProfessionalNavigation current="mercado" />
       <ProfessionalMarketCharts data={data.visualizations} />
       <ProfessionalHorizonComparison data={data.horizonForecast} />
+      <ProfessionalResilienceComparison data={data.careerResilience} />
       <ProfessionalMarket
         professional={data.professional}
         careerResilience={data.careerResilience}
