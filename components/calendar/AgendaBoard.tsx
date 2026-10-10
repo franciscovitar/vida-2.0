@@ -1,3 +1,4 @@
+import { isCalendarHoyUnavailable } from '@/lib/calendar/errors';
 import { formatDuration } from '@/lib/format';
 import type { CalendarAgendaData, CalendarEvent } from '@/types/calendar';
 
@@ -45,6 +46,7 @@ function EventRow({ event }: { event: CalendarEvent }) {
 
 export function AgendaBoard({ data }: { data: CalendarAgendaData }) {
   const s = data.summary;
+  const unavailable = isCalendarHoyUnavailable(data.status);
 
   return (
     <div className={styles.stack}>
@@ -54,11 +56,13 @@ export function AgendaBoard({ data }: { data: CalendarAgendaData }) {
         </h2>
         <ul className={styles['summary-grid']}>
           <li>
-            <strong className="tabular">{s.todayEventCount}</strong>
+            <strong className="tabular">{unavailable ? '—' : s.todayEventCount}</strong>
             <span>Hoy</span>
           </li>
           <li>
-            <strong className="tabular">{formatDuration(s.occupiedMinutesToday)}</strong>
+            <strong className="tabular">
+              {unavailable ? '—' : formatDuration(s.occupiedMinutesToday)}
+            </strong>
             <span>Ocupadas</span>
           </li>
           <li>
@@ -74,11 +78,11 @@ export function AgendaBoard({ data }: { data: CalendarAgendaData }) {
             <span>Próximo</span>
           </li>
           <li>
-            <strong className="tabular">{s.freeBlocksToday.length}</strong>
+            <strong className="tabular">{unavailable ? '—' : s.freeBlocksToday.length}</strong>
             <span>Bloques libres</span>
           </li>
           <li>
-            <strong className="tabular">{s.overlapCountToday}</strong>
+            <strong className="tabular">{unavailable ? '—' : s.overlapCountToday}</strong>
             <span>Superpuestos</span>
           </li>
         </ul>
@@ -89,7 +93,9 @@ export function AgendaBoard({ data }: { data: CalendarAgendaData }) {
           Línea temporal de hoy
         </h2>
         {data.timelineToday.length === 0 ? (
-          <p className={styles.empty}>No hay eventos para hoy.</p>
+          <p className={styles.empty}>
+            {unavailable ? 'No se pudieron consultar los eventos de hoy.' : 'No hay eventos para hoy.'}
+          </p>
         ) : (
           <>
             <ul className={styles.list}>
@@ -125,15 +131,21 @@ export function AgendaBoard({ data }: { data: CalendarAgendaData }) {
             <header className={styles['day-head']}>
               <h3 className={styles['day-title']}>{day.label}</h3>
               <p className={styles['day-meta']}>
-                <span className="tabular">{day.events.length} eventos</span>
-                <span className="tabular">{formatDuration(day.occupiedMinutes)} ocupadas</span>
+                <span className="tabular">
+                  {unavailable ? 'Sin datos' : `${day.events.length} eventos`}
+                </span>
+                <span className="tabular">
+                  {unavailable ? '—' : formatDuration(day.occupiedMinutes)} ocupadas
+                </span>
                 {day.conflictCount > 0 ? (
                   <span className="tabular">{day.conflictCount} en solape</span>
                 ) : null}
               </p>
             </header>
             {day.empty ? (
-              <p className={styles.empty}>Sin eventos este día.</p>
+              <p className={styles.empty}>
+                {unavailable ? 'No se pudieron consultar los eventos.' : 'Sin eventos este día.'}
+              </p>
             ) : (
               <ul className={styles.list}>
                 {day.events.map((event) => (
