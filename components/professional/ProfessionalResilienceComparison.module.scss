@@ -1,0 +1,351 @@
+.section {
+  margin: 2rem 0;
+  padding: 1.7rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.intro {
+  max-width: 66rem;
+  margin-bottom: 1.2rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--text-subtle);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.intro h2 {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2.7vw, 2.1rem);
+  line-height: 1.16;
+}
+
+.intro p:not(.eyebrow) {
+  max-width: 60rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.role-filter {
+  display: grid;
+  flex: 1 1 18rem;
+  gap: 0.45rem;
+}
+
+.role-filter label,
+.horizon-filter legend {
+  margin-bottom: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.role-filter select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.87rem;
+}
+
+.horizon-filter {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.horizon-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.horizon-options button {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.horizon-options button[aria-pressed='true'] {
+  border-color: var(--c-projects);
+  box-shadow: inset 0 0 0 1px var(--c-projects);
+  font-weight: 700;
+}
+
+.role-filter select:focus-visible,
+.horizon-options button:focus-visible,
+.interpretation-grid summary:focus-visible {
+  outline: 2px solid var(--c-projects);
+  outline-offset: 3px;
+}
+
+.role-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 1.1rem 0;
+}
+
+.role-heading h3 {
+  margin: 0;
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+}
+
+.role-heading span {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.metric {
+  min-width: 0;
+  padding: 1.05rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.metric-head {
+  display: flex;
+  min-height: 3.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.metric-head h4 {
+  margin: 0;
+  font-size: 0.93rem;
+  line-height: 1.35;
+}
+
+.value {
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.range-track {
+  position: relative;
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--border);
+}
+
+.range-band {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border: 1px solid var(--text-muted);
+  border-radius: inherit;
+  background: var(--c-projects);
+}
+
+.range-band[data-kind='resilience'] {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--c-projects),
+    var(--c-projects) 5px,
+    var(--surface-2) 5px,
+    var(--surface-2) 8px
+  );
+}
+
+.range-band[data-kind='compression'] {
+  background: var(--text-muted);
+}
+
+.scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.32rem;
+  color: var(--text-subtle);
+  font-size: 0.73rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-detail {
+  margin: 0.9rem 0 0.5rem;
+  color: var(--text);
+  font-size: 0.84rem;
+  line-height: 1.52;
+}
+
+.unit {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.interpretation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.interpretation-grid article {
+  padding: 1.05rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.interpretation-grid h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.interpretation-grid p,
+.interpretation-grid li {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.interpretation-grid details {
+  margin-top: 0.8rem;
+}
+
+.interpretation-grid summary {
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.interpretation-grid ul {
+  padding-left: 1.25rem;
+}
+
+.interpretation-grid li {
+  margin: 0.45rem 0;
+}
+
+.stress-warning,
+.notice,
+.unavailable {
+  margin: 0.8rem 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.89rem;
+  line-height: 1.55;
+}
+
+.stress-warning {
+  border-left: 3px solid var(--c-projects);
+}
+
+.footer {
+  margin: 1.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.footer a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (width <= 980px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-head {
+    min-height: 0;
+  }
+}
+
+@media (width <= 660px) {
+  .interpretation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .controls {
+    align-items: stretch;
+  }
+
+  .role-filter {
+    flex-basis: 100%;
+  }
+}
+
+.calibration-notice {
+  margin: 0 0 1.15rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--c-projects);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.calibration-notice strong {
+  color: var(--text);
+  font-size: 0.91rem;
+}
+
+.calibration-notice p {
+  margin: 0.4rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.interpretation-grid h5 {
+  margin: 0.85rem 0 0.25rem;
+  color: var(--text);
+  font-size: 0.86rem;
+}
+
+.interpretation-grid details details {
+  margin-top: 0.9rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.interpretation-grid details details summary {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
