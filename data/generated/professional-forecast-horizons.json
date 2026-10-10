@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "kind": "professional_forecast_horizons",
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "08ae01c509111438cb77f0f9582b9966013ae4a2",
+    "canonicalRef": "AI/projects/professional-intelligence/FORECAST_CURRENT_V1.json",
+    "observedAt": "2026-09-18",
+    "generatedAt": "2026-10-10",
+    "staleAfterDays": 90,
+    "calibrationStatus": "DIRECTIONAL_NOT_PROBABILISTICALLY_CALIBRATED"
+  },
+  "forecastMode": "BASE_DIRECTIONAL_ONLY",
+  "scenarioVariantsKnown": [
+    "BASE",
+    "FASTER_AI_CAPABILITY_AND_ADOPTION",
+    "SLOWER_OR_CONSTRAINED_ADOPTION"
+  ],
+  "profiles": [
+    {
+      "id": "ai-native-product-software-engineering",
+      "label": "Software y producto con IA",
+      "horizons": {
+        "NEAR_12_24M": {
+          "outlook": "POSITIVE_BUT_TRANSFORMING",
+          "confidence": "MEDIUM_HIGH",
+          "aiInteractionOriginal": "Routine implementation is increasingly accelerated/delegated; value shifts toward specification, architecture, integration, verification, product judgment and ownership.",
+          "aiInteractionEs": "La IA acelera la implementación rutinaria. Ganan valor la especificación, arquitectura, integración, verificación y responsabilidad sobre el producto."
+        },
+        "MID_3_5Y": {
+          "outlook": "POSITIVE_BUT_TRANSFORMING",
+          "confidence": "MEDIUM",
+          "aiInteractionOriginal": "Expect role-content compression around routine coding, not a supported prediction of occupation disappearance.",
+          "aiInteractionEs": "Puede reducirse el peso del código rutinario en el rol. Esto no demuestra que vaya a desaparecer la profesión."
+        },
+        "LONG_5_10Y": {
+          "outlook": "UNCERTAIN",
+          "confidence": "LOW",
+          "aiInteractionOriginal": "Preserve optionality through durable systems/product/security/data foundations rather than predicting a specific job title.",
+          "aiInteractionEs": "Conviene mantener opciones abiertas mediante fundamentos de sistemas, producto, seguridad y datos, sin apostar a un único título laboral."
+        }
+      },
+      "signpostsUp": [
+        {
+          "original": "share of postings emphasizing system design, AI integration, evals or agent workflows",
+          "es": "Ofertas que piden diseño de sistemas, integración de IA, evaluaciones o agentes"
+        },
+        {
+          "original": "actual autonomous repo-task success on realistic codebases",
+          "es": "Resultados reales de agentes autónomos en repositorios complejos"
+        }
+      ],
+      "signpostsDown": [
+        {
+          "original": "sustained decline in software/project creation demand",
+          "es": "Caída sostenida de la demanda de software y nuevos productos"
+        },
+        {
+          "original": "reliable autonomous end-to-end software ownership with little human verification",
+          "es": "Agentes capaces de hacerse cargo de software de principio a fin con muy poca revisión humana"
+        }
+      ],
+      "action": {
+        "original": "If autonomous end-to-end software ownership becomes reliable with much less human verification, move evidence investment further toward product judgment, security, domain expertise and oversight.",
+        "es": "Si los agentes asumen de forma fiable sistemas completos, reforzar evidencia en criterio de producto, seguridad, conocimiento de dominio y supervisión."
+      }
+    },
+    {
+      "id": "security-privacy-engineering",
+      "label": "Ciberseguridad y privacidad",
+      "horizons": {
+        "NEAR_12_24M": {
+          "outlook": "STRONG_POSITIVE",
+          "confidence": "HIGH",
+          "aiInteractionOriginal": "AI accelerates both attack/defense work; accountability, threat modeling and secure integration remain human-intensive.",
+          "aiInteractionEs": "La IA acelera tanto ataques como defensas. Modelar amenazas, integrar sistemas seguros y asumir responsabilidades sigue requiriendo criterio humano."
+        },
+        "MID_3_5Y": {
+          "outlook": "POSITIVE",
+          "confidence": "MEDIUM_HIGH",
+          "aiInteractionOriginal": "More automated security operations, with durable value in architecture, adversarial reasoning and risk ownership.",
+          "aiInteractionEs": "Aumentaría la automatización operativa; la arquitectura segura, el razonamiento adversarial y la gestión del riesgo conservarían valor."
+        },
+        "LONG_5_10Y": {
+          "outlook": "POSITIVE",
+          "confidence": "MEDIUM",
+          "aiInteractionOriginal": "Tooling will change faster than core risk/least-privilege reasoning.",
+          "aiInteractionEs": "Las herramientas cambiarán más rápido que los fundamentos de riesgo, autorizaciones y mínimo privilegio."
+        }
+      },
+      "signpostsUp": [
+        {
+          "original": "security-role demand across Argentina/LATAM/US",
+          "es": "Demanda de puestos de seguridad en Argentina, LATAM y EE. UU."
+        },
+        {
+          "original": "AI-agent security standards",
+          "es": "Evolución de estándares de seguridad para agentes de IA"
+        }
+      ],
+      "signpostsDown": [
+        {
+          "original": "material long-run reduction in system complexity/attack surface",
+          "es": "Reducción importante y sostenida de la superficie de ataque o la complejidad"
+        },
+        {
+          "original": "security responsibilities fully absorbed into other roles without demand for specialized capability",
+          "es": "Desaparición de la demanda especializada porque la seguridad pasa por completo a otros roles"
+        }
+      ],
+      "action": {
+        "original": "If security work becomes strongly embedded into general engineering, retain security reasoning as a cross-cutting capability rather than targeting a narrow specialist title.",
+        "es": "Si la seguridad queda integrada en ingeniería general, conservar el razonamiento de seguridad como habilidad transversal en vez de apostar solo a un título especializado."
+      }
+    },
+    {
+      "id": "data-ai-engineering",
+      "label": "Datos e ingeniería con IA",
+      "horizons": {
+        "NEAR_12_24M": {
+          "outlook": "STRONG_POSITIVE",
+          "confidence": "MEDIUM_HIGH",
+          "aiInteractionOriginal": "AI increases need for data quality, evaluation, grounding and production integration while commoditizing some analysis/coding tasks.",
+          "aiInteractionEs": "La IA eleva la importancia de calidad de datos, evaluaciones, recuperación de información e integración productiva, pero abarata algunos análisis y tareas de código."
+        },
+        "MID_3_5Y": {
+          "outlook": "POSITIVE_BUT_TRANSFORMING",
+          "confidence": "MEDIUM",
+          "aiInteractionOriginal": "Generic model wrapping should commoditize faster than data/eval/domain integration.",
+          "aiInteractionEs": "La integración de datos, evaluaciones y conocimiento de dominio podría diferenciar más que conectar modelos de forma genérica."
+        },
+        "LONG_5_10Y": {
+          "outlook": "UNCERTAIN",
+          "confidence": "LOW",
+          "aiInteractionOriginal": "Favor durable data, experimentation, evaluation and systems skills over vendor-specific model APIs.",
+          "aiInteractionEs": "Priorizar datos, experimentación, evaluaciones y sistemas duraderos antes que depender de APIs específicas de un proveedor."
+        }
+      },
+      "signpostsUp": [
+        {
+          "original": "RAG/retrieval/eval requirements in job postings",
+          "es": "Ofertas que exigen recuperación de información, RAG o evaluación de modelos"
+        },
+        {
+          "original": "enterprise AI production adoption",
+          "es": "Adopción empresarial de IA en sistemas de producción"
+        }
+      ],
+      "signpostsDown": [
+        {
+          "original": "AI applications become reliably turnkey with little data/eval engineering",
+          "es": "Aplicaciones de IA fiables y listas para usar que casi no requieran trabajo propio de datos o evaluaciones"
+        },
+        {
+          "original": "persistent weak enterprise production adoption",
+          "es": "Adopción empresarial sostenidamente débil de IA en producción"
+        }
+      ],
+      "action": {
+        "original": "If reliable turnkey AI sharply reduces custom data/eval work, shift emphasis toward domain integration, experimentation and product outcomes.",
+        "es": "Si las soluciones listas para usar reducen mucho el trabajo de datos y evaluaciones, orientar la especialización hacia integración de dominio, experimentación y resultados del producto."
+      }
+    },
+    {
+      "id": "platform-production-reliability",
+      "label": "Plataformas, DevOps y confiabilidad",
+      "horizons": {
+        "NEAR_12_24M": {
+          "outlook": "POSITIVE",
+          "confidence": "MEDIUM_HIGH",
+          "aiInteractionOriginal": "AI can automate configuration/operations, increasing leverage but also making verification and failure containment important.",
+          "aiInteractionEs": "La IA puede automatizar configuración y operación, pero hace más importante verificar, contener fallos y recuperar sistemas."
+        },
+        "MID_3_5Y": {
+          "outlook": "POSITIVE_BUT_TRANSFORMING",
+          "confidence": "MEDIUM",
+          "aiInteractionOriginal": "Routine operations may compress; reliability architecture and evidence should remain valuable.",
+          "aiInteractionEs": "Podrían comprimirse las operaciones rutinarias; la arquitectura de confiabilidad y la evidencia operativa seguirían siendo importantes."
+        },
+        "LONG_5_10Y": {
+          "outlook": "UNCERTAIN",
+          "confidence": "LOW",
+          "aiInteractionOriginal": "Learn reliability principles and observability/recovery, not only tool-specific administration.",
+          "aiInteractionEs": "Aprender principios de confiabilidad, observabilidad y recuperación; no limitarse a administrar herramientas concretas."
+        }
+      },
+      "signpostsUp": [
+        {
+          "original": "SRE/platform posting volume",
+          "es": "Volumen de ofertas DevOps/SRE y plataformas"
+        },
+        {
+          "original": "managed platform adoption",
+          "es": "Adopción de plataformas completamente gestionadas"
+        }
+      ],
+      "signpostsDown": [
+        {
+          "original": "operational complexity becomes broadly absorbed by fully managed platforms without new reliability/security burdens",
+          "es": "Las plataformas gestionadas absorben ampliamente la complejidad operativa sin generar nuevas necesidades de confiabilidad o seguridad"
+        }
+      ],
+      "action": {
+        "original": "If managed platforms absorb most routine operations, focus on observability, incident judgment, architecture and cost/security rather than tool administration.",
+        "es": "Si las plataformas gestionadas absorben la operación rutinaria, enfocarse en observabilidad, incidentes, arquitectura, costos y seguridad."
+      }
+    },
+    {
+      "id": "systems-architecture-analysis",
+      "label": "Arquitectura y análisis de sistemas",
+      "horizons": {
+        "NEAR_12_24M": {
+          "outlook": "POSITIVE",
+          "confidence": "MEDIUM_HIGH",
+          "aiInteractionOriginal": "AI accelerates design exploration; accountable trade-off decisions remain central.",
+          "aiInteractionEs": "La IA acelera explorar alternativas de diseño; las decisiones responsables y sus compromisos siguen siendo centrales."
+        },
+        "MID_3_5Y": {
+          "outlook": "POSITIVE_BUT_TRANSFORMING",
+          "confidence": "MEDIUM",
+          "aiInteractionOriginal": "Architecture work becomes more evidence- and simulation-assisted.",
+          "aiInteractionEs": "El diseño de arquitectura incorporaría más evidencias, pruebas y simulaciones apoyadas por IA."
+        },
+        "LONG_5_10Y": {
+          "outlook": "UNCERTAIN",
+          "confidence": "LOW",
+          "aiInteractionOriginal": "Durable concepts: boundaries, failure modes, data, security, cost and organizational constraints.",
+          "aiInteractionEs": "Conservar fundamentos de límites entre sistemas, fallas, datos, seguridad, costos y restricciones organizacionales."
+        }
+      },
+      "signpostsUp": [
+        {
+          "original": "architecture/system-design requirements in senior roles",
+          "es": "Requisitos de arquitectura y diseño de sistemas en puestos senior"
+        },
+        {
+          "original": "agent ability to make/revise architecture under real constraints",
+          "es": "Capacidad de agentes para diseñar y revisar arquitectura con restricciones reales"
+        }
+      ],
+      "signpostsDown": [
+        {
+          "original": "reliable autonomous architecture ownership across consequential systems with minimal human accountability",
+          "es": "Agentes que asumen de forma fiable arquitectura de sistemas críticos con mínima responsabilidad humana"
+        }
+      ],
+      "action": {
+        "original": "If agents become consistently strong at architecture under changing real constraints, emphasize review, governance, product/domain trade-offs and accountability.",
+        "es": "Si los agentes diseñan bien bajo restricciones cambiantes, reforzar revisión, gobernanza, decisiones de producto y responsabilidad."
+      }
+    },
+    {
+      "id": "web-implementation-only",
+      "label": "Implementación web rutinaria",
+      "horizons": {
+        "NEAR_12_24M": {
+          "outlook": "PRESSURE_ON_ROUTINE_TASKS",
+          "confidence": "MEDIUM_HIGH",
+          "aiInteractionOriginal": "Template/component/CRUD implementation is increasingly accelerated; product, backend, data, security and systems breadth differentiates.",
+          "aiInteractionEs": "La IA abarata plantillas, componentes y operaciones CRUD. Diferencian más el criterio de producto, backend, datos, seguridad y sistemas."
+        },
+        "MID_3_5Y": {
+          "outlook": "MIXED",
+          "confidence": "MEDIUM",
+          "aiInteractionOriginal": "Avoid positioning solely around framework syntax or page implementation.",
+          "aiInteractionEs": "No conviene definir el perfil únicamente por sintaxis de frameworks o implementación de páginas."
+        },
+        "LONG_5_10Y": {
+          "outlook": "UNCERTAIN",
+          "confidence": "LOW",
+          "aiInteractionOriginal": "Maintain web as delivery capability, not sole professional moat.",
+          "aiInteractionEs": "Mantener el desarrollo web como capacidad de entrega, pero no como única ventaja profesional."
+        }
+      },
+      "signpostsUp": [
+        {
+          "original": "pricing/time for production-quality web delivery",
+          "es": "Precio y tiempo para entregar aplicaciones web de calidad productiva"
+        },
+        {
+          "original": "job postings separating product/system ownership from implementation",
+          "es": "Ofertas que distinguen implementar páginas de responsabilizarse por producto y sistemas"
+        }
+      ],
+      "signpostsDown": [
+        {
+          "original": "persistent premium demand for implementation-only work despite tool improvements",
+          "es": "Demanda sostenida con buena remuneración de implementación aislada pese a mejoras de herramientas"
+        }
+      ],
+      "action": {
+        "original": "If implementation-only demand remains premium and durable despite tooling, maintain more direct web specialization.",
+        "es": "Si la implementación aislada mantiene una demanda premium y duradera, sostener una especialización web más directa."
+      }
+    }
+  ]
+}
