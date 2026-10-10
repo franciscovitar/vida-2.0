@@ -141,7 +141,8 @@ function validMetric(value: unknown): value is VisualMetric {
     !string(value.sourceId) ||
     (value.occupationCode !== null && !string(value.occupationCode)) ||
     (value.seniority !== null && !string(value.seniority)) ||
-    (value.sampleSize !== null && (!Number.isInteger(value.sampleSize) || Number(value.sampleSize) < 1)) ||
+    (value.sampleSize !== null &&
+      (!Number.isInteger(value.sampleSize) || Number(value.sampleSize) < 1)) ||
     (value.dollarized !== null && typeof value.dollarized !== 'boolean')
   ) {
     return false;
@@ -268,11 +269,7 @@ export function parseProfessionalVisualizationSnapshot(
 
     panelIds.add(String(panel.id));
     for (const metric of panel.metrics) {
-      if (
-        !validMetric(metric) ||
-        metricIds.has(metric.id) ||
-        !sourceIds.has(metric.sourceId)
-      ) {
+      if (!validMetric(metric) || metricIds.has(metric.id) || !sourceIds.has(metric.sourceId)) {
         return null;
       }
       metricIds.add(metric.id);
