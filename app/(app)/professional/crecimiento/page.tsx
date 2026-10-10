@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ProfessionalGrowth } from '@/components/professional/ProfessionalGrowth';
+import { ProfessionalSkillsDecision } from '@/components/professional/ProfessionalSkillsDecision';
 import { ProfessionalNavigation } from '@/components/professional/ProfessionalNavigation';
 import { getProfessionalGrowthPageData } from '@/lib/data/professional-intelligence-source';
 
@@ -14,7 +15,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function ProfessionalGrowthPage() {
-  const professional = await getProfessionalGrowthPageData();
+  const data = await getProfessionalGrowthPageData();
 
   return (
     <div className={pageStyles.page}>
@@ -25,7 +26,8 @@ export default async function ProfessionalGrowthPage() {
         domain="projects"
       />
       <ProfessionalNavigation current="crecimiento" />
-      <ProfessionalGrowth data={professional} />
+      <ProfessionalSkillsDecision skills={data.skills} outlook={data.horizonForecast} />
+      <ProfessionalGrowth data={data.professional} />
     </div>
   );
 }

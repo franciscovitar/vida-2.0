@@ -3,6 +3,10 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ProfessionalMarket } from '@/components/professional/ProfessionalMarket';
+import { ProfessionalMarketCharts } from '@/components/professional/ProfessionalMarketCharts';
+import { ProfessionalSkillDemand } from '@/components/professional/ProfessionalSkillDemand';
+import { ProfessionalHorizonComparison } from '@/components/professional/ProfessionalHorizonComparison';
+import { ProfessionalResilienceComparison } from '@/components/professional/ProfessionalResilienceComparison';
 import { ProfessionalNavigation } from '@/components/professional/ProfessionalNavigation';
 import { getProfessionalMarketPageData } from '@/lib/data/professional-intelligence-source';
 
@@ -25,6 +29,10 @@ export default async function ProfessionalMarketPage() {
         domain="projects"
       />
       <ProfessionalNavigation current="mercado" />
+      <ProfessionalMarketCharts data={data.visualizations} />
+      <ProfessionalSkillDemand data={data.skillDemand} observed={data.observedJobs} />
+      <ProfessionalHorizonComparison data={data.horizonForecast} />
+      <ProfessionalResilienceComparison data={data.careerResilience} />
       <ProfessionalMarket
         professional={data.professional}
         careerResilience={data.careerResilience}
