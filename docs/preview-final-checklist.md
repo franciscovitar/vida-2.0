@@ -17,6 +17,38 @@ apagadas. El preflight comprueba configuración, no conectividad externa ni cali
 - `AUTH_GOOGLE_SECRET`
 - `AUTH_ALLOWED_EMAILS`
 - `AUTH_TRUST_HOST=true`
+- `AUTH_REDIRECT_PROXY_URL=https://vida-2-0-git-vida-qa-genova.vercel.app/api/auth`
+
+`AUTH_REDIRECT_PROXY_URL` va únicamente en el entorno Preview. La rama persistente `vida-qa` debe
+mantener el alias `https://vida-2-0-git-vida-qa-genova.vercel.app`; ese deployment sirve como proxy
+Auth.js para el propio QA y para los previews de PR. Todos los deployments Preview ya comparten
+`AUTH_SECRET`, condición necesaria para validar el `state` entre el preview de origen y el proxy.
+No fijar `AUTH_URL` ni `NEXTAUTH_URL`: el host inicial se deriva de la petición.
+Si cualquiera de esas variables está definida en Preview, el preflight debe bloquear la
+certificación porque puede fijar el callback al host equivocado.
+
+Registrar una sola vez en el cliente Google Web usado por `AUTH_GOOGLE_ID` esta URI exacta:
+
+```text
+https://vida-2-0-git-vida-qa-genova.vercel.app/api/auth/callback/google
+```
+
+No registrar callback URLs por deployment y no reutilizar el cliente independiente de Calendar.
+El cliente de login usa solo `openid email profile`; el callback proxy añade la protección `state`
+de Auth.js. Mantener `AUTH_REDIRECT_PROXY_URL` ausente en Production.
+
+Vercel Deployment Protection y Auth.js son dos controles separados. Mantener Vercel Authentication
+activa para Production y Previews. El usuario autorizado debe tener acceso al proyecto Vercel; el
+token de Vercel es por URL, así que el alias `qa` da una URL estable para el acceso de rutina. Al
+abrir un Preview de PR diferente, Vercel puede pedir su acceso de equipo para esa URL; después,
+Google vuelve por el proxy estable y Auth.js devuelve el flujo al Preview original. Las rutas de la
+app siguen exigiendo la sesión Auth.js y la allowlist exacta. `AUTH_ALLOWED_EMAILS` se compara sin
+distinguir mayúsculas y con espacios recortados; incluye únicamente las cuentas autorizadas para
+Preview y no copies una allowlist más amplia a Production.
+
+La cookie Auth.js usa `HttpOnly`, `Secure` en Vercel Preview, `SameSite=Lax`, ruta `/` y no fija
+`Domain`; queda limitada al host del Preview. El proxy estable comparte el `state` de OAuth, pero el
+callback final del Preview emite la sesión para el host original.
 
 ### Google Sheets
 

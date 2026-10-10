@@ -44,11 +44,13 @@ export default async function AgendaPage({
       ? formatArgentineFullDate(data.targetDate)
       : `${formatArgentineFullDate(data.rangeStart)} – ${formatArgentineFullDate(data.rangeEnd)}`;
 
+  const statusLabel = publicStatusLabel(data.status, data.summary.totalEvents);
+
   return (
     <div className={`${pageStyles.page} ${local.page}`}>
       <PageHeader
         title="Agenda"
-        description={`${sourceLabel(data.source, data.status)} · ${data.summary.totalEvents} eventos · ${periodLabel}`}
+        description={`${sourceLabel(data.source, data.status)} · ${statusLabel} · ${periodLabel}`}
         icon={CalendarClock}
         domain="productivity"
       />

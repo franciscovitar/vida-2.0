@@ -171,7 +171,8 @@ test('HW12. callback sin cambios de persistencia/log del refresh token', () => {
   assert.doesNotMatch(callbackSrc, /writeFile|writeFileSync|appendFile/);
   assert.doesNotMatch(callbackSrc, /GOOGLE_CALENDAR_OAUTH_MODE/);
   assert.doesNotMatch(callbackSrc, /calendarScopesForMode|CALENDAR_HOLD_WRITE_SCOPES/);
-  assert.match(callbackSrc, /buildOAuthSuccessHtml\(exchanged\.refreshToken\)/);
+  assert.match(callbackSrc, /buildOAuthSuccessHtml\(\)/);
+  assert.doesNotMatch(callbackSrc, /buildOAuthSuccessHtml\([^)]*refreshToken/);
 });
 
 test('HW13. el modo no amplía la superficie de secretos hacia el cliente', () => {
