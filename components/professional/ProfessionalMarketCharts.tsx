@@ -87,8 +87,8 @@ function MetricRow({ metric, maximum }: { metric: VisualMetric; maximum: number 
 
   return (
     <li className={styles.row}>
-      <div className={styles.rowTop}>
-        <span className={styles.rowLabel}>
+      <div className={styles['row-top']}>
+        <span className={styles['row-label']}>
           {OCCUPATION_LABELS[metric.occupationCode ?? ''] ?? metric.label}
         </span>
         <strong className={styles.value}>{formatValue(metric.value, metric.kind)}</strong>
@@ -147,7 +147,7 @@ function MetricCard({
         </ul>
       </details>
       {kind === 'NET_NEW_JOBS' ? (
-        <p className={styles.finePrint}>
+        <p className={styles['fine-print']}>
           Diferencia calculada a partir de cifras BLS redondeadas en miles.
         </p>
       ) : null}
