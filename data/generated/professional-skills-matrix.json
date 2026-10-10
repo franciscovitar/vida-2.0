@@ -1,0 +1,276 @@
+{
+  "version": 1,
+  "kind": "professional_skills_evidence_matrix",
+  "source": {
+    "repository": "franciscovitar/personal-ai-system",
+    "ref": "main",
+    "commit": "08ae01c509111438cb77f0f9582b9966013ae4a2",
+    "canonicalRefs": [
+      "AI/projects/professional-intelligence/PROFESSIONAL_GROWTH_CURRENT_V1.json",
+      "AI/projects/professional-intelligence/ROLE_ARCHETYPES_V1.json",
+      "AI/projects/professional-intelligence/PERSONAL_EVIDENCE_GRAPH_V1.json"
+    ],
+    "observedAt": "2026-10-02",
+    "personalEvidenceObservedAt": "2026-09-22",
+    "generatedAt": "2026-10-10",
+    "staleAfterDays": 75
+  },
+  "method": "ONTOLOGY_MEMBERSHIP_AND_PERSONAL_ARTIFACT_EVIDENCE_ONLY",
+  "marketSkillFrequencyStatus": "INSUFFICIENT_COMPARABLE_REPEATED_JOB_SAMPLES",
+  "horizons": {
+    "current": "CURRENT_GROWTH_QUEUE_ONLY",
+    "near": "NO_SKILL_SPECIFIC_12_24M_PROJECTION",
+    "mid": "NO_SKILL_SPECIFIC_3_5Y_PROJECTION",
+    "long": "NO_SKILL_SPECIFIC_5_10Y_PROJECTION"
+  },
+  "targetRoles": ["Software Engineer", "Full-Stack Product Engineer"],
+  "roles": [
+    {
+      "id": "ai-native-product-engineer",
+      "name": "AI-Native Product Engineer",
+      "coreSkillRefs": [
+        "ai-native-orchestration",
+        "requirements-specification",
+        "software-design-architecture",
+        "react-nextjs-product-engineering",
+        "testing-debugging-verification",
+        "sql-relational-data-modeling",
+        "applied-llm-systems",
+        "product-ux-information-architecture",
+        "technical-communication-documentation"
+      ]
+    },
+    {
+      "id": "full-stack-product-engineer",
+      "name": "Full-Stack / Product Engineer",
+      "coreSkillRefs": [
+        "requirements-specification",
+        "software-design-architecture",
+        "typescript",
+        "javascript-web-platform",
+        "react-nextjs-product-engineering",
+        "testing-debugging-verification",
+        "sql-relational-data-modeling",
+        "product-ux-information-architecture",
+        "business-client-delivery"
+      ]
+    },
+    {
+      "id": "software-engineer",
+      "name": "Software Engineer",
+      "coreSkillRefs": [
+        "requirements-specification",
+        "software-design-architecture",
+        "testing-debugging-verification",
+        "git-github-change-workflow",
+        "sql-relational-data-modeling",
+        "technical-communication-documentation"
+      ]
+    },
+    {
+      "id": "systems-analyst-architect",
+      "name": "Systems Analyst / Software Architect",
+      "coreSkillRefs": [
+        "research-decision-quality",
+        "requirements-specification",
+        "software-design-architecture",
+        "sql-relational-data-modeling",
+        "security-privacy-least-privilege",
+        "distributed-systems-reliability",
+        "technical-communication-documentation"
+      ]
+    },
+    {
+      "id": "applied-ai-engineer",
+      "name": "Applied AI Engineer",
+      "coreSkillRefs": [
+        "ai-native-orchestration",
+        "software-design-architecture",
+        "python",
+        "data-analytics-pipelines",
+        "applied-llm-systems",
+        "testing-debugging-verification",
+        "security-privacy-least-privilege",
+        "production-deployment-cloud"
+      ]
+    },
+    {
+      "id": "data-analytics-engineer",
+      "name": "Data / Analytics Engineer",
+      "coreSkillRefs": [
+        "python",
+        "sql-relational-data-modeling",
+        "postgresql-transactional-persistence",
+        "data-analytics-pipelines",
+        "testing-debugging-verification",
+        "production-deployment-cloud"
+      ]
+    },
+    {
+      "id": "platform-production-engineer",
+      "name": "Platform / Production Engineer",
+      "coreSkillRefs": [
+        "software-design-architecture",
+        "testing-debugging-verification",
+        "git-github-change-workflow",
+        "security-privacy-least-privilege",
+        "production-deployment-cloud",
+        "distributed-systems-reliability"
+      ]
+    },
+    {
+      "id": "security-engineer",
+      "name": "Security Engineer / Security-Focused Software Engineer",
+      "coreSkillRefs": [
+        "software-design-architecture",
+        "testing-debugging-verification",
+        "security-privacy-least-privilege",
+        "production-deployment-cloud",
+        "distributed-systems-reliability"
+      ]
+    },
+    {
+      "id": "technical-founder-product-builder",
+      "name": "Technical Founder / Product Builder",
+      "coreSkillRefs": [
+        "research-decision-quality",
+        "ai-native-orchestration",
+        "requirements-specification",
+        "react-nextjs-product-engineering",
+        "product-ux-information-architecture",
+        "business-client-delivery",
+        "technical-communication-documentation",
+        "career-capital-portfolio"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "GROWTH-001",
+      "title": "Producción, confiabilidad, observabilidad y recuperación",
+      "queueState": "PRACTICING",
+      "confidence": "HIGH",
+      "whyNow": "Ya diagnosticamos y recuperamos un fallo real de release en Vida 2.0 usando evidencia de CI/typecheck, QA limpio, verificación post-merge y readback de Production. Eso ya cuenta como práctica acotada de confiabilidad de releases, pero todavía falta profundizar observabilidad de runtime, diagnóstico de incidentes, SLI/SLO y recuperación.",
+      "practiceContract": "Diagnosticar escenarios nuevos de producción y elegir la evidencia mínima necesaria antes de actuar.",
+      "evidenceTarget": "La próxima verificación más profunda debe usar un escenario nuevo de runtime u operación con evidencia real de observabilidad, recuperación segura con readback y un postmortem corto. El incidente de release del 02/10 cuenta como práctica, no como dominio completo.",
+      "skillRefs": [
+        {
+          "id": "production-deployment-cloud",
+          "evidenceState": "PRACTICED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM_HIGH"
+        },
+        {
+          "id": "distributed-systems-reliability",
+          "evidenceState": "PRACTICED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "testing-debugging-verification",
+          "evidenceState": "DEMONSTRATED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "id": "GROWTH-002",
+      "title": "SQL, modelado relacional y razonamiento de transacciones en PostgreSQL",
+      "queueState": "QUEUED",
+      "confidence": "HIGH",
+      "whyNow": "PostgreSQL ya aparece en tu portfolio, pero todavía no está verificada tu profundidad personal en consultas, índices y aislamiento. Los roles full-stack y cercanos a datos repiten SQL complejo, diseño de esquemas, índices, transacciones, locking y rendimiento.",
+      "practiceContract": "Trabajar con esquemas y problemas nuevos: escribir o criticar SQL, inspeccionar evidencia de consultas y razonar sobre concurrencia y fallos.",
+      "evidenceTarget": "Un laboratorio nuevo de SQL, índices y transacciones resuelto y explicado sin depender de ejemplos repetidos.",
+      "skillRefs": [
+        {
+          "id": "sql-relational-data-modeling",
+          "evidenceState": "PRACTICED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "postgresql-transactional-persistence",
+          "evidenceState": "DEMONSTRATED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM_HIGH"
+        }
+      ]
+    },
+    {
+      "id": "GROWTH-003",
+      "title": "Arquitectura, APIs y diseño backend consciente de fallos",
+      "queueState": "QUEUED",
+      "confidence": "HIGH",
+      "whyNow": "Tus proyectos ya muestran buenos límites, pero falta verificar de forma directa el razonamiento de trade-offs. El Market-fit QA del 02/10 repitió Node/backend, APIs, webhooks, retries/idempotencia, background jobs y límites de integración. Node/Nest/Express se tratan como vehículos de implementación, no como otro temario para memorizar.",
+      "practiceContract": "Ante una restricción o modo de fallo nuevo, rediseñar un camino existente y explicar por qué descartaste otras alternativas.",
+      "evidenceTarget": "Una revisión de diseño nueva más una implementación acotada de backend/integración si todavía queda un hueco de evidencia.",
+      "skillRefs": [
+        {
+          "id": "software-design-architecture",
+          "evidenceState": "DEMONSTRATED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM_HIGH"
+        },
+        {
+          "id": "requirements-specification",
+          "evidenceState": "DEMONSTRATED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM_HIGH"
+        },
+        {
+          "id": "distributed-systems-reliability",
+          "evidenceState": "PRACTICED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "id": "GROWTH-004",
+      "title": "Seguridad, autorización y razonamiento de mínimo privilegio",
+      "queueState": "QUEUED",
+      "confidence": "MEDIUM_HIGH",
+      "whyNow": "La seguridad ya aparece en tus sistemas, pero el razonamiento directo de threat modeling y autorización todavía no está verificado. Las señales de mercado siguen elevando la importancia de ciberseguridad y operación confiable de software e IA.",
+      "practiceContract": "Hacer threat modeling de un límite real, identificar una ruta de explotación y elegir la mitigación efectiva más pequeña.",
+      "evidenceTarget": "Un artefacto nuevo de threat model/revisión y una explicación directa.",
+      "skillRefs": [
+        {
+          "id": "security-privacy-least-privilege",
+          "evidenceState": "PRACTICED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM_HIGH"
+        }
+      ]
+    },
+    {
+      "id": "GROWTH-005",
+      "title": "Ingeniería de runtimes con LLM y verificación de salidas de IA",
+      "queueState": "QUEUED",
+      "confidence": "MEDIUM_HIGH",
+      "whyNow": "La orquestación AI-native ya es un diferencial, pero la evidencia en retrieval, evals, latencia, costo y observabilidad todavía está incompleta. Las herramientas de IA ya son comunes entre desarrolladores y los problemas de precisión/debugging vuelven cada vez más valiosa la verificación humana.",
+      "practiceContract": "Diseñar y criticar un workflow de IA acotado usando criterios explícitos de evaluación y fallo, no intuición de prompts.",
+      "evidenceTarget": "Un experimento reproducible con LLM aplicado, evidencia de evals y análisis de fallos si un rol o proyecto AI-native lo justifica.",
+      "skillRefs": [
+        {
+          "id": "applied-llm-systems",
+          "evidenceState": "PRACTICED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "MEDIUM"
+        },
+        {
+          "id": "ai-native-orchestration",
+          "evidenceState": "DEMONSTRATED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "HIGH"
+        },
+        {
+          "id": "testing-debugging-verification",
+          "evidenceState": "DEMONSTRATED",
+          "personalVerificationStatus": "UNVERIFIED",
+          "confidence": "HIGH"
+        }
+      ]
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import { loadProfessionalHorizonForecast } from '@/lib/professional/horizon-fore
 import { loadProfessionalMarketDetail } from '@/lib/professional/market-detail';
 import { loadProfessionalOfferVariants } from '@/lib/professional/offer-variants';
 import { loadProfessionalSnapshot } from '@/lib/professional/snapshot';
+import { loadProfessionalSkillsMatrix } from '@/lib/professional/skills-matrix';
 import { loadProfessionalVisualization } from '@/lib/professional/visualization';
 import { loadTechnologyLibrary } from '@/lib/professional/technology-library';
 
@@ -42,7 +43,12 @@ export async function getProfessionalMarketPageData() {
 
 export async function getProfessionalGrowthPageData() {
   await requireAuthorizedSession();
-  return loadProfessionalSnapshot();
+  const [professional, skills, horizonForecast] = await Promise.all([
+    loadProfessionalSnapshot(),
+    loadProfessionalSkillsMatrix(),
+    loadProfessionalHorizonForecast(),
+  ]);
+  return { professional, skills, horizonForecast };
 }
 
 export async function getProfessionalLibraryPageData() {
