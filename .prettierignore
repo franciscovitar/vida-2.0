@@ -6,3 +6,9 @@ node_modules
 package-lock.json
 data/generated/technology-library.json
 lib/english-learning/profile.snapshot.json
+
+# Canonical World-derived receipts: preserve exact bytes/hashes; validate structurally.
+data/generated/world/pieces/eeuu-diesel-ruso-2026-10-09.json
+data/generated/world/pieces/navi-pillay-nobel-paz-2026-10-09.json
+data/generated/world/pieces/panama-terremotos-2026-10-09.json
+data/generated/world/temporal/periods/day/2026-10-09.json
