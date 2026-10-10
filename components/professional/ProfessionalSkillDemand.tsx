@@ -30,7 +30,9 @@ function Bars({ entries, n, name }: { entries: readonly Count[]; n: number; name
         <div className={styles.row} key={entry.id}>
           <div className={styles['row-head']}>
             <span>{entry.label}</span>
-            <strong>{entry.mentions} de {n}</strong>
+            <strong>
+              {entry.mentions} de {n}
+            </strong>
           </div>
           <div
             className={styles.track}
@@ -39,7 +41,7 @@ function Bars({ entries, n, name }: { entries: readonly Count[]; n: number; name
           >
             <span
               className={styles.fill}
-              style={{ width: (n > 0 ? entry.mentions / n * 100 : 0) + '%' }}
+              style={{ width: (n > 0 ? (entry.mentions / n) * 100 : 0) + '%' }}
             />
           </div>
         </div>
@@ -83,40 +85,43 @@ export function ProfessionalSkillDemand({
         </h2>
         <p>
           Cada barra cuenta <strong>menciones dentro de la muestra elegida</strong>. Una misma
-          oferta puede mencionar varias tecnologías. Estas cantidades no miden la demanda total
-          del mercado, la tasa de contratación ni una tendencia entre períodos.
+          oferta puede mencionar varias tecnologías. Estas cantidades no miden la demanda total del
+          mercado, la tasa de contratación ni una tendencia entre períodos.
         </p>
       </header>
 
       <div className={styles['source-options']} role="group" aria-label="Seleccionar la muestra">
         {newer ? (
-          <button
-            type="button"
-            aria-pressed={recent}
-            onClick={() => setSelection('recent')}
-          >
+          <button type="button" aria-pressed={recent} onClick={() => setSelection('recent')}>
             Registro 10 oct · {newer.sample.n} ofertas
           </button>
         ) : null}
-        <button
-          type="button"
-          aria-pressed={!recent}
-          onClick={() => setSelection('historical')}
-        >
+        <button type="button" aria-pressed={!recent} onClick={() => setSelection('historical')}>
           Muestra histórica 2 oct · {historical.sample.n} ofertas
         </button>
       </div>
 
       <div className={styles.metadata}>
-        <span><strong>Observado:</strong> {recent ? newer.source.observedAt : historical.source.observedAt}</span>
-        <span><strong>Muestra:</strong> {n} ofertas seleccionadas</span>
-        <span><strong>Ámbito:</strong> Córdoba, Argentina y remoto LATAM (mezclados)</span>
+        <span>
+          <strong>Observado:</strong>{' '}
+          {recent ? newer.source.observedAt : historical.source.observedAt}
+        </span>
+        <span>
+          <strong>Muestra:</strong> {n} ofertas seleccionadas
+        </span>
+        <span>
+          <strong>Ámbito:</strong> Córdoba, Argentina y remoto LATAM (mezclados)
+        </span>
       </div>
 
       {recent && observed.notice ? (
-        <p className={styles.warning} role="status">{observed.notice}</p>
+        <p className={styles.warning} role="status">
+          {observed.notice}
+        </p>
       ) : !recent && data.notice ? (
-        <p className={styles.warning} role="status">{data.notice}</p>
+        <p className={styles.warning} role="status">
+          {data.notice}
+        </p>
       ) : null}
       {!newer && observed.notice ? (
         <p className={styles.warning} role="status">
@@ -154,8 +159,8 @@ export function ProfessionalSkillDemand({
         <>
           <p className={styles['method-note']}>
             Etiquetas agrupadas a partir de los requisitos «must-have» registrados. Por ejemplo,
-            React incluye React Native; Cloud/DevOps reúne AWS, Docker, Kubernetes y CI/CD.
-            Las menciones pueden superponerse. No son todas las habilidades posibles de cada oferta.
+            React incluye React Native; Cloud/DevOps reúne AWS, Docker, Kubernetes y CI/CD. Las
+            menciones pueden superponerse. No son todas las habilidades posibles de cada oferta.
           </p>
 
           <div className={styles['sample-panels']}>
@@ -168,8 +173,8 @@ export function ProfessionalSkillDemand({
                 name="Años de experiencia declarados en la muestra"
               />
               <p className={styles['method-note']}>
-                Además, {newer.observations.filter((item) => /\bjunior\b/i.test(item.role)).length} títulos
-                dicen «Junior», aunque eso no equivale necesariamente a exigir 0–2 años.
+                Además, {newer.observations.filter((item) => /\bjunior\b/i.test(item.role)).length}{' '}
+                títulos dicen «Junior», aunque eso no equivale necesariamente a exigir 0–2 años.
               </p>
             </article>
 
@@ -211,18 +216,19 @@ export function ProfessionalSkillDemand({
             <p>
               La planilla de Job Search tiene {newer.sample.n} observaciones registradas el{' '}
               {newer.source.observedAt}; {newer.sample.historicalUrlOverlaps} URLs también aparecían
-              en la muestra histórica, por lo que no son {newer.sample.n} oportunidades completamente nuevas.
+              en la muestra histórica, por lo que no son {newer.sample.n} oportunidades
+              completamente nuevas.
             </p>
             <p>
-              Seguimos sin ventanas de búsqueda equivalentes y repetidas. La evolución mensual,
-              las tasas de demanda por región y los rankings generales de tecnología permanecen
+              Seguimos sin ventanas de búsqueda equivalentes y repetidas. La evolución mensual, las
+              tasas de demanda por región y los rankings generales de tecnología permanecen
               <strong> pendientes</strong>.
             </p>
           </>
         ) : (
           <p>
-            La captura histórica está disponible, pero no pudimos validar un derivado actualizado
-            de las observaciones. No inferimos nuevas vacantes ni tendencias.
+            La captura histórica está disponible, pero no pudimos validar un derivado actualizado de
+            las observaciones. No inferimos nuevas vacantes ni tendencias.
           </p>
         )}
       </aside>
@@ -233,7 +239,9 @@ export function ProfessionalSkillDemand({
             <strong>Fuente:</strong> Google Sheets — Job Search Market Evidence V1, pestaña
             Observations, corte {newer.source.observedAt}.{' '}
             <a
-              href={'https://docs.google.com/spreadsheets/d/' + newer.source.spreadsheetId + '/edit'}
+              href={
+                'https://docs.google.com/spreadsheets/d/' + newer.source.spreadsheetId + '/edit'
+              }
               rel="noreferrer"
               target="_blank"
             >
@@ -248,14 +256,16 @@ export function ProfessionalSkillDemand({
             <a
               href={
                 'https://github.com/franciscovitar/personal-ai-system/blob/' +
-                historical.source.commit + '/' + historical.source.evidenceDocumentRef
+                historical.source.commit +
+                '/' +
+                historical.source.evidenceDocumentRef
               }
               target="_blank"
               rel="noreferrer"
             >
               Ver las 20 ofertas y la metodología
-            </a>.
-            Selección intencional, no censo de vacantes.
+            </a>
+            . Selección intencional, no censo de vacantes.
           </>
         )}
       </footer>

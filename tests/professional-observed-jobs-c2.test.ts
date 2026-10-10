@@ -36,8 +36,10 @@ test('PRO-C2-08: registered sample retains exact 14 rows and two historical URL 
 test('PRO-C2-09: explicit skill mentions reproduce logged must-have terms, not market rates', () => {
   const result = sample();
   assert.deepEqual(
-    Object.fromEntries(observedSkillCounts(result.observations).map((item) => [item.id, item.mentions])),
-    {react: 12, node: 10, typescript: 9, sql: 7, testing: 6, cloud: 6, aws: 5},
+    Object.fromEntries(
+      observedSkillCounts(result.observations).map((item) => [item.id, item.mentions]),
+    ),
+    { react: 12, node: 10, typescript: 9, sql: 7, testing: 6, cloud: 6, aws: 5 },
   );
   assert.equal(result.sample.historicalTrend, 'HELD');
   assert.equal(result.sample.crossGeographyDemand, 'HELD');
@@ -46,17 +48,21 @@ test('PRO-C2-09: explicit skill mentions reproduce logged must-have terms, not m
 test('PRO-C2-10: experience groups are disjoint, unknowns explicit, junior title separate', () => {
   const result = sample();
   assert.deepEqual(
-    Object.fromEntries(observedExperienceCounts(result.observations).map(({id, mentions}) => [id, mentions])),
-    {upTo2: 1, threePlus: 7, unspecified: 6},
+    Object.fromEntries(
+      observedExperienceCounts(result.observations).map(({ id, mentions }) => [id, mentions]),
+    ),
+    { upTo2: 1, threePlus: 7, unspecified: 6 },
   );
-  assert.equal(result.observations.filter(({role}) => /\bjunior\b/i.test(role)).length, 3);
+  assert.equal(result.observations.filter(({ role }) => /\bjunior\b/i.test(role)).length, 3);
 });
 
 test('PRO-C2-11: geographic sample composition is not geography demand', () => {
   const result = sample();
   assert.deepEqual(
-    Object.fromEntries(observedGeographyCounts(result.observations).map(({id, mentions}) => [id, mentions])),
-    {CORDOBA_ONSITE_HYBRID: 4, ARGENTINA_REMOTE: 4, LATAM_REMOTE: 4, UNKNOWN: 2},
+    Object.fromEntries(
+      observedGeographyCounts(result.observations).map(({ id, mentions }) => [id, mentions]),
+    ),
+    { CORDOBA_ONSITE_HYBRID: 4, ARGENTINA_REMOTE: 4, LATAM_REMOTE: 4, UNKNOWN: 2 },
   );
 });
 
