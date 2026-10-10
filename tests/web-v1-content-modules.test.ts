@@ -397,8 +397,8 @@ test('10B-6. Hoy no muestra métricas falsas cuando Calendar falla', () => {
     join(process.cwd(), 'components', 'dashboard', 'HoyNotion.tsx'),
     'utf8',
   );
-  assert.match(panel, /isCalendarHoyUnavailable\\(calendar.status\\)/);
-  assert.match(panel, /calendarUnavailable \\? '—' : calendar.todayEvents.length/);
-  assert.match(panel, /calendarUnavailable \\? '—' : formatDuration\\(calendar.occupiedMinutes\\)/);
-  assert.match(panel, /calendarUnavailable \\? '—' : calendar.conflicts.length/);
+  assert.match(panel, /isCalendarHoyUnavailable\(calendar.status\)/);
+  assert.match(panel, /calendarUnavailable \? '—' : calendar.todayEvents.length/);
+  assert.match(panel, /calendarUnavailable \? '—' : formatDuration\(calendar.occupiedMinutes\)/);
+  assert.match(panel, /calendarUnavailable \? '—' : calendar.conflicts.length/);
 });
