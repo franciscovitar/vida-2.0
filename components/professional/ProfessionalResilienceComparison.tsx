@@ -8,6 +8,10 @@ import type {
   CareerResilienceHorizonKey,
 } from '@/types/career-resilience';
 
+import { resilienceSpanishLists } from '@/lib/professional/resilience-copy-es';
+
+import { ProfessionalResilienceTimeline } from './ProfessionalResilienceTimeline';
+
 import styles from './ProfessionalResilienceComparison.module.scss';
 
 const HORIZONS: { key: CareerResilienceHorizonKey; label: string }[] = [
@@ -150,6 +154,7 @@ export function ProfessionalResilienceComparison({ data }: { data: CareerResilie
   const horizon = role.horizons[horizonKey];
   const selectedHorizon = HORIZONS.find((item) => item.key === horizonKey);
   const stressTest = horizonKey === 'Y20';
+  const spanish = resilienceSpanishLists(role, snapshot.source.commit);
 
   return (
     <section className={styles.section} aria-labelledby="professional-resilience-title">
@@ -169,6 +174,19 @@ export function ProfessionalResilienceComparison({ data }: { data: CareerResilie
           {data.notice}
         </p>
       ) : null}
+
+      <aside
+        className={styles['calibration-notice']}
+        aria-label="Cómo interpretar estos escenarios"
+      >
+        <strong>Escenarios exploratorios · sin calibración estadística</strong>
+        <p>
+          Un rango de 60–95% NO significa una probabilidad del 60–95% de perder el empleo, ni un
+          porcentaje observado de puestos automatizados. Es un supuesto de escenario sobre capacidad
+          de IA. Los otros dos rangos son índices heurísticos, no probabilidades ni porcentajes de
+          despidos.
+        </p>
+      </aside>
 
       <div className={styles.controls}>
         <div className={styles['role-filter']}>
@@ -223,6 +241,8 @@ export function ProfessionalResilienceComparison({ data }: { data: CareerResilie
         ))}
       </div>
 
+      <ProfessionalResilienceTimeline role={role} selected={horizonKey} onSelect={setHorizonKey} />
+
       <div className={styles['interpretation-grid']}>
         <article>
           <h4>Cómo proteger tu valor profesional</h4>
@@ -231,17 +251,33 @@ export function ProfessionalResilienceComparison({ data }: { data: CareerResilie
               'Desarrollá habilidades transferibles y evidencia profesional.'}
           </p>
           <details>
-            <summary>Ver trabajo humano clave y recomendaciones originales</summary>
-            <ul>
-              {role.loadBearingHumanWork.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <ul>
-              {role.protectionPlaybook.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+            <summary>Ver capacidades y recomendaciones en español</summary>
+            {spanish ? (
+              <>
+                <h5>Trabajo humano clave</h5>
+                <ul>
+                  {spanish.human.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <h5>Cómo prepararte</h5>
+                <ul>
+                  {spanish.playbook.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p>La traducción necesita revisión porque cambió la fuente canónica.</p>
+            )}
+            <details>
+              <summary>Consultar texto original en inglés</summary>
+              <ul>
+                {[...role.loadBearingHumanWork, ...role.protectionPlaybook].map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </details>
           </details>
         </article>
         <article>
@@ -251,15 +287,33 @@ export function ProfessionalResilienceComparison({ data }: { data: CareerResilie
             capacidades que las organizaciones todavía necesitan supervisar.
           </p>
           <details>
-            <summary>Ver indicadores del análisis original</summary>
-            <ul>
-              {role.riskUpSignposts.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-              {role.riskDownSignposts.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+            <summary>Ver señales e indicadores en español</summary>
+            {spanish ? (
+              <>
+                <h5>Señales de mayor automatización</h5>
+                <ul>
+                  {spanish.up.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <h5>Señales de mayor demanda o responsabilidad humana</h5>
+                <ul>
+                  {spanish.down.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p>La traducción necesita revisión porque cambió la fuente canónica.</p>
+            )}
+            <details>
+              <summary>Consultar texto original en inglés</summary>
+              <ul>
+                {[...role.riskUpSignposts, ...role.riskDownSignposts].map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </details>
           </details>
         </article>
       </div>
