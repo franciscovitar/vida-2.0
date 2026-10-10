@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ProfessionalMarket } from '@/components/professional/ProfessionalMarket';
+import { ProfessionalMarketCharts } from '@/components/professional/ProfessionalMarketCharts';
 import { ProfessionalNavigation } from '@/components/professional/ProfessionalNavigation';
 import { getProfessionalMarketPageData } from '@/lib/data/professional-intelligence-source';
 
@@ -25,6 +26,7 @@ export default async function ProfessionalMarketPage() {
         domain="projects"
       />
       <ProfessionalNavigation current="mercado" />
+      <ProfessionalMarketCharts data={data.visualizations} />
       <ProfessionalMarket
         professional={data.professional}
         careerResilience={data.careerResilience}
