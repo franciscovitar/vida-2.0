@@ -4,61 +4,61 @@
   "source": {
     "repository": "franciscovitar/personal-ai-system",
     "ref": "main",
-    "commit": "020c381f49756885f47a999994013ed53fe588f9",
+    "commit": "190e50e9f6e2091a91c13b87dd655bbe41446715",
     "canonicalSurfaceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_SURFACE_V1.json",
-    "generatedAt": "2026-10-07T20:05:00-03:00",
-    "observedAt": "2026-10-07T19:45:00-03:00",
+    "generatedAt": "2026-10-10T15:25:26.549Z",
+    "observedAt": "2026-10-10T15:25:26.549Z",
     "staleAfterHours": 36
   },
-  "editionDate": "2026-10-06",
+  "editionDate": "2026-10-09",
   "freshnessState": "CURRENT",
-  "provenanceVersion": "world-v1-phase11-daily-owner-automation",
+  "provenanceVersion": "world-v1-phase11-daily-human-approved",
   "readingDebt": false,
   "now": {
     "targetReadingSeconds": 360,
     "selectedReadingSeconds": 360,
     "items": [
       {
-        "briefId": "WORLD-2026-10-06-EU-ENLARGEMENT-SAFEGUARDS",
+        "briefId": "WORLD-2026-10-09-NOBEL-PEACE",
         "mode": "NOW",
-        "slug": "ue-salvaguardas-ampliacion-2026-10-06",
+        "slug": "navi-pillay-nobel-paz-2026-10-09",
         "primaryDomain": "POLITICS_GEOPOLITICS",
-        "headline": "🇪🇺 La UE quiere blindarse contra retrocesos democráticos antes de sumar nuevos miembros",
-        "deck": "La Comisión Europea propuso herramientas más fuertes —como recortar fondos o restringir derechos de voto— si un futuro miembro se aleja del Estado de derecho después de entrar al bloque.",
+        "headline": "⚖️ Navi Pillay gana el Nobel de la Paz por defender el derecho internacional",
+        "deck": "La jurista sudafricana fue reconocida por su trabajo para que los crímenes más graves puedan juzgarse mediante instituciones internacionales.",
         "readingSeconds": 120,
-        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_EU_2026-10-06.json",
-        "editorialDraftSha256": "4133f64bfbe896b03c12aa0caf46c9d5fa7819918e50af22382bcff441cddf63",
-        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
-        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_EU_2026-10-06.json",
-        "deltaMarker": "NEW_STORY"
+        "deltaMarker": "NEW_STORY",
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_PEACE_2026-10-09.json",
+        "editorialDraftSha256": "f20d7b84d2c4f9cd099bbb37bcd8922622213882aa370878c13900f26b9fe93b",
+        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_PEACE_2026-10-09.json",
+        "publicationState": "HUMAN_APPROVED"
       },
       {
-        "briefId": "WORLD-2026-10-06-IMF-COST-OF-LIVING",
+        "briefId": "WORLD-2026-10-09-DIESEL",
         "mode": "NOW",
-        "slug": "fmi-costo-de-vida-2026-10-06",
+        "slug": "eeuu-diesel-ruso-2026-10-09",
         "primaryDomain": "ECONOMICS",
-        "headline": "💸 El FMI advierte que las crisis de costo de vida dejan cicatrices incluso cuando baja la inflación",
-        "deck": "Un nuevo análisis del Fondo sostiene que los saltos de alimentos y energía pueden mantener elevadas las expectativas de inflación y empujar a más hogares a la pobreza durante años.",
+        "headline": "⛽ Estados Unidos suaviza sanciones para facilitar diésel ruso",
+        "deck": "El gobierno estadounidense anunció una excepción temporal a restricciones energéticas para intentar aliviar el precio del combustible, pese a las críticas ucranianas.",
         "readingSeconds": 120,
-        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_IMF_2026-10-06.json",
-        "editorialDraftSha256": "46c34c1cecf09850636efb2a4b9816db9c45f0879773c3116d6c4b2b6ec1193d",
-        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
-        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_IMF_2026-10-06.json",
-        "deltaMarker": "NEW_STORY"
+        "deltaMarker": "NEW_STORY",
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_DIESEL_2026-10-09.json",
+        "editorialDraftSha256": "babd3011b574f487c3c525ba36a0ebd13c2afed5cb4bf2f4f579ddc10ba76a14",
+        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_DIESEL_2026-10-09.json",
+        "publicationState": "HUMAN_APPROVED"
       },
       {
-        "briefId": "WORLD-2026-10-06-NOBEL-PHYSICS-ICECUBE",
+        "briefId": "WORLD-2026-10-09-PANAMA",
         "mode": "NOW",
-        "slug": "nobel-fisica-icecube-2026-10-06",
-        "primaryDomain": "SCIENCE",
-        "headline": "👻 Nobel de Física 2026: Francis Halzen ganó por convertir el hielo antártico en un telescopio de neutrinos",
-        "deck": "El premio reconoció su papel decisivo en IceCube y en la detección de neutrinos cósmicos de alta energía, partículas casi invisibles que permiten rastrear fenómenos extremos del universo.",
+        "slug": "panama-terremotos-2026-10-09",
+        "primaryDomain": "POLITICS_GEOPOLITICS",
+        "headline": "🌎 Panamá sufre fuertes terremotos; la cifra de magnitud fue revisada",
+        "deck": "El USGS registra 7,6 para el movimiento principal, mientras que reportes iniciales citaron 7,7. Las autoridades seguían evaluando daños y réplicas.",
         "readingSeconds": 120,
-        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_2026-10-06.json",
-        "editorialDraftSha256": "de2697f322040127fd42f8b557e0d483c094807ebd7753ed8549f3e2c561251b",
-        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
-        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_2026-10-06.json",
-        "deltaMarker": "NEW_STORY"
+        "deltaMarker": "NEW_STORY",
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_PANAMA_2026-10-09.json",
+        "editorialDraftSha256": "bdd3e303a1c234fd51d5825b152360a1beac3732f3c4e46019819f8a63ba78be",
+        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_PANAMA_2026-10-09.json",
+        "publicationState": "HUMAN_APPROVED"
       }
     ]
   },
@@ -75,18 +75,20 @@
         "headline": "🧬 CRISPR: probaron en ratones una forma de activar la edición genética en zonas elegidas",
         "deck": "CRISPR es una tecnología para modificar ADN. En este estudio, investigadores probaron en ratones una manera de encender esa edición desde fuera del cuerpo y concentrarla en regiones específicas de músculo y cerebro.",
         "readingSeconds": 240,
+        "deltaMarker": "NEW_STORY",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_CRISPR_V1.json",
         "editorialDraftSha256": "1b33334dbbe127b1e37e3a88ea8460f02ba8c2bb4144a6b4c684f3da5719f09c",
         "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_CRISPR_2026-10-03.json",
         "publicationState": "HUMAN_APPROVED",
-        "deltaMarker": "NEW_STORY",
         "sourceCommit": "4ef65a46b3da9bcd2af11fc64091114ec53b29be"
       },
       {
         "briefId": "L-ENTANGLEMENT-2016",
         "mode": "LEARN",
+        "conceptId": "CONCEPT-QUANTUM-ENTANGLEMENT",
         "slug": "que-es-entrelazamiento-cuantico",
         "primaryDomain": "SCIENCE",
+        "subdomain": "PHYSICS",
         "headline": "🔗 Entrelazamiento cuántico: qué tiene de raro de verdad",
         "deck": "No hace falta saber física cuántica para empezar. La idea central es distinguir una correlación normal —dos cosas relacionadas— de un caso cuántico en el que la descripción completa pertenece al sistema formado por ambas partes.",
         "readingSeconds": 240,
@@ -94,8 +96,6 @@
         "editorialDraftSha256": "e596289478f69e99a8380542aa8bae1dd2b8d138ca019088a15bc23f8bb51686",
         "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_LEARN_ENTANGLEMENT_2026-10-03.json",
         "publicationState": "HUMAN_APPROVED",
-        "conceptId": "CONCEPT-QUANTUM-ENTANGLEMENT",
-        "subdomain": "PHYSICS",
         "sourceCommit": "4ef65a46b3da9bcd2af11fc64091114ec53b29be"
       },
       {
@@ -106,11 +106,11 @@
         "headline": "🇾🇪 Yemen vuelve a escalar cerca del Bab el-Mandeb, un paso clave para el comercio mundial",
         "deck": "Fuerzas del gobierno yemení, respaldadas por una coalición liderada por Arabia Saudita, avanzaron contra los hutíes en la zona del estrecho que conecta el mar Rojo con el golfo de Adén.",
         "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_YEMEN_2026-10-05.json",
         "editorialDraftSha256": "40e7966e0a38dde4621dc1e416f80695ea7976ceb3bea4abfd3c96afdcaa1b4d",
         "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_YEMEN_2026-10-05.json",
         "publicationState": "HUMAN_APPROVED",
-        "deltaMarker": "NEW_STORY",
         "sourceCommit": "cd3a83173299896f65a19841459c633c6be02759"
       },
       {
@@ -121,11 +121,11 @@
         "headline": "💡 Nobel de Medicina 2026: premiaron la optogenética, una forma de encender y apagar neuronas con luz",
         "deck": "Karl Deisseroth, Peter Hegemann y Georg Nagel recibieron el Nobel por una herramienta que convirtió proteínas sensibles a la luz en interruptores para estudiar circuitos del cerebro.",
         "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_OPTOGENETICS_2026-10-05.json",
         "editorialDraftSha256": "ff2614c918800e4055496d2c569b30424d95bb59b2acca1411f84dd472a86398",
         "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_OPTOGENETICS_2026-10-05.json",
         "publicationState": "HUMAN_APPROVED",
-        "deltaMarker": "NEW_STORY",
         "sourceCommit": "cd3a83173299896f65a19841459c633c6be02759"
       },
       {
@@ -136,11 +136,11 @@
         "headline": "🇫🇷 Francia sacude al euro: el mercado vuelve a mirar el riesgo de deuda europea",
         "deck": "Las dudas sobre el déficit y la capacidad política de Francia para ordenar sus cuentas llevaron al euro a un mínimo de 17 meses y aumentaron con fuerza la prima exigida por los inversores para financiar al Estado francés.",
         "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_FRANCE_EURO_2026-10-05.json",
         "editorialDraftSha256": "0e20a1e4e95845bdf30d858489b338648754c33d546cc0ff925c778af04187ba",
         "humanReviewRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_FRANCE_EURO_2026-10-05.json",
         "publicationState": "HUMAN_APPROVED",
-        "deltaMarker": "NEW_STORY",
         "sourceCommit": "cd3a83173299896f65a19841459c633c6be02759"
       },
       {
@@ -151,11 +151,12 @@
         "headline": "🇪🇺 La UE quiere blindarse contra retrocesos democráticos antes de sumar nuevos miembros",
         "deck": "La Comisión Europea propuso herramientas más fuertes —como recortar fondos o restringir derechos de voto— si un futuro miembro se aleja del Estado de derecho después de entrar al bloque.",
         "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_EU_2026-10-06.json",
         "editorialDraftSha256": "4133f64bfbe896b03c12aa0caf46c9d5fa7819918e50af22382bcff441cddf63",
-        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
         "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_EU_2026-10-06.json",
-        "deltaMarker": "NEW_STORY"
+        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
+        "sourceCommit": "020c381f49756885f47a999994013ed53fe588f9"
       },
       {
         "briefId": "WORLD-2026-10-06-IMF-COST-OF-LIVING",
@@ -165,11 +166,12 @@
         "headline": "💸 El FMI advierte que las crisis de costo de vida dejan cicatrices incluso cuando baja la inflación",
         "deck": "Un nuevo análisis del Fondo sostiene que los saltos de alimentos y energía pueden mantener elevadas las expectativas de inflación y empujar a más hogares a la pobreza durante años.",
         "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_IMF_2026-10-06.json",
         "editorialDraftSha256": "46c34c1cecf09850636efb2a4b9816db9c45f0879773c3116d6c4b2b6ec1193d",
-        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
         "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_IMF_2026-10-06.json",
-        "deltaMarker": "NEW_STORY"
+        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
+        "sourceCommit": "020c381f49756885f47a999994013ed53fe588f9"
       },
       {
         "briefId": "WORLD-2026-10-06-NOBEL-PHYSICS-ICECUBE",
@@ -179,11 +181,54 @@
         "headline": "👻 Nobel de Física 2026: Francis Halzen ganó por convertir el hielo antártico en un telescopio de neutrinos",
         "deck": "El premio reconoció su papel decisivo en IceCube y en la detección de neutrinos cósmicos de alta energía, partículas casi invisibles que permiten rastrear fenómenos extremos del universo.",
         "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
         "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_2026-10-06.json",
         "editorialDraftSha256": "de2697f322040127fd42f8b557e0d483c094807ebd7753ed8549f3e2c561251b",
-        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
         "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_2026-10-06.json",
-        "deltaMarker": "NEW_STORY"
+        "publicationState": "OWNER_AUTHORIZED_AUTOMATION",
+        "sourceCommit": "020c381f49756885f47a999994013ed53fe588f9"
+      },
+      {
+        "briefId": "WORLD-2026-10-09-NOBEL-PEACE",
+        "mode": "NOW",
+        "slug": "navi-pillay-nobel-paz-2026-10-09",
+        "primaryDomain": "POLITICS_GEOPOLITICS",
+        "headline": "⚖️ Navi Pillay gana el Nobel de la Paz por defender el derecho internacional",
+        "deck": "La jurista sudafricana fue reconocida por su trabajo para que los crímenes más graves puedan juzgarse mediante instituciones internacionales.",
+        "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_NOBEL_PEACE_2026-10-09.json",
+        "editorialDraftSha256": "f20d7b84d2c4f9cd099bbb37bcd8922622213882aa370878c13900f26b9fe93b",
+        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_NOBEL_PEACE_2026-10-09.json",
+        "publicationState": "HUMAN_APPROVED"
+      },
+      {
+        "briefId": "WORLD-2026-10-09-DIESEL",
+        "mode": "NOW",
+        "slug": "eeuu-diesel-ruso-2026-10-09",
+        "primaryDomain": "ECONOMICS",
+        "headline": "⛽ Estados Unidos suaviza sanciones para facilitar diésel ruso",
+        "deck": "El gobierno estadounidense anunció una excepción temporal a restricciones energéticas para intentar aliviar el precio del combustible, pese a las críticas ucranianas.",
+        "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_DIESEL_2026-10-09.json",
+        "editorialDraftSha256": "babd3011b574f487c3c525ba36a0ebd13c2afed5cb4bf2f4f579ddc10ba76a14",
+        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_DIESEL_2026-10-09.json",
+        "publicationState": "HUMAN_APPROVED"
+      },
+      {
+        "briefId": "WORLD-2026-10-09-PANAMA",
+        "mode": "NOW",
+        "slug": "panama-terremotos-2026-10-09",
+        "primaryDomain": "POLITICS_GEOPOLITICS",
+        "headline": "🌎 Panamá sufre fuertes terremotos; la cifra de magnitud fue revisada",
+        "deck": "El USGS registra 7,6 para el movimiento principal, mientras que reportes iniciales citaron 7,7. Las autoridades seguían evaluando daños y réplicas.",
+        "readingSeconds": 120,
+        "deltaMarker": "NEW_STORY",
+        "pieceRef": "AI/projects/world-intelligence/fixtures/PUBLISHED_PIECE_NOW_PANAMA_2026-10-09.json",
+        "editorialDraftSha256": "bdd3e303a1c234fd51d5825b152360a1beac3732f3c4e46019819f8a63ba78be",
+        "authorizationRef": "AI/projects/world-intelligence/reviews/EDITORIAL_REVIEW_NOW_PANAMA_2026-10-09.json",
+        "publicationState": "HUMAN_APPROVED"
       }
     ]
   },
@@ -191,7 +236,7 @@
     {
       "id": "POLITICS_GEOPOLITICS",
       "label": "Política & Geopolítica",
-      "publishedItems": 1
+      "publishedItems": 2
     },
     {
       "id": "ECONOMICS",
@@ -201,7 +246,7 @@
     {
       "id": "SCIENCE",
       "label": "Ciencia",
-      "publishedItems": 1
+      "publishedItems": 0
     },
     {
       "id": "PSYCHOLOGY_BEHAVIOR",
@@ -230,8 +275,9 @@
     }
   ],
   "coverageNotes": [
-    "2026-10-06 DAY was re-verified and published after the original scheduled run was held only by the repository write transport.",
-    "Coverage remained COVERAGE_PARTIAL across the eight-domain pass; missing domains were not misrepresented as NO_MATERIAL_CHANGE.",
-    "Three deep dives survived the bounded retry. Additional verified orientation items are preserved in the CLOSED DAY temporal artifact."
+    "2026-10-09: 9 material items retained across seven domains after current corroboration; PRODUCTIVITY_HABITS remained partial without claimed no change.",
+    "COVERAGE_PARTIAL: full registered due-source process was not independently completed; the DAY edition does not assert completeness.",
+    "Three selective NOW deep dives are published; other verified orientation stories live in the CLOSED DAY temporal record.",
+    "Panama mainshock: reviewed USGS magnitude 7.6; some initial reporting said 7.7."
   ]
 }

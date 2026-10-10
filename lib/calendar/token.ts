@@ -5,7 +5,7 @@
 import 'server-only';
 
 import type { CalendarOAuthConfig } from '@/lib/calendar/config-resolve';
-import type { CalendarReadCode } from '@/lib/calendar/errors';
+import { mapCalendarTokenHttpStatus, type CalendarReadCode } from '@/lib/calendar/errors';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
@@ -44,22 +44,16 @@ export async function fetchCalendarAccessToken(
   }
 
   if (!response.ok) {
-    void bodyText;
-    if (response.status === 401 || response.status === 400) {
-      return { ok: false, code: 'auth-error' };
-    }
-    if (response.status === 403) return { ok: false, code: 'permission-error' };
-    if (response.status === 429) return { ok: false, code: 'rate-limited' };
-    return { ok: false, code: 'auth-error' };
+    return { ok: false, code: mapCalendarTokenHttpStatus(response.status) };
   }
 
   try {
     const parsed = JSON.parse(bodyText) as { access_token?: unknown };
     if (typeof parsed.access_token !== 'string' || parsed.access_token.length === 0) {
-      return { ok: false, code: 'auth-error' };
+      return { ok: false, code: 'read-error' };
     }
     return { ok: true, token: parsed.access_token };
   } catch {
-    return { ok: false, code: 'auth-error' };
+    return { ok: false, code: 'read-error' };
   }
 }
