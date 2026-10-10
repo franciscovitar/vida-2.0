@@ -3,7 +3,11 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { buildUnavailableAgendaData } from '@/lib/calendar/summaries';
+import {
+  buildAgendaData,
+  buildUnavailableAgendaData,
+  emptyCalendarTodayPreview,
+} from '@/lib/calendar/summaries';
 import {
   buildDocumentOverview,
   detectDocumentPresentation,
@@ -307,6 +311,8 @@ test('10B-1. fallo Calendar real produce agenda vacía, no eventos simulados', (
   assert.equal(agenda.summary.totalEvents, 0);
   assert.equal(agenda.timelineToday.length, 0);
   assert.equal(agenda.calendarCount, 0);
+  assert.deepEqual(agenda.summary.freeBlocksToday, []);
+  assert.ok(agenda.days.every((day) => day.freeBlocks.length === 0));
   assert.ok(agenda.days.every((day) => day.events.length === 0));
 });
 
@@ -319,4 +325,80 @@ test('10B-2. la rama de error de Agenda no llama al generador mock', () => {
   assert.ok(fallback);
   assert.match(fallback, /buildUnavailableAgendaData/);
   assert.doesNotMatch(fallback, /buildMockCalendarEvents|mockAgenda\(/);
+});
+
+test('10B-3. fallo Calendar no certifica capacidad libre en Agenda ni Hoy', () => {
+  for (const status of [
+    'auth-error',
+    'permission-error',
+    'network-error',
+    'rate-limited',
+  ] as const) {
+    const agenda = buildUnavailableAgendaData({
+      view: 'today',
+      today: '2026-10-10',
+      status,
+      notice: 'Lectura no disponible.',
+    });
+    assert.equal(agenda.status, status);
+    assert.deepEqual(agenda.summary.freeBlocksToday, []);
+    assert.ok(agenda.days.every((day) => day.freeBlocks.length === 0));
+    assert.equal(agenda.timelineToday.length, 0);
+
+    const hoy = emptyCalendarTodayPreview({
+      today: '2026-10-10',
+      source: 'google',
+      status,
+      notice: 'Lectura no disponible.',
+    });
+    assert.deepEqual(hoy.freeBlocks, []);
+    assert.equal(hoy.focus.nextFreeBlock, null);
+    assert.equal(hoy.focus.freeBlockDurationMinutes, null);
+    assert.equal(hoy.focus.remainingFreeMinutes, null);
+  }
+});
+
+test('10B-4. Calendar confirmado vacío conserva disponibilidad calculada', () => {
+  const empty = buildAgendaData({
+    events: [],
+    view: 'today',
+    today: '2026-10-10',
+    source: 'google',
+    status: 'empty',
+    notice: null,
+    calendarCount: 1,
+    now: new Date('2026-10-10T12:00:00Z'),
+  });
+  assert.ok(empty.summary.freeBlocksToday.length > 0);
+
+  const hoy = emptyCalendarTodayPreview({
+    today: '2026-10-10',
+    source: 'google',
+    status: 'empty',
+    now: new Date('2026-10-10T12:00:00Z'),
+  });
+  assert.ok(hoy.freeBlocks.length > 0);
+});
+
+test('10B-5. vista Agenda distingue lectura fallida de vacío confirmado', () => {
+  const board = readFileSync(
+    join(process.cwd(), 'components', 'calendar', 'AgendaBoard.tsx'),
+    'utf8',
+  );
+  const page = readFileSync(join(process.cwd(), 'app', '(app)', 'agenda', 'page.tsx'), 'utf8');
+  assert.match(board, /isCalendarHoyUnavailable\(data.status\)/);
+  assert.match(board, /unavailable \? '—' : s.freeBlocksToday.length/);
+  assert.match(board, /No se pudieron consultar los eventos de hoy/);
+  assert.match(page, /description=\{.*statusLabel.*\}/);
+});
+
+test('10B-6. Hoy no muestra métricas falsas cuando Calendar falla', () => {
+  const panel = readFileSync(
+    join(process.cwd(), 'components', 'dashboard', 'HoyNotion.tsx'),
+    'utf8',
+  );
+  assert.match(panel, /isCalendarHoyUnavailable\(calendar.status\)/);
+  assert.match(panel, /calendarUnavailable \? '—' : calendar.todayEvents.length/);
+  assert.match(panel, /calendarUnavailable \? '—' : formatDuration\(calendar.occupiedMinutes\)/);
+  assert.match(panel, /calendarUnavailable \? '—' : calendar.conflicts.length/);
 });
