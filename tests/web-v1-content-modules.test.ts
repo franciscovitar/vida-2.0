@@ -391,3 +391,14 @@ test('10B-5. vista Agenda distingue lectura fallida de vacío confirmado', () =>
   assert.match(board, /No se pudieron consultar los eventos de hoy/);
   assert.match(page, /description=\{.*statusLabel.*\}/);
 });
+
+test('10B-6. Hoy no muestra métricas falsas cuando Calendar falla', () => {
+  const panel = readFileSync(
+    join(process.cwd(), 'components', 'dashboard', 'HoyNotion.tsx'),
+    'utf8',
+  );
+  assert.match(panel, /isCalendarHoyUnavailable\\(calendar.status\\)/);
+  assert.match(panel, /calendarUnavailable \\? '—' : calendar.todayEvents.length/);
+  assert.match(panel, /calendarUnavailable \\? '—' : formatDuration\\(calendar.occupiedMinutes\\)/);
+  assert.match(panel, /calendarUnavailable \\? '—' : calendar.conflicts.length/);
+});
