@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
 import { effectiveAssessmentReadiness, matchSubjectProgress } from '@/lib/study-engine/catalog';
@@ -139,4 +141,24 @@ test('F-AR8. evaluación finalizada no certifica readiness de examen activo', ()
   const matched = matchSubjectProgress(subject(), [source]);
   assert.equal(matched.progress, null);
   assert.equal(effectiveAssessmentReadiness(matched), 'unknown');
+});
+
+test('F-AR9. Aprendizaje y Modo estudio exponen fallos de Assessment Progress', () => {
+  for (const path of [
+    ['components', 'learning', 'LearningHubV2.tsx'],
+    ['components', 'study-engine', 'StudyCatalog.tsx'],
+  ]) {
+    const source = readFileSync(join(process.cwd(), ...path), 'utf8');
+    assert.match(source, /assessmentProgress\.notice/);
+    assert.match(source, /role="status"/);
+  }
+});
+
+test('F-AR10. Modo estudio no atribuye readiness general al examen activo', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components', 'study-engine', 'StudyCatalog.tsx'),
+    'utf8',
+  );
+  assert.match(source, /effectiveAssessmentReadiness\(subject\)/);
+  assert.doesNotMatch(source, /progress\?\.payload\.readinessBand\s*\?\?\s*subject\.readinessBand/);
 });
