@@ -3,7 +3,6 @@
  * This is not a browser DTO: keep opaque evidence refs and internal IDs server-side.
  * Observed effort does not establish mastery, project progress or a habit streak.
  */
-const PREFIX = 'vida2:tasks-daily-planning:v2:execution:';
 const CORRECTION_PREFIX = 'correction-of:';
 const OBSERVATION_PATTERN = /^vida2:tasks-daily-planning:v2:execution:[0-9a-f]{64}$/;
 const HEADERS = [
