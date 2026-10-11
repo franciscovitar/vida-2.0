@@ -63,10 +63,13 @@ async function inspectSafe(
  * Never call this with real providers until an independent DEV write approval
  * and full caller/data/authentication guards exist. This is NOT a safe live API.
  */
-export async function simulatePlanningV2DispatchProtocol(input: {
-  kind: PlanningV2ReconcileKind;
-  candidateRow: readonly unknown[];
-}, ports: PlanningV2SyntheticPorts): Promise<PlanningV2ProtocolResult> {
+export async function simulatePlanningV2DispatchProtocol(
+  input: {
+    kind: PlanningV2ReconcileKind;
+    candidateRow: readonly unknown[];
+  },
+  ports: PlanningV2SyntheticPorts,
+): Promise<PlanningV2ProtocolResult> {
   const preflight = reconcilePlanningV2Readback({
     kind: input.kind,
     candidateRow: input.candidateRow,
