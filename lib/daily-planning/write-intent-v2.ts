@@ -11,7 +11,10 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypt
 
 import { compilePlanningV2AppendCells } from '@/lib/daily-planning/append-cells-v2';
 
-import type { PlanningV2SyntheticPorts, PlanningV2ProtocolResult } from '@/lib/daily-planning/dispatch-protocol-v2';
+import type {
+  PlanningV2SyntheticPorts,
+  PlanningV2ProtocolResult,
+} from '@/lib/daily-planning/dispatch-protocol-v2';
 import { simulatePlanningV2DispatchProtocol } from '@/lib/daily-planning/dispatch-protocol-v2';
 
 const PURPOSE = 'planning-v2:normalized-execution:dev:write-intent-v1';
@@ -51,13 +54,18 @@ function digest(value: string): string {
 }
 
 function rowDigest(row: readonly unknown[]): string | null {
-  if (!Array.isArray(row) || row.length !== 17 ||
-      typeof row[0] !== 'string' || !ID.test(row[0]) ||
-      row[16] !== 'planning-execution-v2' ||
-      !compilePlanningV2AppendCells({kind:'execution',row,sheetId:0,target:'dev'}).ok) return null;
+  if (
+    !Array.isArray(row) ||
+    row.length !== 17 ||
+    typeof row[0] !== 'string' ||
+    !ID.test(row[0]) ||
+    row[16] !== 'planning-execution-v2' ||
+    !compilePlanningV2AppendCells({ kind: 'execution', row, sheetId: 0, target: 'dev' }).ok
+  )
+    return null;
   try {
-    const raw = JSON.stringify(['execution',row]);
-    if (!raw || Buffer.byteLength(raw,'utf8') > 32 * 1024) return null;
+    const raw = JSON.stringify(['execution', row]);
+    if (!raw || Buffer.byteLength(raw, 'utf8') > 32 * 1024) return null;
     return digest(raw);
   } catch {
     return null;
@@ -66,19 +74,28 @@ function rowDigest(row: readonly unknown[]): string | null {
 
 function validContext(context: PlanningV2IntentContext, secret: string): boolean {
   return (
-    typeof secret === 'string' && Buffer.byteLength(secret,'utf8') >= 32 &&
-    !!context && typeof context === 'object' &&
-    typeof context.actorId === 'string' && context.actorId.length >= 3 &&
-    context.actorId.length <= 256 && !!context.actorId.trim() && !/[\r\n]/.test(context.actorId) &&
-    typeof context.devWorkbookId === 'string' && context.devWorkbookId.length >= 10 &&
-    context.devWorkbookId.length <= 256 && !!context.devWorkbookId.trim() && !/[\r\n]/.test(context.devWorkbookId) &&
-    Number.isSafeInteger(context.nowSeconds) && context.nowSeconds > 0 &&
+    typeof secret === 'string' &&
+    Buffer.byteLength(secret, 'utf8') >= 32 &&
+    !!context &&
+    typeof context === 'object' &&
+    typeof context.actorId === 'string' &&
+    context.actorId.length >= 3 &&
+    context.actorId.length <= 256 &&
+    !!context.actorId.trim() &&
+    !/[\r\n]/.test(context.actorId) &&
+    typeof context.devWorkbookId === 'string' &&
+    context.devWorkbookId.length >= 10 &&
+    context.devWorkbookId.length <= 256 &&
+    !!context.devWorkbookId.trim() &&
+    !/[\r\n]/.test(context.devWorkbookId) &&
+    Number.isSafeInteger(context.nowSeconds) &&
+    context.nowSeconds > 0 &&
     rowDigest(context.executionRow) !== null
   );
 }
 
 function sign(payload: string, secret: string): string {
-  return createHmac('sha256', secret).update(payload,'utf8').digest('hex');
+  return createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
 }
 
 /**
@@ -89,7 +106,7 @@ export function issueSyntheticPlanningV2WriteIntent(
   context: PlanningV2IntentContext,
   secret: string,
 ): PlanningV2SyntheticWriteIntent | null {
-  if (!validContext(context,secret)) return null;
+  if (!validContext(context, secret)) return null;
   const claims: IntentClaims = {
     purpose: PURPOSE,
     recordId: context.executionRow[0] as string,
@@ -100,8 +117,8 @@ export function issueSyntheticPlanningV2WriteIntent(
     expiresAt: context.nowSeconds + MAX_AGE_SECONDS,
     nonce: randomBytes(16).toString('hex'),
   };
-  const payload=Buffer.from(JSON.stringify(claims),'utf8').toString('base64url');
-  return { payload, mac: sign(payload,secret) };
+  const payload = Buffer.from(JSON.stringify(claims), 'utf8').toString('base64url');
+  return { payload, mac: sign(payload, secret) };
 }
 
 /** Exact-bound, short-lived MAC validation with no plaintext ID in results. */
@@ -110,30 +127,42 @@ export function verifySyntheticPlanningV2WriteIntent(
   context: PlanningV2IntentContext,
   secret: string,
 ): boolean {
-  if (!validContext(context,secret) || !intent || typeof intent.payload !== 'string' ||
-      typeof intent.mac !== 'string' ||
-      intent.payload.length > 2048 || intent.payload.length === 0 ||
-      !HASH.test(intent.mac)) return false;
-  const expected=Buffer.from(sign(intent.payload,secret),'hex');
-  const actual=Buffer.from(intent.mac,'hex');
-  if (expected.length !== actual.length || !timingSafeEqual(expected,actual)) return false;
+  if (
+    !validContext(context, secret) ||
+    !intent ||
+    typeof intent.payload !== 'string' ||
+    typeof intent.mac !== 'string' ||
+    intent.payload.length > 2048 ||
+    intent.payload.length === 0 ||
+    !HASH.test(intent.mac)
+  )
+    return false;
+  const expected = Buffer.from(sign(intent.payload, secret), 'hex');
+  const actual = Buffer.from(intent.mac, 'hex');
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return false;
   try {
-    const raw=Buffer.from(intent.payload,'base64url').toString('utf8');
-    const claims=JSON.parse(raw) as IntentClaims;
-    if (Buffer.from(raw,'utf8').toString('base64url') !== intent.payload ||
-        JSON.stringify(claims) !== raw ||
-        !claims || typeof claims !== 'object' ||
-        Object.keys(claims).length !== 8 ||
-        claims.purpose !== PURPOSE || claims.recordId !== context.executionRow[0] ||
-        claims.payloadDigest !== rowDigest(context.executionRow) ||
-        claims.actorScope !== digest(context.actorId) ||
-        claims.workbookScope !== digest(context.devWorkbookId) ||
-        typeof claims.nonce !== 'string' || !/^[a-f0-9]{32}$/.test(claims.nonce) ||
-        !Number.isSafeInteger(claims.issuedAt) ||
-        !Number.isSafeInteger(claims.expiresAt) ||
-        claims.issuedAt > context.nowSeconds ||
-        claims.expiresAt <= context.nowSeconds ||
-        claims.expiresAt - claims.issuedAt !== MAX_AGE_SECONDS) return false;
+    const raw = Buffer.from(intent.payload, 'base64url').toString('utf8');
+    const claims = JSON.parse(raw) as IntentClaims;
+    if (
+      Buffer.from(raw, 'utf8').toString('base64url') !== intent.payload ||
+      JSON.stringify(claims) !== raw ||
+      !claims ||
+      typeof claims !== 'object' ||
+      Object.keys(claims).length !== 8 ||
+      claims.purpose !== PURPOSE ||
+      claims.recordId !== context.executionRow[0] ||
+      claims.payloadDigest !== rowDigest(context.executionRow) ||
+      claims.actorScope !== digest(context.actorId) ||
+      claims.workbookScope !== digest(context.devWorkbookId) ||
+      typeof claims.nonce !== 'string' ||
+      !/^[a-f0-9]{32}$/.test(claims.nonce) ||
+      !Number.isSafeInteger(claims.issuedAt) ||
+      !Number.isSafeInteger(claims.expiresAt) ||
+      claims.issuedAt > context.nowSeconds ||
+      claims.expiresAt <= context.nowSeconds ||
+      claims.expiresAt - claims.issuedAt !== MAX_AGE_SECONDS
+    )
+      return false;
     return true;
   } catch {
     return false;
@@ -150,10 +179,14 @@ export async function simulateIntentGatedPlanningV2Write(
   secret: string,
   ports: PlanningV2SyntheticPorts,
 ): Promise<PlanningV2ProtocolResult> {
-  if (!verifySyntheticPlanningV2WriteIntent(input.intent,input.context,secret)) {
-    return { status:'blocked', sendAttempts:0, retryAllowed:false };
+  if (!verifySyntheticPlanningV2WriteIntent(input.intent, input.context, secret)) {
+    return { status: 'blocked', sendAttempts: 0, retryAllowed: false };
   }
-  return simulatePlanningV2DispatchProtocol({
-    kind:'execution',candidateRow:input.context.executionRow,
-  },ports);
+  return simulatePlanningV2DispatchProtocol(
+    {
+      kind: 'execution',
+      candidateRow: input.context.executionRow,
+    },
+    ports,
+  );
 }
