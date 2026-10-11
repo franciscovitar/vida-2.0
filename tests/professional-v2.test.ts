@@ -109,9 +109,9 @@ test('PRO-V2-07. Mercado separa geografías y no inventa remote fit', () => {
   const market = repoText('components/professional/ProfessionalMarket.tsx');
 
   assert.match(market, /Argentina separada de referencias internacionales/);
-  assert.match(market, /EE\.UU\. funciona como referencia estructural/);
-  assert.match(market, /muestras remotas acotadas por rol objetivo/);
-  assert.match(market, /no como censo ni como remote-fit score/);
+  assert.match(market, /BLS proyecta ocupaciones de EE\.UU\./);
+  assert.match(market, /las\s+ofertas\s+remotas\s+son\s+muestras\s+acotadas/);
+  assert.match(market, /no una estimación de demanda total/);
   assert.doesNotMatch(market, /remoteScore|employabilityScore|overall score/i);
 });
 
@@ -119,7 +119,11 @@ test('PRO-V2-08. Mercado conserva demanda, compensación y semántica cauta de I
   const market = repoText('components/professional/ProfessionalMarket.tsx');
 
   assert.match(market, /market\.internationalBenchmarks\.map/);
-  assert.match(market, /market\.argentinaSalaryRoles\.map/);
+  const salaries = repoText('components/professional/ProfessionalSalaryPlot.tsx');
+  assert.match(salaries, /market\.argentinaSalaryRoles/);
+  assert.match(salaries, /medianArsGrossMonthly/);
+  assert.match(salaries, /point\.sampleSize/);
+  assert.match(salaries, /!point\.dollarized/);
   assert.match(market, /resilience\.crossRoleFindings\.map/);
   assert.match(market, /No son probabilidades\s+personales de desempleo/);
   assert.match(market, /Escenario a 5 años/);
@@ -183,8 +187,8 @@ test('PRO-V2-14. Biblioteca mantiene archivo legacy y cero deuda de lectura', ()
 
   assert.match(library, /article\.professionalRefs\.length > 0/);
   assert.match(library, /intelligenceArticleHref/);
-  assert.match(library, /No hay backlog/);
-  assert.match(library, /artículos sin leer/);
+  assert.match(library, /Guardado no significa pendiente/);
+  assert.match(library, /sin tareas pendientes/);
   assert.match(legacyArchive, /intelligenceArticleHref/);
   assert.match(legacyRedirect, /redirect\('\/professional'\)/);
 });
@@ -195,7 +199,7 @@ test('PRO-V2-15. Biblioteca tecnológica es referencia progresiva y no adopción
   assert.match(library, /spotlightIds/);
   assert.match(library, /slice\(0, 6\)/);
   assert.match(library, /Explorar biblioteca completa/);
-  assert.match(library, /no implica instalarla, pagarla ni aprenderla/i);
+  assert.match(library, /Guardar una herramienta no implica adoptarla/);
   assert.doesNotMatch(library, /unreadCount|streakCount|readingDebt|backlogCount/i);
 });
 
