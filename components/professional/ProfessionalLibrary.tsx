@@ -112,9 +112,7 @@ export function ProfessionalLibrary({
         <div className={styles['library-heading']}>
           <p className={styles.eyebrow}>Deep dives profesionales</p>
           <h3 id="library-deep-dives-title">Explicaciones conectadas con tu perfil</h3>
-          <p>
-            Artículos históricos vinculados a tus prioridades y tecnologías.
-          </p>
+          <p>Artículos históricos vinculados a tus prioridades y tecnologías.</p>
         </div>
 
         {editorial.notice ? (
@@ -160,9 +158,7 @@ export function ProfessionalLibrary({
           <div className={styles['library-heading']}>
             <p className={styles.eyebrow}>Archivo histórico</p>
             <h3 id="library-history-title">Otras explicaciones que siguen disponibles</h3>
-            <p>
-              Conservamos sus enlaces originales; no describen necesariamente tu estado actual.
-            </p>
+            <p>Conservamos sus enlaces originales; no describen necesariamente tu estado actual.</p>
           </div>
 
           <div className={styles['library-article-list']}>

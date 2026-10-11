@@ -2,10 +2,7 @@
 
 import { useState } from 'react';
 
-import type {
-  CareerResilienceData,
-  CareerResilienceHorizonKey,
-} from '@/types/career-resilience';
+import type { CareerResilienceData, CareerResilienceHorizonKey } from '@/types/career-resilience';
 
 import { resilienceSpanishLists } from '@/lib/professional/resilience-copy-es';
 

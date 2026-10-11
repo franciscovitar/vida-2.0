@@ -45,11 +45,13 @@ export function ProfessionalSalaryPlot({ data }: { data: ProfessionalIntelligenc
       })),
   );
   const dollarized = roles.flatMap((role) =>
-    role.points.filter((point) => point.dollarized).map((point) => ({
-      key: role.id + ':' + point.label,
-      role: role.role,
-      point,
-    })),
+    role.points
+      .filter((point) => point.dollarized)
+      .map((point) => ({
+        key: role.id + ':' + point.label,
+        role: role.role,
+        point,
+      })),
   );
   const levels = [...new Set(regular.map((item) => item.point.label))];
   const max = regular.reduce((acc, item) => Math.max(acc, item.point.medianArsGrossMonthly), 0);
@@ -92,26 +94,38 @@ export function ProfessionalSalaryPlot({ data }: { data: ProfessionalIntelligenc
             ))}
           </div>
 
-          <div className={styles.plot} aria-label="Comparación de medianas salariales por área y seniority">
+          <div
+            className={styles.plot}
+            aria-label="Comparación de medianas salariales por área y seniority"
+          >
             <div className={styles.scale} aria-hidden="true">
               <span>$0</span>
               <span>{formatMoney(max)}</span>
             </div>
-            {entries.map(({key, role, point}) => (
+            {entries.map(({ key, role, point }) => (
               <div className={styles.row} key={key}>
                 <div className={styles.label}>
                   <strong>{role}</strong>
-                  <span>{point.label} · n={point.sampleSize}</span>
+                  <span>
+                    {point.label} · n={point.sampleSize}
+                  </span>
                 </div>
                 <div
                   className={styles.track}
                   role="img"
-                  aria-label={role + ', ' + point.label + ': mediana ' +
-                    formatMoney(point.medianArsGrossMonthly) + ', muestra ' + point.sampleSize}
+                  aria-label={
+                    role +
+                    ', ' +
+                    point.label +
+                    ': mediana ' +
+                    formatMoney(point.medianArsGrossMonthly) +
+                    ', muestra ' +
+                    point.sampleSize
+                  }
                 >
                   <span
                     className={styles.dot}
-                    style={{left: (point.medianArsGrossMonthly / max * 100) + '%'}}
+                    style={{ left: (point.medianArsGrossMonthly / max) * 100 + '%' }}
                   />
                 </div>
                 <strong className={styles.value}>{formatMoney(point.medianArsGrossMonthly)}</strong>
@@ -128,9 +142,11 @@ export function ProfessionalSalaryPlot({ data }: { data: ProfessionalIntelligenc
                   <ul>
                     {role.points.map((point) => (
                       <li key={point.label}>
-                        {point.label}: {formatMoney(point.medianArsGrossMonthly)} brutos/mes
-                        {' '}· n={point.sampleSize}
-                        {point.dollarized ? ' · sueldo al menos parcialmente dolarizado, no comparable' : ''}
+                        {point.label}: {formatMoney(point.medianArsGrossMonthly)} brutos/mes · n=
+                        {point.sampleSize}
+                        {point.dollarized
+                          ? ' · sueldo al menos parcialmente dolarizado, no comparable'
+                          : ''}
                       </li>
                     ))}
                   </ul>
@@ -149,16 +165,19 @@ export function ProfessionalSalaryPlot({ data }: { data: ProfessionalIntelligenc
             </p>
           ) : null}
           <p className={styles.footnote}>
-            Fuente: <a href={source.url} target="_blank" rel="noreferrer">{source.source}</a>.
-            Argentina, {commonPeriod}; n se refiere a respuestas de la encuesta, no a ofertas.
+            Fuente:{' '}
+            <a href={source.url} target="_blank" rel="noreferrer">
+              {source.source}
+            </a>
+            . Argentina, {commonPeriod}; n se refiere a respuestas de la encuesta, no a ofertas.
             Este gráfico no debe compararse como salario equivalente con las proyecciones BLS de
             Estados Unidos mostradas arriba.
           </p>
         </>
       ) : (
         <p className={styles.footnote}>
-          No hay medianas no dolarizadas con muestra suficiente en el snapshot actual.
-          No mostramos puntos inventados.
+          No hay medianas no dolarizadas con muestra suficiente en el snapshot actual. No mostramos
+          puntos inventados.
         </p>
       )}
     </section>

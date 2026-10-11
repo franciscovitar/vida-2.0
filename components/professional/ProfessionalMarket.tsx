@@ -186,30 +186,30 @@ export function ProfessionalMarket({
         <details className={styles['market-details']}>
           <summary>Ver cifras BLS completas, incluidos salarios anuales de EE.UU.</summary>
           <div className={styles['market-benchmark-list']}>
-          {market.internationalBenchmarks.map((item) => (
-            <article className={styles['market-benchmark']} key={item.id}>
-              <div>
-                <span className={styles['market-kicker']}>
-                  {item.geography} · {item.period}
-                </span>
-                <h4>{item.role}</h4>
-              </div>
-              <dl className={styles['market-metrics']}>
+            {market.internationalBenchmarks.map((item) => (
+              <article className={styles['market-benchmark']} key={item.id}>
                 <div>
-                  <dt>Crecimiento</dt>
-                  <dd>+{item.employmentGrowthPercent}%</dd>
+                  <span className={styles['market-kicker']}>
+                    {item.geography} · {item.period}
+                  </span>
+                  <h4>{item.role}</h4>
                 </div>
-                <div>
-                  <dt>Aperturas/año</dt>
-                  <dd>{formatInteger(item.annualOpenings)}</dd>
-                </div>
-                <div>
-                  <dt>Mediana anual</dt>
-                  <dd>{formatUsd(item.medianAnnualUsd)}</dd>
-                </div>
-              </dl>
-            </article>
-          ))}
+                <dl className={styles['market-metrics']}>
+                  <div>
+                    <dt>Crecimiento</dt>
+                    <dd>+{item.employmentGrowthPercent}%</dd>
+                  </div>
+                  <div>
+                    <dt>Aperturas/año</dt>
+                    <dd>{formatInteger(item.annualOpenings)}</dd>
+                  </div>
+                  <div>
+                    <dt>Mediana anual</dt>
+                    <dd>{formatUsd(item.medianAnnualUsd)}</dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
           </div>
         </details>
       </section>
@@ -243,7 +243,10 @@ export function ProfessionalMarket({
 
       <details className={styles['market-details']}>
         <summary>Cómo comparar mercados y muestras sin mezclarlos</summary>
-        <p>Los salarios argentinos proceden de una encuesta; BLS proyecta ocupaciones de EE.UU.; las ofertas remotas son muestras acotadas, no una estimación de demanda total.</p>
+        <p>
+          Los salarios argentinos proceden de una encuesta; BLS proyecta ocupaciones de EE.UU.; las
+          ofertas remotas son muestras acotadas, no una estimación de demanda total.
+        </p>
       </details>
 
       <section className={styles['market-section']} aria-labelledby="market-ai-title">
