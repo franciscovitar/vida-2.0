@@ -7,8 +7,6 @@
  * Recovery after ledger loss: freeze issuers, reconcile physical Sheets rows,
  * permanently quarantine unresolved IDs. Never expire/delete reservations.
  */
-import 'server-only';
-
 import { createHash, createSign, randomUUID } from 'node:crypto';
 import type {
   PlanningV2LedgerOperation,
@@ -152,6 +150,8 @@ export function createPlanningV2FirestoreDispatchLedger(
     record: PlanningV2LedgerRecord,
   ) => Promise<PlanningV2LedgerStatus>;
 } {
+  // No browser boundary: only server Node crypto may hold this credential.
+  if (typeof window !== 'undefined') throw new Error('server-only-firestore-ledger');
   if (
     !PROJECT.test(config.projectId) ||
     !config.clientEmail.endsWith('@' + config.projectId + '.iam.gserviceaccount.com')
