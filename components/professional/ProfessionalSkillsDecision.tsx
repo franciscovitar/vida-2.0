@@ -178,7 +178,7 @@ export function ProfessionalSkillsDecision({
                   {item.queueState === 'PRACTICING' ? 'En práctica' : 'Para trabajar'}
                 </span>
               </div>
-              <div className={styles['card-grid']}>
+              <div>
                 <div>
                   <p className={styles.kicker}>Vínculo con el perfil seleccionado</p>
                   <RoleCoverage selectedRole={selectedRole} skills={item.skillRefs} />
@@ -187,19 +187,6 @@ export function ProfessionalSkillsDecision({
                       ? 'Esta capacidad no tiene correspondencia directa en los requisitos principales de este perfil; puede seguir siendo transversal.'
                       : 'Correspondencia por referencias de habilidades, no por cantidad de ofertas laborales.'}
                   </p>
-                </div>
-                <div>
-                  <p className={styles.kicker}>Acción y evidencia</p>
-                  <p>Esta capacidad se trabaja en la cola de crecimiento, más abajo.</p>
-                  <details>
-                    <summary>Ver motivo, práctica y evidencia requerida</summary>
-                    <p className={styles['why-now']}>{item.whyNow}</p>
-                    <div className={styles['practice-block']}>
-                      <strong>Práctica</strong>
-                      <p>{item.practiceContract}</p>
-                    </div>
-                    <p>{item.evidenceTarget}</p>
-                  </details>
                 </div>
               </div>
             </article>

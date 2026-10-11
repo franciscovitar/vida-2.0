@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "kind": "argentina_salary_observed_survey_reanalysis",
+  "survey": "OpenQube / Sysarmy 2026.01",
+  "period": "dic. 2025 – feb. 2026",
+  "country": "Argentina",
+  "salaryBasis": "BRUTO_MENSUAL_ARS",
+  "sourceOriginal": "https://sueldos.openqube.io/encuesta-sueldos-2026.01/",
+  "sourceProcessed": "https://github.com/cervetade/sueldos-it-argentina/blob/main/data/processed/sueldos_clean.csv",
+  "sourceProcessing": "https://github.com/cervetade/sueldos-it-argentina/blob/main/src/clean.py",
+  "sourceBlobSha": "4d248cce3a23f015e23dfa00646c27c67f6aee12",
+  "processedRowCount": 4840,
+  "processingNotice": "Reanálisis descriptivo sobre dataset comunitario procesado por cervetade: personas sin salario bruto y extremos fuera de percentiles 1–99 excluidos por su ETL; aquí sólo respuestas no dolarizadas, medianas por rol original y seniority, sin reagrupar cargos.",
+  "selectionNotice": "Sólo subgrupos con al menos 20 respuestas no dolarizadas; no se calcula ni garantiza precisión por intervalo de confianza. Categorías sin n suficiente ausentes, no cero. Muestra autoseleccionada y reanálisis distinto del gráfico oficial de OpenQube.",
+  "license": "Datos fuente CC BY-NC-SA 4.0. Mantener atribución y obligaciones de licencia en cualquier republicación.",
+  "roles": [
+    {
+      "id": "DEV",
+      "role": "Desarrollo de software",
+      "sourceCategory": "Developer",
+      "group": "direct",
+      "points": [
+        {
+          "label": "Junior",
+          "medianArsGrossMonthly": 1584000,
+          "sampleSize": 144
+        },
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 2519220,
+          "sampleSize": 436
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 3500000,
+          "sampleSize": 471
+        }
+      ]
+    },
+    {
+      "id": "QA",
+      "role": "QA y testing",
+      "sourceCategory": "QA / Tester",
+      "group": "direct",
+      "points": [
+        {
+          "label": "Junior",
+          "medianArsGrossMonthly": 1400000,
+          "sampleSize": 23
+        },
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 1909147,
+          "sampleSize": 67
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 2600000,
+          "sampleSize": 64
+        }
+      ]
+    },
+    {
+      "id": "BI",
+      "role": "Analista BI / datos",
+      "sourceCategory": "BI Analyst / Data Analyst",
+      "group": "direct",
+      "points": [
+        {
+          "label": "Junior",
+          "medianArsGrossMonthly": 1928875,
+          "sampleSize": 36
+        },
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 2515543,
+          "sampleSize": 57
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 3387000,
+          "sampleSize": 46
+        }
+      ]
+    },
+    {
+      "id": "BUSINESS",
+      "role": "Análisis de negocio",
+      "sourceCategory": "Business Analyst",
+      "group": "direct",
+      "points": [
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 2251000,
+          "sampleSize": 27
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 3175877,
+          "sampleSize": 49
+        }
+      ]
+    },
+    {
+      "id": "DATA",
+      "role": "Ingeniería de datos",
+      "sourceCategory": "Data Engineer",
+      "group": "adjacent",
+      "points": [
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 2997062,
+          "sampleSize": 39
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 3990000,
+          "sampleSize": 39
+        }
+      ]
+    },
+    {
+      "id": "DEVOPS",
+      "role": "DevOps / SRE",
+      "sourceCategory": "SysAdmin / DevOps / SRE",
+      "group": "adjacent",
+      "points": [
+        {
+          "label": "Junior",
+          "medianArsGrossMonthly": 2000000,
+          "sampleSize": 29
+        },
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 2423360,
+          "sampleSize": 104
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 3200000,
+          "sampleSize": 271
+        }
+      ]
+    },
+    {
+      "id": "SEC",
+      "role": "Seguridad informática",
+      "sourceCategory": "Infosec",
+      "group": "adjacent",
+      "points": [
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 2759000,
+          "sampleSize": 25
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 4300000,
+          "sampleSize": 48
+        }
+      ]
+    },
+    {
+      "id": "SCI",
+      "role": "Ciencia de datos",
+      "sourceCategory": "Data Scientist",
+      "group": "adjacent",
+      "points": [
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 4000000,
+          "sampleSize": 23
+        }
+      ]
+    },
+    {
+      "id": "ARCH",
+      "role": "Arquitectura de software",
+      "sourceCategory": "Architect",
+      "group": "future",
+      "points": [
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 5700000,
+          "sampleSize": 79
+        }
+      ]
+    },
+    {
+      "id": "TECH_LEAD",
+      "role": "Liderazgo técnico",
+      "sourceCategory": "Technical Leader",
+      "group": "future",
+      "points": [
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 3914500,
+          "sampleSize": 44
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 4698575,
+          "sampleSize": 190
+        }
+      ]
+    },
+    {
+      "id": "PRODUCT",
+      "role": "Product Owner",
+      "sourceCategory": "Product Owner",
+      "group": "future",
+      "points": [
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 3750000,
+          "sampleSize": 21
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 4160289,
+          "sampleSize": 29
+        }
+      ]
+    },
+    {
+      "id": "MANAGER",
+      "role": "Gestión / dirección",
+      "sourceCategory": "Manager / Director",
+      "group": "future",
+      "points": [
+        {
+          "label": "Semi-Senior",
+          "medianArsGrossMonthly": 3647029,
+          "sampleSize": 38
+        },
+        {
+          "label": "Senior",
+          "medianArsGrossMonthly": 4700000,
+          "sampleSize": 233
+        }
+      ]
+    }
+  ]
+}
