@@ -17,13 +17,15 @@ const TASK_MATCHES: Readonly<Record<string, BenchmarkTaskMatch>> = {
     metric: 'coding',
     label: 'Programación: resultados en Coding',
     applicability: 'DIRECT_CATEGORY',
-    caveat: 'Evalúa tareas de código de LiveBench; no mide tu repositorio ni garantiza un resultado en producción.',
+    caveat:
+      'Evalúa tareas de código de LiveBench; no mide tu repositorio ni garantiza un resultado en producción.',
   },
   debug: {
     metric: 'agenticCoding',
     label: 'Agentes de código: indicador para debugging',
     applicability: 'PROXY',
-    caveat: 'Agentic Coding NO es un test exclusivo de depuración ni de resolución de errores en repositorios.',
+    caveat:
+      'Agentic Coding NO es un test exclusivo de depuración ni de resolución de errores en repositorios.',
   },
   frontend: {
     metric: 'agenticCoding',
@@ -41,7 +43,8 @@ const TASK_MATCHES: Readonly<Record<string, BenchmarkTaskMatch>> = {
     metric: 'reasoning',
     label: 'Razonamiento: referencia indirecta para investigación',
     applicability: 'PROXY',
-    caveat: 'Reasoning no mide búsqueda web, cobertura bibliográfica, actualidad ni fidelidad de las fuentes.',
+    caveat:
+      'Reasoning no mide búsqueda web, cobertura bibliográfica, actualidad ni fidelidad de las fuentes.',
   },
   study: {
     metric: 'reasoning',
@@ -53,13 +56,15 @@ const TASK_MATCHES: Readonly<Record<string, BenchmarkTaskMatch>> = {
     metric: 'dataAnalysis',
     label: 'Análisis de datos: resultados en Data Analysis',
     applicability: 'DIRECT_CATEGORY',
-    caveat: 'Evalúa los ejercicios de Data Analysis de LiveBench; no certifica archivos ni decisiones del usuario.',
+    caveat:
+      'Evalúa los ejercicios de Data Analysis de LiveBench; no certifica archivos ni decisiones del usuario.',
   },
   browser: {
     metric: null,
     label: 'Sin benchmark directo validado para navegador',
     applicability: 'UNAVAILABLE',
-    caveat: 'No usamos Agentic Coding para atribuir capacidad de navegación web ni autonomía con aplicaciones.',
+    caveat:
+      'No usamos Agentic Coding para atribuir capacidad de navegación web ni autonomía con aplicaciones.',
   },
 };
 const DEFAULT_MATCH: BenchmarkTaskMatch = TASK_MATCHES.coding!;
@@ -83,8 +88,7 @@ export function benchmarkForTask(taskId: string, now = new Date()) {
   const source = snapshot.source;
   const observed = Date.parse(source.observedAt + 'T00:00:00Z');
   const stale =
-    !Number.isFinite(observed) ||
-    now.getTime() - observed > source.staleAfterDays * 86400000;
+    !Number.isFinite(observed) || now.getTime() - observed > source.staleAfterDays * 86400000;
 
   const seen = new Set<string>();
   const valid =
