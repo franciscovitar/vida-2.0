@@ -47,3 +47,24 @@ test('separate evidence refs do not change independent observations',()=>{
   const s=selectPlanningExecutionV2Day([h,mk('a'),mk('b',['source:milestone'])],d);
   assert.equal(s.status,'ready');assert.equal(s.current.length,2);
 });
+
+test('sanitized Sheets null optional cells remain valid without inventing a canonical entity',()=>{
+  const r=mk('f'); r[5]='none'; r[6]=null; r[8]=null; r[9]=null;
+  const s=selectPlanningExecutionV2Day([h,r],d);
+  assert.equal(s.status,'ready');
+  assert.equal(s.current.length,1);
+  assert.equal(s.current[0]?.canonicalRef,null);
+  assert.equal(s.current[0]?.declaredMinutes,null);
+  assert.equal(s.current[0]?.realStart,null);
+});
+test('missing required canonical identity is not silently repaired from null',()=>{
+  const r=mk('f'); r[6]=undefined;
+  const s=selectPlanningExecutionV2Day([h,r],d);
+  assert.equal(s.status,'invalid');
+});
+test('blank optional canonical ref is allowed for a declared, unverified subject',()=>{
+  const r=mk('f'); r[6]=null;
+  const s=selectPlanningExecutionV2Day([h,r],d);
+  assert.equal(s.status,'ready');
+  assert.equal(s.current[0]?.progressEffect,'unknown');
+});

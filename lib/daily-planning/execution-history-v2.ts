@@ -73,14 +73,17 @@ function parseRow(row: readonly unknown[]): ExecutionV2Observation | null {
   if (typeof id !== 'string' || !OBSERVATION_PATTERN.test(id) ||
       !civilDay(date) || !validRecordedAt(recordedAt) || version !== 'planning-execution-v2' ||
       !has(activityType,ACTIVITY) || !has(domain,DOMAIN) || !has(entityType,ENTITY) ||
-      (canonicalRaw !== '' && !safeRef(canonicalRaw)) ||
-      (entityType === 'none' && canonicalRaw !== '') || !safeText(activity,200) ||
+      (canonicalRaw !== '' && canonicalRaw !== null && !safeRef(canonicalRaw)) ||
+      (entityType === 'none' && canonicalRaw !== '' && canonicalRaw !== null) ||
+      !safeText(activity,200) ||
       !has(executionState,EXECUTION) || !has(evidenceState,EVIDENCE) ||
       !has(progressEffect,PROGRESS) || !has(sourceClass,SOURCE) || !has(confidence,CONFIDENCE) ||
       (progressEffect === 'verified' && evidenceState !== 'VERIFIED')) return null;
-  const minutes = minutesRaw === '' ? null : minutesRaw;
+  // The shared readTabValues client turns empty Google Sheets cells into
+  // null, not "". Accept both documented blank transport representations.
+  const minutes = minutesRaw === '' || minutesRaw === null ? null : minutesRaw;
   if (minutes !== null && (typeof minutes !== 'number' || !Number.isInteger(minutes) || minutes < 0 || minutes > 1440)) return null;
-  const realStart = startRaw === '' ? null : startRaw;
+  const realStart = startRaw === '' || startRaw === null ? null : startRaw;
   if (realStart !== null && (typeof realStart !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(realStart))) return null;
   if (typeof refsRaw !== 'string' || refsRaw.length > 2400) return null;
   let refs: unknown;
@@ -92,7 +95,7 @@ function parseRow(row: readonly unknown[]): ExecutionV2Observation | null {
   if (refs.some(ref => ref.startsWith(CORRECTION_PREFIX) &&
       !OBSERVATION_PATTERN.test(ref.slice(CORRECTION_PREFIX.length)))) return null;
   return { id,date,recordedAt,activityType,domain,entityType,
-    canonicalRef:canonicalRaw === '' ? null : canonicalRaw as string,activity,
+    canonicalRef:canonicalRaw === '' || canonicalRaw === null ? null : canonicalRaw as string,activity,
     declaredMinutes:minutes as number | null,realStart:realStart as string | null,
     executionState,evidenceState,progressEffect,sourceClass,confidence,evidenceRefs:refs };
 }
