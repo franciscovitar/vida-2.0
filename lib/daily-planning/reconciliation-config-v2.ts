@@ -11,7 +11,8 @@ export function isPlanningV2DevReadbackEnabled(
     env.PLANNING_V2_DEV_RECONCILIATION_READS_ENABLED !== 'true' ||
     env.VERCEL_ENV === 'production' ||
     env.GOOGLE_SHEETS_TARGET !== 'dev'
-  ) return false;
+  )
+    return false;
   const target = resolveSpreadsheetTarget(env);
   if (!target.ok || target.target !== 'dev') return false;
   const prodId = env.GOOGLE_SHEETS_PROD_ID?.trim();

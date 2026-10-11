@@ -15,7 +15,7 @@ import { readTabValues } from '@/lib/google/sheets-read';
  * Reject responses at the cap (and larger); never infer full coverage from
  * a truncated range. No persistence, Sheets writes or Redis transitions.
  */
-const TABS: Record<PlanningV2ReconcileKind,string> = {
+const TABS: Record<PlanningV2ReconcileKind, string> = {
   execution: 'Planning Execution V2',
   orientation: 'Daily Planning',
   assessment: 'Assessment Progress',
@@ -33,19 +33,19 @@ export async function inspectPlanningV2DevReadback(input: {
 }): Promise<PlanningV2ReconcileResult> {
   await requireAuthorizedSession();
   if (!isPlanningV2DevReadbackEnabled()) {
-    return { status:'unavailable', matchedRows:0, retryAllowed:false };
+    return { status: 'unavailable', matchedRows: 0, retryAllowed: false };
   }
   const tab = TABS[input.kind];
-  if (!tab) return { status:'candidate-invalid', matchedRows:0, retryAllowed:false };
+  if (!tab) return { status: 'candidate-invalid', matchedRows: 0, retryAllowed: false };
   const result = await readTabValues(tab);
   if (!result.ok || result.values.length >= LIMIT) {
-    return { status:'unavailable', matchedRows:0, retryAllowed:false };
+    return { status: 'unavailable', matchedRows: 0, retryAllowed: false };
   }
   return reconcilePlanningV2Readback({
     kind: input.kind,
     candidateRow: input.candidateRow,
     rows: result.values,
-    readStatus:'ready',
-    readComplete:true,
+    readStatus: 'ready',
+    readComplete: true,
   });
 }

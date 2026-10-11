@@ -37,10 +37,23 @@ interface Shape {
 const SHAPES: Record<PlanningV2ReconcileKind, Shape> = {
   execution: {
     headers: [
-      'Observation ID', 'Fecha', 'Registrado en', 'Activity Type', 'Domain',
-      'Entity Type', 'Canonical Ref', 'Actividad', 'Minutos declarados',
-      'Inicio real', 'Execution State', 'Evidence State', 'Progress Effect',
-      'Source Class', 'Confianza', 'Evidence Refs JSON', 'Version',
+      'Observation ID',
+      'Fecha',
+      'Registrado en',
+      'Activity Type',
+      'Domain',
+      'Entity Type',
+      'Canonical Ref',
+      'Actividad',
+      'Minutos declarados',
+      'Inicio real',
+      'Execution State',
+      'Evidence State',
+      'Progress Effect',
+      'Source Class',
+      'Confianza',
+      'Evidence Refs JSON',
+      'Version',
     ],
     id: /^vida2:tasks-daily-planning:v2:execution:[a-f0-9]{64}$/,
     version: 'planning-execution-v2',
@@ -60,8 +73,14 @@ const SHAPES: Record<PlanningV2ReconcileKind, Shape> = {
   },
   assessment: {
     headers: [
-      'Snapshot ID', 'Assessment ID', 'Subject ID', 'Fecha evaluación',
-      'Generado en', 'Payload JSON', 'Fuente', 'Versión',
+      'Snapshot ID',
+      'Assessment ID',
+      'Subject ID',
+      'Fecha evaluación',
+      'Generado en',
+      'Payload JSON',
+      'Fuente',
+      'Versión',
     ],
     id: /^vida2:assessment-progress:v1:[a-f0-9]{64}$/,
     version: 'assessment-progress-v1',
@@ -78,21 +97,26 @@ function answer(status: PlanningV2ReconcileStatus, matchedRows = 0): PlanningV2R
 }
 
 function isStamped(value: unknown): boolean {
-  return typeof value === 'string' &&
+  return (
+    typeof value === 'string' &&
     /(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
-    !Number.isNaN(Date.parse(value));
+    !Number.isNaN(Date.parse(value))
+  );
 }
 
 function normalizeBlank(value: unknown, index: number, shape: Shape): unknown {
   return shape.optionalBlankIndices.includes(index) && (value === null || value === '')
-    ? null : value;
+    ? null
+    : value;
 }
 
 function stableJson(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(stableJson);
   if (value !== null && typeof value === 'object') {
     const object = value as Record<string, unknown>;
-    return Object.keys(object).sort().map(key => [key, stableJson(object[key])]);
+    return Object.keys(object)
+      .sort()
+      .map((key) => [key, stableJson(object[key])]);
   }
   return value;
 }
@@ -104,8 +128,11 @@ function validPayloadCell(value: unknown, shape: Shape): boolean {
   try {
     const decoded: unknown = JSON.parse(value);
     if (shape.jsonIndex === 15) {
-      return Array.isArray(decoded) && decoded.length <= 8 &&
-        decoded.every(item => typeof item === 'string' && item.length <= 240);
+      return (
+        Array.isArray(decoded) &&
+        decoded.length <= 8 &&
+        decoded.every((item) => typeof item === 'string' && item.length <= 240)
+      );
     }
     return decoded !== null && typeof decoded === 'object' && !Array.isArray(decoded);
   } catch {
@@ -114,7 +141,9 @@ function validPayloadCell(value: unknown, shape: Shape): boolean {
 }
 
 function sameContent(
-  candidate: readonly unknown[], stored: readonly unknown[], shape: Shape,
+  candidate: readonly unknown[],
+  stored: readonly unknown[],
+  shape: Shape,
 ): boolean {
   if (stored.length !== shape.headers.length || !isStamped(stored[shape.timestampIndex])) {
     return false;
@@ -126,9 +155,14 @@ function sameContent(
     if (index === shape.jsonIndex) {
       if (!validPayloadCell(b, shape)) return false;
       try {
-        if (JSON.stringify(stableJson(JSON.parse(a as string))) !==
-            JSON.stringify(stableJson(JSON.parse(b as string)))) return false;
-      } catch { return false; }
+        if (
+          JSON.stringify(stableJson(JSON.parse(a as string))) !==
+          JSON.stringify(stableJson(JSON.parse(b as string)))
+        )
+          return false;
+      } catch {
+        return false;
+      }
     } else if (a !== b) {
       return false;
     }
@@ -144,35 +178,48 @@ export function reconcilePlanningV2Readback(input: {
   readComplete: boolean;
 }): PlanningV2ReconcileResult {
   const shape = SHAPES[input.kind];
-  if (!shape || !Array.isArray(input.candidateRow) ||
-      input.candidateRow.length !== shape.headers.length ||
-      typeof input.candidateRow[0] !== 'string' ||
-      !shape.id.test(input.candidateRow[0]) ||
-      input.candidateRow[shape.versionIndex] !== shape.version ||
-      !isStamped(input.candidateRow[shape.timestampIndex]) ||
-      !validPayloadCell(input.candidateRow[shape.jsonIndex], shape)) {
+  if (
+    !shape ||
+    !Array.isArray(input.candidateRow) ||
+    input.candidateRow.length !== shape.headers.length ||
+    typeof input.candidateRow[0] !== 'string' ||
+    !shape.id.test(input.candidateRow[0]) ||
+    input.candidateRow[shape.versionIndex] !== shape.version ||
+    !isStamped(input.candidateRow[shape.timestampIndex]) ||
+    !validPayloadCell(input.candidateRow[shape.jsonIndex], shape)
+  ) {
     return answer('candidate-invalid');
   }
-  if (input.kind === 'orientation' &&
-      !(input.candidateRow[0] as string).startsWith(
-        'vida2:tasks-daily-planning:v2:orientation:' + String(input.candidateRow[1]) + ':'
-      )) {
+  if (
+    input.kind === 'orientation' &&
+    !(input.candidateRow[0] as string).startsWith(
+      'vida2:tasks-daily-planning:v2:orientation:' + String(input.candidateRow[1]) + ':',
+    )
+  ) {
     return answer('candidate-invalid');
   }
-  if (input.readStatus !== 'ready' || !input.readComplete || !input.rows ||
-      input.rows.length === 0 || input.rows.length >= 5000) {
+  if (
+    input.readStatus !== 'ready' ||
+    !input.readComplete ||
+    !input.rows ||
+    input.rows.length === 0 ||
+    input.rows.length >= 5000
+  ) {
     return answer('unavailable');
   }
   const header = input.rows[0];
-  if (!header || header.length !== shape.headers.length ||
-      !shape.headers.every((value, i) => value === header[i])) {
+  if (
+    !header ||
+    header.length !== shape.headers.length ||
+    !shape.headers.every((value, i) => value === header[i])
+  ) {
     return answer('schema-blocked');
   }
   let matching = 0;
   let mismatch = false;
   for (const row of input.rows.slice(1)) {
     if (!Array.isArray(row)) return answer('schema-blocked');
-    if (row.length === 0 || row.every(v => v === null || v === '')) continue;
+    if (row.length === 0 || row.every((v) => v === null || v === '')) continue;
     // A corrupt nonempty row makes this store untrustworthy; fail closed.
     if (row.length !== shape.headers.length || typeof row[0] !== 'string') {
       return answer('schema-blocked');
