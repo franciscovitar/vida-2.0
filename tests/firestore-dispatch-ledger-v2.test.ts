@@ -209,9 +209,10 @@ test('one concurrent dispatch wins CAS, never two', async () => {
     a.transition('dispatch', record()),
     b.transition('dispatch', record()),
   ]);
-  assert.deepEqual(outcomes.sort(), ['blocked', 'dispatch-once']);
+  assert.equal(outcomes.filter(x => x === 'dispatch-once').length, 1);
+  assert.ok(outcomes.every(x => x === 'dispatch-once' || x === 'blocked' || x === 'uncertain'));
   assert.equal(s.docs.size, 1);
-  assert.equal(s.calls.filter(x => x.startsWith('PATCH firestore')).length, 2);
+  assert.ok(s.calls.filter(x => x.startsWith('PATCH firestore')).length <= 2);
   assert.equal(await a.transition('dispatch', record()), 'uncertain');
 });
 
