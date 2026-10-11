@@ -6,6 +6,7 @@ import {
   isEmailAuthorized,
   LOGIN_GOOGLE_SCOPES,
   normalizeEmail,
+  resolveAuthRedirectProxyUrl,
   resolveIdentityAllowedEmails,
 } from '@/lib/auth/authorize';
 
@@ -16,6 +17,7 @@ import {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET,
   trustHost: process.env.AUTH_TRUST_HOST === 'true',
+  redirectProxyUrl: resolveAuthRedirectProxyUrl(process.env),
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,

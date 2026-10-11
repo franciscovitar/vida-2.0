@@ -141,7 +141,11 @@ test('O9. callback exige refresh_token', () => {
   );
   assert.match(exchange, /no-refresh-token/);
   assert.match(exchange, /refresh_token/);
+  assert.match(exchange, /calendar\/v3\/calendars\/primary\/events/);
+  assert.match(exchange, /maxResults=1&fields=kind/);
   assert.doesNotMatch(exchange, /return \{ ok: true[^}]*access_token/);
+  assert.doesNotMatch(exchange, /return \{ ok: true[^}]*refreshToken/);
+  assert.match(exchange, /body\?\.cancel\(\)/);
   assert.doesNotMatch(exchange, /from ['"]googleapis['"]/);
   assert.match(noRefreshTokenMessage(), /prompt=consent/);
   const callback = readFileSync(
@@ -149,7 +153,8 @@ test('O9. callback exige refresh_token', () => {
     'utf8',
   );
   assert.match(callback, /no-refresh-token/);
-  assert.match(callback, /buildOAuthSuccessHtml\(exchanged\.refreshToken\)/);
+  assert.match(callback, /buildOAuthSuccessHtml\(\)/);
+  assert.doesNotMatch(callback, /exchanged\.refreshToken\s*\)/);
 });
 
 test('O10. rutas rechazadas en producción', () => {
@@ -173,11 +178,15 @@ test('O10. rutas rechazadas en producción', () => {
 test('O11. ningún secreto llega a errores', () => {
   const html = buildOAuthErrorHtml('Error', oauthErrorPageMessage('state-mismatch'));
   assert.doesNotMatch(html, /client_secret|ya29\.|refresh_token=|BEGIN PRIVATE/i);
-  const success = buildOAuthSuccessHtml('solo-para-test-local');
+  const success = buildOAuthSuccessHtml();
   assert.match(success, /no-referrer/);
   assert.match(success, /no-store/);
-  assert.match(success, /GOOGLE_CALENDAR_REFRESH_TOKEN/);
-  assert.match(success, /No lo pegues/);
+  assert.match(success, /solo lectura a Calendar/);
+  assert.match(success, /El token no se muestra ni se guarda/);
+  assert.doesNotMatch(
+    success,
+    /refresh_token|ya29\.|GOOGLE_CALENDAR_REFRESH_TOKEN|solo-para-test-local/i,
+  );
   assert.doesNotMatch(success, /localStorage|sessionStorage/);
 });
 

@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
 import { effectiveAssessmentReadiness, matchSubjectProgress } from '@/lib/study-engine/catalog';
@@ -137,6 +139,68 @@ test('F-AR7. una materia sin resumen no hereda exam-ready general', () => {
 test('F-AR8. evaluación finalizada no certifica readiness de examen activo', () => {
   const source = snapshot({ payload: { ...snapshot().payload, status: 'complete' } });
   const matched = matchSubjectProgress(subject(), [source]);
+  assert.equal(matched.progress, null);
+  assert.equal(effectiveAssessmentReadiness(matched), 'unknown');
+});
+
+test('F-AR9. Aprendizaje y Modo estudio exponen fallos de Assessment Progress', () => {
+  for (const path of [
+    ['components', 'learning', 'LearningHubV2.tsx'],
+    ['components', 'study-engine', 'StudyCatalog.tsx'],
+  ]) {
+    const source = readFileSync(join(process.cwd(), ...path), 'utf8');
+    assert.match(source, /assessmentProgress\.notice/);
+    assert.match(source, /role="status"/);
+  }
+});
+
+test('F-AR10. Modo estudio no atribuye readiness general al examen activo', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components', 'study-engine', 'StudyCatalog.tsx'),
+    'utf8',
+  );
+  assert.match(source, /effectiveAssessmentReadiness\(subject\)/);
+  assert.doesNotMatch(source, /progress\?\.payload\.readinessBand\s*\?\?\s*subject\.readinessBand/);
+});
+
+test('F-AR11. fecha oficial y fecha de snapshot divergentes invalidan el progreso', () => {
+  const matched = matchSubjectProgress(subject(), [snapshot({ assessmentDate: '2026-11-08' })]);
+  assert.equal(matched.progress, null);
+  assert.equal(effectiveAssessmentReadiness(matched), 'unknown');
+  assert.match(matched.evidenceNotice ?? '', /fecha del examen/);
+});
+
+test('F-AR12. fecha oficial desconocida no inventa un conflicto de fechas', () => {
+  const original = subject();
+  const matched = matchSubjectProgress(
+    subject({ assessment: { ...original.assessment!, date: null } }),
+    [snapshot()],
+  );
+  assert.equal(matched.progress?.payload.progressPercent, 62);
+});
+
+test('F-AR13. scope incompleto con porcentaje no certifica preparación de examen', () => {
+  const original = snapshot();
+  const matched = matchSubjectProgress(subject(), [
+    snapshot({ payload: { ...original.payload, scopeComplete: false } }),
+  ]);
+  assert.equal(matched.progress, null);
+  assert.equal(effectiveAssessmentReadiness(matched), 'unknown');
+  assert.match(matched.evidenceNotice ?? '', /alcance de examen completo/);
+});
+
+test('F-AR14. scope incompleto tampoco permite readiness positiva sin porcentaje', () => {
+  const original = snapshot();
+  const matched = matchSubjectProgress(subject(), [
+    snapshot({
+      payload: {
+        ...original.payload,
+        scopeComplete: false,
+        progressPercent: null,
+        readinessBand: 'developing',
+      },
+    }),
+  ]);
   assert.equal(matched.progress, null);
   assert.equal(effectiveAssessmentReadiness(matched), 'unknown');
 });
