@@ -237,11 +237,12 @@ test('PRO-V2-18. Herramientas tiene selector por tarea y falla cerrado si queda 
   assert.equal(stale.status, 'ready');
   assert.equal(stale.stale, true);
   assert.match(tools, /data\.status !== 'ready' \|\| !data\.snapshot \|\| data\.stale/);
-  assert.match(tools, /snapshot\.comparisonGroups\.map/);
+  assert.match(tools, /snapshot\.comparisonGroups\.find/);
+  assert.match(tools, /TOOL_TASKS\.map/);
   assert.match(tools, /Comparadores por tarea/);
   assert.match(tools, /Comparación sin ranking/);
   assert.match(tools, /limitProvenanceLabel/);
-  assert.match(route, /group\?: string/);
+  assert.match(route, /task\?: string; group\?: string/);
 });
 
 test('PRO-V2-19. Home carga sólo el snapshot que realmente renderiza', () => {
