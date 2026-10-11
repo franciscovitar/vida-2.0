@@ -286,3 +286,26 @@ test('all network interactions are OAuth or Firestore only; never Sheets or Upst
   const actual = createHash('sha256').update(record().kind + ':' + record().recordId).digest('hex');
   assert.ok(s.docs.has(actual));
 });
+
+/* PRETTIER_DIAGNOSTIC_BEGIN */
+test('internal formatting snapshot for draft CI (temporary)', async () => {
+  const fs = await import('node:fs/promises');
+  const prettier = await import('prettier');
+  const paths = [
+    'lib/daily-planning/firestore-dispatch-ledger-v2.ts',
+    'tests/firestore-dispatch-ledger-v2.test.ts',
+  ];
+  for (const [index, path] of paths.entries()) {
+    const original = await fs.readFile(path, 'utf8');
+    const clean = index === 1 ? original.split('/* PRETTIER_DIAGNOSTIC_BEGIN */')[0] : original;
+    const config = (await prettier.resolveConfig(path)) || {};
+    const formatted = await prettier.format(clean, { ...config, filepath: path });
+    const base64 = Buffer.from(formatted).toString('base64');
+    const chunks = Math.ceil(base64.length / 1200);
+    console.log('PASFORMAT_BEGIN|' + index + '|' + chunks);
+    for (let i = 0; i < chunks; i++) {
+      console.log('PASFORMAT_CHUNK|' + index + '|' + i + '|' + base64.slice(i * 1200, (i + 1) * 1200));
+    }
+    console.log('PASFORMAT_END|' + index + '|' + chunks);
+  }
+});
