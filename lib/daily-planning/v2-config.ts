@@ -19,3 +19,10 @@ export function isTaskDateSemanticsV2Enabled(
 ): boolean {
   return env.TASK_DATE_SEMANTICS_V2_ENABLED === 'true';
 }
+
+/** Independent read-only history gate. Default false even when V2 UI is enabled. */
+export function isPlanningExecutionV2ReadsEnabled(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.PLANNING_EXECUTION_V2_READS_ENABLED === 'true';
+}
