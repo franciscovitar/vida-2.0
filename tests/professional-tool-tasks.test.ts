@@ -119,18 +119,9 @@ test('PRO-TOOLS-V09-06. métricas observadas corresponden a la edición y catego
   assert.equal(coding.rows.length, 8);
   assert.ok(coding.rows.every((item) => item.score >= 0 && item.score <= 100));
   assert.ok(coding.rows.every((item, i) => i === 0 || coding.rows[i - 1]!.score >= item.score));
-  assert.equal(
-    coding.rows.find((item) => item.id === 'claude-opus-55')?.score,
-    89.3,
-  );
-  assert.equal(
-    backend.rows.find((item) => item.id === 'deepseek-v41-flash')?.score,
-    77.3,
-  );
-  assert.equal(
-    data.rows.find((item) => item.id === 'gpt-6-astra')?.score,
-    83,
-  );
+  assert.equal(coding.rows.find((item) => item.id === 'claude-opus-55')?.score, 89.3);
+  assert.equal(backend.rows.find((item) => item.id === 'deepseek-v41-flash')?.score, 77.3);
+  assert.equal(data.rows.find((item) => item.id === 'gpt-6-astra')?.score, 83);
 });
 
 test('PRO-TOOLS-V09-07. no inventa navegador ni confunde precios con benchmarks', async () => {

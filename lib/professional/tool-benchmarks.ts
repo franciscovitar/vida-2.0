@@ -89,7 +89,10 @@ export function benchmarkForTask(taskId: string, now = new Date()) {
         Object.values(entry.scores).length === 4 &&
         Object.values(entry.scores).every(
           (value) =>
-            typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100,
+            typeof value === 'number' &&
+            Number.isFinite(value) &&
+            value >= 0 &&
+            value <= 100,
         )
       );
     });

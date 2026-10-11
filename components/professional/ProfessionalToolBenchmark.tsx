@@ -69,7 +69,9 @@ export function ProfessionalToolBenchmark({ taskId }: { taskId: string }) {
           LiveBench · edición {source.release} · consultado {source.observedAt}
           {stale ? ' · corte histórico: requiere nueva consulta' : ''}.
         </span>
-        <a href={source.url} target="_blank" rel="noreferrer">Ver resultados y metodología</a>
+        <a href={source.url} target="_blank" rel="noreferrer">
+          Ver resultados y metodología
+        </a>
       </div>
       <p className={ui['benchmark-scope']}>
         Muestra deliberada de ocho modelos, no toda la clasificación. Cambian el esfuerzo y el acceso
