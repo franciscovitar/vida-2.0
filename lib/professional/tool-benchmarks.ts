@@ -62,53 +62,54 @@ const TASK_MATCHES: Readonly<Record<string, BenchmarkTaskMatch>> = {
     caveat: 'No usamos Agentic Coding para atribuir capacidad de navegación web ni autonomía con aplicaciones.',
   },
 };
-const DEFAULT_MATCH = TASK_MATCHES.coding!;
+const DEFAULT_MATCH: BenchmarkTaskMatch = TASK_MATCHES.coding!;
+
+
+type BenchmarkRow = (typeof snapshot.models)[number];
+
+function isValidModel(entry: BenchmarkRow, seen: Set<string>): boolean {
+  if (!entry.id || seen.has(entry.id) || !entry.name || !entry.provider || !entry.effort) {
+    return false;
+  }
+  seen.add(entry.id);
+  const values = Object.values(entry.scores);
+  return (
+    values.length === 4 &&
+    values.every((value) => Number.isFinite(value) && value >= 0 && value <= 100)
+  );
+}
 
 export function benchmarkForTask(taskId: string, now = new Date()) {
   const match = TASK_MATCHES[taskId] ?? DEFAULT_MATCH;
   const source = snapshot.source;
-  const raw = snapshot.models;
-  const observedTime = Date.parse(source.observedAt + 'T00:00:00Z');
+  const observed = Date.parse(source.observedAt + 'T00:00:00Z');
   const stale =
-    !Number.isFinite(observedTime) ||
-    now.getTime() - observedTime > source.staleAfterDays * 86400000;
+    !Number.isFinite(observed) ||
+    now.getTime() - observed > source.staleAfterDays * 86400000;
 
-  const ids = new Set<string>();
-  const isValid =
+  const seen = new Set<string>();
+  const valid =
     source.kind === 'PUBLIC_BENCHMARK_SNAPSHOT' &&
     source.url.startsWith('https://') &&
     /^\d{4}-\d{2}-\d{2}$/.test(source.release) &&
-    Number.isFinite(observedTime) &&
-    raw.length >= 4 &&
-    raw.every((entry) => {
-      if (!entry.id || ids.has(entry.id) || !entry.name || !entry.provider || !entry.effort) {
-        return false;
-      }
-      ids.add(entry.id);
-      return (
-        Object.values(entry.scores).length === 4 &&
-        Object.values(entry.scores).every(
-          (value) =>
-            typeof value === 'number' &&
-            Number.isFinite(value) &&
-            value >= 0 &&
-            value <= 100,
-        )
-      );
-    });
+    Number.isFinite(observed) &&
+    snapshot.models.length >= 4 &&
+    snapshot.models.every((entry) => isValidModel(entry, seen));
 
-  const rows =
-    isValid && match.metric !== null
-      ? raw
-          .map((entry) => ({
-            id: entry.id,
-            name: entry.name,
-            provider: entry.provider,
-            effort: entry.effort,
-            score: entry.scores[match.metric!],
-          }))
-          .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'es'))
-      : [];
+  const metric = match.metric;
+  if (!valid || metric === null) {
+    return { match, source, stale, valid, rows: [] };
+  }
 
-  return { match, source, stale, valid: isValid, rows };
+  const rows = snapshot.models
+    .map((entry) => ({
+      id: entry.id,
+      name: entry.name,
+      provider: entry.provider,
+      effort: entry.effort,
+      score: entry.scores[metric],
+    }))
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'es'));
+
+  return { match, source, stale, valid, rows };
 }

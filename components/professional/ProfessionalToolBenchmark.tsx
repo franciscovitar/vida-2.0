@@ -23,32 +23,29 @@ export function ProfessionalToolBenchmark({ taskId }: { taskId: string }) {
       {hasRows ? (
         <>
           <p className={ui['benchmark-explain']}>
-            Resultados publicados por LiveBench en una misma categoría y edición. Son
-            configuraciones de <strong>modelos</strong>, no planes de ChatGPT, Claude o Cursor.
-            El puntaje no es una probabilidad de éxito en tu proyecto.
+            Resultados publicados por LiveBench. Son modelos, no planes de ChatGPT, Claude o Cursor.
+          </p>
+          <p className={ui['benchmark-explain']}>
+            Los puntajes no son probabilidades de éxito para tu proyecto.
           </p>
           <div className={ui['benchmark-axis']} aria-hidden="true">
             <span>0</span>
             <span>50</span>
             <span>100</span>
           </div>
-          <div
-            className={ui['benchmark-rows']}
-            role="list"
-            aria-label="Resultados de modelos en el benchmark"
-          >
+          <div className={ui['benchmark-rows']} role="list">
             {rows.map((entry) => (
               <div className={ui['benchmark-row']} key={entry.id} role="listitem">
                 <div className={ui['benchmark-model']}>
                   <strong>{entry.name}</strong>
-                  <span>{entry.provider} · {entry.effort}</span>
+                  <span>
+                    {entry.provider} · {entry.effort}
+                  </span>
                 </div>
                 <div
                   className={ui['benchmark-track']}
                   role="img"
-                  aria-label={
-                    entry.name + ': ' + entry.score.toFixed(1) + ' de 100 en ' + match.label
-                  }
+                  aria-label={entry.name + ': ' + entry.score.toFixed(1) + ' de 100'}
                 >
                   <span className={ui['benchmark-fill']} style={{ width: entry.score + '%' }} />
                 </div>
@@ -74,10 +71,13 @@ export function ProfessionalToolBenchmark({ taskId }: { taskId: string }) {
         </a>
       </div>
       <p className={ui['benchmark-scope']}>
-        Muestra deliberada de ocho modelos, no toda la clasificación. Cambian el esfuerzo y el acceso
-        entre configuraciones. No se infiere su disponibilidad en un plan específico, ni se compara
-        la calidad con el costo mensual de suscripción. V09 es evidencia pública orientativa;
-        las evaluaciones propias y V10 (costo real por tarea resuelta) siguen pendientes.
+        Muestra de ocho configuraciones, no toda la clasificación publicada.
+      </p>
+      <p className={ui['benchmark-scope']}>
+        Su disponibilidad no se deduce de los planes ni de su precio mensual.
+      </p>
+      <p className={ui['benchmark-scope']}>
+        V09 es evidencia pública orientativa. V10 y las pruebas personales siguen pendientes.
       </p>
     </section>
   );
