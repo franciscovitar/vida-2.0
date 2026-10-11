@@ -4,6 +4,8 @@
  * Observed effort does not establish mastery, project progress or a habit streak.
  */
 const PREFIX = 'vida2:tasks-daily-planning:v2:execution:';
+const CORRECTION_PREFIX = 'correction-of:';
+const OBSERVATION_PATTERN = /^vida2:tasks-daily-planning:v2:execution:[0-9a-f]{64}$/;
 const HEADERS = [
   'Observation ID', 'Fecha', 'Registrado en', 'Activity Type', 'Domain',
   'Entity Type', 'Canonical Ref', 'Actividad', 'Minutos declarados',
@@ -68,7 +70,7 @@ function parseRow(row: readonly unknown[]): ExecutionV2Observation | null {
   if (row.length !== HEADERS.length) return null;
   const [id,date,recordedAt,activityType,domain,entityType,canonicalRaw,activity,
     minutesRaw,startRaw,executionState,evidenceState,progressEffect,sourceClass,confidence,refsRaw,version] = row;
-  if (typeof id !== 'string' || !/^vida2:tasks-daily-planning:v2:execution:[0-9a-f]{64}$/.test(id) ||
+  if (typeof id !== 'string' || !OBSERVATION_PATTERN.test(id) ||
       !civilDay(date) || !validRecordedAt(recordedAt) || version !== 'planning-execution-v2' ||
       !has(activityType,ACTIVITY) || !has(domain,DOMAIN) || !has(entityType,ENTITY) ||
       (canonicalRaw !== '' && !safeRef(canonicalRaw)) ||
@@ -84,10 +86,23 @@ function parseRow(row: readonly unknown[]): ExecutionV2Observation | null {
   let refs: unknown;
   try {refs = JSON.parse(refsRaw);} catch {return null;}
   if (!Array.isArray(refs) || refs.length > 8 || !refs.every(safeRef)) return null;
+  // A reference to a past observation can be audit provenance. Only a typed
+  // correction-of:<Observation ID> token means supersession. Reject malformed
+  // typed links rather than interpreting them as harmless provenance.
+  if (refs.some(ref => ref.startsWith(CORRECTION_PREFIX) &&
+      !OBSERVATION_PATTERN.test(ref.slice(CORRECTION_PREFIX.length)))) return null;
   return { id,date,recordedAt,activityType,domain,entityType,
     canonicalRef:canonicalRaw === '' ? null : canonicalRaw as string,activity,
     declaredMinutes:minutes as number | null,realStart:realStart as string | null,
     executionState,evidenceState,progressEffect,sourceClass,confidence,evidenceRefs:refs };
+}
+function sameCorrectionSubject(before: ExecutionV2Observation, after: ExecutionV2Observation): boolean {
+  if (before.date !== after.date || before.activityType !== after.activityType ||
+      before.domain !== after.domain || before.entityType !== after.entityType) return false;
+  // A grounded canonical entity cannot be changed to another via an execution
+  // correction. When one side has no ref, require the same label instead.
+  if (before.canonicalRef && after.canonicalRef) return before.canonicalRef === after.canonicalRef;
+  return before.activity.trim().toLowerCase() === after.activity.trim().toLowerCase();
 }
 function semanticFingerprint(row: ExecutionV2Observation): string {
   return JSON.stringify({ ...row, recordedAt: null, evidenceRefs: [...row.evidenceRefs].sort() });
@@ -126,13 +141,17 @@ export function selectPlanningExecutionV2Day(
 
   const successors = new Map<string,string>();
   for (const record of known.values()) {
-    const parents = record.evidenceRefs.filter(ref => ref.startsWith(PREFIX));
+    const parents = record.evidenceRefs.filter(ref => ref.startsWith(CORRECTION_PREFIX))
+      .map(ref => ref.slice(CORRECTION_PREFIX.length));
     if (parents.length > 1) {
       return {status:'invalid',current:[],invalidRows:invalidRows+1,notice:'Cadena de corrección ambigua.'};
     }
     const parent = parents[0];
     if (!parent) continue;
-    if (!known.has(parent) || parent === record.id || successors.has(parent)) {
+    const prior = known.get(parent);
+    if (!prior || parent === record.id || successors.has(parent) ||
+        !sameCorrectionSubject(prior, record) ||
+        Date.parse(record.recordedAt) < Date.parse(prior.recordedAt)) {
       return {status:'invalid',current:[],invalidRows:invalidRows+1,notice:'Cadena de corrección inválida.'};
     }
     successors.set(parent,record.id);
