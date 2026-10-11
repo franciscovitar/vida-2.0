@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 
 import { NOTION_DATABASES } from '@/lib/notion/constants';
+import { PREVIEW_AUTH_REDIRECT_PROXY_URL } from '@/lib/auth/authorize';
 import {
   buildPreviewPreflight,
   buildRuntimeReadiness,
@@ -21,6 +22,7 @@ function previewEnv(): Record<string, string> {
     AUTH_GOOGLE_ID: 'google-login-id-fixture',
     AUTH_GOOGLE_SECRET: 'google-login-secret-fixture',
     AUTH_ALLOWED_EMAILS: 'authorized@example.test',
+    AUTH_REDIRECT_PROXY_URL: PREVIEW_AUTH_REDIRECT_PROXY_URL,
     DATA_SOURCE: 'google',
     GOOGLE_SERVICE_ACCOUNT_EMAIL: 'service@example.test',
     GOOGLE_PRIVATE_KEY: 'private-key-fixture',
@@ -64,6 +66,25 @@ test('11A-2. el preflight exige confirmar entorno Preview', () => {
   assert.equal(result.ready, false);
   assert.ok(issueCodes(env).includes('environment-not-preview'));
   assert.equal(resolveRuntimeEnvironment(env), 'local');
+});
+
+test('11A-2A. Preview exige el redirect proxy QA exacto y sanitizado', () => {
+  const env = previewEnv();
+  delete env.AUTH_REDIRECT_PROXY_URL;
+  assert.ok(issueCodes(env).includes('auth-preview-proxy-not-stable'));
+
+  env.AUTH_REDIRECT_PROXY_URL = 'https://untrusted.example/api/auth';
+  assert.ok(issueCodes(env).includes('auth-preview-proxy-not-stable'));
+});
+
+test('11A-2B. Preview rechaza URLs base fijas que rompen callbacks por deployment', () => {
+  const env = previewEnv();
+  env.AUTH_URL = 'https://deployment.example';
+  assert.ok(issueCodes(env).includes('auth-preview-fixed-base-url'));
+
+  delete env.AUTH_URL;
+  env.NEXTAUTH_URL = 'https://deployment.example';
+  assert.ok(issueCodes(env).includes('auth-preview-fixed-base-url'));
 });
 
 test('11A-3. fuentes mock no certifican el Preview final', () => {

@@ -3,6 +3,19 @@
  */
 export type EnvLike = Record<string, string | undefined>;
 
+export const PREVIEW_AUTH_REDIRECT_PROXY_URL =
+  'https://vida-2-0-git-vida-qa-genova.vercel.app/api/auth';
+
+/**
+ * Keep the OAuth redirect proxy limited to Vercel Preview and one stable QA alias.
+ * The empty value also prevents Auth.js from inferring a proxy URL in Production/local.
+ */
+export function resolveAuthRedirectProxyUrl(env: EnvLike): string {
+  if (env.VERCEL_ENV !== 'preview') return '';
+  const value = env.AUTH_REDIRECT_PROXY_URL?.trim();
+  return value === PREVIEW_AUTH_REDIRECT_PROXY_URL ? value : '';
+}
+
 export type AuthDenyReason =
   | 'not-configured'
   | 'missing-email'

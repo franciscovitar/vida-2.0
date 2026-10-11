@@ -27,6 +27,7 @@
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
     "verify": "npm run check && npm run build",
     "preview:check": "tsx scripts/preview-preflight.ts",
+    "phase-f:check": "node scripts/phase-f-readonly-preflight.mjs",
     "qa:block1": "tsx scripts/block-1-final-qa.ts"
   },
   "dependencies": {

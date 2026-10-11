@@ -1,6 +1,6 @@
 /**
  * Callback OAuth Calendar (solo desarrollo local).
- * Muestra el refresh_token una sola vez en HTML; no lo guarda ni lo registra.
+ * Confirma el intercambio OAuth sin revelar ni persistir tokens.
  */
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -97,12 +97,12 @@ export async function GET(request: NextRequest) {
     }
     return htmlResponse(
       buildOAuthErrorHtml(
-        'Intercambio fallido',
-        'No se pudo completar el intercambio del código. Volvé a iniciar el flujo.',
+        'Prueba fallida',
+        'No se pudo completar la prueba de lectura de Calendar. Volvé a iniciar el flujo.',
       ),
       400,
     );
   }
 
-  return htmlResponse(buildOAuthSuccessHtml(exchanged.refreshToken), 200);
+  return htmlResponse(buildOAuthSuccessHtml(), 200);
 }

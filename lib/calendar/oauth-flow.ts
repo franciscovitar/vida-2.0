@@ -187,9 +187,8 @@ export function noRefreshTokenMessage(): string {
   ].join(' ');
 }
 
-/** HTML mínimo de éxito: refresh token una sola vez, sin analytics ni storage. */
-export function buildOAuthSuccessHtml(refreshToken: string): string {
-  const token = escapeHtml(refreshToken);
+/** HTML mínimo de éxito: confirma OAuth sin revelar ni persistir tokens. */
+export function buildOAuthSuccessHtml(): string {
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -197,35 +196,15 @@ export function buildOAuthSuccessHtml(refreshToken: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Cache-Control" content="no-store" />
-  <title>Calendar OAuth — refresh token</title>
+  <title>Calendar OAuth — prueba local</title>
   <style>
     body{font-family:system-ui,sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem;line-height:1.45;color:#111;background:#fafafa}
-    code,pre{font-family:ui-monospace,monospace;font-size:0.85rem;word-break:break-all}
-    pre{padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:#fff}
-    .warn{padding:0.75rem;border:1px solid #c4a000;background:#fff8e1;border-radius:6px;margin:1rem 0}
-    button{padding:0.45rem 0.85rem;cursor:pointer}
   </style>
 </head>
 <body>
-  <h1>Refresh token listo</h1>
-  <p>Copiá este valor manualmente a <code>GOOGLE_CALENDAR_REFRESH_TOKEN</code> en <code>.env.local</code>.</p>
-  <div class="warn">
-    <strong>No lo pegues</strong> en chats, commits, capturas ni issues.
-    Cerrá esta pestaña después de copiarlo y reiniciá el servidor de desarrollo.
-  </div>
-  <pre id="rt" role="textbox" aria-label="Refresh token">${token}</pre>
-  <p><button type="button" id="copy">Copiar</button> <span id="status" aria-live="polite"></span></p>
-  <script>
-    document.getElementById('copy').addEventListener('click', async function () {
-      var text = document.getElementById('rt').textContent || '';
-      try {
-        await navigator.clipboard.writeText(text);
-        document.getElementById('status').textContent = 'Copiado.';
-      } catch (e) {
-        document.getElementById('status').textContent = 'No se pudo copiar automáticamente; seleccioná el texto a mano.';
-      }
-    });
-  </script>
+  <h1>Intercambio OAuth correcto</h1>
+  <p>La prueba local confirmó el acceso de solo lectura a Calendar. El token no se muestra ni se guarda.</p>
+  <p>Cerrá esta pestaña. No se habilitaron escrituras ni cambios en Production.</p>
 </body>
 </html>`;
 }
