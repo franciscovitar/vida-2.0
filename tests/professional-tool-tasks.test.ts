@@ -99,7 +99,7 @@ test('PRO-TOOLS-V09-04. conserva fuente de modelos y no inventa una versión aus
     join(process.cwd(), 'components/professional/ProfessionalTools.tsx'),
     'utf8',
   );
-  assert.match(tools, /V09\s+\(calidad por tarea\)\s+y\s+V10\s+\(costo por resultado útil\)/);
+  assert.match(tools, /V09\s+\(calidad por\s+tarea\)\s+y\s+V10\s+\(costo por resultado útil\)/);
   assert.match(tools, /No hay un mejor modelo verificado|no hay un mejor modelo verificado/i);
   assert.doesNotMatch(tools, /qualityScore|performanceScore|winnerModel/);
 });

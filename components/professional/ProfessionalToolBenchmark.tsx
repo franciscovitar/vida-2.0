@@ -32,7 +32,11 @@ export function ProfessionalToolBenchmark({ taskId }: { taskId: string }) {
             <span>50</span>
             <span>100</span>
           </div>
-          <div className={ui['benchmark-rows']} role="list" aria-label="Resultados de modelos en el benchmark">
+          <div
+            className={ui['benchmark-rows']}
+            role="list"
+            aria-label="Resultados de modelos en el benchmark"
+          >
             {rows.map((entry) => (
               <div className={ui['benchmark-row']} key={entry.id} role="listitem">
                 <div className={ui['benchmark-model']}>
@@ -42,7 +46,9 @@ export function ProfessionalToolBenchmark({ taskId }: { taskId: string }) {
                 <div
                   className={ui['benchmark-track']}
                   role="img"
-                  aria-label={entry.name + ': ' + entry.score.toFixed(1) + ' de 100 en ' + match.label}
+                  aria-label={
+                    entry.name + ': ' + entry.score.toFixed(1) + ' de 100 en ' + match.label
+                  }
                 >
                   <span className={ui['benchmark-fill']} style={{ width: entry.score + '%' }} />
                 </div>

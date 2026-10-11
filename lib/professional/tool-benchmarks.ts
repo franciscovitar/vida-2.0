@@ -69,7 +69,8 @@ export function benchmarkForTask(taskId: string, now = new Date()) {
   const source = snapshot.source;
   const raw = snapshot.models;
   const observedTime = Date.parse(source.observedAt + 'T00:00:00Z');
-  const stale = !Number.isFinite(observedTime) ||
+  const stale =
+    !Number.isFinite(observedTime) ||
     now.getTime() - observedTime > source.staleAfterDays * 86400000;
 
   const ids = new Set<string>();
@@ -84,21 +85,27 @@ export function benchmarkForTask(taskId: string, now = new Date()) {
         return false;
       }
       ids.add(entry.id);
-      return Object.values(entry.scores).length === 4 &&
+      return (
+        Object.values(entry.scores).length === 4 &&
         Object.values(entry.scores).every(
-          (value) => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100,
-        );
+          (value) =>
+            typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100,
+        )
+      );
     });
 
-  const rows = isValid && match.metric !== null
-    ? raw.map((entry) => ({
-        id: entry.id,
-        name: entry.name,
-        provider: entry.provider,
-        effort: entry.effort,
-        score: entry.scores[match.metric!],
-      })).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'es'))
-    : [];
+  const rows =
+    isValid && match.metric !== null
+      ? raw
+          .map((entry) => ({
+            id: entry.id,
+            name: entry.name,
+            provider: entry.provider,
+            effort: entry.effort,
+            score: entry.scores[match.metric!],
+          }))
+          .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'es'))
+      : [];
 
   return { match, source, stale, valid: isValid, rows };
 }
