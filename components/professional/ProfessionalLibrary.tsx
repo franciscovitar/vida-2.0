@@ -100,8 +100,7 @@ export function ProfessionalLibrary({
         <p className={styles.eyebrow}>Biblioteca profesional</p>
         <h2 id="professional-library-title">Guardado no significa pendiente</h2>
         <p>
-          Acá viven explicaciones y referencias que pueden ser útiles más adelante. No hay backlog,
-          streak, artículos sin leer ni obligación de “ponerse al día”.
+          Explicaciones y referencias para consultar cuando las necesites, sin tareas pendientes.
         </p>
         <div className={styles['library-meta']}>
           <span>{editorialSnapshot?.archive.length ?? 0} artículos históricos</span>
@@ -114,8 +113,7 @@ export function ProfessionalLibrary({
           <p className={styles.eyebrow}>Deep dives profesionales</p>
           <h3 id="library-deep-dives-title">Explicaciones conectadas con tu perfil</h3>
           <p>
-            Son artículos históricos que el índice canónico relaciona explícitamente con una
-            prioridad o tecnología profesional.
+            Artículos históricos vinculados a tus prioridades y tecnologías.
           </p>
         </div>
 
@@ -163,8 +161,7 @@ export function ProfessionalLibrary({
             <p className={styles.eyebrow}>Archivo histórico</p>
             <h3 id="library-history-title">Otras explicaciones que siguen disponibles</h3>
             <p>
-              Mantienen sus URLs históricas de Intelligence. Biblioteca las reúne; no las convierte
-              en estado profesional actual.
+              Conservamos sus enlaces originales; no describen necesariamente tu estado actual.
             </p>
           </div>
 
@@ -190,8 +187,8 @@ export function ProfessionalLibrary({
           <p className={styles.eyebrow}>Tecnología y referencias</p>
           <h3 id="library-technology-title">Opciones guardadas para el problema correcto</h3>
           <p>
-            Una referencia guardada no implica instalarla, pagarla ni aprenderla. Antes de usarla,
-            el PAS vuelve a verificar mantenimiento, licencia, seguridad, solapamiento y costo.
+            Guardar una herramienta no implica adoptarla. Se vuelven a verificar mantenimiento,
+            licencia, seguridad y costo antes de usarla.
           </p>
         </div>
 
