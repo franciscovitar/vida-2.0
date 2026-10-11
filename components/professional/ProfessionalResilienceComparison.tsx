@@ -2,11 +2,7 @@
 
 import { useState } from 'react';
 
-import type {
-  CareerResilienceData,
-  CareerResilienceHorizon,
-  CareerResilienceHorizonKey,
-} from '@/types/career-resilience';
+import type { CareerResilienceData, CareerResilienceHorizonKey } from '@/types/career-resilience';
 
 import { resilienceSpanishLists } from '@/lib/professional/resilience-copy-es';
 
@@ -66,77 +62,6 @@ const CONFIDENCE: Record<string, string> = {
   LOW: 'Baja',
 };
 
-const NUMBER = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 });
-
-type RangeMetric = {
-  key: 'pressure' | 'resilience' | 'compression';
-  title: string;
-  range: readonly [number, number];
-  suffix: string;
-  unit: string;
-  explanation: string;
-};
-
-function RangeBand({ metric }: { metric: RangeMetric }) {
-  const [low, high] = metric.range;
-  return (
-    <article className={styles.metric}>
-      <div className={styles['metric-head']}>
-        <h4>{metric.title}</h4>
-        <strong className={styles.value}>
-          {NUMBER.format(low)}–{NUMBER.format(high)}
-          {metric.suffix}
-        </strong>
-      </div>
-      <div className={styles['range-track']} aria-hidden="true">
-        <div
-          className={styles['range-band']}
-          data-kind={metric.key}
-          style={{ left: String(low) + '%', width: String(high - low) + '%' }}
-        />
-      </div>
-      <div className={styles.scale} aria-hidden="true">
-        <span>0</span>
-        <span>100</span>
-      </div>
-      <p className={styles['metric-detail']}>{metric.explanation}</p>
-      <p className={styles.unit}>{metric.unit}</p>
-    </article>
-  );
-}
-
-function metrics(horizon: CareerResilienceHorizon): RangeMetric[] {
-  return [
-    {
-      key: 'pressure',
-      title: 'Presión de sustitución por IA sola',
-      range: horizon.aiAloneSubstitutionPressurePctRange,
-      suffix: '%',
-      unit: 'Estimación porcentual de escenario, sin calibración',
-      explanation:
-        'Explora cuánto trabajo valioso podría realizar una IA con supervisión mínima. No representa una probabilidad de despido.',
-    },
-    {
-      key: 'resilience',
-      title: 'Resiliencia de un profesional que usa IA',
-      range: horizon.aiNativeResilienceIndexRange,
-      suffix: '',
-      unit: 'Índice heurístico de 0 a 100; no es una probabilidad',
-      explanation:
-        'Mayor valor significa que una persona actualizada, con criterio y responsabilidad, podría conservar más valor económico.',
-    },
-    {
-      key: 'compression',
-      title: 'Presión para reducir plantillas',
-      range: horizon.headcountCompressionIndexRange,
-      suffix: '',
-      unit: 'Índice heurístico de 0 a 100; no es porcentaje de empleos perdidos',
-      explanation:
-        'Un rol puede seguir existiendo y ser útil mientras la productividad permite realizar el mismo trabajo con menos personas.',
-    },
-  ];
-}
-
 export function ProfessionalResilienceComparison({ data }: { data: CareerResilienceData }) {
   const [roleId, setRoleId] = useState('software-engineer');
   const [horizonKey, setHorizonKey] = useState<CareerResilienceHorizonKey>('Y1');
@@ -164,8 +89,8 @@ export function ProfessionalResilienceComparison({ data }: { data: CareerResilie
           ¿Cómo cambia el valor de tu trabajo si avanza la automatización?
         </h2>
         <p>
-          Compará escenarios de un profesional que se mantiene actualizado y utiliza IA. Las bandas
-          reflejan estimaciones de PAS, no frecuencias observadas ni predicciones de desempleo.
+          Elegí profesión y horizonte para explorar cómo pueden cambiar tres dimensiones distintas.
+          Las bandas son escenarios de PAS, no predicciones de desempleo.
         </p>
       </div>
 
@@ -181,10 +106,9 @@ export function ProfessionalResilienceComparison({ data }: { data: CareerResilie
       >
         <strong>Escenarios exploratorios · sin calibración estadística</strong>
         <p>
-          Un rango de 60–95% NO significa una probabilidad del 60–95% de perder el empleo, ni un
-          porcentaje observado de puestos automatizados. Es un supuesto de escenario sobre capacidad
-          de IA. Los otros dos rangos son índices heurísticos, no probabilidades ni porcentajes de
-          despidos.
+          Sustitución expresa capacidad de IA en un escenario hipotético; resiliencia y reducción de
+          plantillas son índices de 0 a 100. Ninguna de estas escalas representa tu probabilidad de
+          despido ni puestos de trabajo perdidos.
         </p>
       </aside>
 
@@ -233,12 +157,6 @@ export function ProfessionalResilienceComparison({ data }: { data: CareerResilie
           {selectedHorizon?.label} · confianza{' '}
           {CONFIDENCE[horizon.confidence]?.toLowerCase() ?? 'no disponible'}
         </span>
-      </div>
-
-      <div className={styles['metrics-grid']}>
-        {metrics(horizon).map((metric) => (
-          <RangeBand key={metric.key} metric={metric} />
-        ))}
       </div>
 
       <ProfessionalResilienceTimeline role={role} selected={horizonKey} onSelect={setHorizonKey} />

@@ -189,14 +189,15 @@ export function ProfessionalSkillsDecision({
                   </p>
                 </div>
                 <div>
-                  <p className={styles.kicker}>Señal y próxima acción</p>
-                  <p className={styles['why-now']}>{item.whyNow}</p>
-                  <div className={styles['practice-block']}>
-                    <strong>Práctica</strong>
-                    <p>{item.practiceContract}</p>
-                  </div>
+                  <p className={styles.kicker}>Acción y evidencia</p>
+                  <p>Esta capacidad se trabaja en la cola de crecimiento, más abajo.</p>
                   <details>
-                    <summary>Qué evidencia falta conseguir</summary>
+                    <summary>Ver motivo, práctica y evidencia requerida</summary>
+                    <p className={styles['why-now']}>{item.whyNow}</p>
+                    <div className={styles['practice-block']}>
+                      <strong>Práctica</strong>
+                      <p>{item.practiceContract}</p>
+                    </div>
                     <p>{item.evidenceTarget}</p>
                   </details>
                 </div>
