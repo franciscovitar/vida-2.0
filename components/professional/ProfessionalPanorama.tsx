@@ -67,7 +67,6 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
   const snapshot = data.snapshot;
   const activePriority = snapshot.growth.items[0];
   const marketSignal = snapshot.market.globalSignals[0];
-  const forecastSignal = snapshot.forecast.items[0];
   const currentMoves = snapshot.nowMoves.slice(0, 3);
 
   return (
@@ -114,7 +113,6 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
                 <DecisionBadge value="ACT" />
               </div>
               <h3>{activePriority.capability}</h3>
-              <p>{activePriority.whyNow}</p>
               <p className={styles['panorama-action']}>
                 <Link href="/professional/crecimiento">Ver práctica y evidencia de cierre →</Link>
               </p>
@@ -128,16 +126,8 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
             </div>
             <h3>La base de software sigue siendo correcta</h3>
             <p>
-              <strong>Qué se confirma:</strong> la evidencia actual no justifica abandonar
-              software/web.
-            </p>
-            <p>
-              <strong>Por qué importa:</strong> {snapshot.forecast.direction}
-            </p>
-            <p className={styles['panorama-action']}>
-              <strong>Para vos:</strong>{' '}
-              {forecastSignal?.aiInteraction ??
-                'Profundizá el criterio de sistema y operación antes de perseguir otra moda.'}
+              No hay evidencia para abandonar software/web. El siguiente paso es ganar profundidad
+              en sistemas reales.
             </p>
           </article>
 
@@ -152,16 +142,8 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
               <h3>
                 {marketSignal.title} · {marketSignal.value}
               </h3>
-              <p>
-                <strong>Qué cambió / se confirma:</strong> {marketSignal.explanation}
-              </p>
-              <p>
-                <strong>Por qué importa:</strong> es una señal estructural para decidir dónde
-                profundizar, no una predicción individual.
-              </p>
               <p className={styles['panorama-action']}>
-                <strong>Para vos:</strong> seguí la señal en Mercado y mantené visibles su geografía
-                y período antes de cambiar el plan.
+                <Link href="/professional/mercado">Ver la evidencia en Mercado →</Link>
               </p>
             </article>
           ) : null}
@@ -187,7 +169,6 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
                   <DecisionBadge value={moveDecision(move.route)} />
                 </div>
                 <h3>{move.title}</h3>
-                <p>{move.why}</p>
               </div>
             </article>
           ))}

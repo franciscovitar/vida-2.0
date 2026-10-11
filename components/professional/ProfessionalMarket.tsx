@@ -73,260 +73,215 @@ export function ProfessionalMarket({
         </div>
       ) : null}
 
-      <section className={styles['market-hero']} aria-labelledby="professional-market-title">
-        <p className={styles.eyebrow}>Mercado profesional · observado {market.observedAt}</p>
-        <h2 id="professional-market-title">Dónde hay señal y qué significa</h2>
-        <p>{market.headline}</p>
-        <div className={styles['market-meta']}>
-          <span>Argentina separada de referencias internacionales</span>
-          <span>Roles objetivo sin ranking universal</span>
-          <span>Sin score de empleabilidad ni remote fit</span>
-        </div>
-      </section>
-
-      {detail ? (
-        <section className={styles['market-section']} aria-labelledby="market-role-fit-title">
-          <div className={styles['market-heading']}>
-            <p className={styles.eyebrow}>Roles objetivo y barrera de entrada</p>
-            <h3 id="market-role-fit-title">Mejor encaje actual, sin convertirlo en leaderboard</h3>
-            <p>{detail.rule}</p>
-          </div>
-
-          <div className={styles['market-role-fit-grid']}>
-            {targetRoles.map((role) => (
-              <article className={styles['market-role-fit']} key={role.id}>
-                <div className={styles['market-role-head']}>
-                  <h4>{role.name}</h4>
-                  <span>verificación personal pendiente</span>
-                </div>
-                <p>
-                  Evidencia actual: {role.evidence.demonstrated} facetas demostradas ·{' '}
-                  {role.evidence.practiced} practicadas.
-                </p>
-                {role.macroSignals.slice(0, 2).map((signal) => (
-                  <p key={signal}>{signal}</p>
-                ))}
-                {role.remoteSamples.length > 0 ? (
-                  <details className={styles['market-details']}>
-                    <summary>Ver muestras remotas y límites</summary>
-                    <div className={styles['market-role-list']}>
-                      {role.remoteSamples.slice(0, 3).map((sample) => (
-                        <article key={`${role.id}-${sample.sample}`}>
-                          <span className={styles['market-kicker']}>
-                            {sample.geography} · {sample.observedAt}
-                          </span>
-                          <p>{sample.sample}</p>
-                        </article>
-                      ))}
-                      {role.unresolved.map((item) => (
-                        <article key={item}>
-                          <p>{item}</p>
-                        </article>
-                      ))}
-                    </div>
-                  </details>
-                ) : null}
-              </article>
-            ))}
-          </div>
-
-          <div className={styles['market-seniority-grid']}>
-            <article>
-              <span className={styles['market-kicker']}>
-                {detail.seniorityContext.geography} · {detail.seniorityContext.period}
-              </span>
-              <h4>Seniority local</h4>
-              <dl className={styles['market-seniority-levels']}>
-                {Object.entries(detail.seniorityContext.levels).map(([label, definition]) => (
-                  <div key={label}>
-                    <dt>{label}</dt>
-                    <dd>{definition}</dd>
-                  </div>
-                ))}
-              </dl>
-              <a href={detail.seniorityContext.sourceUrl} rel="noreferrer" target="_blank">
-                {detail.seniorityContext.sourceLabel} →
-              </a>
-            </article>
-            <article>
-              <span className={styles['market-kicker']}>Cómo leer la entrada</span>
-              <h4>No hay un “entry barrier score” universal</h4>
-              <p>
-                Las muestras remotas sirven para ver requisitos y seniority observados, no para
-                estimar una probabilidad personal de contratación.
-              </p>
-              <p>{detail.seniorityContext.note}</p>
-            </article>
+      <details className={styles['market-details']}>
+        <summary>Ver contexto adicional, fuentes y explicaciones por profesión</summary>
+        <section className={styles['market-hero']} aria-labelledby="professional-market-title">
+          <p className={styles.eyebrow}>Mercado profesional · observado {market.observedAt}</p>
+          <h2 id="professional-market-title">Dónde hay señal y qué significa</h2>
+          <p>{market.headline}</p>
+          <div className={styles['market-meta']}>
+            <span>Argentina separada de referencias internacionales</span>
+            <span>Roles objetivo sin ranking universal</span>
+            <span>Sin score de empleabilidad ni remote fit</span>
           </div>
         </section>
-      ) : null}
 
-      <section className={styles['market-section']} aria-labelledby="market-demand-title">
-        <div className={styles['market-heading']}>
-          <p className={styles.eyebrow}>Demanda y crecimiento</p>
-          <h3 id="market-demand-title">Señales estructurales</h3>
-        </div>
+        {detail ? (
+          <section className={styles['market-section']} aria-labelledby="market-role-fit-title">
+            <div className={styles['market-heading']}>
+              <p className={styles.eyebrow}>Roles objetivo y barrera de entrada</p>
+              <h3 id="market-role-fit-title">
+                Mejor encaje actual, sin convertirlo en leaderboard
+              </h3>
+              <p>{detail.rule}</p>
+            </div>
 
-        <div className={styles['market-signal-grid']}>
-          {market.globalSignals.map((signal) => (
-            <article className={styles['market-signal']} key={signal.id}>
-              <div className={styles['market-kicker']}>
-                {signal.geography} · {signal.period}
-              </div>
-              <strong>{signal.value}</strong>
-              <h4>{signal.title}</h4>
-              <p>{signal.explanation}</p>
-              <a href={signal.sourceUrl} rel="noreferrer" target="_blank">
-                {signal.sourceLabel} →
-              </a>
-            </article>
-          ))}
-        </div>
-
-        <details className={styles['market-details']}>
-          <summary>Ver cifras BLS completas, incluidos salarios anuales de EE.UU.</summary>
-          <div className={styles['market-benchmark-list']}>
-            {market.internationalBenchmarks.map((item) => (
-              <article className={styles['market-benchmark']} key={item.id}>
-                <div>
-                  <span className={styles['market-kicker']}>
-                    {item.geography} · {item.period}
-                  </span>
-                  <h4>{item.role}</h4>
-                </div>
-                <dl className={styles['market-metrics']}>
-                  <div>
-                    <dt>Crecimiento</dt>
-                    <dd>+{item.employmentGrowthPercent}%</dd>
+            <div className={styles['market-role-fit-grid']}>
+              {targetRoles.map((role) => (
+                <article className={styles['market-role-fit']} key={role.id}>
+                  <div className={styles['market-role-head']}>
+                    <h4>{role.name}</h4>
+                    <span>verificación personal pendiente</span>
                   </div>
-                  <div>
-                    <dt>Aperturas/año</dt>
-                    <dd>{formatInteger(item.annualOpenings)}</dd>
-                  </div>
-                  <div>
-                    <dt>Mediana anual</dt>
-                    <dd>{formatUsd(item.medianAnnualUsd)}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
-          </div>
-        </details>
-      </section>
+                  <p>
+                    Evidencia actual: {role.evidence.demonstrated} facetas demostradas ·{' '}
+                    {role.evidence.practiced} practicadas.
+                  </p>
+                  {role.macroSignals.slice(0, 2).map((signal) => (
+                    <p key={signal}>{signal}</p>
+                  ))}
+                  {role.remoteSamples.length > 0 ? (
+                    <details className={styles['market-details']}>
+                      <summary>Ver muestras remotas y límites</summary>
+                      <div className={styles['market-role-list']}>
+                        {role.remoteSamples.slice(0, 3).map((sample) => (
+                          <article key={`${role.id}-${sample.sample}`}>
+                            <span className={styles['market-kicker']}>
+                              {sample.geography} · {sample.observedAt}
+                            </span>
+                            <p>{sample.sample}</p>
+                          </article>
+                        ))}
+                        {role.unresolved.map((item) => (
+                          <article key={item}>
+                            <p>{item}</p>
+                          </article>
+                        ))}
+                      </div>
+                    </details>
+                  ) : null}
+                </article>
+              ))}
+            </div>
 
-      {detail ? (
-        <section className={styles['market-section']} aria-labelledby="market-skills-title">
-          <div className={styles['market-heading']}>
-            <p className={styles.eyebrow}>Skills con señal de mercado</p>
-            <h3 id="market-skills-title">Qué capacidades merecen atención</h3>
-            <p>
-              Son señales direccionales y contextuales. No equivalen a una lista universal de skills
-              ni reemplazan tu evidencia personal.
-            </p>
-          </div>
-          <div className={styles['market-skill-grid']}>
-            {detail.skillSignals.map((signal) => (
-              <article className={styles['market-skill']} key={signal.id}>
+            <div className={styles['market-seniority-grid']}>
+              <article>
                 <span className={styles['market-kicker']}>
-                  {signal.geography} · {signal.period}
+                  {detail.seniorityContext.geography} · {detail.seniorityContext.period}
                 </span>
-                <h4>{signal.label}</h4>
-                <p>{signal.signal}</p>
+                <h4>Seniority local</h4>
+                <dl className={styles['market-seniority-levels']}>
+                  {Object.entries(detail.seniorityContext.levels).map(([label, definition]) => (
+                    <div key={label}>
+                      <dt>{label}</dt>
+                      <dd>{definition}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <a href={detail.seniorityContext.sourceUrl} rel="noreferrer" target="_blank">
+                  {detail.seniorityContext.sourceLabel} →
+                </a>
+              </article>
+              <article>
+                <span className={styles['market-kicker']}>Cómo leer la entrada</span>
+                <h4>No hay un “entry barrier score” universal</h4>
+                <p>
+                  Las muestras remotas sirven para ver requisitos y seniority observados, no para
+                  estimar una probabilidad personal de contratación.
+                </p>
+                <p>{detail.seniorityContext.note}</p>
+              </article>
+            </div>
+          </section>
+        ) : null}
+
+        <section className={styles['market-section']} aria-labelledby="market-demand-title">
+          <div className={styles['market-heading']}>
+            <p className={styles.eyebrow}>Demanda y crecimiento</p>
+            <h3 id="market-demand-title">Señales estructurales</h3>
+          </div>
+
+          <div className={styles['market-signal-grid']}>
+            {market.globalSignals.map((signal) => (
+              <article className={styles['market-signal']} key={signal.id}>
+                <div className={styles['market-kicker']}>
+                  {signal.geography} · {signal.period}
+                </div>
+                <strong>{signal.value}</strong>
+                <h4>{signal.title}</h4>
+                <p>{signal.explanation}</p>
                 <a href={signal.sourceUrl} rel="noreferrer" target="_blank">
                   {signal.sourceLabel} →
                 </a>
               </article>
             ))}
           </div>
-        </section>
-      ) : null}
 
-      <details className={styles['market-details']}>
-        <summary>Cómo comparar mercados y muestras sin mezclarlos</summary>
-        <p>
-          Los salarios argentinos proceden de una encuesta; BLS proyecta ocupaciones de EE.UU.; las
-          ofertas remotas son muestras acotadas, no una estimación de demanda total.
-        </p>
-      </details>
-
-      <section className={styles['market-section']} aria-labelledby="market-ai-title">
-        <div className={styles['market-heading']}>
-          <p className={styles.eyebrow}>IA y resiliencia profesional</p>
-          <h3 id="market-ai-title">Transformación no significa desaparición automática</h3>
-          <p>
-            La resiliencia se muestra como escenarios e índices heurísticos. No son probabilidades
-            personales de desempleo.
-          </p>
-        </div>
-
-        {resilience ? (
-          <>
-            <div className={styles['market-finding-list']}>
-              {resilience.crossRoleFindings.map((item) => (
-                <article key={item.id}>
-                  <p>{item.finding}</p>
+          <details className={styles['market-details']}>
+            <summary>Ver cifras BLS completas, incluidos salarios anuales de EE.UU.</summary>
+            <div className={styles['market-benchmark-list']}>
+              {market.internationalBenchmarks.map((item) => (
+                <article className={styles['market-benchmark']} key={item.id}>
+                  <div>
+                    <span className={styles['market-kicker']}>
+                      {item.geography} · {item.period}
+                    </span>
+                    <h4>{item.role}</h4>
+                  </div>
+                  <dl className={styles['market-metrics']}>
+                    <div>
+                      <dt>Crecimiento</dt>
+                      <dd>+{item.employmentGrowthPercent}%</dd>
+                    </div>
+                    <div>
+                      <dt>Aperturas/año</dt>
+                      <dd>{formatInteger(item.annualOpenings)}</dd>
+                    </div>
+                    <div>
+                      <dt>Mediana anual</dt>
+                      <dd>{formatUsd(item.medianAnnualUsd)}</dd>
+                    </div>
+                  </dl>
                 </article>
               ))}
             </div>
+          </details>
+        </section>
 
-            <details className={styles['market-details']}>
-              <summary>Ver transformación por rol</summary>
-              <div className={styles['market-role-list']}>
-                {resilience.roles.map((role) => (
-                  <article key={role.id}>
-                    <div className={styles['market-role-head']}>
-                      <h4>{role.name}</h4>
-                      <span>{role.demand.direction.replaceAll('_', ' ').toLowerCase()}</span>
-                    </div>
-                    <p>{role.aiTransformation}</p>
-                    <div className={styles['market-role-horizon']}>
-                      <strong>Escenario a 5 años</strong>
-                      <span>{role.horizons.Y5.summary}</span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </details>
-          </>
-        ) : (
-          <div className={styles.notice} data-tone="warning" role="status">
-            <CircleAlert size={16} aria-hidden="true" />
-            <span>
-              {careerResilience.notice ??
-                'La capa de resiliencia ante IA no está disponible; no mostramos estimaciones.'}
-            </span>
-          </div>
-        )}
-      </section>
-
-      <details className={styles['market-details']}>
-        <summary>Cómo leer estos datos</summary>
-        <ul className={styles['market-limitations']}>
-          {market.limitations.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-          {detail?.commonGaps.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </details>
-
-      <footer className={styles['market-provenance']}>
-        PAS <code>{snapshot.source.commit.slice(0, 8)}</code> · mercado observado{' '}
-        {market.observedAt}
         {detail ? (
-          <>
-            {' '}
-            · roles <code>{detail.source.commit.slice(0, 8)}</code>
-          </>
+          <section className={styles['market-section']} aria-labelledby="market-skills-title">
+            <div className={styles['market-heading']}>
+              <p className={styles.eyebrow}>Skills con señal de mercado</p>
+              <h3 id="market-skills-title">Qué capacidades merecen atención</h3>
+              <p>
+                Son señales direccionales y contextuales. No equivalen a una lista universal de
+                skills ni reemplazan tu evidencia personal.
+              </p>
+            </div>
+            <div className={styles['market-skill-grid']}>
+              {detail.skillSignals.map((signal) => (
+                <article className={styles['market-skill']} key={signal.id}>
+                  <span className={styles['market-kicker']}>
+                    {signal.geography} · {signal.period}
+                  </span>
+                  <h4>{signal.label}</h4>
+                  <p>{signal.signal}</p>
+                  <a href={signal.sourceUrl} rel="noreferrer" target="_blank">
+                    {signal.sourceLabel} →
+                  </a>
+                </article>
+              ))}
+            </div>
+          </section>
         ) : null}
-        {resilience ? (
-          <>
-            {' '}
-            · resiliencia <code>{resilience.source.commit.slice(0, 8)}</code>
-          </>
-        ) : null}
-      </footer>
+
+        <details className={styles['market-details']}>
+          <summary>Cómo comparar mercados y muestras sin mezclarlos</summary>
+          <p>
+            Los salarios argentinos proceden de una encuesta; BLS proyecta ocupaciones de EE.UU.;
+            las ofertas remotas son muestras acotadas, no una estimación de demanda total.
+          </p>
+        </details>
+
+        <details className={styles['market-details']}>
+          <summary>Cómo leer estos datos</summary>
+          <ul className={styles['market-limitations']}>
+            {market.limitations.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+            {detail?.commonGaps.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </details>
+
+        <footer className={styles['market-provenance']}>
+          PAS <code>{snapshot.source.commit.slice(0, 8)}</code> · mercado observado{' '}
+          {market.observedAt}
+          {detail ? (
+            <>
+              {' '}
+              · roles <code>{detail.source.commit.slice(0, 8)}</code>
+            </>
+          ) : null}
+          {resilience ? (
+            <>
+              {' '}
+              · resiliencia <code>{resilience.source.commit.slice(0, 8)}</code>
+            </>
+          ) : null}
+        </footer>
+      </details>
     </div>
   );
 }

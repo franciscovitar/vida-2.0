@@ -2,184 +2,187 @@
 
 import { useState } from 'react';
 
+import expandedSalary from '@/data/generated/professional-salary-expanded-2026.json';
 import type { ProfessionalIntelligenceData } from '@/types/professional-intelligence';
 
 import styles from './ProfessionalSalaryPlot.module.scss';
 
-const formatMoney = (value: number) =>
+const money = (value: number) =>
   new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
     maximumFractionDigits: 0,
   }).format(value);
 
+type Group = 'direct' | 'adjacent' | 'future' | 'all';
+type Level = 'all' | 'Junior' | 'Semi-Senior' | 'Senior';
+
+const groups: { value: Group; label: string }[] = [
+  { value: 'direct', label: 'Más cercanos' },
+  { value: 'adjacent', label: 'Especializaciones' },
+  { value: 'future', label: 'Evolución futura' },
+  { value: 'all', label: 'Todos' },
+];
+const levels: { value: Level; label: string }[] = [
+  { value: 'all', label: 'Todos' },
+  { value: 'Junior', label: 'Junior' },
+  { value: 'Semi-Senior', label: 'Semi-Senior' },
+  { value: 'Senior', label: 'Senior' },
+];
+
 export function ProfessionalSalaryPlot({ data }: { data: ProfessionalIntelligenceData }) {
-  const [selectedLevel, setSelectedLevel] = useState('all');
+  const [group, setGroup] = useState<Group>('direct');
+  const [level, setLevel] = useState<Level>('all');
 
-  if (data.status !== 'ready' || !data.snapshot) {
-    return (
-      <section className={styles.section} aria-label="Sueldos argentinos">
-        <p>{data.notice ?? 'No hay salarios con fuente verificable para mostrar.'}</p>
-      </section>
+  const rows = expandedSalary.roles
+    .filter((role) => group === 'all' || role.group === group)
+    .flatMap((role) =>
+      role.points
+        .filter((point) => level === 'all' || point.label === level)
+        .map((point) => ({
+          key: role.id + '-' + point.label,
+          label: role.role,
+          original: role.sourceCategory,
+          level: point.label,
+          n: point.sampleSize,
+          median: point.medianArsGrossMonthly,
+        })),
     );
-  }
-
-  const roles = data.snapshot.market.argentinaSalaryRoles;
-  const regular = roles.flatMap((role) =>
-    role.points
-      .filter(
-        (point) =>
-          !point.dollarized &&
-          Number.isFinite(point.medianArsGrossMonthly) &&
-          point.medianArsGrossMonthly > 0 &&
-          Number.isInteger(point.sampleSize) &&
-          point.sampleSize > 0,
-      )
-      .map((point) => ({
-        key: role.id + ':' + point.label,
-        role: role.role,
-        period: role.period,
-        source: role.sourceLabel,
-        url: role.sourceUrl,
-        point,
-      })),
-  );
-  const dollarized = roles.flatMap((role) =>
-    role.points
-      .filter((point) => point.dollarized)
-      .map((point) => ({
-        key: role.id + ':' + point.label,
-        role: role.role,
-        point,
-      })),
-  );
-  const levels = [...new Set(regular.map((item) => item.point.label))];
-  const max = regular.reduce((acc, item) => Math.max(acc, item.point.medianArsGrossMonthly), 0);
-  const entries = regular.filter(
-    (item) => selectedLevel === 'all' || item.point.label === selectedLevel,
-  );
-  const source = regular[0];
-  const commonPeriod = [...new Set(roles.map((role) => role.period))].join(' · ');
+  const max = rows.reduce((value, row) => Math.max(value, row.median), 0);
+  const original =
+    data.status === 'ready' && data.snapshot ? data.snapshot.market.argentinaSalaryRoles : [];
 
   return (
     <section className={styles.section} aria-labelledby="professional-salaries-title">
       <header className={styles.header}>
-        <p className={styles.eyebrow}>V04 · Sueldos en Argentina</p>
-        <h2 id="professional-salaries-title">¿Cuánto se gana según el área y el seniority?</h2>
+        <p className={styles.eyebrow}>V04 · Salarios argentinos</p>
+        <h2 id="professional-salaries-title">¿Cuánto se gana en distintas salidas de Sistemas?</h2>
         <p>
-          Medianas mensuales brutas en pesos de una encuesta salarial, no sueldos ofrecidos en
-          vacantes. Período {commonPeriod}. Referencia histórica: revisar antes de negociar.
+          Mediana bruta mensual en pesos · {expandedSalary.period} · encuesta OpenQube/Sysarmy. Las
+          familias organizan la exploración, no certifican que ya cumplas los requisitos de cada
+          puesto.
         </p>
       </header>
 
-      {regular.length > 0 && max > 0 ? (
-        <>
-          <div className={styles.filters} role="group" aria-label="Filtrar por seniority">
-            <button
-              type="button"
-              aria-pressed={selectedLevel === 'all'}
-              onClick={() => setSelectedLevel('all')}
-            >
-              Todos
-            </button>
-            {levels.map((level) => (
-              <button
-                key={level}
-                type="button"
-                aria-pressed={selectedLevel === level}
-                onClick={() => setSelectedLevel(level)}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-
-          <div
-            className={styles.plot}
-            aria-label="Comparación de medianas salariales por área y seniority"
+      <div className={styles.filters} role="group" aria-label="Familia de profesiones">
+        {groups.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={group === option.value}
+            onClick={() => setGroup(option.value)}
           >
-            <div className={styles.scale} aria-hidden="true">
-              <span>$0</span>
-              <span>{formatMoney(max)}</span>
-            </div>
-            {entries.map(({ key, role, point }) => (
-              <div className={styles.row} key={key}>
-                <div className={styles.label}>
-                  <strong>{role}</strong>
-                  <span>
-                    {point.label} · n={point.sampleSize}
-                  </span>
-                </div>
-                <div
-                  className={styles.track}
-                  role="img"
-                  aria-label={
-                    role +
-                    ', ' +
-                    point.label +
-                    ': mediana ' +
-                    formatMoney(point.medianArsGrossMonthly) +
-                    ', muestra ' +
-                    point.sampleSize
-                  }
-                >
-                  <span
-                    className={styles.dot}
-                    style={{ left: (point.medianArsGrossMonthly / max) * 100 + '%' }}
-                  />
-                </div>
-                <strong className={styles.value}>{formatMoney(point.medianArsGrossMonthly)}</strong>
-              </div>
-            ))}
-          </div>
+            {option.label}
+          </button>
+        ))}
+      </div>
+      <div className={styles.filters} role="group" aria-label="Experiencia en el puesto">
+        {levels.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={level === option.value}
+            onClick={() => setLevel(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
 
-          <details className={styles.details}>
-            <summary>Ver todos los valores, tamaños de muestra y otras categorías</summary>
-            <div className={styles.tables}>
-              {roles.map((role) => (
+      {rows.length && max ? (
+        <div className={styles.plot} aria-label="Medianas salariales por rol y experiencia">
+          <div className={styles.scale} aria-hidden="true">
+            <span>$0</span>
+            <span>{money(max)}</span>
+          </div>
+          {rows.map((row) => (
+            <div className={styles.row} key={row.key}>
+              <div className={styles.label}>
+                <strong>{row.label}</strong>
+                <span>
+                  {row.level} · n={row.n}
+                </span>
+              </div>
+              <div
+                className={styles.track}
+                role="img"
+                aria-label={
+                  row.label +
+                  ', ' +
+                  row.level +
+                  ': mediana bruta ' +
+                  money(row.median) +
+                  ', ' +
+                  row.n +
+                  ' respuestas'
+                }
+              >
+                <span className={styles.dot} style={{ left: (row.median / max) * 100 + '%' }} />
+              </div>
+              <strong className={styles.value}>{money(row.median)}</strong>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className={styles.footnote}>No hay una muestra suficiente para este filtro.</p>
+      )}
+
+      <p className={styles.footnote}>
+        Reanálisis descriptivo de {expandedSalary.processedRowCount.toLocaleString('es-AR')}{' '}
+        registros procesados: solo sueldos no dolarizados y grupos con n ≥ 20. Las medianas fueron
+        calculadas sobre una versión depurada que excluye extremos; pueden diferir del gráfico
+        oficial. No son ofertas actuales ni salarios garantizados.
+      </p>
+      <details className={styles.details}>
+        <summary>Fuentes, método y categorías que no tienen datos suficientes</summary>
+        <p>
+          Fuente original:{' '}
+          <a href={expandedSalary.sourceOriginal} target="_blank" rel="noreferrer">
+            OpenQube / Sysarmy 2026.01
+          </a>
+          . Datos procesados y limpieza:{' '}
+          <a href={expandedSalary.sourceProcessed} target="_blank" rel="noreferrer">
+            conjunto comunitario reproducible
+          </a>
+          .{' '}
+          <a href={expandedSalary.sourceProcessing} target="_blank" rel="noreferrer">
+            Método de limpieza
+          </a>
+          . El procesamiento descartó valores extremos (percentiles 1 y 99). Encuesta
+          autoseleccionada, no censo del mercado. Datos con licencia CC BY-NC-SA 4.0.
+        </p>
+        <p>
+          Full-Stack y Backend están incluidos en la categoría original Developer; no se inventaron
+          sueldos específicos para ellos. Analista funcional e ingeniería de IA aplicada no tienen
+          aquí suficiente muestra comparable para graficarlos con el umbral elegido. No combinamos
+          estas cifras con sueldos parcialmente dolarizados, ofertas remotas ni BLS.
+        </p>
+        {original.length > 0 ? (
+          <div className={styles.tables}>
+            <div>
+              <h3>Valores del informe original guardados en Vida</h3>
+              <p>
+                Son una fuente procesada de manera distinta: quedan separados del reanálisis
+                anterior.
+              </p>
+              {original.map((role) => (
                 <div key={role.id}>
-                  <h3>{role.role}</h3>
+                  <strong>{role.role}</strong>
                   <ul>
-                    {role.points.map((point) => (
-                      <li key={point.label}>
-                        {point.label}: {formatMoney(point.medianArsGrossMonthly)} brutos/mes · n=
-                        {point.sampleSize}
-                        {point.dollarized
-                          ? ' · sueldo al menos parcialmente dolarizado, no comparable'
-                          : ''}
-                      </li>
-                    ))}
+                    {role.points
+                      .filter((point) => !point.dollarized)
+                      .map((point) => (
+                        <li key={point.label}>
+                          {point.label}: {money(point.medianArsGrossMonthly)} · n={point.sampleSize}
+                        </li>
+                      ))}
                   </ul>
-                  <a href={role.sourceUrl} target="_blank" rel="noreferrer">
-                    {role.sourceLabel}
-                  </a>
                 </div>
               ))}
             </div>
-          </details>
-          {dollarized.length > 0 ? (
-            <p className={styles.footnote}>
-              {dollarized.length} categorías con remuneración al menos parcialmente dolarizada
-              quedan fuera del gráfico. Se pueden consultar en el detalle sin mezclarlas con las
-              medianas del resto.
-            </p>
-          ) : null}
-          <p className={styles.footnote}>
-            Fuente:{' '}
-            <a href={source.url} target="_blank" rel="noreferrer">
-              {source.source}
-            </a>
-            . Argentina, {commonPeriod}; n se refiere a respuestas de la encuesta, no a ofertas.
-            Este gráfico no debe compararse como salario equivalente con las proyecciones BLS de
-            Estados Unidos mostradas arriba.
-          </p>
-        </>
-      ) : (
-        <p className={styles.footnote}>
-          No hay medianas no dolarizadas con muestra suficiente en el snapshot actual. No mostramos
-          puntos inventados.
-        </p>
-      )}
+          </div>
+        ) : null}
+      </details>
     </section>
   );
 }

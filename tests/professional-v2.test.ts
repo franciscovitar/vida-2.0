@@ -84,7 +84,7 @@ test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada 
 
   assert.match(panorama, /snapshot\.nowMoves\.slice\(0, 3\)/);
   assert.match(panorama, /snapshot\.growth\.items\[0\]/);
-  assert.match(panorama, /snapshot\.forecast\.direction/);
+  assert.match(panorama, /No hay evidencia para abandonar software\/web/);
   assert.match(panorama, /snapshot\.market\.globalSignals\[0\]/);
   assert.match(panorama, /DecisionBadge value="ACT"/);
   assert.match(panorama, /DecisionBadge value="NO_CHANGE"/);
@@ -124,9 +124,9 @@ test('PRO-V2-08. Mercado conserva demanda, compensación y semántica cauta de I
   assert.match(salaries, /medianArsGrossMonthly/);
   assert.match(salaries, /point\.sampleSize/);
   assert.match(salaries, /!point\.dollarized/);
-  assert.match(market, /resilience\.crossRoleFindings\.map/);
-  assert.match(market, /No son probabilidades\s+personales de desempleo/);
-  assert.match(market, /Escenario a 5 años/);
+  const resilience = repoText('components/professional/ProfessionalResilienceComparison.tsx');
+  assert.match(resilience, /ProfessionalResilienceTimeline/);
+  assert.match(resilience, /Ninguna de estas escalas representa tu probabilidad/);
 });
 
 test('PRO-V2-09. Panorama enlaza sólo a superficies V2 ya existentes', () => {
@@ -188,7 +188,6 @@ test('PRO-V2-14. Biblioteca mantiene archivo legacy y cero deuda de lectura', ()
   assert.match(library, /article\.professionalRefs\.length > 0/);
   assert.match(library, /intelligenceArticleHref/);
   assert.match(library, /Guardado no significa pendiente/);
-  assert.match(library, /sin tareas pendientes/);
   assert.match(legacyArchive, /intelligenceArticleHref/);
   assert.match(legacyRedirect, /redirect\('\/professional'\)/);
 });
@@ -206,9 +205,9 @@ test('PRO-V2-15. Biblioteca tecnológica es referencia progresiva y no adopción
 test('PRO-V2-16. Panorama explicita cambio, impacto, implicación y decisión', () => {
   const panorama = repoText('components/professional/ProfessionalPanorama.tsx');
 
-  assert.match(panorama, /Qué cambió \/ se confirma:/);
-  assert.match(panorama, /Por qué importa:/);
-  assert.match(panorama, /Para vos:/);
+  assert.match(panorama, /Tres señales para decidir/);
+  assert.match(panorama, /Ver práctica y evidencia de cierre/);
+  assert.doesNotMatch(panorama, /activePriority\.whyNow/);
   assert.match(panorama, /'ACT' \| 'TRY' \| 'LEARN' \| 'WATCH' \| 'IGNORE' \| 'NO_CHANGE'/);
   assert.match(panorama, /moveDecision/);
 });
@@ -252,4 +251,24 @@ test('PRO-V2-19. Home carga sólo el snapshot que realmente renderiza', () => {
     source,
     /getProfessionalIntelligencePageData\(\)[\s\S]*return \{ professional: await loadProfessionalSnapshot\(\) \}/,
   );
+});
+
+test('PRO-V2-EXT-SALARY. Las categorías ampliadas usan reanálisis único y umbral mínimo', () => {
+  const salaries = JSON.parse(generatedText('professional-salary-expanded-2026.json'));
+  const source = repoText('components/professional/ProfessionalSalaryPlot.tsx');
+  assert.equal(salaries.schemaVersion, 1);
+  assert.equal(salaries.processedRowCount, 4840);
+  assert.ok(salaries.roles.length >= 10);
+  assert.match(salaries.sourceOriginal, /sueldos\.openqube\.io/);
+  assert.match(salaries.sourceProcessed, /cervetade\/sueldos-it-argentina/);
+  assert.ok(
+    salaries.roles.every(
+      (role: { points: { sampleSize: number; medianArsGrossMonthly: number }[] }) =>
+        role.points.length > 0 &&
+        role.points.every((point) => point.sampleSize >= 20 && point.medianArsGrossMonthly > 0),
+    ),
+  );
+  assert.match(source, /expandedSalary\.roles/);
+  assert.match(source, /!point\.dollarized/);
+  assert.match(source, /no dolarizados/);
 });

@@ -99,9 +99,7 @@ export function ProfessionalLibrary({
       <section className={styles['library-hero']} aria-labelledby="professional-library-title">
         <p className={styles.eyebrow}>Biblioteca profesional</p>
         <h2 id="professional-library-title">Guardado no significa pendiente</h2>
-        <p>
-          Explicaciones y referencias para consultar cuando las necesites, sin tareas pendientes.
-        </p>
+
         <div className={styles['library-meta']}>
           <span>{editorialSnapshot?.archive.length ?? 0} artículos históricos</span>
           <span>{technologySnapshot?.totalEntries ?? 0} referencias tecnológicas</span>
@@ -112,7 +110,6 @@ export function ProfessionalLibrary({
         <div className={styles['library-heading']}>
           <p className={styles.eyebrow}>Deep dives profesionales</p>
           <h3 id="library-deep-dives-title">Explicaciones conectadas con tu perfil</h3>
-          <p>Artículos históricos vinculados a tus prioridades y tecnologías.</p>
         </div>
 
         {editorial.notice ? (

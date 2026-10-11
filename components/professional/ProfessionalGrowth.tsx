@@ -136,21 +136,22 @@ export function ProfessionalGrowth({ data }: { data: ProfessionalIntelligenceDat
                   <span>Confianza {confidenceLabel(item.confidence)}</span>
                 </div>
                 <h4>{item.capability}</h4>
-                <p>{item.whyNow}</p>
                 <div className={styles['growth-contract']}>
                   <strong>Práctica</strong>
                   <span>{item.practiceContract}</span>
                 </div>
-                <div className={styles['growth-contract']}>
-                  <strong>Evidencia objetivo</strong>
-                  <span>{item.evidenceTarget}</span>
-                </div>
-                {item.projectCandidate ? (
-                  <div className={styles['growth-contract']}>
-                    <strong>Proyecto candidato</strong>
-                    <span>{item.projectCandidate}</span>
-                  </div>
-                ) : null}
+                <details className={styles['growth-details']}>
+                  <summary>Ver motivo, evidencia objetivo y proyecto sugerido</summary>
+                  <p>{item.whyNow}</p>
+                  <p>
+                    <strong>Evidencia objetivo:</strong> {item.evidenceTarget}
+                  </p>
+                  {item.projectCandidate ? (
+                    <p>
+                      <strong>Proyecto:</strong> {item.projectCandidate}
+                    </p>
+                  ) : null}
+                </details>
 
                 <details className={styles['growth-details']}>
                   <summary>Ver facetas y criterio de verificación</summary>
@@ -187,90 +188,95 @@ export function ProfessionalGrowth({ data }: { data: ProfessionalIntelligenceDat
         </div>
       </section>
 
-      <section className={styles['growth-section']} aria-labelledby="growth-ownership-title">
-        <div className={styles['growth-heading']}>
-          <p className={styles.eyebrow}>Ownership y delegación</p>
-          <h3 id="growth-ownership-title">Qué sigue siendo tu responsabilidad</h3>
-          <p>{snapshot.workSplit.principle}</p>
-        </div>
+      <details className={styles['growth-details']}>
+        <summary>Responsabilidades humanas y qué delegar a la IA</summary>
+        <section className={styles['growth-section']} aria-labelledby="growth-ownership-title">
+          <div className={styles['growth-heading']}>
+            <p className={styles.eyebrow}>Ownership y delegación</p>
+            <h3 id="growth-ownership-title">Qué sigue siendo tu responsabilidad</h3>
+            <p>{snapshot.workSplit.principle}</p>
+          </div>
 
-        <div className={styles['growth-lanes']}>
-          <article>
-            <span className={styles['growth-kicker']}>Vos sí o sí</span>
-            <ul>
-              {snapshot.workSplit.own.map((item) => (
-                <li key={item.title}>
-                  <strong>{item.title}</strong>
-                  <span>{item.explanation}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-          <article>
-            <span className={styles['growth-kicker']}>Vos + IA</span>
-            <ul>
-              {snapshot.workSplit.withAi.map((item) => (
-                <li key={item.title}>
-                  <strong>{item.title}</strong>
-                  <span>{item.explanation}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-          <article>
-            <span className={styles['growth-kicker']}>Delegable a IA</span>
-            <ul>
-              {snapshot.workSplit.delegateToAi.map((item) => (
-                <li key={item.title}>
-                  <strong>{item.title}</strong>
-                  <span>{item.explanation}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-        </div>
+          <div className={styles['growth-lanes']}>
+            <article>
+              <span className={styles['growth-kicker']}>Vos sí o sí</span>
+              <ul>
+                {snapshot.workSplit.own.map((item) => (
+                  <li key={item.title}>
+                    <strong>{item.title}</strong>
+                    <span>{item.explanation}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+            <article>
+              <span className={styles['growth-kicker']}>Vos + IA</span>
+              <ul>
+                {snapshot.workSplit.withAi.map((item) => (
+                  <li key={item.title}>
+                    <strong>{item.title}</strong>
+                    <span>{item.explanation}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+            <article>
+              <span className={styles['growth-kicker']}>Delegable a IA</span>
+              <ul>
+                {snapshot.workSplit.delegateToAi.map((item) => (
+                  <li key={item.title}>
+                    <strong>{item.title}</strong>
+                    <span>{item.explanation}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
 
-        <details className={styles['growth-details']}>
-          <summary>Ver frontera de delegación por faceta</summary>
-          <div className={styles['growth-frontier']}>
-            {snapshot.delegationFrontier.examples.map((item) => (
-              <article key={item.facet}>
+          <details className={styles['growth-details']}>
+            <summary>Ver frontera de delegación por faceta</summary>
+            <div className={styles['growth-frontier']}>
+              {snapshot.delegationFrontier.examples.map((item) => (
+                <article key={item.facet}>
+                  <div className={styles['growth-row-head']}>
+                    <h4>{item.facet}</h4>
+                    <span>{OWNERSHIP_LABELS[item.currentLane]}</span>
+                  </div>
+                  <p>{item.reason}</p>
+                  <small>
+                    {DISPOSITION_LABELS[item.learningDisposition] ?? item.learningDisposition}
+                  </small>
+                </article>
+              ))}
+            </div>
+          </details>
+        </section>
+      </details>
+      <details className={styles['growth-details']}>
+        <summary>Qué podés afirmar de tu perfil y qué todavía no</summary>
+        <section className={styles['growth-section']} aria-labelledby="growth-profile-title">
+          <div className={styles['growth-heading']}>
+            <p className={styles.eyebrow}>Posicionamiento profesional</p>
+            <h3 id="growth-profile-title">Qué podés afirmar y qué todavía no</h3>
+            <p>
+              Esto describe evidencia actual. No modifica automáticamente CV, LinkedIn ni perfiles
+              públicos.
+            </p>
+          </div>
+
+          <div className={styles['growth-profile-list']}>
+            {snapshot.profileFindings.map((item) => (
+              <article key={item.id}>
                 <div className={styles['growth-row-head']}>
-                  <h4>{item.facet}</h4>
-                  <span>{OWNERSHIP_LABELS[item.currentLane]}</span>
+                  <h4>{item.claim}</h4>
+                  <span>{PROFILE_STATUS_LABELS[item.status] ?? item.status}</span>
                 </div>
-                <p>{item.reason}</p>
-                <small>
-                  {DISPOSITION_LABELS[item.learningDisposition] ?? item.learningDisposition}
-                </small>
+                <p>{item.note}</p>
               </article>
             ))}
           </div>
-        </details>
-      </section>
-
-      <section className={styles['growth-section']} aria-labelledby="growth-profile-title">
-        <div className={styles['growth-heading']}>
-          <p className={styles.eyebrow}>Posicionamiento profesional</p>
-          <h3 id="growth-profile-title">Qué podés afirmar y qué todavía no</h3>
-          <p>
-            Esto describe evidencia actual. No modifica automáticamente CV, LinkedIn ni perfiles
-            públicos.
-          </p>
-        </div>
-
-        <div className={styles['growth-profile-list']}>
-          {snapshot.profileFindings.map((item) => (
-            <article key={item.id}>
-              <div className={styles['growth-row-head']}>
-                <h4>{item.claim}</h4>
-                <span>{PROFILE_STATUS_LABELS[item.status] ?? item.status}</span>
-              </div>
-              <p>{item.note}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+        </section>
+      </details>
 
       <footer className={styles['growth-provenance']}>
         PAS <code>{snapshot.source.commit.slice(0, 8)}</code> · frontera de delegación revisada{' '}
