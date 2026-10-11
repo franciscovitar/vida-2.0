@@ -5,7 +5,7 @@ import { test } from 'node:test';
 
 const SCRIPT = join(process.cwd(), 'scripts/phase-f-readonly-preflight.mjs');
 
-const SAFE_QA = {
+const SAFE_QA: NodeJS.ProcessEnv = {
   NODE_ENV: 'test',
   VERCEL_ENV: 'preview',
   VERCEL_GIT_COMMIT_REF: 'vida-qa',
