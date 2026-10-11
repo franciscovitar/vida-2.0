@@ -37,7 +37,14 @@ export function isPlanningExecutionV2ReadsEnabled(
 export function isPlanningExecutionV2DevReadEnabled(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): boolean {
-  if (!isPlanningExecutionV2ReadsEnabled(env) || env.VERCEL_ENV === 'production') return false;
+  if (
+    !isPlanningExecutionV2ReadsEnabled(env) ||
+    env.GOOGLE_SHEETS_TARGET !== 'dev' ||
+    env.DATA_SOURCE !== 'google' ||
+    (env.VERCEL_ENV !== 'preview' && env.VERCEL_ENV !== 'development')
+  )
+    return false;
   const target = resolveSpreadsheetTarget(env);
-  return target.ok && target.target === 'dev';
+  const prodId = env.GOOGLE_SHEETS_PROD_ID?.trim();
+  return target.ok && target.target === 'dev' && !!prodId && prodId !== target.spreadsheetId;
 }

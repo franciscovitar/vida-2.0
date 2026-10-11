@@ -6,6 +6,8 @@ const dev = {
   PLANNING_V2_DEV_RECONCILIATION_READS_ENABLED: 'true',
   GOOGLE_SHEETS_TARGET: 'dev',
   GOOGLE_SHEETS_DEV_ID: 'mock-readback-dev-sheet',
+  GOOGLE_SHEETS_PROD_ID: 'mock-readback-prod-sheet',
+  DATA_SOURCE: 'google',
   VERCEL_ENV: 'preview',
 };
 
@@ -53,4 +55,10 @@ test('a distinct known Production workbook does not disable valid DEV readback',
     isPlanningV2DevReadbackEnabled({ ...dev, GOOGLE_SHEETS_PROD_ID: 'mock-separate-production' }),
     true,
   );
+});
+
+test('readback requires independent Production identity and explicit Preview DEV authority', () => {
+  assert.equal(isPlanningV2DevReadbackEnabled({ ...dev, GOOGLE_SHEETS_PROD_ID: undefined }), false);
+  assert.equal(isPlanningV2DevReadbackEnabled({ ...dev, VERCEL_ENV: undefined }), false);
+  assert.equal(isPlanningV2DevReadbackEnabled({ ...dev, DATA_SOURCE: 'mock' }), false);
 });

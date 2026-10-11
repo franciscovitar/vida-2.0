@@ -51,6 +51,8 @@ test('Planning Execution V2 history is strictly DEV-only even with the read flag
     PLANNING_EXECUTION_V2_READS_ENABLED: 'true',
     GOOGLE_SHEETS_TARGET: 'dev',
     GOOGLE_SHEETS_DEV_ID: 'fake-dev-for-tests',
+    GOOGLE_SHEETS_PROD_ID: 'fake-prod-for-tests',
+    DATA_SOURCE: 'google',
     VERCEL_ENV: 'preview',
   };
   assert.equal(isPlanningExecutionV2DevReadEnabled(dev), true);
@@ -71,4 +73,10 @@ test('Planning Execution V2 history is strictly DEV-only even with the read flag
     isPlanningExecutionV2DevReadEnabled({ ...dev, GOOGLE_SHEETS_DEV_ID: undefined }),
     false,
   );
+  assert.equal(
+    isPlanningExecutionV2DevReadEnabled({ ...dev, GOOGLE_SHEETS_PROD_ID: undefined }),
+    false,
+  );
+  assert.equal(isPlanningExecutionV2DevReadEnabled({ ...dev, VERCEL_ENV: undefined }), false);
+  assert.equal(isPlanningExecutionV2DevReadEnabled({ ...dev, DATA_SOURCE: 'mock' }), false);
 });

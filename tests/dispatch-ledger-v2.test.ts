@@ -62,6 +62,8 @@ test('config is OFF by default and target cannot be PROD', () => {
     VERCEL_ENV: 'preview',
     GOOGLE_SHEETS_TARGET: 'dev',
     GOOGLE_SHEETS_DEV_ID: 'dev-mock-sheet-id',
+    GOOGLE_SHEETS_PROD_ID: 'prod-mock-sheet-id',
+    DATA_SOURCE: 'google',
     UPSTASH_REDIS_REST_URL: config.url,
     UPSTASH_REDIS_REST_TOKEN: config.token,
   };
@@ -86,6 +88,23 @@ test('config is OFF by default and target cannot be PROD', () => {
   assert.equal(enabled.ok, true);
   if (enabled.ok)
     assert.match(enabled.value.namespace, /^vida2:planning-v2:dev:[0-9a-f]{24}:dispatch-v1$/);
+  const invalid = [
+    { GOOGLE_SHEETS_PROD_ID: undefined },
+    { GOOGLE_SHEETS_TARGET: undefined },
+    { VERCEL_ENV: undefined },
+    { VERCEL_ENV: 'production' },
+    { DATA_SOURCE: 'mock' },
+  ];
+  for (const change of invalid) {
+    assert.equal(
+      resolvePlanningV2LedgerConfig({
+        ...env,
+        PLANNING_V2_DEV_LEDGER_ENABLED: 'true',
+        ...change,
+      }).ok,
+      false,
+    );
+  }
 });
 
 test('DEV workbook cannot alias the configured Production workbook', () => {
@@ -94,6 +113,7 @@ test('DEV workbook cannot alias the configured Production workbook', () => {
     GOOGLE_SHEETS_TARGET: 'dev',
     GOOGLE_SHEETS_DEV_ID: 'same-workbook-id',
     GOOGLE_SHEETS_PROD_ID: 'same-workbook-id',
+    DATA_SOURCE: 'google',
     UPSTASH_REDIS_REST_URL: config.url,
     UPSTASH_REDIS_REST_TOKEN: config.token,
     PLANNING_V2_DEV_LEDGER_ENABLED: 'true',

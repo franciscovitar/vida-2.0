@@ -91,15 +91,22 @@ export type PlanningV2LedgerConfigResult = { ok: true; value: UpstashRestConfig 
 export function resolvePlanningV2LedgerConfig(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): PlanningV2LedgerConfigResult {
-  if (env.PLANNING_V2_DEV_LEDGER_ENABLED !== 'true' || env.VERCEL_ENV === 'production') {
+  if (
+    env.PLANNING_V2_DEV_LEDGER_ENABLED !== 'true' ||
+    env.GOOGLE_SHEETS_TARGET !== 'dev' ||
+    env.DATA_SOURCE !== 'google' ||
+    (env.VERCEL_ENV !== 'preview' && env.VERCEL_ENV !== 'development')
+  ) {
     return { ok: false };
   }
   const target = resolveSpreadsheetTarget(env);
+  const prodId = env.GOOGLE_SHEETS_PROD_ID?.trim();
   if (
     !target.ok ||
     target.target !== 'dev' ||
     target.spreadsheetId.length < 10 ||
-    (env.GOOGLE_SHEETS_PROD_ID?.trim() && env.GOOGLE_SHEETS_PROD_ID.trim() === target.spreadsheetId)
+    !prodId ||
+    prodId === target.spreadsheetId
   ) {
     return { ok: false };
   }
