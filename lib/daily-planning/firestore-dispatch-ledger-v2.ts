@@ -14,12 +14,9 @@ import type {
   PlanningV2LedgerStatus,
 } from './dispatch-ledger-v2';
 
-export const PLANNING_V2_FIRESTORE_SECRET_NAME =
-  'PLANNING_V2_DEV_FIRESTORE_SERVICE_ACCOUNT_JSON';
-export const PLANNING_V2_FIRESTORE_PROJECT_NAME =
-  'PLANNING_V2_DEV_FIRESTORE_PROJECT_ID';
-export const PLANNING_V2_FIRESTORE_ENABLED_NAME =
-  'PLANNING_V2_DEV_FIRESTORE_LEDGER_ENABLED';
+export const PLANNING_V2_FIRESTORE_SECRET_NAME = 'PLANNING_V2_DEV_FIRESTORE_SERVICE_ACCOUNT_JSON';
+export const PLANNING_V2_FIRESTORE_PROJECT_NAME = 'PLANNING_V2_DEV_FIRESTORE_PROJECT_ID';
+export const PLANNING_V2_FIRESTORE_ENABLED_NAME = 'PLANNING_V2_DEV_FIRESTORE_LEDGER_ENABLED';
 
 const TOKEN_URI = 'https://oauth2.googleapis.com/token';
 const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1';
@@ -40,8 +37,7 @@ export interface PlanningV2FirestoreDevConfig {
 }
 
 export type PlanningV2FirestoreDevConfigResult =
-  | { readonly ok: true; readonly value: PlanningV2FirestoreDevConfig }
-  | { readonly ok: false };
+  { readonly ok: true; readonly value: PlanningV2FirestoreDevConfig } | { readonly ok: false };
 
 /** The three independent guards are mandatory; generic Preview is denied. */
 export function resolvePlanningV2FirestoreDevConfig(
@@ -53,7 +49,8 @@ export function resolvePlanningV2FirestoreDevConfig(
     env.VERCEL_GIT_COMMIT_REF !== 'vida-qa' ||
     env.GOOGLE_SHEETS_TARGET !== 'dev' ||
     env.DATA_SOURCE !== 'google'
-  ) return { ok: false };
+  )
+    return { ok: false };
 
   const projectId = env[PLANNING_V2_FIRESTORE_PROJECT_NAME]?.trim();
   const json = env[PLANNING_V2_FIRESTORE_SECRET_NAME];
@@ -74,7 +71,8 @@ export function resolvePlanningV2FirestoreDevConfig(
       typeof privateKey !== 'string' ||
       !privateKey.includes('-----BEGIN PRIVATE KEY-----') ||
       !privateKey.includes('-----END PRIVATE KEY-----')
-    ) return { ok: false };
+    )
+      return { ok: false };
     return { ok: true, value: { projectId, clientEmail: email, privateKey } };
   } catch {
     return { ok: false };
@@ -83,12 +81,14 @@ export function resolvePlanningV2FirestoreDevConfig(
 
 export function validPlanningV2FirestoreRecord(record: PlanningV2LedgerRecord): boolean {
   return (
-    !!record && typeof record === 'object' &&
+    !!record &&
+    typeof record === 'object' &&
     Object.keys(record).length === 3 &&
     Object.hasOwn(IDS, record.kind) &&
     typeof record.recordId === 'string' &&
     IDS[record.kind]?.test(record.recordId) === true &&
-    typeof record.payloadDigest === 'string' && HASH.test(record.payloadDigest)
+    typeof record.payloadDigest === 'string' &&
+    HASH.test(record.payloadDigest)
   );
 }
 
@@ -120,9 +120,10 @@ async function jsonDocument(response: Response): Promise<unknown> {
 
 function jwtAssertion(config: PlanningV2FirestoreDevConfig): string {
   const now = Math.floor(Date.now() / 1000);
-  const encode = (data: unknown): string =>
-    Buffer.from(JSON.stringify(data)).toString('base64url');
-  const unsigned = encode({ alg: 'RS256', typ: 'JWT' }) + '.' +
+  const encode = (data: unknown): string => Buffer.from(JSON.stringify(data)).toString('base64url');
+  const unsigned =
+    encode({ alg: 'RS256', typ: 'JWT' }) +
+    '.' +
     encode({
       iss: config.clientEmail,
       scope: DATASTORE_SCOPE,
@@ -155,7 +156,8 @@ export function createPlanningV2FirestoreDispatchLedger(
   if (
     !PROJECT.test(config.projectId) ||
     !config.clientEmail.endsWith('@' + config.projectId + '.iam.gserviceaccount.com')
-  ) throw new Error('invalid-firestore-dev-config');
+  )
+    throw new Error('invalid-firestore-dev-config');
 
   let cachedToken: { token: string; expires: number } | undefined;
   let tokenRequest: Promise<string> | undefined;
@@ -176,23 +178,30 @@ export function createPlanningV2FirestoreDispatchLedger(
         cache: 'no-store',
       });
       if (!response.ok) throw new Error('token-unavailable');
-      const data = await jsonDocument(response) as Record<string, unknown>;
+      const data = (await jsonDocument(response)) as Record<string, unknown>;
       if (
-        typeof data.access_token !== 'string' || !data.access_token ||
+        typeof data.access_token !== 'string' ||
+        !data.access_token ||
         typeof data.expires_in !== 'number' ||
-        data.expires_in < 360 || data.expires_in > 3600
-      ) throw new Error('token-invalid');
+        data.expires_in < 360 ||
+        data.expires_in > 3600
+      )
+        throw new Error('token-invalid');
       cachedToken = {
         token: data.access_token,
         expires: Date.now() + data.expires_in * 1000,
       };
       return data.access_token;
-    })().finally(() => { tokenRequest = undefined; });
+    })().finally(() => {
+      tokenRequest = undefined;
+    });
     return tokenRequest;
   }
 
   async function provider(
-    url: string, method: 'GET' | 'POST' | 'PATCH', body?: unknown,
+    url: string,
+    method: 'GET' | 'POST' | 'PATCH',
+    body?: unknown,
   ): Promise<Response> {
     const token = await accessToken();
     return fetchImpl(url, {
@@ -211,14 +220,25 @@ export function createPlanningV2FirestoreDispatchLedger(
       if (
         (operation !== 'prepare' && operation !== 'dispatch') ||
         !validPlanningV2FirestoreRecord(record)
-      ) return 'blocked';
+      )
+        return 'blocked';
 
       const hash = createHash('sha256')
-        .update(record.kind + ':' + record.recordId).digest('hex');
-      const root = FIRESTORE_BASE + '/projects/' + config.projectId +
-        '/databases/(default)/documents/' + COLLECTION;
-      const name = 'projects/' + config.projectId +
-        '/databases/(default)/documents/' + COLLECTION + '/' + hash;
+        .update(record.kind + ':' + record.recordId)
+        .digest('hex');
+      const root =
+        FIRESTORE_BASE +
+        '/projects/' +
+        config.projectId +
+        '/databases/(default)/documents/' +
+        COLLECTION;
+      const name =
+        'projects/' +
+        config.projectId +
+        '/databases/(default)/documents/' +
+        COLLECTION +
+        '/' +
+        hash;
       const docUrl = root + '/' + hash;
       try {
         const get = await provider(docUrl, 'GET');
@@ -239,7 +259,8 @@ export function createPlanningV2FirestoreDispatchLedger(
             created.fields.kind.stringValue === record.kind &&
             created.fields.digest.stringValue === record.payloadDigest &&
             created.fields.state.stringValue === 'prepared'
-            ? 'prepared' : 'unavailable';
+            ? 'prepared'
+            : 'unavailable';
         }
 
         if (!get.ok) return 'unavailable';
@@ -254,7 +275,8 @@ export function createPlanningV2FirestoreDispatchLedger(
         // Firestore compares updateTime atomically: exactly one CAS winner.
         // Never place a Sheets POST inside this transition or a transaction.
         const patch = await provider(
-          docUrl + '?updateMask.fieldPaths=state&currentDocument.updateTime=' +
+          docUrl +
+            '?updateMask.fieldPaths=state&currentDocument.updateTime=' +
             encodeURIComponent(doc.updateTime),
           'PATCH',
           {
@@ -268,7 +290,8 @@ export function createPlanningV2FirestoreDispatchLedger(
           updated.fields.kind.stringValue === record.kind &&
           updated.fields.digest.stringValue === record.payloadDigest &&
           updated.fields.state.stringValue === 'dispatched'
-          ? 'dispatch-once' : 'unavailable';
+          ? 'dispatch-once'
+          : 'unavailable';
       } catch {
         // This includes token failure, malformed reply and lost PATCH response:
         // an unknown outcome is never proof another send is allowed.
