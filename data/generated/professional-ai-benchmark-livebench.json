@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "kind": "PUBLIC_BENCHMARK_SNAPSHOT",
+    "publisher": "LiveBench",
+    "name": "LiveBench 2026-06-25",
+    "url": "https://livebench.ai/",
+    "release": "2026-06-25",
+    "observedAt": "2026-10-11",
+    "staleAfterDays": 45,
+    "metric": "Puntaje de la categoría reportado por LiveBench, escala 0–100",
+    "evidence": "Referencia pública orientativa, no evaluación controlada del usuario",
+    "selection": "Ocho configuraciones concretas de modelos; selección ilustrativa, no cobertura completa del leaderboard."
+  },
+  "models": [
+    {
+      "id": "claude-opus-55",
+      "name": "Claude 5.5 Opus Thinking",
+      "provider": "Anthropic",
+      "effort": "Max Effort",
+      "scores": {
+        "coding": 89.3,
+        "agenticCoding": 71.7,
+        "dataAnalysis": 80.3,
+        "reasoning": 92.2
+      }
+    },
+    {
+      "id": "claude-sonnet-5",
+      "name": "Claude Sonnet 5",
+      "provider": "Anthropic",
+      "effort": "xHigh Effort",
+      "scores": {
+        "coding": 80.7,
+        "agenticCoding": 59.4,
+        "dataAnalysis": 71.7,
+        "reasoning": 88.7
+      }
+    },
+    {
+      "id": "gpt-6-astra",
+      "name": "GPT-6 Astra",
+      "provider": "OpenAI",
+      "effort": "Max Effort",
+      "scores": {
+        "coding": 80.4,
+        "agenticCoding": 57.3,
+        "dataAnalysis": 83,
+        "reasoning": 92.7
+      }
+    },
+    {
+      "id": "gpt-61-sol",
+      "name": "GPT-6.1 Sol",
+      "provider": "OpenAI",
+      "effort": "Max Effort",
+      "scores": {
+        "coding": 80.4,
+        "agenticCoding": 54.5,
+        "dataAnalysis": 82.7,
+        "reasoning": 92.6
+      }
+    },
+    {
+      "id": "gpt-56-sol",
+      "name": "GPT-5.6 Sol",
+      "provider": "OpenAI",
+      "effort": "Max Effort",
+      "scores": {
+        "coding": 83.9,
+        "agenticCoding": 56.2,
+        "dataAnalysis": 79.8,
+        "reasoning": 91.7
+      }
+    },
+    {
+      "id": "deepseek-v41-flash",
+      "name": "DeepSeek V4.1 Flash",
+      "provider": "DeepSeek",
+      "effort": "Max Effort",
+      "scores": {
+        "coding": 80,
+        "agenticCoding": 77.3,
+        "dataAnalysis": 79.3,
+        "reasoning": 86.7
+      }
+    },
+    {
+      "id": "kimi-k3",
+      "name": "Kimi K3",
+      "provider": "Moonshot AI",
+      "effort": "Configuración publicada",
+      "scores": {
+        "coding": 81.4,
+        "agenticCoding": 62.2,
+        "dataAnalysis": 78.7,
+        "reasoning": 90.7
+      }
+    },
+    {
+      "id": "gemini-37-flash",
+      "name": "Gemini 3.7 Flash",
+      "provider": "Google",
+      "effort": "High",
+      "scores": {
+        "coding": 78.9,
+        "agenticCoding": 58.3,
+        "dataAnalysis": 68,
+        "reasoning": 87.8
+      }
+    }
+  ]
+}
