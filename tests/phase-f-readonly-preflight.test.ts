@@ -6,6 +6,7 @@ import { test } from 'node:test';
 const SCRIPT = join(process.cwd(), 'scripts/phase-f-readonly-preflight.mjs');
 
 const SAFE_QA = {
+  NODE_ENV: 'test',
   VERCEL_ENV: 'preview',
   VERCEL_GIT_COMMIT_REF: 'vida-qa',
   DAILY_PLANNING_V2_UI_ENABLED: 'true',
