@@ -39,3 +39,32 @@ jobs:
 
       - name: Verify project
         run: npm run verify
+
+  format_once_v2_google_append:
+    if: github.event_name == 'pull_request' && github.head_ref == 'ai/planning-v2-dispatch-ledger-20261011'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout exact PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install frozen dependencies
+        run: npm ci
+      - name: Format exactly the two new transport files
+        run: |
+          npx --no-install prettier --write lib/daily-planning/google-append-once-v2.ts tests/google-append-once-v2.test.ts
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- lib/daily-planning/google-append-once-v2.ts tests/google-append-once-v2.test.ts
+          if ! git diff --cached --quiet; then
+            git commit -m 'style(planning): format DEV Google single-attempt transport'
+            git push origin HEAD:refs/heads/ai/planning-v2-dispatch-ledger-20261011
+          fi
