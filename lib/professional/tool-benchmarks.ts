@@ -64,7 +64,6 @@ const TASK_MATCHES: Readonly<Record<string, BenchmarkTaskMatch>> = {
 };
 const DEFAULT_MATCH: BenchmarkTaskMatch = TASK_MATCHES.coding!;
 
-
 type BenchmarkRow = (typeof snapshot.models)[number];
 
 function isValidModel(entry: BenchmarkRow, seen: Set<string>): boolean {
