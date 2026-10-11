@@ -4,7 +4,7 @@ import { cache } from 'react';
 
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { selectPlanningExecutionV2Day, type ExecutionV2DayRead } from '@/lib/daily-planning/execution-history-v2';
-import { isPlanningExecutionV2ReadsEnabled } from '@/lib/daily-planning/v2-config';
+import { isPlanningExecutionV2DevReadEnabled } from '@/lib/daily-planning/v2-config';
 import { readTabValues } from '@/lib/google/sheets-read';
 import type { SheetReadCode } from '@/lib/google/errors';
 
@@ -27,8 +27,8 @@ function unavailable(code: SheetReadCode): ExecutionV2DayRead {
 /** Explicit internal-only read. Never pass the result as a public browser DTO. */
 export const getPlanningExecutionV2Day = cache(async (targetDate: string): Promise<ExecutionV2DayRead> => {
   await requireAuthorizedSession();
-  if (!isPlanningExecutionV2ReadsEnabled()) {
-    return {status:'unavailable',current:[],invalidRows:0,notice:'Historial V2: lectura todavía desactivada.'};
+  if (!isPlanningExecutionV2DevReadEnabled()) {
+    return {status:'unavailable',current:[],invalidRows:0,notice:'Historial V2: lectura DEV todavía desactivada.'};
   }
   const source = await readTabValues(RANGE);
   if (!source.ok) return unavailable(source.code);
