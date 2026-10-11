@@ -14,13 +14,6 @@ function formatUsd(value: number): string {
   }).format(value);
 }
 
-function formatArsMillions(value: number): string {
-  return `$${new Intl.NumberFormat('es-AR', {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 2,
-  }).format(value / 1_000_000)} M`;
-}
-
 function formatInteger(value: number): string {
   return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(value);
 }
@@ -190,7 +183,9 @@ export function ProfessionalMarket({
           ))}
         </div>
 
-        <div className={styles['market-benchmark-list']}>
+        <details className={styles['market-details']}>
+          <summary>Ver cifras BLS completas, incluidos salarios anuales de EE.UU.</summary>
+          <div className={styles['market-benchmark-list']}>
           {market.internationalBenchmarks.map((item) => (
             <article className={styles['market-benchmark']} key={item.id}>
               <div>
@@ -215,7 +210,8 @@ export function ProfessionalMarket({
               </dl>
             </article>
           ))}
-        </div>
+          </div>
+        </details>
       </section>
 
       {detail ? (
@@ -245,71 +241,10 @@ export function ProfessionalMarket({
         </section>
       ) : null}
 
-      <section className={styles['market-section']} aria-labelledby="market-compensation-title">
-        <div className={styles['market-heading']}>
-          <p className={styles.eyebrow}>Compensación · Argentina</p>
-          <h3 id="market-compensation-title">Referencias salariales sin mezclar mercados</h3>
-          <p>
-            Son medianas brutas mensuales de la encuesta indicada. No son ofertas actuales ni una
-            cotización salarial exacta.
-          </p>
-        </div>
-
-        <div className={styles['market-salary-grid']}>
-          {market.argentinaSalaryRoles.map((role) => (
-            <article className={styles['market-salary-role']} key={role.id}>
-              <div className={styles['market-role-head']}>
-                <h4>{role.role}</h4>
-                <span>{role.period}</span>
-              </div>
-              <ul>
-                {role.points.map((point) => (
-                  <li key={point.label}>
-                    <span>{point.label}</span>
-                    <strong>{formatArsMillions(point.medianArsGrossMonthly)}</strong>
-                    <small>n={point.sampleSize}</small>
-                  </li>
-                ))}
-              </ul>
-              <a href={role.sourceUrl} rel="noreferrer" target="_blank">
-                {role.sourceLabel} →
-              </a>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles['market-section']} aria-labelledby="market-geography-title">
-        <div className={styles['market-heading']}>
-          <p className={styles.eyebrow}>Geografía y remoto</p>
-          <h3 id="market-geography-title">No comprimimos mercados distintos en un solo número</h3>
-        </div>
-
-        <div className={styles['market-geo-grid']}>
-          <article>
-            <strong>Argentina</strong>
-            <p>
-              Hay una referencia salarial local con seniority y tamaño de muestra visibles. Se usa
-              para contexto local, no para inferir salarios internacionales.
-            </p>
-          </article>
-          <article>
-            <strong>Internacional</strong>
-            <p>
-              EE.UU. funciona como referencia estructural de crecimiento, aperturas y compensación.
-              No se presenta como equivalente al mercado argentino.
-            </p>
-          </article>
-          <article>
-            <strong>Remoto / LATAM</strong>
-            <p>
-              {detail
-                ? 'Hay muestras remotas acotadas por rol objetivo. Sirven como evidencia representativa, no como censo ni como remote-fit score.'
-                : 'No hay una métrica comparable de remote fit. Hasta que exista evidencia suficiente, no publicamos un score ni una estimación.'}
-            </p>
-          </article>
-        </div>
-      </section>
+      <details className={styles['market-details']}>
+        <summary>Cómo comparar mercados y muestras sin mezclarlos</summary>
+        <p>Los salarios argentinos proceden de una encuesta; BLS proyecta ocupaciones de EE.UU.; las ofertas remotas son muestras acotadas, no una estimación de demanda total.</p>
+      </details>
 
       <section className={styles['market-section']} aria-labelledby="market-ai-title">
         <div className={styles['market-heading']}>
