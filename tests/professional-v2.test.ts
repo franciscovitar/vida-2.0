@@ -84,7 +84,7 @@ test('PRO-V2-05. Panorama usa datos canónicos existentes y mantiene la portada 
 
   assert.match(panorama, /snapshot\.nowMoves\.slice\(0, 3\)/);
   assert.match(panorama, /snapshot\.growth\.items\[0\]/);
-  assert.match(panorama, /snapshot\.forecast\.direction/);
+  assert.match(panorama, /No hay evidencia para abandonar software\/web/);
   assert.match(panorama, /snapshot\.market\.globalSignals\[0\]/);
   assert.match(panorama, /DecisionBadge value="ACT"/);
   assert.match(panorama, /DecisionBadge value="NO_CHANGE"/);
