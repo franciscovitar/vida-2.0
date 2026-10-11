@@ -6,7 +6,10 @@
  * NEVER retry a POST even
  * after a timeout, 429/5xx, lost reply or apparent success.
  */
-import { compilePlanningV2AppendCells, type PlanningV2AppendKind } from '@/lib/daily-planning/append-cells-v2';
+import {
+  compilePlanningV2AppendCells,
+  type PlanningV2AppendKind,
+} from '@/lib/daily-planning/append-cells-v2';
 import { SHEETS_BASE } from '@/lib/google/auth';
 import { resolveSpreadsheetTarget } from '@/lib/google/spreadsheet-target-core';
 
@@ -16,10 +19,16 @@ export type PlanningV2AppendAttempt = {
   retryAllowed: false;
 };
 const blocked = (status: 'blocked' | 'not-sent'): PlanningV2AppendAttempt => ({
-  status, postAttempts: 0, retryAllowed: false,
+  status,
+  postAttempts: 0,
+  retryAllowed: false,
 });
-const outcome = (status: 'submitted-unconfirmed' | 'outcome-uncertain'): PlanningV2AppendAttempt => ({
-  status, postAttempts: 1, retryAllowed: false,
+const outcome = (
+  status: 'submitted-unconfirmed' | 'outcome-uncertain',
+): PlanningV2AppendAttempt => ({
+  status,
+  postAttempts: 1,
+  retryAllowed: false,
 });
 
 export interface PlanningV2DevSendEnv extends Readonly<Record<string, string | undefined>> {
@@ -62,11 +71,18 @@ export function resolvePlanningV2DevSendTarget(
     env.GOOGLE_SHEETS_TARGET !== 'dev' ||
     (env.VERCEL_ENV !== 'preview' && env.VERCEL_ENV !== 'development') ||
     !Object.hasOwn(TAB_IDS, kind)
-  ) return null;
+  )
+    return null;
   const target = resolveSpreadsheetTarget(env);
   const prodId = env.GOOGLE_SHEETS_PROD_ID?.trim();
-  if (!target.ok || target.target !== 'dev' || !target.spreadsheetId ||
-      !prodId || target.spreadsheetId === prodId) return null;
+  if (
+    !target.ok ||
+    target.target !== 'dev' ||
+    !target.spreadsheetId ||
+    !prodId ||
+    target.spreadsheetId === prodId
+  )
+    return null;
   const raw = env[TAB_IDS[kind]];
   if (typeof raw !== 'string' || !/^(?:0|[1-9][0-9]{0,9})$/.test(raw)) return null;
   const sheetId = Number(raw);
@@ -93,7 +109,10 @@ export async function attemptPlanningV2DevAppendOnce(input: {
   const target = resolvePlanningV2DevSendTarget(input.kind, input.env);
   if (!target) return blocked('blocked');
   const compiled = compilePlanningV2AppendCells({
-    kind: input.kind, row: input.row, target: 'dev', sheetId: target.sheetId,
+    kind: input.kind,
+    row: input.row,
+    target: 'dev',
+    sheetId: target.sheetId,
   });
   if (!compiled.ok) return blocked('blocked');
   const body = JSON.stringify(compiled.request);
@@ -105,8 +124,13 @@ export async function attemptPlanningV2DevAppendOnce(input: {
   } catch {
     return blocked('not-sent');
   }
-  if (!accessToken || typeof accessToken !== 'string' || accessToken.length > 8192 ||
-      /\s/.test(accessToken)) return blocked('not-sent');
+  if (
+    !accessToken ||
+    typeof accessToken !== 'string' ||
+    accessToken.length > 8192 ||
+    /\s/.test(accessToken)
+  )
+    return blocked('not-sent');
 
   let attempted = false;
   try {
@@ -125,7 +149,11 @@ export async function attemptPlanningV2DevAppendOnce(input: {
     });
     // Response body is neither trusted confirmation nor needed for a resend.
     // Do not log raw provider contents or identifiers.
-    try { await response.body?.cancel(); } catch { /* no body retention */ }
+    try {
+      await response.body?.cancel();
+    } catch {
+      /* no body retention */
+    }
     return outcome(response.ok ? 'submitted-unconfirmed' : 'outcome-uncertain');
   } catch {
     // Could have committed after a timeout / lost response. Never retry.
