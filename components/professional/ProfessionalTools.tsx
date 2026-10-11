@@ -66,10 +66,12 @@ export function ProfessionalTools({
   data,
   filter = 'all',
   groupId,
+  showAll = false,
 }: {
   data: ProfessionalOfferVariantsData;
   filter?: string;
   groupId?: string;
+  showAll?: boolean;
 }) {
   if (data.status !== 'ready' || !data.snapshot || data.stale) {
     return (
@@ -105,6 +107,8 @@ export function ProfessionalTools({
     snapshot.offers.filter((offer) => allowedIds.has(offer.id)),
     filter,
   );
+
+  const displayedOffers = showAll ? currentOffers : currentOffers.slice(0, 5);
 
   return (
     <div className={styles.stack}>
@@ -157,13 +161,13 @@ export function ProfessionalTools({
         <div className={styles['section-heading']}>
           <div>
             <p className={styles.eyebrow}>Ofertas actuales</p>
-            <h3 id="offer-comparison-title">{group.label}</h3>
+            <h3 id="offer-comparison-title">Opciones disponibles</h3>
           </div>
           <span>{currentOffers.length} opciones</span>
         </div>
 
         <div className={styles['offer-list']}>
-          {currentOffers.map((offer) => (
+          {displayedOffers.map((offer) => (
             <article className={styles.offer} key={offer.id}>
               <div className={styles['offer-head']}>
                 <div>
@@ -220,6 +224,17 @@ export function ProfessionalTools({
             </article>
           ))}
         </div>
+        {currentOffers.length > 5 ? (
+          <p className={styles.provenance}>
+            {showAll ? (
+              <a href={filterHref(group.id, filter)}>Mostrar solo las primeras cinco opciones</a>
+            ) : (
+              <a href={filterHref(group.id, filter) + '&all=1'}>
+                Ver las {currentOffers.length} opciones y sus fichas completas
+              </a>
+            )}
+          </p>
+        ) : null}
       </section>
 
       <footer className={styles.provenance}>

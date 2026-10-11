@@ -101,7 +101,7 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
       <section className={styles['panorama-section']} aria-labelledby="professional-changes-title">
         <div className={styles['panorama-heading']}>
           <p className={styles.eyebrow}>Qué cambió / qué se confirma</p>
-          <h3 id="professional-changes-title">Tres cambios materiales, con decisión explícita</h3>
+          <h3 id="professional-changes-title">Tres señales para decidir</h3>
         </div>
 
         <div className={styles['panorama-list']}>
@@ -114,14 +114,9 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
                 <DecisionBadge value="ACT" />
               </div>
               <h3>{activePriority.capability}</h3>
-              <p>
-                <strong>Qué cambió / se confirma:</strong> {activePriority.whyNow}
-              </p>
-              <p>
-                <strong>Por qué importa:</strong> {activePriority.evidenceTarget}
-              </p>
+              <p>{activePriority.whyNow}</p>
               <p className={styles['panorama-action']}>
-                <strong>Para vos:</strong> {activePriority.practiceContract}
+                <Link href="/professional/crecimiento">Ver práctica y evidencia de cierre →</Link>
               </p>
             </article>
           ) : null}
@@ -176,7 +171,7 @@ export function ProfessionalPanorama({ data }: { data: ProfessionalIntelligenceD
       <section className={styles['panorama-section']} aria-labelledby="professional-now-title">
         <div className={styles['panorama-heading']}>
           <p className={styles.eyebrow}>Qué conviene hacer ahora</p>
-          <h3 id="professional-now-title">Pocos movimientos, con motivo claro</h3>
+          <h3 id="professional-now-title">Tus próximos pasos</h3>
         </div>
 
         <div className={styles['panorama-moves']}>
