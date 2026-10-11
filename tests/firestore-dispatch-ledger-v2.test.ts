@@ -14,7 +14,8 @@ import type { PlanningV2LedgerRecord } from '@/lib/daily-planning/dispatch-ledge
 
 // Generated ephemeral fixture key. No Google account, provider or real key is used.
 const fixtureKey = generateKeyPairSync('rsa', { modulusLength: 2048 })
-  .privateKey.export({ format: 'pem', type: 'pkcs8' }).toString();
+  .privateKey.export({ format: 'pem', type: 'pkcs8' })
+  .toString();
 const PROJECT = 'planning-v2-isolated-dev-test';
 const ACCOUNT = 'writer@' + PROJECT + '.iam.gserviceaccount.com';
 const SECRET = JSON.stringify({
@@ -50,13 +51,15 @@ type Stored = {
   updateTime: string;
 };
 
-function simulator(options: {
-  tokenFailure?: boolean;
-  createLostReply?: boolean;
-  patchLostReply?: boolean;
-  brokenGet?: boolean;
-  forcePatchConflict?: boolean;
-} = {}) {
+function simulator(
+  options: {
+    tokenFailure?: boolean;
+    createLostReply?: boolean;
+    patchLostReply?: boolean;
+    brokenGet?: boolean;
+    forcePatchConflict?: boolean;
+  } = {},
+) {
   const docs = new Map<string, Stored>();
   const calls: string[] = [];
   let sequence = 0;
@@ -76,17 +79,28 @@ function simulator(options: {
       assert.equal(body.get('grant_type'), 'urn:ietf:params:oauth:grant-type:jwt-bearer');
       const jwt = body.get('assertion')?.split('.')[1] || '';
       const claims = JSON.parse(Buffer.from(jwt, 'base64url').toString()) as {
-        iss: string; scope: string; aud: string;
+        iss: string;
+        scope: string;
+        aud: string;
       };
       assert.equal(claims.iss, ACCOUNT);
       assert.equal(claims.scope, 'https://www.googleapis.com/auth/datastore');
       assert.equal(claims.aud, 'https://oauth2.googleapis.com/token');
-      return options.tokenFailure ? error(403) : json({ access_token: 'synthetic', expires_in: 3600 });
+      return options.tokenFailure
+        ? error(403)
+        : json({ access_token: 'synthetic', expires_in: 3600 });
     }
     assert.equal(url.hostname, 'firestore.googleapis.com');
-    assert.equal(init?.headers && (init.headers as Record<string, string>).Authorization, 'Bearer synthetic');
-    assert.match(url.pathname, /\/projects\/planning-v2-isolated-dev-test\/databases\/\(default\)\/documents\/planning_v2_dispatch_v1/);
-    const id = method === 'POST' ? url.searchParams.get('documentId')! : url.pathname.split('/').at(-1)!;
+    assert.equal(
+      init?.headers && (init.headers as Record<string, string>).Authorization,
+      'Bearer synthetic',
+    );
+    assert.match(
+      url.pathname,
+      /\/projects\/planning-v2-isolated-dev-test\/databases\/\(default\)\/documents\/planning_v2_dispatch_v1/,
+    );
+    const id =
+      method === 'POST' ? url.searchParams.get('documentId')! : url.pathname.split('/').at(-1)!;
     assert.match(id, /^[a-f0-9]{64}$/);
 
     if (method === 'GET') {
@@ -98,7 +112,8 @@ function simulator(options: {
       if (docs.has(id)) return error(409);
       const payload = JSON.parse(String(init?.body)) as { fields: Stored['fields'] };
       const doc = {
-        name: 'projects/' + PROJECT + '/databases/(default)/documents/planning_v2_dispatch_v1/' + id,
+        name:
+          'projects/' + PROJECT + '/databases/(default)/documents/planning_v2_dispatch_v1/' + id,
         fields: payload.fields,
         updateTime: stamp(),
       };
@@ -117,7 +132,10 @@ function simulator(options: {
     await Promise.resolve();
     if (!before || docs.get(id)?.updateTime !== expectedTime || options.forcePatchConflict)
       return error(412);
-    const body = JSON.parse(String(init?.body)) as { name: string; fields: { state: { stringValue: string } } };
+    const body = JSON.parse(String(init?.body)) as {
+      name: string;
+      fields: { state: { stringValue: string } };
+    };
     assert.equal(body.name, before.name);
     assert.equal(body.fields.state.stringValue, 'dispatched');
     const updated = {
@@ -161,20 +179,44 @@ test('credential project, principal and token endpoint are strictly validated', 
     { [PLANNING_V2_FIRESTORE_SECRET_NAME]: 'not-json' },
     { [PLANNING_V2_FIRESTORE_PROJECT_NAME]: 'other-production-project' },
     { [PLANNING_V2_FIRESTORE_PROJECT_NAME]: '' },
-    { [PLANNING_V2_FIRESTORE_SECRET_NAME]: JSON.stringify({ ...JSON.parse(SECRET), type: 'authorized_user' }) },
-    { [PLANNING_V2_FIRESTORE_SECRET_NAME]: JSON.stringify({ ...JSON.parse(SECRET), client_email: 'writer@other.iam.gserviceaccount.com' }) },
-    { [PLANNING_V2_FIRESTORE_SECRET_NAME]: JSON.stringify({ ...JSON.parse(SECRET), token_uri: 'https://evil.example/oauth' }) },
-    { [PLANNING_V2_FIRESTORE_SECRET_NAME]: JSON.stringify({ ...JSON.parse(SECRET), private_key: 'not-a-key' }) },
+    {
+      [PLANNING_V2_FIRESTORE_SECRET_NAME]: JSON.stringify({
+        ...JSON.parse(SECRET),
+        type: 'authorized_user',
+      }),
+    },
+    {
+      [PLANNING_V2_FIRESTORE_SECRET_NAME]: JSON.stringify({
+        ...JSON.parse(SECRET),
+        client_email: 'writer@other.iam.gserviceaccount.com',
+      }),
+    },
+    {
+      [PLANNING_V2_FIRESTORE_SECRET_NAME]: JSON.stringify({
+        ...JSON.parse(SECRET),
+        token_uri: 'https://evil.example/oauth',
+      }),
+    },
+    {
+      [PLANNING_V2_FIRESTORE_SECRET_NAME]: JSON.stringify({
+        ...JSON.parse(SECRET),
+        private_key: 'not-a-key',
+      }),
+    },
   ];
   for (const values of bad) {
     assert.equal(resolvePlanningV2FirestoreDevConfig({ ...good, ...values }).ok, false);
   }
-  assert.equal(resolvePlanningV2FirestoreDevConfig({
-    ...good,
-    GOOGLE_SERVICE_ACCOUNT_EMAIL: 'old-production-account@example.com',
-    GOOGLE_PRIVATE_KEY: 'legacy-sheets-secret',
-    UPSTASH_REDIS_REST_TOKEN: 'legacy-redis-secret',
-  }).ok, true, 'old credential presence does not feed Firestore');
+  assert.equal(
+    resolvePlanningV2FirestoreDevConfig({
+      ...good,
+      GOOGLE_SERVICE_ACCOUNT_EMAIL: 'old-production-account@example.com',
+      GOOGLE_PRIVATE_KEY: 'legacy-sheets-secret',
+      UPSTASH_REDIS_REST_TOKEN: 'legacy-redis-secret',
+    }).ok,
+    true,
+    'old credential presence does not feed Firestore',
+  );
 });
 
 test('validated record shapes reject stale, malformed and extra identity fields', () => {
@@ -190,7 +232,7 @@ test('prepare creates once and duplicate prepare is idempotent', async () => {
   assert.equal(await ledger.transition('prepare', record()), 'prepared');
   assert.equal(await ledger.transition('prepare', record()), 'already-prepared');
   assert.equal(s.docs.size, 1);
-  assert.equal(s.calls.filter(x => x.startsWith('POST firestore')).length, 1);
+  assert.equal(s.calls.filter((x) => x.startsWith('POST firestore')).length, 1);
 });
 
 test('dispatch is forbidden before prepare', async () => {
@@ -209,10 +251,10 @@ test('one concurrent dispatch wins CAS, never two', async () => {
     a.transition('dispatch', record()),
     b.transition('dispatch', record()),
   ]);
-  assert.equal(outcomes.filter(x => x === 'dispatch-once').length, 1);
-  assert.ok(outcomes.every(x => x === 'dispatch-once' || x === 'blocked' || x === 'uncertain'));
+  assert.equal(outcomes.filter((x) => x === 'dispatch-once').length, 1);
+  assert.ok(outcomes.every((x) => x === 'dispatch-once' || x === 'blocked' || x === 'uncertain'));
   assert.equal(s.docs.size, 1);
-  assert.ok(s.calls.filter(x => x.startsWith('PATCH firestore')).length <= 2);
+  assert.ok(s.calls.filter((x) => x.startsWith('PATCH firestore')).length <= 2);
   assert.equal(await a.transition('dispatch', record()), 'uncertain');
 });
 
@@ -224,7 +266,7 @@ test('a repeated dispatched ID remains quarantined across new adapter instances'
   const restarted = createPlanningV2FirestoreDispatchLedger(config, s.fetchImpl);
   assert.equal(await restarted.transition('prepare', record()), 'uncertain');
   assert.equal(await restarted.transition('dispatch', record()), 'uncertain');
-  assert.equal(s.calls.filter(x => x.startsWith('PATCH firestore')).length, 1);
+  assert.equal(s.calls.filter((x) => x.startsWith('PATCH firestore')).length, 1);
 });
 
 test('a different digest for the same ID conflicts without replacing the record', async () => {
@@ -234,7 +276,7 @@ test('a different digest for the same ID conflicts without replacing the record'
   assert.equal(await ledger.transition('dispatch', record('a', 'c'.repeat(64))), 'conflict');
   assert.equal(await ledger.transition('prepare', record('a', 'c'.repeat(64))), 'conflict');
   assert.equal(s.docs.size, 1);
-  assert.equal(s.calls.filter(x => x.startsWith('PATCH firestore')).length, 0);
+  assert.equal(s.calls.filter((x) => x.startsWith('PATCH firestore')).length, 0);
 });
 
 test('a lost create response does not authorize dispatch', async () => {
@@ -242,7 +284,7 @@ test('a lost create response does not authorize dispatch', async () => {
   const ledger = createPlanningV2FirestoreDispatchLedger(config, s.fetchImpl);
   assert.equal(await ledger.transition('prepare', record()), 'unavailable');
   assert.equal(s.docs.size, 1);
-  assert.equal(s.calls.filter(x => x.startsWith('PATCH firestore')).length, 0);
+  assert.equal(s.calls.filter((x) => x.startsWith('PATCH firestore')).length, 0);
 });
 
 test('a lost dispatch response is unavailable, but durable retry is uncertain', async () => {
@@ -252,7 +294,7 @@ test('a lost dispatch response is unavailable, but durable retry is uncertain', 
   assert.equal(await ledger.transition('dispatch', record()), 'unavailable');
   const restarted = createPlanningV2FirestoreDispatchLedger(config, s.fetchImpl);
   assert.equal(await restarted.transition('dispatch', record()), 'uncertain');
-  assert.equal(s.calls.filter(x => x.startsWith('PATCH firestore')).length, 1);
+  assert.equal(s.calls.filter((x) => x.startsWith('PATCH firestore')).length, 1);
 });
 
 test('precondition failure, 412, never authorizes a second dispatch', async () => {
@@ -266,15 +308,24 @@ test('precondition failure, 412, never authorizes a second dispatch', async () =
 test('invalid Firestore response and failed Google OAuth both fail closed', async () => {
   const s = simulator({ brokenGet: true });
   assert.equal(
-    await createPlanningV2FirestoreDispatchLedger(config, s.fetchImpl).transition('prepare', record()),
+    await createPlanningV2FirestoreDispatchLedger(config, s.fetchImpl).transition(
+      'prepare',
+      record(),
+    ),
     'unavailable',
   );
   const bad = simulator({ tokenFailure: true });
   assert.equal(
-    await createPlanningV2FirestoreDispatchLedger(config, bad.fetchImpl).transition('prepare', record()),
+    await createPlanningV2FirestoreDispatchLedger(config, bad.fetchImpl).transition(
+      'prepare',
+      record(),
+    ),
     'unavailable',
   );
-  assert.equal(bad.calls.some(x => x.includes('firestore')), false);
+  assert.equal(
+    bad.calls.some((x) => x.includes('firestore')),
+    false,
+  );
 });
 
 test('all network interactions are OAuth or Firestore only; never Sheets or Upstash', async () => {
@@ -282,30 +333,9 @@ test('all network interactions are OAuth or Firestore only; never Sheets or Upst
   const ledger = createPlanningV2FirestoreDispatchLedger(config, s.fetchImpl);
   await ledger.transition('prepare', record());
   await ledger.transition('dispatch', record());
-  assert.ok(s.calls.every(x => /oauth2.googleapis.com|firestore.googleapis.com/.test(x)));
-  const actual = createHash('sha256').update(record().kind + ':' + record().recordId).digest('hex');
+  assert.ok(s.calls.every((x) => /oauth2.googleapis.com|firestore.googleapis.com/.test(x)));
+  const actual = createHash('sha256')
+    .update(record().kind + ':' + record().recordId)
+    .digest('hex');
   assert.ok(s.docs.has(actual));
-});
-
-/* PRETTIER_DIAGNOSTIC_BEGIN */
-test('internal formatting snapshot for draft CI (temporary)', async () => {
-  const fs = await import('node:fs/promises');
-  const prettier = await import('prettier');
-  const paths = [
-    'lib/daily-planning/firestore-dispatch-ledger-v2.ts',
-    'tests/firestore-dispatch-ledger-v2.test.ts',
-  ];
-  for (const [index, path] of paths.entries()) {
-    const original = await fs.readFile(path, 'utf8');
-    const clean = index === 1 ? original.split('/* PRETTIER_DIAGNOSTIC_BEGIN */')[0] : original;
-    const config = (await prettier.resolveConfig(path)) || {};
-    const formatted = await prettier.format(clean, { ...config, filepath: path });
-    const base64 = Buffer.from(formatted).toString('base64');
-    const chunks = Math.ceil(base64.length / 1200);
-    console.log('PASFORMAT_BEGIN|' + index + '|' + chunks);
-    for (let i = 0; i < chunks; i++) {
-      console.log('PASFORMAT_CHUNK|' + index + '|' + i + '|' + base64.slice(i * 1200, (i + 1) * 1200));
-    }
-    console.log('PASFORMAT_END|' + index + '|' + chunks);
-  }
 });
