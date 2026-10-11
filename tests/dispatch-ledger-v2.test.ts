@@ -61,6 +61,19 @@ test('config is OFF by default and target cannot be PROD',()=>{
   if(enabled.ok) assert.match(enabled.value.namespace,/^vida2:planning-v2:dev:[0-9a-f]{24}:dispatch-v1$/);
 });
 
+test('DEV workbook cannot alias the configured Production workbook',()=>{
+  const env={
+    VERCEL_ENV:'preview',
+    GOOGLE_SHEETS_TARGET:'dev',
+    GOOGLE_SHEETS_DEV_ID:'same-workbook-id',
+    GOOGLE_SHEETS_PROD_ID:'same-workbook-id',
+    UPSTASH_REDIS_REST_URL:config.url,
+    UPSTASH_REDIS_REST_TOKEN:config.token,
+    PLANNING_V2_DEV_LEDGER_ENABLED:'true',
+  };
+  assert.equal(resolvePlanningV2LedgerConfig(env).ok,false);
+});
+
 test('invalid and surplus raw user fields are rejected before Upstash',async()=>{
   const p=providerMock();const ledger=createPlanningV2DispatchLedger(config,p.fetchImpl);
   assert.equal(validPlanningV2LedgerRecord(record()),true);

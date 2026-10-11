@@ -82,7 +82,9 @@ export function resolvePlanningV2LedgerConfig(
     return { ok: false };
   }
   const target = resolveSpreadsheetTarget(env);
-  if (!target.ok || target.target !== 'dev' || target.spreadsheetId.length < 10) {
+  if (!target.ok || target.target !== 'dev' || target.spreadsheetId.length < 10 ||
+      (env.GOOGLE_SHEETS_PROD_ID?.trim() &&
+       env.GOOGLE_SHEETS_PROD_ID.trim() === target.spreadsheetId)) {
     return { ok: false };
   }
   // The identifier is never persisted in clear text in Redis keys/logs.
