@@ -50,7 +50,11 @@ export function countConflictingOrientationIdRows(
       seen.set(id, { fingerprint, index });
       continue;
     }
-    if (previous.fingerprint === null || fingerprint === null || previous.fingerprint !== fingerprint) {
+    if (
+      previous.fingerprint === null ||
+      fingerprint === null ||
+      previous.fingerprint !== fingerprint
+    ) {
       conflicting.add(previous.index);
       conflicting.add(index);
     }
