@@ -101,3 +101,10 @@ n8n, tunnels, temporary stores, browser-based OAuth, OpenClaw, or external E2E v
 - Relevant typecheck, lint, Stylelint, formatting, tests, and build checks have been executed.
 - The final diff has been reviewed for generated files, duplicate lockfiles, secrets, and accidental changes.
 - Modified files, executed commands, validation results, remaining risks, and any skipped checks are reported.
+
+## Vida 2.0 — QA Preview URL (canonical)
+
+- For authenticated Vida 2.0 UI acceptance, use the stable QA branch alias: https://vida-2-0-git-vida-qa-genova.vercel.app/ . The Professional Tools page is at `/professional/herramientas`.
+- This alias follows the `vida-qa` branch. An unrelated PR preview URL is **not** the same code: verify the branch, exact commit SHA and Vercel alias before claiming a change is visible in QA.
+- The stable alias is the existing Auth.js Google redirect proxy for Preview. Other PR previews may authenticate through that proxy, but a successful login does not deploy their code to `vida-qa`.
+- Prefer isolated, bounded QA changes with one deliberate Preview build; never merge divergent QA and main branches wholesale or alter OAuth callbacks/Production simply to inspect a PR. Current canonical policy: PAS `AI/projects/vida-2/README.md` and `docs/preview-final-checklist.md`.

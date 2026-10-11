@@ -16,9 +16,9 @@ export const runtime = 'nodejs';
 export default async function ProfessionalToolsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; group?: string }>;
+  searchParams: Promise<{ filter?: string; task?: string; group?: string; all?: string }>;
 }) {
-  const [{ filter, group }, offers] = await Promise.all([
+  const [{ filter, task, group, all }, offers] = await Promise.all([
     searchParams,
     getProfessionalToolsPageData(),
   ]);
@@ -27,12 +27,18 @@ export default async function ProfessionalToolsPage({
     <div className={pageStyles.page}>
       <PageHeader
         title="Herramientas"
-        description="Planes, precios, límites y comparaciones por tarea. Gratis y pago compiten como ofertas distintas."
+        description="IA por tarea, plan y presupuesto. Calidad y costo por resultado sólo con pruebas comparables."
         icon={Workflow}
         domain="projects"
       />
       <ProfessionalNavigation current="herramientas" />
-      <ProfessionalTools data={offers} filter={filter} groupId={group} />
+      <ProfessionalTools
+        data={offers}
+        filter={filter}
+        taskId={task}
+        groupId={group}
+        showAll={all === '1'}
+      />
     </div>
   );
 }
