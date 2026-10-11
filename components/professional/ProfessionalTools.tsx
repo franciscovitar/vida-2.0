@@ -1,5 +1,7 @@
 import { CircleAlert } from 'lucide-react';
 
+import { ProfessionalToolBenchmark } from './ProfessionalToolBenchmark';
+
 import {
   eligibleToolOffers,
   modelAccessLabel,
@@ -153,17 +155,36 @@ export function ProfessionalTools({
   groupId?: string;
   showAll?: boolean;
 }) {
+  const task = resolveToolTask(taskId);
   if (data.status !== 'ready' || !data.snapshot || data.stale) {
     return (
-      <section className={styles.section} aria-labelledby="professional-tools-unavailable">
-        <div className={styles.notice} data-tone="warning" role="status">
-          <CircleAlert size={16} aria-hidden="true" />
-          <span id="professional-tools-unavailable">
-            {data.notice ??
-              'El comparador no está disponible. Revalidá precio y límites antes de comparar.'}
-          </span>
-        </div>
-      </section>
+      <div className={styles.stack}>
+        <header className={ui['task-header']}>
+          <h2>¿Qué IA conviene explorar para cada tarea?</h2>
+          <p>Primero, resultados de modelos por categoría. Los planes se verifican aparte.</p>
+        </header>
+        <nav className={ui['task-nav']} aria-label="Elegir tarea de IA">
+          {TOOL_TASKS.map((option) => (
+            <a
+              aria-current={option.id === task.id ? 'page' : undefined}
+              href={toolsHref(option.id, 'all', null)}
+              key={option.id}
+            >
+              {option.label}
+            </a>
+          ))}
+        </nav>
+        <ProfessionalToolBenchmark taskId={task.id} />
+        <section className={styles.section} aria-labelledby="professional-tools-unavailable">
+          <div className={styles.notice} data-tone="warning" role="status">
+            <CircleAlert size={16} aria-hidden="true" />
+            <span id="professional-tools-unavailable">
+              {data.notice ??
+                'Los precios y límites no están disponibles o necesitan revalidación. Los resultados del benchmark son independientes de los planes.'}
+            </span>
+          </div>
+        </section>
+      </div>
     );
   }
 
@@ -184,7 +205,6 @@ export function ProfessionalTools({
 
   // Keep `group` in links only when it differs from the default catalog.
   const linkedGroupId = group.id === defaultGroup?.id ? null : group.id;
-  const task = resolveToolTask(taskId);
   const selectedFilter = FILTERS.find((item) => item.id === filter)?.id ?? 'all';
   const currentOffers = eligibleToolOffers(snapshot.offers, group.offerIds, task, selectedFilter);
   const representatives = representativeToolOffers(currentOffers, selectedFilter);
@@ -197,8 +217,8 @@ export function ProfessionalTools({
         <p className={styles.eyebrow}>Comparadores por tarea · {group.label}</p>
         <h2>¿Qué IA conviene explorar para cada tarea?</h2>
         <p>
-          Elegí la tarea y el presupuesto. Primero aparece un plan de entrada por producto, sin
-          ganadores inventados. Modelo, producto, plan y canal se muestran por separado.
+          Primero compará resultados públicos de modelos por categoría. Después revisá el costo y
+          los límites de cada herramienta, sin confundir un modelo con un plan.
         </p>
       </header>
 
@@ -214,6 +234,8 @@ export function ProfessionalTools({
         ))}
       </nav>
       <p className={ui['offer-intro']}>{task.description}</p>
+      <ProfessionalToolBenchmark taskId={task.id} />
+      <p className={styles.eyebrow}>02 · Planes y presupuesto</p>
 
       <nav className={ui['budget-nav']} aria-label="Filtrar precio y frecuencia">
         {FILTERS.map((option) => (
@@ -235,12 +257,11 @@ export function ProfessionalTools({
           · no hay un mejor modelo verificado para esta tarea
         </strong>
         <span>
-          Los precios y límites de los planes están verificados en fuentes oficiales, pero todavía
-          no hay evidencia controlada y comparable por tarea para ordenar un número uno. Los
-          candidatos se filtran por canales de acceso documentados, no por éxito demostrado. El
-          catálogo se recopiló para programación y no cubre todos los modelos, tareas ni APIs. V09
-          (calidad por tarea) y V10 (costo por resultado útil) siguen pendientes de evaluaciones
-          controladas. Precio bajo no significa más o menos capacidad.
+          El gráfico anterior recoge resultados de LiveBench, no pruebas personales ni un ganador
+          para tu flujo. Estos planes son ofertas de acceso, no los modelos puntuados arriba. Los
+          candidatos se filtran por canales documentados, no por éxito demostrado. V09 (calidad por
+          tarea) y V10 (costo por resultado útil) siguen sin validación personal comparable. Precio
+          bajo no significa más o menos capacidad.
         </span>
       </div>
 
