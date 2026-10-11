@@ -109,8 +109,8 @@ function validStored(value: unknown, expected: string): value is Stored {
     typeof doc.updateTime === 'string' &&
     /^\d{4}-\d{2}-\d{2}T/.test(doc.updateTime) &&
     typeof doc.fields?.kind?.stringValue === 'string' &&
-    typeof doc.fields.digest?.stringValue === 'string' &&
-    typeof doc.fields.state?.stringValue === 'string'
+    typeof doc.fields?.digest?.stringValue === 'string' &&
+    typeof doc.fields?.state?.stringValue === 'string'
   );
 }
 
