@@ -110,7 +110,7 @@ test('PRO-V2-07. Mercado separa geografías y no inventa remote fit', () => {
 
   assert.match(market, /Argentina separada de referencias internacionales/);
   assert.match(market, /BLS proyecta ocupaciones de EE\.UU\./);
-  assert.match(market, /las ofertas remotas son muestras acotadas/);
+  assert.match(market, /las\s+ofertas\s+remotas\s+son\s+muestras\s+acotadas/);
   assert.match(market, /no una estimación de demanda total/);
   assert.doesNotMatch(market, /remoteScore|employabilityScore|overall score/i);
 });
