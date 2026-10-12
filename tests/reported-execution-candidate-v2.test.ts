@@ -102,7 +102,7 @@ test('incomplete/invalid dates, times and quantities cannot become verified fact
     { domain: 'invented' },
     { canonicalRef: 'https://example.com' },
     { activity: '=HYPERLINK("https://example.com")' },
-    { activity: 'a\\nprivate text' },
+    { activity: 'a\nprivate text' },
     { activity: 'Check https://example.com' },
   ]) {
     assert.equal(proposePlanningV2ReportedExecution({ ...checkin(), ...broken }).status, 'blocked');
