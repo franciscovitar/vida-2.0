@@ -75,7 +75,9 @@ const rows = { execution, orientation, assessment };
 type Kind = keyof typeof rows;
 const DEV = {
   PLANNING_V2_DEV_GOOGLE_APPEND_ENABLED: 'true',
-  PLANNING_V2_DEV_LEDGER_ENABLED: 'true',
+  PLANNING_V2_DEV_FIRESTORE_LEDGER_ENABLED: 'true',
+  PLANNING_V2_DEV_LEDGER_ENABLED: 'false',
+  VERCEL_GIT_COMMIT_REF: 'vida-qa',
   DATA_SOURCE: 'google',
   GOOGLE_SHEETS_TARGET: 'dev',
   GOOGLE_SHEETS_DEV_ID: 'mock-dev-workbook-id-for-isolated-tests',
@@ -145,11 +147,33 @@ test('feature flag OFF blocks before token or POST', async () => {
   assert.equal(m.tokenCalls, 0);
   assert.equal(m.requests, 0);
 });
-test('ledger flag OFF blocks before token or POST', async () => {
-  const m = mock('execution', { PLANNING_V2_DEV_LEDGER_ENABLED: 'false' });
+test('Firestore ledger flag OFF blocks before token or POST', async () => {
+  const m = mock('execution', { PLANNING_V2_DEV_FIRESTORE_LEDGER_ENABLED: 'false' });
   assert.equal((await m.run()).status, 'blocked');
   assert.equal(m.tokenCalls, 0);
   assert.equal(m.requests, 0);
+});
+test('legacy Redis-only flag never activates the Firestore transport', async () => {
+  const m = mock('execution', {
+    PLANNING_V2_DEV_LEDGER_ENABLED: 'true',
+    PLANNING_V2_DEV_FIRESTORE_LEDGER_ENABLED: undefined,
+  });
+  assert.equal((await m.run()).status, 'blocked');
+  assert.equal(m.tokenCalls, 0);
+  assert.equal(m.requests, 0);
+});
+test('simultaneous Redis and Firestore flags are an ambiguous writer and fail closed', async () => {
+  const m = mock('execution', { PLANNING_V2_DEV_LEDGER_ENABLED: 'true' });
+  assert.equal((await m.run()).status, 'blocked');
+  assert.equal(m.requests, 0);
+});
+test('generic Preview and non-vida-qa branches cannot resolve a send target', async () => {
+  for (const ref of [undefined, 'main', 'another-branch', 'vida-qa-temp', '']) {
+    const m = mock('execution', { VERCEL_GIT_COMMIT_REF: ref });
+    assert.equal((await m.run()).status, 'blocked');
+    assert.equal(m.tokenCalls, 0);
+    assert.equal(m.requests, 0);
+  }
 });
 test('non-google data source cannot mutate Google', async () => {
   const m = mock('execution', { DATA_SOURCE: 'mock' });
@@ -164,7 +188,7 @@ test('explicit DEV is required; never use implicit fallback or PROD', async () =
   }
 });
 test('production, unknown or missing deployment environment is always blocked', async () => {
-  for (const value of ['production', undefined, 'local', 'test']) {
+  for (const value of ['production', 'development', undefined, 'local', 'test']) {
     const m = mock('execution', { VERCEL_ENV: value });
     assert.equal((await m.run()).status, 'blocked');
     assert.equal(m.requests, 0);

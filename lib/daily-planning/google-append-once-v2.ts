@@ -37,8 +37,11 @@ export interface PlanningV2DevSendEnv extends Readonly<Record<string, string | u
   GOOGLE_SHEETS_PROD_ID?: string;
   DATA_SOURCE?: string;
   VERCEL_ENV?: string;
+  /** Legacy Redis flag must stay OFF; cannot arm the selected Firestore path. */
   PLANNING_V2_DEV_LEDGER_ENABLED?: string;
+  PLANNING_V2_DEV_FIRESTORE_LEDGER_ENABLED?: string;
   PLANNING_V2_DEV_GOOGLE_APPEND_ENABLED?: string;
+  VERCEL_GIT_COMMIT_REF?: string;
   PLANNING_V2_DEV_EXECUTION_SHEET_ID?: string;
   PLANNING_V2_DEV_ORIENTATION_SHEET_ID?: string;
   PLANNING_V2_DEV_ASSESSMENT_SHEET_ID?: string;
@@ -66,10 +69,12 @@ export function resolvePlanningV2DevSendTarget(
 ): PlanningV2DevSendTarget | null {
   if (
     env.PLANNING_V2_DEV_GOOGLE_APPEND_ENABLED !== 'true' ||
-    env.PLANNING_V2_DEV_LEDGER_ENABLED !== 'true' ||
+    env.PLANNING_V2_DEV_FIRESTORE_LEDGER_ENABLED !== 'true' ||
+    env.PLANNING_V2_DEV_LEDGER_ENABLED === 'true' ||
     env.DATA_SOURCE !== 'google' ||
     env.GOOGLE_SHEETS_TARGET !== 'dev' ||
-    (env.VERCEL_ENV !== 'preview' && env.VERCEL_ENV !== 'development') ||
+    env.VERCEL_ENV !== 'preview' ||
+    env.VERCEL_GIT_COMMIT_REF !== 'vida-qa' ||
     !Object.hasOwn(TAB_IDS, kind)
   )
     return null;
@@ -93,8 +98,8 @@ export function resolvePlanningV2DevSendTarget(
 /**
  * The only POST primitive, with all network dependencies injected for tests.
  * The optional token callback is invoked only after all local guards pass.
- * Authenticated actor, consent, canonical source and Redis DISPATCHED must be
- * verified by a future independent server-only caller before invoking this.
+ * Authenticated actor, consent, canonical source and Firestore DISPATCHED must
+ * be verified by a future independent server-only caller before invoking this.
  */
 export async function attemptPlanningV2DevAppendOnce(input: {
   kind: PlanningV2AppendKind;
