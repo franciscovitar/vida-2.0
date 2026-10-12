@@ -41,13 +41,15 @@ const env = (): Record<string, string> => ({
   AUTH_ALLOWED_EMAILS: 'owner@example.test',
 });
 
-function fixture(overrides: {
-  row?: readonly unknown[];
-  actorId?: string;
-  source?: string;
-  consent?: boolean;
-  email?: string | null;
-} = {}) {
+function fixture(
+  overrides: {
+    row?: readonly unknown[];
+    actorId?: string;
+    source?: string;
+    consent?: boolean;
+    email?: string | null;
+  } = {},
+) {
   const calls = { session: 0, source: 0, consent: 0 };
   let binding: {
     actorId: string;
@@ -208,21 +210,4 @@ test('legacy Sheets keys, Redis tokens and Firestore key presence do not bypass 
   };
   assert.equal((await preflightPlanningV2ExecutionIssuer(supplied, f.ports)).status, 'blocked');
   assert.equal(f.calls.consent, 1);
-});
-
-/* PAS_V2_FORMAT_CAPTURE_BEGIN */
-test('temporary offline format capture for CI; remove before final commit', async () => {
-  const fs = await import('node:fs/promises');
-  const prettier = await import('prettier');
-  const target = 'tests/execution-issuer-preflight-v2.test.ts';
-  const raw = await fs.readFile(target, 'utf8');
-  const original = raw.split('/* PAS_V2_FORMAT_CAPTURE_BEGIN */')[0];
-  const options = (await prettier.resolveConfig(target)) || {};
-  const formatted = await prettier.format(original, { ...options, filepath: target });
-  const b64 = Buffer.from(formatted, 'utf8').toString('base64');
-  const count = Math.ceil(b64.length / 1200);
-  console.log('PASFMT_START|' + count);
-  for (let i = 0; i < count; i++)
-    console.log('PASFMT_PART|' + i + '|' + b64.slice(i * 1200, (i + 1) * 1200));
-  console.log('PASFMT_FINISH|' + count);
 });
