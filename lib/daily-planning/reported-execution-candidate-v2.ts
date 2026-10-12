@@ -127,18 +127,14 @@ export function proposePlanningV2ReportedExecution(input: unknown): PlanningV2Pr
   const minutes = fields.declaredMinutes;
   if (
     minutes !== null &&
-    (typeof minutes !== 'number' ||
-      !Number.isSafeInteger(minutes) ||
-      minutes < 0 ||
-      minutes > 1440)
+    (typeof minutes !== 'number' || !Number.isSafeInteger(minutes) || minutes < 0 || minutes > 1440)
   ) {
     return { status: 'blocked' };
   }
   const actualStart = fields.actualStart;
   if (
     actualStart !== null &&
-    (typeof actualStart !== 'string' ||
-      !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(actualStart))
+    (typeof actualStart !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(actualStart))
   ) {
     return { status: 'blocked' };
   }

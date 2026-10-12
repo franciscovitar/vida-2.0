@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  proposePlanningV2ReportedExecution,
-} from '@/lib/daily-planning/reported-execution-candidate-v2';
+import { proposePlanningV2ReportedExecution } from '@/lib/daily-planning/reported-execution-candidate-v2';
 import { compilePlanningV2AppendCells } from '@/lib/daily-planning/append-cells-v2';
 
 const checkin = () => ({
@@ -71,7 +69,8 @@ test('changed explicit duration/state changes the identity, not an existing reco
     original.status !== 'candidate-only' ||
     changed.status !== 'candidate-only' ||
     state.status !== 'candidate-only'
-  ) return;
+  )
+    return;
   assert.notEqual(original.row[0], changed.row[0]);
   assert.notEqual(original.row[0], state.row[0]);
 });
@@ -107,10 +106,7 @@ test('incomplete/invalid dates, times and quantities cannot become verified fact
     { activity: 'a\nprivate text' },
     { activity: 'Check https://example.com' },
   ]) {
-    assert.equal(
-      proposePlanningV2ReportedExecution({ ...checkin(), ...broken }).status,
-      'blocked',
-    );
+    assert.equal(proposePlanningV2ReportedExecution({ ...checkin(), ...broken }).status, 'blocked');
   }
 });
 
