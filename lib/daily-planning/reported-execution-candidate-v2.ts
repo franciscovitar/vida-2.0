@@ -84,9 +84,7 @@ function validStamp(value: unknown): value is string {
 }
 
 /** Rejects unexpected fields, including raw conversation and consent claims. */
-export function proposePlanningV2ReportedExecution(
-  input: unknown,
-): PlanningV2ProposedExecution {
+export function proposePlanningV2ReportedExecution(input: unknown): PlanningV2ProposedExecution {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     return { status: 'blocked' };
   }
