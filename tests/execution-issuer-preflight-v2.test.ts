@@ -77,7 +77,13 @@ function fixture(overrides: {
       return overrides.consent ?? true;
     },
   };
-  return { ports, calls, get binding() { return binding; } };
+  return {
+    ports,
+    calls,
+    get binding() {
+      return binding;
+    },
+  };
 }
 
 test('authenticated check-in and exact consent can pass isolated OFFLINE preflight', async () => {
@@ -176,13 +182,17 @@ test('consent denied or unavailable always blocks even with a valid report', asy
   assert.equal((await preflightPlanningV2ExecutionIssuer(env(), denied.ports)).status, 'blocked');
   assert.equal(denied.calls.consent, 1);
   const lost = fixture();
-  lost.ports.confirmOptIn = async () => { throw new Error('source unavailable'); };
+  lost.ports.confirmOptIn = async () => {
+    throw new Error('source unavailable');
+  };
   assert.equal((await preflightPlanningV2ExecutionIssuer(env(), lost.ports)).status, 'blocked');
 });
 
 test('failed authoritative source never becomes an inferred check-in', async () => {
   const f = fixture();
-  f.ports.loadTrustedReport = async () => { throw new Error('unavailable'); };
+  f.ports.loadTrustedReport = async () => {
+    throw new Error('unavailable');
+  };
   assert.equal((await preflightPlanningV2ExecutionIssuer(env(), f.ports)).status, 'blocked');
   assert.equal(f.calls.consent, 0);
 });
