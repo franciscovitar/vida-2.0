@@ -1,6 +1,7 @@
 /**
  * Separate read-only authorization gate for V2 write reconciliation.
- * Explicit OFF by default. This is a PRECONDITION, not user consent.
+ * Explicit OFF by default, only vida-qa Preview. This is a PRECONDITION,
+ * not user consent, a producer identity, or a write authorization.
  */
 import { resolveSpreadsheetTarget } from '@/lib/google/spreadsheet-target-core';
 
@@ -11,7 +12,8 @@ export function isPlanningV2DevReadbackEnabled(
     env.PLANNING_V2_DEV_RECONCILIATION_READS_ENABLED !== 'true' ||
     env.GOOGLE_SHEETS_TARGET !== 'dev' ||
     env.DATA_SOURCE !== 'google' ||
-    (env.VERCEL_ENV !== 'preview' && env.VERCEL_ENV !== 'development')
+    env.VERCEL_ENV !== 'preview' ||
+    env.VERCEL_GIT_COMMIT_REF !== 'vida-qa'
   )
     return false;
   const target = resolveSpreadsheetTarget(env);

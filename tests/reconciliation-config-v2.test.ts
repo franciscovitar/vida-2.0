@@ -9,6 +9,7 @@ const dev = {
   GOOGLE_SHEETS_PROD_ID: 'mock-readback-prod-sheet',
   DATA_SOURCE: 'google',
   VERCEL_ENV: 'preview',
+  VERCEL_GIT_COMMIT_REF: 'vida-qa',
 };
 
 test('readback is OFF without its own dedicated flag', () => {
@@ -61,4 +62,26 @@ test('readback requires independent Production identity and explicit Preview DEV
   assert.equal(isPlanningV2DevReadbackEnabled({ ...dev, GOOGLE_SHEETS_PROD_ID: undefined }), false);
   assert.equal(isPlanningV2DevReadbackEnabled({ ...dev, VERCEL_ENV: undefined }), false);
   assert.equal(isPlanningV2DevReadbackEnabled({ ...dev, DATA_SOURCE: 'mock' }), false);
+});
+
+test('readback refuses generic Preview, wrong branch and Development environments', () => {
+  for (const ref of [undefined, '', 'main', 'vida-qa-scratch', 'other-qa']) {
+    assert.equal(isPlanningV2DevReadbackEnabled({ ...dev, VERCEL_GIT_COMMIT_REF: ref }), false);
+  }
+  for (const environment of [undefined, 'development', 'production', 'test']) {
+    assert.equal(isPlanningV2DevReadbackEnabled({ ...dev, VERCEL_ENV: environment }), false);
+  }
+});
+
+test('legacy Redis and Google append flags never activate independent DEV readback', () => {
+  assert.equal(
+    isPlanningV2DevReadbackEnabled({
+      ...dev,
+      PLANNING_V2_DEV_RECONCILIATION_READS_ENABLED: undefined,
+      PLANNING_V2_DEV_LEDGER_ENABLED: 'true',
+      PLANNING_V2_DEV_GOOGLE_APPEND_ENABLED: 'true',
+      PLANNING_V2_DEV_FIRESTORE_LEDGER_ENABLED: 'true',
+    }),
+    false,
+  );
 });
