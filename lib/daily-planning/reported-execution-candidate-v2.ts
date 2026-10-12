@@ -70,7 +70,7 @@ const REFERENCE = /^[a-z0-9][a-z0-9:_/-]{0,239}$/;
 const PREFIX = 'vida2:tasks-daily-planning:v2:execution:';
 
 function validDay(value: unknown): value is string {
-  if (typeof value !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const day = new Date(value + 'T00:00:00.000Z');
   return !Number.isNaN(day.getTime()) && day.toISOString().startsWith(value + 'T');
 }
@@ -78,7 +78,7 @@ function validDay(value: unknown): value is string {
 function validStamp(value: unknown): value is string {
   return (
     typeof value === 'string' &&
-    /(?:Z|[+-]\\d{2}:\\d{2})$/.test(value) &&
+    /(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
     !Number.isNaN(Date.parse(value))
   );
 }
@@ -115,13 +115,13 @@ export function proposePlanningV2ReportedExecution(
   const rawLabel = fields.activity;
   if (typeof rawLabel !== 'string') return { status: 'blocked' };
   // Do not paste paragraphs, URLs, formula expressions or Journal text.
-  const activity = rawLabel.normalize('NFC').trim().split(/\\s+/u).join(' ');
+  const activity = rawLabel.normalize('NFC').trim().split(/\s+/u).join(' ');
   if (
     !activity ||
     activity.length > 200 ||
-    /[\\x00-\\x1f\\x7f]/u.test(rawLabel) ||
+    /[\x00-\x1f\x7f]/u.test(rawLabel) ||
     /^[=+@-]/u.test(activity) ||
-    /https?:\\/\\//iu.test(activity)
+    /https?:\/\//iu.test(activity)
   ) {
     return { status: 'blocked' };
   }
@@ -140,7 +140,7 @@ export function proposePlanningV2ReportedExecution(
   if (
     actualStart !== null &&
     (typeof actualStart !== 'string' ||
-      !/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(actualStart))
+      !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(actualStart))
   ) {
     return { status: 'blocked' };
   }
@@ -149,7 +149,7 @@ export function proposePlanningV2ReportedExecution(
   const start = actualStart === null ? '' : actualStart;
   const identity = ref
     ? 'ref:' + ref
-    : 'label:' + activity.toLowerCase().trim().split(/\\s+/u).join(' ');
+    : 'label:' + activity.toLowerCase().trim().split(/\s+/u).join(' ');
   // Mirror the already-certified append-cells-v2 identity exactly.
   // Classification is deliberately never elevated from a user report.
   const fingerprint = createHash('sha256')
