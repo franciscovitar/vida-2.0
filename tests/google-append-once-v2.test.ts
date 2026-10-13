@@ -87,11 +87,40 @@ const DEV = {
   PLANNING_V2_DEV_ORIENTATION_SHEET_ID: '102',
   PLANNING_V2_DEV_ASSESSMENT_SHEET_ID: '103',
 };
+const liveHeaders = {
+  execution: [
+    'Observation ID', 'Fecha', 'Registrado en', 'Activity Type',
+    'Domain', 'Entity Type', 'Canonical Ref', 'Actividad',
+    'Minutos declarados', 'Inicio real', 'Execution State',
+    'Evidence State', 'Progress Effect', 'Source Class',
+    'Confianza', 'Evidence Refs JSON', 'Version',
+  ],
+  orientation: ['Snapshot ID', 'Fecha', 'Generado en', 'Payload JSON', 'Fuente', 'Versión'],
+  assessment: [
+    'Snapshot ID', 'Assessment ID', 'Subject ID', 'Fecha evaluación',
+    'Generado en', 'Payload JSON', 'Fuente', 'Versión',
+  ],
+} as const;
+const liveTitles = {
+  execution: 'Planning Execution V2',
+  orientation: 'Daily Planning',
+  assessment: 'Assessment Progress',
+} as const;
 type MockOptions = {
   response?: number;
   transportError?: boolean;
   token?: string | null;
   tokenError?: boolean;
+  metadataError?: boolean;
+  metadataTransportError?: boolean;
+  metadataWorkbook?: string;
+  metadataTabId?: number;
+  metadataTabTitle?: string;
+  metadataColumns?: number;
+  metadataHeaders?: readonly unknown[];
+  headerError?: boolean;
+  headerTransportError?: boolean;
+  headerExtraRows?: boolean;
 };
 function mock(
   kind: Kind = 'execution',
@@ -100,6 +129,7 @@ function mock(
 ) {
   let tokenCalls = 0,
     requests = 0,
+    reads = 0,
     requestUrl = '',
     init: RequestInit | undefined;
   const env = { ...DEV, ...overrides };
@@ -109,8 +139,35 @@ function mock(
     return opts.token === undefined ? 'dummy-test-token' : opts.token;
   };
   const fetchImpl = (async (url: string | URL | Request, options?: RequestInit) => {
+    const address = String(url);
+    if (options?.method === 'GET') {
+      reads++;
+      assert.equal(options.cache, 'no-store');
+      assert.equal(options.redirect, 'error');
+      assert.equal(options.headers && (options.headers as Record<string, string>).Authorization, 'Bearer dummy-test-token');
+      if (address.includes('/values/')) {
+        if (opts.headerTransportError) throw Error('synthetic header timeout');
+        if (opts.headerError) return new Response(null, { status: 403 });
+        const values = [opts.metadataHeaders ?? [...liveHeaders[kind]]];
+        if (opts.headerExtraRows) values.push(['unexpected-data']);
+        return Response.json({ values });
+      }
+      if (opts.metadataTransportError) throw Error('synthetic metadata timeout');
+      if (opts.metadataError) return new Response(null, { status: 403 });
+      if (!address.includes('fields=')) throw Error('metadata must be projected');
+      return Response.json({
+        spreadsheetId: opts.metadataWorkbook ?? env.GOOGLE_SHEETS_DEV_ID,
+        sheets: [{
+          properties: {
+            sheetId: opts.metadataTabId ?? Number(env[('PLANNING_V2_DEV_' + kind.toUpperCase() + '_SHEET_ID') as keyof typeof env]),
+            title: opts.metadataTabTitle ?? liveTitles[kind],
+            gridProperties: { columnCount: opts.metadataColumns ?? liveHeaders[kind].length },
+          },
+        }],
+      });
+    }
     requests++;
-    requestUrl = String(url);
+    requestUrl = address;
     init = options;
     if (opts.transportError) throw Error('synthetic lost Google reply');
     return new Response(null, { status: opts.response ?? 200 });
@@ -131,6 +188,9 @@ function mock(
     },
     get requests() {
       return requests;
+    },
+    get reads() {
+      return reads;
     },
     get url() {
       return requestUrl;
@@ -243,6 +303,7 @@ test('three canonical V2 formats send exactly one typed POST and stay unconfirme
     });
     assert.equal(m.tokenCalls, 1);
     assert.equal(m.requests, 1);
+    assert.equal(m.reads, 2, 'metadata and exact header must be checked before POST');
     assert.match(m.url, /^https:\/\/sheets\.googleapis\.com\/v4\/spreadsheets\/[^?]+:batchUpdate$/);
     assert.equal(m.init?.method, 'POST');
     assert.equal(m.init?.cache, 'no-store');
@@ -265,6 +326,58 @@ test('three canonical V2 formats send exactly one typed POST and stay unconfirme
     assert.equal(op.rows[0].values[0].userEnteredValue.stringValue, rows[kind][0]);
   }
 });
+
+test('wrong workbook metadata never sends a POST, even with valid env', async () => {
+  const m = mock('execution', {}, { metadataWorkbook: 'wrong-workbook' });
+  assert.deepEqual(await m.run(), { status: 'not-sent', postAttempts: 0, retryAllowed: false });
+  assert.equal(m.reads, 1);
+  assert.equal(m.requests, 0);
+});
+test('wrong numeric DEV tab id or tab title cannot send', async () => {
+  for (const opts of [{ metadataTabId: 900 }, { metadataTabTitle: 'Daily Planning' }]) {
+    const m = mock('execution', {}, opts);
+    assert.equal((await m.run()).status, 'not-sent');
+    assert.equal(m.requests, 0);
+    assert.equal(m.reads, 1);
+  }
+});
+test('undersized DEV tab and schema drift fail closed', async () => {
+  for (const opts of [
+    { metadataColumns: 16 },
+    { metadataHeaders: [...liveHeaders.execution].reverse() },
+    { metadataHeaders: liveHeaders.execution.slice(0, 16) },
+    { metadataHeaders: [...liveHeaders.execution, 'Extra'] },
+  ]) {
+    const m = mock('execution', {}, opts);
+    const status = (await m.run()).status;
+    assert.equal(status, 'not-sent');
+    assert.equal(m.requests, 0);
+  }
+});
+test('metadata and header auth failures or timeouts never attempt POST', async () => {
+  for (const opts of [
+    { metadataError: true },
+    { metadataTransportError: true },
+    { headerError: true },
+    { headerTransportError: true },
+    { headerExtraRows: true },
+  ]) {
+    const m = mock('execution', {}, opts);
+    assert.deepEqual(await m.run(), { status: 'not-sent', postAttempts: 0, retryAllowed: false });
+    assert.equal(m.requests, 0);
+    assert.ok(m.reads >= 1 && m.reads <= 2);
+  }
+});
+test('read-only preflight never uses POST before both metadata reads pass', async () => {
+  for (const kind of ['execution', 'orientation', 'assessment'] as const) {
+    const m = mock(kind);
+    const res = await m.run();
+    assert.equal(res.postAttempts, 1);
+    assert.equal(m.reads, 2);
+    assert.equal(m.requests, 1);
+  }
+});
+
 test('403/429/500 responses are uncertain; no hidden retry', async () => {
   for (const code of [401, 403, 429, 500, 503]) {
     const m = mock('execution', {}, { response: code });

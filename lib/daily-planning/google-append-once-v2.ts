@@ -3,7 +3,7 @@
  *
  * This does NOT establish consent, exclusive writer ownership or durable
  * dispatch permission. No live credential-bound wrapper or UI/API route calls it.
- * NEVER retry a POST even
+ * Verify the actual DEV target schema before the POST. NEVER retry a POST even
  * after a timeout, 429/5xx, lost reply or apparent success.
  */
 import {
@@ -95,6 +95,99 @@ export function resolvePlanningV2DevSendTarget(
   return { workbookId: target.spreadsheetId, sheetId, kind };
 }
 
+const DEV_HEADERS = {
+  execution: [
+    'Observation ID', 'Fecha', 'Registrado en', 'Activity Type',
+    'Domain', 'Entity Type', 'Canonical Ref', 'Actividad',
+    'Minutos declarados', 'Inicio real', 'Execution State',
+    'Evidence State', 'Progress Effect', 'Source Class',
+    'Confianza', 'Evidence Refs JSON', 'Version',
+  ],
+  orientation: ['Snapshot ID', 'Fecha', 'Generado en', 'Payload JSON', 'Fuente', 'Versión'],
+  assessment: [
+    'Snapshot ID', 'Assessment ID', 'Subject ID', 'Fecha evaluación',
+    'Generado en', 'Payload JSON', 'Fuente', 'Versión',
+  ],
+} as const;
+const DEV_TABS = {
+  execution: 'Planning Execution V2',
+  orientation: 'Daily Planning',
+  assessment: 'Assessment Progress',
+} as const;
+
+/**
+ * Read-only, last-moment schema/target check before the single POST. Two bounded
+ * Google GETs: spreadsheet tab metadata and *header only* for the exact tab.
+ * It is NOT an issuer, consent, lock, exactly-once proof or write authorization.
+ * No provider JSON or header contents are logged or returned to the caller.
+ */
+async function checkedDevTabIsCurrent(
+  target: PlanningV2DevSendTarget,
+  accessToken: string,
+  fetchImpl: typeof fetch,
+): Promise<boolean> {
+  const name = DEV_TABS[target.kind];
+  const expected = DEV_HEADERS[target.kind];
+  const headers = { Authorization: `Bearer ${accessToken}` };
+  async function readBounded(url: string): Promise<Record<string, unknown> | null> {
+    try {
+      const response = await fetchImpl(url, {
+        method: 'GET',
+        headers,
+        cache: 'no-store',
+        redirect: 'error',
+        signal: AbortSignal.timeout(8_000),
+      });
+      if (!response.ok) {
+        await response.body?.cancel();
+        return null;
+      }
+      const raw = await response.text();
+      if (Buffer.byteLength(raw, 'utf8') > 16 * 1024) return null;
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+      return parsed as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+  }
+  const base = `${SHEETS_BASE}/${encodeURIComponent(target.workbookId)}`;
+  const metadata = await readBounded(
+    `${base}?fields=${encodeURIComponent('spreadsheetId,sheets(properties(sheetId,title,gridProperties(columnCount)))')}`,
+  );
+  if (
+    !metadata ||
+    metadata.spreadsheetId !== target.workbookId ||
+    !Array.isArray(metadata.sheets)
+  ) return false;
+  const candidates = metadata.sheets.filter((entry: unknown) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return false;
+    const properties = (entry as Record<string, unknown>).properties;
+    return !!properties && typeof properties === 'object' &&
+      (properties as Record<string, unknown>).sheetId === target.sheetId;
+  });
+  if (candidates.length !== 1) return false;
+  const properties = (candidates[0] as { properties: {
+    title?: unknown;
+    gridProperties?: { columnCount?: unknown };
+  }}).properties;
+  if (
+    properties.title !== name ||
+    typeof properties.gridProperties?.columnCount !== 'number' ||
+    !Number.isSafeInteger(properties.gridProperties.columnCount) ||
+    properties.gridProperties.columnCount < expected.length
+  ) return false;
+  const range = `'${name.replace(/'/g, "''")}'!A1:${String.fromCharCode(64 + expected.length)}1`;
+  const values = await readBounded(
+    `${base}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE`,
+  );
+  if (!values || !Array.isArray(values.values) || values.values.length !== 1) return false;
+  const firstRow = values.values[0];
+  return Array.isArray(firstRow) &&
+    firstRow.length === expected.length &&
+    expected.every((header, index) => firstRow[index] === header);
+}
+
 /**
  * The only POST primitive, with all network dependencies injected for tests.
  * The optional token callback is invoked only after all local guards pass.
@@ -136,6 +229,12 @@ export async function attemptPlanningV2DevAppendOnce(input: {
     /\s/.test(accessToken)
   )
     return blocked('not-sent');
+
+  // Provider-verified read-only metadata: a numeric sheetId from env is not
+  // proof that the actual DEV tab still has the expected name and headers.
+  if (!(await checkedDevTabIsCurrent(target, accessToken, input.fetchImpl))) {
+    return blocked('not-sent');
+  }
 
   let attempted = false;
   try {
