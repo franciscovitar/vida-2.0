@@ -97,16 +97,34 @@ export function resolvePlanningV2DevSendTarget(
 
 const DEV_HEADERS = {
   execution: [
-    'Observation ID', 'Fecha', 'Registrado en', 'Activity Type',
-    'Domain', 'Entity Type', 'Canonical Ref', 'Actividad',
-    'Minutos declarados', 'Inicio real', 'Execution State',
-    'Evidence State', 'Progress Effect', 'Source Class',
-    'Confianza', 'Evidence Refs JSON', 'Version',
+    'Observation ID',
+    'Fecha',
+    'Registrado en',
+    'Activity Type',
+    'Domain',
+    'Entity Type',
+    'Canonical Ref',
+    'Actividad',
+    'Minutos declarados',
+    'Inicio real',
+    'Execution State',
+    'Evidence State',
+    'Progress Effect',
+    'Source Class',
+    'Confianza',
+    'Evidence Refs JSON',
+    'Version',
   ],
   orientation: ['Snapshot ID', 'Fecha', 'Generado en', 'Payload JSON', 'Fuente', 'Versión'],
   assessment: [
-    'Snapshot ID', 'Assessment ID', 'Subject ID', 'Fecha evaluación',
-    'Generado en', 'Payload JSON', 'Fuente', 'Versión',
+    'Snapshot ID',
+    'Assessment ID',
+    'Subject ID',
+    'Fecha evaluación',
+    'Generado en',
+    'Payload JSON',
+    'Fuente',
+    'Versión',
   ],
 } as const;
 const DEV_TABS = {
@@ -155,37 +173,44 @@ async function checkedDevTabIsCurrent(
   const metadata = await readBounded(
     `${base}?fields=${encodeURIComponent('spreadsheetId,sheets(properties(sheetId,title,gridProperties(columnCount)))')}`,
   );
-  if (
-    !metadata ||
-    metadata.spreadsheetId !== target.workbookId ||
-    !Array.isArray(metadata.sheets)
-  ) return false;
+  if (!metadata || metadata.spreadsheetId !== target.workbookId || !Array.isArray(metadata.sheets))
+    return false;
   const candidates = metadata.sheets.filter((entry: unknown) => {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return false;
     const properties = (entry as Record<string, unknown>).properties;
-    return !!properties && typeof properties === 'object' &&
-      (properties as Record<string, unknown>).sheetId === target.sheetId;
+    return (
+      !!properties &&
+      typeof properties === 'object' &&
+      (properties as Record<string, unknown>).sheetId === target.sheetId
+    );
   });
   if (candidates.length !== 1) return false;
-  const properties = (candidates[0] as { properties: {
-    title?: unknown;
-    gridProperties?: { columnCount?: unknown };
-  }}).properties;
+  const properties = (
+    candidates[0] as {
+      properties: {
+        title?: unknown;
+        gridProperties?: { columnCount?: unknown };
+      };
+    }
+  ).properties;
   if (
     properties.title !== name ||
     typeof properties.gridProperties?.columnCount !== 'number' ||
     !Number.isSafeInteger(properties.gridProperties.columnCount) ||
     properties.gridProperties.columnCount < expected.length
-  ) return false;
+  )
+    return false;
   const range = `'${name.replace(/'/g, "''")}'!A1:${String.fromCharCode(64 + expected.length)}1`;
   const values = await readBounded(
     `${base}/values/${encodeURIComponent(range)}?valueRenderOption=FORMATTED_VALUE`,
   );
   if (!values || !Array.isArray(values.values) || values.values.length !== 1) return false;
   const firstRow = values.values[0];
-  return Array.isArray(firstRow) &&
+  return (
+    Array.isArray(firstRow) &&
     firstRow.length === expected.length &&
-    expected.every((header, index) => firstRow[index] === header);
+    expected.every((header, index) => firstRow[index] === header)
+  );
 }
 
 /**

@@ -13,16 +13,18 @@
 - The new branch-specific Vercel Git deployment rule is OFF. The existing
   `vida-qa` alias and deployment configuration are unchanged.
 
-## 2026-10-13 DEV preflight improvement (unmerged, unexecuted QA)
+## 2026-10-13 DEV preflight improvement (unmerged, local QA)
 
 On this draft branch, `google-append-once-v2.ts` now requires **two
 read-only provider GETs**, immediately before the only possible POST:
 workbook/tab identity, grid width and exact header values. On mismatch,
 transport/auth failure or timeout it returns `not-sent` with zero POSTs.
 All three V2 tab kinds are included; five negative/positive synthetic test
-cases were added to the existing test file (24 total). **This change has
-not run TypeScript tests or build on its new HEAD**, so do not treat it as
-certified from source review alone. It does not solve trusted ChatGPT event
+cases were added to the existing test file (24 total). Local exact-checkout QA
+executed all **24/24 transport tests**, `npm run typecheck` and focused ESLint
+with exit code 0. Formatting-only issues in these three changed files were
+corrected locally. No build, hosted CI, deployment or provider writes were run.
+This certifies the synthetic schema-check subgate only. It does not solve trusted ChatGPT event
 identity, user consent, single-writer authority, corrections or exactly-once
 persistence.
 
@@ -32,7 +34,6 @@ workbook is physically separate; no values were written. A read-only
 Vercel project inspection identified `vida-2-0`; the env variable
 metadata endpoint returned **403**, so **effective Preview variables
 remain UNVERIFIED** (do not infer values or try reading decrypted secrets).
-
 
 ## Hard gates
 

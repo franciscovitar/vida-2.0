@@ -89,16 +89,34 @@ const DEV = {
 };
 const liveHeaders = {
   execution: [
-    'Observation ID', 'Fecha', 'Registrado en', 'Activity Type',
-    'Domain', 'Entity Type', 'Canonical Ref', 'Actividad',
-    'Minutos declarados', 'Inicio real', 'Execution State',
-    'Evidence State', 'Progress Effect', 'Source Class',
-    'Confianza', 'Evidence Refs JSON', 'Version',
+    'Observation ID',
+    'Fecha',
+    'Registrado en',
+    'Activity Type',
+    'Domain',
+    'Entity Type',
+    'Canonical Ref',
+    'Actividad',
+    'Minutos declarados',
+    'Inicio real',
+    'Execution State',
+    'Evidence State',
+    'Progress Effect',
+    'Source Class',
+    'Confianza',
+    'Evidence Refs JSON',
+    'Version',
   ],
   orientation: ['Snapshot ID', 'Fecha', 'Generado en', 'Payload JSON', 'Fuente', 'Versión'],
   assessment: [
-    'Snapshot ID', 'Assessment ID', 'Subject ID', 'Fecha evaluación',
-    'Generado en', 'Payload JSON', 'Fuente', 'Versión',
+    'Snapshot ID',
+    'Assessment ID',
+    'Subject ID',
+    'Fecha evaluación',
+    'Generado en',
+    'Payload JSON',
+    'Fuente',
+    'Versión',
   ],
 } as const;
 const liveTitles = {
@@ -144,7 +162,10 @@ function mock(
       reads++;
       assert.equal(options.cache, 'no-store');
       assert.equal(options.redirect, 'error');
-      assert.equal(options.headers && (options.headers as Record<string, string>).Authorization, 'Bearer dummy-test-token');
+      assert.equal(
+        options.headers && (options.headers as Record<string, string>).Authorization,
+        'Bearer dummy-test-token',
+      );
       if (address.includes('/values/')) {
         if (opts.headerTransportError) throw Error('synthetic header timeout');
         if (opts.headerError) return new Response(null, { status: 403 });
@@ -157,13 +178,19 @@ function mock(
       if (!address.includes('fields=')) throw Error('metadata must be projected');
       return Response.json({
         spreadsheetId: opts.metadataWorkbook ?? env.GOOGLE_SHEETS_DEV_ID,
-        sheets: [{
-          properties: {
-            sheetId: opts.metadataTabId ?? Number(env[('PLANNING_V2_DEV_' + kind.toUpperCase() + '_SHEET_ID') as keyof typeof env]),
-            title: opts.metadataTabTitle ?? liveTitles[kind],
-            gridProperties: { columnCount: opts.metadataColumns ?? liveHeaders[kind].length },
+        sheets: [
+          {
+            properties: {
+              sheetId:
+                opts.metadataTabId ??
+                Number(
+                  env[('PLANNING_V2_DEV_' + kind.toUpperCase() + '_SHEET_ID') as keyof typeof env],
+                ),
+              title: opts.metadataTabTitle ?? liveTitles[kind],
+              gridProperties: { columnCount: opts.metadataColumns ?? liveHeaders[kind].length },
+            },
           },
-        }],
+        ],
       });
     }
     requests++;
