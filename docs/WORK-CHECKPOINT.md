@@ -443,3 +443,30 @@ Next gate: permitted reviewed candidate publication, then authenticated dev/Prev
 bounded real QA. Only after all required gates pass, request specific protected merge and
 Production cutover authorizations. Store/schema migration and write activation remain separate
 approval scopes. Preserve V1 and record exact outcomes in PAS PR #484 without duplicate state PRs.
+
+## Planning V2 Phase 3 — 2026-10-13 identity/consent preflight
+
+**BLOCKED — authentic ChatGPT ingress and acceptance evidence unavailable.**
+
+- Preserved the clean, local schema-QA commit
+  `c7e983f560f8508e6de733b4acbe05cae73031f5`; no destructive checkout/reset.
+- Revalidated PAS contracts from canonical main
+  `64f7af79f13629f2cc9d1cd08089da203e59d375` and inspected current issuer,
+  acceptance contract, Auth.js, OpenClaw and existing history adapters.
+- Real Vercel project metadata lookup succeeded; project-connector GET returned
+  404 `Connector Project not found`. A registered/live ChatGPT link remains
+  unverified. No credentials or alternative identity were used to bypass it.
+- No authenticated ChatGPT principal-to-owner mapping, stable per-intent source
+  receipt, trusted report source, bound consent resolver or complete association
+  history is currently available to the Planning preflight. Web sessions and
+  agent HMAC authentication cannot replace ChatGPT-origin evidence.
+- Existing focused issuer/acceptance tests: **27/27 PASS, exit 0**, synthetic.
+  Runtime-OFF probe: `blocked`, zero session/report/consent/network calls.
+- No application code, adapter, endpoint or permission was changed. The prior
+  24-test schema subgate was not repeated. All local V2 flags stayed OFF/unset;
+  branch autodeployment remained disabled. No push, hosted CI, deployment,
+  provider mutation, Production action, Journal access or canary.
+- Exact evidence matrix and smallest next adaptation are recorded in
+  `docs/planning-v2-execution-acceptance-contract.md`. Verify an authenticated
+  ChatGPT-to-existing-Vida ingress and trusted stable intent receipt first;
+  bind current opt-in/history only to real evidence. No duplicate user records.

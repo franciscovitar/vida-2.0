@@ -109,3 +109,49 @@ but cannot substitute for this ChatGPT-first product gate.
 Only after those bindings and exclusive writer/recovery behavior are certified,
 and exact runtime destinations are revalidated, request separate authorization
 for one bounded synthetic DEV canary. The current slice activates nothing.
+
+## 2026-10-13 read-only transport inspection — BLOCKED
+
+The local schema-QA commit `c7e983f560f8508e6de733b4acbe05cae73031f5`
+was preserved on the overlay branch. Canonical PAS contracts were fetched from
+verified `main` commit `64f7af79f13629f2cc9d1cd08089da203e59d375`.
+No authenticated ChatGPT acceptance adapter can be bound from the capabilities
+actually observable in this session.
+
+| Required evidence                                      | Current observation                                                                                                                                                                                   | Gate    |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Authenticated ChatGPT principal mapped to the owner    | Auth.js resolves web sessions; OpenClaw HMAC resolves agents/workflows. Neither attests this ChatGPT invocation. No callable Vida integration was identified in the active tool catalog.              | BLOCKED |
+| Stable acceptance receipt per intent                   | OpenClaw generates a request UUID for dispatch. This is not an authenticated ChatGPT activity/intent receipt reusable across host retries. The semantic Observation ID is not an occurrence identity. | BLOCKED |
+| Trusted normalized report                              | `loadTrustedReport` remains an unbound port; the candidate constructor only validates user-supplied data. No live Planning route calls the issuer.                                                    | BLOCKED |
+| Current consent bound to actor, report, digest and DEV | PAS records a conditional standing opt-in. `confirmOptIn` has no authoritative report-specific binding. The user does not need to repeat the general opt-in.                                          | BLOCKED |
+| Complete same-target association history               | The Firestore candidate records kind/digest/dispatch state, not authenticated actor/event/consent associations. Safe Writes' existing ledger is not currently a Planning acceptance-history adapter.  | BLOCKED |
+
+A real read-only Vercel project metadata query found the intended project.
+Its project-connector query returned HTTP **404**, `Connector Project not found`,
+using the project/team identifiers supplied by that metadata query. This failed
+read does not prove all integrations are absent; it cannot certify registration,
+authentication or runtime linkage. No alternate credential route, provisioning,
+secret lookup, deployment or provider mutation was attempted.
+
+The two existing issuer/acceptance test files passed **27/27**, exit 0. These
+are synthetic rejection/consistency tests, not real ChatGPT identity evidence.
+The local runtime-OFF probe returned `blocked` before any session/report/consent
+callback or network call; all four local issuer/append/ledger flags were OFF or
+unset. Remote runtime flags were not queried or changed.
+
+**Minimum next adaptation:** establish a user-scoped authenticated ingress from
+the actual ChatGPT integration to Vida's existing server/Safe Writes boundary.
+It must resolve the principal-to-owner mapping and retrieve an executor-owned,
+retry-stable receipt per intent, rather than trusting model/request IDs. Reuse the
+current candidate and acceptance checker, evaluate the current canonical opt-in
+against the exact binding, and resolve complete event/observation associations
+through an explicitly reviewed extension of existing history infrastructure.
+No second activity store or manual re-entry in Vida is required by this plan.
+Do not implement an adapter that pretends these unavailable sources exist.
+
+If the host cannot provide an original event identity, the already-specified
+stable trusted-executor receipt is the required alternative. Without either a
+sufficient integration or that receipt source, the result stays BLOCKED. Auth.js
+may serve a distinct Vida acceptance route; it must not relabel it as ChatGPT.
+The next work is ingress/receipt capability verification, still read-only and OFF,
+not connecting dispatch, activating a writer or authorizing a canary.
