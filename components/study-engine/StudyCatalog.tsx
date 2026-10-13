@@ -1,7 +1,7 @@
 import { BookOpen, ChevronDown, CircleAlert, Layers3, Play } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
-import { matchSubjectProgress } from '@/lib/study-engine/catalog';
+import { effectiveAssessmentReadiness, matchSubjectProgress } from '@/lib/study-engine/catalog';
 import type { AssessmentProgressRead } from '@/types/assessment-progress';
 import type { StudyCatalogRead, StudyCatalogSubject } from '@/types/study-catalog';
 
@@ -67,9 +67,15 @@ export function StudyCatalog({
       </div>
 
       {catalog.notice ? (
-        <div className={styles.notice}>
+        <div className={styles.notice} role="status">
           <CircleAlert size={16} aria-hidden="true" />
           <span>{catalog.notice}</span>
+        </div>
+      ) : null}
+      {assessmentProgress.notice ? (
+        <div className={styles.notice} role="status">
+          <CircleAlert size={16} aria-hidden="true" />
+          <span>{assessmentProgress.notice}</span>
         </div>
       ) : null}
 
@@ -77,7 +83,7 @@ export function StudyCatalog({
         {subjects.map((subject) => {
           const progress = subject.progress;
           const progressPercent = progress?.payload.progressPercent ?? null;
-          const readiness = progress?.payload.readinessBand ?? subject.readinessBand ?? 'unknown';
+          const readiness = effectiveAssessmentReadiness(subject);
 
           return (
             <details key={subject.id} className={styles.card}>
