@@ -13,6 +13,27 @@
 - The new branch-specific Vercel Git deployment rule is OFF. The existing
   `vida-qa` alias and deployment configuration are unchanged.
 
+## 2026-10-13 DEV preflight improvement (unmerged, unexecuted QA)
+
+On this draft branch, `google-append-once-v2.ts` now requires **two
+read-only provider GETs**, immediately before the only possible POST:
+workbook/tab identity, grid width and exact header values. On mismatch,
+transport/auth failure or timeout it returns `not-sent` with zero POSTs.
+All three V2 tab kinds are included; five negative/positive synthetic test
+cases were added to the existing test file (24 total). **This change has
+not run TypeScript tests or build on its new HEAD**, so do not treat it as
+certified from source review alone. It does not solve trusted ChatGPT event
+identity, user consent, single-writer authority, corrections or exactly-once
+persistence.
+
+Canonical DEV workbook as observed by the read-only Drive connector:
+`1TBrEQuocPSNv9SradWea2YWQtMpOEIsHHNRJe0YACdY`. The Production
+workbook is physically separate; no values were written. A read-only
+Vercel project inspection identified `vida-2-0`; the env variable
+metadata endpoint returned **403**, so **effective Preview variables
+remain UNVERIFIED** (do not infer values or try reading decrypted secrets).
+
+
 ## Hard gates
 
 1. The 24 modules and tests are a transport/readback staging set, not
@@ -27,8 +48,13 @@
    Production physical Redis store with isolated namespaces. That
    historical fact does **not** authorize it for a nonexpiring V2
    dispatch ledger or establish safe backup/restore behavior.
-6. Verify the service account, Google write scope, actual DEV tab
-   metadata, and missing 17-column execution schema separately.
+6. **DEV schema metadata and three exact headers were read-only verified
+   on 2026-10-13** in the DEV workbook; the Execution V2 17-column schema
+   exists (sheetId 1324547998, 26 available columns). Daily Planning is
+   sheetId 130076136 with six expected headers; Assessment Progress is
+   sheetId 130076137 with eight. This validates **source shape**, not the
+   effective Vercel env, service account, Google write scope or the writer.
+   Verify those effective runtime bindings separately before any mutation.
 7. Build the authenticated issuer and exclusive dispatch authority
    before any future V2 write. A simulated HMAC is not consent.
 8. Require a reviewed Preview revision and owner-approved deployment
