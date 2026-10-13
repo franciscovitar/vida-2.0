@@ -20,6 +20,7 @@ import type {
 } from '@/types/daily-orientation-v2';
 
 import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
+import { countConflictingOrientationIdRows } from '@/lib/daily-planning/orientation-id-integrity';
 
 const HEADERS = ['Snapshot ID', 'Fecha', 'Generado en', 'Payload JSON', 'Fuente', 'Versión'];
 const SOURCE = 'chatgpt_project';
@@ -384,6 +385,19 @@ export function selectLatestDailyOrientationSnapshot(
       snapshot: null,
       notice: 'Orientación diaria: falta el esquema esperado.',
       invalidRows: 0,
+    };
+  }
+
+  // An append-only store must not silently choose a timestamp when the same
+  // deterministic snapshot ID contains incompatible data. Keep V1 fallback
+  // distinct from this corrupt V2 read.
+  const conflictingRows = countConflictingOrientationIdRows(values, targetDate);
+  if (conflictingRows > 0) {
+    return {
+      status: 'invalid',
+      snapshot: null,
+      notice: 'Orientación diaria: hay IDs V2 duplicados con datos contradictorios.',
+      invalidRows: conflictingRows,
     };
   }
 

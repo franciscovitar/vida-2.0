@@ -339,3 +339,38 @@ test('F-OR6. Degraded sources cannot expose stale referenced advice in the brows
   assert.equal(view.quality.unresolvedRefs, 2);
   assert.doesNotMatch(serialized, /task-1|project-1|fixture-private-journal-text/);
 });
+
+test('F-ID1. Repeated V2 snapshot ID with conflicting payload fails closed', () => {
+  const first = v2Row(payload());
+  const changed = JSON.parse(payload()) as { review: { headline: string } };
+  changed.review.headline = 'Contradictory snapshot';
+  const second = v2Row(JSON.stringify(changed));
+  second[2] = '2026-10-07T09:00:00-03:00';
+
+  const read = selectLatestDailyOrientationSnapshot([HEADER, first, second], TODAY);
+  assert.equal(read.status, 'invalid');
+  assert.equal(read.snapshot, null);
+  assert.ok(read.invalidRows >= 2);
+  assert.match(read.notice ?? '', /IDs V2 duplicados/);
+});
+
+test('F-ID2. Identical V2 snapshot replay with different recordedAt is not a conflict', () => {
+  const first = v2Row(payload());
+  const replay = [...first];
+  replay[2] = '2026-10-07T09:00:00-03:00';
+
+  const read = selectLatestDailyOrientationSnapshot([HEADER, first, replay], TODAY);
+  assert.equal(read.status, 'ready');
+  assert.notEqual(read.snapshot, null);
+});
+
+test('F-ID3. Separate V2 snapshot IDs remain separate legitimate revisions', () => {
+  const first = v2Row(payload());
+  const second = v2Row(payload());
+  second[0] = String(second[0]) + '-revision';
+  second[2] = '2026-10-07T09:00:00-03:00';
+
+  const read = selectLatestDailyOrientationSnapshot([HEADER, first, second], TODAY);
+  assert.equal(read.status, 'ready');
+  assert.equal(read.snapshot?.id, second[0]);
+});

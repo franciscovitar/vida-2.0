@@ -288,7 +288,7 @@ test('the vida_operation model-facing schemas never declare trusted transport or
 test('direct inbox schema exposes only operation plus text/link; transport identity stays runtime-owned', () => {
   const source = readAdapterSource();
   const directMatch = source.match(
-    /const DirectInboxCallSchema = Type\.Object\(([\s\S]*?)\n\);\n\nconst HealthCallSchema/,
+    /const DirectInboxCallSchema = Type\.Object\(([\s\S]*?)\r?\n\);\r?\n\r?\nconst HealthCallSchema/,
   );
   assert.ok(directMatch, 'expected the dedicated direct inbox schema');
   const body = directMatch![1] ?? '';
