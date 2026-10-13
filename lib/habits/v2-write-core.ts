@@ -31,6 +31,21 @@ export interface HabitV2SheetPort {
   ): Promise<{ ok: true } | { ok: false }>;
 }
 
+/**
+ * A capability supplied only by a future CERTIFIED single-writer adapter.
+ * It must hold a durable workbook-scoped exclusive authority across all
+ * server instances until the mutation AND its provider read-back finish.
+ * An in-process mutex, local flag, or a time-limited lease without fencing
+ * is NOT an acceptable live implementation.
+ *
+ * There is deliberately no live implementation in the Google Sheets port.
+ * Synthetic tests may inject a local serializer to prove invocation order,
+ * but that never certifies multi-instance write safety.
+ */
+export interface HabitV2ExclusiveWriter {
+  run<T>(mutation: () => Promise<T>): Promise<T>;
+}
+
 function failure(
   code: 'disabled' | 'invalid' | 'conflict' | 'unavailable' | 'not-found' | 'verification-failed',
   message: string,
@@ -136,11 +151,13 @@ export function createHabitsV2WriteService(input: {
   port: HabitV2SheetPort;
   today: string;
   writesEnabled: boolean;
+  /** Required for every enabled mutation; NOT provided by the live port yet. */
+  exclusiveWriter?: HabitV2ExclusiveWriter;
   now?: () => string;
 }) {
   const now = input.now ?? (() => new Date().toISOString());
 
-  return {
+  const unguarded = {
     async toggle(payload: ToggleHabitV2Input): Promise<HabitV2MutationResult> {
       if (!input.writesEnabled)
         return failure('disabled', 'Escrituras de Hábitos V2 desactivadas.');
@@ -415,6 +432,36 @@ export function createHabitsV2WriteService(input: {
         code: 'applied',
         message: 'Hábito desactivado; el historial se conserva.',
       };
+    },
+  };
+
+  // The former optimistic read-then-PUT was not serializable across
+  // Vercel instances. Fail closed even if someone enables the V2 write
+  // flag without supplying a genuinely certified exclusive writer.
+  // Keep the entire read → validate → write → readback inside one scope.
+  async function locked(mutation: () => Promise<HabitV2MutationResult>): Promise<HabitV2MutationResult> {
+    if (!input.writesEnabled)
+      return failure('disabled', 'Escrituras de Hábitos V2 desactivadas.');
+    if (!input.exclusiveWriter)
+      return failure('unavailable', 'La escritura segura de Hábitos V2 aún no está certificada.');
+    try {
+      return await input.exclusiveWriter.run(mutation);
+    } catch {
+      // Could be lock contention or an ambiguous provider failure. Never
+      // retry a PUT here or claim that an earlier write was rolled back.
+      return failure('unavailable', 'No se pudo confirmar una escritura exclusiva.');
+    }
+  }
+
+  return {
+    toggle(payload: ToggleHabitV2Input): Promise<HabitV2MutationResult> {
+      return locked(() => unguarded.toggle(payload));
+    },
+    addManual(payload: AddHabitV2Input): Promise<HabitV2MutationResult> {
+      return locked(() => unguarded.addManual(payload));
+    },
+    deactivate(payload: DeactivateHabitV2Input): Promise<HabitV2MutationResult> {
+      return locked(() => unguarded.deactivate(payload));
     },
   };
 }

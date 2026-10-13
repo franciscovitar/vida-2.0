@@ -9,7 +9,11 @@ import {
   parseHabitLogV2Table,
   parseHabitRegistryTable,
 } from '@/lib/habits/v2-contract';
-import { createHabitsV2WriteService, type HabitV2SheetPort } from '@/lib/habits/v2-write-core';
+import {
+  createHabitsV2WriteService,
+  type HabitV2ExclusiveWriter,
+  type HabitV2SheetPort,
+} from '@/lib/habits/v2-write-core';
 
 type Cell = string | number | boolean | null;
 
@@ -106,14 +110,128 @@ function fakePort() {
   return { port, registry, log, legacy, writes };
 }
 
-function service(fake: ReturnType<typeof fakePort>, enabled = true) {
+/**
+ * TEST ONLY, single-process queue. Does not certify durable multi-instance
+ * exclusion or lease fencing in a live Google Sheets deployment.
+ */
+function localTestExclusiveWriter(): HabitV2ExclusiveWriter {
+  let tail: Promise<void> = Promise.resolve();
+  return {
+    run<T>(mutation: () => Promise<T>): Promise<T> {
+      const result = tail.then(mutation);
+      tail = result.then(
+        () => undefined,
+        () => undefined,
+      );
+      return result;
+    },
+  };
+}
+
+function service(
+  fake: ReturnType<typeof fakePort>,
+  enabled = true,
+  exclusiveWriter: HabitV2ExclusiveWriter | null = localTestExclusiveWriter(),
+) {
   return createHabitsV2WriteService({
     port: fake.port,
     today: '2026-10-08',
     writesEnabled: enabled,
+    exclusiveWriter: exclusiveWriter ?? undefined,
     now: () => '2026-10-08T12:00:00Z',
   });
 }
+
+
+test('enabled flag ALONE cannot mutate: missing certified exclusive writer fails before sheet reads', async () => {
+  const fake = fakePort();
+  let reads = 0;
+  const original = fake.port.readRegistry.bind(fake.port);
+  fake.port.readRegistry = async () => {
+    reads++;
+    return original();
+  };
+  const unguarded = service(fake, true, null);
+  const result = await unguarded.addManual({
+    name: 'Caminar',
+    icon: null,
+    cadence: 'daily',
+    target: 1,
+    unit: 'vez',
+    operationId: 'no-fence-001',
+  });
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, 'unavailable');
+  assert.equal(reads, 0);
+  assert.equal(fake.writes.length, 0);
+});
+
+test('live server action does not inject a fake lock or activate a writer', () => {
+  const source = readFileSync(join(process.cwd(), 'app', 'actions', 'habits-v2.ts'), 'utf8');
+  assert.match(source, /createHabitsV2WriteService/);
+  assert.doesNotMatch(source, /exclusiveWriter:/);
+});
+
+test('two independent requests sharing a test-only serial executor cannot overwrite one row', async () => {
+  const fake = fakePort();
+  const shared = localTestExclusiveWriter();
+  const first = service(fake, true, shared);
+  const second = service(fake, true, shared);
+  const candidate = {
+    name: 'Caminar',
+    icon: null,
+    cadence: 'daily' as const,
+    target: 1,
+    unit: 'vez',
+    operationId: 'same-intent-001',
+  };
+  const results = await Promise.all([first.addManual(candidate), second.addManual(candidate)]);
+  assert.equal(results.filter((x) => x.ok && x.code === 'applied').length, 1);
+  assert.equal(results.filter((x) => x.ok && x.code === 'idempotent').length, 1);
+  assert.equal(fake.writes.length, 1);
+  const registry = parseHabitRegistryTable(fake.registry);
+  assert.equal(registry.ok, true);
+  if (registry.ok) assert.equal(registry.rows.filter((x) => x.name === 'Caminar').length, 1);
+});
+
+test('two different intents choosing same habit name remain conflict-free from overwrite', async () => {
+  const fake = fakePort();
+  const shared = localTestExclusiveWriter();
+  const payload = {
+    name: 'Leer',
+    icon: null,
+    cadence: 'daily' as const,
+    target: 1,
+    unit: 'vez',
+  };
+  const [a, b] = await Promise.all([
+    service(fake, true, shared).addManual({ ...payload, operationId: 'different-intent-a' }),
+    service(fake, true, shared).addManual({ ...payload, operationId: 'different-intent-b' }),
+  ]);
+  assert.equal(a.ok, true);
+  assert.equal(b.ok, false);
+  if (!b.ok) assert.equal(b.code, 'conflict');
+  assert.equal(fake.writes.length, 1);
+});
+
+test('lock unavailability/rejection never retries a Google row PUT', async () => {
+  const fake = fakePort();
+  const rejecting: HabitV2ExclusiveWriter = {
+    async run<T>(_mutation: () => Promise<T>): Promise<T> {
+      throw new Error('synthetic lock timeout');
+    },
+  };
+  const result = await service(fake, true, rejecting).toggle({
+    targetDate: '2026-10-07',
+    habitId: 'journaling',
+    nextValue: true,
+    expectedPreviousValue: false,
+    operationId: 'mutex-failure-001',
+  });
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, 'unavailable');
+  assert.equal(fake.writes.length, 0);
+});
 
 test('historical manual correction writes only Habit Log V2 and verifies replay idempotently', async () => {
   const fake = fakePort();
