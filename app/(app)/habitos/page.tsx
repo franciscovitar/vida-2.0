@@ -38,20 +38,24 @@ export default async function HabitosPage({
   searchParams: Promise<{ period?: string | string[]; date?: string | string[] }>;
 }) {
   const params = await searchParams;
+  let useReadOnlyLegacyFallback = false;
   if (isHabitsV2UiEnabled()) {
     const rawDate = Array.isArray(params.date) ? params.date[0] : params.date;
     const view = await getHabitsV2View(rawDate ?? null);
-    return (
-      <div className={pageStyles.page}>
-        <PageHeader
-          title="Hábitos"
-          description="Seguimiento de fuentes canónicas en modo lectura."
-          icon={CalendarCheck}
-          domain="habits"
-        />
-        <HabitsV2Board view={view} />
-      </div>
-    );
+    if (view.status === 'ready' || view.status === 'empty') {
+      return (
+        <div className={pageStyles.page}>
+          <PageHeader
+            title="Hábitos"
+            description="Seguimiento de fuentes canónicas en modo lectura."
+            icon={CalendarCheck}
+            domain="habits"
+          />
+          <HabitsV2Board view={view} />
+        </div>
+      );
+    }
+    useReadOnlyLegacyFallback = true;
   }
   const periodDays = parsePeriodParam(params.period);
   const data = await getDomainPages(periodDays);
@@ -70,6 +74,13 @@ export default async function HabitosPage({
           </Suspense>
         }
       />
+
+      {useReadOnlyLegacyFallback ? (
+        <IntegrationNotice
+          status="missing-tab"
+          message="Los stores normalizados de Hábitos V2 no están disponibles. Se muestra el historial V1 como respaldo, en modo solo lectura. Los registros faltantes no se interpretan como hábitos incumplidos."
+        />
+      ) : null}
 
       {data.habits.notice ? (
         <IntegrationNotice status={data.habits.status} message={data.habits.notice} />
@@ -167,15 +178,17 @@ export default async function HabitosPage({
         <HabitMatrix days={data.habits.calendar} habitIds={habitIds} />
       </Card>
 
-      <HabitsBoard
-        habits={data.habits.todayHabits}
-        weekly={data.habits.todayWeekly}
-        targetDate={data.habits.targetDate}
-        writable={data.habits.writable}
-        rowExists={data.habits.rowExists}
-        title="Edición de hoy"
-        description="Solo hoy · Hoja de hábitos"
-      />
+      {!useReadOnlyLegacyFallback ? (
+        <HabitsBoard
+          habits={data.habits.todayHabits}
+          weekly={data.habits.todayWeekly}
+          targetDate={data.habits.targetDate}
+          writable={data.habits.writable}
+          rowExists={data.habits.rowExists}
+          title="Edición de hoy"
+          description="Solo hoy · Hoja de hábitos"
+        />
+      ) : null}
     </div>
   );
 }
