@@ -206,6 +206,10 @@ export function TodayCockpitV2({
         />
 
         <div className={styles.life}>
+          <p className={styles['empty-text']}>
+            Métricas de Salud · lectura independiente de la orientación V2.
+            {today.source === 'mock' ? ' Datos simulados.' : null}
+          </p>
           <ul className={styles.metrics}>
             <li>
               <span>Sueño</span>

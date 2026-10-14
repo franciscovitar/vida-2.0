@@ -56,8 +56,28 @@ export function LearningHubV2({
   catalog: StudyCatalogRead;
   assessmentProgress: AssessmentProgressRead;
 }) {
-  const subjects = catalog.subjects
-    .map((subject) => matchSubjectProgress(subject, assessmentProgress.snapshots))
+  const catalogUnavailable =
+    catalog.state === 'unavailable' ||
+    catalog.state === 'invalid' ||
+    catalog.state === 'unconfigured';
+  const progressUnavailable =
+    assessmentProgress.status === 'unavailable' || assessmentProgress.status === 'invalid';
+  const catalogNotice =
+    catalog.notice ??
+    (catalogUnavailable
+      ? 'No se pudo verificar el catálogo de materias. No se infiere ausencia de aprendizaje.'
+      : null);
+  const progressNotice =
+    assessmentProgress.notice ??
+    (progressUnavailable
+      ? 'No se pudo verificar Assessment Progress. La preparación sigue sin confirmar.'
+      : assessmentProgress.status === 'degraded'
+        ? 'Lectura académica parcial; la evidencia visible no es completa.'
+        : null);
+  const subjects = (catalogUnavailable ? [] : catalog.subjects)
+    .map((subject) =>
+      matchSubjectProgress(subject, progressUnavailable ? [] : assessmentProgress.snapshots),
+    )
     .sort((left, right) => {
       const byDate = subjectSortValue(left).localeCompare(subjectSortValue(right));
       return byDate || left.name.localeCompare(right.name, 'es');
@@ -65,16 +85,16 @@ export function LearningHubV2({
 
   return (
     <div className={styles.stack}>
-      {catalog.notice ? (
+      {catalogNotice ? (
         <div className={styles.notice} role="status">
           <CircleAlert size={16} aria-hidden="true" />
-          <span>{catalog.notice}</span>
+          <span>{catalogNotice}</span>
         </div>
       ) : null}
-      {assessmentProgress.notice ? (
+      {progressNotice ? (
         <div className={styles.notice} role="status">
           <CircleAlert size={16} aria-hidden="true" />
-          <span>{assessmentProgress.notice}</span>
+          <span>{progressNotice}</span>
         </div>
       ) : null}
 
@@ -94,7 +114,9 @@ export function LearningHubV2({
 
         {subjects.length === 0 ? (
           <p className={styles.empty}>
-            No hay materias activas verificables en el catálogo canónico.
+            {catalogUnavailable
+              ? 'Las materias activas siguen sin confirmar por un error de lectura.'
+              : 'No hay materias activas verificables en el catálogo canónico.'}
           </p>
         ) : (
           <div className={styles.subjects}>

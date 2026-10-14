@@ -15,6 +15,7 @@ import {
   isTaskDateSemanticsV2Enabled,
 } from '@/lib/daily-planning/v2-config';
 import { shouldRenderStagedDailyOrientationV2 } from '@/lib/daily-planning/orientation-rollout';
+import { getUniversityStudyCatalog } from '@/lib/study-engine/catalog-source';
 import { buildPlanningTaskCatalog } from '@/lib/planning/task-catalog';
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 import type { PlanningView, PlanningViewV2 } from '@/types/planning';
@@ -56,12 +57,20 @@ export default async function PlanificacionPage({
   const v2Enabled = isDailyPlanningV2UiEnabled();
   const taskDateSemanticsV2 = isTaskDateSemanticsV2Enabled();
 
-  const [dailyPlan, orientation, notion, assessments, projects] = await Promise.all([
+  const [dailyPlan, orientation, notion, assessments, projects, studyCatalog] = await Promise.all([
     getDailyPlanningView(),
     v2Enabled ? getDailyOrientationV2View() : Promise.resolve<DailyOrientationView | null>(null),
     getNotionDashboard(),
     getAssessmentProgress(),
     getProjectsIntelligence(),
+    v2Enabled && resolveV2View(params.view) === 'semana'
+      ? getUniversityStudyCatalog()
+      : Promise.resolve({
+          state: 'unconfigured' as const,
+          subjects: [],
+          notice: null,
+          sourceCommit: null,
+        }),
   ]);
 
   const taskCatalog = buildPlanningTaskCatalog(notion);
@@ -86,6 +95,7 @@ export default async function PlanificacionPage({
           dailyPlan={dailyPlan}
           notion={notion}
           assessments={assessments}
+          studyCatalog={studyCatalog}
           projects={projects}
           taskCatalog={taskCatalog}
           writable={isWriteActionsEnabled()}

@@ -491,3 +491,66 @@ approval scopes. Preserve V1 and record exact outcomes in PAS PR #484 without du
   `docs/planning-v2-execution-acceptance-contract.md`. Verify an authenticated
   ChatGPT-to-existing-Vida ingress and trusted stable intent receipt first;
   bind current opt-in/history only to real evidence. No duplicate user records.
+
+## Planning V2 — Fase 4, Semana / Proyectos / Aprendizaje, 2026-10-14 UTC
+
+- Rama local aislada desde `4a3bee2860de36a39b7a285a2bbd07a5c78d7243`,
+  worktree `/workspace/vida-phase4-surfaces-v2`. Los cuatro worktrees previos
+  conservan exactamente `4a3bee286…`, `ad9ff877…`, `0acb686…`, `65e415c…`, limpios.
+- PAS main leído desde FETCH_HEAD `7347e9144aba7092cc26d697ebefe9048872b5f7`;
+  decisión ChatGPT-first y roadmap mantienen `SHADOW_READ_ONLY`.
+- Corregido: Semana preserva avisos parciales/de error, expone fecha del resumen,
+  y reutiliza `matchSubjectProgress` con el catálogo existente. Un resumen anterior
+  a la actualización de la materia ya no demuestra preparación actual; una fecha
+  conflictiva se reemplaza por la fecha oficial para clasificar la ventana semanal.
+  El catálogo se consulta sólo para Semana V2, en el Promise.all existente.
+- Aprendizaje tiene fallback accesible cuando falla catálogo o progreso sin notice;
+  un error con snapshots retenidos no publica preparación. Hoy separa métricas de
+  Salud independientes de orientación y etiqueta el origen mock como simulado.
+- QA focalizada: `node --import tsx --test tests/phase4-v2-surface-render.test.ts
+tests/phase4-v2-read-failure-render.test.ts tests/study-engine-catalog.test.ts`:
+  43/43 PASS, exit 0 (19 nuevos, 18 renders previos afectados, 6 tests del catálogo
+  reutilizado). Typecheck, ESLint de los seis archivos TS/TSX y Prettier: exit 0.
+  Un primer typecheck detectó una regexp ES2018 incompatible con el target;
+  corregida en el test. Sin cambios SCSS; no build integral ni suites generales.
+- Chromium 154: 32 casos únicos PASS, 390x844 y 1440x1000; cinco estados por cada
+  vista pendiente y Hoy con Salud independiente. Repetidos sólo casos afectados:
+  6 tras ampliar fixtures/etiquetar Salud y 10 de Semana tras reconciliar catálogo.
+  Sin overflow cerrado/abierto, aria-labelledby válido, aria-current de Semana,
+  Tab en enlaces y Enter en disclosures. Verificación básica, no auditoría WCAG.
+  Evidencia visual y runner en `/workspace/scratch/phase4-v2-surfaces/`.
+- Alcance: React auténtico + SCSS real con DTOs totalmente sintéticos, banner visible.
+  Las server actions no usadas por Semana se sustituyen por rechazos en el harness
+  Node para no cargar Auth.js/proveedores. Sin hidratación/router completo ni sesión.
+  Proyectos se prueba con su superficie canónica existente; señales V2 E6 siguen OFF.
+  E2E autenticado NOT RUN; no fuente privada, Journal ni escritura de proveedor.
+
+| Vista         | Implementado / probado                                                                                                  | Pendiente                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Hoy           | Lecturas fallidas diferenciadas; métricas Salud independientes; renders + Chromium                                      | Auth/frescura real sobre el mismo candidato                         |
+| Planificación | Revisión/Prioridades previas; Semana coherente con catálogo, listas largas, fechas tipadas y legacy; renders + Chromium | Router/hidratación y fuentes reales; Acciones no ejercitada aquí    |
+| Proyectos     | Renderer canónico, progreso por hitos, vacío/error y PI antiguo; cinco estados desktop/móvil                            | Señales staged OFF; fuente/E2E real                                 |
+| Aprendizaje   | Faculty-first, preparación desconocida/antigua, error y fallback; cinco estados desktop/móvil                           | Catálogo/Assessment reales, sesión y navegación completa            |
+| Hábitos       | UI/lectores existen en `0acb686…`; QA anterior conservado, sin repetición                                               | Superficie no integrada a este candidato; writer sigue desconectado |
+
+**Dependencias reconciliadas, sin merge:**
+
+- Planning `ad9ff877…` es ancestro de este candidato: conservar sus avisos académicos,
+  rechazo de readiness por evidencia incompatible y contratos DEV; ninguna activación.
+- Fechas `65e415c…` añade consumidores a `lib/notion/task-date-semantics.ts` existente;
+  no duplicar `lib/tasks/date-semantics-v2.ts`. Sus firmas de `selectAttentionTasks`
+  y `TasksBoard` agregan opt-in compatible; `selectWeekTasks` no cambia. Su árbol
+  completo tiene LearningHub anterior: copiarlo perdería validación/avisos actuales.
+- Hábitos `0acb686…` tiene rutas compartidas Hoy/Planificación y LearningHub anterior,
+  además de su UI/config/reader/actions propios. Seleccionar dependencias read-only
+  requeridas conservando estos renderers; no reemplazar rutas ni árboles completos,
+  no conectar `exclusiveWriter` ni activar escritura. Redis no se reinvestigó.
+
+**Decisión:** QA de componentes revisados PASS; Fase 4 integral PARTIAL.
+No hay fallo reproducido pendiente en los escenarios de este gate. Antes de QA
+integral autenticada falta un único candidato compatible de las cinco vistas:
+incorporar selectivamente dependencias read-only de Hábitos y consumidores de fechas,
+conservar avisos/validación de este árbol y verificar sesión/binding DEV/SHA exacto.
+No afirmar que el Preview existente contiene este commit local ni activar flags.
+Todos los flags locales inspeccionados continúan false; sin push, PR, CI, deploy,
+Production, secretos, bindings, migraciones o escrituras. Terminar aquí el gate.

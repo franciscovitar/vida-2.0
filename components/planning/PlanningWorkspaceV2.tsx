@@ -8,8 +8,11 @@ import {
 import { TaskManager } from '@/components/planning/TaskManager';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { dailyOrientationV2ReadNotice } from '@/lib/daily-planning/orientation-rollout';
 import { selectPlanningProjects, selectWeekTasks } from '@/lib/planning/overview';
 import { classifyWeekAssessments, classifyWeekUpcoming } from '@/lib/planning/week-v2';
+import { matchSubjectProgress } from '@/lib/study-engine/catalog';
+import type { StudyCatalogRead } from '@/types/study-catalog';
 import type { AssessmentProgressRead } from '@/types/assessment-progress';
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 import type { DailyPlanningView } from '@/types/daily-planning-view';
@@ -30,17 +33,50 @@ function WeekView({
   dailyPlan,
   notion,
   assessments,
+  studyCatalog,
   projects,
   orientation,
 }: {
   dailyPlan: DailyPlanningView;
   notion: NotionDashboardData;
   assessments: AssessmentProgressRead;
+  studyCatalog: StudyCatalogRead;
   projects: ProjectsIntelligenceData;
   orientation: DailyOrientationView;
 }) {
+  const orientationNotice = dailyOrientationV2ReadNotice(orientation);
+  const assessmentNotice =
+    assessments.notice ??
+    (assessments.status === 'degraded'
+      ? 'Lectura académica parcial; las evaluaciones visibles no representan la totalidad de la fuente.'
+      : null);
   const weekTasks = selectWeekTasks(notion.tasks, notion.projects, dailyPlan.targetDate);
-  const academic = classifyWeekAssessments(assessments.snapshots, dailyPlan.targetDate);
+  const catalogAvailable = studyCatalog.state === 'ready' || studyCatalog.state === 'degraded';
+  const evidenceNotices = new Map<string, string>();
+  const academicSnapshots = assessments.snapshots.map((snapshot) => {
+    const subject = catalogAvailable
+      ? studyCatalog.subjects.find(
+          (item) => item.id === snapshot.subjectId && item.assessment?.id === snapshot.assessmentId,
+        )
+      : undefined;
+    const matched = subject ? matchSubjectProgress(subject, [snapshot]) : null;
+    const notice =
+      matched?.evidenceNotice ??
+      (!subject
+        ? 'Evaluación sin correspondencia verificable con el catálogo canónico; fecha y preparación siguen sin confirmar.'
+        : null);
+    if (notice) evidenceNotices.set(snapshot.assessmentId, notice);
+    return {
+      ...snapshot,
+      assessmentDate: subject?.assessment?.date ?? null,
+      payload: {
+        ...snapshot.payload,
+        progressPercent: matched?.progress?.payload.progressPercent ?? null,
+        readinessBand: matched?.progress?.payload.readinessBand ?? ('unknown' as const),
+      },
+    };
+  });
+  const academic = classifyWeekAssessments(academicSnapshots, dailyPlan.targetDate);
   const activeProjects =
     projects.status === 'ready' && projects.source === 'notion'
       ? selectPlanningProjects(projects.projects)
@@ -57,6 +93,11 @@ function WeekView({
 
   return (
     <div className={styles.stack}>
+      {orientationNotice ? (
+        <p className={styles.empty} role="status">
+          {orientationNotice}
+        </p>
+      ) : null}
       <Card>
         <SectionHeader
           title="Semana en contexto"
@@ -108,8 +149,21 @@ function WeekView({
           domain="learning"
           action={<Link href="/aprendizaje/estudio">Ver materias →</Link>}
         />
+        {studyCatalog.notice || !catalogAvailable ? (
+          <p className={styles.empty} role="status">
+            {studyCatalog.notice ??
+              'El catálogo académico no está disponible; fecha y preparación siguen sin confirmar.'}
+          </p>
+        ) : null}
+        {assessmentNotice ? (
+          <p className={styles.empty} role="status">
+            {assessmentNotice}
+          </p>
+        ) : null}
         {assessmentUnavailable ? (
-          <p className={styles.empty}>Assessment Progress no está disponible o es inválido.</p>
+          <p className={styles.empty} role="status">
+            Assessment Progress no está disponible o es inválido.
+          </p>
         ) : academic.week.length === 0 ? (
           <p className={styles.empty}>Sin evaluaciones con fecha confirmada en esta ventana.</p>
         ) : (
@@ -120,10 +174,21 @@ function WeekView({
                   <strong>{assessment.payload.name}</strong>
                   <span>
                     {assessment.subjectId} · preparación{' '}
-                    {assessment.payload.progressPercent === null
+                    {!assessment.payload.scopeComplete ||
+                    assessment.payload.progressPercent === null
                       ? 'sin medir'
                       : `${assessment.payload.progressPercent}%`}
-                    {' · '}readiness {assessment.payload.readinessBand}
+                    {' · '}readiness{' '}
+                    {assessment.payload.scopeComplete
+                      ? assessment.payload.readinessBand
+                      : 'unknown'}
+                  </span>
+                  {evidenceNotices.has(assessment.assessmentId) ? (
+                    <span>{evidenceNotices.get(assessment.assessmentId)}</span>
+                  ) : null}
+                  <span>
+                    Resumen generado {assessment.generatedAt.slice(0, 10)}; no demuestra práctica
+                    independiente reciente.
                   </span>
                 </div>
                 <span>{assessment.assessmentDate}</span>
@@ -159,6 +224,9 @@ function WeekView({
                   <div>
                     <strong>{assessment.payload.name}</strong>
                     <span>Fecha no confirmada; no se asigna urgencia inventada.</span>
+                    {evidenceNotices.has(assessment.assessmentId) ? (
+                      <span>{evidenceNotices.get(assessment.assessmentId)}</span>
+                    ) : null}
                   </div>
                   <span>Sin fecha</span>
                 </li>
@@ -312,6 +380,7 @@ export function PlanningWorkspaceV2({
   dailyPlan,
   notion,
   assessments,
+  studyCatalog,
   projects,
   taskCatalog,
   writable,
@@ -322,6 +391,7 @@ export function PlanningWorkspaceV2({
   dailyPlan: DailyPlanningView;
   notion: NotionDashboardData;
   assessments: AssessmentProgressRead;
+  studyCatalog: StudyCatalogRead;
   projects: ProjectsIntelligenceData;
   taskCatalog: PlanningTaskCatalog;
   writable: boolean;
@@ -334,6 +404,7 @@ export function PlanningWorkspaceV2({
           <Link
             key={tab.key}
             href={tab.key === 'revision' ? '/planificacion' : `/planificacion?view=${tab.key}`}
+            aria-current={view === tab.key ? 'page' : undefined}
             data-active={view === tab.key ? 'true' : 'false'}
           >
             {tab.label}
@@ -348,6 +419,7 @@ export function PlanningWorkspaceV2({
           dailyPlan={dailyPlan}
           notion={notion}
           assessments={assessments}
+          studyCatalog={studyCatalog}
           projects={projects}
           orientation={orientation}
         />
