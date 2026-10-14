@@ -1,5 +1,26 @@
 # Vida 2.0 — Work checkpoint
 
+## Planning V2 — Fase 4, estados de lectura, 2026-10-13
+
+- `VERIFIED`: corrección local en rama aislada desde `ad9ff877…`: Hoy, Revisión y
+  Prioridades distinguen fuente fallida de ausencia confirmada, mantienen avisos
+  accesibles y no presentan prioridades filtradas como no-change verificado.
+- QA: 67/67 tests de componentes/adaptadores/config, incluidos 18 renders React;
+  11/11 tests lectores/config de Hábitos en su worktree intacto. Todos exit 0.
+  Typecheck, ESLint y Prettier exit 0. No se repitió el gate Redis/escritor.
+- Chromium local: 8/8 casos con datos sintéticos y SCSS real a 390/1440 px;
+  sin overflow horizontal, labels/status válidos y Tab en enlaces de Hoy.
+  Preview de componentes estáticos: no es el router completo ni E2E autenticado.
+- `PARTIAL`: Hoy/Planificación tienen superficies V2 staged; Proyectos tiene modelo
+  canónico probado; Aprendizaje tiene Faculty-first/catalog y preparación no medida;
+  Hábitos V2 existe en su rama independiente, con controles de lectura y writers bloqueados.
+- `PRESERVED`: los tres worktrees originales y sus SHAs no se modificaron.
+  Sin flags, rutas V1, escritores, source bindings, push, CI, deploy o proveedores.
+- `NEXT`: QA renderizada de Semana/Aprendizaje/Proyectos y reconciliación selectiva
+  de consumidores read-only entre árboles antes de una vista integral de cinco páginas.
+  Conservar avisos de fuentes del overlay; no mezclar ramas completas. Auth/source
+  freshness y publicación DEV requieren sus propios gates; E2E autenticado NOT RUN.
+
 Este archivo es el handoff durable para retomar setup externo y validaciones E2E sin depender de la
 memoria del chat. **No es una fuente de verdad en vivo.** Todo dato volátil debe revalidarse antes de
 actuar.

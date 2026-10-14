@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { isCalendarHoyUnavailable } from '@/lib/calendar/errors';
+import {
+  dailyOrientationV2ReadNotice,
+  isDailyOrientationV2ReadFailure,
+} from '@/lib/daily-planning/orientation-rollout';
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 import type { TodayData } from '@/types';
 
@@ -26,9 +30,11 @@ export function TodayCockpitV2({
   orientation: DailyOrientationView;
 }) {
   const review = orientation.review;
-  const nextEvent = isCalendarHoyUnavailable(today.calendar.status)
-    ? null
-    : today.calendar.nextEvent;
+  const readFailed = isDailyOrientationV2ReadFailure(orientation.readStatus);
+  const notice = dailyOrientationV2ReadNotice(orientation);
+  const filtered = orientation.quality.unresolvedRefs > 0 || orientation.quality.dateConflicts > 0;
+  const calendarUnavailable = isCalendarHoyUnavailable(today.calendar.status);
+  const nextEvent = calendarUnavailable ? null : today.calendar.nextEvent;
 
   return (
     <div className={styles.stack}>
@@ -47,18 +53,22 @@ export function TodayCockpitV2({
           }
         />
 
-        {orientation.notice ? (
+        {notice ? (
           <p className={styles.notice} role="status">
-            {orientation.notice}
+            {notice}
           </p>
         ) : null}
 
         {orientation.attention.length === 0 ? (
           <div className={styles.empty}>
             <strong>
-              {review
-                ? 'No cambiaría nada importante sólo para llenar el día.'
-                : 'Todavía no hay una orientación V2 persistida para hoy.'}
+              {readFailed
+                ? 'No se pudo verificar la atención V2.'
+                : filtered
+                  ? 'No hay prioridades verificables con las fuentes actuales.'
+                  : review
+                    ? 'No cambiaría nada importante sólo para llenar el día.'
+                    : 'Todavía no hay una orientación V2 persistida para hoy.'}
             </strong>
             <p>El cockpit evita fabricar prioridades cuando la evidencia no justifica un ajuste.</p>
           </div>
@@ -102,7 +112,8 @@ export function TodayCockpitV2({
 
           {!review ? (
             <p className={styles['empty-text']}>
-              Sin revisión V2 persistida. No se reconstruye ayer desde suposiciones.
+              {readFailed ? 'No se pudo verificar la revisión V2.' : 'Sin revisión V2 persistida.'}{' '}
+              No se reconstruye ayer desde suposiciones.
             </p>
           ) : (
             <div className={styles.review}>
@@ -136,6 +147,12 @@ export function TodayCockpitV2({
           />
 
           <div className={styles.upcoming}>
+            {calendarUnavailable ? (
+              <p className={styles.notice} role="status">
+                {today.calendar.notice ?? 'Calendar no está disponible.'} No se puede confirmar que
+                la agenda esté libre.
+              </p>
+            ) : null}
             {nextEvent ? (
               <div className={styles['next-event']}>
                 <span>Hoy</span>
@@ -164,7 +181,9 @@ export function TodayCockpitV2({
               </ul>
             ) : nextEvent ? null : (
               <p className={styles['empty-text']}>
-                No hay una fecha próxima V2 que necesite ocupar este espacio.
+                {readFailed
+                  ? 'No se pudieron verificar las fechas próximas de la orientación.'
+                  : 'No hay una fecha próxima V2 que necesite ocupar este espacio.'}
               </p>
             )}
           </div>
@@ -221,7 +240,9 @@ export function TodayCockpitV2({
             </ul>
           ) : (
             <p className={styles['empty-text']}>
-              Sin señal adicional de recuperación, ocio o capacidad que requiera atención.
+              {readFailed
+                ? 'No se pudieron verificar las señales V2 de vida y capacidad.'
+                : 'Sin señal adicional de recuperación, ocio o capacidad que requiera atención.'}
             </p>
           )}
         </div>

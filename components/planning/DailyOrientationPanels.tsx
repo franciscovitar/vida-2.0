@@ -2,6 +2,10 @@ import { CircleDot, Compass, HeartPulse, History } from 'lucide-react';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import {
+  dailyOrientationV2ReadNotice,
+  isDailyOrientationV2ReadFailure,
+} from '@/lib/daily-planning/orientation-rollout';
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 
 import styles from './DailyOrientationPanels.module.scss';
@@ -13,6 +17,8 @@ function shortDate(value: string): string {
 
 export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOrientationView }) {
   const review = orientation.review;
+  const readFailed = isDailyOrientationV2ReadFailure(orientation.readStatus);
+  const notice = dailyOrientationV2ReadNotice(orientation);
 
   return (
     <Card>
@@ -23,18 +29,23 @@ export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOri
         domain="productivity"
       />
 
-      {orientation.notice ? (
+      {notice ? (
         <p className={styles.notice} role="status">
-          {orientation.notice}
+          {notice}
         </p>
       ) : null}
 
       {!review ? (
         <div className={styles.empty}>
-          <strong>Todavía no hay una revisión V2 persistida.</strong>
+          <strong>
+            {readFailed
+              ? 'No se pudo verificar la revisión V2.'
+              : 'Todavía no hay una revisión V2 persistida.'}
+          </strong>
           <p>
-            El runtime conversacional puede razonar en modo sombra, pero esta superficie no inventa
-            una revisión si todavía no existe un snapshot V2 válido.
+            {readFailed
+              ? 'Podés continuar la revisión en el chat. Esta vista no reconstruye lo ocurrido desde suposiciones.'
+              : 'El runtime conversacional puede razonar en modo sombra, pero esta superficie no inventa una revisión si todavía no existe un snapshot V2 válido.'}
           </p>
         </div>
       ) : (
@@ -103,6 +114,9 @@ export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOri
 }
 
 export function DailyAttentionPanel({ orientation }: { orientation: DailyOrientationView }) {
+  const readFailed = isDailyOrientationV2ReadFailure(orientation.readStatus);
+  const notice = dailyOrientationV2ReadNotice(orientation);
+  const filtered = orientation.quality.unresolvedRefs > 0 || orientation.quality.dateConflicts > 0;
   return (
     <div className={styles.stack}>
       <Card>
@@ -113,12 +127,22 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
           domain="productivity"
         />
 
+        {notice ? (
+          <p className={styles.notice} role="status">
+            {notice}
+          </p>
+        ) : null}
+
         {orientation.attention.length === 0 ? (
           <div className={styles.empty}>
             <strong>
-              {orientation.review
-                ? 'No hay un ajuste importante persistido para hoy.'
-                : 'Sin orientación V2 persistida.'}
+              {readFailed
+                ? 'No se pudo verificar la atención V2.'
+                : filtered
+                  ? 'No hay prioridades verificables con las fuentes actuales.'
+                  : orientation.review
+                    ? 'No hay un ajuste importante persistido para hoy.'
+                    : 'Sin orientación V2 persistida.'}
             </strong>
             <p>No se fabrica una prioridad sólo para llenar la pantalla.</p>
           </div>
