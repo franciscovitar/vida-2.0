@@ -3,6 +3,8 @@
  */
 import { isProjectOverdueActive } from '@/lib/notion/classify';
 import { isHoyOverdueTask } from '@/lib/notion/hoy';
+import { isTaskDateSemanticsV2Enabled } from '@/lib/daily-planning/v2-config';
+import { isTaskDeadlineDueTodayV2 } from '@/lib/notion/task-date-semantics';
 import type {
   NotionDashboardData,
   NotionHoyPreview,
@@ -12,7 +14,10 @@ import type {
   NotionTaskSummary,
 } from '@/types/notion';
 
-export function summarizeTasks(tasks: readonly NotionTask[]): NotionTaskSummary {
+export function summarizeTasks(
+  tasks: readonly NotionTask[],
+  dateSemanticsV2 = isTaskDateSemanticsV2Enabled(),
+): NotionTaskSummary {
   const summary: NotionTaskSummary = {
     pending: 0,
     inProgress: 0,
@@ -29,8 +34,13 @@ export function summarizeTasks(tasks: readonly NotionTask[]): NotionTaskSummary 
     if (task.status === 'Bloqueada') summary.blocked += 1;
     if (task.status === 'Hecha') summary.done += 1;
     if (task.status === 'Algún día') summary.someday += 1;
-    if (isHoyOverdueTask(task)) summary.overdue += 1;
-    if (task.dateKind === 'today' && task.status !== 'Hecha') summary.dueToday += 1;
+    if (isHoyOverdueTask(task, dateSemanticsV2)) summary.overdue += 1;
+    if (
+      dateSemanticsV2
+        ? isTaskDeadlineDueTodayV2(task)
+        : task.dateKind === 'today' && task.status !== 'Hecha'
+    )
+      summary.dueToday += 1;
   }
   return summary;
 }
@@ -66,11 +76,16 @@ export function summarizeProjects(projects: readonly NotionProject[]): NotionPro
 }
 
 /** Contrato listo para Hoy; todavía no se renderiza en la UI. */
-export function buildNotionHoyPreview(data: NotionDashboardData): NotionHoyPreview {
-  const tasksDueToday = data.tasks.filter(
-    (task) => task.dateKind === 'today' && task.status !== 'Hecha',
+export function buildNotionHoyPreview(
+  data: NotionDashboardData,
+  dateSemanticsV2 = isTaskDateSemanticsV2Enabled(),
+): NotionHoyPreview {
+  const tasksDueToday = data.tasks.filter((task) =>
+    dateSemanticsV2
+      ? isTaskDeadlineDueTodayV2(task)
+      : task.dateKind === 'today' && task.status !== 'Hecha',
   );
-  const overdueTasks = data.tasks.filter((task) => isHoyOverdueTask(task));
+  const overdueTasks = data.tasks.filter((task) => isHoyOverdueTask(task, dateSemanticsV2));
   const activeProjects = data.projects.filter((project) => project.status === 'Activo');
   const blockedProjects = data.projects.filter(
     (project) =>

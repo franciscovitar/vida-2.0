@@ -56,7 +56,7 @@ button.primary,
   cursor: pointer;
 }
 
-button:disabled {
+.manager button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }

@@ -1,4 +1,10 @@
 import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
+import { isTaskDateSemanticsV2Enabled } from '@/lib/daily-planning/v2-config';
+import {
+  isTaskDeadlineDueTodayV2,
+  isTaskDeadlineOverdueV2,
+  taskDateViewV2,
+} from '@/lib/notion/task-date-semantics';
 import type { AssessmentProgressSnapshot } from '@/types/assessment-progress';
 import type { NotionProject, NotionTask } from '@/types/notion';
 import type { ProjectsIntelligenceProject } from '@/types/projects-intelligence';
@@ -38,12 +44,14 @@ export function selectAttentionTasks(
   tasks: readonly NotionTask[],
   projects: readonly NotionProject[],
   limit = 8,
+  dateSemanticsV2 = isTaskDateSemanticsV2Enabled(),
 ): NotionTask[] {
   const rankStatus = (task: NotionTask): number => {
     if (task.status === 'Bloqueada') return 0;
-    if (task.dateKind === 'overdue') return 1;
-    if (task.dateKind === 'today') return 2;
+    if (dateSemanticsV2 ? isTaskDeadlineOverdueV2(task) : task.dateKind === 'overdue') return 1;
+    if (dateSemanticsV2 ? isTaskDeadlineDueTodayV2(task) : task.dateKind === 'today') return 2;
     if (task.status === 'En progreso') return 3;
+    if (dateSemanticsV2 && taskDateViewV2(task).attention === 'review-needed') return 4;
     if (task.priority === 'Alta') return 4;
     return 5;
   };
@@ -55,8 +63,10 @@ export function selectAttentionTasks(
     .sort((a, b) => {
       const byStatus = rankStatus(a) - rankStatus(b);
       if (byStatus !== 0) return byStatus;
-      const byDate = dateValue(a.date) - dateValue(b.date);
-      if (byDate !== 0) return byDate;
+      const attentionDate = (task: NotionTask) =>
+        !dateSemanticsV2 || taskDateViewV2(task).semantics === 'deadline' ? task.date : null;
+      const byDate = dateValue(attentionDate(a)) - dateValue(attentionDate(b));
+      if (byDate !== 0 && (!dateSemanticsV2 || !Number.isNaN(byDate))) return byDate;
       return a.title.localeCompare(b.title, 'es');
     })
     .slice(0, limit);

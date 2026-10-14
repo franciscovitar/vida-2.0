@@ -8,6 +8,8 @@ import {
   type CanonicalAreaDef,
 } from '@/lib/areas/canonical';
 import { buildAreaIntegrityWarnings } from '@/lib/areas/integrity';
+import { isTaskDateSemanticsV2Enabled } from '@/lib/daily-planning/v2-config';
+import { isTaskDeadlineOverdueV2, taskDateDisplayKindV2 } from '@/lib/notion/task-date-semantics';
 import { isExcludedProject, isExcludedTask, sanitizePublicNote } from '@/lib/areas/privacy';
 import type {
   AreaAssessmentSummary,
@@ -87,13 +89,13 @@ function toProjectSummary(project: NotionProject, slug: AreaSlug): AreaProjectSu
   };
 }
 
-function toTaskSummary(task: NotionTask, slug: AreaSlug): AreaTaskSummary {
+function toTaskSummary(task: NotionTask, slug: AreaSlug, dateSemanticsV2 = false): AreaTaskSummary {
   return {
     key: opaqueKey('task', task.id),
     title: task.title,
     status: task.status,
     date: task.date,
-    dateKind: task.dateKind,
+    dateKind: dateSemanticsV2 ? taskDateDisplayKindV2(task) : task.dateKind,
     duration: task.duration,
     energy: task.energy,
     projectName: task.project?.available ? (task.project.name ?? null) : null,
@@ -134,6 +136,7 @@ export type AreaSheetsSlice = {
 };
 
 export type ComposeAreaInput = {
+  dateSemanticsV2?: boolean;
   slug: AreaSlug;
   notion: NotionDashboardData;
   calendarEvents: readonly CalendarEvent[];
@@ -331,6 +334,7 @@ export function composeAreaSummary(
 }
 
 export function composeAreaDashboard(input: ComposeAreaInput): AreaDashboardData | null {
+  const dateSemanticsV2 = input.dateSemanticsV2 ?? isTaskDateSemanticsV2Enabled();
   const def = getCanonicalAreaDef(input.slug);
   if (!def) return null;
   const area = findCanonicalNotionArea(input.notion.areas, input.slug);
@@ -349,16 +353,20 @@ export function composeAreaDashboard(input: ComposeAreaInput): AreaDashboardData
 
   const pendingTasks = tasks
     .filter((task) => task.status === 'Pendiente')
-    .map((task) => toTaskSummary(task, def.slug));
+    .map((task) => toTaskSummary(task, def.slug, dateSemanticsV2));
   const inProgressTasks = tasks
     .filter((task) => task.status === 'En progreso')
-    .map((task) => toTaskSummary(task, def.slug));
+    .map((task) => toTaskSummary(task, def.slug, dateSemanticsV2));
   const blockedTasks = tasks
     .filter((task) => task.status === 'Bloqueada')
-    .map((task) => toTaskSummary(task, def.slug));
+    .map((task) => toTaskSummary(task, def.slug, dateSemanticsV2));
   const overdueTasks = tasks
-    .filter((task) => task.dateKind === 'overdue' && task.status !== 'Hecha')
-    .map((task) => toTaskSummary(task, def.slug));
+    .filter((task) =>
+      dateSemanticsV2
+        ? isTaskDeadlineOverdueV2(task)
+        : task.dateKind === 'overdue' && task.status !== 'Hecha',
+    )
+    .map((task) => toTaskSummary(task, def.slug, dateSemanticsV2));
   const upcomingTasks = tasks
     .filter(
       (task) =>
@@ -366,7 +374,7 @@ export function composeAreaDashboard(input: ComposeAreaInput): AreaDashboardData
     )
     .sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''))
     .slice(0, 12)
-    .map((task) => toTaskSummary(task, def.slug));
+    .map((task) => toTaskSummary(task, def.slug, dateSemanticsV2));
 
   const nextAction =
     activeProjects.find((project) => project.nextAction)?.nextAction ??
@@ -397,7 +405,13 @@ export function composeAreaDashboard(input: ComposeAreaInput): AreaDashboardData
     calendar: filterCalendar(input.calendarEvents, def.slug),
     metrics: buildMetrics(def.slug, sheets),
     sources: input.sources,
-    integrity: buildAreaIntegrityWarnings({ area, projects, tasks, areaNotionId: area.id }),
+    integrity: buildAreaIntegrityWarnings({
+      area,
+      projects,
+      tasks,
+      areaNotionId: area.id,
+      dateSemanticsV2,
+    }),
     variant: buildVariant(def.slug, sheets, academicSections, input.assessmentProgress),
     targetDate: input.notion.targetDate,
   };

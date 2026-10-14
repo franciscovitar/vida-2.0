@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge';
 import { filterTasks, relationLabel, type TaskFilterState } from '@/lib/notion/view-filters';
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/lib/notion/constants';
 import type { NotionArea, NotionProject, NotionTask } from '@/types/notion';
+import { taskDateDisplayKindV2, taskDateLabelV2 } from '@/lib/notion/task-date-semantics';
 
 import styles from './NotionBoards.module.scss';
 
@@ -20,10 +21,13 @@ export function TasksBoard({
   tasks,
   projects,
   areas,
+  dateSemanticsV2 = false,
 }: {
   tasks: NotionTask[];
   projects: NotionProject[];
   areas: NotionArea[];
+  /** Server-resolved opt-in; the default preserves the V1 surface. */
+  dateSemanticsV2?: boolean;
 }) {
   const [filters, setFilters] = useState<TaskFilterState>({
     query: '',
@@ -121,7 +125,11 @@ export function TasksBoard({
 
       <ul className={styles.list}>
         {visible.map((task) => (
-          <li key={task.id} className={styles.item} data-kind={task.dateKind}>
+          <li
+            key={task.id}
+            className={styles.item}
+            data-kind={dateSemanticsV2 ? taskDateDisplayKindV2(task) : task.dateKind}
+          >
             <div className={styles.main}>
               <span className={styles.title}>{task.title}</span>
               <div className={styles.meta}>
@@ -138,7 +146,9 @@ export function TasksBoard({
               </div>
             </div>
             <div className={styles.side}>
-              <span className={styles.date}>{formatDate(task.date, task.dateKind)}</span>
+              <span className={styles.date}>
+                {dateSemanticsV2 ? taskDateLabelV2(task) : formatDate(task.date, task.dateKind)}
+              </span>
               <span className={styles.sub}>{relationLabel(task.area)}</span>
               <span className={styles.sub}>{relationLabel(task.project)}</span>
               {task.blocker ? <span className={styles.block}>Bloqueo: {task.blocker}</span> : null}

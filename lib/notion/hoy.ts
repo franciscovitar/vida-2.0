@@ -5,6 +5,11 @@
 import { addDaysYmd } from '@/lib/adapters/dates';
 import { isCalendarHoyUnavailable } from '@/lib/calendar/errors';
 import { isTaskOverdue } from '@/lib/notion/classify';
+import { isTaskDateSemanticsV2Enabled } from '@/lib/daily-planning/v2-config';
+import {
+  isTaskDeadlineDueTodayV2,
+  isTaskDeadlineOverdueV2,
+} from '@/lib/notion/task-date-semantics';
 import type { CalendarTodayPreview } from '@/types/calendar';
 import type {
   HoyNotionView,
@@ -93,8 +98,12 @@ function toHoyProject(project: NotionProject, today: string): HoyProjectView {
 }
 
 /** Vencida operativa: fecha pasada, no hecha, no «Algún día». */
-export function isHoyOverdueTask(task: NotionTask): boolean {
+export function isHoyOverdueTask(
+  task: NotionTask,
+  dateSemanticsV2 = isTaskDateSemanticsV2Enabled(),
+): boolean {
   if (task.status === 'Hecha' || task.status === 'Algún día') return false;
+  if (dateSemanticsV2) return isTaskDeadlineOverdueV2(task);
   return isTaskOverdue(task.dateKind, task.status);
 }
 
@@ -180,6 +189,7 @@ export function suggestNextActions(
   data: NotionDashboardData,
   calendar?: CalendarTodayPreview | null,
   limit = 3,
+  dateSemanticsV2 = isTaskDateSemanticsV2Enabled(),
 ): HoySuggestedAction[] {
   const closedProjects = closedProjectIds(data.projects);
   const usable = data.tasks.filter((task) => taskCompetesForPlanning(task, closedProjects));
@@ -219,7 +229,7 @@ export function suggestNextActions(
 
   for (const task of usable) {
     if (
-      task.dateKind === 'today' &&
+      (dateSemanticsV2 ? isTaskDeadlineDueTodayV2(task) : task.dateKind === 'today') &&
       task.priority === 'Alta' &&
       taskFitsAvailableBlock(task, availableMinutes)
     ) {
@@ -232,7 +242,9 @@ export function suggestNextActions(
     }
   }
 
-  for (const task of sortOverdueTasks(usable.filter(isHoyOverdueTask))) {
+  for (const task of sortOverdueTasks(
+    usable.filter((task) => isHoyOverdueTask(task, dateSemanticsV2)),
+  )) {
     if (task.priority === 'Alta' && taskFitsAvailableBlock(task, availableMinutes)) {
       push({
         id: `task:${task.id}`,
@@ -287,15 +299,20 @@ export function suggestNextActions(
 export function buildHoyNotionView(
   data: NotionDashboardData,
   calendar?: CalendarTodayPreview | null,
+  dateSemanticsV2 = isTaskDateSemanticsV2Enabled(),
 ): HoyNotionView {
   const today = data.targetDate;
   const closedProjects = closedProjectIds(data.projects);
   const planningTasks = data.tasks.filter((task) => taskCompetesForPlanning(task, closedProjects));
-  const dueTodayTasks = planningTasks.filter((task) => task.dateKind === 'today');
+  const dueTodayTasks = planningTasks.filter((task) =>
+    dateSemanticsV2 ? isTaskDeadlineDueTodayV2(task) : task.dateKind === 'today',
+  );
   const dueTodayIds = new Set(dueTodayTasks.map((t) => t.id));
 
   const overdueTasks = sortOverdueTasks(
-    planningTasks.filter((task) => isHoyOverdueTask(task) && !dueTodayIds.has(task.id)),
+    planningTasks.filter(
+      (task) => isHoyOverdueTask(task, dateSemanticsV2) && !dueTodayIds.has(task.id),
+    ),
   );
   const overdueIds = new Set(overdueTasks.map((t) => t.id));
   const claimed = new Set([...dueTodayIds, ...overdueIds]);
@@ -333,7 +350,7 @@ export function buildHoyNotionView(
       activeProjects: activeProjects.length,
       withoutNextAction,
     },
-    suggestedActions: suggestNextActions(data, calendar),
+    suggestedActions: suggestNextActions(data, calendar, 3, dateSemanticsV2),
   };
 }
 

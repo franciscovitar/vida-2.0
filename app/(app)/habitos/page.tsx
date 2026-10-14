@@ -8,6 +8,9 @@ import { HabitMatrix } from '@/components/domain/HabitMatrix';
 import { PeriodSelector } from '@/components/domain/PeriodSelector';
 import { SparkBars } from '@/components/domain/SparkBars';
 import { IntegrationNotice } from '@/components/dashboard/IntegrationNotice';
+import { HabitsV2Board } from '@/components/habits/HabitsV2Board';
+import { isHabitsV2UiEnabled } from '@/lib/habits/v2-config';
+import { getHabitsV2View } from '@/lib/habits/v2-source';
 import { HabitsBoard } from '@/components/habits/HabitsBoard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card } from '@/components/ui/Card';
@@ -32,9 +35,24 @@ function rateLabel(rate: number | null, completed: number, available: number): s
 export default async function HabitosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string | string[] }>;
+  searchParams: Promise<{ period?: string | string[]; date?: string | string[] }>;
 }) {
   const params = await searchParams;
+  if (isHabitsV2UiEnabled()) {
+    const rawDate = Array.isArray(params.date) ? params.date[0] : params.date;
+    const view = await getHabitsV2View(rawDate ?? null);
+    return (
+      <div className={pageStyles.page}>
+        <PageHeader
+          title="Hábitos"
+          description="Seguimiento de fuentes canónicas en modo lectura."
+          icon={CalendarCheck}
+          domain="habits"
+        />
+        <HabitsV2Board view={view} />
+      </div>
+    );
+  }
   const periodDays = parsePeriodParam(params.period);
   const data = await getDomainPages(periodDays);
   const habitIds = AUTHORIZED_HABIT_META.map((item) => item.header);

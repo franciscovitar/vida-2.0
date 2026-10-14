@@ -3,15 +3,19 @@
  */
 import type { AreaIntegrityWarning } from '@/types/areas';
 import type { NotionArea, NotionProject, NotionTask } from '@/types/notion';
+import { isTaskDateSemanticsV2Enabled } from '@/lib/daily-planning/v2-config';
+import { isTaskDeadlineOverdueV2 } from '@/lib/notion/task-date-semantics';
 
 export function buildAreaIntegrityWarnings(input: {
   area: NotionArea;
   projects: readonly NotionProject[];
   tasks: readonly NotionTask[];
   areaNotionId: string;
+  dateSemanticsV2?: boolean;
 }): readonly AreaIntegrityWarning[] {
   const warnings: AreaIntegrityWarning[] = [];
   const { area, projects, tasks, areaNotionId } = input;
+  const dateSemanticsV2 = input.dateSemanticsV2 ?? isTaskDateSemanticsV2Enabled();
 
   if (!area.reviewDate) {
     warnings.push({
@@ -46,7 +50,11 @@ export function buildAreaIntegrityWarnings(input: {
   }
 
   for (const task of tasks) {
-    if (task.dateKind === 'overdue' && task.status !== 'Hecha') {
+    if (
+      dateSemanticsV2
+        ? isTaskDeadlineOverdueV2(task)
+        : task.dateKind === 'overdue' && task.status !== 'Hecha'
+    ) {
       warnings.push({
         code: 'overdue-pending-task',
         message: 'Tarea vencida que sigue pendiente.',

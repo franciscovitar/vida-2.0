@@ -554,3 +554,58 @@ conservar avisos/validación de este árbol y verificar sesión/binding DEV/SHA 
 No afirmar que el Preview existente contiene este commit local ni activar flags.
 Todos los flags locales inspeccionados continúan false; sin push, PR, CI, deploy,
 Production, secretos, bindings, migraciones o escrituras. Terminar aquí el gate.
+
+## Planning V2 — integración local de cinco vistas, 2026-10-13 (AR)
+
+- Candidato aislado en `/workspace/vida-phase4-integrated-v2`, rama
+  `qa/phase4-v2-five-surfaces-20261013`, desde `6257ba399…`.
+  PAS main revalidado: `7347e9144aba7092cc26d697ebefe9048872b5f7`.
+  Los cinco worktrees aprobados y sus HEADs siguen intactos y limpios.
+- Fechas: aplicado sólo el delta revisado de `65e415c…` para semántica y
+  consumidores; sin esquema, duplicación de parser, vercel.json ni cambios de flags.
+  Las regresiones confirman V1 sin opt-in y V2 sin vencimientos para Objetivo,
+  Revisión o fechas legacy ambiguas.
+- Hábitos: incorporados contrato/config/lector/UI de `0acb686…`, reconciliados
+  como lectura. El lector devuelve siempre writable=false; la UI no importa
+  acciones, puertos ni escritor exclusivo y no ofrece alta/toggle/desactivación,
+  incluso con un DTO erróneamente editable. Historial y navegación por fecha sí.
+  Error no implica ausencia. Cobertura semanal incompleta no aparece como 0/3;
+  cobertura completa conserva el cero medido. Sin gate Redis ni suites writer.
+- Delta encontrado por Next: `button:disabled` global en TaskManager rompía CSS
+  Modules. Acotado a `.manager button:disabled`, conservando el estilo de sus
+  controles. Stylelint y compilación Next verifican el selector real.
+- QA: 38/38 tests (10 integración, 9 consumidores fechas, 19 renders de superficies
+  con el nuevo árbol); exit 0. Typecheck, ESLint/Prettier de archivos incorporados
+  o modificados, Stylelint de dos SCSS y build auténtico webpack: exit 0.
+  No se repitieron suites independientes de escritor, Redis o consentimiento.
+- Next 16 + React 19 local: 50 escenarios de cinco vistas/five estados y 15
+  interacciones hidratadas a 390x844 / 1440x1000: 65/65 PASS, exit 0. Sin overflow,
+  errores de consola/hidratación, requests externos ni mutaciones. Enter en links,
+  menú móvil/Escape/retorno de foco y router.push de fecha Hábitos verificados.
+- Límites: rutas de fixture en harness fuera del repo, con componentes reales,
+  AppShell, ThemeProvider, CSS Modules y App Router auténticos. No son los handlers
+  autenticados leyendo proveedores. El banner declara datos sintéticos y sesión
+  ausente; ninguna identidad ni consentimiento fueron fabricados. Server actions
+  de Tareas sustituidas por rechazos en el harness; flags de proceso intactos/OFF.
+  Rutas del build auténtico `/`, `/planificacion`, `/proyectos`, `/aprendizaje`,
+  `/habitos`: GET sin cookie devuelve 307 a login (5/5), sin ampliar acceso.
+- Evidencia y comandos reproducibles:
+  `/workspace/scratch/phase4-integrated-next/` contiene harness, runner CDP,
+  screenshots, browser-results.json, authentic-build.log y preflight de rutas.
+  Tests: `node --import tsx --test tests/phase4-v2-integration.test.ts tests/task-date-consumers-v2.test.ts tests/phase4-v2-surface-render.test.ts`.
+  Build: `npm run build -- --webpack`, con guard de red local y telemetry deshabilitada.
+
+| Vista         | Resultado local integrado                                                                          | Pendiente real                                           |
+| ------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Hoy           | Salud independiente, error Calendar/orientación y no-change sintético; hidratación/navegación PASS | Fuentes actuales y sesión del candidato                  |
+| Planificación | Semana/catálogo compatibles, fechas tipadas y Acciones no editable; navegación PASS                | Handler autenticado y datos DEV                          |
+| Proyectos     | Renderer canónico con progreso medido/desconocido/error; hidratación PASS                          | Fuentes actuales; señales V2 siguen OFF                  |
+| Aprendizaje   | Validación canónica y frescura preservadas; navegación PASS                                        | Catálogo/Assessment y sesión reales                      |
+| Hábitos       | Fuente/UI read-only, histórico por fecha, cobertura parcial desconocida; hidratación PASS          | Stores DEV y sesión reales; escritor fuera del candidato |
+
+**Gate local de integración: PASS. Fase 4 real: PARTIAL. E2E autenticado NOT RUN.**
+Próximo bloqueo exacto: este candidato sólo existe localmente; falta verificar
+sesión, SHA/binding DEV y fuentes actuales en un entorno que pueda mostrar la UI
+V2 bajo autorización independiente. No inferir que el Preview existente contiene
+este código. Sin push/PR/CI/deploy, migración, Production, secretos, modificación
+de flags, escrituras o lecturas de Journal. V2 permanece SHADOW_READ_ONLY.
