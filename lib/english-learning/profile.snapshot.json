@@ -1,129 +1,142 @@
 {
   "schema_version": 1,
   "project_id": "english-speaking-lab",
-  "updated": "2026-10-06",
-  "baseline_status": "collecting",
-  "working_cefr": null,
-  "summary": "Baseline still collecting after two substantial sessions. Communication can be sustained on familiar and semi-familiar topics, with promising repair and clarification behavior. Fluency and grammatical control remain variable under real-time pressure, especially during lexical search and longer spontaneous turns.",
+  "updated": "2026-10-14",
+  "baseline_status": "provisional",
+  "working_cefr": "A2+ / B1 emerging",
+  "summary": "Five substantial sessions now include spontaneous role-play giving advice about moving abroad, social integration, loneliness and family boundaries. The 2026-10-14 session sustained several extended, unscripted explanations, showed independent repair of 'he have' to 'he has', and added evidence of hypothetical-advice tense instability. Working range remains A2+ / emerging B1 with medium confidence; pronunciation remains unassessed without acoustic evidence.",
   "dimensions": {
     "range": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 2,
-      "note": "Can discuss familiar interests, hypothetical situations, travel problems and interpersonal boundaries; broader sampling is still needed."
+      "state": "developing",
+      "trend": "improving",
+      "confidence": "medium",
+      "evidence_count": 5,
+      "note": "Spontaneously discusses social situations, AI in education, software, abstract personal motives, relocation and family boundaries, often using reasons and practical examples."
     },
     "accuracy": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 2,
-      "note": "Meaning is usually recoverable, but agreement, prepositions and sentence assembly become unstable under time pressure."
+      "state": "developing",
+      "trend": "inconsistent",
+      "confidence": "medium",
+      "evidence_count": 5,
+      "note": "Frequent he have/he has repairs confirm agreement instability; real/hypothetical forms 'I will' vs 'I would' also need more consistent control. Meaning remains understandable."
     },
     "fluency": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 2,
-      "note": "Can sustain extended turns, but frequent restarts, fillers and word-by-word construction remain visible."
+      "state": "developing",
+      "trend": "improving",
+      "confidence": "medium",
+      "evidence_count": 5,
+      "note": "Sustained several multi-sentence 30–60 second explanations in a relocation/advice role-play, but pauses and restart chains are still frequent; independent self-repair helps maintain meaning."
     },
     "interaction": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 2,
-      "note": "Regularly asks for clarification, redirects topics when needed and keeps conversational intent clear."
+      "state": "stable",
+      "trend": "stable",
+      "confidence": "medium",
+      "evidence_count": 5,
+      "note": "Requests clarification, manages the direction and pace of the conversation, and explicitly asks the coach to maintain conversational momentum."
     },
     "coherence": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 2,
-      "note": "Longer opinions are understandable, though organization can loosen when searching for language."
+      "state": "developing",
+      "trend": "improving",
+      "confidence": "medium",
+      "evidence_count": 5,
+      "note": "Proposed a staged one-month visit, support from a companion, gradual independence and building a social circle; articulated reasons behind setting boundaries."
     },
     "pronunciation_intelligibility": {
       "state": "insufficient_evidence",
       "trend": "insufficient_evidence",
       "confidence": "low",
-      "evidence_count": 0
+      "evidence_count": 0,
+      "note": "No durable pronunciation claim: the available closeout evidence is transcript-based rather than acoustic."
     },
     "active_vocabulary": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 2,
-      "note": "Useful vocabulary is available in familiar domains; lexical retrieval gaps frequently trigger circumlocution."
+      "state": "developing",
+      "trend": "improving",
+      "confidence": "medium",
+      "evidence_count": 5,
+      "note": "Can produce everyday advice vocabulary, though searched for 'remind him' and 'don't back down' in a fresh interpersonal scenario."
     },
     "repair_ability": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 2,
-      "note": "Promising candidate strength: often reformulates, asks for the missing word, or explains around a lexical gap."
+      "state": "strong",
+      "trend": "stable",
+      "confidence": "medium",
+      "evidence_count": 5,
+      "note": "Independently repaired 'he have' to 'he has' and rephrased several incomplete ideas while sustaining meaning."
     },
     "spontaneous_complexity": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 2,
-      "note": "Can express nuanced reasoning about enjoyment, progress, social boundaries and reinforcement, but with substantial formulation effort."
+      "state": "developing",
+      "trend": "improving",
+      "confidence": "medium",
+      "evidence_count": 5,
+      "note": "Extended independent reasoning about loneliness, regret, guilt, autonomy, family reactions and practical plans for moving abroad."
     },
     "transfer": {
-      "state": "insufficient_evidence",
-      "trend": "insufficient_evidence",
-      "confidence": "low",
-      "evidence_count": 0
+      "state": "emerging",
+      "trend": "inconsistent",
+      "confidence": "medium",
+      "evidence_count": 3,
+      "note": "New relocation role-play confirms sustained reasoning transfers beyond academic/personal-development domains; subject-verb agreement still inconsistent, and hypothetical 'would' not reliably transferred."
     }
   },
   "strengths": [
     {
       "area": "repair_ability",
       "label": "Keeps communication going by reformulating, clarifying and describing around missing words.",
-      "confidence": "low",
-      "evidence_count": 2,
+      "confidence": "medium",
+      "evidence_count": 5,
       "first_observed": "2026-09-28",
-      "last_observed": "2026-10-06",
-      "trend": "insufficient_evidence"
+      "last_observed": "2026-10-14",
+      "trend": "stable"
     },
     {
       "area": "interaction",
       "label": "Actively signals misunderstanding and redirects the conversation when a topic or question is not working.",
-      "confidence": "low",
-      "evidence_count": 2,
+      "confidence": "medium",
+      "evidence_count": 5,
       "first_observed": "2026-09-28",
-      "last_observed": "2026-10-06",
-      "trend": "insufficient_evidence"
+      "last_observed": "2026-10-14",
+      "trend": "stable"
     }
   ],
   "recurring_weaknesses": [
     {
       "area": "fluency",
       "pattern": "Frequent restart chains and fillers while assembling spontaneous sentences.",
-      "note": "Observed across both substantial sessions; slowing down slightly is the current strategy.",
+      "note": "Observed across four substantial sessions. On 2026-10-13 long turns were sustained successfully, but restart chains and fillers remained frequent.",
       "confidence": "medium",
-      "evidence_count": 2,
+      "evidence_count": 5,
       "first_observed": "2026-09-28",
-      "last_observed": "2026-10-06",
-      "trend": "insufficient_evidence"
+      "last_observed": "2026-10-14",
+      "trend": "improving"
     },
     {
       "area": "active_vocabulary",
       "pattern": "Lexical retrieval gaps lead to Spanish-influenced forms or repeated circumlocution.",
       "confidence": "medium",
-      "evidence_count": 2,
+      "evidence_count": 5,
       "first_observed": "2026-09-28",
-      "last_observed": "2026-10-06",
-      "trend": "insufficient_evidence"
+      "last_observed": "2026-10-14",
+      "trend": "inconsistent",
+      "note": "Lexical search still appears in abstract speech, although circumlocution and self-repair increasingly preserve the message."
     },
     {
       "area": "accuracy",
-      "pattern": "Third-person singular agreement becomes unstable during longer spontaneous speech.",
-      "note": "Strong within-session recurrence on 2026-10-06; needs confirmation in a fresh context before becoming a durable weakness.",
-      "confidence": "low",
-      "evidence_count": 1,
+      "pattern": "Present-tense subject-verb agreement is unstable in spontaneous speech.",
+      "note": "2026-10-14 fresh-country-advice role-play showed recurrent 'he have' beginnings followed by independent repairs to 'he has', alongside correct spontaneous agreement. Still unstable, with improving repair.",
+      "confidence": "medium",
+      "evidence_count": 3,
       "first_observed": "2026-10-06",
-      "last_observed": "2026-10-06",
-      "trend": "insufficient_evidence"
+      "last_observed": "2026-10-14",
+      "trend": "inconsistent"
+    },
+    {
+      "area": "accuracy",
+      "pattern": "Comparative forms for short adjectives are unstable in spontaneous comparison (e.g. easier/simpler/shorter).",
+      "note": "The pattern recurred in a fresh personal-development context after the earlier networking/design examples, so it is now a recurring rather than single-session pattern.",
+      "confidence": "medium",
+      "evidence_count": 2,
+      "first_observed": "2026-10-07",
+      "last_observed": "2026-10-13",
+      "trend": "inconsistent"
     }
   ],
   "pronunciation_targets": [],
@@ -148,23 +161,32 @@
       "meaning": "sentido de la orientación",
       "evidence_count": 1,
       "last_observed": "2026-10-06"
+    },
+    {
+      "expression": "computer networks",
+      "status": "used_with_help",
+      "meaning": "redes informáticas / redes de datos",
+      "evidence_count": 1,
+      "last_observed": "2026-10-07"
     }
   ],
   "current_priorities": [
-    "Reduce restart chains by speaking slightly more slowly and finishing the current sentence before reformulating.",
-    "Stabilize third-person singular agreement during spontaneous speech.",
-    "Build high-frequency natural chunks for situations where Spanish-influenced wording causes lexical blocks."
+    "Improve third-person singular control without disrupting spontaneous speech (he has / he wants / he doesn't).",
+    "Keep real versus hypothetical advice consistent (I will vs I would; if he asked, I would tell him).",
+    "Sustain extended answers with fewer restart chains, while activating useful interpersonal chunks like remind someone and don't back down."
   ],
   "quests": [
     {
       "id": "steady-one-minute-answer",
       "title": "Steady one-minute answer",
       "description": "Give a fresh one-minute answer at a controlled pace, prioritizing continuity over Spanish-like speed.",
-      "status": "available",
+      "status": "completed",
       "targets": [
         "fluency",
         "repair"
-      ]
+      ],
+      "completed_at": "2026-10-07",
+      "evidence": "Explained IPv6 for about a minute using a house-address analogy and maintained the communicative thread despite lexical search."
     },
     {
       "id": "third-person-fresh-context",
@@ -180,38 +202,54 @@
   "achievements": [],
   "coverage": {
     "recent_domains": [
-      "learning and football",
-      "hypothetical lifestyle",
-      "travel and navigation",
-      "friendship and social support",
-      "personal boundaries"
+      "moving abroad and relocation",
+      "friendship, loneliness and social integration",
+      "family autonomy and boundaries",
+      "personal development and capability",
+      "competition and hobbies",
+      "belonging and social connection",
+      "AI in education",
+      "software design",
+      "computer networks"
     ],
     "recent_functions": [
-      "hypothetical reasoning",
-      "planning",
-      "clarification",
-      "explanation",
-      "advice",
+      "giving advice",
+      "hypothetical role-play",
+      "problem solving",
+      "defending an opinion",
+      "extended monologue",
+      "self-reflection",
       "argumentation",
-      "social conversation"
+      "comparison",
+      "clarification",
+      "social conversation",
+      "explanation"
     ]
   },
   "activity": {
-    "conversations_this_week": 1,
+    "conversations_this_week": 2,
     "active_days": [
-      "2026-10-06"
+      "2026-10-13",
+      "2026-10-14"
     ]
   },
   "evidence_notes": [
-    "Two substantial naturalistic baseline sessions completed: 2026-09-28 and 2026-10-06.",
-    "No working CEFR assigned yet; evidence breadth remains insufficient.",
-    "Pronunciation/intelligibility remains unscored in durable state because transcript-only evidence is insufficient."
+    "Four substantial naturalistic sessions completed: 2026-09-28, 2026-10-06, 2026-10-07 and 2026-10-13.",
+    "The working CEFR range remains A2+ / B1 emerging; confidence is now medium because another varied spontaneous session supported the same range rather than a level change.",
+    "Pronunciation/intelligibility remains unscored in durable state because acoustic evidence was not available to this closeout.",
+    "2026-10-13 provided fresh-domain evidence through extended self-reflection about capability, competition, belonging, respect and relationships.",
+    "The session confirmed recurring transfer problems with present-tense agreement and short-adjective comparatives, while repair ability remained a clear strength.",
+    "2026-10-14 substantial role-play covered relocation and loneliness, staged moving plans and firm but respectful family boundaries; learner produced multi-sentence explanations and some 30–60 second turns.",
+    "Agreement self-repair recurred in a new context ('he have' -> 'he has'); spontaneous hypothetical advice often used will instead of would. Lexical search produced candidate high-reuse chunks for 'remind him' and 'don't back down'."
   ],
+  "working_cefr_confidence": "medium",
+  "working_cefr_observed": "2026-10-14",
+  "working_cefr_evidence": "Across five varied spontaneous sessions, the learner sustains explanations, opinion defense, reformulation and interpersonal advice, including abstract and unfamiliar scenarios. 2026-10-14 confirmed developing B1-like extended speech but recurring agreement, hypothetical tense choice and pauses mean the working A2+ / B1 emerging range is unchanged; audio pronunciation remains unassessed.",
   "anki_summary": {
-    "active_targets": 10,
-    "high_priority_targets": 2,
+    "active_targets": 14,
+    "high_priority_targets": 4,
     "retired_targets": 0,
-    "last_session_processed": "2026-10-06-session-002",
+    "last_session_processed": "2026-10-14-session-005",
     "local_sync_enabled": false,
     "current_targets": [
       {
@@ -225,30 +263,20 @@
         ]
       },
       {
-        "id": "third_person_singular_spontaneous",
-        "label": "third-person singular in spontaneous speech: he/she has, does, keeps, realizes",
+        "id": "hypothetical_if_had",
+        "label": "Hypothetical situations and advice: if + past, would + base verb",
         "priority": "high",
         "lifecycle": "unstable",
-        "types": [
-          "error_detection",
-          "productive"
-        ]
-      },
-      {
-        "id": "hypothetical_if_had",
-        "label": "If I had ... I would ...",
-        "priority": "medium",
-        "lifecycle": "learning",
         "types": [
           "productive",
           "error_detection"
         ]
       },
       {
-        "id": "see_some_improvement",
-        "label": "see some improvement / improve over the week",
+        "id": "done_with_lunch",
+        "label": "I'm done with lunch / I've finished lunch",
         "priority": "medium",
-        "lifecycle": "new",
+        "lifecycle": "learning",
         "types": [
           "productive",
           "chunk"
@@ -269,6 +297,66 @@
         "label": "be close to someone / know someone well enough",
         "priority": "medium",
         "lifecycle": "learning",
+        "types": [
+          "productive",
+          "chunk"
+        ]
+      },
+      {
+        "id": "third_person_singular_spontaneous",
+        "label": "present-tense subject-verb agreement in spontaneous speech",
+        "priority": "high",
+        "lifecycle": "unstable",
+        "types": [
+          "error_detection",
+          "productive"
+        ]
+      },
+      {
+        "id": "better_to_x_than_y",
+        "label": "It's better to X than to Y",
+        "priority": "medium",
+        "lifecycle": "new",
+        "types": [
+          "productive",
+          "chunk"
+        ]
+      },
+      {
+        "id": "short_adjective_comparatives",
+        "label": "short-adjective comparatives: easier, simpler, shorter; superlative: simplest",
+        "priority": "high",
+        "lifecycle": "unstable",
+        "types": [
+          "error_detection",
+          "productive"
+        ]
+      },
+      {
+        "id": "gain_confidence",
+        "label": "gain confidence / become more confident",
+        "priority": "medium",
+        "lifecycle": "new",
+        "types": [
+          "productive",
+          "chunk"
+        ]
+      },
+      {
+        "id": "remind_someone",
+        "label": "remind someone of / remind someone why",
+        "priority": "medium",
+        "lifecycle": "new",
+        "types": [
+          "productive",
+          "chunk"
+        ]
+      },
+      {
+        "id": "dont_back_down",
+        "label": "don't back down / stand your ground",
+        "priority": "medium",
+        "lifecycle": "new",
         "types": [
           "productive",
           "chunk"
