@@ -34,6 +34,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Temporary canonical formatter capture
+        run: |
+          npx prettier --write 'components/gym/GymDashboard.tsx' 'components/gym/GymSummaryOverview.tsx' 'components/planning/DailyOrientationPanels.tsx' 'components/planning/PlanningWorkspaceV2.tsx' 'lib/daily-planning/minimal-orientation-candidate.ts' 'lib/daily-planning/orientation-v2.ts' 'tests/append-cells-v2.test.ts' 'tests/daily-orientation-v2.test.ts' 'tests/minimal-orientation-candidate.test.ts'
+          for path in 'components/gym/GymDashboard.tsx' 'components/gym/GymSummaryOverview.tsx' 'components/planning/DailyOrientationPanels.tsx' 'components/planning/PlanningWorkspaceV2.tsx' 'lib/daily-planning/minimal-orientation-candidate.ts' 'lib/daily-planning/orientation-v2.ts' 'tests/append-cells-v2.test.ts' 'tests/daily-orientation-v2.test.ts' 'tests/minimal-orientation-candidate.test.ts'; do
+            printf 'FORMATTED_BEGIN:%s:' "$path"
+            base64 -w0 "$path"
+            printf '\n'
+          done
+
       - name: Test project
         run: npm test
 
