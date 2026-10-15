@@ -92,10 +92,10 @@ test('a valid no-change remains visible and does not become an error', () => {
     /No hay un ajuste importante persistido/,
   );
 });
-test('staged empty read keeps V1 fallback; failures stay visible in V2; flags remain OFF', () => {
+test('staged empty reads keep V2 visible; failures remain visible; flag off retains V1', () => {
   assert.equal(
     shouldRenderStagedDailyOrientationV2(true, orientation({ readStatus: 'empty' })),
-    false,
+    true,
   );
   assert.equal(
     shouldRenderStagedDailyOrientationV2(true, orientation({ readStatus: 'invalid' })),
