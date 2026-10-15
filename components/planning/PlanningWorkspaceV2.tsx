@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {
   DailyAttentionPanel,
   DailyRealityReviewPanel,
+  DailyUpcomingPanel,
 } from '@/components/planning/DailyOrientationPanels';
 import { TaskManager } from '@/components/planning/TaskManager';
 import { Card } from '@/components/ui/Card';
@@ -412,7 +413,22 @@ export function PlanningWorkspaceV2({
         ))}
       </nav>
 
-      {view === 'revision' ? <DailyRealityReviewPanel orientation={orientation} /> : null}
+      {orientation.generatedAt ? (
+        <p className={styles['week-source-note']} role="status">
+          Análisis guardado: {orientation.generatedAt.slice(0, 16).replace('T', ' ')} · Las fechas y prioridades reflejan lo conocido al generarlo, no consultas en vivo.
+        </p>
+      ) : (
+        <p className={styles['week-source-note']} role="status">
+          Aún no hay un análisis V2 guardado. Podés hacerlo en el proyecto ChatGPT de Planificación; la web no calcula ni guarda decisiones por su cuenta.
+        </p>
+      )}
+      {view === 'revision' ? (
+        <div className={styles.stack}>
+          <DailyRealityReviewPanel orientation={orientation} />
+          <DailyAttentionPanel orientation={orientation} />
+          <DailyUpcomingPanel orientation={orientation} />
+        </div>
+      ) : null}
       {view === 'prioridades' ? <DailyAttentionPanel orientation={orientation} /> : null}
       {view === 'semana' ? (
         <WeekView

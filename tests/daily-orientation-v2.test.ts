@@ -3,6 +3,7 @@ import { test } from 'node:test';
 
 import { selectLatestDailyOrientationSnapshot } from '@/lib/daily-planning/orientation-v2';
 import { buildDailyOrientationV2View } from '@/lib/daily-planning/orientation-v2-view';
+import { shouldRenderStagedDailyOrientationV2 } from '@/lib/daily-planning/orientation-rollout';
 import type { DailyPlanningContext } from '@/types/daily-planning-intelligence';
 
 const TODAY = '2026-10-07';
@@ -373,4 +374,17 @@ test('F-ID3. Separate V2 snapshot IDs remain separate legitimate revisions', () 
   const read = selectLatestDailyOrientationSnapshot([HEADER, first, second], TODAY);
   assert.equal(read.status, 'ready');
   assert.equal(read.snapshot?.id, second[0]);
+});
+
+
+test('V2-MIN1: enabled minimal planning renders an empty honest state instead of silently falling back to V1', () => {
+  const empty = { readStatus: 'empty' as const, generatedAt: null, review: null };
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, empty), true);
+  assert.equal(shouldRenderStagedDailyOrientationV2(false, empty), false);
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, null), false);
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, {
+    readStatus: 'unavailable' as const,
+    generatedAt: null,
+    review: null,
+  }), true);
 });

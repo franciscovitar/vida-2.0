@@ -1,4 +1,4 @@
-import { CircleDot, Compass, HeartPulse, History } from 'lucide-react';
+import { CalendarDays, CircleDot, Compass, HeartPulse, History } from 'lucide-react';
 
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -45,7 +45,7 @@ export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOri
           <p>
             {readFailed
               ? 'Podés continuar la revisión en el chat. Esta vista no reconstruye lo ocurrido desde suposiciones.'
-              : 'El runtime conversacional puede razonar en modo sombra, pero esta superficie no inventa una revisión si todavía no existe un snapshot V2 válido.'}
+              : 'El análisis se hace en tu proyecto ChatGPT de Planificación. Todavía no hay un resultado guardado para mostrar acá; no se inventa un resumen de ayer.'}
           </p>
         </div>
       ) : (
@@ -142,7 +142,7 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
                   ? 'No hay prioridades verificables con las fuentes actuales.'
                   : orientation.review
                     ? 'No hay un ajuste importante persistido para hoy.'
-                    : 'Sin orientación V2 persistida.'}
+                    : 'Todavía no hay prioridades guardadas desde ChatGPT.'}
             </strong>
             <p>No se fabrica una prioridad sólo para llenar la pantalla.</p>
           </div>
@@ -203,5 +203,40 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** Upcoming commitments belong to the saved conversational snapshot.
+ * Vida displays their verified-at-analysis claims; it does not query Google
+ * Calendar or infer a free day from an empty list. */
+export function DailyUpcomingPanel({ orientation }: { orientation: DailyOrientationView }) {
+  return (
+    <Card>
+      <SectionHeader
+        title="Próximas fechas"
+        description="Compromisos seleccionados cuando ChatGPT generó el análisis, no un calendario en vivo."
+        icon={CalendarDays}
+        domain="productivity"
+      />
+      {orientation.upcoming.length === 0 ? (
+        <div className={styles.empty}>
+          <strong>Sin fechas confirmadas en el último análisis guardado.</strong>
+          <p>Esto no significa que tengas el calendario libre. Consultá las fuentes actuales en ChatGPT antes de decidir.</p>
+        </div>
+      ) : (
+        <ul className={styles.items}>
+          {orientation.upcoming.slice(0, 5).map((item, index) => (
+            <li key={`${item.kind}-${item.title}-${index}`}>
+              <div className={styles['item-top']}>
+                <strong>{item.title}</strong>
+                <span>{shortDate(item.date)}</span>
+              </div>
+              <p>{item.reason}</p>
+              <small>{item.dateType === 'unknown' ? 'Tipo de fecha no confirmado' : item.dateType}</small>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   );
 }
