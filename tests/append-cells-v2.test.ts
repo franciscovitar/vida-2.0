@@ -264,7 +264,7 @@ test('minimal orientation writer rejects nested private fields a lax reader woul
     ...orientationPayload,
     review: { ...orientationPayload.review, rawJournal: 'private entry' },
   };
-  const id = createHash('sha256').update('different', 'utf8').digest('hex');
+  const id = createHash('sha256').update(JSON.stringify(body, (_key, value) => value && typeof value === 'object' && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) : value), 'utf8').digest('hex');
   const candidate = [`vida2:tasks-daily-planning:v2:orientation:${DAY}:${id}`, DAY, AT, JSON.stringify(body), 'chatgpt_project', 'daily-orientation-v2'];
   assert.equal(compile('orientation', candidate).ok, false);
 });
