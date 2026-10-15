@@ -1,7 +1,18 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { createRequire } from 'node:module';
+import { after, test } from 'node:test';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+
+import {
+  EMPTY_CAPABILITY_FILTERS,
+  capabilityExcerpt,
+  capabilitySubcategories,
+  filterCapabilities,
+  subcategoryLabel,
+} from '@/components/learning/capabilities-exploration';
 
 import {
   initialDiscoveries,
@@ -126,4 +137,118 @@ test('Learning V2 links to the authorized, dynamic capabilities page', () => {
   assert.match(hub, /href="\/aprendizaje\/capacidades"/);
   assert.match(page, /requireAuthorizedSession\(\)/);
   assert.match(page, /dynamic = 'force-dynamic'/);
+});
+
+const require = createRequire(import.meta.url);
+const oldScss = require.extensions['.scss'];
+require.extensions['.scss'] = (module) => {
+  module.exports = new Proxy(
+    {},
+    { get: (_target, key) => (key === '__esModule' ? false : String(key)) },
+  );
+};
+const { CapabilitiesLibrary } =
+  require('@/components/learning/CapabilitiesLibrary') as typeof import('@/components/learning/CapabilitiesLibrary');
+after(() => {
+  if (oldScss) require.extensions['.scss'] = oldScss;
+  else delete require.extensions['.scss'];
+});
+
+function libraryFixture() {
+  const data = fixtures();
+  const items = projectCapabilityData(data.inventory, data.cards, data.times, data.routing);
+  return {
+    status: 'ready' as const,
+    items,
+    initialIds: initialDiscoveries(items),
+    updated: '2030-01-01',
+    sourceCommit: 'a'.repeat(40),
+    notice: null,
+  };
+}
+
+test('subcategory options come only from the selected category and retain canonical values', () => {
+  const { items } = libraryFixture();
+  items[0]!.subcategory = 'expresión_oral';
+  items[1]!.subcategory = 'otra_referencia';
+  assert.deepEqual(capabilitySubcategories(items, items[0]!.area), ['expresión_oral', 'muestra']);
+  assert.equal(capabilitySubcategories(items, '').includes('otra_referencia'), true);
+  assert.equal(subcategoryLabel('expresión_oral'), 'Expresión oral');
+  assert.equal(items[0]!.subcategory, 'expresión_oral');
+});
+
+test('search combines category, subcategory and content across the full inventory, ignoring accents', () => {
+  const { items } = libraryFixture();
+  const entry = items[100]!;
+  entry.name = 'Práctica sintética';
+  entry.subcategory = 'expresión_oral';
+  const filters = {
+    query: 'ORAL practica',
+    area: entry.area,
+    subcategory: entry.subcategory,
+    content: 'discovery' as const,
+  };
+  assert.deepEqual(filterCapabilities(items, filters), [entry]);
+  assert.deepEqual(filterCapabilities(items, { ...filters, content: 'curated' }), []);
+  assert.deepEqual(filterCapabilities(items, { ...filters, area: 'Área inexistente' }), []);
+  assert.equal(
+    filterCapabilities(items, { ...EMPTY_CAPABILITY_FILTERS, content: 'curated' }).length,
+    12,
+  );
+  assert.equal(filterCapabilities(items, EMPTY_CAPABILITY_FILTERS).length, 245);
+  assert.deepEqual(
+    filterCapabilities(items, {
+      ...EMPTY_CAPABILITY_FILTERS,
+      query: 'sin coincidencias sintéticas',
+    }),
+    [],
+  );
+});
+
+test('compact descriptions use existing content without truncating the underlying card', () => {
+  const { items } = libraryFixture();
+  const item = items[0]!;
+  assert.equal(capabilityExcerpt(item), item.card!.whatYouGet);
+  item.card!.whatYouGet = 'Una descripción sintética con palabras. '.repeat(30);
+  const original = item.card!.whatYouGet;
+  assert.equal(capabilityExcerpt(item).endsWith('…'), true);
+  assert.ok(capabilityExcerpt(item).length <= 151);
+  assert.equal(item.card!.whatYouGet, original);
+  assert.equal(
+    capabilityExcerpt(items[20]!).includes(subcategoryLabel(items[20]!.subcategory)),
+    true,
+  );
+});
+
+test('initial view renders just three collapsed discoveries with filters first and no opportunity debt', () => {
+  const html = renderToStaticMarkup(
+    createElement(CapabilitiesLibrary, { library: libraryFixture() }),
+  );
+  assert.equal((html.match(/<article/g) ?? []).length, 3);
+  assert.equal((html.match(/aria-expanded="false"/g) ?? []).length, 3);
+  assert.equal((html.match(/aria-pressed=/g) ?? []).length, 8);
+  assert.ok(html.indexOf('Buscar capacidades') < html.indexOf('Tres descubrimientos'));
+  assert.match(html, /Subcategoría/);
+  assert.match(html, /Explorar todo el inventario/);
+  assert.match(html, /Ficha curada/);
+  assert.match(html, /2030-01-01/);
+  assert.doesNotMatch(html, /<h4|Si nunca lo aprendés|Fricciones habituales/);
+  assert.doesNotMatch(
+    html,
+    /aún sin|todavía|pendientes|por completar|[0-9]+%|private_score|private_value/,
+  );
+});
+
+test('unavailable library retains its generic notice without surfacing controls or data', () => {
+  const library = {
+    ...libraryFixture(),
+    status: 'unavailable' as const,
+    items: [],
+    initialIds: [],
+    notice: 'Biblioteca no disponible.',
+  };
+  const html = renderToStaticMarkup(createElement(CapabilitiesLibrary, { library }));
+  assert.match(html, /role="status"/);
+  assert.match(html, /Biblioteca no disponible/);
+  assert.doesNotMatch(html, /<article|<input|PAS main/);
 });
