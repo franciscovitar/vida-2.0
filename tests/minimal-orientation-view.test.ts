@@ -9,32 +9,54 @@ import type { DailyOrientationPayload } from '@/types/daily-orientation-v2';
 const DAY = '2026-10-15';
 const HEADER = ['Snapshot ID', 'Fecha', 'Generado en', 'Payload JSON', 'Fuente', 'Versión'];
 const payload: DailyOrientationPayload = {
-  review: { date: '2026-10-14', headline: 'Un día de avances declarados.', items: [], uncertainties: [] },
-  attention: [{
-    domain: 'university', targetKind: 'subject', ref: null, title: 'Materia',
-    recommendation: 'Repasar un concepto.', why: 'Hace días que no se practica.',
-    confidence: 'Media', nextAction: 'Una variante nueva.',
-  }],
-  upcoming: [{
-    kind: 'assessment', ref: null, title: 'Próxima evaluación',
-    date: '2026-10-20', dateType: 'unknown', reason: 'Fecha seleccionada en la revisión.',
-  }],
+  review: {
+    date: '2026-10-14',
+    headline: 'Un día de avances declarados.',
+    items: [],
+    uncertainties: [],
+  },
+  attention: [
+    {
+      domain: 'university',
+      targetKind: 'subject',
+      ref: null,
+      title: 'Materia',
+      recommendation: 'Repasar un concepto.',
+      why: 'Hace días que no se practica.',
+      confidence: 'Media',
+      nextAction: 'Una variante nueva.',
+    },
+  ],
+  upcoming: [
+    {
+      kind: 'assessment',
+      ref: null,
+      title: 'Próxima evaluación',
+      date: '2026-10-20',
+      dateType: 'unknown',
+      reason: 'Fecha seleccionada en la revisión.',
+    },
+  ],
   lifeSignals: [],
   minimum: [{ domain: 'personal', title: 'Descanso', why: 'Cuidar la recuperación.', ref: null }],
   notNow: [],
 };
+
 function read(body: DailyOrientationPayload = payload) {
-  return selectLatestDailyOrientationSnapshot([
-    HEADER,
+  return selectLatestDailyOrientationSnapshot(
     [
-      'vida2:tasks-daily-planning:v2:orientation:2026-10-15:fixture',
-      DAY,
-      '2026-10-15T08:00:00-03:00',
-      JSON.stringify(body),
-      'chatgpt_project',
-      'daily-orientation-v2',
+      HEADER,
+      [
+        'vida2:tasks-daily-planning:v2:orientation:2026-10-15:fixture',
+        DAY,
+        '2026-10-15T08:00:00-03:00',
+        JSON.stringify(body),
+        'chatgpt_project',
+        'daily-orientation-v2',
+      ],
     ],
-  ], DAY);
+    DAY,
+  );
 }
 
 test('MIN-VIEW1: snapshot-only V2 shows all unreferenced ChatGPT recommendations', () => {
@@ -64,7 +86,8 @@ test('MIN-VIEW2: no live source lookup can silently certify ref-bearing items', 
 
 test('MIN-VIEW3: empty and unavailable are different truthful states', () => {
   const empty = buildMinimalOrientationView(
-    { status: 'empty', snapshot: null, notice: null, invalidRows: 0 }, DAY,
+    { status: 'empty', snapshot: null, notice: null, invalidRows: 0 },
+    DAY,
   );
   const broken = buildMinimalOrientationView(
     { status: 'unavailable', snapshot: null, notice: 'Sheet inaccessible', invalidRows: 0 },
@@ -80,5 +103,8 @@ test('MIN-VIEW4: V2 transport depends on Sheets only; V1 remains separate', () =
   const file = readFileSync('lib/data/daily-orientation-v2-source.ts', 'utf8');
   assert.match(file, /readTabValues\(DAILY_PLAN_TAB\)/);
   assert.match(file, /requireAuthorizedSession/);
-  assert.doesNotMatch(file, /loadDailyPlanningContextUncached|loadCalendar|loadNotion|loadAssessments/);
+  assert.doesNotMatch(
+    file,
+    /loadDailyPlanningContextUncached|loadCalendar|loadNotion|loadAssessments/,
+  );
 });
