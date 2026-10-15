@@ -30,11 +30,17 @@ function unavailable(code: SheetReadCode): DailyOrientationSnapshotRead {
 export const getDailyOrientationV2View = cache(async () => {
   await requireAuthorizedSession();
   const [context, tab] = await Promise.all([
-    loadDailyPlanningContextUncached(),
+    loadDailyPlanningContextUncached({
+      // Planning V2 only displays commitments checked by ChatGPT when the
+      // snapshot was authored. Vida does not access the user's live Calendar.
+      getCalendarDataSource: () => 'mock',
+      getCalendarConfig: () => ({ ok: false, reason: 'not-configured' }),
+      getCalendarTimezone: () => 'America/Argentina/Cordoba',
+    }),
     readTabValues(DAILY_PLAN_TAB),
   ]);
   const read = tab.ok
     ? selectLatestDailyOrientationSnapshot(tab.values, context.targetDate)
     : unavailable(tab.code);
-  return buildDailyOrientationV2View(context, read);
+  return buildDailyOrientationV2View(context, read, { calendarIndependent: true });
 });

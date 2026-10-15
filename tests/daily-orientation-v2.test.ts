@@ -388,3 +388,48 @@ test('V2-MIN1: enabled minimal planning renders an empty honest state instead of
     review: null,
   }), true);
 });
+
+
+test('V2-MIN2: snapshot commitments remain visible when Vida Calendar is intentionally not connected', () => {
+  const baseline = context();
+  const noCalendar: DailyPlanningContext = {
+    ...baseline,
+    status: 'degraded',
+    sources: {
+      ...baseline.sources,
+      calendar: { status: 'not-configured', available: false, notice: null, mode: 'mock' },
+    },
+  };
+  const read = selectLatestDailyOrientationSnapshot(
+    [
+      HEADER,
+      [
+        'vida2:tasks-daily-planning:v2:orientation:2026-10-07:morning',
+        TODAY,
+        '2026-10-07T07:30:00-03:00',
+        payload({
+          attention: [],
+          upcoming: [
+            {
+              kind: 'calendar',
+              ref: null,
+              title: 'Reunión verificada por ChatGPT al generar el análisis',
+              date: '2026-10-08',
+              dateType: 'event',
+              reason: 'Confirmada al generar el snapshot; volver a consultar si cambió.',
+            },
+          ],
+        }),
+        'chatgpt_project',
+        'daily-orientation-v2',
+      ],
+    ],
+    TODAY,
+  );
+  const independent = buildDailyOrientationV2View(noCalendar, read, { calendarIndependent: true });
+  assert.equal(read.status, 'ready');
+  assert.equal(independent.status, 'ready');
+  assert.equal(independent.upcoming.length, 1);
+  assert.equal(independent.upcoming[0]?.date, '2026-10-08');
+  assert.equal(buildDailyOrientationV2View(noCalendar, read).status, 'degraded');
+});
