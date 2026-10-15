@@ -7,7 +7,10 @@
  */
 import { createHash } from 'node:crypto';
 
-import { parseDailyOrientationPayload, selectLatestDailyOrientationSnapshot } from '@/lib/daily-planning/orientation-v2';
+import {
+  parseDailyOrientationPayload,
+  selectLatestDailyOrientationSnapshot,
+} from '@/lib/daily-planning/orientation-v2';
 import { reconcilePlanningV2Readback } from '@/lib/daily-planning/write-reconciliation-v2';
 import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
 
@@ -23,15 +26,15 @@ function sorted(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(sorted);
   if (value !== null && typeof value === 'object')
     return Object.fromEntries(
-      Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      Object.entries(value)
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
         .map(([key, part]) => [key, sorted(part)]),
     );
   return value;
 }
 
 export type MinimalOrientationCandidate =
-  | { ok: false; reason: 'invalid-candidate' }
-  | { ok: true; row: OrientationRow };
+  { ok: false; reason: 'invalid-candidate' } | { ok: true; row: OrientationRow };
 
 /**
  * The plan date is today (or the target day); review.date describes the
@@ -47,7 +50,8 @@ export function buildMinimalOrientationCandidate(input: {
     typeof input.generatedAt !== 'string' ||
     !STAMP.test(input.generatedAt) ||
     !Number.isFinite(Date.parse(input.generatedAt))
-  ) return { ok: false, reason: 'invalid-candidate' };
+  )
+    return { ok: false, reason: 'invalid-candidate' };
 
   const payload = parseDailyOrientationPayload(input.payload);
   if (!payload || payload.review.date > input.planDate) {
@@ -76,10 +80,7 @@ export function buildMinimalOrientationCandidate(input: {
 }
 
 export type MinimalOrientationReadbackStatus =
-  | 'confirmed-current'
-  | 'confirmed-not-current'
-  | 'absent-or-uncertain'
-  | 'blocked';
+  'confirmed-current' | 'confirmed-not-current' | 'absent-or-uncertain' | 'blocked';
 
 /**
  * Only meaningful when the caller supplies a COMPLETE, authorized DEV read.

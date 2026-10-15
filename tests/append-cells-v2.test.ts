@@ -235,15 +235,31 @@ test('a caller cannot append arbitrary cells without an ID from canonical Python
 
 // Independently derive a sorted-content fingerprint for date boundary cases.
 function orientationRowWithReviewDate(reviewDate: string): unknown[] {
-  const body = { ...orientationPayload, review: { ...orientationPayload.review, date: reviewDate } };
+  const body = {
+    ...orientationPayload,
+    review: { ...orientationPayload.review, date: reviewDate },
+  };
   const sorted = (v: unknown): unknown =>
     Array.isArray(v)
       ? v.map(sorted)
       : v && typeof v === 'object'
-        ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([k, x]) => [k, sorted(x)]))
+        ? Object.fromEntries(
+            Object.entries(v)
+              .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+              .map(([k, x]) => [k, sorted(x)]),
+          )
         : v;
-  const id = createHash('sha256').update(JSON.stringify(sorted(body)), 'utf8').digest('hex');
-  return [`vida2:tasks-daily-planning:v2:orientation:${DAY}:${id}`, DAY, AT, JSON.stringify(body), 'chatgpt_project', 'daily-orientation-v2'];
+  const id = createHash('sha256')
+    .update(JSON.stringify(sorted(body)), 'utf8')
+    .digest('hex');
+  return [
+    `vida2:tasks-daily-planning:v2:orientation:${DAY}:${id}`,
+    DAY,
+    AT,
+    JSON.stringify(body),
+    'chatgpt_project',
+    'daily-orientation-v2',
+  ];
 }
 
 test('minimal orientation writer accepts yesterday review for todays plan', () => {
@@ -264,7 +280,25 @@ test('minimal orientation writer rejects nested private fields a lax reader woul
     ...orientationPayload,
     review: { ...orientationPayload.review, rawJournal: 'private entry' },
   };
-  const id = createHash('sha256').update(JSON.stringify(body, (_key, value) => value && typeof value === 'object' && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) : value), 'utf8').digest('hex');
-  const candidate = [`vida2:tasks-daily-planning:v2:orientation:${DAY}:${id}`, DAY, AT, JSON.stringify(body), 'chatgpt_project', 'daily-orientation-v2'];
+  const id = createHash('sha256')
+    .update(
+      JSON.stringify(body, (_key, value) =>
+        value && typeof value === 'object' && !Array.isArray(value)
+          ? Object.fromEntries(
+              Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+            )
+          : value,
+      ),
+      'utf8',
+    )
+    .digest('hex');
+  const candidate = [
+    `vida2:tasks-daily-planning:v2:orientation:${DAY}:${id}`,
+    DAY,
+    AT,
+    JSON.stringify(body),
+    'chatgpt_project',
+    'daily-orientation-v2',
+  ];
   assert.equal(compile('orientation', candidate).ok, false);
 });

@@ -221,7 +221,10 @@ export function DailyUpcomingPanel({ orientation }: { orientation: DailyOrientat
       {orientation.upcoming.length === 0 ? (
         <div className={styles.empty}>
           <strong>Sin fechas confirmadas en el último análisis guardado.</strong>
-          <p>Esto no significa que tengas el calendario libre. Consultá las fuentes actuales en ChatGPT antes de decidir.</p>
+          <p>
+            Esto no significa que tengas el calendario libre. Consultá las fuentes actuales en
+            ChatGPT antes de decidir.
+          </p>
         </div>
       ) : (
         <ul className={styles.items}>
@@ -232,7 +235,9 @@ export function DailyUpcomingPanel({ orientation }: { orientation: DailyOrientat
                 <span>{shortDate(item.date)}</span>
               </div>
               <p>{item.reason}</p>
-              <small>{item.dateType === 'unknown' ? 'Tipo de fecha no confirmado' : item.dateType}</small>
+              <small>
+                {item.dateType === 'unknown' ? 'Tipo de fecha no confirmado' : item.dateType}
+              </small>
             </li>
           ))}
         </ul>

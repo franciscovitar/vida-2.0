@@ -376,19 +376,20 @@ test('F-ID3. Separate V2 snapshot IDs remain separate legitimate revisions', () 
   assert.equal(read.snapshot?.id, second[0]);
 });
 
-
 test('V2-MIN1: enabled minimal planning renders an empty honest state instead of silently falling back to V1', () => {
   const empty = { readStatus: 'empty' as const, generatedAt: null, review: null };
   assert.equal(shouldRenderStagedDailyOrientationV2(true, empty), true);
   assert.equal(shouldRenderStagedDailyOrientationV2(false, empty), false);
   assert.equal(shouldRenderStagedDailyOrientationV2(true, null), false);
-  assert.equal(shouldRenderStagedDailyOrientationV2(true, {
-    readStatus: 'unavailable' as const,
-    generatedAt: null,
-    review: null,
-  }), true);
+  assert.equal(
+    shouldRenderStagedDailyOrientationV2(true, {
+      readStatus: 'unavailable' as const,
+      generatedAt: null,
+      review: null,
+    }),
+    true,
+  );
 });
-
 
 test('V2-MIN2: snapshot commitments remain visible when Vida Calendar is intentionally not connected', () => {
   const baseline = context();
@@ -434,12 +435,21 @@ test('V2-MIN2: snapshot commitments remain visible when Vida Calendar is intenti
   assert.equal(buildDailyOrientationV2View(noCalendar, read).status, 'degraded');
 });
 
-
 test('V2-MIN3: reader rejects reviews dated after the target plan day', () => {
   const bad = JSON.parse(payload()) as Record<string, unknown>;
   bad.review = { ...(bad.review as Record<string, unknown>), date: '2026-10-08' };
   const read = selectLatestDailyOrientationSnapshot(
-    [HEADER, ['vida2:tasks-daily-planning:v2:orientation:2026-10-07:future', TODAY, '2026-10-07T08:00:00-03:00', JSON.stringify(bad), 'chatgpt_project', 'daily-orientation-v2']],
+    [
+      HEADER,
+      [
+        'vida2:tasks-daily-planning:v2:orientation:2026-10-07:future',
+        TODAY,
+        '2026-10-07T08:00:00-03:00',
+        JSON.stringify(bad),
+        'chatgpt_project',
+        'daily-orientation-v2',
+      ],
+    ],
     TODAY,
   );
   assert.notEqual(read.status, 'ready');

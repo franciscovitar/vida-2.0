@@ -364,9 +364,7 @@ function parseRow(row: readonly unknown[], targetDate: string): DailyOrientation
 
   const payload = parseDailyOrientationPayload(decoded);
   // A plan cannot cite a review that happens after its own planning date.
-  return payload && payload.review.date <= planDate
-    ? { id, planDate, generatedAt, payload }
-    : null;
+  return payload && payload.review.date <= planDate ? { id, planDate, generatedAt, payload } : null;
 }
 
 export function selectLatestDailyOrientationSnapshot(

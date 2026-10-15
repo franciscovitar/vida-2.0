@@ -60,14 +60,10 @@ function WarningCard({ data }: { data: GymDashboardData }) {
       source.kind === 'sessions' &&
       (source.state === 'unavailable' || source.state === 'error' || source.state === 'disabled'),
   );
-  const needsAttention = [
-    'error',
-    'partial',
-    'ambiguous',
-    'empty',
-    'forbidden',
-    'not-configured',
-  ].includes(data.moduleStatus) || sessionsNotVerified;
+  const needsAttention =
+    ['error', 'partial', 'ambiguous', 'empty', 'forbidden', 'not-configured'].includes(
+      data.moduleStatus,
+    ) || sessionsNotVerified;
 
   if (data.warnings.length === 0 && !needsAttention) return null;
 

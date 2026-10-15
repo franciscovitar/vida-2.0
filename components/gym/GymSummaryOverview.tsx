@@ -93,8 +93,8 @@ export function GymSummaryOverview({
                 {!sessionsVerified
                   ? 'La fuente de sesiones no se pudo verificar'
                   : analytics.adherencePercent === null
-                  ? 'sesiones registradas'
-                  : `${analytics.adherencePercent}% de la frecuencia objetivo`}
+                    ? 'sesiones registradas'
+                    : `${analytics.adherencePercent}% de la frecuencia objetivo`}
               </small>
             </div>
           </article>
@@ -104,7 +104,9 @@ export function GymSummaryOverview({
             <div>
               <span>Última sesión</span>
               <strong>
-                {sessionsVerified ? (analytics.latestSessionLabel ?? 'Sin sesión registrada') : 'Sin verificar'}
+                {sessionsVerified
+                  ? (analytics.latestSessionLabel ?? 'Sin sesión registrada')
+                  : 'Sin verificar'}
               </strong>
               <small>{sessionsVerified ? shortDate(analytics.latestSessionDate) : '—'}</small>
             </div>
@@ -114,7 +116,9 @@ export function GymSummaryOverview({
             <LineChart size={17} aria-hidden="true" />
             <div>
               <span>Comparaciones útiles</span>
-              <strong className="tabular">{sessionsVerified ? analytics.comparableExercises : 'Sin datos'}</strong>
+              <strong className="tabular">
+                {sessionsVerified ? analytics.comparableExercises : 'Sin datos'}
+              </strong>
               <small>ejercicios con al menos dos registros comparables</small>
             </div>
           </article>

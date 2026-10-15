@@ -415,11 +415,13 @@ export function PlanningWorkspaceV2({
 
       {orientation.generatedAt ? (
         <p className={styles['week-source-note']} role="status">
-          Análisis guardado: {orientation.generatedAt.slice(0, 16).replace('T', ' ')} · Las fechas y prioridades reflejan lo conocido al generarlo, no consultas en vivo.
+          Análisis guardado: {orientation.generatedAt.slice(0, 16).replace('T', ' ')} · Las fechas y
+          prioridades reflejan lo conocido al generarlo, no consultas en vivo.
         </p>
       ) : (
         <p className={styles['week-source-note']} role="status">
-          Aún no hay un análisis V2 guardado. Podés hacerlo en el proyecto ChatGPT de Planificación; la web no calcula ni guarda decisiones por su cuenta.
+          Aún no hay un análisis V2 guardado. Podés hacerlo en el proyecto ChatGPT de Planificación;
+          la web no calcula ni guarda decisiones por su cuenta.
         </p>
       )}
       {view === 'revision' ? (
