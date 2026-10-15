@@ -32,7 +32,13 @@ function readinessLabel(value: string | null): string {
 
 function assessmentLabel(subject: StudySubjectWithProgress): string {
   const assessment = subject.assessment;
-  if (!assessment) return 'Sin evaluación activa resuelta';
+  if (!assessment) {
+    return subject.id === 'green'
+      ? 'Sin próxima evaluación verificada'
+      : 'Sin evaluación siguiente verificada';
+  }
+  if (assessment.label) return assessment.label;
+  if (!assessment.id) return 'Instancia reportada';
 
   const id = assessment.id.toLowerCase();
   const parcial = /-p(\d+)$/.exec(id);
@@ -142,6 +148,17 @@ export function LearningHubV2({
 
                   <div className={styles.meta}>
                     <span>{subject.assessment?.date ?? 'Fecha sin confirmar'}</span>
+                    {subject.assessment?.dateEvidence ? (
+                      <span>{subject.assessment.dateEvidence}</span>
+                    ) : null}
+                    {subject.assessment?.deliveryDate ? (
+                      <span>
+                        Entrega TP: {subject.assessment.deliveryDate}
+                        {subject.assessment.deliveryEvidence
+                          ? ` · ${subject.assessment.deliveryEvidence}`
+                          : ''}
+                      </span>
+                    ) : null}
                     <span>
                       {progressPercent === null
                         ? 'Preparación sin medir'
@@ -231,14 +248,13 @@ export function LearningHubV2({
           />
           <div className={styles.feature}>
             <p>
-              La biblioteca generalista está capturada en el PAS, pero permanece en pausa mientras
-              Universidad sea la prioridad. No hay porcentaje por completar ni deuda por lo que no
-              aprendas ahora.
+              Explorá capacidades de siete áreas. Las fichas completas están identificadas y las
+              demás muestran solo la información disponible en la fuente.
             </p>
-            <div className={styles.dormant}>
-              <span>Estado</span>
-              <strong>En pausa · disponible cuando decidas activarla</strong>
-            </div>
+            <Link href="/aprendizaje/capacidades" className={styles.featureLink}>
+              Abrir biblioteca de capacidades
+              <ArrowRight size={13} aria-hidden="true" />
+            </Link>
           </div>
         </Card>
       </div>

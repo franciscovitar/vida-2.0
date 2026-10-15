@@ -8,8 +8,13 @@ import type { StudyCatalogRead, StudyCatalogSubject } from '@/types/study-catalo
 import styles from './StudyCatalog.module.scss';
 
 function assessmentLabel(subject: StudyCatalogSubject): string {
+  if (subject.assessment?.label) return subject.assessment.label;
   const id = subject.assessment?.id;
-  if (!id) return 'Sin evaluación activa resuelta';
+  if (!id) {
+    return subject.id === 'green'
+      ? 'Sin próxima evaluación verificada'
+      : 'Sin evaluación siguiente verificada';
+  }
 
   const normalized = id.toLowerCase();
   const p = /-p(\d+)$/.exec(normalized);

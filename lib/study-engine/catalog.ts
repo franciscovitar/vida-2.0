@@ -115,25 +115,76 @@ function scopeIsComplete(status: string | null): boolean {
 }
 
 function assessmentFrom(
+  subjectId: string,
   blueprintValue: unknown,
   currentValue: unknown,
   sourceScopeStatus: string | null,
 ): StudyCatalogAssessment | null {
   const blueprint = record(blueprintValue);
   const current = record(currentValue);
-  const id =
-    stringValue(blueprint.assessment_id) ??
+  const assignment = record(current.active_assignment);
+  const currentId =
     stringValue(current.next_assessment) ??
+    stringValue(assignment.study && record(assignment.study).assessment_id) ??
+    stringValue(assignment.id) ??
     stringValue(current.active_assignment);
+  const reportedInstance = record(current.reported_upcoming_instance);
+  const reportedDate = record(current.reported_next_assessment_date);
+  const id = currentId;
+  if (!id && !stringValue(reportedInstance.local_date)) return null;
 
-  if (!id) return null;
+  const validBlueprint = stringValue(blueprint.assessment_id) === id ? blueprint : {};
+  const reportDate = stringValue(reportedInstance.local_date);
+  const currentReportedDate = stringValue(reportedDate.local_date);
+  const blueprintDate = stringValue(validBlueprint.date);
+  let date: string | null = blueprintDate;
+  let dateEvidence: string | null = blueprintDate ? 'PAS' : null;
+  let label: string | null = id ? null : 'Parcial informado';
+
+  if (subjectId === 'redes' && currentReportedDate) {
+    date = currentReportedDate;
+    dateEvidence = 'Fecha tentativa informada por el usuario';
+  } else if (subjectId === 'tpa' && reportDate && !id) {
+    date = reportDate;
+    dateEvidence =
+      reportedInstance.calendar_event_status === 'confirmed'
+        ? 'Informada por el usuario; evento de Calendar confirmado'
+        : 'Informada por el usuario; Calendar sin confirmar';
+    label = 'Parcial informado';
+  } else if (subjectId === 'cdd' && blueprintDate) {
+    dateEvidence = 'Cronograma de cursada; también figura en Calendar';
+  } else if (subjectId === 'iop' && blueprintDate) {
+    dateEvidence = 'Fecha de Calendar registrada en PAS';
+  } else if (subjectId === 'dsi' && blueprintDate) {
+    dateEvidence = 'Fecha registrada en PAS y material de evaluación';
+  } else if (subjectId === 'dao' && assignment.delivery_separate_from_defense === true) {
+    date = blueprintDate;
+    dateEvidence = date ? 'Registro de defensa en PAS' : null;
+    label = 'Defensa del TP Integrador';
+  }
+
+  if (id && subjectId === 'tpa') label = 'Parcial informado';
+  if (id && subjectId === 'cdd') label = 'Entrega 3';
+  if (id && subjectId === 'dsi') label = 'Parcial 3';
+  if (id && subjectId === 'iop') label = 'Parcial 2';
+  if (id && subjectId === 'redes') label = 'Parcial 3';
 
   return {
     id,
-    status: stringValue(blueprint.status),
-    date: stringValue(blueprint.date),
-    format: stringValue(blueprint.format),
+    label,
+    status: stringValue(validBlueprint.status),
+    date,
+    dateEvidence,
+    format: stringValue(validBlueprint.format),
     scopeComplete: scopeIsComplete(sourceScopeStatus),
+    deliveryDate:
+      subjectId === 'dao' && assignment.delivery_separate_from_defense === true
+        ? stringValue(assignment.delivery_date)
+        : null,
+    deliveryEvidence:
+      subjectId === 'dao' && assignment.delivery_separate_from_defense === true
+        ? 'Entrega reportada por el usuario y confirmada en Calendar'
+        : null,
   };
 }
 
@@ -241,7 +292,12 @@ export function buildStudyCatalogSubject(input: StudyCatalogSubjectInput): Study
   const readiness = record(input.readiness);
 
   const sourceScopeStatus = stringValue(inventory.source_scope_status);
-  const assessment = assessmentFrom(input.blueprint, input.current, sourceScopeStatus);
+  const assessment = assessmentFrom(
+    input.subjectId,
+    input.blueprint,
+    input.current,
+    sourceScopeStatus,
+  );
   const studySets = deriveStudySets(input.learningFiles);
   const topics = deriveTopics(
     input.subjectId,
@@ -301,7 +357,7 @@ export function matchSubjectProgress(
   snapshots: readonly AssessmentProgressSnapshot[],
 ): StudySubjectWithProgress {
   const assessment = subject.assessment;
-  const snapshot = assessment
+  const snapshot = assessment?.id
     ? (snapshots.find(
         (item) => item.subjectId === subject.id && item.assessmentId === assessment.id,
       ) ?? null)

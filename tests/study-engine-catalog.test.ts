@@ -112,8 +112,8 @@ test('assessment progress only attaches to the exact subject + assessment pair',
   const subject = buildStudyCatalogSubject({
     subjectId: 'redes',
     subject: { name: 'Redes', status: 'active' },
-    current: {},
-    blueprint: { assessment_id: 'redes-2026-p3' },
+    current: { next_assessment: 'redes-synthetic-p3' },
+    blueprint: { assessment_id: 'redes-synthetic-p3' },
     conceptInventory: { source_scope_status: 'resolved', concepts: [] },
     readiness: {},
     learningFiles: [],
@@ -121,7 +121,7 @@ test('assessment progress only attaches to the exact subject + assessment pair',
 
   const snapshot: AssessmentProgressSnapshot = {
     snapshotId: 'snap-1',
-    assessmentId: 'redes-2026-p3',
+    assessmentId: 'redes-synthetic-p3',
     subjectId: 'redes',
     assessmentDate: null,
     generatedAt: '2026-09-27T20:00:00Z',
@@ -144,7 +144,7 @@ test('assessment progress only attaches to the exact subject + assessment pair',
 
   assert.equal(matchSubjectProgress(subject, [snapshot]).progress?.snapshotId, 'snap-1');
   assert.equal(
-    matchSubjectProgress(subject, [{ ...snapshot, assessmentId: 'redes-2026-p2' }]).progress,
+    matchSubjectProgress(subject, [{ ...snapshot, assessmentId: 'redes-synthetic-p2' }]).progress,
     null,
   );
 });
@@ -162,3 +162,131 @@ test('canonical runtime file marks a subject as Study Engine ready', () => {
 
   assert.equal(subject.studyRuntimeAvailable, true);
 });
+
+test('academic current state wins over obsolete blueprints and keeps unmeasured state', () => {
+  const dao = buildStudyCatalogSubject({
+    subjectId: 'dao',
+    subject: { name: 'DAO', status: 'active' },
+    current: {
+      next_assessment: 'dao-synthetic-defense',
+      active_assignment: {
+        study: { assessment_id: 'dao-synthetic-defense' },
+        delivery_date: '2030-03-05',
+        delivery_separate_from_defense: true,
+        delivery_source: 'DIRECT_USER_REPORT_CONFIRMED_AS_CALENDAR_EVENT',
+      },
+    },
+    blueprint: {
+      assessment_id: 'dao-synthetic-old-assessment',
+      date: '2030-02-01',
+      status: 'draft',
+    },
+    conceptInventory: { source_scope_status: 'incomplete' },
+    readiness: { band: 'not-ready' },
+    learningFiles: [],
+  });
+  assert.equal(dao.assessment?.id, 'dao-synthetic-defense');
+  assert.equal(dao.assessment?.label, 'Defensa del TP Integrador');
+  assert.equal(dao.assessment?.date, null);
+  assert.equal(dao.assessment?.deliveryDate, '2030-03-05');
+
+  const green = buildStudyCatalogSubject({
+    subjectId: 'green',
+    subject: { name: 'Green Software', status: 'active' },
+    current: { next_assessment: null, active_assignment: null },
+    blueprint: { assessment_id: 'green-synthetic-old-assessment', date: '2030-02-02' },
+    conceptInventory: { source_scope_status: 'complete_for_tp2_oral' },
+    readiness: { band: 'not-ready' },
+    learningFiles: [],
+  });
+  assert.equal(green.assessment, null);
+  assert.equal(effectiveReadinessForTest(green), 'unknown');
+});
+
+test('TPA reported instance has no invented ID and Redes date stays provisional', () => {
+  const tpa = buildStudyCatalogSubject({
+    subjectId: 'tpa',
+    subject: { name: 'TPA', status: 'active' },
+    current: {
+      reported_upcoming_instance: {
+        local_date: '2030-04-01',
+        assessment_id: null,
+        calendar_event_status: 'confirmed',
+      },
+    },
+    blueprint: { assessment_id: '', date: null },
+    conceptInventory: { source_scope_status: 'incomplete' },
+    readiness: {},
+    learningFiles: [],
+  });
+  assert.equal(tpa.assessment?.id, null);
+  assert.equal(tpa.assessment?.date, '2030-04-01');
+  assert.match(tpa.assessment?.dateEvidence ?? '', /Calendar confirmado/);
+
+  const redes = buildStudyCatalogSubject({
+    subjectId: 'redes',
+    subject: { name: 'Redes', status: 'active' },
+    current: {
+      next_assessment: 'redes-synthetic-p3',
+      reported_next_assessment_date: { local_date: '2030-04-15' },
+    },
+    blueprint: { assessment_id: 'redes-synthetic-p3', date: null },
+    conceptInventory: { source_scope_status: 'resolved' },
+    readiness: {},
+    learningFiles: [],
+  });
+  assert.equal(redes.assessment?.id, 'redes-synthetic-p3');
+  assert.equal(redes.assessment?.date, '2030-04-15');
+  assert.match(redes.assessment?.dateEvidence ?? '', /tentativa/);
+});
+
+test('CDD, DSI, and IOP preserve their current named assessments and date evidence', () => {
+  const cases = [
+    {
+      subjectId: 'cdd',
+      current: { next_assessment: 'cdd-synthetic-entrega3' },
+      blueprint: {
+        assessment_id: 'cdd-synthetic-entrega3',
+        status: 'provisional-date-only',
+        date: '2030-05-01',
+      },
+      id: 'cdd-synthetic-entrega3',
+      label: 'Entrega 3',
+      evidence: /cronograma de cursada/i,
+    },
+    {
+      subjectId: 'dsi',
+      current: { next_assessment: 'dsi-synthetic-p3' },
+      blueprint: { assessment_id: 'dsi-synthetic-p3', date: '2030-05-02' },
+      id: 'dsi-synthetic-p3',
+      label: 'Parcial 3',
+      evidence: /material de evaluación/i,
+    },
+    {
+      subjectId: 'iop',
+      current: { next_assessment: 'iop-synthetic-p2' },
+      blueprint: { assessment_id: 'iop-synthetic-p2', date: '2030-05-03' },
+      id: 'iop-synthetic-p2',
+      label: 'Parcial 2',
+      evidence: /Calendar/i,
+    },
+  ];
+  for (const fixture of cases) {
+    const subject = buildStudyCatalogSubject({
+      subjectId: fixture.subjectId,
+      subject: { name: fixture.subjectId.toUpperCase(), status: 'active' },
+      current: fixture.current,
+      blueprint: fixture.blueprint,
+      conceptInventory: { source_scope_status: 'incomplete' },
+      readiness: {},
+      learningFiles: [],
+    });
+    assert.equal(subject.assessment?.id, fixture.id);
+    assert.equal(subject.assessment?.label, fixture.label);
+    assert.match(subject.assessment?.dateEvidence ?? '', fixture.evidence);
+  }
+});
+
+function effectiveReadinessForTest(subject: ReturnType<typeof buildStudyCatalogSubject>) {
+  return matchSubjectProgress(subject, []).progress?.payload.readinessBand ?? 'unknown';
+}
