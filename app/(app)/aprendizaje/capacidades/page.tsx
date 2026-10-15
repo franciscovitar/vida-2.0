@@ -5,7 +5,7 @@ import { CapabilitiesLibrary } from '@/components/learning/CapabilitiesLibrary';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { getCapabilityLibrary } from '@/lib/learning/capabilities-source';
-import pageStyles from '../page.module.scss';
+import pageStyles from '../../page.module.scss';
 
 export const metadata: Metadata = { title: 'Explorar capacidades' };
 export const dynamic = 'force-dynamic';
