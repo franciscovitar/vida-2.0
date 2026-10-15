@@ -57,11 +57,11 @@ test('F-ROLL4. Flag on and persisted daily review can switch the view to V2', ()
 
 test('F-ROLL5. Hoy keeps staged selection; Planificacion chooses a minimal V2 route', () => {
   const hoy = readFileSync('app/(app)/page.tsx', 'utf8');
-  assert.match(hoy, /shouldRenderStagedDailyOrientationV2\\(v2Enabled, orientation\\)/);
+  assert.ok(hoy.includes('shouldRenderStagedDailyOrientationV2(v2Enabled, orientation)'));
   const planning = readFileSync('app/(app)/planificacion/page.tsx', 'utf8');
-  assert.match(planning, /if \\(isDailyPlanningV2UiEnabled\\(\\)\\)/);
-  assert.match(planning, /<MinimalPlanningOverview orientation=\\{orientation\\}/);
-  assert.match(planning, /<PlanningWorkspace/);
+  assert.ok(planning.includes('if (isDailyPlanningV2UiEnabled())'));
+  assert.ok(planning.includes('<MinimalPlanningOverview orientation={orientation} />'));
+  assert.ok(planning.includes('<PlanningWorkspace'));
   assert.doesNotMatch(planning, /shouldRenderStagedDailyOrientationV2/);
 });
 
