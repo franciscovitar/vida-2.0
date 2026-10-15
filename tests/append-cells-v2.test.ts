@@ -240,7 +240,7 @@ function orientationRowWithReviewDate(reviewDate: string): unknown[] {
     Array.isArray(v)
       ? v.map(sorted)
       : v && typeof v === 'object'
-        ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, sorted(x)]))
+        ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([k, x]) => [k, sorted(x)]))
         : v;
   const id = createHash('sha256').update(JSON.stringify(sorted(body)), 'utf8').digest('hex');
   return [`vida2:tasks-daily-planning:v2:orientation:${DAY}:${id}`, DAY, AT, JSON.stringify(body), 'chatgpt_project', 'daily-orientation-v2'];
