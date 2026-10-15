@@ -10,6 +10,8 @@
  * is not proof that a claimed observation occurred.
  */
 import { createHash } from 'node:crypto';
+import { parseDailyOrientationPayload } from '@/lib/daily-planning/orientation-v2';
+import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
 
 export type PlanningV2AppendKind = 'execution' | 'orientation' | 'assessment';
 export type PlanningV2AppendResult =
@@ -205,14 +207,12 @@ function orientation(row: readonly unknown[]): boolean {
     )
   )
     return false;
-  if (
-    !p.review ||
-    typeof p.review !== 'object' ||
-    Array.isArray(p.review) ||
-    (p.review as Record<string, unknown>).date !== row[1] ||
-    !['attention', 'upcoming', 'lifeSignals', 'minimum', 'notNow'].every((k) => Array.isArray(p[k]))
-  )
-    return false;
+  // The plan is for today, while review.date normally refers to yesterday.
+  // Use the exact strict reader schema: no unknown/private nested fields,
+  // impossible dates, future reviews or snapshots the website would reject.
+  const parsed = parseDailyOrientationPayload(p);
+  if (!parsed || parsed.review.date > (row[1] as string)) return false;
+  if (parsePlanningCivilDay(row[1] as string) === null) return false;
   return row[0] === PREFIX + 'orientation:' + row[1] + ':' + hash(JSON.stringify(sortDeep(p)));
 }
 function assessment(row: readonly unknown[]): boolean {

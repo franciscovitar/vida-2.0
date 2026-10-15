@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 
 import { compilePlanningV2AppendCells } from '@/lib/daily-planning/append-cells-v2';
@@ -230,4 +231,40 @@ test('a caller cannot append arbitrary cells without an ID from canonical Python
   const bad = [...execution];
   bad[0] = 'vida2:tasks-daily-planning:v2:execution:' + 'f'.repeat(64);
   assert.equal(compile('execution', bad).ok, false);
+});
+
+// Independently derive a sorted-content fingerprint for date boundary cases.
+function orientationRowWithReviewDate(reviewDate: string): unknown[] {
+  const body = { ...orientationPayload, review: { ...orientationPayload.review, date: reviewDate } };
+  const sorted = (v: unknown): unknown =>
+    Array.isArray(v)
+      ? v.map(sorted)
+      : v && typeof v === 'object'
+        ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, sorted(x)]))
+        : v;
+  const id = createHash('sha256').update(JSON.stringify(sorted(body)), 'utf8').digest('hex');
+  return [`vida2:tasks-daily-planning:v2:orientation:${DAY}:${id}`, DAY, AT, JSON.stringify(body), 'chatgpt_project', 'daily-orientation-v2'];
+}
+
+test('minimal orientation writer accepts yesterday review for todays plan', () => {
+  const candidate = orientationRowWithReviewDate('2026-10-10');
+  const result = compile('orientation', candidate);
+  assert.equal(result.ok, true);
+  if (result.ok) assert.equal(result.request.requests[0].appendCells.rows[0].values.length, 6);
+});
+
+test('minimal orientation writer blocks future and invalid review dates even with valid identity hash', () => {
+  for (const day of ['2026-10-12', '2026-02-30']) {
+    assert.equal(compile('orientation', orientationRowWithReviewDate(day)).ok, false);
+  }
+});
+
+test('minimal orientation writer rejects nested private fields a lax reader would discard', () => {
+  const body = {
+    ...orientationPayload,
+    review: { ...orientationPayload.review, rawJournal: 'private entry' },
+  };
+  const id = createHash('sha256').update('different', 'utf8').digest('hex');
+  const candidate = [`vida2:tasks-daily-planning:v2:orientation:${DAY}:${id}`, DAY, AT, JSON.stringify(body), 'chatgpt_project', 'daily-orientation-v2'];
+  assert.equal(compile('orientation', candidate).ok, false);
 });

@@ -433,3 +433,15 @@ test('V2-MIN2: snapshot commitments remain visible when Vida Calendar is intenti
   assert.equal(independent.upcoming[0]?.date, '2026-10-08');
   assert.equal(buildDailyOrientationV2View(noCalendar, read).status, 'degraded');
 });
+
+
+test('V2-MIN3: reader rejects reviews dated after the target plan day', () => {
+  const bad = JSON.parse(payload()) as Record<string, unknown>;
+  bad.review = { ...(bad.review as Record<string, unknown>), date: '2026-10-08' };
+  const read = selectLatestDailyOrientationSnapshot(
+    [HEADER, ['vida2:tasks-daily-planning:v2:orientation:2026-10-07:future', TODAY, '2026-10-07T08:00:00-03:00', JSON.stringify(bad), 'chatgpt_project', 'daily-orientation-v2']],
+    TODAY,
+  );
+  assert.notEqual(read.status, 'ready');
+  assert.equal(read.snapshot, null);
+});
