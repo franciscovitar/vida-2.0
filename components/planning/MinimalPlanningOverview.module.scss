@@ -1,0 +1,32 @@
+.overview,
+.panels {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.freshness {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.freshness strong {
+  color: var(--text);
+  font-size: 0.96rem;
+}
+
+.freshness time {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}

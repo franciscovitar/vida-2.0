@@ -8,11 +8,24 @@ import {
 } from '@/lib/daily-planning/orientation-rollout';
 import type { DailyOrientationView } from '@/types/daily-orientation-v2';
 
+import {
+  dateTypeLabel,
+  evidenceStateLabel,
+  lifeSignalLevelLabel,
+  progressEffectLabel,
+} from './daily-orientation-labels';
+
 import styles from './DailyOrientationPanels.module.scss';
 
-function shortDate(value: string): string {
+function dateLabel(value: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  return match ? `${match[3]}/${match[2]}` : value;
+  if (!match) return value;
+  return new Intl.DateTimeFormat('es-AR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${value}T12:00:00Z`));
 }
 
 export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOrientationView }) {
@@ -23,8 +36,8 @@ export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOri
   return (
     <Card>
       <SectionHeader
-        title="Revisión"
-        description="Qué pasó realmente ayer, qué cambió y qué sigue incierto."
+        title="Balance de ayer"
+        description="Lo que pasó ayer, el avance observado y lo que aún no se sabe."
         icon={History}
         domain="productivity"
       />
@@ -39,19 +52,19 @@ export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOri
         <div className={styles.empty}>
           <strong>
             {readFailed
-              ? 'No se pudo verificar la revisión V2.'
-              : 'Todavía no hay una revisión V2 persistida.'}
+              ? 'No se pudo verificar la revisión.'
+              : 'Todavía no hay una revisión guardada.'}
           </strong>
           <p>
             {readFailed
-              ? 'Podés continuar la revisión en el chat. Esta vista no reconstruye lo ocurrido desde suposiciones.'
-              : 'El análisis se hace en tu proyecto ChatGPT de Planificación. Todavía no hay un resultado guardado para mostrar acá; no se inventa un resumen de ayer.'}
+              ? 'Podés continuarla en el chat. Esta vista no completa lo ocurrido con suposiciones.'
+              : 'Hacé la revisión en tu proyecto ChatGPT de Planificación. Vida muestra el resumen cuando queda guardado; no inventa qué pasó ayer.'}
           </p>
         </div>
       ) : (
         <div className={styles.stack}>
           <div className={styles.headline}>
-            <span>{shortDate(review.date)}</span>
+            <time dateTime={review.date}>{dateLabel(review.date)}</time>
             <strong>{review.headline}</strong>
           </div>
 
@@ -61,16 +74,12 @@ export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOri
                 <li key={`${item.domain}-${item.activity}-${index}`}>
                   <div className={styles['item-top']}>
                     <strong>{item.activity}</strong>
-                    <span>{item.evidenceState}</span>
+                    <span className={styles.badge}>{evidenceStateLabel(item.evidenceState)}</span>
                   </div>
                   <p>{item.summary}</p>
-                  <small>
-                    {item.progressEffect === 'verified'
-                      ? 'Avance verificado'
-                      : item.progressEffect === 'none'
-                        ? 'Actividad sin avance objetivo atribuido'
-                        : `Efecto en progreso: ${item.progressEffect}`}
-                  </small>
+                  <span className={styles['progress-label']}>
+                    {progressEffectLabel(item.progressEffect)}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -80,15 +89,16 @@ export function DailyRealityReviewPanel({ orientation }: { orientation: DailyOri
 
           {orientation.lifeSignals.length > 0 ? (
             <section>
-              <p className={styles.label}>Vida / recuperación</p>
+              <p className={styles.label}>Bienestar y recuperación</p>
               <ul className={styles.signals}>
                 {orientation.lifeSignals.map((signal, index) => (
                   <li key={`${signal.kind}-${index}`}>
-                    <HeartPulse size={14} aria-hidden="true" />
-                    <span>
+                    <HeartPulse size={18} aria-hidden="true" />
+                    <span className={styles['signal-copy']}>
                       <strong>{signal.summary}</strong>
                       <small>
-                        {signal.level} · confianza {signal.confidence}
+                        {lifeSignalLevelLabel(signal.level)} · confianza{' '}
+                        {signal.confidence.toLowerCase()}
                       </small>
                     </span>
                   </li>
@@ -121,8 +131,8 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
     <div className={styles.stack}>
       <Card>
         <SectionHeader
-          title="Atención"
-          description="Pocas señales explicables; no un ranking opaco ni una agenda completa."
+          title="Prioridades de hoy"
+          description="Hasta tres prioridades, cada una con su motivo y próximo paso."
           icon={Compass}
           domain="productivity"
         />
@@ -137,14 +147,14 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
           <div className={styles.empty}>
             <strong>
               {readFailed
-                ? 'No se pudo verificar la atención V2.'
+                ? 'No se pudo verificar la atención.'
                 : filtered
                   ? 'No hay prioridades verificables con las fuentes actuales.'
                   : orientation.review
-                    ? 'No hay un ajuste importante persistido para hoy.'
+                    ? 'No hay un ajuste importante para hoy.'
                     : 'Todavía no hay prioridades guardadas desde ChatGPT.'}
             </strong>
-            <p>No se fabrica una prioridad sólo para llenar la pantalla.</p>
+            <p>No agregamos prioridades solo para completar la lista.</p>
           </div>
         ) : (
           <ol className={styles.attention}>
@@ -154,11 +164,16 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
                 <div>
                   <div className={styles['item-top']}>
                     <strong>{item.title}</strong>
-                    <span>{item.confidence}</span>
+                    <span className={styles.badge}>Confianza {item.confidence.toLowerCase()}</span>
                   </div>
                   <p>{item.recommendation}</p>
-                  <small>{item.why}</small>
-                  {item.nextAction ? <b>Próximo: {item.nextAction}</b> : null}
+                  <p className={styles.why}>{item.why}</p>
+                  {item.nextAction ? (
+                    <div className={styles.next}>
+                      <span>Próximo paso</span>
+                      <strong>{item.nextAction}</strong>
+                    </div>
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -170,8 +185,8 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
         <div className={styles.grid}>
           <Card>
             <SectionHeader
-              title="Versión mínima"
-              description="Qué preservar si baja la capacidad."
+              title="Mínimo viable"
+              description="Lo esencial si hoy tenés menos tiempo o energía."
               icon={CircleDot}
               domain="productivity"
             />
@@ -187,7 +202,7 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
           <Card>
             <SectionHeader
               title="No movería hoy"
-              description="Trabajo que puede esperar para proteger foco o recuperación."
+              description="Lo que puede esperar para cuidar tu foco o descanso."
               icon={CircleDot}
               domain="neutral"
             />
@@ -214,30 +229,28 @@ export function DailyUpcomingPanel({ orientation }: { orientation: DailyOrientat
     <Card>
       <SectionHeader
         title="Próximas fechas"
-        description="Compromisos seleccionados cuando ChatGPT generó el análisis, no un calendario en vivo."
+        description="Fechas incluidas en el último análisis; no se actualizan en vivo."
         icon={CalendarDays}
         domain="productivity"
       />
       {orientation.upcoming.length === 0 ? (
         <div className={styles.empty}>
-          <strong>Sin fechas confirmadas en el último análisis guardado.</strong>
+          <strong>No hay próximas fechas confirmadas en este análisis.</strong>
           <p>
-            Esto no significa que tengas el calendario libre. Consultá las fuentes actuales en
-            ChatGPT antes de decidir.
+            Esto no confirma que estés libre. Revisá tus fuentes actuales en ChatGPT antes de
+            decidir.
           </p>
         </div>
       ) : (
-        <ul className={styles.items}>
+        <ul className={styles.upcoming}>
           {orientation.upcoming.slice(0, 5).map((item, index) => (
             <li key={`${item.kind}-${item.title}-${index}`}>
-              <div className={styles['item-top']}>
+              <div className={styles['upcoming-main']}>
                 <strong>{item.title}</strong>
-                <span>{shortDate(item.date)}</span>
+                <time dateTime={item.date}>{dateLabel(item.date)}</time>
               </div>
               <p>{item.reason}</p>
-              <small>
-                {item.dateType === 'unknown' ? 'Tipo de fecha no confirmado' : item.dateType}
-              </small>
+              <span className={styles['date-type']}>{dateTypeLabel(item.dateType)}</span>
             </li>
           ))}
         </ul>
