@@ -24,6 +24,7 @@ export function SparkBars({
           key={index}
           className={styles.bar}
           data-empty={value === null || undefined}
+          data-negative={values[index] === false || undefined}
           style={
             value === null
               ? undefined

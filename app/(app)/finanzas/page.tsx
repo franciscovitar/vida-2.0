@@ -47,6 +47,9 @@ export default async function FinanzasPage() {
         <Card>
           <h2>Tu resumen no está disponible ahora</h2>
           <p>
+            {store.status === 'connected'
+              ? 'La fuente está conectada, pero no se pudo construir un resumen verificable.'
+              : `Estado de la fuente: ${store.label}.`}{' '}
             No mostramos números parciales ni simulados cuando la fuente financiera no puede leerse.
             Podés revisar el estado de los datos desde “Datos y fuentes”.
           </p>

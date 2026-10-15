@@ -4,7 +4,7 @@ import { Activity, Bike, CalendarDays, Dumbbell, LineChart, Sparkles, Target } f
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { computeGymV2Analytics } from '@/lib/gym/v2-analytics';
-import type { GymRoutine, GymSession, GymSessionSummary } from '@/types/gym';
+import type { GymDataSourceState, GymRoutine, GymSession, GymSessionSummary } from '@/types/gym';
 
 import styles from './GymSummaryOverview.module.scss';
 
@@ -20,12 +20,14 @@ export function GymSummaryOverview({
   weeklyTarget,
   today,
   routine,
+  sessionsState,
 }: {
   sessions: readonly GymSession[];
   summaries: readonly GymSessionSummary[];
   weeklyTarget: number | null;
   today: string;
   routine: GymRoutine | null;
+  sessionsState: GymDataSourceState;
 }) {
   const exerciseScopeNames =
     routine?.presentation === 'structured'
@@ -41,10 +43,19 @@ export function GymSummaryOverview({
   const meaningfulInsights = analytics.insights
     .filter((insight) => insight.id !== 'weekly-frequency')
     .slice(0, 2);
+  const sessionsVerified = sessionsState === 'ready' || sessionsState === 'empty';
+  const statusLabel = !sessionsVerified
+    ? 'Historial sin verificar'
+    : sessionsState === 'empty'
+      ? 'Sin sesiones registradas'
+      : analytics.statusLabel;
+  const statusDetail = !sessionsVerified
+    ? 'La fuente de sesiones no está disponible; cero no significa que no entrenaste.'
+    : analytics.statusDetail;
   const statusTone =
-    analytics.statusLabel === 'Progresando'
+    sessionsVerified && analytics.statusLabel === 'Progresando'
       ? 'positive'
-      : analytics.statusLabel === 'Tendencia mixta'
+      : sessionsVerified && analytics.statusLabel === 'Tendencia mixta'
         ? 'watch'
         : 'neutral';
 
@@ -64,8 +75,8 @@ export function GymSummaryOverview({
           <Activity size={19} aria-hidden="true" />
           <span>
             <small>Estado reciente</small>
-            <strong>{analytics.statusLabel}</strong>
-            <span>{analytics.statusDetail}</span>
+            <strong>{statusLabel}</strong>
+            <span>{statusDetail}</span>
           </span>
         </div>
 
@@ -75,11 +86,13 @@ export function GymSummaryOverview({
             <div>
               <span>Esta semana</span>
               <strong className="tabular">
-                {analytics.currentWeekSessions}
+                {sessionsVerified ? analytics.currentWeekSessions : 'Sin datos'}
                 {analytics.weeklyTarget ? `/${analytics.weeklyTarget}` : ''}
               </strong>
               <small>
-                {analytics.adherencePercent === null
+                {!sessionsVerified
+                  ? 'La fuente de sesiones no se pudo verificar'
+                  : analytics.adherencePercent === null
                   ? 'sesiones registradas'
                   : `${analytics.adherencePercent}% de la frecuencia objetivo`}
               </small>
@@ -90,8 +103,10 @@ export function GymSummaryOverview({
             <CalendarDays size={17} aria-hidden="true" />
             <div>
               <span>Última sesión</span>
-              <strong>{analytics.latestSessionLabel ?? 'Sin sesión reciente'}</strong>
-              <small>{shortDate(analytics.latestSessionDate)}</small>
+              <strong>
+                {sessionsVerified ? (analytics.latestSessionLabel ?? 'Sin sesión registrada') : 'Sin verificar'}
+              </strong>
+              <small>{sessionsVerified ? shortDate(analytics.latestSessionDate) : '—'}</small>
             </div>
           </article>
 
@@ -99,7 +114,7 @@ export function GymSummaryOverview({
             <LineChart size={17} aria-hidden="true" />
             <div>
               <span>Comparaciones útiles</span>
-              <strong className="tabular">{analytics.comparableExercises}</strong>
+              <strong className="tabular">{sessionsVerified ? analytics.comparableExercises : 'Sin datos'}</strong>
               <small>ejercicios con al menos dos registros comparables</small>
             </div>
           </article>

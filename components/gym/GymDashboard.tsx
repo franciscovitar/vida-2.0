@@ -55,6 +55,11 @@ function publicWarningSubject(subject: string | null): string | null {
 }
 
 function WarningCard({ data }: { data: GymDashboardData }) {
+  const sessionsNotVerified = data.sources.some(
+    (source) =>
+      source.kind === 'sessions' &&
+      (source.state === 'unavailable' || source.state === 'error' || source.state === 'disabled'),
+  );
   const needsAttention = [
     'error',
     'partial',
@@ -62,7 +67,7 @@ function WarningCard({ data }: { data: GymDashboardData }) {
     'empty',
     'forbidden',
     'not-configured',
-  ].includes(data.moduleStatus);
+  ].includes(data.moduleStatus) || sessionsNotVerified;
 
   if (data.warnings.length === 0 && !needsAttention) return null;
 
@@ -114,6 +119,8 @@ function WarningCard({ data }: { data: GymDashboardData }) {
 }
 
 export function GymDashboardView({ data }: { data: GymDashboardData }) {
+  const sessionSourceState =
+    data.sources.find((source) => source.kind === 'sessions')?.state ?? 'unavailable';
   const hasUsefulContext = Boolean(
     data.readiness.sleep || data.readiness.energy || data.readiness.commitments.length > 0,
   );
@@ -126,6 +133,7 @@ export function GymDashboardView({ data }: { data: GymDashboardData }) {
         weeklyTarget={data.weeklyTarget ?? null}
         today={data.targetDate}
         routine={data.routine}
+        sessionsState={sessionSourceState}
       />
 
       {hasUsefulContext ? (

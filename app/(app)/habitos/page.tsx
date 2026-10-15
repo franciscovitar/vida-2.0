@@ -65,7 +65,7 @@ export default async function HabitosPage({
     <div className={pageStyles.page}>
       <PageHeader
         title="Hábitos"
-        description={`${periodLabel(periodDays)} · ${data.habits.availableDays} días con datos`}
+        description={`${periodLabel(periodDays)} · ${data.habits.availableDays} días evaluables`}
         icon={CalendarCheck}
         domain="habits"
         action={
@@ -90,15 +90,15 @@ export default async function HabitosPage({
         <span>
           Período {data.habits.periodStart} → {data.habits.periodEnd}
         </span>
-        <span>{data.habits.availableDays} días reales</span>
-        <span>Anterior: {data.habits.previousAvailableDays} días</span>
+        <span>{data.habits.availableDays} días evaluables por activación</span>
+        <span>Anterior: {data.habits.previousAvailableDays} días evaluables</span>
       </p>
 
       <Card aria-labelledby="habits-daily-title">
         <SectionHeader
           id="habits-daily-title"
           title="Hábitos diarios"
-          description="Cumplimiento en el período seleccionado."
+          description="Lectura histórica V1: las celdas sin marca cuentan como pendientes o incumplidas; el porcentaje no prueba que cada día haya sido registrado."
           domain="habits"
         />
         <ul className={styles.list}>

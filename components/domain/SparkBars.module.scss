@@ -35,3 +35,10 @@
   background: var(--surface-3);
   opacity: 0.7;
 }
+
+/* Los false explícitos nunca deben verse como barras positivas. */
+.root[data-domain] .bar[data-negative] {
+  height: 15% !important;
+  background: var(--c-neutral-border);
+  opacity: 0.9;
+}
