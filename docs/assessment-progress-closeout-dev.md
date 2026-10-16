@@ -11,12 +11,18 @@ El candidato/modelo APP se conserva intacto y desactivado como trabajo históric
 no es requisito ni permiso para el nuevo flujo. Vida conserva su lector actual.
 El resto de este documento describe el diseño anterior y no habilita infraestructura.
 
-IOP lectura sigue PASS. El owner devolvió herramienta nativa de escritura y
-esquema AVAILABLE desde IOP, sin invocarla. La consulta de metadata no identificó
-inequívocamente el permiso efectivo de edición de la cuenta conectada: la lista
-de roles del archivo no basta. No se reabre la auditoría; sigue pendiente una
-escritura autorizada. Antes corresponde preparar un candidato de cierre real y
-preflight de duplicados, sin enviar; si está sin cambios, no se agrega otra fila.
+IOP lectura sigue PASS. El owner reportó ahora una publicación nativa DEV con
+prelectura sin coincidencias, una invocación de appendCells, readback exacto de
+ocho celdas y una sola coincidencia posterior, sin retry ni sobrescritura. Escritura
+efectiva PASS para ese intento, no una verificación nueva ejecutada por Codex.
+No se copian fila, payload, identificador real ni estado académico privado al APP.
+Siguiente paso: comprobar esa nueva fila en Vida QA autenticada, solo lectura.
+La aceptación UI anterior no se extrapola a este snapshot. No crear otra fila ni
+otro deploy. Replay, concurrencia y cierres recurrentes siguen sin certificar.
+
+El lector actual admite el prefijo contractual con un sufijo de evaluación/sesión.
+Ese identificador no es prueba de digest; los helpers offline que exigen SHA no
+se activan ni se extrapolan al camino nativo. No corregir datos reales para ellos.
 En PAS, procedimiento actual: `IOP_NATIVE_SHEETS_PREFLIGHT.md` y
 `SESSION_CLOSEOUT_RUNTIME.md`. Todavía son cambios locales, no publicados en main.
 

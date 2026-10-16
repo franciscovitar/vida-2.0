@@ -5,11 +5,14 @@
 - Solo ChatGPT, GitHub privado, Sheets/Drive y Notion cuando corresponda, usando
   conectores existentes. Cancelados para este objetivo los requisitos de MCP
   personalizado, servidor escritor y store académico adicional.
-- IOP lectores PASS preservado. Owner devolvió herramienta nativa y esquema desde
-  IOP: AVAILABLE, sin invocación. Metadata no identificó permisos efectivos de
-  edición de la cuenta conectada; lista de roles no basta. Escritura no verificada.
-- Siguiente paso: preparar candidato de un cierre IOP real y preflight de duplicados
-  sin enviar; si corresponde nueva fila, pedir autorización sobre ese paquete concreto.
+- IOP lectores PASS. Nueva evidencia del owner: publicación nativa DEV y readback
+  exacto de ocho celdas PASS; una sola coincidencia, sin retry/sobrescritura reportados.
+  Detalles académicos conservados fuera del repo APP. Codex no ejecutó ese envío.
+- Compatibilidad del lector con identidad de sesión: probada con fixture sintético,
+  5/5 tests lector PASS; ESLint focal, Prettier y diff-check PASS. Sin datos reales
+  nuevos en fixtures ni código. El ID no constituye un digest.
+- Siguiente paso: comprobar esta nueva fila en Vida QA autenticada, solo lectura,
+  sin otra publicación o deployment. Replay/concurrencia/recurrencia no certificados.
 - Protocolo PAS local adaptado: intención estable, DEV, validación, prelectura
   completa, replay sin append, un intento y readback exacto. Serialización operativa
   para un piloto acotado; no garantiza exclusión atómica ni exactly-once concurrente.
