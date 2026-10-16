@@ -21,6 +21,16 @@ type CapabilityCard = {
   maintenance: string;
   ifNeverLearned: string;
 };
+type ActiveHourRange = { min: number; max: number };
+export type CapabilityTimeEstimate = {
+  unit: 'active_hours' | null;
+  levelRanges: Array<ActiveHourRange & { level: number }>;
+  stateRange: ActiveHourRange | null;
+  modelLabel: string | null;
+  criterion: string | null;
+  stateLabel: string | null;
+};
+
 export type CapabilityItem = {
   id: string;
   name: string;
@@ -28,7 +38,7 @@ export type CapabilityItem = {
   subcategory: string;
   status: 'curated' | 'discovery';
   card: CapabilityCard | null;
-  genericHours: string[];
+  timeEstimate: CapabilityTimeEstimate;
   timeConfidence: string | null;
   primaryRoute: string | null;
   learningRoute: string | null;
@@ -59,6 +69,99 @@ function textArray(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === 'string' && Boolean(item.trim()))
     : [];
+}
+
+const TIME_MODELS: Record<string, { label: string; criterion: string }> = {
+  LEVEL_ACTIVE_HOURS: {
+    label: 'Horas activas por nivel',
+    criterion: 'Horas de adquisición y práctica activa acumuladas desde el nivel 0.',
+  },
+  LEVEL_ACTIVE_HOURS_PLUS_REAL_EXPOSURE: {
+    label: 'Horas activas y exposición real',
+    criterion: 'Combina horas activas acumuladas por nivel con exposición en situaciones reales.',
+  },
+  LEVEL_ACTIVE_HOURS_PLUS_EXPOSURE: {
+    label: 'Horas activas y exposición',
+    criterion: 'Combina horas activas acumuladas por nivel con exposición adicional.',
+  },
+  LEVEL_ACTIVE_HOURS_PLUS_ONGOING_REFRESH: {
+    label: 'Horas activas y actualización continua',
+    criterion: 'Combina horas activas acumuladas por nivel con actualización continua.',
+  },
+  CALENDAR_AND_REPEATED_BEHAVIOR_NOT_HOURS_ONLY: {
+    label: 'Conducta repetida a lo largo del tiempo',
+    criterion:
+      'Se observa la repetición de conductas a lo largo del tiempo; no se resume en horas.',
+  },
+  EVENT_OR_EXPOSURE_NOT_HOURS_ONLY: {
+    label: 'Experiencia o exposición elegida',
+    criterion: 'La referencia es la experiencia o exposición elegida; no se expresa solo en horas.',
+  },
+  CALENDAR_AND_RELATIONSHIP_QUALITY_NOT_HOURS_ONLY: {
+    label: 'Calidad y continuidad de la relación',
+    criterion: 'Se observa la calidad y continuidad de la relación a lo largo del tiempo.',
+  },
+  MIXED_ACTIVE_HOURS_AND_CONTEXTUAL_CONSISTENCY: {
+    label: 'Práctica y consistencia en contexto',
+    criterion: 'Combina práctica activa y consistencia en distintos contextos, sin un plazo único.',
+  },
+  STATE_AND_RESILIENCE_NOT_HOURS_ONLY: {
+    label: 'Estado del recurso y resiliencia',
+    criterion: 'Se observa el estado del recurso y su resiliencia; no una cantidad de horas.',
+  },
+  ACTIVE_HOURS_PLUS_REAL_WORLD_REPETITION: {
+    label: 'Horas activas y repetición en situaciones reales',
+    criterion: 'Combina horas de práctica activa con repetición en situaciones reales.',
+  },
+  ACTIVE_HOURS_TO_FUNCTIONAL_STATE_PLUS_REFRESH: {
+    label: 'Práctica hasta un estado funcional y actualización',
+    criterion: 'Horas de práctica activa hasta un estado funcional, con actualización posterior.',
+  },
+};
+
+const REFERENCE_STATES: Record<string, string> = {
+  CONSISTENT_WHEN_RELEVANT: 'Consistencia cuando resulte relevante',
+  MEANINGFUL_EXPOSURE_WHEN_CHOSEN: 'Exposición significativa cuando se elija',
+  HEALTHY_RECIPROCAL_AND_SUSTAINED_WHEN_RELEVANT:
+    'Relación sana, recíproca y sostenida cuando resulte relevante',
+  CONSISTENTLY_APPROPRIATE_AND_NATURAL: 'Adecuación natural y consistente al contexto',
+  SUFFICIENT_WITH_MARGIN: 'Suficiencia con margen',
+};
+
+function activeHourRange(value: unknown): ActiveHourRange | null {
+  const { min, max } = record(value);
+  return typeof min === 'number' &&
+    typeof max === 'number' &&
+    Number.isFinite(min) &&
+    Number.isFinite(max) &&
+    min >= 0 &&
+    max >= min
+    ? { min, max }
+    : null;
+}
+
+function projectTimeEstimate(time: JsonRecord): CapabilityTimeEstimate {
+  const modelKey = text(time.estimate_type) ?? '';
+  const model = Object.hasOwn(TIME_MODELS, modelKey) ? TIME_MODELS[modelKey] : null;
+  const stateKey = text(time.default_target_state) ?? '';
+  const levelRanges = Object.entries(record(time.generic_cumulative_active_hours_from_level_0))
+    .flatMap(([key, value]) => {
+      const range = activeHourRange(value);
+      const level = Number(key);
+      return /^[1-9]\d*$/.test(key) && Number.isSafeInteger(level) && range
+        ? [{ level, ...range }]
+        : [];
+    })
+    .sort((a, b) => a.level - b.level);
+  const stateRange = activeHourRange(time.generic_active_hours_to_default_state);
+  return {
+    unit: levelRanges.length || stateRange ? 'active_hours' : null,
+    levelRanges,
+    stateRange,
+    modelLabel: model?.label ?? null,
+    criterion: model?.criterion ?? null,
+    stateLabel: Object.hasOwn(REFERENCE_STATES, stateKey) ? REFERENCE_STATES[stateKey]! : null,
+  };
 }
 
 function evidenceLabel(value: unknown): string {
@@ -200,7 +303,7 @@ export function projectCapabilityData(
               item.trigger === 'ONLY_AFTER_EXPLICIT_LEARNING_OR_PRACTICE_ACTIVATION',
           )
       : null;
-    const genericHours = textArray(time.generic_cumulative_active_hours_from_level_0);
+
     const card: CapabilityCard | null = curated
       ? {
           whatYouGet: text(cardRecord.what_you_get) ?? '',
@@ -229,8 +332,10 @@ export function projectCapabilityData(
         subcategory: text(row.subcategory) ?? 'General',
         status: curated ? 'curated' : 'discovery',
         card,
-        genericHours,
-        timeConfidence: text(time.generic_confidence),
+        timeEstimate: projectTimeEstimate(time),
+        timeConfidence: ['LOW', 'MEDIUM', 'HIGH'].includes(String(time.generic_confidence))
+          ? text(time.generic_confidence)
+          : null,
         primaryRoute: text(route.primary_route),
         learningRoute: learningRoute ? 'LEARNING_OS' : null,
       },

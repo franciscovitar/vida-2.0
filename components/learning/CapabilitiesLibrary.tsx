@@ -9,10 +9,12 @@ import type { CapabilityItem, CapabilityLibraryRead } from '@/lib/learning/capab
 import {
   CAPABILITY_PAGE_SIZE,
   EMPTY_CAPABILITY_FILTERS,
+  activeHoursLabel,
   capabilityExcerpt,
   capabilitySubcategories,
   filterCapabilities,
   subcategoryLabel,
+  timeConfidenceLabel,
   type CapabilityFilters,
 } from './capabilities-exploration';
 import styles from './CapabilitiesLibrary.module.scss';
@@ -42,25 +44,39 @@ function routeLabel(item: CapabilityItem): string {
     : primary;
 }
 
-function hoursLabel(item: CapabilityItem): string {
-  if (!item.genericHours.length) return 'Sin estimación disponible';
-  const confidence =
-    item.timeConfidence === 'LOW'
-      ? 'confianza baja'
-      : item.timeConfidence === 'HIGH'
-        ? 'confianza alta'
-        : 'confianza media';
-  return `Horas genéricas acumuladas por nivel: ${item.genericHours.join(' / ')} · ${confidence}. No estima tu tiempo personal.`;
+function CapabilityTimeReference({ item }: { item: CapabilityItem }) {
+  const time = item.timeEstimate;
+  return (
+    <div className={styles['time-reference']}>
+      <p>{time.criterion ?? 'Referencia de esfuerzo no disponible.'}</p>
+      {time.levelRanges.length ? (
+        <>
+          <p>Rangos genéricos acumulados desde el nivel 0:</p>
+          <ul>
+            {time.levelRanges.map((range) => (
+              <li key={range.level}>
+                Nivel {range.level}: {activeHoursLabel(range)}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      {time.stateRange ? (
+        <p>Para el estado de referencia: {activeHoursLabel(time.stateRange)}.</p>
+      ) : null}
+      {time.stateLabel ? <p>Estado de referencia: {time.stateLabel}.</p> : null}
+      <p>
+        {timeConfidenceLabel(item)}. Referencia genérica, no una garantía ni una predicción
+        personal. Las horas activas no son tiempo de calendario.
+      </p>
+    </div>
+  );
 }
 
 function CapabilityDetails({ item }: { item: CapabilityItem }) {
   if (!item.card) {
     return (
       <div className={styles.discovery}>
-        <p>
-          Esta entrada reúne la información disponible en el inventario. Podés consultarla por
-          curiosidad, sin iniciar un aprendizaje.
-        </p>
         <dl>
           <div>
             <dt>Categoría y subcategoría</dt>
@@ -69,8 +85,10 @@ function CapabilityDetails({ item }: { item: CapabilityItem }) {
             </dd>
           </div>
           <div>
-            <dt>Referencia de tiempo</dt>
-            <dd>{hoursLabel(item)}</dd>
+            <dt>Tiempo y esfuerzo</dt>
+            <dd>
+              <CapabilityTimeReference item={item} />
+            </dd>
           </div>
           <div>
             <dt>Ruta si después pedís aprenderla</dt>
@@ -128,8 +146,10 @@ function CapabilityDetails({ item }: { item: CapabilityItem }) {
           <dd>{item.card.maintenance}</dd>
         </div>
         <div>
-          <dt>Referencia de tiempo</dt>
-          <dd>{hoursLabel(item)}</dd>
+          <dt>Tiempo y esfuerzo</dt>
+          <dd>
+            <CapabilityTimeReference item={item} />
+          </dd>
         </div>
         <div>
           <dt>Ruta si después pedís aprenderla</dt>

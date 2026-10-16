@@ -8,10 +8,13 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import {
   EMPTY_CAPABILITY_FILTERS,
+  activeHoursLabel,
   capabilityExcerpt,
   capabilitySubcategories,
   filterCapabilities,
   subcategoryLabel,
+  genericTimeSummary,
+  timeConfidenceLabel,
 } from '@/components/learning/capabilities-exploration';
 
 import {
@@ -68,7 +71,21 @@ function fixtures() {
     });
     times.items.push({
       generalist_item_id: id,
-      generic_cumulative_active_hours_from_level_0: ['1', '2'],
+      ...(index <= 171
+        ? {
+            estimate_type: 'LEVEL_ACTIVE_HOURS',
+            generic_cumulative_active_hours_from_level_0: {
+              '4': { min: 503, max: 907 },
+              '2': { min: 29, max: 47 },
+              '1': { min: 7, max: 13 },
+              '3': { min: 91, max: 137 },
+            },
+          }
+        : {
+            estimate_type: 'CALENDAR_AND_REPEATED_BEHAVIOR_NOT_HOURS_ONLY',
+            generic_active_hours_to_default_state: null,
+            default_target_state: 'CONSISTENT_WHEN_RELEVANT',
+          }),
       generic_confidence: 'LOW',
       personalized: { private_value: 42 },
     });
@@ -110,7 +127,6 @@ test('library projects only display fields, exposes no complete card for uncured
   assert.deepEqual(Object.keys(items[0] ?? {}).sort(), [
     'area',
     'card',
-    'genericHours',
     'id',
     'learningRoute',
     'name',
@@ -118,6 +134,7 @@ test('library projects only display fields, exposes no complete card for uncured
     'status',
     'subcategory',
     'timeConfidence',
+    'timeEstimate',
   ]);
 });
 
@@ -251,4 +268,152 @@ test('unavailable library retains its generic notice without surfacing controls 
   assert.match(html, /role="status"/);
   assert.match(html, /Biblioteca no disponible/);
   assert.doesNotMatch(html, /<article|<input|PAS main/);
+});
+
+test('structured level estimates keep units, numeric level order and confidence without personalized fields', () => {
+  const data = fixtures();
+  const items = projectCapabilityData(data.inventory, data.cards, data.times, data.routing);
+  assert.equal(items.filter((item) => item.timeEstimate.levelRanges.length === 4).length, 171);
+  assert.equal(items.filter((item) => item.timeEstimate.levelRanges.length === 0).length, 74);
+  const item = items[20]!;
+  assert.equal(item.timeEstimate.unit, 'active_hours');
+  assert.deepEqual(item.timeEstimate.levelRanges, [
+    { level: 1, min: 7, max: 13 },
+    { level: 2, min: 29, max: 47 },
+    { level: 3, min: 91, max: 137 },
+    { level: 4, min: 503, max: 907 },
+  ]);
+  assert.match(item.timeEstimate.criterion!, /acumuladas desde el nivel 0/);
+  assert.match(genericTimeSummary(item), /Nivel 1: 7–13 horas activas/);
+  assert.equal(timeConfidenceLabel(item), 'Confianza baja');
+  assert.doesNotMatch(JSON.stringify(items), /private_value|personalized|remaining|genericHours/);
+});
+
+test('level estimates preserve exposure and ongoing refresh rather than reducing their models to hours', () => {
+  for (const [model, label] of [
+    ['LEVEL_ACTIVE_HOURS_PLUS_REAL_EXPOSURE', 'exposición real'],
+    ['LEVEL_ACTIVE_HOURS_PLUS_EXPOSURE', 'exposición'],
+    ['LEVEL_ACTIVE_HOURS_PLUS_ONGOING_REFRESH', 'actualización continua'],
+  ]) {
+    const data = fixtures();
+    data.times.items[20]!.estimate_type = model;
+    data.times.items[20]!.generic_confidence = 'MEDIUM';
+    const item = projectCapabilityData(data.inventory, data.cards, data.times, data.routing)[20]!;
+    assert.match(genericTimeSummary(item), new RegExp(label!));
+    assert.equal(item.timeEstimate.levelRanges.length, 4);
+    assert.equal(timeConfidenceLabel(item), 'Confianza media');
+  }
+});
+
+test('non-hour-only models explain their actual criterion without inventing quantities or unavailable hours', () => {
+  const models = [
+    ['CALENDAR_AND_REPEATED_BEHAVIOR_NOT_HOURS_ONLY', 'repetición de conductas'],
+    ['EVENT_OR_EXPOSURE_NOT_HOURS_ONLY', 'experiencia o exposición'],
+    ['CALENDAR_AND_RELATIONSHIP_QUALITY_NOT_HOURS_ONLY', 'calidad y continuidad'],
+    ['MIXED_ACTIVE_HOURS_AND_CONTEXTUAL_CONSISTENCY', 'consistencia en distintos contextos'],
+    ['STATE_AND_RESILIENCE_NOT_HOURS_ONLY', 'estado del recurso y su resiliencia'],
+  ];
+  for (const [model, criterion] of models) {
+    const data = fixtures();
+    data.times.items[171]!.estimate_type = model;
+    const item = projectCapabilityData(data.inventory, data.cards, data.times, data.routing)[171]!;
+    assert.match(item.timeEstimate.criterion!, new RegExp(criterion!));
+    assert.deepEqual(item.timeEstimate.levelRanges, []);
+    assert.equal(item.timeEstimate.unit, null);
+    assert.equal(item.timeEstimate.stateRange, null);
+    const excerpt = capabilityExcerpt(item);
+    assert.doesNotMatch(excerpt, /no disponible|Sin estimación|\d|Del inventario/);
+    assert.match(excerpt, /Confianza baja/);
+  }
+});
+
+test('mixed state models retain their hour ranges as secondary references alongside the real-world criterion', () => {
+  for (const model of [
+    'ACTIVE_HOURS_PLUS_REAL_WORLD_REPETITION',
+    'ACTIVE_HOURS_TO_FUNCTIONAL_STATE_PLUS_REFRESH',
+  ]) {
+    const data = fixtures();
+    data.times.items[171] = {
+      ...data.times.items[171],
+      estimate_type: model,
+      generic_active_hours_to_default_state: { min: 17, max: 31 },
+      default_target_state: 'SUFFICIENT_WITH_MARGIN',
+    };
+    const item = projectCapabilityData(data.inventory, data.cards, data.times, data.routing)[171]!;
+    assert.deepEqual(item.timeEstimate.levelRanges, []);
+    assert.deepEqual(item.timeEstimate.stateRange, { min: 17, max: 31 });
+    assert.match(genericTimeSummary(item), /17–31 horas activas/);
+    assert.match(
+      item.timeEstimate.criterion!,
+      /repetición en situaciones reales|actualización posterior/,
+    );
+    assert.equal(item.timeEstimate.stateLabel, 'Suficiencia con margen');
+  }
+});
+
+test('invalid, absent and unknown time data stay unavailable instead of becoming zero or medium confidence', () => {
+  const data = fixtures();
+  data.times.items[20] = {
+    ...data.times.items[20],
+    estimate_type: 'constructor',
+    default_target_state: 'toString',
+    generic_confidence: 'UNREVIEWED',
+    generic_cumulative_active_hours_from_level_0: {
+      '1': { min: '7', max: 13 },
+      '2': { min: -1, max: 2 },
+      '3': { min: 12, max: 3 },
+      '4': { min: 2, max: Infinity },
+      metadata: { min: 0, max: 1 },
+    },
+    generic_active_hours_to_default_state: { min: 1, max: null },
+  };
+  let item = projectCapabilityData(data.inventory, data.cards, data.times, data.routing)[20]!;
+  assert.deepEqual(item.timeEstimate, {
+    unit: null,
+    levelRanges: [],
+    stateRange: null,
+    modelLabel: null,
+    criterion: null,
+    stateLabel: null,
+  });
+  assert.equal(timeConfidenceLabel(item), 'Confianza no indicada');
+  assert.equal(genericTimeSummary(item), 'Referencia de esfuerzo no disponible');
+  data.times.items[20]!.generic_cumulative_active_hours_from_level_0 = { '1': { min: 0, max: 0 } };
+  item = projectCapabilityData(data.inventory, data.cards, data.times, data.routing)[20]!;
+  assert.equal(activeHoursLabel(item.timeEstimate.levelRanges[0]!), '0 horas activas');
+});
+
+test('Spanish subcategory labels remain searchable without changing filter values or curated card content', () => {
+  const data = fixtures();
+  const before = projectCapabilityData(data.inventory, data.cards, data.times, data.routing);
+  data.inventory.items[20]!.subcategory = 'learning';
+  data.times.items[20]!.generic_confidence = 'HIGH';
+  const items = projectCapabilityData(data.inventory, data.cards, data.times, data.routing);
+  assert.equal(subcategoryLabel('learning'), 'Aprendizaje');
+  assert.equal(subcategoryLabel('body_language'), 'Lenguaje corporal');
+  assert.equal(subcategoryLabel('knowledge'), 'Knowledge'); // unknown taxonomy is not invented
+  assert.equal(items[20]!.subcategory, 'learning');
+  assert.deepEqual(filterCapabilities(items, { ...EMPTY_CAPABILITY_FILTERS, query: 'learning' }), [
+    items[20],
+  ]);
+  assert.deepEqual(
+    filterCapabilities(items, {
+      ...EMPTY_CAPABILITY_FILTERS,
+      query: 'aprendizaje',
+      subcategory: 'learning',
+    }),
+    [items[20]],
+  );
+  assert.deepEqual(
+    items.map((item) => item.card),
+    before.map((item) => item.card),
+  );
+  const library = { ...libraryFixture(), items, initialIds: [items[20]!.id, items[171]!.id] };
+  const html = renderToStaticMarkup(createElement(CapabilitiesLibrary, { library }));
+  assert.match(
+    html,
+    /Aprendizaje · Horas activas por nivel · Nivel 1: 7–13 horas activas · Confianza alta/,
+  );
+  assert.match(html, /Conducta repetida a lo largo del tiempo/);
+  assert.doesNotMatch(html, /Del inventario|Sin estimación disponible|Learning/);
 });

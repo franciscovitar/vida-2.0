@@ -312,6 +312,20 @@
   line-height: 1.65;
 }
 
+.time-reference {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.time-reference p,
+.time-reference ul {
+  margin: 0;
+}
+
+.time-reference ul {
+  padding-left: 1.35rem;
+}
+
 .outcome {
   margin: 0.5rem 0 0;
   color: var(--text);
@@ -341,8 +355,8 @@
   margin: 1.25rem 0 0;
 }
 
-.details dl div,
-.discovery dl div {
+.details dl > div,
+.discovery dl > div {
   min-width: 0;
   padding: 1rem;
   border-radius: var(--radius);
