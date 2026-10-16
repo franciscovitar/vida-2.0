@@ -649,3 +649,87 @@
     align-items: flex-start;
   }
 }
+
+/* Metas personales: separadas de la clasificación externa fija. */
+.strength-goals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.72rem;
+}
+
+.strength-goal {
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+  padding: 0.82rem;
+  border: 1px solid var(--c-health-border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.strength-goal-heading {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.strength-goal-heading h3 {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.strength-goal-heading span {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.strength-goal-comparison {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.strength-goal-comparison > div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.strength-goal-comparison > div + div {
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border);
+}
+
+.strength-goal-comparison small {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+}
+
+.strength-goal-comparison strong {
+  color: var(--text);
+  font-size: 0.96rem;
+  overflow-wrap: anywhere;
+}
+
+.strength-goal-comparison > div:last-child strong {
+  color: var(--c-health);
+}
+
+.strength-goals-note {
+  margin-top: 0.72rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+@media (width <= 1120px) {
+  .strength-goals-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 640px) {
+  .strength-goals-grid {
+    grid-template-columns: 1fr;
+  }
+}

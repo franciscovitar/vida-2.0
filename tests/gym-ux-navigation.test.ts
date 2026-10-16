@@ -59,6 +59,15 @@ test('Gym Progreso no repite el resumen ni la tabla completa de semana anterior'
   assert.match(progress, /gym-v2-benchmark-title/);
 });
 
+test('Gym muestra objetivos personales desde Notion como sección separada del benchmark externo', () => {
+  const progress = source('components/gym/GymV2Overview.tsx');
+  const dashboard = source('components/gym/GymDashboard.tsx');
+  assert.match(progress, /Metas personales de fuerza/);
+  assert.match(progress, /buildPersonalStrengthGoals/);
+  assert.match(dashboard, /routine=\{data\.routine\}/);
+  assert.ok(progress.indexOf('gym-personal-strength-goals-title') < progress.indexOf('gym-v2-benchmark-title'));
+});
+
 test('Gym Cardio prioriza el plan real antes de la equivalencia MET-min', () => {
   const cardio = source('components/gym/GymWeeklyCardio.tsx');
   const planIndex = cardio.indexOf('Tu plan real');

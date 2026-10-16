@@ -7,8 +7,9 @@ import {
   buildMaleStrengthLevelBenchmark,
   isExternalStrengthBenchmarkSupported,
 } from '@/lib/gym/external-strength-benchmark';
+import { buildPersonalStrengthGoals } from '@/lib/gym/personal-strength-goals';
 import { computeGymV2Analytics, type GymV2Trend } from '@/lib/gym/v2-analytics';
-import type { GymSession, GymSessionSummary } from '@/types/gym';
+import type { GymRoutine, GymSession, GymSessionSummary } from '@/types/gym';
 
 import benchmarkStyles from './GymExternalBenchmark.module.scss';
 import styles from './GymV2Overview.module.scss';
@@ -67,14 +68,17 @@ export function GymV2Overview({
   summaries,
   weeklyTarget,
   today,
+  routine,
 }: {
   sessions: readonly GymSession[];
   summaries: readonly GymSessionSummary[];
   weeklyTarget: number | null;
   today: string;
+  routine?: GymRoutine | null;
 }) {
   const analytics = computeGymV2Analytics({ sessions, summaries, weeklyTarget, today });
   const benchmark = buildMaleStrengthLevelBenchmark(analytics.exerciseTrends);
+  const strengthGoals = buildPersonalStrengthGoals(routine?.supplementalSections ?? [], analytics.exerciseTrends);
   const exerciseCards = analytics.exerciseTrends.slice(0, 6);
   const maxMuscleSets = Math.max(...analytics.muscleGroups.map((group) => group.completedSets), 1);
   const totalMuscleSets = analytics.muscleGroups.reduce(
@@ -174,6 +178,45 @@ export function GymV2Overview({
           </div>
         )}
       </Card>
+
+      {strengthGoals.length > 0 ? (
+        <Card aria-labelledby="gym-personal-strength-goals-title">
+          <SectionHeader
+            id="gym-personal-strength-goals-title"
+            title="Metas personales de fuerza"
+            description="Objetivos ambiciosos a largo plazo desde Notion, comparados con tus últimas marcas registradas en Sheets."
+            domain="health"
+          />
+          <div className={styles['strength-goals-grid']}>
+            {strengthGoals.map((goal) => (
+              <article key={goal.label} className={styles['strength-goal']}>
+                <div className={styles['strength-goal-heading']}>
+                  <h3>{goal.label}</h3>
+                  {goal.provisional ? <span>Provisional</span> : null}
+                </div>
+                <div className={styles['strength-goal-comparison']}>
+                  <div>
+                    <small>Última marca · {shortDate(goal.latestDate)}</small>
+                    <strong className="tabular">
+                      {goal.latestLoad !== null && goal.latestReps !== null
+                        ? `${number(goal.latestLoad)} kg × ${goal.latestReps}`
+                        : 'Sin registro comparable'}
+                    </strong>
+                  </div>
+                  <div>
+                    <small>Meta a largo plazo</small>
+                    <strong>{goal.target}</strong>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className={styles['strength-goals-note']}>
+            Metas personales revisables, no rangos de fuerza externos ni pronósticos. 
+            La carga depende de la máquina, técnica y recorrido; la comparación no sustituye una evaluación de esos factores.
+          </p>
+        </Card>
+      ) : null}
 
       <Card aria-labelledby="gym-v2-distribution-title">
         <SectionHeader

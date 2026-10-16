@@ -125,6 +125,12 @@ La pantalla mantiene unos pocos ejercicios destacados y `Ver todos los ejercicio
 
 No se ajusta por peso corporal ni edad en este slice. No se realizan ni recomiendan tests reales de 1RM para alimentar el dashboard.
 
+## Metas personales de fuerza (2026-10-16)
+
+Los objetivos ambiciosos del usuario viven exclusivamente en la sección `Metas personales de fuerza` de la rutina canónica de Notion. La vista `/gimnasio/progreso` interpreta sus ítems y los contrasta con la última exposición registrada/comparable del mismo ejercicio en Sheets. El código contiene sólo alias de identidad (incluida separación de elevaciones laterales de pie), no una segunda tabla de objetivos. Si Notion está caído, omite los objetivos: no muestra objetivos desactualizados.
+
+Las marcas actuales se actualizan desde el historial, no desde una foto congelada al 16/10. No se modifica el benchmark masculino fijo ni su ETA al siguiente rango; no se calcula una ETA para metas aspiracionales. Metas de máquina sujetas a identificación y técnica; prensa horizontal muy provisional.
+
 ## Revisión mensual a demanda
 
 Gimnasio y Nutrición exponen una acción de revisión de 30 días que prepara un pedido para el coach. No corre en segundo plano, no programa tareas y no cambia planes automáticamente. La regla explícita es conservar lo que funciona y proponer ajustes solo cuando los datos repetidos o una incompatibilidad clara justifican el cambio.
