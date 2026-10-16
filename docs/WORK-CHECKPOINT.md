@@ -1,5 +1,22 @@
 # Vida 2.0 — Work checkpoint
 
+## Assessment Progress — cierre DEV local, 2026-10-16
+
+- `VERIFIED`: contratos de PAS main revisados; proyección estricta del cierre y
+  reductor puro de despacho añadidos en rama aislada. Se reutilizan parser y
+  reconciliación existentes. Fixtures nuevos exclusivamente sintéticos.
+- QA local: 162/162 tests focales, typecheck, ESLint focal, Stylelint, Prettier,
+  diff-check y build completo PASS. CAS probado solo con modelo de tests.
+- `OWNER_REPORTED`: transporte individual académico DEV → readback → QA autenticada
+  confirmado por el owner. No se repitió ni se copiaron sus datos a GitHub.
+- `BLOCKED`: automatización recurrente sin emisor certificado ni prueba de CAS
+  durable, aislamiento y retención no expirante. El modelo local no es un escritor.
+- `PRESERVED`: capacidades, Planning, Gate C, autenticación y escritores existentes.
+  Sin filas reales, infraestructura, cambios remotos, push o deploy.
+- `NEXT`: auditoría de lectura del store/emisor existente, adaptador mínimo solo
+  tras garantías demostradas; luego autorización separada para un cierre IOP DEV.
+  Detalle: `docs/assessment-progress-closeout-dev.md`.
+
 ## Planning V2 — Fase 4, estados de lectura, 2026-10-13
 
 - `VERIFIED`: corrección local en rama aislada desde `ad9ff877…`: Hoy, Revisión y
