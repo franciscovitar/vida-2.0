@@ -11,10 +11,12 @@ El candidato/modelo APP se conserva intacto y desactivado como trabajo históric
 no es requisito ni permiso para el nuevo flujo. Vida conserva su lector actual.
 El resto de este documento describe el diseño anterior y no habilita infraestructura.
 
-IOP lectura sigue PASS. El chequeo pendiente es observar en el propio IOP la
-herramienta nativa de escritura y metadata de capacidades de edición, sin ejecutar
-mutaciones. Su presencia en este chat no demuestra disponibilidad en IOP;
-`canEdit=true` tampoco demuestra por sí solo permisos OAuth de escritura.
+IOP lectura sigue PASS. El owner devolvió herramienta nativa de escritura y
+esquema AVAILABLE desde IOP, sin invocarla. La consulta de metadata no identificó
+inequívocamente el permiso efectivo de edición de la cuenta conectada: la lista
+de roles del archivo no basta. No se reabre la auditoría; sigue pendiente una
+escritura autorizada. Antes corresponde preparar un candidato de cierre real y
+preflight de duplicados, sin enviar; si está sin cambios, no se agrega otra fila.
 En PAS, procedimiento actual: `IOP_NATIVE_SHEETS_PREFLIGHT.md` y
 `SESSION_CLOSEOUT_RUNTIME.md`. Todavía son cambios locales, no publicados en main.
 

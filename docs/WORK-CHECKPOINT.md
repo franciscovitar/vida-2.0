@@ -5,8 +5,11 @@
 - Solo ChatGPT, GitHub privado, Sheets/Drive y Notion cuando corresponda, usando
   conectores existentes. Cancelados para este objetivo los requisitos de MCP
   personalizado, servidor escritor y store académico adicional.
-- IOP lectores PASS preservado. Pendiente observar herramienta nativa de escritura
-  y capacidades de edición desde IOP, sin mutaciones. No inferirlo desde Codex.
+- IOP lectores PASS preservado. Owner devolvió herramienta nativa y esquema desde
+  IOP: AVAILABLE, sin invocación. Metadata no identificó permisos efectivos de
+  edición de la cuenta conectada; lista de roles no basta. Escritura no verificada.
+- Siguiente paso: preparar candidato de un cierre IOP real y preflight de duplicados
+  sin enviar; si corresponde nueva fila, pedir autorización sobre ese paquete concreto.
 - Protocolo PAS local adaptado: intención estable, DEV, validación, prelectura
   completa, replay sin append, un intento y readback exacto. Serialización operativa
   para un piloto acotado; no garantiza exclusión atómica ni exactly-once concurrente.
