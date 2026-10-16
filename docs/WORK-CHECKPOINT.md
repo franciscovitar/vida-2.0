@@ -11,6 +11,11 @@
   confirmado por el owner. No se repitió ni se copiaron sus datos a GitHub.
 - `BLOCKED`: automatización recurrente sin emisor certificado ni prueba de CAS
   durable, aislamiento y retención no expirante. El modelo local no es un escritor.
+- Alcance confirmado: los siete ChatGPT Projects deben cargar reglas compartidas
+  e invocar una herramienta real. Su existencia está verificada por inventario;
+  instrucciones/conexiones internas no son inspeccionables con esa API. Candidato
+  PAS compartido preparado localmente, sin publicación ni configuración de Projects.
+  PAS `3ff1d2d`: 14 tests estáticos PASS; APP: 31 tests del modelo repetidos PASS.
 - `PRESERVED`: capacidades, Planning, Gate C, autenticación y escritores existentes.
   Sin filas reales, infraestructura, cambios remotos, push o deploy.
 - `NEXT`: auditoría de lectura del store/emisor existente, adaptador mínimo solo

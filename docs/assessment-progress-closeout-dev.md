@@ -119,6 +119,34 @@ recurrente ni autorización implícita para filas reales.
 
 ## Siguiente paso para IOP
 
+El alcance incluye los siete ChatGPT Projects de materias como emisores reales,
+además del escritor y lector QA de Vida. Un endpoint en Vida no se convierte
+automáticamente en herramienta de ChatGPT; la sesión Auth.js del navegador no
+delega por sí sola identidad a esa llamada. No hay herramienta de cierre
+académico conectada en este candidato.
+
+La capa universitaria compartida de PAS tiene un candidato local con
+`SESSION_CLOSEOUT_RUNTIME.md` y `CHATGPT_CLOSEOUT_SETUP.md`, junto al loader y
+las instrucciones comunes. Reconoce «cerramos por hoy», exige herramienta real,
+identidad delegada, autorización, exclusión y readback. No copia reglas en siete
+perfiles. Estas modificaciones locales todavía no están publicadas en PAS main.
+Referencia del candidato PAS: `codex/university-session-closeout-tools`, commit
+`3ff1d2de3d18268911c75ef4ed9f1b48ef443cb5`. Sus 14 pruebas son estáticas y no
+demuestran invocación desde ChatGPT. Se repitieron los 31 tests del modelo APP
+con resultado PASS; sin cambios de código APP ni repetición innecesaria de build.
+
+El inventario de Projects confirmó los siete nombres; no expone las instrucciones
+instaladas ni sus conexiones. Disponibilidad efectiva de lectura privada y de
+la herramienta de cierre en cada Project: **NO VERIFICADA**. No se enviaron
+mensajes a esos Projects. La configuración de uno no se infiere desde otro ni
+desde las herramientas disponibles en Codex.
+
+La aceptación debe empezar dentro del Project IOP: sesión académica → cierre
+natural → invocación real de herramienta → escritor único → fila/readback DEV →
+vista QA autenticada coincidente. Después se comprueba cada uno de los otros
+seis emisores con el mismo escritor y alcance autorizado. El resultado anterior
+del transporte individual no certifica ese flujo completo ni las siete conexiones.
+
 Primero auditar en modo lectura las garantías del store/emisor existentes; no
 repetir el canary individual que ya pasó. Con esa evidencia, revisar el adaptador
 durable mínimo y el transporte. Después solicitar autorización específica para
