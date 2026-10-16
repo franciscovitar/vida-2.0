@@ -1,5 +1,6 @@
 import { BookOpen, ChevronDown, CircleAlert, Layers3, Play } from 'lucide-react';
 
+import { AssessmentPreparation } from '@/components/learning/AssessmentPreparation';
 import { Button } from '@/components/ui/Button';
 import { effectiveAssessmentReadiness, matchSubjectProgress } from '@/lib/study-engine/catalog';
 import type { AssessmentProgressRead } from '@/types/assessment-progress';
@@ -64,8 +65,8 @@ export function StudyCatalog({
           <p className={styles.eyebrow}>Facultad · 2026</p>
           <h2 id="study-catalog-title">Tus materias</h2>
           <p>
-            Elegí una materia para ver su evaluación, temas y mazos. El progreso se muestra solo
-            cuando existe evidencia canónica; “sin medir” no significa 0%.
+            Elegí una materia para ver su evaluación, temas y mazos. La preparación estimada se
+            identifica como provisional, con confianza y fecha; “sin medir” no significa 0%.
           </p>
         </div>
         <span className={styles.count}>{subjects.length} activas</span>
@@ -87,7 +88,6 @@ export function StudyCatalog({
       <div className={styles.grid}>
         {subjects.map((subject) => {
           const progress = subject.progress;
-          const progressPercent = progress?.payload.progressPercent ?? null;
           const readiness = effectiveAssessmentReadiness(subject);
 
           return (
@@ -107,18 +107,13 @@ export function StudyCatalog({
                     <span>{structureLabel(subject)}</span>
                   </div>
                   <div className={styles['progress-row']}>
-                    <span className={styles['progress-primary']}>
-                      {progressPercent === null
-                        ? 'Preparación sin medir'
-                        : `Preparación ${progressPercent}%`}
+                    <span>
+                      {progress?.payload.preparationEstimate
+                        ? 'Estimación provisional'
+                        : readinessLabel(readiness)}
                     </span>
-                    <span>{readinessLabel(readiness)}</span>
                   </div>
-                  {progressPercent !== null ? (
-                    <div className={styles['progress-track']} aria-hidden="true">
-                      <span style={{ width: `${progressPercent}%` }} />
-                    </div>
-                  ) : null}
+                  <AssessmentPreparation snapshot={progress} subjectName={subject.name} />
                 </div>
                 <ChevronDown className={styles.chevron} size={18} aria-hidden="true" />
               </summary>

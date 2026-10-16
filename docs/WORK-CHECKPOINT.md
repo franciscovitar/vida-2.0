@@ -656,3 +656,23 @@ sesión, SHA/binding DEV y fuentes actuales en un entorno que pueda mostrar la U
 V2 bajo autorización independiente. No inferir que el Preview existente contiene
 este código. Sin push/PR/CI/deploy, migración, Production, secretos, modificación
 de flags, escrituras o lecturas de Journal. V2 permanece SHADOW_READ_ONLY.
+
+## 2026-10-16 — Assessment preparation V2 candidate (local only)
+
+The subject ChatGPT Project owns diagnosis/calculation; PAS defines methodology,
+Sheets keeps dynamic state/history, Vida displays and Planning consumes. The
+compatible reader preserves V1 and accepts a separate provisional estimate in V2,
+with original estimate date, confidence, bounded basis and optional interval.
+Learning surfaces share an accessible bar; null is never converted into 0%.
+No private academic fixture, new writer, integration or infrastructure is added.
+The native closeout keeps one operational emitter, one authorized attempt, exact
+readback and quarantine on uncertainty; concurrent recurrence remains uncertified.
+One final separately authorized acceptance chain remains: subject closeout → DEV
+V2 row → exact readback → authenticated QA bar → Planning reads the same row.
+Local source changes do not update PAS main, installed Project Instructions or
+QA. No push, deploy, credential/alias change or external write was performed.
+
+Local QA: 109 focused/regression tests PASS (including 20 new V2 cases), full
+build, typecheck, focused ESLint/Stylelint, Prettier and diff whitespace PASS.
+The private PAS companion has 23 static shared-contract checks PASS. These are
+local checks, not observed V2 native publication or authenticated UI acceptance.

@@ -9,16 +9,45 @@ externo. No continuar las investigaciones anteriores de esos componentes.
 
 El candidato/modelo APP se conserva intacto y desactivado como trabajo histórico;
 no es requisito ni permiso para el nuevo flujo. Vida conserva su lector actual.
-El resto de este documento describe el diseño anterior y no habilita infraestructura.
+Las secciones históricas conservan el diseño anterior y no habilitan infraestructura.
 
 IOP lectura sigue PASS. El owner reportó ahora una publicación nativa DEV con
 prelectura sin coincidencias, una invocación de appendCells, readback exacto de
 ocho celdas y una sola coincidencia posterior, sin retry ni sobrescritura. Escritura
 efectiva PASS para ese intento, no una verificación nueva ejecutada por Codex.
 No se copian fila, payload, identificador real ni estado académico privado al APP.
-Siguiente paso: comprobar esa nueva fila en Vida QA autenticada, solo lectura.
-La aceptación UI anterior no se extrapola a este snapshot. No crear otra fila ni
-otro deploy. Replay, concurrencia y cierres recurrentes siguen sin certificar.
+El owner confirmó también la visualización autenticada de la actualización.
+No repetir auditorías de lectura/conectividad. Replay, concurrencia y cierres
+recurrentes siguen sin certificar; este cambio no los habilita.
+
+## Delta vigente: preparación estimada separada (candidato local)
+
+El ChatGPT Project de materia es el único dueño del diagnóstico y cálculo.
+Sheets conserva el estado dinámico y el historial; GitHub privado define reglas;
+Vida muestra y el Project de Planificación consume el mismo estado guardado.
+
+El lector admite V1 sin cambios y V2 con un único campo adicional nullable:
+`preparationEstimate` (percent, confidence, asOf, basis, rangeLow, rangeHigh).
+Se conservan ocho columnas. La estimación no ocupa `progressPercent`, no cambia
+el readiness canónico ni equivale a una medición certificada. Fechas, intervalo,
+límites y claves se validan; filas inválidas no borran historia válida.
+
+Aprendizaje y Modo estudio comparten una barra accesible: preparación demostrada
+cuando hay porcentaje canónico; de lo contrario preparación estimada con fecha
+real, confianza, intervalo y fundamento; ambas null significan Sin medir.
+No se calculan porcentajes desde cantidad de evidencias, horas o sesiones.
+Fixtures nuevas exclusivamente sintéticas, sin copiar estado del PAS privado.
+
+El procedimiento compartido PAS define cálculo/cierre en la materia y lectura en
+Planificación. Los helpers offline históricos V1 que siguen debajo no se activan
+para V2 ni se convierten en un servidor escritor. Una referencia vieja conserva
+su fecha; no se actualiza por crear un snapshot.
+
+Única validación pendiente, bajo autorización separada y con contratos/lector ya
+publicados: cierre real de la materia → un snapshot V2 DEV si hay cambio material
+→ readback exacto → barra en QA → lectura de la misma fila desde Planificación.
+Un emisor en vuelo, un intento; incertidumbre implica cuarentena y cero reintentos.
+Sin cambios de Production, credenciales, variables ni infraestructura.
 
 El lector actual admite el prefijo contractual con un sufijo de evaluación/sesión.
 Ese identificador no es prueba de digest; los helpers offline que exigen SHA no

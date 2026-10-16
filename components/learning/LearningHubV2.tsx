@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { AssessmentPreparation } from '@/components/learning/AssessmentPreparation';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { effectiveAssessmentReadiness, matchSubjectProgress } from '@/lib/study-engine/catalog';
@@ -128,7 +129,6 @@ export function LearningHubV2({
           <div className={styles.subjects}>
             {subjects.map((subject) => {
               const progress = subject.progress;
-              const progressPercent = progress?.payload.progressPercent ?? null;
               const readiness = effectiveAssessmentReadiness(subject);
               const next = progress?.payload.nextBestActivity ?? null;
               const setCount = subject.topics.reduce(
@@ -143,7 +143,11 @@ export function LearningHubV2({
                       <span className={styles.kicker}>{assessmentLabel(subject)}</span>
                       <h3>{subject.name}</h3>
                     </div>
-                    <span className={styles.readiness}>{readinessLabel(readiness)}</span>
+                    <span className={styles.readiness}>
+                      {progress?.payload.preparationEstimate
+                        ? 'Estimación provisional'
+                        : readinessLabel(readiness)}
+                    </span>
                   </div>
 
                   <div className={styles.meta}>
@@ -160,20 +164,11 @@ export function LearningHubV2({
                       </span>
                     ) : null}
                     <span>
-                      {progressPercent === null
-                        ? 'Preparación sin medir'
-                        : `Preparación ${progressPercent}%`}
-                    </span>
-                    <span>
                       {setCount > 0 ? `${setCount} set(s) de estudio` : 'Sets por resolver'}
                     </span>
                   </div>
 
-                  {progressPercent !== null ? (
-                    <div className={styles.track} aria-hidden="true">
-                      <span style={{ width: `${progressPercent}%` }} />
-                    </div>
-                  ) : null}
+                  <AssessmentPreparation snapshot={progress} subjectName={subject.name} />
 
                   {subject.evidenceNotice ? (
                     <p className={styles.current}>{subject.evidenceNotice}</p>
