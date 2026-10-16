@@ -1,15 +1,21 @@
 import { BookOpen, ChevronDown, CircleAlert, Layers3, Play } from 'lucide-react';
 
+import { AssessmentPreparation } from '@/components/learning/AssessmentPreparation';
 import { Button } from '@/components/ui/Button';
-import { matchSubjectProgress } from '@/lib/study-engine/catalog';
+import { effectiveAssessmentReadiness, matchSubjectProgress } from '@/lib/study-engine/catalog';
 import type { AssessmentProgressRead } from '@/types/assessment-progress';
 import type { StudyCatalogRead, StudyCatalogSubject } from '@/types/study-catalog';
 
 import styles from './StudyCatalog.module.scss';
 
 function assessmentLabel(subject: StudyCatalogSubject): string {
+  if (subject.assessment?.label) return subject.assessment.label;
   const id = subject.assessment?.id;
-  if (!id) return 'Sin evaluación activa resuelta';
+  if (!id) {
+    return subject.id === 'green'
+      ? 'Sin próxima evaluación verificada'
+      : 'Sin evaluación siguiente verificada';
+  }
 
   const normalized = id.toLowerCase();
   const p = /-p(\d+)$/.exec(normalized);
@@ -59,25 +65,30 @@ export function StudyCatalog({
           <p className={styles.eyebrow}>Facultad · 2026</p>
           <h2 id="study-catalog-title">Tus materias</h2>
           <p>
-            Elegí una materia para ver su evaluación, temas y mazos. El progreso se muestra solo
-            cuando existe evidencia canónica; “sin medir” no significa 0%.
+            Elegí una materia para ver su evaluación, temas y mazos. La preparación estimada se
+            identifica como provisional, con confianza y fecha; “sin medir” no significa 0%.
           </p>
         </div>
         <span className={styles.count}>{subjects.length} activas</span>
       </div>
 
       {catalog.notice ? (
-        <div className={styles.notice}>
+        <div className={styles.notice} role="status">
           <CircleAlert size={16} aria-hidden="true" />
           <span>{catalog.notice}</span>
+        </div>
+      ) : null}
+      {assessmentProgress.notice ? (
+        <div className={styles.notice} role="status">
+          <CircleAlert size={16} aria-hidden="true" />
+          <span>{assessmentProgress.notice}</span>
         </div>
       ) : null}
 
       <div className={styles.grid}>
         {subjects.map((subject) => {
           const progress = subject.progress;
-          const progressPercent = progress?.payload.progressPercent ?? null;
-          const readiness = progress?.payload.readinessBand ?? subject.readinessBand ?? 'unknown';
+          const readiness = effectiveAssessmentReadiness(subject);
 
           return (
             <details key={subject.id} className={styles.card}>
@@ -96,18 +107,13 @@ export function StudyCatalog({
                     <span>{structureLabel(subject)}</span>
                   </div>
                   <div className={styles['progress-row']}>
-                    <span className={styles['progress-primary']}>
-                      {progressPercent === null
-                        ? 'Preparación sin medir'
-                        : `Preparación ${progressPercent}%`}
+                    <span>
+                      {progress?.payload.preparationEstimate
+                        ? 'Estimación provisional'
+                        : readinessLabel(readiness)}
                     </span>
-                    <span>{readinessLabel(readiness)}</span>
                   </div>
-                  {progressPercent !== null ? (
-                    <div className={styles['progress-track']} aria-hidden="true">
-                      <span style={{ width: `${progressPercent}%` }} />
-                    </div>
-                  ) : null}
+                  <AssessmentPreparation snapshot={progress} subjectName={subject.name} />
                 </div>
                 <ChevronDown className={styles.chevron} size={18} aria-hidden="true" />
               </summary>
