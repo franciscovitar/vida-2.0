@@ -1,5 +1,18 @@
 # Vida 2.0 — Work checkpoint
 
+## Alcance universitario vigente — conectores nativos, 2026-10-16
+
+- Solo ChatGPT, GitHub privado, Sheets/Drive y Notion cuando corresponda, usando
+  conectores existentes. Cancelados para este objetivo los requisitos de MCP
+  personalizado, servidor escritor y store académico adicional.
+- IOP lectores PASS preservado. Pendiente observar herramienta nativa de escritura
+  y capacidades de edición desde IOP, sin mutaciones. No inferirlo desde Codex.
+- Protocolo PAS local adaptado: intención estable, DEV, validación, prelectura
+  completa, replay sin append, un intento y readback exacto. Serialización operativa
+  para un piloto acotado; no garantiza exclusión atómica ni exactly-once concurrente.
+- Modelos/commits anteriores preservados y desactivados; no son requisitos del
+  flujo actual. Vida sigue leyendo. Sin push, deploy, permisos ni escrituras reales.
+
 ## Assessment Progress — cierre DEV local, 2026-10-16
 
 - `VERIFIED`: contratos de PAS main revisados; proyección estricta del cierre y

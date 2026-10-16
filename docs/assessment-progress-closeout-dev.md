@@ -1,5 +1,30 @@
 # Assessment Progress — cierre de sesión DEV
 
+## Alcance vigente: conectores nativos exclusivamente
+
+Cambio obligatorio del owner: ChatGPT + GitHub privado + Google Sheets/Drive y
+Notion cuando corresponda, mediante los conectores existentes. Quedan cancelados
+para este objetivo los requisitos de app MCP, servidor escritor y store CAS
+externo. No continuar las investigaciones anteriores de esos componentes.
+
+El candidato/modelo APP se conserva intacto y desactivado como trabajo histórico;
+no es requisito ni permiso para el nuevo flujo. Vida conserva su lector actual.
+El resto de este documento describe el diseño anterior y no habilita infraestructura.
+
+IOP lectura sigue PASS. El chequeo pendiente es observar en el propio IOP la
+herramienta nativa de escritura y metadata de capacidades de edición, sin ejecutar
+mutaciones. Su presencia en este chat no demuestra disponibilidad en IOP;
+`canEdit=true` tampoco demuestra por sí solo permisos OAuth de escritura.
+En PAS, procedimiento actual: `IOP_NATIVE_SHEETS_PREFLIGHT.md` y
+`SESSION_CLOSEOUT_RUNTIME.md`. Todavía son cambios locales, no publicados en main.
+
+Límite: prelectura → append no ofrece exclusión atómica entre chats. La opción
+mínima dentro de alcance es un piloto IOP autorizado, operacionalmente serializado,
+un solo intento y readback exacto; sin afirmar exactly-once ni habilitar escritura
+concurrente desatendida. Un resultado incierto bloquea nuevos envíos de esa intención.
+
+---
+
 Estado: **SHADOW_READ_ONLY; automatización recurrente BLOCKED**. Implementación
 local, sin endpoint, adaptador de persistencia ni transporte conectado.
 
