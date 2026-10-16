@@ -9,6 +9,12 @@
   diff-check y build completo PASS. CAS probado solo con modelo de tests.
 - `OWNER_REPORTED`: transporte individual académico DEV → readback → QA autenticada
   confirmado por el owner. No se repitió ni se copiaron sus datos a GitHub.
+- Evidencia posterior IOP: invocación real de lectores GitHub privado y Sheets DEV
+  PASS; no repetir auditoría ni exigir otras seis materias. Writer pendiente.
+- Auditoría CAS: APIs Vercel de integración Upstash y env metadata sin descifrar
+  devolvieron 403. No hay credenciales locales; no se ejecutaron comandos del store.
+  EVAL sin TTL no acredita por sí solo retención/aislamiento ni CAS tras failover.
+  Apps MCP privadas con escritura en la cuenta IOP: owner responde NO VERIFICADO.
 - `BLOCKED`: automatización recurrente sin emisor certificado ni prueba de CAS
   durable, aislamiento y retención no expirante. El modelo local no es un escritor.
 - Alcance confirmado: los siete ChatGPT Projects deben cargar reglas compartidas

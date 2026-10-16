@@ -119,6 +119,26 @@ recurrente ni autorización implícita para filas reales.
 
 ## Siguiente paso para IOP
 
+Actualización del owner: los conectores de lectura de PAS privado y Sheets DEV
+fueron invocados desde el propio Project IOP con resultado PASS. No se reabren
+esas auditorías ni se exige comprobar las otras seis materias para este piloto.
+Esto no certifica herramienta escritora ni control de concurrencia.
+
+Inspección posterior del store: la consulta de integraciones Upstash y el listado
+de variables **sin descifrar** en Vercel devolvieron 403. No se leyeron secretos,
+ejecutaron comandos Redis ni intentaron cambios de permisos. Se revisaron las
+primitivas existentes: Actions/Automations usan TTL; Planning tiene EVAL sin TTL
+por snapshot, pero no el agregado académico ni pruebas del proveedor ante fallos.
+La documentación oficial distingue persistencia y Lua atómico de consistencia
+eventual; no acredita por sí sola la garantía requerida durante failover.
+
+Siguiente acción ejecutable: el owner comprueba, sin cambiar nada, si su cuenta
+de ChatGPT permite conectar una app MCP privada con acciones de escritura. Su
+respuesta actual es **NO VERIFICADO**. La inspección del store existente también
+requiere metadatos desde su panel de owner debido al 403; no valores de credenciales.
+No se instala un backend alternativo ni se añade otro modelo offline. El detalle
+acotado está en PAS `AI/projects/university/IOP_WRITER_UNBLOCK_2026-10-16.md`.
+
 El alcance incluye los siete ChatGPT Projects de materias como emisores reales,
 además del escritor y lector QA de Vida. Un endpoint en Vida no se convierte
 automáticamente en herramienta de ChatGPT; la sesión Auth.js del navegador no
