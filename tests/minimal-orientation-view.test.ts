@@ -101,7 +101,10 @@ test('MIN-VIEW3: empty and unavailable are different truthful states', () => {
 
 test('MIN-VIEW4: V2 transport depends on Sheets only; V1 remains separate', () => {
   const file = readFileSync('lib/data/daily-orientation-v2-source.ts', 'utf8');
-  assert.match(file, /resolveScopedSheetReadTarget\(process\.env\.DAILY_PLANNING_V2_SHEETS_TARGET\)/);
+  assert.match(
+    file,
+    /resolveScopedSheetReadTarget\(process\.env\.DAILY_PLANNING_V2_SHEETS_TARGET\)/,
+  );
   assert.match(file, /readTabValues\(DAILY_PLAN_TAB, target\)/);
   assert.match(file, /requireAuthorizedSession/);
   assert.doesNotMatch(
@@ -109,3 +112,26 @@ test('MIN-VIEW4: V2 transport depends on Sheets only; V1 remains separate', () =
     /loadDailyPlanningContextUncached|loadCalendar|loadNotion|loadAssessments/,
   );
 });
+
+for (const fields of [['minimum'], ['notNow'], ['minimum', 'notNow']] as const) {
+  test(`unverified focus refs in ${fields.join(' and ')} degrade the view with a complete notice`, () => {
+    const body: DailyOrientationPayload = {
+      ...payload,
+      attention: [],
+      upcoming: [],
+      minimum: [],
+      notNow: [],
+    };
+    for (const field of fields) {
+      body[field] = [{ ...payload.minimum[0]!, ref: 'hidden-focus-ref' }];
+    }
+    const view = buildMinimalOrientationView(read(body), DAY);
+    assert.equal(view.readStatus, 'ready');
+    assert.equal(view.status, 'degraded');
+    assert.equal(view.quality.unresolvedRefs, fields.length);
+    assert.match(view.notice ?? '', new RegExp(`${fields.length} entrada`));
+    assert.deepEqual(view.minimum, []);
+    assert.deepEqual(view.notNow, []);
+    assert.doesNotMatch(JSON.stringify(view), /hidden-focus-ref/);
+  });
+}

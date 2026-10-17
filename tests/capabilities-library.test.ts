@@ -19,6 +19,7 @@ import {
 
 import {
   initialDiscoveries,
+  projectCapabilityLibraryForClient,
   projectCapabilityData,
   validCapabilityDataset,
 } from '@/lib/learning/capabilities-model';
@@ -268,6 +269,34 @@ test('unavailable library retains its generic notice without surfacing controls 
   assert.match(html, /role="status"/);
   assert.match(html, /Biblioteca no disponible/);
   assert.doesNotMatch(html, /<article|<input|PAS main/);
+});
+
+test('capability presentation does not expose private repository references', () => {
+  const library = libraryFixture();
+  const html = renderToStaticMarkup(createElement(CapabilitiesLibrary, { library }));
+  assert.doesNotMatch(html, new RegExp(`${library.sourceCommit.slice(0, 12)}|PAS main`));
+  assert.match(html, /2030-01-01/);
+});
+
+test('client library serialization excludes server provenance and unexpected metadata', () => {
+  const library = { ...libraryFixture(), privateMetadata: 'synthetic-server-only' };
+  const view = projectCapabilityLibraryForClient(library);
+  assert.deepEqual(Object.keys(view).sort(), [
+    'initialIds',
+    'items',
+    'notice',
+    'status',
+    'updated',
+  ]);
+  assert.deepEqual(view.items, library.items);
+  assert.deepEqual(view.initialIds, library.initialIds);
+  assert.equal(view.updated, library.updated);
+  assert.doesNotMatch(JSON.stringify(view), /sourceCommit|aaaaaaaaaaaa|synthetic-server-only/);
+  const page = readFileSync(
+    join(process.cwd(), 'app/(app)/aprendizaje/capacidades/page.tsx'),
+    'utf8',
+  );
+  assert.match(page, /library=\{projectCapabilityLibraryForClient\(library\)\}/);
 });
 
 test('structured level estimates keep units, numeric level order and confidence without personalized fields', () => {

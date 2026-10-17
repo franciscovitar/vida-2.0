@@ -4,6 +4,7 @@ import { LibraryBig } from 'lucide-react';
 import { CapabilitiesLibrary } from '@/components/learning/CapabilitiesLibrary';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
+import { projectCapabilityLibraryForClient } from '@/lib/learning/capabilities-model';
 import { getCapabilityLibrary } from '@/lib/learning/capabilities-source';
 import pageStyles from '../../page.module.scss';
 
@@ -22,7 +23,7 @@ export default async function CapabilitiesPage() {
         icon={LibraryBig}
         domain="learning"
       />
-      <CapabilitiesLibrary library={library} />
+      <CapabilitiesLibrary library={projectCapabilityLibraryForClient(library)} />
     </div>
   );
 }

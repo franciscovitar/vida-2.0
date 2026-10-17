@@ -52,6 +52,21 @@ export type CapabilityLibraryRead = {
   notice: string | null;
 };
 
+export type CapabilityLibraryView = Omit<CapabilityLibraryRead, 'sourceCommit'>;
+
+/** Explicit client projection keeps private repository provenance on the server. */
+export function projectCapabilityLibraryForClient(
+  library: CapabilityLibraryRead,
+): CapabilityLibraryView {
+  return {
+    status: library.status,
+    items: library.items,
+    initialIds: library.initialIds,
+    updated: library.updated,
+    notice: library.notice,
+  };
+}
+
 function record(value: unknown): JsonRecord {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as JsonRecord) : {};
 }

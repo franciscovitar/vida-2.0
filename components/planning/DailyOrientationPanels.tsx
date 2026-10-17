@@ -225,6 +225,7 @@ export function DailyAttentionPanel({ orientation }: { orientation: DailyOrienta
  * Vida displays their verified-at-analysis claims; it does not query Google
  * Calendar or infer a free day from an empty list. */
 export function DailyUpcomingPanel({ orientation }: { orientation: DailyOrientationView }) {
+  const readFailed = isDailyOrientationV2ReadFailure(orientation.readStatus);
   return (
     <Card>
       <SectionHeader
@@ -235,7 +236,11 @@ export function DailyUpcomingPanel({ orientation }: { orientation: DailyOrientat
       />
       {orientation.upcoming.length === 0 ? (
         <div className={styles.empty}>
-          <strong>No hay próximas fechas confirmadas en este análisis.</strong>
+          <strong>
+            {readFailed
+              ? 'No se pudieron verificar las próximas fechas.'
+              : 'No hay próximas fechas confirmadas en este análisis.'}
+          </strong>
           <p>
             Esto no confirma que estés libre. Revisá tus fuentes actuales en ChatGPT antes de
             decidir.

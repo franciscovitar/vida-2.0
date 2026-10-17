@@ -4,7 +4,7 @@ import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Search, X } from 'l
 import { useId, useMemo, useRef, useState } from 'react';
 
 import { Card } from '@/components/ui/Card';
-import type { CapabilityItem, CapabilityLibraryRead } from '@/lib/learning/capabilities-source';
+import type { CapabilityItem, CapabilityLibraryView } from '@/lib/learning/capabilities-model';
 
 import {
   CAPABILITY_PAGE_SIZE,
@@ -202,7 +202,7 @@ function CapabilityTile({
   );
 }
 
-export function CapabilitiesLibrary({ library }: { library: CapabilityLibraryRead }) {
+export function CapabilitiesLibrary({ library }: { library: CapabilityLibraryView }) {
   const prefix = useId();
   const resultsHeading = useRef<HTMLHeadingElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -433,8 +433,7 @@ export function CapabilitiesLibrary({ library }: { library: CapabilityLibraryRea
 
       <Card compact>
         <p className={styles.provenance}>
-          Fuente privada: PAS main
-          {library.sourceCommit ? ` · ${library.sourceCommit.slice(0, 12)}` : ''}
+          Biblioteca privada
           {library.updated ? ` · datos actualizados ${library.updated}` : ''}. Las referencias de
           tiempo son genéricas; no estiman tu tiempo personal.
         </p>

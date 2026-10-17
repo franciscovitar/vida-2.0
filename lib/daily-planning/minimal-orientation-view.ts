@@ -49,6 +49,9 @@ export function buildMinimalOrientationView(
     });
   }
 
+  const minimum = snapshot ? resolveFocus(snapshot.payload.minimum) : [];
+  const notNow = snapshot ? resolveFocus(snapshot.payload.notNow) : [];
+
   const status: DailyOrientationView['status'] = snapshot
     ? read.status === 'ready' && unresolvedRefs === 0
       ? 'ready'
@@ -73,8 +76,8 @@ export function buildMinimalOrientationView(
     attention,
     upcoming,
     lifeSignals: snapshot?.payload.lifeSignals ?? [],
-    minimum: snapshot ? resolveFocus(snapshot.payload.minimum) : [],
-    notNow: snapshot ? resolveFocus(snapshot.payload.notNow) : [],
+    minimum,
+    notNow,
     quality: {
       unresolvedRefs,
       dateConflicts: 0,
