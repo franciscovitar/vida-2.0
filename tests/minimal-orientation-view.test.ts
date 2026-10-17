@@ -101,7 +101,8 @@ test('MIN-VIEW3: empty and unavailable are different truthful states', () => {
 
 test('MIN-VIEW4: V2 transport depends on Sheets only; V1 remains separate', () => {
   const file = readFileSync('lib/data/daily-orientation-v2-source.ts', 'utf8');
-  assert.match(file, /readTabValues\(DAILY_PLAN_TAB\)/);
+  assert.match(file, /resolveScopedSheetReadTarget\(process\.env\.DAILY_PLANNING_V2_SHEETS_TARGET\)/);
+  assert.match(file, /readTabValues\(DAILY_PLAN_TAB, target\)/);
   assert.match(file, /requireAuthorizedSession/);
   assert.doesNotMatch(
     file,
