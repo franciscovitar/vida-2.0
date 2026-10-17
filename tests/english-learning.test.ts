@@ -9,7 +9,8 @@ test('English Speaking snapshot is a real sanitized learner projection', () => {
 
   assert.equal(raw.schema_version, 1);
   assert.equal(raw.project_id, 'english-speaking-lab');
-  assert.ok(raw.baseline_status === 'collecting' || raw.baseline_status === 'ready');
+  // The current canonical learner can be provisional before mastery is established.
+  assert.ok(['collecting', 'provisional', 'ready'].includes(String(raw.baseline_status)));
   assert.equal(typeof raw.summary, 'string');
   assert.equal(typeof raw.updated, 'string');
   assert.ok(raw.dimensions && typeof raw.dimensions === 'object');

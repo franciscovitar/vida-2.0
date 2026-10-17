@@ -26,28 +26,28 @@ test('F-ROLL1. Flag off keeps certified V1 even with a valid V2 snapshot', () =>
   assert.equal(shouldRenderStagedDailyOrientationV2(false, null), false);
 });
 
-test('F-ROLL2. Flag on with no V2 row stays on V1 during staged migration', () => {
+test('F-ROLL2. Flag on shows a truthful V2 empty state instead of masking it', () => {
   assert.equal(shouldRenderStagedDailyOrientationV2(true, null), false);
   assert.equal(
     shouldRenderStagedDailyOrientationV2(
       true,
       orientation({ readStatus: 'empty', generatedAt: null, review: null }),
     ),
-    false,
+    true,
   );
 });
 
-test('F-ROLL3. Confirmed empty read without persisted fields cannot displace V1', () => {
+test('F-ROLL3. Confirmed empty V2 remains visible while no snapshot is saved', () => {
   assert.equal(
     shouldRenderStagedDailyOrientationV2(
       true,
       orientation({ readStatus: 'empty', generatedAt: null }),
     ),
-    false,
+    true,
   );
   assert.equal(
     shouldRenderStagedDailyOrientationV2(true, orientation({ readStatus: 'empty', review: null })),
-    false,
+    true,
   );
 });
 
@@ -55,13 +55,14 @@ test('F-ROLL4. Flag on and persisted daily review can switch the view to V2', ()
   assert.equal(shouldRenderStagedDailyOrientationV2(true, orientation()), true);
 });
 
-test('F-ROLL5. Both Hoy and Planificacion routes actually use the staged selector', () => {
-  const routes = ['app/(app)/page.tsx', 'app/(app)/planificacion/page.tsx'];
-  for (const path of routes) {
-    const content = readFileSync(path, 'utf8');
-    assert.match(content, /shouldRenderStagedDailyOrientationV2\(v2Enabled, orientation\)/);
-    assert.doesNotMatch(content, /\{v2Enabled && orientation \?/);
-  }
+test('F-ROLL5. Hoy keeps staged selection; Planificacion chooses a minimal V2 route', () => {
+  const hoy = readFileSync('app/(app)/page.tsx', 'utf8');
+  assert.ok(hoy.includes('shouldRenderStagedDailyOrientationV2(v2Enabled, orientation)'));
+  const planning = readFileSync('app/(app)/planificacion/page.tsx', 'utf8');
+  assert.ok(planning.includes('if (isDailyPlanningV2UiEnabled())'));
+  assert.ok(planning.includes('<MinimalPlanningOverview orientation={orientation} />'));
+  assert.ok(planning.includes('<PlanningWorkspace'));
+  assert.doesNotMatch(planning, /shouldRenderStagedDailyOrientationV2/);
 });
 
 test('F-ROLL6. Read failure does not silently switch to V1', () => {
@@ -93,11 +94,11 @@ test('F-ROLL8. Flag off keeps V1, including during source failure', () => {
   );
 });
 
-test('F-ROLL9. New read after source recovery selects V2; confirmed empty selects V1', () => {
+test('F-ROLL9. Recovery and confirmed empty both keep an enabled V2 visible', () => {
   const error = orientation({ readStatus: 'unavailable', generatedAt: null, review: null });
   const refreshed = orientation({ readStatus: 'ready' });
   const empty = orientation({ readStatus: 'empty', generatedAt: null, review: null });
   assert.equal(shouldRenderStagedDailyOrientationV2(true, error), true);
   assert.equal(shouldRenderStagedDailyOrientationV2(true, refreshed), true);
-  assert.equal(shouldRenderStagedDailyOrientationV2(true, empty), false);
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, empty), true);
 });

@@ -104,6 +104,41 @@ test('null progress remains unknown rather than fake 0', () => {
   assert.equal(read.snapshots[0]?.payload.progressPercent, null);
 });
 
+test('reader accepts synthetic assessment/session identities without treating them as content hashes', () => {
+  const makeRow = (day: string, count: number) => [
+    `vida2:assessment-progress:v1:synthetic-exam-a:chat-2030010${day}T120000Z`,
+    'synthetic-exam-a',
+    'synthetic-subject-a',
+    '2030-02-02',
+    `2030-01-0${day}T12:00:00Z`,
+    JSON.stringify({
+      name: 'Evaluación sintética A',
+      type: 'written-exam',
+      status: 'active',
+      progressPercent: null,
+      progressConfidence: 'low',
+      readinessBand: 'unknown',
+      remainingMinutesLow: null,
+      remainingMinutesHigh: null,
+      etaConfidence: 'low',
+      criticalGaps: ['Brecha sintética'],
+      nextBestActivity: 'Actividad sintética siguiente',
+      scopeComplete: false,
+      evidenceCount: count,
+    }),
+    'chatgpt_subject_project',
+    'assessment-progress-v1',
+  ];
+  const latest = makeRow('2', 3);
+  const read = selectLatestAssessmentProgressSnapshots([HEADER, makeRow('1', 1), latest]);
+  assert.equal(read.status, 'ready');
+  assert.equal(read.snapshots.length, 1);
+  assert.equal(read.snapshots[0].snapshotId, latest[0]);
+  assert.equal(read.snapshots[0].payload.progressPercent, null);
+  assert.equal(read.snapshots[0].payload.scopeComplete, false);
+  assert.equal(read.snapshots[0].payload.evidenceCount, 3);
+});
+
 test('Facultad exposes bounded active assessment summary', () => {
   const notion = fullDashboard();
   const assessmentProgress = selectLatestAssessmentProgressSnapshots([

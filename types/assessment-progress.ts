@@ -2,6 +2,17 @@ export type AssessmentProgressConfidence = 'low' | 'medium' | 'high';
 export type AssessmentReadinessBand =
   'not-ready' | 'developing' | 'close' | 'exam-ready' | 'unknown';
 export type AssessmentLifecycleStatus = 'planned' | 'active' | 'complete' | 'cancelled';
+export type AssessmentProgressVersion = 'assessment-progress-v1' | 'assessment-progress-v2';
+
+/** Estimación del ChatGPT Project de materia; nunca reemplaza progressPercent. */
+export interface AssessmentPreparationEstimate {
+  percent: number;
+  confidence: AssessmentProgressConfidence;
+  asOf: string;
+  basis: string;
+  rangeLow: number | null;
+  rangeHigh: number | null;
+}
 
 export interface AssessmentProgressPayload {
   name: string;
@@ -18,6 +29,8 @@ export interface AssessmentProgressPayload {
   nextBestActivity: string | null;
   scopeComplete: boolean;
   evidenceCount: number;
+  /** Solo V2. Ausente en filas históricas V1. */
+  preparationEstimate?: AssessmentPreparationEstimate | null;
 }
 
 export interface AssessmentProgressSnapshot {

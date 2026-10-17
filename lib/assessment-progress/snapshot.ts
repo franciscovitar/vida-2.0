@@ -2,10 +2,12 @@ import { parsePlanningCivilDay } from '@/lib/planning/civil-day';
 
 import type {
   AssessmentLifecycleStatus,
+  AssessmentPreparationEstimate,
   AssessmentProgressConfidence,
   AssessmentProgressPayload,
   AssessmentProgressRead,
   AssessmentProgressSnapshot,
+  AssessmentProgressVersion,
   AssessmentReadinessBand,
 } from '@/types/assessment-progress';
 
@@ -20,7 +22,6 @@ const HEADERS = [
   'Versión',
 ] as const;
 const SOURCE = 'chatgpt_subject_project';
-const VERSION = 'assessment-progress-v1';
 const YMD = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_TEXT = 240;
 const MAX_GAPS = 8;
@@ -90,7 +91,39 @@ function parseCriticalGaps(value: unknown): string[] | null {
   return out;
 }
 
-export function parseAssessmentProgressPayload(value: unknown): AssessmentProgressPayload | null {
+function parsePreparationEstimate(value: unknown): AssessmentPreparationEstimate | null {
+  if (
+    !isObject(value) ||
+    !hasOnlyKeys(value, ['percent', 'confidence', 'asOf', 'basis', 'rangeLow', 'rangeHigh'])
+  )
+    return null;
+  const percent = nullableInt(value.percent, 0, 100);
+  const estimateConfidence = confidence(value.confidence);
+  const asOf = boundedString(value.asOf, 10);
+  const basis = boundedString(value.basis, 240);
+  const rangeLow = nullableInt(value.rangeLow, 0, 100);
+  const rangeHigh = nullableInt(value.rangeHigh, 0, 100);
+  if (
+    percent === null ||
+    percent === undefined ||
+    !estimateConfidence ||
+    !asOf ||
+    !YMD.test(asOf) ||
+    parsePlanningCivilDay(asOf) === null ||
+    !basis ||
+    rangeLow === undefined ||
+    rangeHigh === undefined ||
+    (rangeLow === null) !== (rangeHigh === null) ||
+    (rangeLow !== null && rangeHigh !== null && (rangeLow > percent || rangeHigh < percent))
+  )
+    return null;
+  return { percent, confidence: estimateConfidence, asOf, basis, rangeLow, rangeHigh };
+}
+
+export function parseAssessmentProgressPayload(
+  value: unknown,
+  version: AssessmentProgressVersion = 'assessment-progress-v1',
+): AssessmentProgressPayload | null {
   if (!isObject(value)) return null;
   const keys = [
     'name',
@@ -107,7 +140,13 @@ export function parseAssessmentProgressPayload(value: unknown): AssessmentProgre
     'scopeComplete',
     'evidenceCount',
   ] as const;
-  if (!hasOnlyKeys(value, keys)) return null;
+  if (
+    !hasOnlyKeys(
+      value,
+      version === 'assessment-progress-v2' ? [...keys, 'preparationEstimate'] : keys,
+    )
+  )
+    return null;
 
   const name = boundedString(value.name, 160);
   const type = boundedString(value.type, 80);
@@ -142,6 +181,15 @@ export function parseAssessmentProgressPayload(value: unknown): AssessmentProgre
     return null;
   }
 
+  const estimate =
+    version === 'assessment-progress-v2' && value.preparationEstimate !== null
+      ? parsePreparationEstimate(value.preparationEstimate)
+      : null;
+  if (version === 'assessment-progress-v2' && value.preparationEstimate !== null && !estimate)
+    return null;
+  if (estimate && (progressPercent !== null || evidenceCount === 0 || band !== 'unknown'))
+    return null;
+
   if (
     remainingMinutesLow !== null &&
     remainingMinutesHigh !== null &&
@@ -175,6 +223,7 @@ export function parseAssessmentProgressPayload(value: unknown): AssessmentProgre
     nextBestActivity,
     scopeComplete,
     evidenceCount,
+    ...(version === 'assessment-progress-v2' ? { preparationEstimate: estimate } : {}),
   };
 }
 
@@ -197,6 +246,10 @@ function parseRow(row: readonly unknown[]): AssessmentProgressSnapshot | null {
   const assessmentId = boundedString(assessmentRaw, 160);
   const subjectId = boundedString(subjectRaw, 80);
   const generatedAt = boundedString(generatedRaw, 80);
+  const version =
+    versionRaw === 'assessment-progress-v1' || versionRaw === 'assessment-progress-v2'
+      ? versionRaw
+      : null;
 
   const assessmentDate =
     dateRaw === '' || dateRaw === null || dateRaw === undefined
@@ -207,15 +260,22 @@ function parseRow(row: readonly unknown[]): AssessmentProgressSnapshot | null {
 
   if (
     !snapshotId ||
-    !snapshotId.startsWith('vida2:assessment-progress:v1:') ||
+    !version ||
+    !snapshotId.startsWith(
+      `vida2:assessment-progress:${version === 'assessment-progress-v2' ? 'v2' : 'v1'}:`,
+    ) ||
     !assessmentId ||
+    (version === 'assessment-progress-v2' &&
+      (!snapshotId.startsWith(`vida2:assessment-progress:v2:${assessmentId}:`) ||
+        snapshotId.length <= `vida2:assessment-progress:v2:${assessmentId}:`.length)) ||
     !subjectId ||
     assessmentDate === undefined ||
     (assessmentDate !== null && parsePlanningCivilDay(assessmentDate) === null) ||
     !generatedAt ||
     Number.isNaN(Date.parse(generatedAt)) ||
+    (version === 'assessment-progress-v2' &&
+      parsePlanningCivilDay(generatedAt.slice(0, 10)) === null) ||
     sourceRaw !== SOURCE ||
-    versionRaw !== VERSION ||
     typeof payloadRaw !== 'string'
   ) {
     return null;
@@ -227,8 +287,11 @@ function parseRow(row: readonly unknown[]): AssessmentProgressSnapshot | null {
   } catch {
     return null;
   }
-  const payload = parseAssessmentProgressPayload(decoded);
+  const payload = parseAssessmentProgressPayload(decoded, version);
   if (!payload) return null;
+  // Compare civil dates as carried by the source, not an invented freshness time.
+  if (payload.preparationEstimate && payload.preparationEstimate.asOf > generatedAt.slice(0, 10))
+    return null;
 
   return {
     snapshotId,
