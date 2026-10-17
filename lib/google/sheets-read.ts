@@ -5,7 +5,8 @@
 import { sanitizeSheetValues } from '@/lib/data/plain';
 import { assertResolvedSpreadsheetId } from '@/lib/validation/spreadsheet-id';
 
-import { getGoogleConfig } from '../data/config';
+import { getScopedGoogleReadConfig } from './scoped-sheet-read';
+import type { SheetsTargetName } from './spreadsheet-target-core';
 import { fetchAccessToken, READONLY_SCOPE, SHEETS_BASE } from './auth';
 import type { ReadTabResult, SheetReadCode } from './errors';
 
@@ -22,9 +23,12 @@ function mapHttpStatus(status: number, bodyText: string): SheetReadCode {
  * Lee los valores de una pestaña completa (rango = nombre de la pestaña).
  * Devuelve valores planos serializables o un código de error; nunca lanza.
  */
-export async function readTabValues(tab: string): Promise<ReadTabResult> {
+export async function readTabValues(
+  tab: string,
+  readTarget?: SheetsTargetName,
+): Promise<ReadTabResult> {
   try {
-    const result = getGoogleConfig();
+    const result = getScopedGoogleReadConfig(process.env, readTarget);
     if (!result.ok) {
       return { ok: false, code: 'not-configured' };
     }

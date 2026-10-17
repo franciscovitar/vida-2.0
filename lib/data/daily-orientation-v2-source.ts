@@ -7,6 +7,7 @@ import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { buildMinimalOrientationView } from '@/lib/daily-planning/minimal-orientation-view';
 import { selectLatestDailyOrientationSnapshot } from '@/lib/daily-planning/orientation-v2';
 import { readTabValues } from '@/lib/google/sheets-read';
+import { resolveScopedSheetReadTarget } from '@/lib/google/scoped-sheet-read';
 import type { SheetReadCode } from '@/lib/google/errors';
 import type { DailyOrientationSnapshotRead } from '@/types/daily-orientation-v2';
 
@@ -32,9 +33,11 @@ export const getDailyOrientationV2View = cache(async () => {
   const date = todayInBuenosAires();
   // Nothing else: no Calendar, Notion, project, university or health fetch.
   // Those inputs are checked by ChatGPT BEFORE publishing the snapshot.
-  const tab = await readTabValues(DAILY_PLAN_TAB);
-  const read = tab.ok
+  // Opt-in source binding only for this V2 reader; never redirect V1 or the global target.
+  const target = resolveScopedSheetReadTarget(process.env.DAILY_PLANNING_V2_SHEETS_TARGET);
+  const tab = target ? await readTabValues(DAILY_PLAN_TAB, target) : null;
+  const read = tab?.ok
     ? selectLatestDailyOrientationSnapshot(tab.values, date)
-    : unavailable(tab.code);
+    : unavailable(tab?.code ?? 'not-configured');
   return buildMinimalOrientationView(read, date);
 });

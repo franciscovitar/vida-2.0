@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { DocumentaryStableKeyPage } from '@/components/web-catalog/DocumentaryStableKeyPage';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
-import { getAssessmentProgress } from '@/lib/data/assessment-progress-source';
+import { getAssessmentProgressForLearningV2 } from '@/lib/data/assessment-progress-source';
 import { isLearningHubV2Enabled } from '@/lib/learning/v2-config';
 import { getUniversityStudyCatalog } from '@/lib/study-engine/catalog-source';
 import { WEB_CATALOG_FIXED_ROUTES } from '@/lib/web-catalog/section-labels';
@@ -24,7 +24,7 @@ export default async function AprendizajePage() {
   if (v2Enabled) {
     const [catalog, assessmentProgress] = await Promise.all([
       getUniversityStudyCatalog(),
-      getAssessmentProgress(),
+      getAssessmentProgressForLearningV2(),
     ]);
 
     return (

@@ -5,6 +5,7 @@ import { cache } from 'react';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { selectLatestAssessmentProgressSnapshots } from '@/lib/assessment-progress/snapshot';
 import { readTabValues } from '@/lib/google/sheets-read';
+import { resolveScopedSheetReadTarget } from '@/lib/google/scoped-sheet-read';
 import type { SheetReadCode } from '@/lib/google/errors';
 import type { AssessmentProgressRead } from '@/types/assessment-progress';
 
@@ -36,6 +37,17 @@ export function unavailableAssessmentProgress(code: SheetReadCode): AssessmentPr
 
 export async function loadAssessmentProgressUncached(): Promise<AssessmentProgressRead> {
   const tab = await readTabValues(ASSESSMENT_PROGRESS_TAB);
+  return tab.ok
+    ? selectLatestAssessmentProgressSnapshots(tab.values)
+    : unavailableAssessmentProgress(tab.code);
+}
+
+/** Learning V2 only: explicit read target, independent of all V1 consumers. */
+export async function getAssessmentProgressForLearningV2(): Promise<AssessmentProgressRead> {
+  await requireAuthorizedSession();
+  const target = resolveScopedSheetReadTarget(process.env.ASSESSMENT_PROGRESS_V2_SHEETS_TARGET);
+  if (!target) return unavailableAssessmentProgress('not-configured');
+  const tab = await readTabValues(ASSESSMENT_PROGRESS_TAB, target);
   return tab.ok
     ? selectLatestAssessmentProgressSnapshots(tab.values)
     : unavailableAssessmentProgress(tab.code);
