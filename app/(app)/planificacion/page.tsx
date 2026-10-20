@@ -1,4 +1,5 @@
 import { CalendarRange } from 'lucide-react';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -53,6 +54,9 @@ export default async function PlanificacionPage({
           domain="productivity"
         />
         <MinimalPlanningOverview orientation={orientation} />
+        <p>
+          <Link href="/planificacion/en-que-quede">En qué quedé →</Link>
+        </p>
       </div>
     );
   }
