@@ -5,7 +5,11 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { StudyCatalog } from '@/components/study-engine/StudyCatalog';
 import { Button } from '@/components/ui/Button';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
-import { getAssessmentProgress } from '@/lib/data/assessment-progress-source';
+import {
+  getAssessmentProgress,
+  getAssessmentProgressForLearningV2,
+} from '@/lib/data/assessment-progress-source';
+import { isLearningHubV2Enabled } from '@/lib/learning/v2-config';
 import { getUniversityStudyCatalog } from '@/lib/study-engine/catalog-source';
 
 import pageStyles from '../../page.module.scss';
@@ -19,7 +23,7 @@ export default async function StudyEnginePage() {
 
   const [catalog, assessmentProgress] = await Promise.all([
     getUniversityStudyCatalog(),
-    getAssessmentProgress(),
+    isLearningHubV2Enabled() ? getAssessmentProgressForLearningV2() : getAssessmentProgress(),
   ]);
 
   return (

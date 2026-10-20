@@ -3,6 +3,7 @@ import { test } from 'node:test';
 
 import { selectLatestDailyOrientationSnapshot } from '@/lib/daily-planning/orientation-v2';
 import { buildDailyOrientationV2View } from '@/lib/daily-planning/orientation-v2-view';
+import { shouldRenderStagedDailyOrientationV2 } from '@/lib/daily-planning/orientation-rollout';
 import type { DailyPlanningContext } from '@/types/daily-planning-intelligence';
 
 const TODAY = '2026-10-07';
@@ -338,4 +339,119 @@ test('F-OR6. Degraded sources cannot expose stale referenced advice in the brows
   assert.deepEqual(view.upcoming, []);
   assert.equal(view.quality.unresolvedRefs, 2);
   assert.doesNotMatch(serialized, /task-1|project-1|fixture-private-journal-text/);
+});
+
+test('F-ID1. Repeated V2 snapshot ID with conflicting payload fails closed', () => {
+  const first = v2Row(payload());
+  const changed = JSON.parse(payload()) as { review: { headline: string } };
+  changed.review.headline = 'Contradictory snapshot';
+  const second = v2Row(JSON.stringify(changed));
+  second[2] = '2026-10-07T09:00:00-03:00';
+
+  const read = selectLatestDailyOrientationSnapshot([HEADER, first, second], TODAY);
+  assert.equal(read.status, 'invalid');
+  assert.equal(read.snapshot, null);
+  assert.ok(read.invalidRows >= 2);
+  assert.match(read.notice ?? '', /IDs V2 duplicados/);
+});
+
+test('F-ID2. Identical V2 snapshot replay with different recordedAt is not a conflict', () => {
+  const first = v2Row(payload());
+  const replay = [...first];
+  replay[2] = '2026-10-07T09:00:00-03:00';
+
+  const read = selectLatestDailyOrientationSnapshot([HEADER, first, replay], TODAY);
+  assert.equal(read.status, 'ready');
+  assert.notEqual(read.snapshot, null);
+});
+
+test('F-ID3. Separate V2 snapshot IDs remain separate legitimate revisions', () => {
+  const first = v2Row(payload());
+  const second = v2Row(payload());
+  second[0] = String(second[0]) + '-revision';
+  second[2] = '2026-10-07T09:00:00-03:00';
+
+  const read = selectLatestDailyOrientationSnapshot([HEADER, first, second], TODAY);
+  assert.equal(read.status, 'ready');
+  assert.equal(read.snapshot?.id, second[0]);
+});
+
+test('V2-MIN1: enabled minimal planning renders an empty honest state instead of silently falling back to V1', () => {
+  const empty = { readStatus: 'empty' as const, generatedAt: null, review: null };
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, empty), true);
+  assert.equal(shouldRenderStagedDailyOrientationV2(false, empty), false);
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, null), false);
+  assert.equal(
+    shouldRenderStagedDailyOrientationV2(true, {
+      readStatus: 'unavailable' as const,
+      generatedAt: null,
+      review: null,
+    }),
+    true,
+  );
+});
+
+test('V2-MIN2: snapshot commitments remain visible when Vida Calendar is intentionally not connected', () => {
+  const baseline = context();
+  const noCalendar: DailyPlanningContext = {
+    ...baseline,
+    status: 'degraded',
+    sources: {
+      ...baseline.sources,
+      calendar: { status: 'not-configured', available: false, notice: null, mode: 'mock' },
+    },
+  };
+  const read = selectLatestDailyOrientationSnapshot(
+    [
+      HEADER,
+      [
+        'vida2:tasks-daily-planning:v2:orientation:2026-10-07:morning',
+        TODAY,
+        '2026-10-07T07:30:00-03:00',
+        payload({
+          attention: [],
+          upcoming: [
+            {
+              kind: 'calendar',
+              ref: null,
+              title: 'Reunión verificada por ChatGPT al generar el análisis',
+              date: '2026-10-08',
+              dateType: 'event',
+              reason: 'Confirmada al generar el snapshot; volver a consultar si cambió.',
+            },
+          ],
+        }),
+        'chatgpt_project',
+        'daily-orientation-v2',
+      ],
+    ],
+    TODAY,
+  );
+  const independent = buildDailyOrientationV2View(noCalendar, read, { calendarIndependent: true });
+  assert.equal(read.status, 'ready');
+  assert.equal(independent.status, 'ready');
+  assert.equal(independent.upcoming.length, 1);
+  assert.equal(independent.upcoming[0]?.date, '2026-10-08');
+  assert.equal(buildDailyOrientationV2View(noCalendar, read).status, 'degraded');
+});
+
+test('V2-MIN3: reader rejects reviews dated after the target plan day', () => {
+  const bad = JSON.parse(payload()) as Record<string, unknown>;
+  bad.review = { ...(bad.review as Record<string, unknown>), date: '2026-10-08' };
+  const read = selectLatestDailyOrientationSnapshot(
+    [
+      HEADER,
+      [
+        'vida2:tasks-daily-planning:v2:orientation:2026-10-07:future',
+        TODAY,
+        '2026-10-07T08:00:00-03:00',
+        JSON.stringify(bad),
+        'chatgpt_project',
+        'daily-orientation-v2',
+      ],
+    ],
+    TODAY,
+  );
+  assert.notEqual(read.status, 'ready');
+  assert.equal(read.snapshot, null);
 });

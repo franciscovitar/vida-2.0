@@ -147,7 +147,18 @@ function focusRefExists(context: DailyPlanningContext, item: DailyOrientationFoc
 export function buildDailyOrientationV2View(
   context: DailyPlanningContext,
   read: DailyOrientationSnapshotRead,
+  options: { calendarIndependent?: boolean } = {},
 ): DailyOrientationView {
+  // The minimal ChatGPT-first view does not need a second Calendar read.
+  // Other source failures still degrade the view; saved Calendar entries must
+  // carry a null ref and explicit generated-at context rather than a claimed
+  // live provider verification.
+  const sourceContextReady = options.calendarIndependent
+    ? context.sources.tasks.available &&
+      context.sources.projects.available &&
+      context.sources.milestones.available &&
+      context.sources.assessments?.available !== false
+    : context.status === 'ready';
   const snapshot = read.snapshot;
   let unresolvedRefs = 0;
   let dateConflicts = 0;
@@ -204,13 +215,13 @@ export function buildDailyOrientationV2View(
   let status: DailyOrientationView['status'];
   if (!snapshot) {
     status =
-      context.status === 'unavailable'
+      !sourceContextReady && context.status === 'unavailable'
         ? 'unavailable'
         : read.status === 'empty'
           ? 'empty'
           : 'degraded';
   } else if (
-    context.status !== 'ready' ||
+    !sourceContextReady ||
     read.status !== 'ready' ||
     unresolvedRefs > 0 ||
     dateConflicts > 0
@@ -227,7 +238,7 @@ export function buildDailyOrientationV2View(
   if (dateConflicts > 0) {
     notice = `${notice ? `${notice} ` : ''}${dateConflicts} fecha(s) V2 ya no coinciden con la fuente actual y se ocultaron para evitar urgencias incorrectas.`;
   }
-  if (context.status === 'degraded' && !notice) {
+  if (!sourceContextReady && context.status === 'degraded' && !notice) {
     notice = 'La orientación V2 se muestra con fuentes actuales parcialmente degradadas.';
   }
 

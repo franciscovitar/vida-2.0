@@ -9,22 +9,41 @@ function section(items: string[], label = 'Metas personales de fuerza'): GymRout
   return { key: 'personal-goals', label, kind: 'notes', order: 1, description: null, items };
 }
 
-function trend(exerciseName: string, latestDate: string, latestLoad: number, latestReps: number): GymV2ExerciseTrend {
+function trend(
+  exerciseName: string,
+  latestDate: string,
+  latestLoad: number,
+  latestReps: number,
+): GymV2ExerciseTrend {
   return {
-    key: exerciseName, exerciseName, latestDate, latestLoad, latestReps,
-    latestPerformance: null, previousPerformance: null, bestLoad: latestLoad,
-    bestPerformance: null, deltaPercent: null, baselineDeltaPercent: null,
-    trend: 'unknown', sessionCount: 1, completedSets: 1, series: [], observations: [],
+    key: exerciseName,
+    exerciseName,
+    latestDate,
+    latestLoad,
+    latestReps,
+    latestPerformance: null,
+    previousPerformance: null,
+    bestLoad: latestLoad,
+    bestPerformance: null,
+    deltaPercent: null,
+    baselineDeltaPercent: null,
+    trend: 'unknown',
+    sessionCount: 1,
+    completedSets: 1,
+    series: [],
+    observations: [],
   };
 }
 
 test('personal strength goals are owned by Notion, not by external benchmark thresholds', () => {
   const goals = buildPersonalStrengthGoals(
-    [section([
-      'Jalón al pecho — 100 kg × 10',
-      'Bíceps sentado — 22,5 kg × 8–10 por mancuerna',
-      'Prensa horizontal — 140–160 kg × 10 (muy provisional)',
-    ])],
+    [
+      section([
+        'Jalón al pecho — 100 kg × 10',
+        'Bíceps sentado — 22,5 kg × 8–10 por mancuerna',
+        'Prensa horizontal — 140–160 kg × 10 (muy provisional)',
+      ]),
+    ],
     [
       trend('Jalón al pecho en polea', '2026-10-14', 75, 8),
       trend('Curl de bíceps con mancuernas sentado', '2026-10-14', 15, 10),
@@ -32,7 +51,14 @@ test('personal strength goals are owned by Notion, not by external benchmark thr
     ],
   );
   assert.equal(goals.length, 3);
-  assert.deepEqual(goals.map(({ latestLoad, latestReps }) => [latestLoad, latestReps]), [[75, 8], [15, 10], [90, 10]]);
+  assert.deepEqual(
+    goals.map(({ latestLoad, latestReps }) => [latestLoad, latestReps]),
+    [
+      [75, 8],
+      [15, 10],
+      [90, 10],
+    ],
+  );
   assert.equal(goals[1]!.target, '22,5 kg × 8–10 por mancuerna');
   assert.equal(goals[2]!.provisional, true);
 });
@@ -53,7 +79,10 @@ test('goal matches keep lateral-raise variants separate and prefer the latest co
 
 test('missing Notion goals or unmatched exercise do not invent personal data', () => {
   assert.deepEqual(buildPersonalStrengthGoals([], []), []);
-  const goals = buildPersonalStrengthGoals([section(['Press pecho máquina — 110–120 kg × 10'])], []);
+  const goals = buildPersonalStrengthGoals(
+    [section(['Press pecho máquina — 110–120 kg × 10'])],
+    [],
+  );
   assert.equal(goals[0]!.latestLoad, null);
   assert.equal(goals[0]!.latestReps, null);
 });

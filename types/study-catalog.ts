@@ -20,11 +20,15 @@ export interface StudyCatalogTopic {
 }
 
 export interface StudyCatalogAssessment {
-  id: string;
+  id: string | null;
+  label?: string | null;
   status: string | null;
   date: string | null;
+  dateEvidence?: string | null;
   format: string | null;
   scopeComplete: boolean;
+  deliveryDate?: string | null;
+  deliveryEvidence?: string | null;
 }
 
 export interface StudyCatalogSubject {
@@ -40,18 +44,6 @@ export interface StudyCatalogSubject {
   readinessBand: string | null;
   updated: string | null;
   studyRuntimeAvailable: boolean;
-}
-
-export interface StudyCatalogSnapshot {
-  schemaVersion: 1;
-  source: {
-    repository: 'franciscovitar/personal-ai-system';
-    ref: 'main';
-    commit: string;
-    generatedAt: string;
-    canonicalRoot: 'AI/projects/university/subjects';
-  };
-  subjects: readonly StudyCatalogSubject[];
 }
 
 export interface StudyCatalogRead {

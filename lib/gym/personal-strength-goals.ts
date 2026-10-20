@@ -23,7 +23,11 @@ const GOAL_MATCHERS: Readonly<Record<string, RegExp>> = {
 };
 
 function normalizedLabel(value: string): string {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
 }
 
 /**
@@ -51,13 +55,15 @@ export function buildPersonalStrengthGoals(
           .sort((a, b) => b.latestDate.localeCompare(a.latestDate))[0]
       : undefined;
 
-    return [{
-      label,
-      target,
-      latestLoad: trend?.latestLoad ?? null,
-      latestReps: trend?.latestReps ?? null,
-      latestDate: trend?.latestDate ?? null,
-      provisional: /provisional/i.test(target),
-    }];
+    return [
+      {
+        label,
+        target,
+        latestLoad: trend?.latestLoad ?? null,
+        latestReps: trend?.latestReps ?? null,
+        latestDate: trend?.latestDate ?? null,
+        provisional: /provisional/i.test(target),
+      },
+    ];
   });
 }

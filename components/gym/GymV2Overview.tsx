@@ -78,7 +78,10 @@ export function GymV2Overview({
 }) {
   const analytics = computeGymV2Analytics({ sessions, summaries, weeklyTarget, today });
   const benchmark = buildMaleStrengthLevelBenchmark(analytics.exerciseTrends);
-  const strengthGoals = buildPersonalStrengthGoals(routine?.supplementalSections ?? [], analytics.exerciseTrends);
+  const strengthGoals = buildPersonalStrengthGoals(
+    routine?.supplementalSections ?? [],
+    analytics.exerciseTrends,
+  );
   const exerciseCards = analytics.exerciseTrends.slice(0, 6);
   const maxMuscleSets = Math.max(...analytics.muscleGroups.map((group) => group.completedSets), 1);
   const totalMuscleSets = analytics.muscleGroups.reduce(
@@ -212,8 +215,9 @@ export function GymV2Overview({
             ))}
           </div>
           <p className={styles['strength-goals-note']}>
-            Metas personales revisables, no rangos de fuerza externos ni pronósticos. 
-            La carga depende de la máquina, técnica y recorrido; la comparación no sustituye una evaluación de esos factores.
+            Metas personales revisables, no rangos de fuerza externos ni pronósticos. La carga
+            depende de la máquina, técnica y recorrido; la comparación no sustituye una evaluación
+            de esos factores.
           </p>
         </Card>
       ) : null}

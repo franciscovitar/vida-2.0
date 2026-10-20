@@ -67,11 +67,11 @@ function read(status: DailyOrientationSnapshotRead['status']): DailyOrientationS
   };
 }
 
-test('F-REC1. Exact empty transport, without V2 rows, permits staged V1', () => {
+test('F-REC1. Empty source still displays the V2 not-yet-saved state', () => {
   const view = buildDailyOrientationV2View(context(), read('empty'));
   assert.equal(view.readStatus, 'empty');
   assert.equal(view.generatedAt, null);
-  assert.equal(shouldRenderStagedDailyOrientationV2(true, view), false);
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, view), true);
 });
 
 test('F-REC2. Transport outage stays on V2 degraded notice, not silent V1', () => {
@@ -101,10 +101,10 @@ test('F-REC4. A new successful read after outage restores V2 without a cached fa
   assert.doesNotMatch(JSON.stringify(recovered), /private-fixture/);
 });
 
-test('F-REC5. Confirmed empty V2 can retain V1 even if other canonical sources are down', () => {
+test('F-REC5. Confirmed empty V2 remains visible despite unrelated source failures', () => {
   const view = buildDailyOrientationV2View(context('unavailable'), read('empty'));
   assert.equal(view.readStatus, 'empty');
-  assert.equal(shouldRenderStagedDailyOrientationV2(true, view), false);
+  assert.equal(shouldRenderStagedDailyOrientationV2(true, view), true);
 });
 
 test('F-REC6. V2 reader and UI flag remain distinct permissions', () => {
