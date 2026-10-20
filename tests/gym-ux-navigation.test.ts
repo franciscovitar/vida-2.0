@@ -65,7 +65,10 @@ test('Gym muestra objetivos personales desde Notion como sección separada del b
   assert.match(progress, /Metas personales de fuerza/);
   assert.match(progress, /buildPersonalStrengthGoals/);
   assert.match(dashboard, /routine=\{data\.routine\}/);
-  assert.ok(progress.indexOf('gym-personal-strength-goals-title') < progress.indexOf('gym-v2-benchmark-title'));
+  assert.ok(
+    progress.indexOf('gym-personal-strength-goals-title') <
+      progress.indexOf('gym-v2-benchmark-title'),
+  );
 });
 
 test('Gym Cardio prioriza el plan real antes de la equivalencia MET-min', () => {
