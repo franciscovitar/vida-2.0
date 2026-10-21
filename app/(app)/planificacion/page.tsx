@@ -1,4 +1,5 @@
 import { CalendarRange } from 'lucide-react';
+import { isAchievementsReadEnabled } from '@/lib/achievements/config';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
@@ -57,6 +58,11 @@ export default async function PlanificacionPage({
         <p>
           <Link href="/planificacion/en-que-quede">En qué quedé →</Link>
         </p>
+        {isAchievementsReadEnabled() ? (
+          <p>
+            <Link href="/planificacion/logros">Mis logros →</Link>
+          </p>
+        ) : null}
       </div>
     );
   }
