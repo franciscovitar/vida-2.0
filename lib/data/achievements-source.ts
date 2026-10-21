@@ -3,7 +3,11 @@ import 'server-only';
 
 import { Client } from '@notionhq/client';
 
-import { buildAchievementsView, type AchievementsView, type NotionAchievementPage } from '@/lib/achievements/view';
+import {
+  buildAchievementsView,
+  type AchievementsView,
+  type NotionAchievementPage,
+} from '@/lib/achievements/view';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 
 import { getAchievementsReadConfig } from '@/lib/achievements/config';
