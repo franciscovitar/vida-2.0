@@ -134,3 +134,41 @@ export function buildAchievementsView(
     .slice(0, 30);
   return { state: degraded ? 'degraded' : items.length ? 'ready' : 'empty', items };
 }
+
+/** Strictly parse a bounded Notion data-source query from the authorized server.
+ * Fail closed when a response is malformed, truncated or includes foreign pages.
+ * Never trust page-level properties as authorization without source scoping.
+ */
+export function buildAchievementsFromNotionQuery(
+  response: unknown,
+  expectedDataSourceId: string,
+): AchievementsView {
+  const query = record(response);
+  if (
+    !query ||
+    !Array.isArray(query.results) ||
+    query.results.length > 100 ||
+    typeof query.has_more !== 'boolean'
+  ) {
+    return { state: 'unavailable', items: [] };
+  }
+  const pages: NotionAchievementPage[] = [];
+  let incomplete = false;
+  for (const value of query.results) {
+    const page = record(value);
+    const parent = record(page?.parent);
+    const properties = record(page?.properties);
+    if (
+      page?.object !== 'page' ||
+      page.archived !== false ||
+      parent?.type !== 'data_source_id' ||
+      parent.data_source_id !== expectedDataSourceId ||
+      !properties
+    ) {
+      incomplete = true;
+      continue;
+    }
+    pages.push({ properties });
+  }
+  return buildAchievementsView(pages, { hasMore: query.has_more || incomplete });
+}

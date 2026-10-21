@@ -4,9 +4,8 @@ import 'server-only';
 import { Client } from '@notionhq/client';
 
 import {
-  buildAchievementsView,
+  buildAchievementsFromNotionQuery,
   type AchievementsView,
-  type NotionAchievementPage,
 } from '@/lib/achievements/view';
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 
@@ -23,13 +22,7 @@ export async function getAchievementsView(): Promise<AchievementsView> {
       data_source_id: config.dataSourceId,
       page_size: 100,
     });
-    const pages: NotionAchievementPage[] = [];
-    for (const item of response.results) {
-      if ('properties' in item && item.properties) {
-        pages.push({ properties: item.properties as Record<string, unknown> });
-      }
-    }
-    return buildAchievementsView(pages, { hasMore: response.has_more });
+    return buildAchievementsFromNotionQuery(response, config.dataSourceId);
   } catch {
     return { state: 'unavailable', items: [] };
   }
