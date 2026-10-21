@@ -41,13 +41,9 @@ export default async function LogrosPage() {
           domain="productivity"
         />
         {view.state === 'not-configured' ? (
-          <p role="status">
-            Logros todavía no está conectado a una fuente privada autorizada.
-          </p>
+          <p role="status">Logros todavía no está conectado a una fuente privada autorizada.</p>
         ) : view.state === 'unavailable' ? (
-          <p role="status">
-            No se pudo consultar Logros. No mostramos resultados sin verificar.
-          </p>
+          <p role="status">No se pudo consultar Logros. No mostramos resultados sin verificar.</p>
         ) : (
           <>
             {view.state === 'degraded' ? (

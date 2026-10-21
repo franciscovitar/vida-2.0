@@ -2,18 +2,8 @@
  * This module does NOT authenticate sources or accept LLM claims as trusted.
  * The future authenticated writer owns ACCEPTED provenance and eventKey checks.
  */
-export type AchievementCategory =
-  | 'ACADEMIC'
-  | 'PROJECT'
-  | 'PROFESSIONAL'
-  | 'PERSONAL'
-  | 'OTHER';
-export type AchievementState =
-  | 'not-configured'
-  | 'unavailable'
-  | 'empty'
-  | 'ready'
-  | 'degraded';
+export type AchievementCategory = 'ACADEMIC' | 'PROJECT' | 'PROFESSIONAL' | 'PERSONAL' | 'OTHER';
+export type AchievementState = 'not-configured' | 'unavailable' | 'empty' | 'ready' | 'degraded';
 
 export type AchievementCard = Readonly<{
   title: string;
@@ -35,7 +25,8 @@ const CATEGORY = new Set<AchievementCategory>([
   'OTHER',
 ]);
 const EVENT_KEY = /^[a-z0-9]+(?::[a-z0-9_-]+){2,6}$/;
-const PRIVATE_TEXT = /(?:-----BEGIN [A-Z ]*PRIVATE KEY|\b(?:password|token|api[_ -]?key|secret[_ -]?key)\s*[:=]|\bsk-[a-z0-9_-]{12,}|\b[^\s@]+@[^\s@]+\.[a-z]{2,}\b)/i;
+const PRIVATE_TEXT =
+  /(?:-----BEGIN [A-Z ]*PRIVATE KEY|\b(?:password|token|api[_ -]?key|secret[_ -]?key)\s*[:=]|\bsk-[a-z0-9_-]{12,}|\b[^\s@]+@[^\s@]+\.[a-z]{2,}\b)/i;
 
 function record(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -49,23 +40,14 @@ function selection(value: unknown): string | null {
   return selected && typeof selected.name === 'string' ? selected.name : null;
 }
 
-function textArray(
-  value: unknown,
-  kind: 'title' | 'rich_text',
-  maxLength: number,
-): string | null {
+function textArray(value: unknown, kind: 'title' | 'rich_text', maxLength: number): string | null {
   const property = record(value);
   const items = property?.[kind];
   if (!Array.isArray(items) || items.length < 1 || items.length > 6) return null;
   const text = items.map((item) => record(item)?.plain_text);
   if (text.some((chunk) => typeof chunk !== 'string')) return null;
   const result = (text as string[]).join('').trim();
-  if (
-    !result ||
-    result.length > maxLength ||
-    /[\r\n]/.test(result) ||
-    PRIVATE_TEXT.test(result)
-  ) {
+  if (!result || result.length > maxLength || /[\r\n]/.test(result) || PRIVATE_TEXT.test(result)) {
     return null;
   }
   return result;
@@ -147,8 +129,7 @@ export function buildAchievementsView(
   const items = [...byKey.values()]
     .sort(
       (a, b) =>
-        (b.occurredOn ?? '').localeCompare(a.occurredOn ?? '') ||
-        a.title.localeCompare(b.title),
+        (b.occurredOn ?? '').localeCompare(a.occurredOn ?? '') || a.title.localeCompare(b.title),
     )
     .slice(0, 30);
   return { state: degraded ? 'degraded' : items.length ? 'ready' : 'empty', items };

@@ -15,20 +15,14 @@ test('default denies achievements', () => {
   assert.equal(getAchievementsReadConfig({}), null);
 });
 test('requires exact true flag', () => {
-  assert.equal(
-    getAchievementsReadConfig({ ...env, ACHIEVEMENTS_V1_READ_ENABLED: 'TRUE' }),
-    null,
-  );
+  assert.equal(getAchievementsReadConfig({ ...env, ACHIEVEMENTS_V1_READ_ENABLED: 'TRUE' }), null);
 });
 test('valid explicitly allowed source stays bounded to unique ID', () => {
   assert.deepEqual(getAchievementsReadConfig(env), { token: 'synthetic', dataSourceId: id });
 });
 test('missing token or ID is not a valid source', () => {
   assert.equal(getAchievementsReadConfig({ ...env, NOTION_API_TOKEN: '' }), null);
-  assert.equal(
-    getAchievementsReadConfig({ ...env, NOTION_ACHIEVEMENTS_DATA_SOURCE_ID: '' }),
-    null,
-  );
+  assert.equal(getAchievementsReadConfig({ ...env, NOTION_ACHIEVEMENTS_DATA_SOURCE_ID: '' }), null);
 });
 test('invalid ID fails closed', () => {
   assert.equal(
