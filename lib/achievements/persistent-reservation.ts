@@ -12,7 +12,7 @@ import {
   type UpstashRestConfig,
 } from '@/lib/actions/upstash-rest';
 
-const ID = /^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+const ID = /^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 const KEY = /^[a-z0-9]+(?::[a-z0-9_-]+){2,6}$/;
 const NAMESPACE = 'vida2:achievements:logros:reservation:v1';
 
