@@ -1,37 +1,22 @@
-# Logros V1 — lectura privada (DRAFT)
+# Logros V1 — lectura privada y piloto simple (DRAFT)
 
-**Estado:** no activado; no hay Ledger Notion ni escritor certificado.
+**Estado:** base privada Notion **creada y verificada vacía**; Vista Vida en rama DRAFT; no hay escrituras personales ni despliegue. Se descarta usar Upstash/Redis para Logros por decisión expresa del propietario.
 
-## Alcance
+## Arquitectura mínima
+- **Notion Logros** es la única fuente de persistencia de resultados aceptados. Ya existe bajo Vida 2.0 / Datos del sistema (backend), con 8 propiedades verificadas.
+- **PAS PR #572** contiene el gate de candidatos, deduplicación por `ClaveEvento`, escritor Python y adaptador Notion, probados en escenario sintético. No tiene autorización para registrar datos personales por sí solo.
+- **Vida PR #247** ofrece una vista autenticada `/planificacion/logros` con lectura explícita: `ACHIEVEMENTS_V1_READ_ENABLED` OFF por defecto, `NOTION_ACHIEVEMENTS_DATA_SOURCE_ID` y token privados. Aún no está conectada ni desplegada.
+- **No agregar:** Redis/Upstash, cron, segundo ledger, colas ni ruta pública de escritura.
 
-- Vista autenticada `/planificacion/logros` en Vida.
-- Solo lectura, sin acceso automático a Journaling.
-- Desactivado salvo `ACHIEVEMENTS_V1_READ_ENABLED=true`.
-- Fuente explícita: `NOTION_ACHIEVEMENTS_DATA_SOURCE_ID`.
-- No usar Proyectos, Tareas, Áreas o Hitos como Ledger.
-- No crear registros ficticios ni mostrar propuestas no aceptadas.
-- Un máximo de 100 filas consultadas y 30 tarjetas mostradas.
-- Si la fuente está incompleta, mostrar una advertencia de cobertura parcial.
-- No revelar referencias privadas, claves semánticas ni contenido del Journal.
+## Esquema confirmado en Notion
+`Nombre` (title), `ClaveEvento` (rich_text), `Categoria` (select), `Asercion` (select), `Fecha` (date), `Estado` (select), `Sensibilidad` (select), `RegistroAutorizado` (checkbox). La vista muestra únicamente `ACCEPTED` + `STANDARD` + `RegistroAutorizado=true`; no expone referencias del diario.
 
-## Esquema propuesto, aún no creado
+## Gate de escritura simple y limitación
+Para un piloto **manual y serial** con autorización por logro, un único ejecutor autenticado debe consultar la clave, validar la aceptación, escribir como máximo una vez, leer de nuevo y detenerse si hay duplicados, fallos o incertidumbre. **No habilitar concurrencia, procesos automáticos ni escrituras paralelas:** las búsquedas de Notion no imponen unicidad transaccional. Este procedimiento no certifica exclusividad universal. Antes de habilitar automatización, probar coordinación real o mantener un solo ejecutor.
 
-- `Nombre`: título de Notion.
-- `ClaveEvento`: texto de identidad estable, sin datos íntimos.
-- `Categoria`: `ACADEMIC`, `PROJECT`, `PROFESSIONAL`, `PERSONAL` u `OTHER`.
-- `Asercion`: `SELF_REPORTED` u `OWNER_VERIFIED`.
-- `Fecha`: fecha o vacío si es desconocida.
-- `Estado`: solo `ACCEPTED` aparece en Vida.
-- `Sensibilidad`: solo `STANDARD` aparece en Vida.
-- `RegistroAutorizado`: checkbox solo del futuro escritor confiable.
+## Qué falta para la función completa
+1. QA repo-aware del escritor PAS y prueba acotada contra fuente autorizada con readback, sin registros personales hasta permiso específico.
+2. Integrar extracción limitada del Journaling diario y cierres de proyectos, propuestas/aceptaciones, corrección y revocación.
+3. Completar y certificar lectura privada en Vida y resumen de logros en Daily Planning; QA, privacidad y aprobación explícita para cualquier despliegue.
 
-Los campos editables de Notion no son prueba independiente de permiso o veracidad.
-El escritor deberá reutilizar los gates de PAS PR #572, con deduplicación y readback.
-
-## QA y siguiente gate
-
-- 19 pruebas focales observadas PASS.
-- TypeScript estricto del modelo y de la configuración PASS.
-- QA completa de Vida, E2E y activación requieren pruebas separadas.
-- Crear/configurar el Ledger privado requiere autorización específica.
-- No fusionar ni desplegar esta propuesta sin completar esos controles.
+Ambas PR permanecen **DRAFT / NO MERGE / NO PRODUCTION**.
