@@ -73,10 +73,7 @@ test('canonical event identity hashes private event key and source', () => {
   assert.match(key, /:[a-f0-9]{64}$/);
   assert.ok(!key.includes(eventKey));
   assert.notEqual(key, achievementReservationKey(dataSourceId, 'university:synthetic:p3:passed'));
-  assert.notEqual(
-    key,
-    achievementReservationKey('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', eventKey),
-  );
+  assert.notEqual(key, achievementReservationKey('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', eventKey));
 });
 
 test('invalid event cannot reach Redis', async () => {
