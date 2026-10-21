@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildAchievementsView } from '../lib/achievements/view.ts';
+import { buildAchievementsView } from '@/lib/achievements/view';
 
 type Prop = Record<string, unknown>;
 const text = (s: string) => ({ rich_text: [{ plain_text: s }] });

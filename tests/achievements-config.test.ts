@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { getAchievementsReadConfig, isAchievementsReadEnabled } from '../lib/achievements/config.ts';
+import { getAchievementsReadConfig, isAchievementsReadEnabled } from '@/lib/achievements/config';
 
 const id = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
 const env = { ACHIEVEMENTS_V1_READ_ENABLED: 'true', NOTION_API_TOKEN: 'synthetic', NOTION_ACHIEVEMENTS_DATA_SOURCE_ID: id };
