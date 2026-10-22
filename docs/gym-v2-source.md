@@ -21,6 +21,14 @@ Pestañas consumidas:
 
 `Cardio Sessions` conserva actividad, modalidad, duración y las métricas que realmente existan. Vida no rellena distancia, potencia, FC, RPE ni estado cuando la fuente no los aporta.
 
+## Rutina V4 — alternativa visible, no canónica (2026-10-22)
+
+La vista `/gimnasio/rutina` ofrece una pestaña opcional **Rutina V4** junto a `Rutina fija`, `Última sesión` y `Movilidad / postura`. Es una propuesta estática y versionada, reproducida de la elección del usuario de 2026-10-22: 3 días (A: 25 series, B: 24, C: 25), 74 series nominales por semana y sesiones objetivo de 70 min, máximo 75 min incluyendo movilidad, calentamiento y transiciones.
+
+**No es el plan activo ni reemplaza la fuente canónica de Notion.** La única copia de esta _alternativa_ vive en `lib/gym/routine-v4-proposal.ts` y se presenta desde `components/gym/GymRoutineV4.tsx`; la navegación conserva el plan de Notion y las sesiones reales de Sheets. El cambio de pestaña es meramente visual y no escribe en ningún sistema; abrir la ficha V4 no indica que se haya realizado ni adoptado. El bloque propone 6–8 semanas de prueba una vez recuperado, y los tiempos son estimaciones no verificadas.
+
+La aplicación no interpreta los registros históricos como ejecución de la V4 ni mezcla sus ejercicios con las metas y análisis de la rutina canónica. Si en el futuro se decide activar V4, habrá que actualizar separadamente la fuente canónica y ajustar las comparaciones de sesiones, con autorización explícita y validación de la migración.
+
 ## Comparaciones personales V2.0
 
 La pantalla distingue:

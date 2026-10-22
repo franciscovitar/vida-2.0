@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 
+import { GYM_V4_DAYS } from '@/lib/gym/routine-v4-proposal';
 import type { GymRoutine, GymRoutineSectionKind, GymSession, GymSessionSummary } from '@/types/gym';
+
+import { GymRoutineV4 } from './GymRoutineV4';
 
 import styles from './GymDashboard.module.scss';
 
@@ -15,7 +18,7 @@ const SECTION_LABELS: Record<GymRoutineSectionKind, string> = {
 };
 
 type DayKind = 'torso-a' | 'torso-b' | 'pierna';
-type RoutineView = 'plan' | 'previous' | 'mobility';
+type RoutineView = 'plan' | 'previous' | 'mobility' | 'v4';
 type MobilityItemKind = 'posture' | 'flexibility' | 'criteria' | 'other';
 
 function dayKind(value: string | null | undefined): DayKind | null {
@@ -217,6 +220,8 @@ export function GymRoutineTabs({
   const [active, setActive] = useState(0);
   const [view, setView] = useState<RoutineView>('plan');
   const day = days[Math.min(active, Math.max(days.length - 1, 0))] ?? null;
+  const v4DayIndex = Math.min(active, GYM_V4_DAYS.length - 1);
+  const v4Day = GYM_V4_DAYS[v4DayIndex];
   const previousSession = day
     ? latestComparableSession({ dayLabel: day.label, sessions, summaries, today })
     : null;
@@ -261,7 +266,7 @@ export function GymRoutineTabs({
                 data-active={index === active ? 'true' : 'false'}
                 onClick={() => setActive(index)}
               >
-                {item.label}
+                {view === 'v4' ? (GYM_V4_DAYS[index]?.label ?? item.label) : item.label}
               </button>
             ))}
           </div>
@@ -298,6 +303,16 @@ export function GymRoutineTabs({
                   onClick={() => setView('mobility')}
                 >
                   Movilidad / postura
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={view === 'v4'}
+                  className={styles.tab}
+                  data-active={view === 'v4' ? 'true' : 'false'}
+                  onClick={() => setView('v4')}
+                >
+                  Rutina V4
                 </button>
               </div>
 
@@ -380,6 +395,10 @@ export function GymRoutineTabs({
                 ) : (
                   <p className={styles.body}>Todavía no hay una sesión comparable registrada.</p>
                 )
+              ) : view === 'v4' ? (
+                v4Day ? (
+                  <GymRoutineV4 day={v4Day} dayIndex={v4DayIndex} />
+                ) : null
               ) : (
                 <MobilityProtocol sections={mobilitySections} />
               )}
