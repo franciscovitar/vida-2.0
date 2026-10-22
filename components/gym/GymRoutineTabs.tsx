@@ -396,7 +396,9 @@ export function GymRoutineTabs({
                   <p className={styles.body}>Todavía no hay una sesión comparable registrada.</p>
                 )
               ) : view === 'v4' ? (
-                v4Day ? <GymRoutineV4 day={v4Day} dayIndex={v4DayIndex} /> : null
+                v4Day ? (
+                  <GymRoutineV4 day={v4Day} dayIndex={v4DayIndex} />
+                ) : null
               ) : (
                 <MobilityProtocol sections={mobilitySections} />
               )}
