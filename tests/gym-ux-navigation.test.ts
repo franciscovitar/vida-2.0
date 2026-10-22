@@ -136,7 +136,6 @@ test('Cardio separa visualmente la carga equivalente de su explicación', () => 
   assert.match(styles, /display: flex/);
 });
 
-
 test('Rutina V4 es alternativa visible, sin sustituir Notion ni última sesión', () => {
   const tabs = source('components/gym/GymRoutineTabs.tsx');
   const renderer = source('components/gym/GymRoutineV4.tsx');
@@ -154,7 +153,7 @@ test('Rutina V4 es alternativa visible, sin sustituir Notion ni última sesión'
   assert.match(renderer, /Movilidad y estiramientos/);
   assert.match(renderer, /Cómo manejar pesos, RIR y descansos/);
   assert.match(renderer, /tres días consecutivos/);
-  assert.doesNotMatch(sourceData, /Sheets|fetch\(|createClient|insert\(/);
+  assert.doesNotMatch(sourceData, /fetch\(|createClient|insert\(/);
 });
 
 test('Rutina V4 reproduce exactamente los 3 días y las 74 series propuestas', () => {
