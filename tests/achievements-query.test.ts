@@ -117,26 +117,33 @@ test('multiple Notion batches retain more than 100 achievements without mixing s
       },
     };
   });
-  const view = buildAchievementsFromNotionQueries([
-    { object: 'list', results: rows.slice(0, 100), has_more: true, next_cursor: 'cursor1' },
-    { object: 'list', results: rows.slice(100), has_more: false, next_cursor: null },
-  ], dataSourceId);
+  const view = buildAchievementsFromNotionQueries(
+    [
+      { object: 'list', results: rows.slice(0, 100), has_more: true, next_cursor: 'cursor1' },
+      { object: 'list', results: rows.slice(100), has_more: false, next_cursor: null },
+    ],
+    dataSourceId,
+  );
   assert.equal(view.state, 'ready');
   assert.equal(view.items.length, 125);
 });
 
 test('a truncated final Notion batch never claims complete coverage', () => {
-  const view = buildAchievementsFromNotionQueries([
-    { object: 'list', results: [page()], has_more: true, next_cursor: 'cursor1' },
-  ], dataSourceId);
+  const view = buildAchievementsFromNotionQueries(
+    [{ object: 'list', results: [page()], has_more: true, next_cursor: 'cursor1' }],
+    dataSourceId,
+  );
   assert.equal(view.state, 'degraded');
   assert.equal(view.items.length, 1);
 });
 
 test('out-of-order batches cannot claim a complete query', () => {
-  const view = buildAchievementsFromNotionQueries([
-    { object: 'list', results: [page()], has_more: false },
-    { object: 'list', results: [], has_more: false },
-  ], dataSourceId);
+  const view = buildAchievementsFromNotionQueries(
+    [
+      { object: 'list', results: [page()], has_more: false },
+      { object: 'list', results: [], has_more: false },
+    ],
+    dataSourceId,
+  );
   assert.deepEqual(view, { state: 'unavailable', items: [] });
 });

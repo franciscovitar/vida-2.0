@@ -59,8 +59,13 @@ function textArray(value: unknown, kind: 'title' | 'rich_text', maxLength: numbe
 function storyText(value: unknown): string | null | undefined {
   if (value === undefined) return null; // legacy record, before the schema extension
   const property = record(value);
-  if (!property || !Array.isArray(property.rich_text) || property.rich_text.length > 16)
+  if (
+    !property ||
+    !Array.isArray(property.rich_text) ||
+    property.rich_text.length > 16
+  ) {
     return undefined;
+  }
   if (property.rich_text.length === 0) return null;
   const parts = property.rich_text.map((item: unknown) => record(item)?.plain_text);
   if (parts.some((part: unknown) => typeof part !== 'string')) return undefined;
@@ -70,7 +75,9 @@ function storyText(value: unknown): string | null | undefined {
     story.length > 1800 ||
     /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(story) ||
     PRIVATE_TEXT.test(story)
-  ) return undefined;
+  ) {
+    return undefined;
+  }
   return story;
 }
 
@@ -150,11 +157,10 @@ export function buildAchievementsView(
     byKey.set(parsed.eventKey, parsed.card);
   }
   for (const key of duplicates) byKey.delete(key); // fail closed on ambiguous event identity
-  const items = [...byKey.values()]
-    .sort(
-      (a, b) =>
-        (b.occurredOn ?? '').localeCompare(a.occurredOn ?? '') || a.title.localeCompare(b.title),
-    );
+  const items = [...byKey.values()].sort(
+    (a, b) =>
+      (b.occurredOn ?? '').localeCompare(a.occurredOn ?? '') || a.title.localeCompare(b.title),
+  );
   return { state: degraded ? 'degraded' : items.length ? 'ready' : 'empty', items };
 }
 
