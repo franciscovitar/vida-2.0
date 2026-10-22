@@ -117,7 +117,7 @@ test('an owner-approved detailed memory renders with names and line breaks but n
     row({
       Recuerdo: {
         rich_text: [
-          { plain_text: 'En el cumpleaños de Claudia me daba vergüenza bailar.\\n' },
+          { plain_text: 'En el cumpleaños de Claudia me daba vergüenza bailar.\n' },
           { plain_text: 'Estuve con Val, Fer y Juan; terminé bailando igual.' },
         ],
       },
@@ -126,7 +126,7 @@ test('an owner-approved detailed memory renders with names and line breaks but n
   assert.equal(result.state, 'ready');
   assert.equal(
     result.items[0]?.story,
-    'En el cumpleaños de Claudia me daba vergüenza bailar.\\nEstuve con Val, Fer y Juan; terminé bailando igual.',
+    'En el cumpleaños de Claudia me daba vergüenza bailar.\nEstuve con Val, Fer y Juan; terminé bailando igual.',
   );
   assert.doesNotMatch(JSON.stringify(result), /source:never-expose/);
 });
