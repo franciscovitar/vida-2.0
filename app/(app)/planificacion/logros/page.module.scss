@@ -16,3 +16,11 @@
   font-size: 0.875rem;
   color: var(--text-muted, #68718a);
 }
+
+.story {
+  margin: 0.75rem 0 0;
+  max-width: 85ch;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildAchievementsFromNotionQuery } from '@/lib/achievements/view';
+import {
+  buildAchievementsFromNotionQuery,
+  buildAchievementsFromNotionQueries,
+} from '@/lib/achievements/view';
 
 const dataSourceId = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
 const pick = (name: string) => ({ type: 'select', select: { name } });
@@ -101,4 +104,46 @@ test('a failed authorization or sensitivity check removes the row', () => {
   unauthorized.properties.RegistroAutorizado = { type: 'checkbox', checkbox: false };
   const result = buildAchievementsFromNotionQuery(query([sensitive, unauthorized]), dataSourceId);
   assert.deepEqual(result, { state: 'degraded', items: [] });
+});
+
+test('multiple Notion batches retain more than 100 achievements without mixing sources', () => {
+  const rows = Array.from({ length: 125 }, (_, i) => {
+    const item = page();
+    return {
+      ...item,
+      properties: {
+        ...item.properties,
+        ClaveEvento: { rich_text: [{ plain_text: 'project:synthetic:item' + i + ':completed' }] },
+      },
+    };
+  });
+  const view = buildAchievementsFromNotionQueries(
+    [
+      { object: 'list', results: rows.slice(0, 100), has_more: true, next_cursor: 'cursor1' },
+      { object: 'list', results: rows.slice(100), has_more: false, next_cursor: null },
+    ],
+    dataSourceId,
+  );
+  assert.equal(view.state, 'ready');
+  assert.equal(view.items.length, 125);
+});
+
+test('a truncated final Notion batch never claims complete coverage', () => {
+  const view = buildAchievementsFromNotionQueries(
+    [{ object: 'list', results: [page()], has_more: true, next_cursor: 'cursor1' }],
+    dataSourceId,
+  );
+  assert.equal(view.state, 'degraded');
+  assert.equal(view.items.length, 1);
+});
+
+test('out-of-order batches cannot claim a complete query', () => {
+  const view = buildAchievementsFromNotionQueries(
+    [
+      { object: 'list', results: [page()], has_more: false },
+      { object: 'list', results: [], has_more: false },
+    ],
+    dataSourceId,
+  );
+  assert.deepEqual(view, { state: 'unavailable', items: [] });
 });
