@@ -6,7 +6,6 @@ import { SessionContinuityBoard } from '@/components/planning/SessionContinuityB
 import { requireAuthorizedSession } from '@/lib/auth/dal';
 import { getAssessmentProgressForLearningV2 } from '@/lib/data/assessment-progress-source';
 import { getProjectsIntelligence } from '@/lib/data/projects-intelligence-source';
-import { isDailyPlanningV2UiEnabled } from '@/lib/daily-planning/v2-config';
 import { buildSessionContinuityView } from '@/lib/session-continuity/view';
 
 import pageStyles from '../../page.module.scss';
@@ -17,21 +16,7 @@ export const runtime = 'nodejs';
 
 export default async function EnQueQuedePage() {
   await requireAuthorizedSession();
-  // This new route is available only when its parent V2 Planning experience
-  // was explicitly enabled. No V1 fallback silently reaches new sources.
-  if (!isDailyPlanningV2UiEnabled()) {
-    return (
-      <div className={pageStyles.page}>
-        <PageHeader
-          title="En qué quedé"
-          description="Esta vista todavía no está habilitada."
-          icon={BookmarkCheck}
-          domain="productivity"
-        />
-      </div>
-    );
-  }
-
+  // Independent authenticated, read-only route; does not enable Planning V2.
   const [projects, academic] = await Promise.allSettled([
     getProjectsIntelligence(),
     getAssessmentProgressForLearningV2(),

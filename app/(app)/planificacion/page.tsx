@@ -92,6 +92,9 @@ export default async function PlanificacionPage({
         taskCatalog={taskCatalog}
         writable={isWriteActionsEnabled()}
       />
+      <p>
+        <Link href="/planificacion/en-que-quede">En qué quedé →</Link>
+      </p>
     </div>
   );
 }
