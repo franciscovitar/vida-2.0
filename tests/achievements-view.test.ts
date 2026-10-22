@@ -105,9 +105,54 @@ test('owner-verified label does not claim independent readback', () => {
   assert.equal(view.items[0]?.evidenceLabel, 'Marcado como verificado en Logros');
 });
 
-test('source entries over 30 are capped', () => {
+test('source entries over 30 remain visible', () => {
   const rows = Array.from({ length: 40 }, (_, i) =>
     row({ ClaveEvento: text('project:example:item' + i + ':complete') }),
   );
-  assert.equal(buildAchievementsView(rows).items.length, 30);
+  assert.equal(buildAchievementsView(rows).items.length, 40);
+});
+
+test('an owner-approved detailed memory renders with names and line breaks but no source pointer', () => {
+  const result = buildAchievementsView([
+    row({
+      Recuerdo: {
+        rich_text: [
+          { plain_text: 'En el cumpleaños de Claudia me daba vergüenza bailar.\\n' },
+          { plain_text: 'Estuve con Val, Fer y Juan; terminé bailando igual.' },
+        ],
+      },
+    }),
+  ]);
+  assert.equal(result.state, 'ready');
+  assert.equal(
+    result.items[0]?.story,
+    'En el cumpleaños de Claudia me daba vergüenza bailar.\\nEstuve con Val, Fer y Juan; terminé bailando igual.',
+  );
+  assert.doesNotMatch(JSON.stringify(result), /source:never-expose/);
+});
+
+test('legacy entries without Recuerdo remain visible without an invented story', () => {
+  const result = buildAchievementsView([row()]);
+  assert.equal(result.state, 'ready');
+  assert.equal('story' in result.items[0]!, false);
+});
+
+test('malformed, secret-bearing and oversized stories fail closed', () => {
+  for (const value of [
+    { rich_text: [{ plain_text: 'token=topsecret' }] },
+    { rich_text: [{ plain_text: 'a'.repeat(1801) }] },
+    { rich_text: [{ text: { content: 'missing plain_text' } }] },
+    { rich_text: 'wrong-shape' },
+  ]) {
+    const result = buildAchievementsView([row({ Recuerdo: value })]);
+    assert.equal(result.state, 'degraded');
+    assert.equal(result.items.length, 0);
+  }
+});
+
+test('an unapproved narrative is not displayed even if its text is well formed', () => {
+  const result = buildAchievementsView([
+    row({ Recuerdo: { rich_text: [{ plain_text: 'A private story' }] }, Estado: pick('PROPOSED') }),
+  ]);
+  assert.deepEqual(result, { state: 'empty', items: [] });
 });

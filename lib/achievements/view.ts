@@ -10,6 +10,8 @@ export type AchievementCard = Readonly<{
   occurredOn: string | null;
   category: AchievementCategory;
   evidenceLabel: string;
+  /** Optional, owner-approved narrative; legacy entries remain valid without one. */
+  story?: string;
 }>;
 export type AchievementsView = Readonly<{
   state: AchievementState;
@@ -53,6 +55,25 @@ function textArray(value: unknown, kind: 'title' | 'rich_text', maxLength: numbe
   return result;
 }
 
+/** Optional Notion Recuerdo property; render only owner-approved STANDARD content. */
+function storyText(value: unknown): string | null | undefined {
+  if (value === undefined) return null; // legacy record, before the schema extension
+  const property = record(value);
+  if (!property || !Array.isArray(property.rich_text) || property.rich_text.length > 16)
+    return undefined;
+  if (property.rich_text.length === 0) return null;
+  const parts = property.rich_text.map((item: unknown) => record(item)?.plain_text);
+  if (parts.some((part: unknown) => typeof part !== 'string')) return undefined;
+  const story = (parts as string[]).join('').trim();
+  if (!story) return null;
+  if (
+    story.length > 1800 ||
+    /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(story) ||
+    PRIVATE_TEXT.test(story)
+  ) return undefined;
+  return story;
+}
+
 function civilDate(value: unknown): string | null | undefined {
   const property = record(value);
   if (!property || property.date === null) return null;
@@ -71,6 +92,7 @@ function parseAccepted(page: NotionAchievementPage): Parsed | null {
     return null;
   }
   const title = textArray(p.Nombre, 'title', 180);
+  const story = storyText(p.Recuerdo);
   const eventKey = textArray(p.ClaveEvento, 'rich_text', 128);
   const category = selection(p.Categoria);
   const assertion = selection(p.Asercion);
@@ -78,6 +100,7 @@ function parseAccepted(page: NotionAchievementPage): Parsed | null {
   const confirmed = record(p.RegistroAutorizado)?.checkbox;
   if (
     !title ||
+    story === undefined ||
     !eventKey ||
     !EVENT_KEY.test(eventKey) ||
     !category ||
@@ -94,6 +117,7 @@ function parseAccepted(page: NotionAchievementPage): Parsed | null {
       title,
       occurredOn,
       category: category as AchievementCategory,
+      ...(story ? { story } : {}),
       evidenceLabel:
         assertion === 'OWNER_VERIFIED'
           ? 'Marcado como verificado en Logros'
@@ -130,8 +154,7 @@ export function buildAchievementsView(
     .sort(
       (a, b) =>
         (b.occurredOn ?? '').localeCompare(a.occurredOn ?? '') || a.title.localeCompare(b.title),
-    )
-    .slice(0, 30);
+    );
   return { state: degraded ? 'degraded' : items.length ? 'ready' : 'empty', items };
 }
 
@@ -139,36 +162,56 @@ export function buildAchievementsView(
  * Fail closed when a response is malformed, truncated or includes foreign pages.
  * Never trust page-level properties as authorization without source scoping.
  */
-export function buildAchievementsFromNotionQuery(
-  response: unknown,
+export const MAX_ACHIEVEMENTS_QUERY_PAGES = 20;
+
+/** Combine bounded Notion pages while validating every page's source and flags.
+ * A partial final page stays degraded; invalid pagination fails closed.
+ */
+export function buildAchievementsFromNotionQueries(
+  responses: readonly unknown[],
   expectedDataSourceId: string,
 ): AchievementsView {
-  const query = record(response);
-  if (
-    !query ||
-    !Array.isArray(query.results) ||
-    query.results.length > 100 ||
-    typeof query.has_more !== 'boolean'
-  ) {
+  if (responses.length < 1 || responses.length > MAX_ACHIEVEMENTS_QUERY_PAGES) {
     return { state: 'unavailable', items: [] };
   }
   const pages: NotionAchievementPage[] = [];
   let incomplete = false;
-  for (const value of query.results) {
-    const page = record(value);
-    const parent = record(page?.parent);
-    const properties = record(page?.properties);
+  for (let index = 0; index < responses.length; index++) {
+    const query = record(responses[index]);
     if (
-      page?.object !== 'page' ||
-      page.archived !== false ||
-      parent?.type !== 'data_source_id' ||
-      parent.data_source_id !== expectedDataSourceId ||
-      !properties
+      !query ||
+      !Array.isArray(query.results) ||
+      query.results.length > 100 ||
+      typeof query.has_more !== 'boolean' ||
+      (index < responses.length - 1 && query.has_more !== true)
     ) {
-      incomplete = true;
-      continue;
+      return { state: 'unavailable', items: [] };
     }
-    pages.push({ properties });
+    if (index === responses.length - 1 && query.has_more) incomplete = true;
+    for (const value of query.results) {
+      const page = record(value);
+      const parent = record(page?.parent);
+      const properties = record(page?.properties);
+      if (
+        page?.object !== 'page' ||
+        page.archived !== false ||
+        parent?.type !== 'data_source_id' ||
+        parent.data_source_id !== expectedDataSourceId ||
+        !properties
+      ) {
+        incomplete = true;
+        continue;
+      }
+      pages.push({ properties });
+    }
   }
-  return buildAchievementsView(pages, { hasMore: query.has_more || incomplete });
+  return buildAchievementsView(pages, { hasMore: incomplete });
+}
+
+/** Compatibility entry point for existing one-page callers/tests. */
+export function buildAchievementsFromNotionQuery(
+  response: unknown,
+  expectedDataSourceId: string,
+): AchievementsView {
+  return buildAchievementsFromNotionQueries([response], expectedDataSourceId);
 }

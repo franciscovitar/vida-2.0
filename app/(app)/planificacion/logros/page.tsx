@@ -36,7 +36,7 @@ export default async function LogrosPage() {
       <Card>
         <SectionHeader
           title="Resultados importantes"
-          description="Solo logros aceptados desde una fuente privada autorizada, sin mostrar tu diario."
+          description="Momentos importantes y sus historias, desde una fuente privada autorizada."
           icon={Trophy}
           domain="productivity"
         />
@@ -70,6 +70,7 @@ export default async function LogrosPage() {
                         'Fecha no verificada'
                       )}
                     </p>
+                    {item.story ? <p className={styles.story}>{item.story}</p> : null}
                     <p className={styles.meta}>{item.evidenceLabel}</p>
                   </li>
                 ))}
