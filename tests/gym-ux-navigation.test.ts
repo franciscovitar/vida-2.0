@@ -157,10 +157,16 @@ test('Rutina V4 es alternativa visible, sin sustituir Notion ni última sesión'
 });
 
 test('Rutina V4 reproduce exactamente los 3 días y las 74 series propuestas', () => {
-  assert.deepEqual(GYM_V4_DAYS.map((day) => day.id), ['a', 'b', 'c']);
+  assert.deepEqual(
+    GYM_V4_DAYS.map((day) => day.id),
+    ['a', 'b', 'c'],
+  );
   assert.deepEqual([...GYM_V4_DAY_SETS], [25, 24, 25]);
   assert.equal(GYM_V4_WEEKLY_SETS, 74);
-  assert.deepEqual(GYM_V4_DAYS.map((day) => day.exercises.length), [9, 9, 9]);
+  assert.deepEqual(
+    GYM_V4_DAYS.map((day) => day.exercises.length),
+    [9, 9, 9],
+  );
   assert.equal(GYM_V4_DAYS[0]?.exercises[0]?.name, 'Press inclinado máquina');
   assert.equal(GYM_V4_DAYS[1]?.exercises[0]?.name, 'Prensa horizontal');
   assert.equal(GYM_V4_DAYS[2]?.exercises[3]?.name, 'Press militar');
