@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 
+import { GYM_V4_DAYS, GYM_V4_DAY_SETS, GYM_V4_WEEKLY_SETS } from '@/lib/gym/routine-v4-proposal';
+
 function source(relative: string): string {
   return readFileSync(path.join(process.cwd(), relative), 'utf8');
 }
@@ -132,4 +134,38 @@ test('Cardio separa visualmente la carga equivalente de su explicación', () => 
   const styles = source('components/gym/GymWeeklyCardio.module.scss');
   assert.match(styles, /\.secondary-heading/);
   assert.match(styles, /display: flex/);
+});
+
+
+test('Rutina V4 es alternativa visible, sin sustituir Notion ni última sesión', () => {
+  const tabs = source('components/gym/GymRoutineTabs.tsx');
+  const renderer = source('components/gym/GymRoutineV4.tsx');
+  const sourceData = source('lib/gym/routine-v4-proposal.ts');
+
+  assert.match(tabs, /Rutina fija/);
+  assert.match(tabs, /Última sesión/);
+  assert.match(tabs, /Movilidad \/ postura/);
+  assert.match(tabs, /Rutina V4/);
+  assert.match(tabs, /setView\('v4'\)/);
+  assert.match(tabs, /GymRoutineV4/);
+  assert.match(renderer, /La rutina fija sigue siendo el plan vigente de Notion/);
+  assert.match(renderer, /70 min/);
+  assert.match(renderer, /75 min/);
+  assert.match(renderer, /Movilidad y estiramientos/);
+  assert.match(renderer, /Cómo manejar pesos, RIR y descansos/);
+  assert.match(renderer, /tres días consecutivos/);
+  assert.doesNotMatch(sourceData, /Sheets|fetch\(|createClient|insert\(/);
+});
+
+test('Rutina V4 reproduce exactamente los 3 días y las 74 series propuestas', () => {
+  assert.deepEqual(GYM_V4_DAYS.map((day) => day.id), ['a', 'b', 'c']);
+  assert.deepEqual([...GYM_V4_DAY_SETS], [25, 24, 25]);
+  assert.equal(GYM_V4_WEEKLY_SETS, 74);
+  assert.deepEqual(GYM_V4_DAYS.map((day) => day.exercises.length), [9, 9, 9]);
+  assert.equal(GYM_V4_DAYS[0]?.exercises[0]?.name, 'Press inclinado máquina');
+  assert.equal(GYM_V4_DAYS[1]?.exercises[0]?.name, 'Prensa horizontal');
+  assert.equal(GYM_V4_DAYS[2]?.exercises[3]?.name, 'Press militar');
+  assert.equal(GYM_V4_DAYS[1]?.exercises[2]?.rest, '75–90 s');
+  assert.ok(GYM_V4_DAYS[1]?.exercises[2]?.note?.includes('tumbado'));
+  assert.ok(GYM_V4_DAYS.every((day) => day.mobility.length > 0));
 });
