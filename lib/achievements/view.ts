@@ -59,11 +59,7 @@ function textArray(value: unknown, kind: 'title' | 'rich_text', maxLength: numbe
 function storyText(value: unknown): string | null | undefined {
   if (value === undefined) return null; // legacy record, before the schema extension
   const property = record(value);
-  if (
-    !property ||
-    !Array.isArray(property.rich_text) ||
-    property.rich_text.length > 16
-  ) {
+  if (!property || !Array.isArray(property.rich_text) || property.rich_text.length > 16) {
     return undefined;
   }
   if (property.rich_text.length === 0) return null;
