@@ -34,6 +34,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Temporary one-run release-prep step. Removed before merging.
+      - name: Export Prettier-formatted V4 files for release prep
+        run: |
+          npx prettier --write "components/gym/GymRoutineTabs.tsx" "components/gym/GymRoutineV4.tsx" "docs/gym-v2-source.md" "lib/gym/routine-v4-proposal.ts" "tests/gym-ux-navigation.test.ts"
+          node -e 'const fs=require("node:fs"); for (const p of ["components/gym/GymRoutineTabs.tsx","components/gym/GymRoutineV4.tsx","docs/gym-v2-source.md","lib/gym/routine-v4-proposal.ts","tests/gym-ux-navigation.test.ts"]) console.log("V4_FORMATTED_JSON "+JSON.stringify({path:p,content:fs.readFileSync(p,"utf8")}))'
+
       - name: Test project
         run: npm test
 
