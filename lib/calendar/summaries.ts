@@ -144,7 +144,7 @@ export function buildUnavailableAgendaData(input: {
   notice: string;
   timezone?: string;
 }): CalendarAgendaData {
-  return buildAgendaData({
+  const unavailable = buildAgendaData({
     events: [],
     view: input.view,
     today: input.today,
@@ -154,6 +154,13 @@ export function buildUnavailableAgendaData(input: {
     calendarCount: 0,
     timezone: input.timezone,
   });
+
+  // Lectura fallida: no inferir bloques libres a partir de una lista vacía por error.
+  return {
+    ...unavailable,
+    days: unavailable.days.map((day) => ({ ...day, freeBlocks: [] })),
+    summary: { ...unavailable.summary, freeBlocksToday: [] },
+  };
 }
 
 export function buildCalendarTodayPreview(input: {
@@ -199,7 +206,7 @@ export function emptyCalendarTodayPreview(input?: {
   timezone?: string;
   now?: Date;
 }): CalendarTodayPreview {
-  return buildCalendarTodayPreview({
+  const preview = buildCalendarTodayPreview({
     events: [],
     today: input?.today ?? todayInCalendarTz(),
     source: input?.source ?? 'mock',
@@ -208,6 +215,22 @@ export function emptyCalendarTodayPreview(input?: {
     timezone: input?.timezone,
     now: input?.now,
   });
+
+  if (preview.status === 'mock' || preview.status === 'ready' || preview.status === 'empty') {
+    return preview;
+  }
+
+  // Calendar indisponible: ningún consumidor debe recibir capacidad libre ficticia.
+  return {
+    ...preview,
+    freeBlocks: [],
+    focus: {
+      ...preview.focus,
+      nextFreeBlock: null,
+      freeBlockDurationMinutes: null,
+      remainingFreeMinutes: null,
+    },
+  };
 }
 
 export function emptyAgendaData(
