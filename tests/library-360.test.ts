@@ -9,15 +9,21 @@ import {
 } from '@/lib/professional/library-360-contract';
 import {
   searchLibrary360Entries,
+  searchLibrary360Results,
   selectLibrary360Entries,
+  selectLibrary360Results,
 } from '@/lib/professional/library-360-view';
 
 const raw = readFileSync(join(process.cwd(), 'data/generated/library-360.json'), 'utf8');
 const payload = JSON.parse(raw);
+const legacyPayload = JSON.parse(
+  readFileSync(join(process.cwd(), 'data/generated/technology-library.json'), 'utf8'),
+);
 
-test('LIB360-01. V2 deriva exactamente 193 fichas únicas en 12 áreas', () => {
+test('LIB360-01. V3 conserva exactamente 193 fichas únicas en las 12 áreas', () => {
   const snapshot = parseLibrary360Snapshot(payload);
   assert.ok(snapshot);
+  assert.equal(snapshot.schemaVersion, 3);
   assert.equal(snapshot.totalEntries, 193);
   assert.equal(snapshot.areas.length, 12);
   assert.equal(snapshot.source.ref, 'main');
@@ -43,6 +49,143 @@ test('LIB360-01. V2 deriva exactamente 193 fichas únicas en 12 áreas', () => {
       verifiedAt: '2026-09-21',
     },
   ]);
+});
+
+test('LIB360-13. campos, fuentes e identidades de las 193 fichas siguen intactos', () => {
+  const snapshot = parseLibrary360Snapshot(payload);
+  assert.ok(snapshot);
+  const current = snapshot.areas.flatMap((area) => area.entries);
+  const legacy = legacyPayload.categories.flatMap(
+    (category: { entries: Record<string, unknown>[] }) => category.entries,
+  );
+  const legacyById = new Map<string, Record<string, unknown>>(
+    legacy.map((entry: Record<string, unknown>) => [String(entry.id), entry]),
+  );
+  for (const entry of current) {
+    const old = legacyById.get(entry.id);
+    assert.ok(old, `missing legacy identity ${entry.id}`);
+    for (const field of [
+      'name',
+      'kind',
+      'status',
+      'attention',
+      'summary',
+      'application',
+      'benefit',
+      'caution',
+      'tags',
+      'repository',
+      'sourceUrl',
+    ]) {
+      assert.deepEqual(entry[field as keyof typeof entry], old[field]);
+    }
+    assert.ok(entry.sourceReferences.some((reference) => reference.url === entry.sourceUrl));
+  }
+});
+
+test('LIB360-09. incorpora 154 casos A03–A11 como documentación con prueba y adopción separadas', () => {
+  const snapshot = parseLibrary360Snapshot(payload);
+  assert.ok(snapshot);
+  assert.equal(snapshot.researchCases.length, 154);
+  assert.deepEqual(
+    Object.fromEntries(
+      snapshot.areas
+        .filter((area) => area.code >= 'A03' && area.code <= 'A11')
+        .map((area) => [area.code, area.researchCases.length]),
+    ),
+    { A03: 16, A04: 18, A05: 12, A06: 18, A07: 18, A08: 18, A09: 18, A10: 18, A11: 18 },
+  );
+  assert.equal(
+    snapshot.researchCases.every(
+      (item) =>
+        item.evidenceKind === 'DOCUMENTARY_RESEARCH_CASE' &&
+        item.trialStatus === 'NOT_RUN' &&
+        item.adoptionStatus === 'NOT_AUTHORIZED',
+    ),
+    true,
+  );
+  assert.equal(
+    snapshot.researchCases.every(
+      (item) =>
+        item.sourcePath.startsWith('AI/projects/professional-intelligence/') &&
+        /^[a-f0-9]{40}$/.test(item.sourceBlobSha),
+    ),
+    true,
+  );
+});
+
+test('LIB360-10. revisión de menciones conserva TL, deja candidatos pendientes y bloquea ambigüedades', () => {
+  const snapshot = parseLibrary360Snapshot(payload);
+  assert.ok(snapshot);
+  assert.equal(snapshot.researchMentionAudit.length, 356);
+  assert.equal(snapshot.researchReview.attachedToExistingResourceCount, 42);
+  assert.equal(snapshot.researchReview.sameRepositoryGroupsHeld, 13);
+  assert.equal(snapshot.researchReview.nameCollisionHolds, 1);
+  assert.equal(snapshot.researchReview.decision, 'NO_COMMERCIAL_RIGHTS_OR_ADOPTION_CERTIFIED');
+  assert.equal(snapshot.candidateReferences.length, 0);
+  assert.equal(snapshot.researchReview.holdCount, 314);
+  assert.equal(
+    snapshot.researchMentionAudit.some(
+      (mention) => mention.id === 'A01-P2-013' && mention.disposition === 'HOLD',
+    ),
+    true,
+  );
+  assert.equal(
+    snapshot.identityHolds.some(
+      (hold) => hold.reason === 'ORVAL_ALIAS_REVIEW_NO_COMMON_REPOSITORY',
+    ),
+    true,
+  );
+  assert.equal(
+    snapshot.areas
+      .flatMap((area) => area.entries)
+      .find((entry) => entry.id === 'TL-169')
+      ?.researchMentionRefs?.some((ref) => ref.sourceId === 'A12-G-007'),
+    true,
+  );
+});
+
+test('LIB360-11. la búsqueda unificada consulta casos, candidatos y conserva filtro por área', () => {
+  const snapshot = parseLibrary360Snapshot(payload);
+  assert.ok(snapshot);
+  const all = selectLibrary360Results(snapshot);
+  const matchingCase = searchLibrary360Results(all, 'API low-cost extraction');
+  assert.equal(
+    matchingCase.some((result) => result.kind === 'case' && result.id === 'A03-S01'),
+    true,
+  );
+  assert.equal(
+    searchLibrary360Results(all, 'cardsort').some((result) => result.kind === 'hold'),
+    true,
+  );
+  assert.equal(
+    selectLibrary360Results(snapshot, 'A03_AI_MODELS').filter((result) => result.kind === 'case')
+      .length,
+    16,
+  );
+  assert.equal(
+    selectLibrary360Results(snapshot, 'A03_AI_MODELS').some((result) => result.areaCode === 'A01'),
+    false,
+  );
+  assert.equal(selectLibrary360Results(snapshot, 'ALL', 'hold').length, 314);
+  assert.equal(
+    searchLibrary360Results(all, 'ORVAL').some((result) => result.kind === 'hold'),
+    true,
+  );
+});
+
+test('LIB360-12. los duplicados de contenido, pruebas ejecutadas falsas y adopción falsa fallan cerrado', () => {
+  const duplicateCase = structuredClone(payload);
+  duplicateCase.researchCases.push(structuredClone(duplicateCase.researchCases[0]));
+  assert.equal(parseLibrary360Snapshot(duplicateCase), null);
+
+  const executedTrial = structuredClone(payload);
+  executedTrial.researchCases[0].trialStatus = 'EXECUTED';
+  assert.equal(parseLibrary360Snapshot(executedTrial), null);
+
+  const adopted = structuredClone(payload);
+  adopted.researchCases[0].adoptionStatus = 'AUTHORIZED';
+  assert.equal(parseLibrary360Snapshot(adopted), null);
 });
 
 test('LIB360-02. cinco áreas sin fichas conservan referencia de investigación', () => {
@@ -95,7 +238,7 @@ test('LIB360-04. entradas duplicadas y facetas desconocidas fallan cerrado', () 
 test('LIB360-05. falta de fuente o datos inválidos no muestra el catálogo antiguo', () => {
   assert.equal(resolveLibrary360Text(null).status, 'missing');
   assert.equal(resolveLibrary360Text('{').status, 'invalid');
-  assert.equal(resolveLibrary360Text(JSON.stringify({ schemaVersion: 1 })).status, 'invalid');
+  assert.equal(resolveLibrary360Text(JSON.stringify({ schemaVersion: 2 })).status, 'invalid');
 });
 
 test('LIB360-06. frescura corresponde a datos V1, no a fecha de reorganización', () => {

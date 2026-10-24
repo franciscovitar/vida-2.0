@@ -28,6 +28,76 @@ const srcPrefix = 'AI/projects/professional-intelligence/';
 const indexPath = srcPrefix + 'TECHNOLOGY_LIBRARY_INDEX_V1.json';
 const crossPath = srcPrefix + 'KNOWLEDGE_LIBRARY_360_INVENTORY_PROPOSAL_V1.json';
 const navPath = srcPrefix + 'KNOWLEDGE_LIBRARY_360_GLOBAL_FINAL_G_READER_NAV_20261024.json';
+const candidateSourcePaths = {
+  A01: 'KNOWLEDGE_LIBRARY_360_A01_P5_123_RECORD_TRIAGE_20261023.json',
+  A02: 'KNOWLEDGE_LIBRARY_360_A02_P5_204_RECORD_GPD_TRIAGE_20261023.json',
+  A12: 'KNOWLEDGE_LIBRARY_360_A12_P3_SELECTED_CANDIDATE_IDENTITY_TRIAGE_20261023.json',
+};
+const dossierSources = [
+  {
+    area: 'A03',
+    path: 'KNOWLEDGE_LIBRARY_360_A03_P4_PASS5_G16_DECISION_DOSSIERS_20261023.json',
+    key: 'entries',
+    id: (r) => r.id,
+    title: (r) => r.capability,
+  },
+  {
+    area: 'A04',
+    path: 'KNOWLEDGE_LIBRARY_360_A04_P4_G18_DECISION_DOSSIERS_20261023.json',
+    key: 'dossiers',
+    id: (r) => r.family,
+    title: (r) => r.capability,
+  },
+  {
+    area: 'A05',
+    path: 'KNOWLEDGE_LIBRARY_360_A05_P4_CURATED_12_DECISIONS_20261023.json',
+    key: 'selected',
+    id: (r) => r.id,
+    title: (r) => r.area,
+  },
+  {
+    area: 'A06',
+    path: 'KNOWLEDGE_LIBRARY_360_A06_P4_G18_DECISION_DOSSIERS_20261023.json',
+    key: 'dossiers',
+    id: (r) => r.family,
+    title: (r) => r.capability,
+  },
+  {
+    area: 'A07',
+    path: 'KNOWLEDGE_LIBRARY_360_A07_P4_PASS4_G18_DECISION_DOSSIERS_20261023.json',
+    key: 'dossiers',
+    id: (r) => r.family,
+    title: (r) => r.capability,
+  },
+  {
+    area: 'A08',
+    path: 'KNOWLEDGE_LIBRARY_360_A08_P4_G18_DECISIONS_AND_NOT_RUN_TRIALS_20261023.json',
+    key: 'dossiers',
+    id: (r) => r.family,
+    title: (r) => r.goal,
+  },
+  {
+    area: 'A09',
+    path: 'KNOWLEDGE_LIBRARY_360_A09_P4_G18_DECISIONS_AND_NOT_RUN_TRIALS_20261023.json',
+    key: 'dossiers',
+    id: (r) => r.family,
+    title: (r) => r.problem,
+  },
+  {
+    area: 'A10',
+    path: 'KNOWLEDGE_LIBRARY_360_A10_P4_G18_DECISION_DOSSIERS_20261023.json',
+    key: 'dossiers',
+    id: (r) => r.family,
+    title: (r) => r.goal,
+  },
+  {
+    area: 'A11',
+    path: 'KNOWLEDGE_LIBRARY_360_A11_P4_G18_DECISION_DOSSIERS_20261023.json',
+    key: 'dossiers',
+    id: (r) => r.family,
+    title: (r) => r.goal,
+  },
+];
 const legacyPath = join(process.cwd(), 'data/generated/technology-library.json');
 const outputPath = join(process.cwd(), 'data/generated/library-360.json');
 
@@ -52,6 +122,17 @@ function pasFile(file) {
 const { data: index, sha: indexSha } = pasFile(indexPath);
 const { data: cross, sha: crossSha } = pasFile(crossPath);
 const { data: nav, sha: navSha } = pasFile(navPath);
+const candidateInputs = Object.fromEntries(
+  Object.entries(candidateSourcePaths).map(([area, path]) => [
+    area,
+    { ...pasFile(srcPrefix + path), path: srcPrefix + path },
+  ]),
+);
+const dossierInputs = dossierSources.map((spec) => ({
+  ...spec,
+  ...pasFile(srcPrefix + spec.path),
+  fullPath: srcPrefix + spec.path,
+}));
 const legacyRaw = readFileSync(legacyPath, 'utf8');
 const legacy = JSON.parse(legacyRaw);
 const entries = index.categories.flatMap((category) => pasFile(category.path).data.entries);
@@ -78,6 +159,8 @@ const areas = cross.areas.map((area) => {
     researchReportPath: report.path,
     researchReportBlobSha: report.sha,
     entries: [],
+    researchCases: [],
+    candidateReferences: [],
   };
 });
 const areaMap = new Map(areas.map((area) => [area.id, area]));
@@ -146,21 +229,628 @@ const source = {
   crosswalkBlobSha: crossSha,
   researchNavigationRef: navPath,
   researchNavigationBlobSha: navSha,
+  researchContentSources: [
+    ...Object.entries(candidateInputs).map(([area, input]) => ({
+      area,
+      path: input.path,
+      blobSha: input.sha,
+    })),
+    ...dossierInputs.map((input) => ({
+      area: input.area,
+      path: input.fullPath,
+      blobSha: input.sha,
+    })),
+  ],
   legacyDerivativeRef: 'data/generated/technology-library.json',
   legacyDerivativeBlobSha: blobSha(legacyRaw),
   legacyDerivativeCommit: legacy.source.commit,
   provenanceNote:
     'PAS main pins reference corpus; individual tool metadata observedAt remains the original TL September 2026 date. Crosswalk PROPOSED_NOT_VERIFIED; G research only documentary.',
 };
+
+const tlByRepository = new Map(entries.map((entry) => [entry.repository.toLowerCase(), entry.id]));
+const crossRepoHolds = new Set([
+  'appflowy-io/appflowy',
+  'electron/electron',
+  'evidence-dev/evidence',
+  'expo/expo',
+  'flutter/flutter',
+  'marimo-team/marimo',
+  'pact-foundation/pact-js',
+  'penpot/penpot',
+  'pwa-builder/pwabuilder',
+  'rilldata/rill',
+  'schemathesis/schemathesis',
+  'tauri-apps/tauri',
+  'testcontainers/testcontainers-node',
+]);
+const mentionAudit = [];
+const identityHolds = [];
+const candidateRefs = [];
+const attachedMentionRefs = new Map();
+function addAttached(tlId, ref) {
+  const refs = attachedMentionRefs.get(tlId) ?? [];
+  refs.push(ref);
+  attachedMentionRefs.set(tlId, refs);
+}
+function repoRoot(value) {
+  if (!value) return null;
+  const stripped = String(value)
+    .replace(/^https?:\/\/(www\.)?github\.com\//i, '')
+    .replace(/\.git$/i, '')
+    .replace(/^\/+|\/+$/g, '');
+  return /^[^/]+\/[^/]+$/.test(stripped) ? stripped.toLowerCase() : null;
+}
+function mention(
+  area,
+  id,
+  name,
+  sourcePath,
+  sourceBlobSha,
+  identity,
+  disposition,
+  reason,
+  tlId = null,
+) {
+  const item = {
+    area,
+    id,
+    name,
+    sourcePath,
+    sourceBlobSha,
+    identity: identity ?? null,
+    disposition,
+    reason,
+  };
+  if (tlId) item.existingResourceId = tlId;
+  mentionAudit.push(item);
+}
+const seenCandidateIdentities = new Set();
+for (const row of candidateInputs.A01.data.rows) {
+  const root = repoRoot(row.official_code_repository_identity);
+  const tlId = row.canonical_193_match;
+  const ref = {
+    sourceId: row.a01_record_id,
+    sourcePath: candidateInputs.A01.path,
+    sourceBlobSha: candidateInputs.A01.sha,
+    sourceCheckedAt: row.checked_at,
+  };
+  if (tlId) {
+    addAttached(tlId, { ...ref, disposition: 'ATTACHED_TO_EXISTING_TL' });
+    mention(
+      'A01',
+      row.a01_record_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'ATTACHED_TO_EXISTING_TL',
+      'Exact PAS canonical TL match',
+      tlId,
+    );
+  } else if (row.triage_decision === 'HOLD_OR_RESTRICTED') {
+    mention(
+      'A01',
+      row.a01_record_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'HOLD',
+      row.triage_decision,
+    );
+    identityHolds.push({
+      id: row.a01_record_id,
+      name: row.name,
+      area: 'A01',
+      repository: root,
+      reason: row.triage_decision,
+    });
+  } else if (row.name.trim().toLowerCase() === 'orval') {
+    mention(
+      'A01',
+      row.a01_record_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'HOLD',
+      'ORVAL_ALIAS_REVIEW_NO_COMMON_REPOSITORY',
+    );
+    identityHolds.push({
+      id: row.a01_record_id,
+      name: row.name,
+      area: 'A01',
+      repository: root,
+      reason: 'ORVAL_ALIAS_REVIEW_NO_COMMON_REPOSITORY',
+    });
+  } else if (root && crossRepoHolds.has(root)) {
+    mention(
+      'A01',
+      row.a01_record_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'HOLD',
+      'Shared repository requires component/edition review',
+    );
+    identityHolds.push({
+      id: row.a01_record_id,
+      name: row.name,
+      area: 'A01',
+      repository: root,
+      reason: 'SAME_REPOSITORY_COMPONENT_EDITION_REVIEW',
+    });
+  } else if (row.a02_repo_match) {
+    mention(
+      'A01',
+      row.a01_record_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'HOLD',
+      'Cross-area identity requires component/edition review',
+    );
+    identityHolds.push({
+      id: row.a01_record_id,
+      name: row.name,
+      area: 'A01',
+      repository: root,
+      reason: 'A01_A02_IDENTITY_REVIEW',
+    });
+  } else if (
+    root &&
+    ['REFERENCE_LEARN_OR_REUSE', 'EVALUATE_IF_FIT'].includes(row.triage_decision)
+  ) {
+    const identity = 'repo:' + root;
+    if (seenCandidateIdentities.has(identity)) {
+      mention(
+        'A01',
+        row.a01_record_id,
+        row.name,
+        ref.sourcePath,
+        ref.sourceBlobSha,
+        root,
+        'DEDUPLICATED_CANDIDATE_MENTION',
+        'One candidate reference per repository identity',
+      );
+    } else {
+      seenCandidateIdentities.add(identity);
+      const candidate = {
+        id: row.a01_record_id,
+        area: 'A01',
+        name: row.name,
+        identity: root,
+        referenceUrl: row.source_links[0],
+        subcategory: row.family,
+        candidateStatus: 'CANDIDATE_PENDING_REVIEW',
+        rightsStatus: 'NOT_CERTIFIED',
+        testStatus: row.P4_executed ? 'EXECUTED_SOURCE_RECORD' : 'NOT_RUN',
+        adoptionStatus: row.adopted ? 'AUTHORIZED_SOURCE_RECORD' : 'NOT_AUTHORIZED',
+        sourcePath: ref.sourcePath,
+        sourceBlobSha: ref.sourceBlobSha,
+        sourceCheckedAt: row.checked_at,
+        triage: row.triage_decision,
+      };
+      candidateRefs.push(candidate);
+      mention(
+        'A01',
+        row.a01_record_id,
+        row.name,
+        ref.sourcePath,
+        ref.sourceBlobSha,
+        root,
+        'CANDIDATE_PENDING_REVIEW',
+        'Triage allows reference; identity is a repository, rights and edition remain unverified',
+      );
+    }
+  } else {
+    mention(
+      'A01',
+      row.a01_record_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'HOLD',
+      'Identity, repository, product or edition not sufficiently resolved',
+    );
+    identityHolds.push({
+      id: row.a01_record_id,
+      name: row.name,
+      area: 'A01',
+      repository: root,
+      reason: 'IDENTITY_OR_EDITION_UNVERIFIED',
+    });
+  }
+}
+for (const row of candidateInputs.A02.data.rows) {
+  const root = repoRoot(row.repository);
+  const ref = {
+    sourceId: row.id,
+    sourcePath: candidateInputs.A02.path,
+    sourceBlobSha: candidateInputs.A02.sha,
+    sourceCheckedAt: row.source_checked_at,
+  };
+  if (row.canonical_193_match) {
+    addAttached(row.canonical_193_match, { ...ref, disposition: 'ATTACHED_TO_EXISTING_TL' });
+    mention(
+      'A02',
+      row.id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'ATTACHED_TO_EXISTING_TL',
+      'Explicit PAS canonical TL match',
+      row.canonical_193_match,
+    );
+  } else if (
+    row.A01_record_match ||
+    (root && crossRepoHolds.has(root)) ||
+    row.name.toLowerCase() === 'orval'
+  ) {
+    const reason =
+      row.name.toLowerCase() === 'orval'
+        ? 'ORVAL_ALIAS_REVIEW_NO_COMMON_REPOSITORY'
+        : 'SAME_REPOSITORY_COMPONENT_EDITION_REVIEW';
+    mention('A02', row.id, row.name, ref.sourcePath, ref.sourceBlobSha, root, 'HOLD', reason);
+    identityHolds.push({ id: row.id, name: row.name, area: 'A02', repository: root, reason });
+  } else if (
+    ['G_CORE_SOFTWARE', 'G_ADJACENT_DIGITAL'].includes(row.GPD_fit) &&
+    row.license_evidence_state === 'VERIFIED_ROOT_CODE_FILE' &&
+    row.root_license_current_review?.source_url?.startsWith('https://') &&
+    root
+  ) {
+    const identity = 'repo:' + root;
+    if (seenCandidateIdentities.has(identity)) {
+      mention(
+        'A02',
+        row.id,
+        row.name,
+        ref.sourcePath,
+        ref.sourceBlobSha,
+        root,
+        'DEDUPLICATED_CANDIDATE_MENTION',
+        'One candidate reference per repository identity',
+      );
+    } else {
+      seenCandidateIdentities.add(identity);
+      candidateRefs.push({
+        id: row.id,
+        area: 'A02',
+        name: row.name,
+        identity: root,
+        referenceUrl: row.root_license_current_review.source_url,
+        subcategory: row.GPD_fit,
+        candidateStatus: 'CANDIDATE_PENDING_REVIEW',
+        rightsStatus: 'ROOT_FILE_ONLY_COMMERCIAL_SCOPE_UNVERIFIED',
+        testStatus: 'NOT_RUN',
+        adoptionStatus: 'NOT_AUTHORIZED',
+        sourcePath: ref.sourcePath,
+        sourceBlobSha: ref.sourceBlobSha,
+        sourceCheckedAt: row.source_checked_at,
+        licenseEvidence: row.root_license_current_review.value,
+      });
+      mention(
+        'A02',
+        row.id,
+        row.name,
+        ref.sourcePath,
+        ref.sourceBlobSha,
+        root,
+        'CANDIDATE_PENDING_REVIEW',
+        'Root license file checked; product edition and commercial eligibility still require review',
+      );
+    }
+  } else {
+    mention(
+      'A02',
+      row.id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'HOLD',
+      'Rights, source identity or product edition not sufficiently verified',
+    );
+    identityHolds.push({
+      id: row.id,
+      name: row.name,
+      area: 'A02',
+      repository: root,
+      reason: 'RIGHTS_OR_IDENTITY_UNVERIFIED',
+    });
+  }
+}
+for (const row of candidateInputs.A12.data.selected_candidates) {
+  const root = repoRoot(row.repo_url);
+  const ref = {
+    sourceId: row.candidate_id,
+    sourcePath: candidateInputs.A12.path,
+    sourceBlobSha: candidateInputs.A12.sha,
+    sourceCheckedAt: row.checked_at,
+  };
+  const tlId = row.existing_library_match;
+  if (tlId) {
+    addAttached(tlId, { ...ref, disposition: 'ATTACHED_TO_EXISTING_TL' });
+    mention(
+      'A12',
+      row.candidate_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'ATTACHED_TO_EXISTING_TL',
+      'Explicit existing library match',
+      tlId,
+    );
+  } else if (!['NEW_CANDIDATE', 'WATCH'].includes(row.research_status)) {
+    mention(
+      'A12',
+      row.candidate_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      'HOLD',
+      'Source triage excludes this reference',
+    );
+    identityHolds.push({
+      id: row.candidate_id,
+      name: row.name,
+      area: 'A12',
+      repository: root,
+      reason: 'SOURCE_TRIAGE_EXCLUSION_' + row.research_status,
+    });
+  } else if (root && (crossRepoHolds.has(root) || tlByRepository.has(root))) {
+    const tlMatch = tlByRepository.get(root);
+    mention(
+      'A12',
+      row.candidate_id,
+      row.name,
+      ref.sourcePath,
+      ref.sourceBlobSha,
+      root,
+      tlMatch ? 'HOLD' : 'HOLD',
+      tlMatch
+        ? 'Repository identity conflicts with an existing TL resource; exact product/edition review required'
+        : 'Shared repository requires component/edition review',
+      tlMatch ?? null,
+    );
+    identityHolds.push({
+      id: row.candidate_id,
+      name: row.name,
+      area: 'A12',
+      repository: root,
+      reason: 'REPOSITORY_IDENTITY_REVIEW',
+    });
+  } else {
+    const publicUrl = row.primary_reference_url;
+    const identity = root
+      ? 'repo:' + root
+      : 'ref:' + (publicUrl ?? '').toLowerCase().replace(/[?#].*$/, '');
+    if (!publicUrl?.startsWith('https://') || seenCandidateIdentities.has(identity)) {
+      mention(
+        'A12',
+        row.candidate_id,
+        row.name,
+        ref.sourcePath,
+        ref.sourceBlobSha,
+        root ?? identity,
+        'HOLD',
+        !publicUrl?.startsWith('https://')
+          ? 'No public identity reference'
+          : 'Duplicate repository, edition or product mention',
+      );
+      identityHolds.push({
+        id: row.candidate_id,
+        name: row.name,
+        area: 'A12',
+        repository: root,
+        reason: 'IDENTITY_OR_DUPLICATE_REVIEW',
+      });
+    } else {
+      seenCandidateIdentities.add(identity);
+      candidateRefs.push({
+        id: row.candidate_id,
+        area: 'A12',
+        name: row.name,
+        identity: root ?? identity.slice(4),
+        referenceUrl: publicUrl,
+        subcategory: row.subarea,
+        resourceType: row.resource_type,
+        candidateStatus: 'CANDIDATE_PENDING_REVIEW',
+        rightsStatus: 'NOT_CERTIFIED',
+        testStatus: row.trial_executed ? 'EXECUTED_SOURCE_RECORD' : 'NOT_RUN',
+        adoptionStatus: row.adopted ? 'AUTHORIZED_SOURCE_RECORD' : 'NOT_AUTHORIZED',
+        sourcePath: ref.sourcePath,
+        sourceBlobSha: ref.sourceBlobSha,
+        sourceCheckedAt: row.checked_at,
+        sourceResearchStatus: row.research_status,
+        licenseNote: row.license_code,
+      });
+      mention(
+        'A12',
+        row.candidate_id,
+        row.name,
+        ref.sourcePath,
+        ref.sourceBlobSha,
+        root ?? identity,
+        'CANDIDATE_PENDING_REVIEW',
+        'Source class permits a reference candidate; rights and fit remain unapproved',
+      );
+    }
+  }
+}
+// The intake fields identify references, but do not certify each edition and its
+// commercial scope. Keep those rows visible in HOLD until that gate is complete.
+for (const candidate of candidateRefs) {
+  const auditRow = mentionAudit.find(
+    (item) => item.id === candidate.id && item.area === candidate.area,
+  );
+  if (!auditRow || auditRow.disposition !== 'CANDIDATE_PENDING_REVIEW') {
+    throw new Error('Candidate review row is missing from the mention audit: ' + candidate.id);
+  }
+  const reason =
+    candidate.area === 'A02' &&
+    candidate.rightsStatus === 'ROOT_FILE_ONLY_COMMERCIAL_SCOPE_UNVERIFIED'
+      ? 'ROOT_LICENSE_CHECKED_BUT_COMMERCIAL_SCOPE_OR_EDITION_NOT_VERIFIED'
+      : candidate.area === 'A12'
+        ? 'COMMERCIAL_CONDITIONS_OR_EXACT_PRODUCT_EDITION_NOT_VERIFIED'
+        : 'COMMERCIAL_CONDITIONS_AND_PRODUCT_EDITION_NOT_VERIFIED';
+  auditRow.disposition = 'HOLD';
+  auditRow.reason = reason;
+  identityHolds.push({
+    id: candidate.id,
+    name: candidate.name,
+    area: candidate.area,
+    repository: candidate.identity.includes('/') ? candidate.identity : null,
+    reason,
+  });
+}
+candidateRefs.length = 0;
+
+for (const [tlId, refs] of attachedMentionRefs) {
+  const resource = byId.get(tlId);
+  const viewResource = areaMap
+    .get(crossById.get(tlId).proposed_primary_area)
+    .entries.find((entry) => entry.id === tlId);
+  if (resource && viewResource) viewResource.researchMentionRefs = refs;
+}
+for (const area of areas) {
+  area.candidateReferences = candidateRefs
+    .filter((candidate) => candidate.area === area.code)
+    .map((candidate) => candidate.id);
+}
+
+function getField(record, fields) {
+  for (const field of fields)
+    if (typeof record[field] === 'string' && record[field].trim()) return record[field];
+  return null;
+}
+const researchCases = [];
+for (const spec of dossierInputs) {
+  const rows = spec.data[spec.key];
+  const area =
+    areaMap.get(
+      spec.area +
+        '_' +
+        ({
+          A03: 'AI_MODELS_APIS',
+          A04: 'DATA_DISCOVERY',
+          A05: 'APIS_INTEGRATIONS',
+          A06: 'RESEARCH_DISCOVERY',
+          A07: 'BENCHMARKS',
+          A08: 'SECURITY',
+          A09: 'COMMUNITY_KNOWLEDGE',
+          A10: 'EDUCATION_BENEFITS',
+          A11: 'OPERATIONS',
+        }[spec.area] ?? ''),
+    ) ?? areas.find((item) => item.code === spec.area);
+  if (!Array.isArray(rows)) throw new Error('Missing dossier array for ' + spec.area);
+  for (const record of rows) {
+    const id = String(spec.id(record));
+    const title = String(spec.title(record));
+    const sourceUrl = getField(record, ['primary_url', 'primary_source', 'source', 'source_url']);
+    const item = {
+      id: spec.area + '-' + id,
+      areaCode: spec.area,
+      title,
+      topic:
+        getField(record, ['use_case', 'capability', 'goal', 'problem', 'question', 'area']) ??
+        title,
+      alternatives: getField(record, ['alternatives', 'candidates', 'examples']),
+      noChange: getField(record, ['NO_CHANGE_baseline', 'NO_CHANGE', 'NO_CHANGE_baseline']),
+      limitations: getField(record, [
+        'rights_limitations',
+        'rights_and_cost',
+        'cost_and_rights',
+        'rights',
+        'limits',
+        'limitations',
+        'conditions',
+        'constraints',
+        'critical_limit',
+        'cautions',
+        'risk',
+      ]),
+      decision: getField(record, ['decision', 'policy']),
+      trialPlan: getField(record, [
+        'trial_NOT_RUN',
+        'trial_not_run',
+        'synthetic_test_NOT_RUN',
+        'synthetic_fixture_NOT_CREATED',
+      ]),
+      trialStatus: 'NOT_RUN',
+      adoptionStatus: 'NOT_AUTHORIZED',
+      evidenceKind: 'DOCUMENTARY_RESEARCH_CASE',
+      sourceUrl: sourceUrl?.startsWith('https://') ? sourceUrl : null,
+      sourcePath: spec.fullPath,
+      sourceBlobSha: spec.sha,
+    };
+    if (!item.sourceUrl) throw new Error('Dossier missing public source URL: ' + item.id);
+    item.searchText = [
+      item.id,
+      item.title,
+      item.topic,
+      item.alternatives,
+      item.noChange,
+      item.limitations,
+      item.decision,
+      item.trialPlan,
+      sourceUrl,
+    ]
+      .filter(Boolean)
+      .join(' ');
+    researchCases.push(item);
+    if (area) area.researchCases.push(item.id);
+  }
+}
+for (const candidate of candidateRefs) {
+  candidate.searchText = Object.values(candidate)
+    .filter((value) => typeof value === 'string')
+    .join(' ');
+}
+if (researchCases.length !== 154 || mentionAudit.length !== 356 || candidateRefs.length !== 0) {
+  throw new Error(
+    `Content intake mismatch: ${researchCases.length} dossiers, ${mentionAudit.length} mentions, ${candidateRefs.length} candidate references`,
+  );
+}
+for (const area of areas) area.entries.sort((a, b) => a.id.localeCompare(b.id));
 const prettierOptions = (await resolveConfig(outputPath)) ?? {};
 const result = await format(
   JSON.stringify(
     {
-      schemaVersion: 2,
+      schemaVersion: 3,
       source,
       totalEntries: total,
       spotlightIds: legacy.spotlightIds,
       areas,
+      researchCases,
+      candidateReferences: candidateRefs,
+      identityHolds,
+      researchMentionAudit: mentionAudit,
+      researchReview: {
+        sourceMentionCount: mentionAudit.length,
+        attachedToExistingResourceCount: mentionAudit.filter(
+          (item) => item.disposition === 'ATTACHED_TO_EXISTING_TL',
+        ).length,
+        candidateReferenceCount: candidateRefs.length,
+        holdCount: mentionAudit.filter((item) => item.disposition === 'HOLD').length,
+        deduplicatedMentionCount: mentionAudit.filter(
+          (item) => item.disposition === 'DEDUPLICATED_CANDIDATE_MENTION',
+        ).length,
+        sameRepositoryGroupsHeld: crossRepoHolds.size,
+        nameCollisionHolds: new Set(
+          identityHolds
+            .filter((item) => item.reason === 'ORVAL_ALIAS_REVIEW_NO_COMMON_REPOSITORY')
+            .map((item) => item.name.toLowerCase()),
+        ).size,
+        decision: 'NO_COMMERCIAL_RIGHTS_OR_ADOPTION_CERTIFIED',
+      },
     },
     null,
     2,
@@ -177,6 +867,14 @@ process.stdout.write(
     result: mode === '--write' ? 'WRITTEN' : 'PASS',
     sourceCommit: mainSha,
     identityCount: total,
+    researchCases: researchCases.length,
+    candidateReferences: candidateRefs.length,
+    mentionDispositions: Object.fromEntries(
+      [...new Set(mentionAudit.map((m) => m.disposition))].map((status) => [
+        status,
+        mentionAudit.filter((m) => m.disposition === status).length,
+      ]),
+    ),
     counts: areas.map((a) => [a.code, a.entries.length]),
   }) + '\n',
 );
