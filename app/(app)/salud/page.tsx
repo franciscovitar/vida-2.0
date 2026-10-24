@@ -12,6 +12,7 @@ import {
   HealthTrajectorySection,
 } from '@/components/health/HealthIntelligenceSections';
 import { HealthNavigation } from '@/components/health/HealthNavigation';
+import { HealthScoresOverview } from '@/components/health/HealthScoresOverview';
 import {
   HealthLongitudinalSummary,
   HealthReadinessSummary,
@@ -43,7 +44,7 @@ export default async function SaludPage({
 }) {
   const params = await searchParams;
   const periodDays = parsePeriodParam(params.period);
-  const { health, intelligence, deviationRadar } = await loadHealthPageModel(periodDays);
+  const { health, intelligence, rhythm, deviationRadar } = await loadHealthPageModel(periodDays);
   const actionable = intelligence.priorities.filter((priority) => priority.id !== 'maintenance');
 
   return (
@@ -70,6 +71,7 @@ export default async function SaludPage({
       />
 
       <HealthReadinessSummary score={intelligence.scores.readiness} />
+      <HealthScoresOverview scores={intelligence.scores} rhythm={rhythm} />
 
       <HealthTrajectorySection trajectory={intelligence.trajectory} />
 

@@ -273,3 +273,66 @@ test('HS11. la UI objetiva pone el brief primero y separa los dominios', () => {
   assert.match(navigation, /\/salud\/corazon/);
   assert.match(navigation, /\/salud\/actividad/);
 });
+
+test('HS12. VFC con tres noches previas no altera cardio, Recovery ni Readiness', () => {
+  const sparse = baselineRows().map((source, i) => {
+    if (i >= 11) return source;
+    const copy = [...source];
+    copy[HEADERS.indexOf(SAL.hrv)] = '';
+    return copy;
+  });
+  const withHrv = buildExplainableHealthScores(healthFor([...sparse, todayRow()]));
+  const without = buildExplainableHealthScores(healthFor([...sparse, todayRow({ hrv: false })]));
+  const cardio = withHrv.domains.find((s) => s.id === 'cardio-stability');
+  const recovery = withHrv.domains.find((s) => s.id === 'recovery');
+  assert.ok(cardio && recovery);
+  assert.equal(cardio.contributors.find((x) => x.id === 'hrv')?.score, null);
+  assert.equal(cardio.score, without.domains.find((x) => x.id === 'cardio-stability')?.score);
+  assert.equal(
+    cardio.confidence,
+    without.domains.find((x) => x.id === 'cardio-stability')?.confidence,
+  );
+  assert.equal(recovery.score, without.domains.find((x) => x.id === 'recovery')?.score);
+  assert.equal(withHrv.readiness.score, without.readiness.score);
+  assert.equal(withHrv.readiness.confidence, without.readiness.confidence);
+  assert.ok(recovery.uncertainties.some((x) => /VFC no ponderada/.test(x)));
+});
+
+test('HS13. VFC con 14 noches de referencia sí puede aportar a cardio', () => {
+  const cardio = scoreOf([...baselineRows(), todayRow()], 'cardio-stability');
+  const hrv = cardio.contributors.find((c) => c.id === 'hrv');
+  assert.ok(hrv && hrv.score !== null);
+  assert.match(hrv.detail, /60 ms hoy vs base 60 ms/);
+});
+
+test('HS14. Resumen expone todos los scores con definiciones cortas sin crear métricas', () => {
+  const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
+  const overview = readFileSync(
+    join(process.cwd(), 'components', 'health', 'HealthScoresOverview.tsx'),
+    'utf8',
+  );
+  const readinessIndex = page.indexOf('<HealthReadinessSummary');
+  const overviewIndex = page.indexOf('<HealthScoresOverview');
+  const trajectoryIndex = page.indexOf('<HealthTrajectorySection');
+  assert.ok(
+    readinessIndex >= 0 && overviewIndex > readinessIndex && trajectoryIndex > overviewIndex,
+  );
+  assert.match(page, /rhythm,\s*deviationRadar/);
+  assert.match(overview, /scores\.domains\.map/);
+  assert.match(overview, /rhythm\.result\?\.score/);
+  assert.match(overview, /scores\.momentum\.score/);
+  for (const label of [
+    'Readiness',
+    'Sueño',
+    'Recuperación',
+    'Actividad',
+    'Estabilidad cardio',
+    'Movilidad',
+    'Regularidad de sueño',
+    'Dirección reciente',
+  ]) {
+    assert.ok(overview.includes(label), 'Falta explicación: ' + label);
+  }
+  assert.match(overview, /item\.value === null \? '—'/);
+  assert.doesNotMatch(page, /HealthCheckinCard|loadHealthCheckinSnapshot/);
+});

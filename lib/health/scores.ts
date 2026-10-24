@@ -537,8 +537,10 @@ function buildCardioScore(health: HealthPageData): HealthExplainableScore {
     resting !== null && restingCenter !== null
       ? personalDeviationScore(resting, restingCenter, 'higher-is-worse')
       : null;
+  // Mantener la medición visible, pero no ponderarla con una base nocturna inmadura.
+  // El umbral de 14 noches es editorial/analítico, no un criterio médico.
   const hrvScore =
-    hrv !== null && hrvCenter !== null
+    hrvBaseline.days >= STRONG_BASELINE_DAYS && hrv !== null && hrvCenter !== null
       ? personalDeviationScore(hrv, hrvCenter, 'lower-is-worse')
       : null;
 
@@ -579,7 +581,7 @@ function buildCardioScore(health: HealthPageData): HealthExplainableScore {
               ? 'negative'
               : 'neutral',
       detail:
-        hrv === null || hrvCenter === null
+        hrvScore === null || hrv === null || hrvCenter === null
           ? 'HRV no tiene cobertura/semántica suficiente para pesar hoy.'
           : `${formatInt(hrv)} ms hoy vs base ${formatInt(hrvCenter)} ms.`,
       evidenceRefs: ['hrv'],
@@ -902,9 +904,8 @@ function buildRecoveryScore(
     contributors,
     uncertainties: [
       'La carga de entrenamiento todavía no pesa hasta tener un resumen estructurado de Gym.',
-      ...(health.signals.today?.values.hrv === null ||
-      health.signals.today?.values.hrv === undefined
-        ? ['HRV ausente: el score sigue visible, pero pierde confianza.']
+      ...(cardio.contributors.find((item) => item.id === 'hrv')?.score === null
+        ? ['VFC no ponderada: faltan noches comparables o la medición actual.']
         : []),
     ],
     calculationVersion: SCORE_VERSION,
