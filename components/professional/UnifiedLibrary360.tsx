@@ -271,7 +271,8 @@ export function UnifiedLibrary360({ data }: { data: Library360Data }) {
         <p>
           {snapshot.totalEntries} fichas existentes, {snapshot.researchCases.length} casos
           documentales, {snapshot.candidateReferences.length} referencias candidatas pendientes y{' '}
-          {kindCounts.hold} menciones en HOLD por conflictos reales. Guardar una referencia no implica probarla ni
+          {kindCounts.hold} menciones en HOLD por conflictos reales. Guardar una referencia no
+          implica probarla ni
           adoptarla.
         </p>
         {data.notice ? (
