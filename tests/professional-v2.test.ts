@@ -201,7 +201,8 @@ test('PRO-V2-15. Biblioteca 360 es única, progresiva y no adopción automática
   assert.match(library, /snapshot\.areas/);
   assert.match(library, /Explorar los 12 informes de investigación/);
   assert.match(library, /Guardar una herramienta no implica adoptarla/);
-  assert.match(library, /matching\.slice\(0, 80\)/);
+  assert.match(library, /matching\.slice\(0, resultLimit\)/);
+  assert.match(library, /Math\.min\(INITIAL_RESULT_LIMIT, matching\.length - visible\.length\)/);
   assert.doesNotMatch(library, /unreadCount|streakCount|readingDebt|backlogCount/i);
 });
 

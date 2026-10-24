@@ -40,7 +40,8 @@
   gap: 0.4rem;
 }
 
-.areaButton {
+.area-button {
+  min-height: 44px;
   padding: 0.45rem 0.65rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
@@ -51,15 +52,17 @@
   font-size: 0.72rem;
 }
 
-.areaButton[aria-pressed='true'] {
+.area-button[aria-pressed='true'] {
   border-color: var(--text);
   color: var(--text);
   font-weight: 800;
 }
 
-.areaButton:focus-visible,
-.searchRow input:focus-visible,
-.details summary:focus-visible {
+.area-button:focus-visible,
+.search-row input:focus-visible,
+.details summary:focus-visible,
+.research a:focus-visible,
+.details-body a:focus-visible {
   outline: 2px solid var(--text);
   outline-offset: 3px;
 }
@@ -78,7 +81,8 @@
 }
 
 .research a,
-.detailsBody a {
+.details-body a {
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -88,24 +92,24 @@
   font-weight: 750;
 }
 
-.researchGrid {
+.research-grid {
   display: grid;
   gap: 0.6rem;
   margin-top: 0.5rem;
 }
 
-.researchItem {
+.research-item {
   display: grid;
   gap: 0.2rem;
   font-size: 0.72rem;
 }
 
-.searchRow {
+.search-row {
   display: grid;
   gap: 0.45rem;
 }
 
-.searchRow label {
+.search-row label {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -114,9 +118,10 @@
   font-weight: 800;
 }
 
-.searchRow input {
+.search-row input {
   min-width: 0;
   width: 100%;
+  min-height: 44px;
   padding: 0.7rem 0.8rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -146,7 +151,7 @@
   border-top: 1px solid var(--border);
 }
 
-.entryHead {
+.entry-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -154,19 +159,19 @@
   gap: 0.5rem;
 }
 
-.entryHead h4 {
+.entry-head h4 {
   margin: 0;
   color: var(--text);
   font-size: 0.98rem;
 }
 
-.entryHead span {
+.entry-head span {
   color: var(--text-subtle);
   font-size: 0.66rem;
 }
 
 .entry > p,
-.detailsBody p {
+.details-body p {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.78rem;
@@ -179,13 +184,16 @@
 }
 
 .details summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   cursor: pointer;
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 750;
 }
 
-.detailsBody {
+.details-body {
   display: grid;
   gap: 0.55rem;
   padding-top: 0.55rem;
@@ -204,12 +212,12 @@
   border-top: 1px solid var(--border);
 }
 
-.srOnly {
+.sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -217,7 +225,8 @@
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .researchGrid {
+
+  .research-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

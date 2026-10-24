@@ -20,8 +20,24 @@ function sha(value: unknown): value is string {
   return typeof value === 'string' && /^[a-f0-9]{40}$/.test(value);
 }
 
+function isoDate(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const timestamp = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === value;
+}
+
 function strings(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(text);
+}
+
+function sourceReference(value: unknown): boolean {
+  if (!record(value)) return false;
+  return (
+    text(value.label) &&
+    text(value.url) &&
+    value.url.startsWith('https://') &&
+    isoDate(value.verifiedAt)
+  );
 }
 
 function entry(value: unknown): value is Library360Entry {
@@ -29,15 +45,27 @@ function entry(value: unknown): value is Library360Entry {
   return (
     text(value.id) &&
     /^TL-\d{3}$/.test(value.id) &&
-    ['name', 'kind', 'summary', 'application', 'benefit', 'caution', 'repository',
-      'sourceUrl', 'legacyCategoryId'].every((key) => text(value[key])) &&
+    [
+      'name',
+      'kind',
+      'summary',
+      'application',
+      'benefit',
+      'caution',
+      'repository',
+      'sourceUrl',
+      'legacyCategoryId',
+    ].every((key) => text(value[key])) &&
     (value.sourceUrl as string).startsWith('https://') &&
     STATES.has(value.status as string) &&
     ATTENTION.has(value.attention as string) &&
     strings(value.tags) &&
     (value.tags as string[]).length > 0 &&
     strings(value.relatedAreaIds) &&
-    value.classificationStatus === 'PROPOSED_NOT_VERIFIED'
+    value.classificationStatus === 'PROPOSED_NOT_VERIFIED' &&
+    Array.isArray(value.sourceReferences) &&
+    value.sourceReferences.length > 0 &&
+    value.sourceReferences.every(sourceReference)
   );
 }
 
@@ -71,8 +99,15 @@ export function parseLibrary360Snapshot(value: unknown): Library360Snapshot | nu
     !sha(source.researchNavigationBlobSha) ||
     !sha(source.legacyDerivativeBlobSha) ||
     !sha(source.legacyDerivativeCommit) ||
-    !['generatedAt', 'observedAt', 'canonicalRef', 'crosswalkRef',
-      'researchNavigationRef', 'legacyDerivativeRef', 'provenanceNote'].every((key) => text(source[key])) ||
+    ![
+      'generatedAt',
+      'observedAt',
+      'canonicalRef',
+      'crosswalkRef',
+      'researchNavigationRef',
+      'legacyDerivativeRef',
+      'provenanceNote',
+    ].every((key) => text(source[key])) ||
     typeof source.staleAfterDays !== 'number' ||
     !Number.isFinite(source.staleAfterDays) ||
     source.staleAfterDays <= 0 ||
@@ -83,14 +118,18 @@ export function parseLibrary360Snapshot(value: unknown): Library360Snapshot | nu
     !Array.isArray(value.areas) ||
     value.areas.length !== 12 ||
     !value.areas.every(area)
-  ) return null;
+  )
+    return null;
 
   const areas = value.areas as Library360Area[];
   const areaIds = areas.map((item) => item.id);
   if (new Set(areaIds).size !== 12) return null;
   const expectedCodes = Array.from({ length: 12 }, (_, i) => 'A' + String(i + 1).padStart(2, '0'));
-  if (new Set(areas.map((item) => item.code)).size !== 12 ||
-      !expectedCodes.every((code) => areas.some((item) => item.code === code))) return null;
+  if (
+    new Set(areas.map((item) => item.code)).size !== 12 ||
+    !expectedCodes.every((code) => areas.some((item) => item.code === code))
+  )
+    return null;
 
   const knownAreas = new Set(areaIds);
   const resources = areas.flatMap((item) => item.entries);
@@ -100,36 +139,57 @@ export function parseLibrary360Snapshot(value: unknown): Library360Snapshot | nu
     resources.length !== value.totalEntries ||
     new Set(ids).size !== ids.length ||
     new Set(repositories).size !== repositories.length ||
-    resources.some((item) =>
-      new Set(item.relatedAreaIds).size !== item.relatedAreaIds.length ||
-      item.relatedAreaIds.some((id) => !knownAreas.has(id))
+    resources.some(
+      (item) =>
+        new Set(item.relatedAreaIds).size !== item.relatedAreaIds.length ||
+        item.relatedAreaIds.some((id) => !knownAreas.has(id)),
     ) ||
-    areas.some((item) =>
-      item.entries.some((resource) => resource.relatedAreaIds.includes(item.id))
-    )
-  ) return null;
+    areas.some((item) => item.entries.some((resource) => resource.relatedAreaIds.includes(item.id)))
+  )
+    return null;
 
   const knownIds = new Set(ids);
-  if (new Set(value.spotlightIds).size !== value.spotlightIds.length ||
-      value.spotlightIds.some((id) => !knownIds.has(id))) return null;
+  if (
+    new Set(value.spotlightIds).size !== value.spotlightIds.length ||
+    value.spotlightIds.some((id) => !knownIds.has(id))
+  )
+    return null;
 
   return value as unknown as Library360Snapshot;
 }
 
 export function resolveLibrary360Text(raw: string | null, now = new Date()): Library360Data {
   if (raw === null) {
-    return { status: 'missing', notice: 'La Biblioteca 360° no está disponible.', stale: false, snapshot: null };
+    return {
+      status: 'missing',
+      notice: 'La Biblioteca 360° no está disponible.',
+      stale: false,
+      snapshot: null,
+    };
   }
   let value: unknown;
-  try { value = JSON.parse(raw); } catch {
-    return { status: 'invalid', notice: 'La Biblioteca 360° contiene JSON inválido.', stale: false, snapshot: null };
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    return {
+      status: 'invalid',
+      notice: 'La Biblioteca 360° contiene JSON inválido.',
+      stale: false,
+      snapshot: null,
+    };
   }
   const snapshot = parseLibrary360Snapshot(value);
   if (!snapshot) {
-    return { status: 'invalid', notice: 'La Biblioteca 360° no cumple su contrato.', stale: false, snapshot: null };
+    return {
+      status: 'invalid',
+      notice: 'La Biblioteca 360° no cumple su contrato.',
+      stale: false,
+      snapshot: null,
+    };
   }
   const observed = new Date(snapshot.source.observedAt + 'T00:00:00Z').getTime();
-  const stale = Number.isNaN(observed) ||
+  const stale =
+    Number.isNaN(observed) ||
     Math.max(0, now.getTime() - observed) > snapshot.source.staleAfterDays * 86400000;
   return {
     status: 'ready',

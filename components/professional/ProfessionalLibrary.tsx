@@ -120,13 +120,17 @@ export function ProfessionalLibrary({
 
       <footer className={styles['library-provenance']}>
         {editorialSnapshot ? (
-          <>Editorial <code>{editorialSnapshot.source.commit.slice(0, 8)}</code></>
+          <>
+            Editorial <code>{editorialSnapshot.source.commit.slice(0, 8)}</code>
+          </>
         ) : (
           'Editorial no disponible'
         )}
         {' · '}
         {library360.snapshot ? (
-          <>Biblioteca 360° <code>{library360.snapshot.source.commit.slice(0, 8)}</code></>
+          <>
+            Biblioteca 360° <code>{library360.snapshot.source.commit.slice(0, 8)}</code>
+          </>
         ) : (
           'Biblioteca 360° no disponible'
         )}

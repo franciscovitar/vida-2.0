@@ -62,15 +62,17 @@
           "caution": "Tiene acceso potencial a credenciales, chats y herramientas; cualquier prueba requiere threat model, aislamiento y mínimo privilegio.",
           "repository": "openclaw/openclaw",
           "sourceUrl": "https://github.com/openclaw/openclaw",
-          "tags": [
-            "personal-ai",
-            "local-first",
-            "agents",
-            "plugins"
-          ],
+          "tags": ["personal-ai", "local-first", "agents", "plugins"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/openclaw/openclaw",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-014",
@@ -84,14 +86,17 @@
           "caution": "No hace falta para usar ChatGPT/Codex; sólo para construir un producto agente propio.",
           "repository": "openai/openai-agents-python",
           "sourceUrl": "https://github.com/openai/openai-agents-python",
-          "tags": [
-            "agents",
-            "python",
-            "multi-agent"
-          ],
+          "tags": ["agents", "python", "multi-agent"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/openai/openai-agents-python",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-015",
@@ -105,16 +110,17 @@
           "caution": "Evitarlo si una función/tool call simple resuelve el caso.",
           "repository": "langchain-ai/langgraph",
           "sourceUrl": "https://github.com/langchain-ai/langgraph",
-          "tags": [
-            "agents",
-            "state-machines",
-            "workflows"
-          ],
+          "tags": ["agents", "state-machines", "workflows"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/langchain-ai/langgraph",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-016",
@@ -128,14 +134,17 @@
           "caution": "Comparar con Agents SDK antes de sumar otra abstracción.",
           "repository": "pydantic/pydantic-ai",
           "sourceUrl": "https://github.com/pydantic/pydantic-ai",
-          "tags": [
-            "python",
-            "agents",
-            "typed"
-          ],
+          "tags": ["python", "agents", "typed"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/pydantic/pydantic-ai",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-017",
@@ -149,13 +158,17 @@
           "caution": "Evaluar madurez, observabilidad y lock-in frente a Vercel AI SDK/LangGraph.",
           "repository": "mastra-ai/mastra",
           "sourceUrl": "https://github.com/mastra-ai/mastra",
-          "tags": [
-            "typescript",
-            "agents"
-          ],
+          "tags": ["typescript", "agents"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/mastra-ai/mastra",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-018",
@@ -169,13 +182,17 @@
           "caution": "Multi-agente añade costo y errores; no usar si un agente fuerte alcanza.",
           "repository": "crewAIInc/crewAI",
           "sourceUrl": "https://github.com/crewAIInc/crewAI",
-          "tags": [
-            "multi-agent",
-            "orchestration"
-          ],
+          "tags": ["multi-agent", "orchestration"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/crewAIInc/crewAI",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-019",
@@ -189,16 +206,17 @@
           "caution": "Necesita datasets/evals buenos; sin ellos agrega complejidad sin señal.",
           "repository": "stanfordnlp/dspy",
           "sourceUrl": "https://github.com/stanfordnlp/dspy",
-          "tags": [
-            "evals",
-            "optimization",
-            "llm"
-          ],
+          "tags": ["evals", "optimization", "llm"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
-          "relatedAreaIds": [
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/stanfordnlp/dspy",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-020",
@@ -212,14 +230,17 @@
           "caution": "No asumir que minimalismo equivale a producción segura.",
           "repository": "huggingface/smolagents",
           "sourceUrl": "https://github.com/huggingface/smolagents",
-          "tags": [
-            "agents",
-            "learning",
-            "python"
-          ],
+          "tags": ["agents", "learning", "python"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/huggingface/smolagents",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-021",
@@ -233,13 +254,17 @@
           "caution": "Alto solapamiento con herramientas actuales; sólo evaluar con una tarea comparable.",
           "repository": "OpenHands/OpenHands",
           "sourceUrl": "https://github.com/OpenHands/OpenHands",
-          "tags": [
-            "coding-agent",
-            "sandbox"
-          ],
+          "tags": ["coding-agent", "sandbox"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/OpenHands/OpenHands",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-022",
@@ -253,13 +278,17 @@
           "caution": "No sumar otro agente diario sin evidencia de mejora.",
           "repository": "anomalyco/opencode",
           "sourceUrl": "https://github.com/anomalyco/opencode",
-          "tags": [
-            "coding-agent",
-            "terminal"
-          ],
+          "tags": ["coding-agent", "terminal"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/anomalyco/opencode",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-023",
@@ -273,13 +302,17 @@
           "caution": "Solapa fuertemente con Codex/Claude Code.",
           "repository": "Aider-AI/aider",
           "sourceUrl": "https://github.com/Aider-AI/aider",
-          "tags": [
-            "coding-agent",
-            "git"
-          ],
+          "tags": ["coding-agent", "git"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/Aider-AI/aider",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-041",
@@ -293,13 +326,17 @@
           "caution": "La memoria puede acumular datos sensibles o incorrectos; requiere reglas de retención, corrección y privacidad.",
           "repository": "mem0ai/mem0",
           "sourceUrl": "https://github.com/mem0ai/mem0",
-          "tags": [
-            "memory",
-            "agents"
-          ],
+          "tags": ["memory", "agents"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/mem0ai/mem0",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-042",
@@ -313,14 +350,17 @@
           "caution": "Mayor complejidad operacional que memoria simple; usar sólo si el problema lo exige.",
           "repository": "getzep/graphiti",
           "sourceUrl": "https://github.com/getzep/graphiti",
-          "tags": [
-            "memory",
-            "knowledge-graph",
-            "agents"
-          ],
+          "tags": ["memory", "knowledge-graph", "agents"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/getzep/graphiti",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-043",
@@ -334,15 +374,17 @@
           "caution": "Puede ser caro y complejo; no usar donde vector search simple alcanza.",
           "repository": "microsoft/graphrag",
           "sourceUrl": "https://github.com/microsoft/graphrag",
-          "tags": [
-            "rag",
-            "knowledge-graph"
-          ],
+          "tags": ["rag", "knowledge-graph"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/microsoft/graphrag",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-044",
@@ -356,13 +398,17 @@
           "caution": "Validar calidad en tus propios documentos antes de inferir ventaja.",
           "repository": "HKUDS/LightRAG",
           "sourceUrl": "https://github.com/HKUDS/LightRAG",
-          "tags": [
-            "rag",
-            "graph"
-          ],
+          "tags": ["rag", "graph"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/HKUDS/LightRAG",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-045",
@@ -376,13 +422,17 @@
           "caution": "Persistencia de estado aumenta superficie de seguridad y gobernanza.",
           "repository": "letta-ai/letta",
           "sourceUrl": "https://github.com/letta-ai/letta",
-          "tags": [
-            "memory",
-            "agents"
-          ],
+          "tags": ["memory", "agents"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/letta-ai/letta",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-046",
@@ -396,14 +446,17 @@
           "caution": "Evitar framework grande si sólo hace falta una consulta vectorial simple.",
           "repository": "run-llama/llama_index",
           "sourceUrl": "https://github.com/run-llama/llama_index",
-          "tags": [
-            "rag",
-            "data",
-            "agents"
-          ],
+          "tags": ["rag", "data", "agents"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/run-llama/llama_index",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-047",
@@ -417,16 +470,17 @@
           "caution": "Comparar con LlamaIndex y código propio antes de adoptar.",
           "repository": "deepset-ai/haystack",
           "sourceUrl": "https://github.com/deepset-ai/haystack",
-          "tags": [
-            "rag",
-            "python",
-            "pipelines"
-          ],
+          "tags": ["rag", "python", "pipelines"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/deepset-ai/haystack",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-048",
@@ -440,16 +494,17 @@
           "caution": "No reemplaza evaluación técnica del backend ni las reglas de seguridad del PAS.",
           "repository": "langgenius/dify",
           "sourceUrl": "https://github.com/langgenius/dify",
-          "tags": [
-            "llm-apps",
-            "workflows",
-            "rag"
-          ],
+          "tags": ["llm-apps", "workflows", "rag"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/langgenius/dify",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-049",
@@ -463,14 +518,17 @@
           "caution": "Revisar recursos, calidad de parsing y privacidad de documentos.",
           "repository": "infiniflow/ragflow",
           "sourceUrl": "https://github.com/infiniflow/ragflow",
-          "tags": [
-            "rag",
-            "documents",
-            "agents"
-          ],
+          "tags": ["rag", "documents", "agents"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/infiniflow/ragflow",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-050",
@@ -484,16 +542,17 @@
           "caution": "No convertir prototipo visual en producción sin tests y gobernanza.",
           "repository": "FlowiseAI/Flowise",
           "sourceUrl": "https://github.com/FlowiseAI/Flowise",
-          "tags": [
-            "visual",
-            "agents",
-            "workflows"
-          ],
+          "tags": ["visual", "agents", "workflows"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/FlowiseAI/Flowise",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-051",
@@ -507,16 +566,17 @@
           "caution": "Evitar solapamiento; elegir sólo si un caso real lo justifica.",
           "repository": "langflow-ai/langflow",
           "sourceUrl": "https://github.com/langflow-ai/langflow",
-          "tags": [
-            "visual",
-            "agents",
-            "workflows"
-          ],
+          "tags": ["visual", "agents", "workflows"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/langflow-ai/langflow",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-052",
@@ -530,16 +590,17 @@
           "caution": "No asumir que self-hosting elimina riesgos de datos/modelos.",
           "repository": "Mintplex-Labs/anything-llm",
           "sourceUrl": "https://github.com/Mintplex-Labs/anything-llm",
-          "tags": [
-            "local-ai",
-            "rag",
-            "ux"
-          ],
+          "tags": ["local-ai", "rag", "ux"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A12_PRODUCT_MARKET"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A12_PRODUCT_MARKET"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/Mintplex-Labs/anything-llm",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-053",
@@ -553,14 +614,17 @@
           "caution": "No hace falta duplicar ChatGPT salvo un caso local/privacy concreto.",
           "repository": "open-webui/open-webui",
           "sourceUrl": "https://github.com/open-webui/open-webui",
-          "tags": [
-            "local-ai",
-            "ui",
-            "models"
-          ],
+          "tags": ["local-ai", "ui", "models"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/open-webui/open-webui",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-054",
@@ -574,13 +638,17 @@
           "caution": "No introducir otra base si PostgreSQL + pgvector resuelve el problema.",
           "repository": "qdrant/qdrant",
           "sourceUrl": "https://github.com/qdrant/qdrant",
-          "tags": [
-            "vector-db",
-            "rag"
-          ],
+          "tags": ["vector-db", "rag"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/qdrant/qdrant",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-055",
@@ -594,14 +662,17 @@
           "caution": "Medir índices, latencia y tamaño antes de escalar.",
           "repository": "pgvector/pgvector",
           "sourceUrl": "https://github.com/pgvector/pgvector",
-          "tags": [
-            "postgres",
-            "vector",
-            "rag"
-          ],
+          "tags": ["postgres", "vector", "rag"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/pgvector/pgvector",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-056",
@@ -615,13 +686,17 @@
           "caution": "Menos alineada al stack actual que PostgreSQL para casos generales.",
           "repository": "lancedb/lancedb",
           "sourceUrl": "https://github.com/lancedb/lancedb",
-          "tags": [
-            "vector-db",
-            "multimodal"
-          ],
+          "tags": ["vector-db", "multimodal"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/lancedb/lancedb",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-057",
@@ -635,13 +710,17 @@
           "caution": "Otra infraestructura a operar; no usar sin necesidad de escala/capacidad.",
           "repository": "weaviate/weaviate",
           "sourceUrl": "https://github.com/weaviate/weaviate",
-          "tags": [
-            "vector-db",
-            "rag"
-          ],
+          "tags": ["vector-db", "rag"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/weaviate/weaviate",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-058",
@@ -655,13 +734,17 @@
           "caution": "Overkill absoluto para los volúmenes actuales.",
           "repository": "milvus-io/milvus",
           "sourceUrl": "https://github.com/milvus-io/milvus",
-          "tags": [
-            "vector-db",
-            "scale"
-          ],
+          "tags": ["vector-db", "scale"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/milvus-io/milvus",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-059",
@@ -675,16 +758,17 @@
           "caution": "Hardware, calidad y mantenimiento pueden hacer peor el costo total que una API.",
           "repository": "ollama/ollama",
           "sourceUrl": "https://github.com/ollama/ollama",
-          "tags": [
-            "local-models",
-            "privacy",
-            "offline"
-          ],
+          "tags": ["local-models", "privacy", "offline"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A08_SECURITY_STANDARDS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A08_SECURITY_STANDARDS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/ollama/ollama",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-060",
@@ -698,13 +782,17 @@
           "caution": "Menos alineado a tu stack TypeScript actual salvo proyecto específico.",
           "repository": "microsoft/semantic-kernel",
           "sourceUrl": "https://github.com/microsoft/semantic-kernel",
-          "tags": [
-            "agents",
-            "plugins"
-          ],
+          "tags": ["agents", "plugins"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/microsoft/semantic-kernel",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-084",
@@ -718,16 +806,17 @@
           "caution": "Copiar componentes no reemplaza diseño ni revisión de accesibilidad; mantenerlos actualizados es responsabilidad propia.",
           "repository": "shadcn-ui/ui",
           "sourceUrl": "https://github.com/shadcn-ui/ui",
-          "tags": [
-            "ui",
-            "components",
-            "react"
-          ],
+          "tags": ["ui", "components", "react"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/shadcn-ui/ui",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-085",
@@ -741,14 +830,17 @@
           "caution": "La accesibilidad final depende también de estilos, labels y uso correcto.",
           "repository": "radix-ui/primitives",
           "sourceUrl": "https://github.com/radix-ui/primitives",
-          "tags": [
-            "accessibility",
-            "ui",
-            "react"
-          ],
+          "tags": ["accessibility", "ui", "react"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/radix-ui/primitives",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-086",
@@ -762,14 +854,17 @@
           "caution": "Evitar mezclar varias familias de primitives sin motivo.",
           "repository": "mui/base-ui",
           "sourceUrl": "https://github.com/mui/base-ui",
-          "tags": [
-            "ui",
-            "accessibility",
-            "react"
-          ],
+          "tags": ["ui", "accessibility", "react"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/mui/base-ui",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-087",
@@ -783,16 +878,17 @@
           "caution": "Puede ser más abstracción de la necesaria para interfaces simples.",
           "repository": "adobe/react-spectrum",
           "sourceUrl": "https://github.com/adobe/react-spectrum",
-          "tags": [
-            "accessibility",
-            "react",
-            "ui"
-          ],
+          "tags": ["accessibility", "react", "ui"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/adobe/react-spectrum",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-088",
@@ -806,14 +902,17 @@
           "caution": "Usar movimiento con propósito y respetar reduced-motion; exceso de animación empeora UX.",
           "repository": "motiondivision/motion",
           "sourceUrl": "https://github.com/motiondivision/motion",
-          "tags": [
-            "animation",
-            "react",
-            "ui"
-          ],
+          "tags": ["animation", "react", "ui"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/motiondivision/motion",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-089",
@@ -827,14 +926,17 @@
           "caution": "Mayor complejidad y licencia/uso a revisar según el proyecto; no usar para microinteracciones simples.",
           "repository": "greensock/GSAP",
           "sourceUrl": "https://github.com/greensock/GSAP",
-          "tags": [
-            "animation",
-            "web",
-            "creative"
-          ],
+          "tags": ["animation", "web", "creative"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/greensock/GSAP",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-093",
@@ -848,13 +950,17 @@
           "caution": "No usar iconos sin labels cuando el significado no sea obvio.",
           "repository": "lucide-icons/lucide",
           "sourceUrl": "https://github.com/lucide-icons/lucide",
-          "tags": [
-            "icons",
-            "design-system"
-          ],
+          "tags": ["icons", "design-system"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/lucide-icons/lucide",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-094",
@@ -868,16 +974,17 @@
           "caution": "Tiene costo de mantenimiento; no hace falta en proyectos pequeños con pocos componentes.",
           "repository": "storybookjs/storybook",
           "sourceUrl": "https://github.com/storybookjs/storybook",
-          "tags": [
-            "components",
-            "design-system",
-            "testing"
-          ],
+          "tags": ["components", "design-system", "testing"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
-          "relatedAreaIds": [
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/storybookjs/storybook",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-095",
@@ -891,14 +998,17 @@
           "caution": "Con Next.js server components puede ser innecesaria en muchas rutas; usar sólo donde aporte.",
           "repository": "TanStack/query",
           "sourceUrl": "https://github.com/TanStack/query",
-          "tags": [
-            "react",
-            "data-fetching",
-            "cache"
-          ],
+          "tags": ["react", "data-fetching", "cache"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/TanStack/query",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-096",
@@ -912,14 +1022,17 @@
           "caution": "Comparar con React Hook Form antes de incorporar otro estándar.",
           "repository": "TanStack/form",
           "sourceUrl": "https://github.com/TanStack/form",
-          "tags": [
-            "forms",
-            "typescript",
-            "react"
-          ],
+          "tags": ["forms", "typescript", "react"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/TanStack/form",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-097",
@@ -933,13 +1046,17 @@
           "caution": "Coordinarla con Zod u otro schema en vez de duplicar validaciones.",
           "repository": "react-hook-form/react-hook-form",
           "sourceUrl": "https://github.com/react-hook-form/react-hook-form",
-          "tags": [
-            "forms",
-            "react"
-          ],
+          "tags": ["forms", "react"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/react-hook-form/react-hook-form",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-098",
@@ -953,13 +1070,17 @@
           "caution": "No convertir cada objeto interno en schema sin necesidad; mantener una sola fuente de tipos cuando sea posible.",
           "repository": "colinhacks/zod",
           "sourceUrl": "https://github.com/colinhacks/zod",
-          "tags": [
-            "validation",
-            "typescript"
-          ],
+          "tags": ["validation", "typescript"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/colinhacks/zod",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-099",
@@ -973,13 +1094,17 @@
           "caution": "Usar una primitive existente si ya resuelve el caso; no duplicar.",
           "repository": "floating-ui/floating-ui",
           "sourceUrl": "https://github.com/floating-ui/floating-ui",
-          "tags": [
-            "ui",
-            "positioning"
-          ],
+          "tags": ["ui", "positioning"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/floating-ui/floating-ui",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-100",
@@ -993,13 +1118,17 @@
           "caution": "No crear store global por comodidad; server state y URL state tienen dueños distintos.",
           "repository": "pmndrs/zustand",
           "sourceUrl": "https://github.com/pmndrs/zustand",
-          "tags": [
-            "react",
-            "state"
-          ],
+          "tags": ["react", "state"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/pmndrs/zustand",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-101",
@@ -1013,14 +1142,17 @@
           "caution": "Costo fuerte de performance y complejidad; sólo si 3D aporta valor real.",
           "repository": "pmndrs/react-three-fiber",
           "sourceUrl": "https://github.com/pmndrs/react-three-fiber",
-          "tags": [
-            "3d",
-            "react",
-            "creative"
-          ],
+          "tags": ["3d", "react", "creative"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/pmndrs/react-three-fiber",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-102",
@@ -1034,13 +1166,17 @@
           "caution": "Hereda el costo/performance de 3D; no es una mejora automática de UX.",
           "repository": "pmndrs/drei",
           "sourceUrl": "https://github.com/pmndrs/drei",
-          "tags": [
-            "3d",
-            "react"
-          ],
+          "tags": ["3d", "react"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/pmndrs/drei",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-103",
@@ -1054,14 +1190,17 @@
           "caution": "Elegir gráficos por la pregunta que responden, no por estética.",
           "repository": "recharts/recharts",
           "sourceUrl": "https://github.com/recharts/recharts",
-          "tags": [
-            "charts",
-            "react",
-            "data-viz"
-          ],
+          "tags": ["charts", "react", "data-viz"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/recharts/recharts",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-156",
@@ -1075,16 +1214,17 @@
           "caution": "Revisar RLS, políticas, backups y dependencia de servicios antes de asumir que el backend está seguro.",
           "repository": "supabase/supabase",
           "sourceUrl": "https://github.com/supabase/supabase",
-          "tags": [
-            "postgres",
-            "backend",
-            "auth"
-          ],
+          "tags": ["postgres", "backend", "auth"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A08_SECURITY_STANDARDS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A08_SECURITY_STANDARDS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/supabase/supabase",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-157",
@@ -1098,14 +1238,17 @@
           "caution": "Comparar con Supabase/managed Postgres actual antes de fragmentar infraestructura.",
           "repository": "neondatabase/neon",
           "sourceUrl": "https://github.com/neondatabase/neon",
-          "tags": [
-            "postgres",
-            "serverless",
-            "database"
-          ],
+          "tags": ["postgres", "serverless", "database"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/neondatabase/neon",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-158",
@@ -1119,14 +1262,17 @@
           "caution": "No reemplazar PostgreSQL cuando relaciones, concurrencia o tooling actual ya encajan.",
           "repository": "tursodatabase/libsql",
           "sourceUrl": "https://github.com/tursodatabase/libsql",
-          "tags": [
-            "sqlite",
-            "edge",
-            "database"
-          ],
+          "tags": ["sqlite", "edge", "database"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/tursodatabase/libsql",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-159",
@@ -1140,14 +1286,17 @@
           "caution": "Persistencia/configuración y semántica de eviction deben diseñarse según el caso.",
           "repository": "valkey-io/valkey",
           "sourceUrl": "https://github.com/valkey-io/valkey",
-          "tags": [
-            "cache",
-            "key-value",
-            "redis"
-          ],
+          "tags": ["cache", "key-value", "redis"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/valkey-io/valkey",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-160",
@@ -1161,16 +1310,17 @@
           "caution": "Self-hosting de datos exige backups, upgrades y disponibilidad; no es automáticamente más barato.",
           "repository": "minio/minio",
           "sourceUrl": "https://github.com/minio/minio",
-          "tags": [
-            "storage",
-            "s3",
-            "self-host"
-          ],
+          "tags": ["storage", "s3", "self-host"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/minio/minio",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-174",
@@ -1184,14 +1334,17 @@
           "caution": "Un CMS añade superficie de auth, migraciones y mantenimiento; no usar para contenido casi estático.",
           "repository": "payloadcms/payload",
           "sourceUrl": "https://github.com/payloadcms/payload",
-          "tags": [
-            "cms",
-            "typescript",
-            "nextjs"
-          ],
+          "tags": ["cms", "typescript", "nextjs"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/payloadcms/payload",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-175",
@@ -1205,14 +1358,17 @@
           "caution": "Revisar permisos y modelo de extensiones; no exponer DB sin políticas estrictas.",
           "repository": "directus/directus",
           "sourceUrl": "https://github.com/directus/directus",
-          "tags": [
-            "cms",
-            "admin",
-            "sql"
-          ],
+          "tags": ["cms", "admin", "sql"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/directus/directus",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-176",
@@ -1226,13 +1382,17 @@
           "caution": "Solapa con Payload/Directus; elegir uno sólo si aparece caso real.",
           "repository": "strapi/strapi",
           "sourceUrl": "https://github.com/strapi/strapi",
-          "tags": [
-            "cms",
-            "javascript"
-          ],
+          "tags": ["cms", "javascript"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/strapi/strapi",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-177",
@@ -1246,16 +1406,17 @@
           "caution": "Puede ser mucho más sistema del necesario; Mercado Pago/localización requieren verificación específica.",
           "repository": "medusajs/medusa",
           "sourceUrl": "https://github.com/medusajs/medusa",
-          "tags": [
-            "commerce",
-            "ecommerce",
-            "backend"
-          ],
+          "tags": ["commerce", "ecommerce", "backend"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A12_PRODUCT_MARKET"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A12_PRODUCT_MARKET"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/medusajs/medusa",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-178",
@@ -1269,16 +1430,17 @@
           "caution": "Infraestructura y modelo operativo probablemente excesivos para tiendas pequeñas.",
           "repository": "saleor/saleor",
           "sourceUrl": "https://github.com/saleor/saleor",
-          "tags": [
-            "commerce",
-            "graphql"
-          ],
+          "tags": ["commerce", "graphql"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A05_APIS_INTEGRATIONS",
-            "A12_PRODUCT_MARKET"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A05_APIS_INTEGRATIONS", "A12_PRODUCT_MARKET"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/saleor/saleor",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-179",
@@ -1292,15 +1454,17 @@
           "caution": "No adoptar sin comparar costo de integrar pagos/localización con solución propia.",
           "repository": "vendurehq/vendure",
           "sourceUrl": "https://github.com/vendurehq/vendure",
-          "tags": [
-            "commerce",
-            "typescript"
-          ],
+          "tags": ["commerce", "typescript"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A12_PRODUCT_MARKET"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A12_PRODUCT_MARKET"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vendurehq/vendure",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-180",
@@ -1314,16 +1478,17 @@
           "caution": "No fragmentar stack actual sin un requisito que Supabase no cubra.",
           "repository": "appwrite/appwrite",
           "sourceUrl": "https://github.com/appwrite/appwrite",
-          "tags": [
-            "backend",
-            "auth",
-            "storage"
-          ],
+          "tags": ["backend", "auth", "storage"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A08_SECURITY_STANDARDS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A08_SECURITY_STANDARDS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/appwrite/appwrite",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-188",
@@ -1337,16 +1502,17 @@
           "caution": "Comandos complejos y codecs/licencias requieren verificación por caso.",
           "repository": "FFmpeg/FFmpeg",
           "sourceUrl": "https://github.com/FFmpeg/FFmpeg",
-          "tags": [
-            "video",
-            "audio",
-            "automation"
-          ],
+          "tags": ["video", "audio", "automation"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/FFmpeg/FFmpeg",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-189",
@@ -1360,16 +1526,17 @@
           "caution": "No reemplaza edición creativa; render y assets pueden tener costo/tiempo.",
           "repository": "remotion-dev/remotion",
           "sourceUrl": "https://github.com/remotion-dev/remotion",
-          "tags": [
-            "video",
-            "react",
-            "automation"
-          ],
+          "tags": ["video", "react", "automation"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/remotion-dev/remotion",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-190",
@@ -1383,14 +1550,17 @@
           "caution": "Usar sólo cuando derechos, términos de servicio y autorización permitan la descarga.",
           "repository": "yt-dlp/yt-dlp",
           "sourceUrl": "https://github.com/yt-dlp/yt-dlp",
-          "tags": [
-            "video",
-            "metadata",
-            "tooling"
-          ],
+          "tags": ["video", "metadata", "tooling"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/yt-dlp/yt-dlp",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-191",
@@ -1404,14 +1574,17 @@
           "caution": "Revisar precisión, idioma, hardware y privacidad del audio.",
           "repository": "SYSTRAN/faster-whisper",
           "sourceUrl": "https://github.com/SYSTRAN/faster-whisper",
-          "tags": [
-            "speech",
-            "transcription",
-            "ai"
-          ],
+          "tags": ["speech", "transcription", "ai"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/SYSTRAN/faster-whisper",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-192",
@@ -1425,14 +1598,17 @@
           "caution": "Tiene curva de aprendizaje y APIs amplias; recuperar sólo módulos relevantes.",
           "repository": "opencv/opencv",
           "sourceUrl": "https://github.com/opencv/opencv",
-          "tags": [
-            "computer-vision",
-            "images",
-            "robotics"
-          ],
+          "tags": ["computer-vision", "images", "robotics"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/opencv/opencv",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-193",
@@ -1446,14 +1622,17 @@
           "caution": "Modelos, licencias, VRAM y provenance de assets requieren revisión antes de uso comercial.",
           "repository": "Comfy-Org/ComfyUI",
           "sourceUrl": "https://github.com/Comfy-Org/ComfyUI",
-          "tags": [
-            "images",
-            "generative-ai",
-            "creative"
-          ],
+          "tags": ["images", "generative-ai", "creative"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/Comfy-Org/ComfyUI",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         }
       ]
     },
@@ -1477,14 +1656,17 @@
           "caution": "No copiar efectos sin revisar performance, accesibilidad y encaje con la marca.",
           "repository": "DavidHDev/react-bits",
           "sourceUrl": "https://github.com/DavidHDev/react-bits",
-          "tags": [
-            "animation",
-            "components",
-            "inspiration"
-          ],
+          "tags": ["animation", "components", "inspiration"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/DavidHDev/react-bits",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-091",
@@ -1498,14 +1680,17 @@
           "caution": "Validar dependencias y accesibilidad antes de incorporar código.",
           "repository": "imskyleen/animate-ui",
           "sourceUrl": "https://github.com/imskyleen/animate-ui",
-          "tags": [
-            "animation",
-            "ui",
-            "inspiration"
-          ],
+          "tags": ["animation", "ui", "inspiration"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/imskyleen/animate-ui",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-092",
@@ -1519,16 +1704,17 @@
           "caution": "Evitar estética genérica o exceso de efectos; adaptar al sistema de diseño propio.",
           "repository": "magicuidesign/magicui",
           "sourceUrl": "https://github.com/magicuidesign/magicui",
-          "tags": [
-            "ui",
-            "animation",
-            "marketing"
-          ],
+          "tags": ["ui", "animation", "marketing"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
-          "relatedAreaIds": [
-            "A12_PRODUCT_MARKET"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A12_PRODUCT_MARKET"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/magicuidesign/magicui",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-181",
@@ -1542,14 +1728,17 @@
           "caution": "Es una opinión de arquitectura, no una norma; adaptar al tamaño y framework real.",
           "repository": "alan2207/bulletproof-react",
           "sourceUrl": "https://github.com/alan2207/bulletproof-react",
-          "tags": [
-            "react",
-            "architecture",
-            "reference"
-          ],
+          "tags": ["react", "architecture", "reference"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/alan2207/bulletproof-react",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-182",
@@ -1563,14 +1752,17 @@
           "caution": "Cambios de versión pueden alterar comportamiento; verificar docs de la versión real.",
           "repository": "vercel/next.js",
           "sourceUrl": "https://github.com/vercel/next.js",
-          "tags": [
-            "nextjs",
-            "react",
-            "reference"
-          ],
+          "tags": ["nextjs", "react", "reference"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vercel/next.js",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-183",
@@ -1584,16 +1776,17 @@
           "caution": "Es referencia, no plantilla universal; pagos y backend pueden diferir de tus necesidades.",
           "repository": "vercel/commerce",
           "sourceUrl": "https://github.com/vercel/commerce",
-          "tags": [
-            "nextjs",
-            "commerce",
-            "reference"
-          ],
+          "tags": ["nextjs", "commerce", "reference"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A12_PRODUCT_MARKET"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A12_PRODUCT_MARKET"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vercel/commerce",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-184",
@@ -1607,14 +1800,17 @@
           "caution": "No copiar stack completo si la app necesita menos piezas.",
           "repository": "t3-oss/create-t3-app",
           "sourceUrl": "https://github.com/t3-oss/create-t3-app",
-          "tags": [
-            "typescript",
-            "fullstack",
-            "reference"
-          ],
+          "tags": ["typescript", "fullstack", "reference"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/t3-oss/create-t3-app",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-185",
@@ -1628,14 +1824,17 @@
           "caution": "Revisar auth/data model/model providers y no copiar secretos/config sin entenderlos.",
           "repository": "vercel/chatbot",
           "sourceUrl": "https://github.com/vercel/chatbot",
-          "tags": [
-            "nextjs",
-            "ai",
-            "reference"
-          ],
+          "tags": ["nextjs", "ai", "reference"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vercel/chatbot",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-186",
@@ -1649,14 +1848,17 @@
           "caution": "Multi-tenancy aumenta mucho la seguridad/aislamiento; no anticiparlo sin necesidad.",
           "repository": "vercel/platforms",
           "sourceUrl": "https://github.com/vercel/platforms",
-          "tags": [
-            "multi-tenant",
-            "nextjs",
-            "reference"
-          ],
+          "tags": ["multi-tenant", "nextjs", "reference"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vercel/platforms",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         }
       ]
     },
@@ -1698,16 +1900,17 @@
           "caution": "Introduce un tercero en el límite de credenciales; revisar permisos, datos y costo.",
           "repository": "ComposioHQ/composio",
           "sourceUrl": "https://github.com/ComposioHQ/composio",
-          "tags": [
-            "tools",
-            "auth",
-            "integrations"
-          ],
+          "tags": ["tools", "auth", "integrations"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
-          "relatedAreaIds": [
-            "A08_SECURITY_STANDARDS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A08_SECURITY_STANDARDS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/ComposioHQ/composio",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-028",
@@ -1721,16 +1924,17 @@
           "caution": "Los servidores de referencia no implican que cada integración sea segura o necesaria.",
           "repository": "modelcontextprotocol/servers",
           "sourceUrl": "https://github.com/modelcontextprotocol/servers",
-          "tags": [
-            "mcp",
-            "reference",
-            "tools"
-          ],
+          "tags": ["mcp", "reference", "tools"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/modelcontextprotocol/servers",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-029",
@@ -1744,14 +1948,22 @@
           "caution": "Autorización, confianza del servidor y alcance de tools siguen necesitando AGENT_SECURITY.",
           "repository": "modelcontextprotocol/typescript-sdk",
           "sourceUrl": "https://github.com/modelcontextprotocol/typescript-sdk",
-          "tags": [
-            "mcp",
-            "typescript",
-            "python"
-          ],
+          "tags": ["mcp", "typescript", "python"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "SDK TypeScript oficial",
+              "url": "https://github.com/modelcontextprotocol/typescript-sdk",
+              "verifiedAt": "2026-09-21"
+            },
+            {
+              "label": "SDK Python oficial",
+              "url": "https://github.com/modelcontextprotocol/python-sdk",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-030",
@@ -1765,14 +1977,17 @@
           "caution": "No confundir facilidad de integración con evaluación/calidad del sistema.",
           "repository": "vercel/ai",
           "sourceUrl": "https://github.com/vercel/ai",
-          "tags": [
-            "nextjs",
-            "typescript",
-            "ai-sdk"
-          ],
+          "tags": ["nextjs", "typescript", "ai-sdk"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vercel/ai",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-031",
@@ -1786,14 +2001,17 @@
           "caution": "Añade una capa crítica en el camino de todas las llamadas; requiere observabilidad y secretos bien gestionados.",
           "repository": "BerriAI/litellm",
           "sourceUrl": "https://github.com/BerriAI/litellm",
-          "tags": [
-            "gateway",
-            "llm",
-            "routing"
-          ],
+          "tags": ["gateway", "llm", "routing"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/BerriAI/litellm",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-061",
@@ -1807,14 +2025,17 @@
           "caution": "Revisar cómo se manejan logs, secretos y dependencia de gateway.",
           "repository": "Portkey-AI/gateway",
           "sourceUrl": "https://github.com/Portkey-AI/gateway",
-          "tags": [
-            "gateway",
-            "routing",
-            "llm"
-          ],
+          "tags": ["gateway", "routing", "llm"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/Portkey-AI/gateway",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-161",
@@ -1828,14 +2049,17 @@
           "caution": "Los conectores y esquemas cambian; revisar costos y calidad antes de depender de ellos.",
           "repository": "airbytehq/airbyte",
           "sourceUrl": "https://github.com/airbytehq/airbyte",
-          "tags": [
-            "etl",
-            "connectors",
-            "data"
-          ],
+          "tags": ["etl", "connectors", "data"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/airbytehq/airbyte",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-163",
@@ -1849,13 +2073,17 @@
           "caution": "Mayor mantenimiento que soluciones gestionadas; sólo si la flexibilidad importa.",
           "repository": "meltano/meltano",
           "sourceUrl": "https://github.com/meltano/meltano",
-          "tags": [
-            "etl",
-            "dataops"
-          ],
+          "tags": ["etl", "dataops"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/meltano/meltano",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         }
       ]
     },
@@ -1888,14 +2116,17 @@
           "caution": "La calidad depende de buenos casos de prueba; un score pobremente diseñado puede engañar.",
           "repository": "promptfoo/promptfoo",
           "sourceUrl": "https://github.com/promptfoo/promptfoo",
-          "tags": [
-            "evals",
-            "red-team",
-            "testing"
-          ],
+          "tags": ["evals", "red-team", "testing"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/promptfoo/promptfoo",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-035",
@@ -1909,14 +2140,17 @@
           "caution": "No adoptar junto a múltiples frameworks de evals sin elegir uno por caso.",
           "repository": "confident-ai/deepeval",
           "sourceUrl": "https://github.com/confident-ai/deepeval",
-          "tags": [
-            "evals",
-            "python",
-            "testing"
-          ],
+          "tags": ["evals", "python", "testing"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/confident-ai/deepeval",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-036",
@@ -1930,13 +2164,17 @@
           "caution": "Las métricas automáticas necesitan validación humana y datasets representativos.",
           "repository": "vibrantlabsai/ragas",
           "sourceUrl": "https://github.com/vibrantlabsai/ragas",
-          "tags": [
-            "rag",
-            "evals"
-          ],
+          "tags": ["rag", "evals"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vibrantlabsai/ragas",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-040",
@@ -1950,16 +2188,17 @@
           "caution": "No es prioridad si no hay modelos o datasets operativos que monitorear.",
           "repository": "EvidentlyAI/evidently",
           "sourceUrl": "https://github.com/EvidentlyAI/evidently",
-          "tags": [
-            "ml",
-            "data-quality",
-            "monitoring"
-          ],
+          "tags": ["ml", "data-quality", "monitoring"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/EvidentlyAI/evidently",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-104",
@@ -1973,14 +2212,17 @@
           "caution": "Los tests E2E son más lentos/frágiles; reservarlos para flujos de alto valor.",
           "repository": "microsoft/playwright",
           "sourceUrl": "https://github.com/microsoft/playwright",
-          "tags": [
-            "testing",
-            "browser",
-            "e2e"
-          ],
+          "tags": ["testing", "browser", "e2e"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/microsoft/playwright",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-105",
@@ -1994,13 +2236,17 @@
           "caution": "No migrar suites sanas sólo por uniformidad.",
           "repository": "vitest-dev/vitest",
           "sourceUrl": "https://github.com/vitest-dev/vitest",
-          "tags": [
-            "testing",
-            "typescript"
-          ],
+          "tags": ["testing", "typescript"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vitest-dev/vitest",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-106",
@@ -2014,14 +2260,17 @@
           "caution": "No intentar cubrir lógica pura a través del DOM si puede probarse más barato en unidad.",
           "repository": "testing-library/react-testing-library",
           "sourceUrl": "https://github.com/testing-library/react-testing-library",
-          "tags": [
-            "testing",
-            "react",
-            "ui"
-          ],
+          "tags": ["testing", "react", "ui"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/testing-library/react-testing-library",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-107",
@@ -2035,16 +2284,17 @@
           "caution": "Los mocks pueden divergir del backend real; mantener contratos/verificación.",
           "repository": "mswjs/msw",
           "sourceUrl": "https://github.com/mswjs/msw",
-          "tags": [
-            "testing",
-            "api",
-            "mocks"
-          ],
+          "tags": ["testing", "api", "mocks"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
-          "relatedAreaIds": [
-            "A05_APIS_INTEGRATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A05_APIS_INTEGRATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/mswjs/msw",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-108",
@@ -2058,13 +2308,17 @@
           "caution": "Sólo detecta parte de los problemas; siempre hace falta revisión manual de UX/teclado/lectores.",
           "repository": "dequelabs/axe-core",
           "sourceUrl": "https://github.com/dequelabs/axe-core",
-          "tags": [
-            "accessibility",
-            "testing"
-          ],
+          "tags": ["accessibility", "testing"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/dequelabs/axe-core",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-109",
@@ -2078,15 +2332,17 @@
           "caution": "Misma limitación que otros scanners: no reemplaza evaluación humana.",
           "repository": "pa11y/pa11y",
           "sourceUrl": "https://github.com/pa11y/pa11y",
-          "tags": [
-            "accessibility",
-            "ci"
-          ],
+          "tags": ["accessibility", "ci"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/pa11y/pa11y",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-110",
@@ -2100,14 +2356,17 @@
           "caution": "Un score no es el objetivo final; validar experiencia real y métricas de usuario.",
           "repository": "GoogleChrome/lighthouse",
           "sourceUrl": "https://github.com/GoogleChrome/lighthouse",
-          "tags": [
-            "performance",
-            "accessibility",
-            "web"
-          ],
+          "tags": ["performance", "accessibility", "web"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/GoogleChrome/lighthouse",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-111",
@@ -2121,13 +2380,17 @@
           "caution": "No generar carga contra producción sin ventana y autorización; modelar escenarios realistas.",
           "repository": "grafana/k6",
           "sourceUrl": "https://github.com/grafana/k6",
-          "tags": [
-            "performance",
-            "load-testing"
-          ],
+          "tags": ["performance", "load-testing"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/grafana/k6",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         }
       ]
     },
@@ -2151,16 +2414,17 @@
           "caution": "Las reglas pueden dar falsos positivos/negativos; no sustituye threat modeling ni revisión humana.",
           "repository": "semgrep/semgrep",
           "sourceUrl": "https://github.com/semgrep/semgrep",
-          "tags": [
-            "sast",
-            "ci",
-            "security"
-          ],
+          "tags": ["sast", "ci", "security"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/semgrep/semgrep",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-063",
@@ -2174,16 +2438,17 @@
           "caution": "Los findings necesitan triage; no bloquear todo indiscriminadamente.",
           "repository": "aquasecurity/trivy",
           "sourceUrl": "https://github.com/aquasecurity/trivy",
-          "tags": [
-            "vulnerabilities",
-            "containers",
-            "ci"
-          ],
+          "tags": ["vulnerabilities", "containers", "ci"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/aquasecurity/trivy",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-064",
@@ -2197,16 +2462,17 @@
           "caution": "Un match no prueba exposición real; igualmente cualquier secreto detectado debe rotarse si fue publicado.",
           "repository": "gitleaks/gitleaks",
           "sourceUrl": "https://github.com/gitleaks/gitleaks",
-          "tags": [
-            "secrets",
-            "git",
-            "ci"
-          ],
+          "tags": ["secrets", "git", "ci"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/gitleaks/gitleaks",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-065",
@@ -2220,15 +2486,17 @@
           "caution": "No convertir CVEs sin contexto en cambios automáticos destructivos.",
           "repository": "google/osv-scanner",
           "sourceUrl": "https://github.com/google/osv-scanner",
-          "tags": [
-            "dependencies",
-            "vulnerabilities"
-          ],
+          "tags": ["dependencies", "vulnerabilities"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/google/osv-scanner",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-066",
@@ -2242,14 +2510,17 @@
           "caution": "El score no es una garantía de seguridad; usarlo como señal, no como sentencia.",
           "repository": "ossf/scorecard",
           "sourceUrl": "https://github.com/ossf/scorecard",
-          "tags": [
-            "supply-chain",
-            "opensource",
-            "security"
-          ],
+          "tags": ["supply-chain", "opensource", "security"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/ossf/scorecard",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-067",
@@ -2263,16 +2534,17 @@
           "caution": "Sólo usar contra sistemas propios/autorizados y revisar falsos positivos.",
           "repository": "zaproxy/zaproxy",
           "sourceUrl": "https://github.com/zaproxy/zaproxy",
-          "tags": [
-            "web-security",
-            "dast",
-            "testing"
-          ],
+          "tags": ["web-security", "dast", "testing"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/zaproxy/zaproxy",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-068",
@@ -2286,16 +2558,17 @@
           "caution": "Aplicar sólo las hojas relevantes al contexto; no copiar controles mecánicamente.",
           "repository": "OWASP/CheatSheetSeries",
           "sourceUrl": "https://github.com/OWASP/CheatSheetSeries",
-          "tags": [
-            "security",
-            "reference",
-            "best-practices"
-          ],
+          "tags": ["security", "reference", "best-practices"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/OWASP/CheatSheetSeries",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-069",
@@ -2309,14 +2582,17 @@
           "caution": "No hace falta cumplir el nivel máximo en todo proyecto; calibrar según riesgo.",
           "repository": "OWASP/ASVS",
           "sourceUrl": "https://github.com/OWASP/ASVS",
-          "tags": [
-            "security",
-            "verification",
-            "standard"
-          ],
+          "tags": ["security", "verification", "standard"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/OWASP/ASVS",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-070",
@@ -2330,17 +2606,17 @@
           "caution": "Es extensa; recuperar sólo la sección relevante al problema.",
           "repository": "OWASP/wstg",
           "sourceUrl": "https://github.com/OWASP/wstg",
-          "tags": [
-            "web-security",
-            "testing",
-            "reference"
-          ],
+          "tags": ["web-security", "testing", "reference"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES",
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES", "A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/OWASP/wstg",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-071",
@@ -2354,17 +2630,17 @@
           "caution": "Debe complementarse con threat model específico de cada sistema.",
           "repository": "OWASP/API-Security",
           "sourceUrl": "https://github.com/OWASP/API-Security",
-          "tags": [
-            "api",
-            "security",
-            "reference"
-          ],
+          "tags": ["api", "security", "reference"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES",
-            "A05_APIS_INTEGRATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES", "A05_APIS_INTEGRATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/OWASP/API-Security",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-072",
@@ -2378,16 +2654,17 @@
           "caution": "Es una taxonomía, no una solución; cada amenaza necesita mitigaciones verificadas.",
           "repository": "OWASP/www-project-top-10-for-large-language-model-applications",
           "sourceUrl": "https://github.com/OWASP/www-project-top-10-for-large-language-model-applications",
-          "tags": [
-            "llm-security",
-            "agents",
-            "owasp"
-          ],
+          "tags": ["llm-security", "agents", "owasp"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/OWASP/www-project-top-10-for-large-language-model-applications",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-073",
@@ -2401,16 +2678,17 @@
           "caution": "No reutilizar código vulnerable en proyectos reales.",
           "repository": "OWASP/NodeGoat",
           "sourceUrl": "https://github.com/OWASP/NodeGoat",
-          "tags": [
-            "nodejs",
-            "training",
-            "security"
-          ],
+          "tags": ["nodejs", "training", "security"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/OWASP/NodeGoat",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-074",
@@ -2424,15 +2702,17 @@
           "caution": "Debe correr aislada; está diseñada para ser insegura.",
           "repository": "juice-shop/juice-shop",
           "sourceUrl": "https://github.com/juice-shop/juice-shop",
-          "tags": [
-            "training",
-            "web-security"
-          ],
+          "tags": ["training", "web-security"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/juice-shop/juice-shop",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-075",
@@ -2446,13 +2726,17 @@
           "caution": "Añade gestión de identidad/políticas; no es necesario para cada proyecto chico.",
           "repository": "sigstore/cosign",
           "sourceUrl": "https://github.com/sigstore/cosign",
-          "tags": [
-            "supply-chain",
-            "signing"
-          ],
+          "tags": ["supply-chain", "signing"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/sigstore/cosign",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-076",
@@ -2466,14 +2750,17 @@
           "caution": "Las claves maestras y permisos siguen siendo críticos; cifrado no elimina el riesgo de mal diseño.",
           "repository": "getsops/sops",
           "sourceUrl": "https://github.com/getsops/sops",
-          "tags": [
-            "secrets",
-            "git",
-            "encryption"
-          ],
+          "tags": ["secrets", "git", "encryption"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/getsops/sops",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-077",
@@ -2487,16 +2774,17 @@
           "caution": "Añade un componente crítico; evaluar disponibilidad, backup y mínimo privilegio.",
           "repository": "Infisical/infisical",
           "sourceUrl": "https://github.com/Infisical/infisical",
-          "tags": [
-            "secrets",
-            "devops",
-            "security"
-          ],
+          "tags": ["secrets", "devops", "security"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/Infisical/infisical",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-078",
@@ -2510,14 +2798,17 @@
           "caution": "Autenticación es frontera sensible: revisar versión, adaptadores y defaults antes de producción.",
           "repository": "better-auth/better-auth",
           "sourceUrl": "https://github.com/better-auth/better-auth",
-          "tags": [
-            "auth",
-            "typescript",
-            "nextjs"
-          ],
+          "tags": ["auth", "typescript", "nextjs"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/better-auth/better-auth",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-079",
@@ -2531,14 +2822,17 @@
           "caution": "Revisar dependencia externa, datos enviados y costo antes de hacerlo parte del camino crítico.",
           "repository": "arcjet/arcjet-js",
           "sourceUrl": "https://github.com/arcjet/arcjet-js",
-          "tags": [
-            "security",
-            "rate-limit",
-            "bots"
-          ],
+          "tags": ["security", "rate-limit", "bots"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/arcjet/arcjet-js",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-080",
@@ -2552,16 +2846,17 @@
           "caution": "Otra capa de auth/infra; sólo tiene sentido con APIs reales para terceros.",
           "repository": "unkeyed/unkey",
           "sourceUrl": "https://github.com/unkeyed/unkey",
-          "tags": [
-            "api-keys",
-            "rate-limit",
-            "api"
-          ],
+          "tags": ["api-keys", "rate-limit", "api"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A05_APIS_INTEGRATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A05_APIS_INTEGRATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/unkeyed/unkey",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-081",
@@ -2575,13 +2870,17 @@
           "caution": "Dependencia de servicio externo y costo por uso; definir fall-open/fail-closed conscientemente.",
           "repository": "upstash/ratelimit-js",
           "sourceUrl": "https://github.com/upstash/ratelimit-js",
-          "tags": [
-            "rate-limit",
-            "serverless"
-          ],
+          "tags": ["rate-limit", "serverless"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/upstash/ratelimit-js",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-082",
@@ -2595,16 +2894,17 @@
           "caution": "Nunca auto-mergear cambios sensibles sólo porque CI esté verde; configurar límites.",
           "repository": "renovatebot/renovate",
           "sourceUrl": "https://github.com/renovatebot/renovate",
-          "tags": [
-            "dependencies",
-            "automation",
-            "maintenance"
-          ],
+          "tags": ["dependencies", "automation", "maintenance"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/renovatebot/renovate",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-083",
@@ -2618,15 +2918,17 @@
           "caution": "Usar como referencia contextual, no como checklist universal.",
           "repository": "OWASP/DevGuide",
           "sourceUrl": "https://github.com/OWASP/DevGuide",
-          "tags": [
-            "secure-development",
-            "reference"
-          ],
+          "tags": ["secure-development", "reference"],
           "legacyCategoryId": "SECURITY_PRIVACY_SUPPLY_CHAIN",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/OWASP/DevGuide",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         }
       ]
     },
@@ -2668,17 +2970,17 @@
           "caution": "Su modelo es fair-code, no una licencia open-source permisiva clásica; revisar licencia, secretos y permisos antes de usarlo con datos reales.",
           "repository": "n8n-io/n8n",
           "sourceUrl": "https://github.com/n8n-io/n8n",
-          "tags": [
-            "automation",
-            "workflows",
-            "ai",
-            "integrations"
-          ],
+          "tags": ["automation", "workflows", "ai", "integrations"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
-          "relatedAreaIds": [
-            "A05_APIS_INTEGRATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A05_APIS_INTEGRATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/n8n-io/n8n",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-002",
@@ -2692,16 +2994,17 @@
           "caution": "No sumar dos motores de workflows sin un caso comparativo real.",
           "repository": "activepieces/activepieces",
           "sourceUrl": "https://github.com/activepieces/activepieces",
-          "tags": [
-            "automation",
-            "mcp",
-            "agents"
-          ],
+          "tags": ["automation", "mcp", "agents"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
-          "relatedAreaIds": [
-            "A05_APIS_INTEGRATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A05_APIS_INTEGRATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/activepieces/activepieces",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-003",
@@ -2715,14 +3018,17 @@
           "caution": "Añade infraestructura propia; evaluar sólo cuando un script real ya duela mantener.",
           "repository": "windmill-labs/windmill",
           "sourceUrl": "https://github.com/windmill-labs/windmill",
-          "tags": [
-            "automation",
-            "scripts",
-            "internal-tools"
-          ],
+          "tags": ["automation", "scripts", "internal-tools"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/windmill-labs/windmill",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-004",
@@ -2736,14 +3042,17 @@
           "caution": "Demasiado pesado para automatizaciones simples; no introducirlo por moda.",
           "repository": "temporalio/temporal",
           "sourceUrl": "https://github.com/temporalio/temporal",
-          "tags": [
-            "durable-execution",
-            "reliability",
-            "workflows"
-          ],
+          "tags": ["durable-execution", "reliability", "workflows"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/temporalio/temporal",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-005",
@@ -2757,14 +3066,17 @@
           "caution": "Comparar con Inngest y soluciones nativas antes de agregar dependencia.",
           "repository": "triggerdotdev/trigger.dev",
           "sourceUrl": "https://github.com/triggerdotdev/trigger.dev",
-          "tags": [
-            "typescript",
-            "background-jobs",
-            "agents"
-          ],
+          "tags": ["typescript", "background-jobs", "agents"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/triggerdotdev/trigger.dev",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-006",
@@ -2778,14 +3090,17 @@
           "caution": "Evaluar costo, lock-in y solapamiento con Trigger.dev antes de adoptar.",
           "repository": "inngest/inngest",
           "sourceUrl": "https://github.com/inngest/inngest",
-          "tags": [
-            "typescript",
-            "events",
-            "serverless"
-          ],
+          "tags": ["typescript", "events", "serverless"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/inngest/inngest",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-007",
@@ -2799,14 +3114,17 @@
           "caution": "Excesivo para necesidades actuales pequeñas.",
           "repository": "kestra-io/kestra",
           "sourceUrl": "https://github.com/kestra-io/kestra",
-          "tags": [
-            "orchestration",
-            "scheduling",
-            "data"
-          ],
+          "tags": ["orchestration", "scheduling", "data"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/kestra-io/kestra",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-008",
@@ -2820,14 +3138,17 @@
           "caution": "Validar madurez y necesidad real frente a Trigger.dev/Inngest.",
           "repository": "hatchet-dev/hatchet",
           "sourceUrl": "https://github.com/hatchet-dev/hatchet",
-          "tags": [
-            "background-jobs",
-            "agents",
-            "durable"
-          ],
+          "tags": ["background-jobs", "agents", "durable"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/hatchet-dev/hatchet",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-009",
@@ -2841,13 +3162,17 @@
           "caution": "No justificar infraestructura adicional sin fallos reales que resolver.",
           "repository": "restatedev/restate",
           "sourceUrl": "https://github.com/restatedev/restate",
-          "tags": [
-            "reliability",
-            "durable-execution"
-          ],
+          "tags": ["reliability", "durable-execution"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/restatedev/restate",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-010",
@@ -2861,13 +3186,17 @@
           "caution": "No es prioridad para workflows web generales.",
           "repository": "PrefectHQ/prefect",
           "sourceUrl": "https://github.com/PrefectHQ/prefect",
-          "tags": [
-            "python",
-            "data-pipelines"
-          ],
+          "tags": ["python", "data-pipelines"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/PrefectHQ/prefect",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-011",
@@ -2881,14 +3210,17 @@
           "caution": "Tiene costo conceptual alto para proyectos chicos.",
           "repository": "dagster-io/dagster",
           "sourceUrl": "https://github.com/dagster-io/dagster",
-          "tags": [
-            "data-assets",
-            "lineage",
-            "pipelines"
-          ],
+          "tags": ["data-assets", "lineage", "pipelines"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/dagster-io/dagster",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-012",
@@ -2902,14 +3234,17 @@
           "caution": "Menos alineado al stack web actual que n8n/Windmill.",
           "repository": "node-red/node-red",
           "sourceUrl": "https://github.com/node-red/node-red",
-          "tags": [
-            "low-code",
-            "events",
-            "iot"
-          ],
+          "tags": ["low-code", "events", "iot"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/node-red/node-red",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-024",
@@ -2923,14 +3258,17 @@
           "caution": "Web + credenciales + prompt injection es una frontera de alto riesgo; sandbox y permisos mínimos obligatorios.",
           "repository": "browser-use/browser-use",
           "sourceUrl": "https://github.com/browser-use/browser-use",
-          "tags": [
-            "browser",
-            "agents",
-            "automation"
-          ],
+          "tags": ["browser", "agents", "automation"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/browser-use/browser-use",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-025",
@@ -2944,14 +3282,17 @@
           "caution": "Mantener fallback determinista y no confiar decisiones sensibles al modelo sin verificación.",
           "repository": "browserbase/stagehand",
           "sourceUrl": "https://github.com/browserbase/stagehand",
-          "tags": [
-            "browser",
-            "playwright",
-            "agents"
-          ],
+          "tags": ["browser", "playwright", "agents"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/browserbase/stagehand",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-026",
@@ -2965,14 +3306,17 @@
           "caution": "Licencia y uso de datos/telemetría deben revisarse; cualquier credencial exige aislamiento.",
           "repository": "Skyvern-AI/skyvern",
           "sourceUrl": "https://github.com/Skyvern-AI/skyvern",
-          "tags": [
-            "browser",
-            "vision",
-            "automation"
-          ],
+          "tags": ["browser", "vision", "automation"],
           "legacyCategoryId": "AI_AGENTS_AUTOMATION",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/Skyvern-AI/skyvern",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-032",
@@ -2986,16 +3330,17 @@
           "caution": "Revisar qué prompts/datos se registran y dónde se almacenan antes de instrumentar producción.",
           "repository": "langfuse/langfuse",
           "sourceUrl": "https://github.com/langfuse/langfuse",
-          "tags": [
-            "llm",
-            "observability",
-            "evals"
-          ],
+          "tags": ["llm", "observability", "evals"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/langfuse/langfuse",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-033",
@@ -3009,14 +3354,17 @@
           "caution": "Evitar duplicarlo con Langfuse/OpenLIT sin una comparación real.",
           "repository": "Arize-ai/phoenix",
           "sourceUrl": "https://github.com/Arize-ai/phoenix",
-          "tags": [
-            "llm",
-            "observability",
-            "otel"
-          ],
+          "tags": ["llm", "observability", "otel"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/Arize-ai/phoenix",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-037",
@@ -3030,14 +3378,17 @@
           "caution": "Revisar soporte real de cada proveedor y evitar registrar contenido sensible.",
           "repository": "traceloop/openllmetry",
           "sourceUrl": "https://github.com/traceloop/openllmetry",
-          "tags": [
-            "otel",
-            "llm",
-            "tracing"
-          ],
+          "tags": ["otel", "llm", "tracing"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/traceloop/openllmetry",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-038",
@@ -3051,16 +3402,17 @@
           "caution": "Introduce una capa en el tráfico del modelo; revisar privacidad, latencia y dependencia.",
           "repository": "Helicone/helicone",
           "sourceUrl": "https://github.com/Helicone/helicone",
-          "tags": [
-            "llm",
-            "gateway",
-            "observability"
-          ],
+          "tags": ["llm", "gateway", "observability"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
-          "relatedAreaIds": [
-            "A05_APIS_INTEGRATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A05_APIS_INTEGRATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/Helicone/helicone",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-039",
@@ -3074,14 +3426,17 @@
           "caution": "No sumar observabilidad duplicada; elegir una sola ruta después de un lab.",
           "repository": "openlit/openlit",
           "sourceUrl": "https://github.com/openlit/openlit",
-          "tags": [
-            "otel",
-            "llm",
-            "observability"
-          ],
+          "tags": ["otel", "llm", "observability"],
           "legacyCategoryId": "AI_EVALS_MEMORY_KNOWLEDGE",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/openlit/openlit",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-112",
@@ -3095,14 +3450,17 @@
           "caution": "Revisar falsos positivos por entrypoints dinámicos/frameworks antes de borrar.",
           "repository": "webpro-nl/knip",
           "sourceUrl": "https://github.com/webpro-nl/knip",
-          "tags": [
-            "typescript",
-            "dead-code",
-            "maintenance"
-          ],
+          "tags": ["typescript", "dead-code", "maintenance"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/webpro-nl/knip",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-113",
@@ -3116,14 +3474,17 @@
           "caution": "No migrar repos estables de ESLint/Prettier sin beneficio medido.",
           "repository": "biomejs/biome",
           "sourceUrl": "https://github.com/biomejs/biome",
-          "tags": [
-            "lint",
-            "format",
-            "typescript"
-          ],
+          "tags": ["lint", "format", "typescript"],
           "legacyCategoryId": "WEB_UI_ACCESSIBILITY_QUALITY",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/biomejs/biome",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-114",
@@ -3137,14 +3498,17 @@
           "caution": "La telemetría puede contener datos sensibles; minimizar atributos y controlar exporters.",
           "repository": "open-telemetry/opentelemetry-collector",
           "sourceUrl": "https://github.com/open-telemetry/opentelemetry-collector",
-          "tags": [
-            "otel",
-            "observability",
-            "collector"
-          ],
+          "tags": ["otel", "observability", "collector"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/open-telemetry/opentelemetry-collector",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-115",
@@ -3158,13 +3522,17 @@
           "caution": "Un dashboard sin alertas/SLIs útiles sólo agrega ruido; diseñar desde preguntas reales.",
           "repository": "grafana/grafana",
           "sourceUrl": "https://github.com/grafana/grafana",
-          "tags": [
-            "observability",
-            "dashboards"
-          ],
+          "tags": ["observability", "dashboards"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/grafana/grafana",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-116",
@@ -3178,13 +3546,17 @@
           "caution": "Operarlo bien requiere retención, cardinalidad y alertas cuidadas.",
           "repository": "prometheus/prometheus",
           "sourceUrl": "https://github.com/prometheus/prometheus",
-          "tags": [
-            "metrics",
-            "observability"
-          ],
+          "tags": ["metrics", "observability"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/prometheus/prometheus",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-117",
@@ -3198,13 +3570,17 @@
           "caution": "Controlar volumen, retención y datos sensibles; logs infinitos cuestan.",
           "repository": "grafana/loki",
           "sourceUrl": "https://github.com/grafana/loki",
-          "tags": [
-            "logs",
-            "observability"
-          ],
+          "tags": ["logs", "observability"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/grafana/loki",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-118",
@@ -3218,14 +3594,17 @@
           "caution": "No desplegar un backend de traces sólo por aprender; primero validar necesidad.",
           "repository": "grafana/tempo",
           "sourceUrl": "https://github.com/grafana/tempo",
-          "tags": [
-            "tracing",
-            "otel",
-            "observability"
-          ],
+          "tags": ["tracing", "otel", "observability"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/grafana/tempo",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-119",
@@ -3239,14 +3618,17 @@
           "caution": "Comparar costo operativo y experiencia con Sentry/proveedor actual antes de elegir.",
           "repository": "SigNoz/signoz",
           "sourceUrl": "https://github.com/SigNoz/signoz",
-          "tags": [
-            "otel",
-            "observability",
-            "apm"
-          ],
+          "tags": ["otel", "observability", "apm"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/SigNoz/signoz",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-120",
@@ -3260,13 +3642,17 @@
           "caution": "No sustituye observabilidad interna ni SLA real; self-hosting también debe mantenerse.",
           "repository": "louislam/uptime-kuma",
           "sourceUrl": "https://github.com/louislam/uptime-kuma",
-          "tags": [
-            "uptime",
-            "monitoring"
-          ],
+          "tags": ["uptime", "monitoring"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/louislam/uptime-kuma",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-121",
@@ -3280,14 +3666,17 @@
           "caution": "Evaluar costo/infra frente a Uptime Kuma y servicios gestionados.",
           "repository": "openstatusHQ/openstatus",
           "sourceUrl": "https://github.com/openstatusHQ/openstatus",
-          "tags": [
-            "uptime",
-            "synthetics",
-            "status-page"
-          ],
+          "tags": ["uptime", "synthetics", "status-page"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/openstatusHQ/openstatus",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-122",
@@ -3301,16 +3690,17 @@
           "caution": "Configurar scrubbing de datos y sampling; no enviar información sensible por defecto.",
           "repository": "getsentry/sentry",
           "sourceUrl": "https://github.com/getsentry/sentry",
-          "tags": [
-            "errors",
-            "performance",
-            "observability"
-          ],
+          "tags": ["errors", "performance", "observability"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
-          "relatedAreaIds": [
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/getsentry/sentry",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-123",
@@ -3324,13 +3714,17 @@
           "caution": "Para nuevas stacks quizá convenga OTel + otro backend; verificar estado del proyecto al usarlo.",
           "repository": "jaegertracing/jaeger",
           "sourceUrl": "https://github.com/jaegertracing/jaeger",
-          "tags": [
-            "tracing",
-            "observability"
-          ],
+          "tags": ["tracing", "observability"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/jaegertracing/jaeger",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-124",
@@ -3344,13 +3738,17 @@
           "caution": "No hay necesidad actual de ese nivel de escala.",
           "repository": "VictoriaMetrics/VictoriaMetrics",
           "sourceUrl": "https://github.com/VictoriaMetrics/VictoriaMetrics",
-          "tags": [
-            "metrics",
-            "timeseries"
-          ],
+          "tags": ["metrics", "timeseries"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/VictoriaMetrics/VictoriaMetrics",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-125",
@@ -3364,13 +3762,17 @@
           "caution": "Evitar multiplicar backends; sólo comparar con un caso concreto.",
           "repository": "uptrace/uptrace",
           "sourceUrl": "https://github.com/uptrace/uptrace",
-          "tags": [
-            "otel",
-            "apm"
-          ],
+          "tags": ["otel", "apm"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/uptrace/uptrace",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-126",
@@ -3384,14 +3786,17 @@
           "caution": "No aplica al stack actual sin Kubernetes y puede causar daño si se usa sin aislamiento.",
           "repository": "chaos-mesh/chaos-mesh",
           "sourceUrl": "https://github.com/chaos-mesh/chaos-mesh",
-          "tags": [
-            "chaos",
-            "kubernetes",
-            "reliability"
-          ],
+          "tags": ["chaos", "kubernetes", "reliability"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/chaos-mesh/chaos-mesh",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-127",
@@ -3405,13 +3810,17 @@
           "caution": "Sólo ejecutar en entornos autorizados y con rollback claro.",
           "repository": "litmuschaos/litmus",
           "sourceUrl": "https://github.com/litmuschaos/litmus",
-          "tags": [
-            "chaos",
-            "reliability"
-          ],
+          "tags": ["chaos", "reliability"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/litmuschaos/litmus",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-128",
@@ -3425,14 +3834,17 @@
           "caution": "El state puede contener datos sensibles; backend y locking requieren diseño.",
           "repository": "opentofu/opentofu",
           "sourceUrl": "https://github.com/opentofu/opentofu",
-          "tags": [
-            "iac",
-            "cloud",
-            "devops"
-          ],
+          "tags": ["iac", "cloud", "devops"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/opentofu/opentofu",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-129",
@@ -3446,14 +3858,17 @@
           "caution": "Comparar claridad/state/costo con OpenTofu antes de adoptar.",
           "repository": "pulumi/pulumi",
           "sourceUrl": "https://github.com/pulumi/pulumi",
-          "tags": [
-            "iac",
-            "typescript",
-            "python"
-          ],
+          "tags": ["iac", "typescript", "python"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/pulumi/pulumi",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-130",
@@ -3467,14 +3882,17 @@
           "caution": "No hace falta en infraestructura totalmente gestionada.",
           "repository": "ansible/ansible",
           "sourceUrl": "https://github.com/ansible/ansible",
-          "tags": [
-            "automation",
-            "servers",
-            "devops"
-          ],
+          "tags": ["automation", "servers", "devops"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/ansible/ansible",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-131",
@@ -3488,13 +3906,17 @@
           "caution": "No migrar Docker workflows sanos sin beneficio concreto.",
           "repository": "podman-container-tools/podman",
           "sourceUrl": "https://github.com/podman-container-tools/podman",
-          "tags": [
-            "containers",
-            "oci"
-          ],
+          "tags": ["containers", "oci"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/podman-container-tools/podman",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-132",
@@ -3508,13 +3930,17 @@
           "caution": "Sigue heredando complejidad de Kubernetes; no es necesidad actual.",
           "repository": "k3s-io/k3s",
           "sourceUrl": "https://github.com/k3s-io/k3s",
-          "tags": [
-            "kubernetes",
-            "containers"
-          ],
+          "tags": ["kubernetes", "containers"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/k3s-io/k3s",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-133",
@@ -3528,14 +3954,17 @@
           "caution": "Revisar topología, headers y exposición antes de ponerlo frente a servicios sensibles.",
           "repository": "caddyserver/caddy",
           "sourceUrl": "https://github.com/caddyserver/caddy",
-          "tags": [
-            "reverse-proxy",
-            "https",
-            "self-host"
-          ],
+          "tags": ["reverse-proxy", "https", "self-host"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/caddyserver/caddy",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-134",
@@ -3549,13 +3978,17 @@
           "caution": "Más complejo que Caddy para setups pequeños.",
           "repository": "traefik/traefik",
           "sourceUrl": "https://github.com/traefik/traefik",
-          "tags": [
-            "reverse-proxy",
-            "containers"
-          ],
+          "tags": ["reverse-proxy", "containers"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/traefik/traefik",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-135",
@@ -3569,16 +4002,17 @@
           "caution": "Revisar identidad, ACLs y dependencia del control plane antes de usar en datos sensibles.",
           "repository": "tailscale/tailscale",
           "sourceUrl": "https://github.com/tailscale/tailscale",
-          "tags": [
-            "networking",
-            "wireguard",
-            "security"
-          ],
+          "tags": ["networking", "wireguard", "security"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
-          "relatedAreaIds": [
-            "A08_SECURITY_STANDARDS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A08_SECURITY_STANDARDS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/tailscale/tailscale",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-136",
@@ -3592,14 +4026,17 @@
           "caution": "Self-hosting traslada a vos backups, upgrades, seguridad y disponibilidad.",
           "repository": "coollabsio/coolify",
           "sourceUrl": "https://github.com/coollabsio/coolify",
-          "tags": [
-            "self-host",
-            "paas",
-            "deploy"
-          ],
+          "tags": ["self-host", "paas", "deploy"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/coollabsio/coolify",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-137",
@@ -3613,13 +4050,17 @@
           "caution": "Más responsabilidad operacional que Vercel/managed services.",
           "repository": "dokku/dokku",
           "sourceUrl": "https://github.com/dokku/dokku",
-          "tags": [
-            "self-host",
-            "paas"
-          ],
+          "tags": ["self-host", "paas"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/dokku/dokku",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-138",
@@ -3633,14 +4074,17 @@
           "caution": "Requiere operar servidores, networking y backups.",
           "repository": "basecamp/kamal",
           "sourceUrl": "https://github.com/basecamp/kamal",
-          "tags": [
-            "deploy",
-            "containers",
-            "servers"
-          ],
+          "tags": ["deploy", "containers", "servers"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/basecamp/kamal",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-139",
@@ -3654,13 +4098,17 @@
           "caution": "Evaluar mantenimiento y seguridad del panel expuesto.",
           "repository": "caprover/caprover",
           "sourceUrl": "https://github.com/caprover/caprover",
-          "tags": [
-            "self-host",
-            "paas"
-          ],
+          "tags": ["self-host", "paas"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/caprover/caprover",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-140",
@@ -3674,14 +4122,17 @@
           "caution": "La identidad/acceso debe configurarse; un túnel no vuelve segura una app insegura.",
           "repository": "cloudflare/cloudflared",
           "sourceUrl": "https://github.com/cloudflare/cloudflared",
-          "tags": [
-            "tunnel",
-            "networking",
-            "cloudflare"
-          ],
+          "tags": ["tunnel", "networking", "cloudflare"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/cloudflare/cloudflared",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-141",
@@ -3695,13 +4146,22 @@
           "caution": "Añade costo de contenedores y archivos de configuración; no hace falta para repos simples.",
           "repository": "devcontainers/spec",
           "sourceUrl": "https://github.com/devcontainers/spec",
-          "tags": [
-            "dev-environment",
-            "containers"
-          ],
+          "tags": ["dev-environment", "containers"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Especificación oficial",
+              "url": "https://github.com/devcontainers/spec",
+              "verifiedAt": "2026-09-21"
+            },
+            {
+              "label": "CLI oficial",
+              "url": "https://github.com/devcontainers/cli",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-142",
@@ -3715,14 +4175,17 @@
           "caution": "No sustituir workflows simples por una capa adicional sin dolor real.",
           "repository": "dagger/dagger",
           "sourceUrl": "https://github.com/dagger/dagger",
-          "tags": [
-            "ci",
-            "pipelines",
-            "containers"
-          ],
+          "tags": ["ci", "pipelines", "containers"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/dagger/dagger",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-143",
@@ -3736,14 +4199,17 @@
           "caution": "Introducir sólo si realmente reemplaza gestores actuales y no añade otra capa paralela.",
           "repository": "jdx/mise",
           "sourceUrl": "https://github.com/jdx/mise",
-          "tags": [
-            "toolchain",
-            "versions",
-            "devex"
-          ],
+          "tags": ["toolchain", "versions", "devex"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/jdx/mise",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-144",
@@ -3757,13 +4223,17 @@
           "caution": "Nunca guardar secretos en archivos versionados; revisar `.envrc` antes de permitir ejecución.",
           "repository": "direnv/direnv",
           "sourceUrl": "https://github.com/direnv/direnv",
-          "tags": [
-            "env",
-            "devex"
-          ],
+          "tags": ["env", "devex"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/direnv/direnv",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-145",
@@ -3777,15 +4247,17 @@
           "caution": "No duplicar un gestor de secretos central; revisar modelo criptográfico antes de confiar datos reales.",
           "repository": "dotenvx/dotenvx",
           "sourceUrl": "https://github.com/dotenvx/dotenvx",
-          "tags": [
-            "env",
-            "secrets"
-          ],
+          "tags": ["env", "secrets"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
-          "relatedAreaIds": [
-            "A08_SECURITY_STANDARDS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A08_SECURITY_STANDARDS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/dotenvx/dotenvx",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-146",
@@ -3799,13 +4271,17 @@
           "caution": "No hace falta si npm scripts/Make ya cubren bien el repo.",
           "repository": "casey/just",
           "sourceUrl": "https://github.com/casey/just",
-          "tags": [
-            "task-runner",
-            "devex"
-          ],
+          "tags": ["task-runner", "devex"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/casey/just",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-147",
@@ -3819,13 +4295,17 @@
           "caution": "No sumar otro runner si los comandos actuales son pocos y claros.",
           "repository": "go-task/task",
           "sourceUrl": "https://github.com/go-task/task",
-          "tags": [
-            "task-runner",
-            "devex"
-          ],
+          "tags": ["task-runner", "devex"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/go-task/task",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-148",
@@ -3839,14 +4319,17 @@
           "caution": "Migrar reglas conscientemente para no cambiar semántica o cobertura accidentalmente.",
           "repository": "astral-sh/ruff",
           "sourceUrl": "https://github.com/astral-sh/ruff",
-          "tags": [
-            "python",
-            "lint",
-            "format"
-          ],
+          "tags": ["python", "lint", "format"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/astral-sh/ruff",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-149",
@@ -3860,14 +4343,17 @@
           "caution": "Migrar con lockfile y CI verificados; no tocar entornos estables sólo por velocidad.",
           "repository": "astral-sh/uv",
           "sourceUrl": "https://github.com/astral-sh/uv",
-          "tags": [
-            "python",
-            "packages",
-            "devex"
-          ],
+          "tags": ["python", "packages", "devex"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/astral-sh/uv",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-150",
@@ -3881,13 +4367,17 @@
           "caution": "No migrar npm/yarn sin una razón concreta y lockfile controlado.",
           "repository": "pnpm/pnpm",
           "sourceUrl": "https://github.com/pnpm/pnpm",
-          "tags": [
-            "javascript",
-            "packages"
-          ],
+          "tags": ["javascript", "packages"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/pnpm/pnpm",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-151",
@@ -3901,14 +4391,17 @@
           "caution": "Overkill para repos únicos sin paquetes compartidos.",
           "repository": "vercel/turborepo",
           "sourceUrl": "https://github.com/vercel/turborepo",
-          "tags": [
-            "monorepo",
-            "build",
-            "typescript"
-          ],
+          "tags": ["monorepo", "build", "typescript"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/vercel/turborepo",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-152",
@@ -3922,13 +4415,17 @@
           "caution": "Tiene mayor complejidad; no es necesario para el tamaño actual.",
           "repository": "nrwl/nx",
           "sourceUrl": "https://github.com/nrwl/nx",
-          "tags": [
-            "monorepo",
-            "build"
-          ],
+          "tags": ["monorepo", "build"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/nrwl/nx",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-153",
@@ -3942,16 +4439,17 @@
           "caution": "No poner suites lentas en hooks que bloqueen el flujo diario.",
           "repository": "evilmartians/lefthook",
           "sourceUrl": "https://github.com/evilmartians/lefthook",
-          "tags": [
-            "git",
-            "hooks",
-            "quality"
-          ],
+          "tags": ["git", "hooks", "quality"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
-          "relatedAreaIds": [
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/evilmartians/lefthook",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-154",
@@ -3965,16 +4463,17 @@
           "caution": "No confiar en hooks locales como único gate; CI sigue siendo autoridad.",
           "repository": "lint-staged/lint-staged",
           "sourceUrl": "https://github.com/lint-staged/lint-staged",
-          "tags": [
-            "git",
-            "lint",
-            "quality"
-          ],
+          "tags": ["git", "lint", "quality"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
-          "relatedAreaIds": [
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/lint-staged/lint-staged",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-155",
@@ -3988,16 +4487,17 @@
           "caution": "Benchmarks sintéticos no equivalen a experiencia real de producción.",
           "repository": "mcollina/autocannon",
           "sourceUrl": "https://github.com/mcollina/autocannon",
-          "tags": [
-            "performance",
-            "http",
-            "nodejs"
-          ],
+          "tags": ["performance", "http", "nodejs"],
           "legacyCategoryId": "OBSERVABILITY_INFRA_DEVEX",
-          "relatedAreaIds": [
-            "A07_EVALUATIONS_BENCHMARKS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A07_EVALUATIONS_BENCHMARKS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/mcollina/autocannon",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-162",
@@ -4011,16 +4511,17 @@
           "caution": "No aporta valor si los datos caben en consultas simples dentro del producto.",
           "repository": "dbt-labs/dbt",
           "sourceUrl": "https://github.com/dbt-labs/dbt",
-          "tags": [
-            "analytics",
-            "sql",
-            "data"
-          ],
+          "tags": ["analytics", "sql", "data"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A12_PRODUCT_MARKET"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A12_PRODUCT_MARKET"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/dbt-labs/dbt",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         }
       ]
     },
@@ -4044,14 +4545,17 @@
           "caution": "Controlar permisos y exposición de datos; no usar dashboards como fuente de verdad transaccional.",
           "repository": "metabase/metabase",
           "sourceUrl": "https://github.com/metabase/metabase",
-          "tags": [
-            "bi",
-            "analytics",
-            "sql"
-          ],
+          "tags": ["bi", "analytics", "sql"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/metabase/metabase",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-165",
@@ -4065,14 +4569,17 @@
           "caution": "Session replay/events pueden capturar datos sensibles; definir redacción y consentimiento.",
           "repository": "PostHog/posthog",
           "sourceUrl": "https://github.com/PostHog/posthog",
-          "tags": [
-            "analytics",
-            "product",
-            "feature-flags"
-          ],
+          "tags": ["analytics", "product", "feature-flags"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/PostHog/posthog",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-166",
@@ -4086,16 +4593,17 @@
           "caution": "Menos profundidad de producto que PostHog/GA; elegir según necesidad.",
           "repository": "plausible/analytics",
           "sourceUrl": "https://github.com/plausible/analytics",
-          "tags": [
-            "analytics",
-            "privacy",
-            "web"
-          ],
+          "tags": ["analytics", "privacy", "web"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A08_SECURITY_STANDARDS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A08_SECURITY_STANDARDS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/plausible/analytics",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-167",
@@ -4109,16 +4617,17 @@
           "caution": "Self-hosting añade mantenimiento; comparar con Plausible/GA existente.",
           "repository": "umami-software/umami",
           "sourceUrl": "https://github.com/umami-software/umami",
-          "tags": [
-            "analytics",
-            "web",
-            "self-host"
-          ],
+          "tags": ["analytics", "web", "self-host"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A11_PRODUCTIVITY_OPERATIONS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A11_PRODUCTIVITY_OPERATIONS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/umami-software/umami",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-168",
@@ -4132,16 +4641,17 @@
           "caution": "Más complejo de operar que soluciones simples.",
           "repository": "matomo-org/matomo",
           "sourceUrl": "https://github.com/matomo-org/matomo",
-          "tags": [
-            "analytics",
-            "privacy",
-            "web"
-          ],
+          "tags": ["analytics", "privacy", "web"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A08_SECURITY_STANDARDS"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A08_SECURITY_STANDARDS"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/matomo-org/matomo",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-169",
@@ -4155,14 +4665,17 @@
           "caution": "Evitar molestar usuarios o convertir feedback en vanity metrics; recolectar sólo lo necesario.",
           "repository": "formbricks/formbricks",
           "sourceUrl": "https://github.com/formbricks/formbricks",
-          "tags": [
-            "feedback",
-            "product",
-            "surveys"
-          ],
+          "tags": ["feedback", "product", "surveys"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/formbricks/formbricks",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-170",
@@ -4176,16 +4689,17 @@
           "caution": "Migrar datos/clientes a una plataforma propia exige backups y control de permisos.",
           "repository": "twentyhq/twenty",
           "sourceUrl": "https://github.com/twentyhq/twenty",
-          "tags": [
-            "crm",
-            "business",
-            "reference"
-          ],
+          "tags": ["crm", "business", "reference"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/twentyhq/twenty",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-171",
@@ -4199,16 +4713,17 @@
           "caution": "Validez legal, identidad y jurisdicción deben verificarse antes de uso contractual real.",
           "repository": "documenso/documenso",
           "sourceUrl": "https://github.com/documenso/documenso",
-          "tags": [
-            "documents",
-            "signatures",
-            "business"
-          ],
+          "tags": ["documents", "signatures", "business"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/documenso/documenso",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-172",
@@ -4222,16 +4737,17 @@
           "caution": "Integraciones de calendario y datos personales requieren permisos claros.",
           "repository": "calcom/cal.diy",
           "sourceUrl": "https://github.com/calcom/cal.diy",
-          "tags": [
-            "scheduling",
-            "calendar",
-            "business"
-          ],
+          "tags": ["scheduling", "calendar", "business"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/calcom/cal.diy",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-173",
@@ -4245,14 +4761,17 @@
           "caution": "Tracking debe respetar privacidad y no duplicar analytics sin motivo.",
           "repository": "dubinc/dub",
           "sourceUrl": "https://github.com/dubinc/dub",
-          "tags": [
-            "marketing",
-            "links",
-            "analytics"
-          ],
+          "tags": ["marketing", "links", "analytics"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
           "relatedAreaIds": [],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/dubinc/dub",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         },
         {
           "id": "TL-187",
@@ -4266,16 +4785,17 @@
           "caution": "No asumir que su lógica financiera/regulatoria aplica a Argentina; usar como inspiración.",
           "repository": "maybe-finance/maybe",
           "sourceUrl": "https://github.com/maybe-finance/maybe",
-          "tags": [
-            "finance",
-            "product",
-            "reference"
-          ],
+          "tags": ["finance", "product", "reference"],
           "legacyCategoryId": "DATA_PRODUCT_REFERENCE_MEDIA",
-          "relatedAreaIds": [
-            "A02_REPOS_REFERENCES"
-          ],
-          "classificationStatus": "PROPOSED_NOT_VERIFIED"
+          "relatedAreaIds": ["A02_REPOS_REFERENCES"],
+          "classificationStatus": "PROPOSED_NOT_VERIFIED",
+          "sourceReferences": [
+            {
+              "label": "Repositorio oficial",
+              "url": "https://github.com/maybe-finance/maybe",
+              "verifiedAt": "2026-09-21"
+            }
+          ]
         }
       ]
     }

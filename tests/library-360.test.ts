@@ -7,6 +7,10 @@ import {
   parseLibrary360Snapshot,
   resolveLibrary360Text,
 } from '@/lib/professional/library-360-contract';
+import {
+  searchLibrary360Entries,
+  selectLibrary360Entries,
+} from '@/lib/professional/library-360-view';
 
 const raw = readFileSync(join(process.cwd(), 'data/generated/library-360.json'), 'utf8');
 const payload = JSON.parse(raw);
@@ -24,20 +28,36 @@ test('LIB360-01. V2 deriva exactamente 193 fichas únicas en 12 áreas', () => {
   assert.equal(new Set(resources.map((entry) => entry.id)).size, 193);
   assert.equal(new Set(resources.map((entry) => entry.repository)).size, 193);
   assert.equal(snapshot.spotlightIds.length, 20);
-  assert.equal(resources.some((entry) => entry.id === 'TL-001' && entry.name === 'n8n'), true);
-  assert.equal(resources.some((entry) => entry.id === 'TL-169' && entry.name === 'Formbricks'), true);
+  assert.equal(
+    resources.some((entry) => entry.id === 'TL-001' && entry.name === 'n8n'),
+    true,
+  );
+  assert.equal(
+    resources.some((entry) => entry.id === 'TL-169' && entry.name === 'Formbricks'),
+    true,
+  );
+  assert.deepEqual(resources.find((entry) => entry.id === 'TL-001')?.sourceReferences, [
+    {
+      label: 'Repositorio oficial',
+      url: 'https://github.com/n8n-io/n8n',
+      verifiedAt: '2026-09-21',
+    },
+  ]);
 });
 
 test('LIB360-02. cinco áreas sin fichas conservan referencia de investigación', () => {
   const snapshot = parseLibrary360Snapshot(payload);
   assert.ok(snapshot);
-  const emptyCodes = snapshot.areas.filter((area) => area.entries.length === 0)
+  const emptyCodes = snapshot.areas
+    .filter((area) => area.entries.length === 0)
     .map((area) => area.code);
   assert.deepEqual(emptyCodes, ['A03', 'A04', 'A06', 'A09', 'A10']);
   assert.equal(
-    snapshot.areas.every((area) =>
-      area.researchStatus === 'EVIDENCE_READY_DOCUMENTARY_ONLY' &&
-      area.researchReportPath.endsWith('.md')),
+    snapshot.areas.every(
+      (area) =>
+        area.researchStatus === 'EVIDENCE_READY_DOCUMENTARY_ONLY' &&
+        area.researchReportPath.endsWith('.md'),
+    ),
     true,
   );
 });
@@ -66,6 +86,10 @@ test('LIB360-04. entradas duplicadas y facetas desconocidas fallan cerrado', () 
   const badCommit = structuredClone(payload);
   badCommit.source.commit = 'not-a-commit';
   assert.equal(parseLibrary360Snapshot(badCommit), null);
+
+  const badSourceDate = structuredClone(payload);
+  badSourceDate.areas[0].entries[0].sourceReferences[0].verifiedAt = '2026-02-31';
+  assert.equal(parseLibrary360Snapshot(badSourceDate), null);
 });
 
 test('LIB360-05. falta de fuente o datos inválidos no muestra el catálogo antiguo', () => {
@@ -82,4 +106,41 @@ test('LIB360-06. frescura corresponde a datos V1, no a fecha de reorganización'
   assert.equal(stale.status, 'ready');
   assert.equal(stale.stale, true);
   assert.match(stale.notice ?? '', /históricos/);
+});
+
+test('LIB360-07. filtros por facetas secundarias muestran una identidad única', () => {
+  const snapshot = parseLibrary360Snapshot(payload);
+  assert.ok(snapshot);
+  const all = selectLibrary360Entries(snapshot.areas);
+  const apiArea = selectLibrary360Entries(snapshot.areas, 'A05_APIS_INTEGRATIONS');
+  const n8nAll = all.filter(({ entry }) => entry.id === 'TL-001');
+  const n8nInApi = apiArea.filter(({ entry }) => entry.id === 'TL-001');
+
+  assert.equal(n8nAll.length, 1);
+  assert.equal(n8nInApi.length, 1);
+  assert.equal(n8nInApi[0]?.primaryArea.code, 'A11');
+  assert.equal(
+    n8nInApi[0]?.relatedAreas.some((area) => area.code === 'A05'),
+    true,
+  );
+});
+
+test('LIB360-08. búsqueda consulta contexto, etiquetas y nombres de áreas relacionadas', () => {
+  const snapshot = parseLibrary360Snapshot(payload);
+  assert.ok(snapshot);
+  const all = selectLibrary360Entries(snapshot.areas);
+
+  assert.equal(
+    searchLibrary360Entries(all, 'copiar/pegar').some(({ entry }) => entry.id === 'TL-001'),
+    true,
+  );
+  assert.equal(
+    searchLibrary360Entries(all, 'integrations').some(({ entry }) => entry.id === 'TL-001'),
+    true,
+  );
+  assert.equal(
+    searchLibrary360Entries(all, 'APIs e integraciones').some(({ entry }) => entry.id === 'TL-001'),
+    true,
+  );
+  assert.equal(searchLibrary360Entries(all, 'sin-coincidencias').length, 0);
 });

@@ -1,9 +1,16 @@
 import type { TechnologyLibraryEntry } from '@/types/technology-library';
 
+export interface Library360SourceReference {
+  label: string;
+  url: string;
+  verifiedAt: string;
+}
+
 export interface Library360Entry extends TechnologyLibraryEntry {
   legacyCategoryId: string;
   relatedAreaIds: readonly string[];
   classificationStatus: 'PROPOSED_NOT_VERIFIED';
+  sourceReferences: readonly Library360SourceReference[];
 }
 
 export interface Library360Area {

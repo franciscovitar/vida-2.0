@@ -99,6 +99,8 @@ Library is voluntary reference memory:
 and `KNOWLEDGE_LIBRARY_360_GLOBAL_FINAL_G_READER_NAV_20261024.json`
 (the 12 documentary area reports). The derivative pins its PAS commit and source
 blobs and preserves previous names, fields, statuses and 20 spotlights.
+It also carries each PAS source label, URL and `verified_at` date into the entry
+so source provenance remains visible alongside the original caution/licensing notes.
 
 All 12 areas are navigable; A03, A04, A06, A09 and A10 have no dedicated entries
 among the **original** 193. Those areas still link to completed documentary research.
