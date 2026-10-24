@@ -124,12 +124,28 @@ test('LIB360-10. descubrimientos no certificados son visibles; solo conflictos r
   assert.equal(snapshot.researchReview.decision, 'NO_COMMERCIAL_RIGHTS_OR_ADOPTION_CERTIFIED');
   assert.equal(snapshot.candidateReferences.length, 272);
   assert.equal(snapshot.researchReview.holdCount, 42);
-  assert.equal(snapshot.researchMentionAudit.filter((x) => x.disposition === 'CANDIDATE_PENDING_REVIEW').length, 272);
-  assert.equal(snapshot.candidateReferences.every((x) => x.knowledgeStatus === 'DISCOVERED_NOT_VERIFIED' && x.testStatus === 'NOT_RUN' && x.adoptionStatus === 'NOT_AUTHORIZED'), true);
-  assert.equal(snapshot.candidateReferences.some((x) => x.name === 'GitHub Copilot'), true);
-  assert.equal(snapshot.candidateReferences.some((x) => x.name === 'Docling'), true);
-  assert.equal(snapshot.candidateReferences.some((x) => x.name === 'WCAG 2.2'), true);
-  assert.equal(snapshot.researchMentionAudit.some((x) => x.name === 'PWABuilder' && x.area === 'A01' && x.disposition === 'HOLD'), true);
+  const discovered = snapshot.candidateReferences;
+  const discoveredMentions = snapshot.researchMentionAudit.filter(
+    (item) => item.disposition === 'CANDIDATE_PENDING_REVIEW',
+  );
+  assert.equal(discoveredMentions.length, 272);
+  const allDiscoveryUnverified = discovered.every(
+    (item) =>
+      item.knowledgeStatus === 'DISCOVERED_NOT_VERIFIED' &&
+      item.testStatus === 'NOT_RUN' &&
+      item.adoptionStatus === 'NOT_AUTHORIZED',
+  );
+  assert.equal(allDiscoveryUnverified, true);
+  assert.equal(discovered.some((item) => item.name === 'GitHub Copilot'), true);
+  assert.equal(discovered.some((item) => item.name === 'Docling'), true);
+  assert.equal(discovered.some((item) => item.name === 'WCAG 2.2'), true);
+  const pwabuilderHold = snapshot.researchMentionAudit.some(
+    (item) =>
+      item.name === 'PWABuilder' &&
+      item.area === 'A01' &&
+      item.disposition === 'HOLD',
+  );
+  assert.equal(pwabuilderHold, true);
   assert.equal(new Set(snapshot.candidateReferences.map((x) => x.identity)).size, 272);
   assert.equal(
     snapshot.researchMentionAudit.some(
@@ -177,7 +193,9 @@ test('LIB360-11. la búsqueda unificada consulta casos, candidatos y conserva fi
   assert.equal(selectLibrary360Results(snapshot, 'ALL', 'hold').length, 42);
   assert.equal(selectLibrary360Results(snapshot).length, 193 + 154 + 272);
   assert.equal(
-    searchLibrary360Results(selectLibrary360Results(snapshot, 'ALL', 'hold'), 'ORVAL').some((result) => result.kind === 'hold'),
+    searchLibrary360Results(selectLibrary360Results(snapshot, 'ALL', 'hold'), 'ORVAL').some(
+      (result) => result.kind === 'hold',
+    ),
     true,
   );
 });
