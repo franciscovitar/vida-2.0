@@ -444,10 +444,10 @@ export function HealthTodayHero({
                 <span className={styles['signal-label']}>{item.label}</span>
                 <strong className={`${styles['signal-value']} tabular`}>{item.valueLabel}</strong>
                 <small className={styles['signal-base']}>
-                    {item.signal === 'hrv' && item.baselineDays < HRV_MIN_BASELINE_DAYS
-                      ? `Base en formación · ${item.baselineDays}/${HRV_MIN_BASELINE_DAYS} noches previas`
-                      : `base ${item.baselineLabel}`}
-                  </small>
+                  {item.signal === 'hrv' && item.baselineDays < HRV_MIN_BASELINE_DAYS
+                    ? `Base en formación · ${item.baselineDays}/${HRV_MIN_BASELINE_DAYS} noches previas`
+                    : `base ${item.baselineLabel}`}
+                </small>
               </li>
             ))}
           </ul>

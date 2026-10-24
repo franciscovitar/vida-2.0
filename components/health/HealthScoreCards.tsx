@@ -195,7 +195,6 @@ export function HealthLongitudinalSummary({
   );
 }
 
-
 /** Single scan-first view over all existing domain scores, no new score calculation.
  * Readiness stays prominent directly above; this panel surfaces the remaining
  * five domain scores plus Rhythm Stability and longitudinal Momentum.
@@ -242,14 +241,46 @@ export function HealthScoresOverview({
   ];
 
   const explanations = [
-    { id: 'readiness', label: 'Readiness', detail: 'Preparación estimada combinando sueño y señales cardio.' },
-    { id: 'sleep', label: 'Sueño', detail: 'Duración y calidad de datos de sueño frente a tu patrón.' },
-    { id: 'recovery', label: 'Recuperación', detail: 'Sueño y señales cardiovasculares; no mide recuperación muscular.' },
-    { id: 'activity', label: 'Actividad', detail: 'Movimiento reciente comparado con tu historia.' },
-    { id: 'cardio-stability', label: 'Estabilidad cardio', detail: 'FC en reposo y VFC si existen suficientes noches comparables.' },
-    { id: 'mobility', label: 'Movilidad', detail: 'Regularidad de tus métricas al caminar.' },
-    { id: 'rhythm', label: 'Regularidad del sueño', detail: 'Qué tan constantes son tus horarios de descanso.' },
-    { id: 'momentum', label: 'Evolución', detail: 'Tendencia general reciente, no un pronóstico médico.' },
+    {
+      id: 'readiness',
+      label: 'Readiness',
+      detail: 'Preparación estimada combinando sueño y señales cardio.',
+    },
+    {
+      id: 'sleep',
+      label: 'Sueño',
+      detail: 'Duración y calidad de datos de sueño frente a tu patrón.',
+    },
+    {
+      id: 'recovery',
+      label: 'Recuperación',
+      detail: 'Sueño y señales cardiovasculares; no mide recuperación muscular.',
+    },
+    {
+      id: 'activity',
+      label: 'Actividad',
+      detail: 'Movimiento reciente comparado con tu historia.',
+    },
+    {
+      id: 'cardio-stability',
+      label: 'Estabilidad cardio',
+      detail: 'FC en reposo y VFC si existen suficientes noches comparables.',
+    },
+    {
+      id: 'mobility',
+      label: 'Movilidad',
+      detail: 'Regularidad de tus métricas al caminar.',
+    },
+    {
+      id: 'rhythm',
+      label: 'Regularidad del sueño',
+      detail: 'Qué tan constantes son tus horarios de descanso.',
+    },
+    {
+      id: 'momentum',
+      label: 'Evolución',
+      detail: 'Tendencia general reciente, no un pronóstico médico.',
+    },
   ] as const;
 
   return (
@@ -288,8 +319,8 @@ export function HealthScoresOverview({
         </dl>
       </div>
       <p className={styles['score-overview-caveat']}>
-        Son indicadores personales orientativos, no diagnósticos. Un dato faltante no se reemplaza por cero.
-        La VFC empieza a pesar en Estabilidad cardio cuando tiene una base previa suficiente.
+        Son indicadores personales orientativos, no diagnósticos. Un dato faltante no se reemplaza por
+        cero. La VFC empieza a pesar en Estabilidad cardio cuando tiene una base previa suficiente.
       </p>
     </Card>
   );

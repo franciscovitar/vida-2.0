@@ -108,7 +108,7 @@ test('HS1. datos estables producen scores explicables y versionados', () => {
   const sleep = scores.domains.find((score) => score.id === 'sleep');
   assert.ok(sleep);
   assert.ok(sleep.confidence < 80, 'sin Rhythm objetivo, la confianza no debe parecer alta');
-  assert.equal(scores.readiness.calculationVersion, 'health-scores-v1.2.0');
+  assert.equal(scores.readiness.calculationVersion, 'health-scores-v1.2.1');
   assert.equal(scores.readiness.evidenceStrength, 'limited');
   assert.equal(scores.domains.length, 5);
 
@@ -148,11 +148,16 @@ test('HS2b. VFC con dos noches previas no puede alterar Cardio, Recovery ni Read
     return copy;
   });
   const withHrv = buildExplainableHealthScores(healthFor([...limited, todayRow()]));
-  const withoutToday = buildExplainableHealthScores(healthFor([...limited, todayRow({ hrv: false })]));
+  const withoutToday = buildExplainableHealthScores(
+    healthFor([...limited, todayRow({ hrv: false })]),
+  );
   const cardio = withHrv.domains.find((item) => item.id === 'cardio-stability');
   const missingCardio = withoutToday.domains.find((item) => item.id === 'cardio-stability');
   assert.equal(cardio?.contributors.find((item) => item.id === 'hrv')?.score, null);
-  assert.match(cardio?.contributors.find((item) => item.id === 'hrv')?.detail ?? '', /base en formación/i);
+  assert.match(
+    cardio?.contributors.find((item) => item.id === 'hrv')?.detail ?? '',
+    /base en formación/i,
+  );
   assert.equal(cardio?.score, missingCardio?.score);
   assert.equal(cardio?.confidence, missingCardio?.confidence);
   assert.deepEqual(withHrv.readiness, withoutToday.readiness);
@@ -322,8 +327,14 @@ test('HS12. el resumen muestra todos los scores y glosario breve sin sustituir l
   assert.match(component, /scoreboard.momentum.score/);
   assert.match(component, /¿Qué significa cada score\?/);
   for (const id of [
-    'readiness', 'sleep', 'recovery', 'activity', 'cardio-stability', 'mobility',
-    'rhythm', 'momentum',
+    'readiness',
+    'sleep',
+    'recovery',
+    'activity',
+    'cardio-stability',
+    'mobility',
+    'rhythm',
+    'momentum',
   ]) {
     assert.match(component, new RegExp(`id: '${id}'`));
   }

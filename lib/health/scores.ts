@@ -45,7 +45,7 @@ export interface HealthExplainableScore {
   trend: HealthScoreTrend;
   contributors: readonly HealthScoreContributor[];
   uncertainties: readonly string[];
-  calculationVersion: 'health-scores-v1.2.0';
+  calculationVersion: 'health-scores-v1.2.1';
 }
 
 export interface HealthMomentum {
@@ -79,7 +79,7 @@ const RELIABILITY_FACTOR: Readonly<Record<HealthScoreReliabilityTier, number>> =
   C: 0.62,
 };
 
-const SCORE_VERSION = 'health-scores-v1.2.0' as const;
+const SCORE_VERSION = 'health-scores-v1.2.1' as const;
 const MOMENTUM_VERSION = 'health-momentum-v1.1.0' as const;
 const STRONG_BASELINE_DAYS = 14;
 
