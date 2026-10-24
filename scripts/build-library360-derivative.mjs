@@ -707,8 +707,11 @@ for (const auditRow of mentionAudit) {
   // Archived/restricted A02 projects remain genuinely held.
   if (auditRow.area === 'A02' && row.GPD_fit === 'HOLD_ARCHIVED_OR_RESTRICTED') continue;
   const referenceUrl =
-    auditRow.area === 'A01' ? row.source_links?.[0] :
-    auditRow.area === 'A02' ? row.source_url : row.primary_reference_url;
+    auditRow.area === 'A01'
+      ? row.source_links?.[0]
+      : auditRow.area === 'A02'
+        ? row.source_url
+        : row.primary_reference_url;
   if (typeof referenceUrl !== 'string' || !referenceUrl.startsWith('https://')) {
     continue;
   }
@@ -745,7 +748,8 @@ for (let i = identityHolds.length - 1; i >= 0; i--) {
 // No candidate is tested, licensed or adopted merely because it is discoverable.
 for (const candidate of candidateRefs) {
   candidate.knowledgeStatus = 'DISCOVERED_NOT_VERIFIED';
-  candidate.sourceScope ??= candidate.triage ?? candidate.sourceResearchStatus ?? candidate.subcategory;
+  candidate.sourceScope ??=
+    candidate.triage ?? candidate.sourceResearchStatus ?? candidate.subcategory;
   if (candidate.testStatus !== 'NOT_RUN' || candidate.adoptionStatus !== 'NOT_AUTHORIZED') {
     throw new Error('Cannot expose source claiming a trial or adoption: ' + candidate.id);
   }
