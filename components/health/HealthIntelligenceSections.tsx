@@ -18,6 +18,7 @@ import {
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import type { PersonalDeviationRadar } from '@/lib/health/deviation-radar';
+import { HRV_MIN_BASELINE_DAYS } from '@/lib/health/hrv-policy';
 import type {
   HealthCrossDomainContext,
   HealthCurrentState,
@@ -442,7 +443,11 @@ export function HealthTodayHero({
               >
                 <span className={styles['signal-label']}>{item.label}</span>
                 <strong className={`${styles['signal-value']} tabular`}>{item.valueLabel}</strong>
-                <small className={styles['signal-base']}>base {item.baselineLabel}</small>
+                <small className={styles['signal-base']}>
+                    {item.signal === 'hrv' && item.baselineDays < HRV_MIN_BASELINE_DAYS
+                      ? `Base en formación · ${item.baselineDays}/${HRV_MIN_BASELINE_DAYS} noches previas`
+                      : `base ${item.baselineLabel}`}
+                  </small>
               </li>
             ))}
           </ul>

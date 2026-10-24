@@ -140,6 +140,40 @@ test('HS2. missing HRV baja confianza pero no se convierte en cero', () => {
   assert.match(hrv?.detail ?? '', /no tiene cobertura/i);
 });
 
+test('HS2b. VFC con dos noches previas no puede alterar Cardio, Recovery ni Readiness', () => {
+  const column = HEADERS.indexOf(SAL.hrv);
+  const limited = baselineRows().map((source, index) => {
+    const copy = [...source];
+    if (index < 12) copy[column] = '';
+    return copy;
+  });
+  const withHrv = buildExplainableHealthScores(healthFor([...limited, todayRow()]));
+  const withoutToday = buildExplainableHealthScores(healthFor([...limited, todayRow({ hrv: false })]));
+  const cardio = withHrv.domains.find((item) => item.id === 'cardio-stability');
+  const missingCardio = withoutToday.domains.find((item) => item.id === 'cardio-stability');
+  assert.equal(cardio?.contributors.find((item) => item.id === 'hrv')?.score, null);
+  assert.match(cardio?.contributors.find((item) => item.id === 'hrv')?.detail ?? '', /base en formación/i);
+  assert.equal(cardio?.score, missingCardio?.score);
+  assert.equal(cardio?.confidence, missingCardio?.confidence);
+  assert.deepEqual(withHrv.readiness, withoutToday.readiness);
+  assert.equal(
+    withHrv.domains.find((item) => item.id === 'recovery')?.score,
+    withoutToday.domains.find((item) => item.id === 'recovery')?.score,
+  );
+});
+
+test('HS2c. siete noches previas habilitan la contribución HRV', () => {
+  const column = HEADERS.indexOf(SAL.hrv);
+  const justSeven = baselineRows().map((source, index) => {
+    const copy = [...source];
+    if (index < 7) copy[column] = '';
+    return copy;
+  });
+  const scores = buildExplainableHealthScores(healthFor([...justSeven, todayRow()]));
+  const cardio = scores.domains.find((item) => item.id === 'cardio-stability');
+  assert.notEqual(cardio?.contributors.find((item) => item.id === 'hrv')?.score, null);
+});
+
 test('HS3. el selector visual de período no cambia los scores diarios', () => {
   const rows = [...baselineRows(), todayRow()];
   const seven = buildExplainableHealthScores(healthFor(rows, 7));
@@ -272,4 +306,35 @@ test('HS11. la UI objetiva pone el brief primero y separa los dominios', () => {
   assert.match(navigation, /\/salud\/sueno/);
   assert.match(navigation, /\/salud\/corazon/);
   assert.match(navigation, /\/salud\/actividad/);
+});
+
+test('HS12. el resumen muestra todos los scores y glosario breve sin sustituir los dominios', () => {
+  const page = readFileSync(join(process.cwd(), 'app', '(app)', 'salud', 'page.tsx'), 'utf8');
+  const component = readFileSync(
+    join(process.cwd(), 'components', 'health', 'HealthScoreCards.tsx'),
+    'utf8',
+  );
+  assert.match(page, /<HealthReadinessSummary score={intelligence.scores.readiness}/);
+  assert.match(page, /<HealthScoresOverview scoreboard={intelligence.scores} rhythm={rhythm}/);
+  assert.ok(page.indexOf('<HealthScoresOverview') < page.indexOf('<HealthTrajectorySection'));
+  assert.match(component, /scoreboard.domains.map/);
+  assert.match(component, /rhythm.result\?\.score/);
+  assert.match(component, /scoreboard.momentum.score/);
+  assert.match(component, /¿Qué significa cada score\?/);
+  for (const id of [
+    'readiness', 'sleep', 'recovery', 'activity', 'cardio-stability', 'mobility',
+    'rhythm', 'momentum',
+  ]) {
+    assert.match(component, new RegExp(`id: '${id}'`));
+  }
+});
+
+test('HS13. el brief de VFC escasa debe indicar base en formación, no base consolidada', () => {
+  const hero = readFileSync(
+    join(process.cwd(), 'components', 'health', 'HealthIntelligenceSections.tsx'),
+    'utf8',
+  );
+  assert.match(hero, /HRV_MIN_BASELINE_DAYS/);
+  assert.match(hero, /Base en formación/);
+  assert.match(hero, /item\.baselineDays < HRV_MIN_BASELINE_DAYS/);
 });
