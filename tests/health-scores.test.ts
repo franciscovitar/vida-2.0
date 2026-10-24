@@ -282,9 +282,7 @@ test('HS12. VFC con tres noches previas no altera cardio, Recovery ni Readiness'
     return copy;
   });
   const withHrv = buildExplainableHealthScores(healthFor([...sparse, todayRow()]));
-  const without = buildExplainableHealthScores(
-    healthFor([...sparse, todayRow({ hrv: false })]),
-  );
+  const without = buildExplainableHealthScores(healthFor([...sparse, todayRow({ hrv: false })]));
   const cardio = withHrv.domains.find((s) => s.id === 'cardio-stability');
   const recovery = withHrv.domains.find((s) => s.id === 'recovery');
   assert.ok(cardio && recovery);
