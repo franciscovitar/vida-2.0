@@ -25,7 +25,7 @@ export default async function ProfessionalLibraryPage() {
         domain="projects"
       />
       <ProfessionalNavigation current="biblioteca" />
-      <ProfessionalLibrary editorial={data.editorial} technologyLibrary={data.technologyLibrary} />
+      <ProfessionalLibrary editorial={data.editorial} library360={data.library360} />
     </div>
   );
 }

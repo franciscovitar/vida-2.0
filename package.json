@@ -24,6 +24,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --import tsx --test \"tests/*.test.ts\"",
+    "qa:library360": "node scripts/build-library360-derivative.mjs ../personal-ai-system 9725bc71a6b704f20db3d740e687c349bac54b38 2026-10-24 --check",
     "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
     "verify": "npm run check && npm run build",
     "preview:check": "tsx scripts/preview-preflight.ts",

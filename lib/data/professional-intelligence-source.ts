@@ -11,7 +11,7 @@ import { loadProfessionalSkillsMatrix } from '@/lib/professional/skills-matrix';
 import { loadSkillDemandBaseline } from '@/lib/professional/skill-demand';
 import { loadObservedJobs } from '@/lib/professional/observed-jobs';
 import { loadProfessionalVisualization } from '@/lib/professional/visualization';
-import { loadTechnologyLibrary } from '@/lib/professional/technology-library';
+import { loadLibrary360 } from '@/lib/professional/library-360';
 
 export async function getProfessionalIntelligence() {
   await requireAuthorizedSession();
@@ -73,10 +73,10 @@ export async function getProfessionalGrowthPageData() {
 export async function getProfessionalLibraryPageData() {
   await requireAuthorizedSession();
 
-  const [editorial, technologyLibrary] = await Promise.all([
+  const [editorial, library360] = await Promise.all([
     loadIntelligenceEditorialSnapshot(),
-    loadTechnologyLibrary(),
+    loadLibrary360(),
   ]);
 
-  return { editorial, technologyLibrary };
+  return { editorial, library360 };
 }

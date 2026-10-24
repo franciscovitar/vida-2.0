@@ -22,7 +22,8 @@ Vida stores only sanitized generated derivatives:
 - `data/generated/professional-market-detail.json`
 - `data/generated/professional-offer-variants.json`
 - `data/generated/ai-career-resilience.json`
-- `data/generated/technology-library.json`
+- `data/generated/technology-library.json` (legacy V1 consumers)
+- `data/generated/library-360.json` (unified V2 derivative)
 - `data/generated/intelligence-editorial-snapshot.json` plus sanitized article derivatives
 
 These files are views, not editable sources of truth. They must preserve PAS repository/ref/commit and observation dates.
@@ -87,11 +88,37 @@ Vida may copy an Adaptive Learning handoff but must not write mastery or ownersh
 
 Library is voluntary reference memory:
 
-- no unread count;
-- no backlog;
-- no streak;
-- no catch-up requirement;
-- storing a technology does not imply installing, paying for or learning it.
+- no unread count, backlog, streak or catch-up requirement;
+- storing a technology does not imply installing, paying for or learning it;
+- **one unified library** under `/professional/biblioteca`, not a second 360°
+  catalog rendered beside the old six technology categories.
+
+`data/generated/library-360.json` is a **sanitized PAS derivative** of
+`TECHNOLOGY_LIBRARY_INDEX_V1.json` (the unchanged 193 resource identities),
+`KNOWLEDGE_LIBRARY_360_INVENTORY_PROPOSAL_V1.json` (provisional 12-area crosswalk),
+and `KNOWLEDGE_LIBRARY_360_GLOBAL_FINAL_G_READER_NAV_20261024.json`
+(the 12 documentary area reports). The derivative pins its PAS commit and source
+blobs and preserves previous names, fields, statuses and 20 spotlights.
+It also carries each PAS source label, URL and `verified_at` date into the entry
+so source provenance remains visible alongside the original caution/licensing notes.
+
+All 12 areas are navigable; A03, A04, A06, A09 and A10 have no dedicated entries
+among the **original** 193. Those areas still link to completed documentary research.
+Their absence of curated cards must not be filled with invented models or products.
+Report links point to private PAS GitHub content and require separate repository access.
+
+The area assignments remain `PROPOSED_NOT_VERIFIED`. The G status
+`EVIDENCE_READY` is documentary only, not an empirical product review or
+commercial permission. The previous `data/generated/technology-library.json` V1
+remains intact for the legacy `ProfessionalDashboard` and historical tests; it
+is **not displayed as a second catalog** on the V2 Library route. A missing/invalid
+V2 derivative fails closed without falling back to old categories.
+
+Regenerate the derivative only from the current PAS `main` source and recheck
+all 193 identities/fields, crosswalk, source fingerprints, status and privacy.
+The V1 snapshot's observation date stays separate from the later 360° generation
+date. No changes to PAS canonical entities, Genova, deployments or tool adoption
+are authorized by this view.
 
 ## Fail-closed and freshness
 

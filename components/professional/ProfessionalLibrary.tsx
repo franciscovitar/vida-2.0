@@ -1,13 +1,10 @@
-import { CircleAlert, ExternalLink, Info } from 'lucide-react';
+import { CircleAlert, Info } from 'lucide-react';
 import Link from 'next/link';
 
 import { intelligenceArticleHref } from '@/lib/intelligence/contract';
 import type { IntelligenceEditorialData, IntelligenceFront } from '@/types/intelligence-editorial';
-import type {
-  TechnologyLibraryData,
-  TechnologyLibraryEntry,
-  TechnologyLibraryStatus,
-} from '@/types/technology-library';
+import { UnifiedLibrary360 } from '@/components/professional/UnifiedLibrary360';
+import type { Library360Data } from '@/types/library-360';
 
 import styles from './ProfessionalV2.module.scss';
 
@@ -18,58 +15,15 @@ const FRONT_LABELS: Record<IntelligenceFront, string> = {
   pas: 'PAS',
 };
 
-const TECHNOLOGY_STATUS_LABELS: Record<TechnologyLibraryStatus, string> = {
-  CURRENT_STACK: 'Ya lo usás',
-  ASSESS_NOW: 'Evaluar ahora',
-  WATCH: 'Seguir de cerca',
-  REFERENCE: 'Referencia',
-  HOLD: 'Esperar',
-  ARCHIVED: 'Archivado',
-};
-
-function TechnologyEntry({ entry }: { entry: TechnologyLibraryEntry }) {
-  return (
-    <article className={styles['library-tech-entry']}>
-      <div className={styles['library-row-head']}>
-        <h4>{entry.name}</h4>
-        <span>{TECHNOLOGY_STATUS_LABELS[entry.status]}</span>
-      </div>
-      <p>{entry.summary}</p>
-      <details className={styles['library-details']}>
-        <summary>Ver contexto</summary>
-        <div className={styles['library-details-body']}>
-          <p>
-            <strong>Aplicación:</strong> {entry.application}
-          </p>
-          <p>
-            <strong>Beneficio:</strong> {entry.benefit}
-          </p>
-          <p>
-            <strong>Cuidado:</strong> {entry.caution}
-          </p>
-          <a href={entry.sourceUrl} target="_blank" rel="noreferrer">
-            <ExternalLink size={13} aria-hidden="true" /> {entry.repository}
-          </a>
-        </div>
-      </details>
-    </article>
-  );
-}
-
 export function ProfessionalLibrary({
   editorial,
-  technologyLibrary,
+  library360,
 }: {
   editorial: IntelligenceEditorialData;
-  technologyLibrary: TechnologyLibraryData;
+  library360: Library360Data;
 }) {
   const editorialSnapshot =
     editorial.status === 'ready' && editorial.snapshot ? editorial.snapshot : null;
-  const technologySnapshot =
-    technologyLibrary.status === 'ready' && technologyLibrary.snapshot
-      ? technologyLibrary.snapshot
-      : null;
-
   const deepDives = editorialSnapshot
     ? [...editorialSnapshot.archive]
         .filter((article) => article.professionalRefs.length > 0)
@@ -81,19 +35,6 @@ export function ProfessionalLibrary({
         .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
     : [];
 
-  const allTechnologyEntries = technologySnapshot
-    ? technologySnapshot.categories.flatMap((category) => category.entries)
-    : [];
-  const technologyById = new Map(allTechnologyEntries.map((entry) => [entry.id, entry]));
-  const spotlights = technologySnapshot
-    ? technologySnapshot.spotlightIds
-        .flatMap((id) => {
-          const entry = technologyById.get(id);
-          return entry ? [entry] : [];
-        })
-        .slice(0, 6)
-    : [];
-
   return (
     <div className={styles.library}>
       <section className={styles['library-hero']} aria-labelledby="professional-library-title">
@@ -102,7 +43,7 @@ export function ProfessionalLibrary({
 
         <div className={styles['library-meta']}>
           <span>{editorialSnapshot?.archive.length ?? 0} artículos históricos</span>
-          <span>{technologySnapshot?.totalEntries ?? 0} referencias tecnológicas</span>
+          <span>{library360.snapshot?.totalEntries ?? 0} referencias tecnológicas</span>
         </div>
       </section>
 
@@ -175,67 +116,7 @@ export function ProfessionalLibrary({
         </section>
       ) : null}
 
-      <section className={styles['library-section']} aria-labelledby="library-technology-title">
-        <div className={styles['library-heading']}>
-          <p className={styles.eyebrow}>Tecnología y referencias</p>
-          <h3 id="library-technology-title">Opciones guardadas para el problema correcto</h3>
-          <p>
-            Guardar una herramienta no implica adoptarla. Se vuelven a verificar mantenimiento,
-            licencia, seguridad y costo antes de usarla.
-          </p>
-        </div>
-
-        {technologyLibrary.notice ? (
-          <div
-            className={styles.notice}
-            data-tone={technologyLibrary.stale ? 'warning' : 'info'}
-            role="status"
-          >
-            {technologyLibrary.stale ? (
-              <CircleAlert size={16} aria-hidden="true" />
-            ) : (
-              <Info size={16} aria-hidden="true" />
-            )}
-            <span>{technologyLibrary.notice}</span>
-          </div>
-        ) : null}
-
-        {technologySnapshot ? (
-          <>
-            <div className={styles['library-tech-grid']}>
-              {spotlights.map((entry) => (
-                <TechnologyEntry entry={entry} key={entry.id} />
-              ))}
-            </div>
-
-            <details className={styles['library-all']}>
-              <summary>Explorar biblioteca completa ({technologySnapshot.totalEntries})</summary>
-              <div className={styles['library-category-list']}>
-                {technologySnapshot.categories.map((category) => (
-                  <details className={styles['library-category']} key={category.id}>
-                    <summary>
-                      <span>{category.label}</span>
-                      <span>{category.entries.length}</span>
-                    </summary>
-                    <div className={styles['library-tech-grid']}>
-                      {category.entries.map((entry) => (
-                        <TechnologyEntry entry={entry} key={entry.id} />
-                      ))}
-                    </div>
-                  </details>
-                ))}
-              </div>
-            </details>
-          </>
-        ) : (
-          <div className={styles.notice} data-tone="warning" role="status">
-            <CircleAlert size={16} aria-hidden="true" />
-            <span>
-              {technologyLibrary.notice ?? 'La biblioteca tecnológica no está disponible.'}
-            </span>
-          </div>
-        )}
-      </section>
+      <UnifiedLibrary360 data={library360} />
 
       <footer className={styles['library-provenance']}>
         {editorialSnapshot ? (
@@ -246,12 +127,12 @@ export function ProfessionalLibrary({
           'Editorial no disponible'
         )}
         {' · '}
-        {technologySnapshot ? (
+        {library360.snapshot ? (
           <>
-            Tecnología <code>{technologySnapshot.source.commit.slice(0, 8)}</code>
+            Biblioteca 360° <code>{library360.snapshot.source.commit.slice(0, 8)}</code>
           </>
         ) : (
-          'Tecnología no disponible'
+          'Biblioteca 360° no disponible'
         )}
       </footer>
     </div>
