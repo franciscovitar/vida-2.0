@@ -177,7 +177,7 @@ test('PRO-V2-13. Biblioteca completa las cinco superficies de Profesional V2', (
   assert.match(route, /ProfessionalLibrary/);
   assert.match(route, /getProfessionalLibraryPageData/);
   assert.match(source, /loadIntelligenceEditorialSnapshot/);
-  assert.match(source, /loadTechnologyLibrary/);
+  assert.match(source, /loadLibrary360/);
 });
 
 test('PRO-V2-14. Biblioteca mantiene archivo legacy y cero deuda de lectura', () => {
@@ -192,13 +192,16 @@ test('PRO-V2-14. Biblioteca mantiene archivo legacy y cero deuda de lectura', ()
   assert.match(legacyRedirect, /redirect\('\/professional'\)/);
 });
 
-test('PRO-V2-15. Biblioteca tecnológica es referencia progresiva y no adopción automática', () => {
-  const library = repoText('components/professional/ProfessionalLibrary.tsx');
+test('PRO-V2-15. Biblioteca 360 es única, progresiva y no adopción automática', () => {
+  const page = repoText('components/professional/ProfessionalLibrary.tsx');
+  const library = repoText('components/professional/UnifiedLibrary360.tsx');
 
-  assert.match(library, /spotlightIds/);
-  assert.match(library, /slice\(0, 6\)/);
-  assert.match(library, /Explorar biblioteca completa/);
+  assert.match(page, /UnifiedLibrary360/);
+  assert.doesNotMatch(page, /technologySnapshot\.categories\.map/);
+  assert.match(library, /snapshot\.areas/);
+  assert.match(library, /Explorar los 12 informes de investigación/);
   assert.match(library, /Guardar una herramienta no implica adoptarla/);
+  assert.match(library, /matching\.slice\(0, 80\)/);
   assert.doesNotMatch(library, /unreadCount|streakCount|readingDebt|backlogCount/i);
 });
 

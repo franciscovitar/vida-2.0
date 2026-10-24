@@ -1,0 +1,223 @@
+.section {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.heading {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 72ch;
+}
+
+.eyebrow {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.heading h3 {
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.16;
+}
+
+.heading p,
+.research p,
+.empty,
+.provenance p {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.areaButton {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.areaButton[aria-pressed='true'] {
+  border-color: var(--text);
+  color: var(--text);
+  font-weight: 800;
+}
+
+.areaButton:focus-visible,
+.searchRow input:focus-visible,
+.details summary:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+.research {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.85rem 0;
+  border-block: 1px solid var(--border);
+}
+
+.research summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.research a,
+.detailsBody a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.researchGrid {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.researchItem {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+}
+
+.searchRow {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.searchRow label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.searchRow input {
+  min-width: 0;
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.count,
+.facet {
+  color: var(--text-subtle);
+  font-size: 0.71rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 1.35rem;
+}
+
+.entry {
+  display: grid;
+  align-content: start;
+  gap: 0.48rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.entryHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.entryHead h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+
+.entryHead span {
+  color: var(--text-subtle);
+  font-size: 0.66rem;
+}
+
+.entry > p,
+.detailsBody p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.details {
+  border-top: 1px solid var(--border);
+  padding-top: 0.5rem;
+}
+
+.details summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.detailsBody {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.55rem;
+}
+
+.notice {
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.provenance {
+  display: grid;
+  gap: 0.3rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (width >= 760px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .researchGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
