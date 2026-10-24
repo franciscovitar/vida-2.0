@@ -1,0 +1,97 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));
+  gap: 0.65rem;
+  margin-top: 0.3rem;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.label {
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  color: var(--text);
+}
+
+.value strong {
+  font-size: 1.7rem;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.value small, .detail, .confidence {
+  color: var(--text-muted);
+  font-size: 0.67rem;
+  line-height: 1.35;
+}
+
+.detail {
+  overflow-wrap: anywhere;
+}
+
+.confidence {
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
+.glossary {
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+}
+
+.glossary h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.glossary dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 1rem;
+  margin: 0;
+}
+
+.glossary dl > div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.glossary dt {
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.glossary dd, .caveat {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.caveat {
+  margin-top: 0.7rem;
+  color: var(--text-subtle);
+}
+
+@media (width <= 700px) {
+  .glossary dl { grid-template-columns: 1fr; }
+}
