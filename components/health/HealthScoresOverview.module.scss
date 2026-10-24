@@ -1,6 +1,6 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
   gap: 0.65rem;
   margin-top: 0.3rem;
 }
@@ -35,7 +35,9 @@
   line-height: 1.1;
 }
 
-.value small, .detail, .confidence {
+.value small,
+.detail,
+.confidence {
   color: var(--text-muted);
   font-size: 0.67rem;
   line-height: 1.35;
@@ -80,7 +82,8 @@
   font-weight: 750;
 }
 
-.glossary dd, .caveat {
+.glossary dd,
+.caveat {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.68rem;
@@ -93,5 +96,7 @@
 }
 
 @media (width <= 700px) {
-  .glossary dl { grid-template-columns: 1fr; }
+  .glossary dl {
+    grid-template-columns: 1fr;
+  }
 }

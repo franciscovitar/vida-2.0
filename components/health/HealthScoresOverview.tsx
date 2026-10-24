@@ -100,8 +100,8 @@ export function HealthScoresOverview({
         </dl>
       </div>
       <p className={styles.caveat}>
-        Índices orientativos, no diagnósticos ni predicciones de salud. «—» significa falta
-        de datos, no un valor cero. La VFC se interpreta solo con historial suficiente.
+        Índices orientativos, no diagnósticos ni predicciones de salud. «—» significa falta de
+        datos, no un valor cero. La VFC se interpreta solo con historial suficiente.
       </p>
     </Card>
   );
