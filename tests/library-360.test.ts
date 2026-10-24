@@ -136,14 +136,20 @@ test('LIB360-10. descubrimientos no certificados son visibles; solo conflictos r
       item.adoptionStatus === 'NOT_AUTHORIZED',
   );
   assert.equal(allDiscoveryUnverified, true);
-  assert.equal(discovered.some((item) => item.name === 'GitHub Copilot'), true);
-  assert.equal(discovered.some((item) => item.name === 'Docling'), true);
-  assert.equal(discovered.some((item) => item.name === 'WCAG 2.2'), true);
+  assert.equal(
+    discovered.some((item) => item.name === 'GitHub Copilot'),
+    true,
+  );
+  assert.equal(
+    discovered.some((item) => item.name === 'Docling'),
+    true,
+  );
+  assert.equal(
+    discovered.some((item) => item.name === 'WCAG 2.2'),
+    true,
+  );
   const pwabuilderHold = snapshot.researchMentionAudit.some(
-    (item) =>
-      item.name === 'PWABuilder' &&
-      item.area === 'A01' &&
-      item.disposition === 'HOLD',
+    (item) => item.name === 'PWABuilder' && item.area === 'A01' && item.disposition === 'HOLD',
   );
   assert.equal(pwabuilderHold, true);
   assert.equal(new Set(snapshot.candidateReferences.map((x) => x.identity)).size, 272);

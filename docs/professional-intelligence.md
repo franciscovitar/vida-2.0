@@ -159,7 +159,7 @@ restricted or excluded mentions in explicit HOLD. The previously existing 193 re
 identities and 154 decision dossiers remain untouched. No new canonical TL entry,
 benchmark, entitlement, commercial licence or approval is asserted.
 
-A02 `D_SPECIALIST_ON_DEMAND` and `P_CONTEXTUAL_ONLY` may be *discovered*, but their
+A02 `D_SPECIALIST_ON_DEMAND` and `P_CONTEXTUAL_ONLY` may be _discovered_, but their
 `sourceScope` must constrain recommendations. A02 `HOLD_ARCHIVED_OR_RESTRICTED` remains
 HOLD, as do A01 `HOLD_OR_RESTRICTED`, identity collisions (13 shared repositories plus
 Orval) and A12 source exclusions. Check provider status, edition, price, licence,

@@ -691,9 +691,7 @@ for (const row of candidateInputs.A12.data.selected_candidates) {
 const sourceRows = {
   A01: new Map(candidateInputs.A01.data.rows.map((row) => [row.a01_record_id, row])),
   A02: new Map(candidateInputs.A02.data.rows.map((row) => [row.id, row])),
-  A12: new Map(
-    candidateInputs.A12.data.selected_candidates.map((row) => [row.candidate_id, row]),
-  ),
+  A12: new Map(candidateInputs.A12.data.selected_candidates.map((row) => [row.candidate_id, row])),
 };
 const discoveryReasons = new Set([
   'Identity, repository, product or edition not sufficiently resolved',
