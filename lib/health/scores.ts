@@ -581,7 +581,7 @@ function buildCardioScore(health: HealthPageData): HealthExplainableScore {
               ? 'negative'
               : 'neutral',
       detail:
-        hrvScore === null
+        hrvScore === null || hrv === null || hrvCenter === null
           ? 'HRV no tiene cobertura/semántica suficiente para pesar hoy.'
           : `${formatInt(hrv)} ms hoy vs base ${formatInt(hrvCenter)} ms.`,
       evidenceRefs: ['hrv'],
