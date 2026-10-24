@@ -319,8 +319,7 @@ export function HealthScoresOverview({
         </dl>
       </div>
       <p className={styles['score-overview-caveat']}>
-        Son indicadores personales orientativos, no diagnósticos. Un dato faltante no se reemplaza por
-        cero. La VFC empieza a pesar en Estabilidad cardio cuando tiene una base previa suficiente.
+        No son diagnósticos. La VFC necesita una base suficiente y los datos faltantes no son cero.
       </p>
     </Card>
   );
