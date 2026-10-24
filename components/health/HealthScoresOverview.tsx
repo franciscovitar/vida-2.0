@@ -6,14 +6,14 @@ import type { HealthScoreboard } from '@/lib/health/scores';
 import styles from './HealthScoresOverview.module.scss';
 
 const MEANINGS = [
-  ['Readiness', 'Síntesis de sueño y estabilidad cardio.'],
-  ['Sueño', 'Duración y regularidad del descanso.'],
-  ['Recuperación', 'Sueño y señales cardio; falta carga de Gym.'],
-  ['Actividad', 'Movimiento y pasos comparados con tu historia.'],
-  ['Estabilidad cardio', 'FC en reposo y VFC cuando hay base válida.'],
-  ['Movilidad', 'Cambios en tu patrón de marcha.'],
-  ['Regularidad de sueño', 'Constancia de horarios nocturnos.'],
-  ['Dirección reciente', 'Tendencia global: cerca de 50 es estable.'],
+  ['Readiness', 'Si baja, tu sueño o tu pulso sugieren que hoy podrías estar menos descansado.'],
+  ['Sueño', 'Si baja, dormiste poco, pasaste tiempo despierto en cama o tu sueño fue irregular.'],
+  ['Recuperación', 'Si baja, tu sueño o pulso sugieren menor recuperación. No incluye gimnasio.'],
+  ['Actividad', 'Si baja, caminaste poco o menos que durante tus semanas habituales.'],
+  ['Estabilidad cardio', 'Si baja, subió tu pulso en reposo o bajó tu VFC (si hay historial).'],
+  ['Movilidad', 'Si baja, caminaste más lento, con pasos más cortos o desparejos que antes.'],
+  ['Regularidad de sueño', 'Si baja, te acostaste o despertaste a horas muy distintas entre días.'],
+  ['Dirección reciente', 'Cerca de 50: venís igual; lejos de 50: tus señales mejoran o empeoran.'],
 ] as const;
 
 type OverviewItem = {
