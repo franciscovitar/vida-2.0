@@ -200,7 +200,7 @@ test('PRO-V2-15. Biblioteca 360 es única, progresiva y no adopción automática
   assert.doesNotMatch(page, /technologySnapshot\.categories\.map/);
   assert.match(library, /snapshot\.areas/);
   assert.match(library, /Explorar los 12 informes de investigación/);
-  assert.match(library, /referencia no implica probarla/);
+  assert.match(library, /referencia no\s+implica probarla/);
   assert.match(library, /searchLibrary360Results/);
   assert.match(library, /Descubrimiento · verificar antes de recomendar/);
   assert.match(library, /matching\.slice\(0, resultLimit\)/);
