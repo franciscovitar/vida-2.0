@@ -59,6 +59,8 @@ export interface Library360CandidateReference {
   referenceUrl: string;
   subcategory: string;
   candidateStatus: 'CANDIDATE_PENDING_REVIEW';
+  knowledgeStatus: 'DISCOVERED_NOT_VERIFIED';
+  sourceScope: string;
   rightsStatus: string;
   testStatus: string;
   adoptionStatus: 'NOT_AUTHORIZED';

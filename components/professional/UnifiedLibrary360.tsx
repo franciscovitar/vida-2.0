@@ -169,10 +169,10 @@ function CandidateCard({
     <article className={styles.entry}>
       <div className={styles['entry-head']}>
         <h4>{item.name}</h4>
-        <span>Candidato pendiente · no adoptado</span>
+        <span>Descubrimiento · verificar antes de recomendar</span>
       </div>
       <p>
-        Identidad: {item.identity} · subcategoría {item.subcategory}
+        Identidad provisional: {item.identity} · ámbito: {item.sourceScope}
       </p>
       <p>
         Derechos: {item.rightsStatus}. Prueba: {item.testStatus}. Adopción: no autorizada.
@@ -248,11 +248,6 @@ export function UnifiedLibrary360({ data }: { data: Library360Data }) {
       ).length +
       snapshot.candidateReferences.filter(
         (item) => selectedAreaId === 'ALL' || item.area === selectedArea?.code,
-      ).length +
-      snapshot.researchMentionAudit.filter(
-        (item) =>
-          item.disposition === 'HOLD' &&
-          (selectedAreaId === 'ALL' || item.area === selectedArea?.code),
       ).length,
     resource: selectLibrary360Entries(areas, selectedAreaId).length,
     case: snapshot.researchCases.filter(
@@ -276,8 +271,8 @@ export function UnifiedLibrary360({ data }: { data: Library360Data }) {
         <p>
           {snapshot.totalEntries} fichas existentes, {snapshot.researchCases.length} casos
           documentales, {snapshot.candidateReferences.length} referencias candidatas pendientes y{' '}
-          {kindCounts.hold} menciones en HOLD. Guardar una referencia no implica probarla ni
-          adoptarla.
+          {kindCounts.hold} menciones en HOLD por conflictos reales. Guardar una referencia no
+          implica probarla ni adoptarla.
         </p>
         {data.notice ? (
           <p className={styles.notice} role="status">
@@ -324,7 +319,7 @@ export function UnifiedLibrary360({ data }: { data: Library360Data }) {
             ['ALL', 'Todo'],
             ['resource', 'Fichas'],
             ['case', 'Casos documentales'],
-            ['candidate', 'Candidatos'],
+            ['candidate', 'Descubrimientos'],
             ['hold', 'HOLD'],
           ] as const
         ).map(([kind, label]) => (

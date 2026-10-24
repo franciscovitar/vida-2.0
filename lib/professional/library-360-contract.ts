@@ -129,8 +129,10 @@ function candidateReference(value: unknown): value is Library360CandidateReferen
     value.referenceUrl.startsWith('https://') &&
     text(value.subcategory) &&
     value.candidateStatus === 'CANDIDATE_PENDING_REVIEW' &&
+    value.knowledgeStatus === 'DISCOVERED_NOT_VERIFIED' &&
+    text(value.sourceScope) &&
     text(value.rightsStatus) &&
-    text(value.testStatus) &&
+    value.testStatus === 'NOT_RUN' &&
     value.adoptionStatus === 'NOT_AUTHORIZED' &&
     text(value.sourcePath) &&
     value.sourcePath.startsWith('AI/projects/professional-intelligence/') &&
@@ -232,6 +234,8 @@ export function parseLibrary360Snapshot(value: unknown): Library360Snapshot | nu
     review.sourceMentionCount !== 356 ||
     review.attachedToExistingResourceCount !== 42 ||
     review.candidateReferenceCount !== (value.candidateReferences as unknown[]).length ||
+    review.candidateReferenceCount !== 272 ||
+    review.holdCount !== 42 ||
     review.holdCount !==
       (value.researchMentionAudit as Record<string, unknown>[]).filter(
         (item) => item.disposition === 'HOLD',
@@ -264,6 +268,8 @@ export function parseLibrary360Snapshot(value: unknown): Library360Snapshot | nu
     new Set(casesById.keys()).size !== allCases.length ||
     new Set(candidateIds).size !== candidateIds.length ||
     new Set(candidateIdentities).size !== candidateIdentities.length ||
+    candidateRefs.some((item) => item.adoptionStatus !== 'NOT_AUTHORIZED') ||
+    candidateRefs.some((item) => !item.sourceScope) ||
     allCases.some(
       (item) =>
         !areas.some((area) => area.code === item.areaCode && area.researchCases.includes(item.id)),

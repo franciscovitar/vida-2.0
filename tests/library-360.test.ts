@@ -114,7 +114,7 @@ test('LIB360-09. incorpora 154 casos A03–A11 como documentación con prueba y 
   );
 });
 
-test('LIB360-10. revisión de menciones conserva TL, deja candidatos pendientes y bloquea ambigüedades', () => {
+test('LIB360-10. descubrimientos no certificados son visibles; solo conflictos reales quedan en HOLD', () => {
   const snapshot = parseLibrary360Snapshot(payload);
   assert.ok(snapshot);
   assert.equal(snapshot.researchMentionAudit.length, 356);
@@ -122,8 +122,37 @@ test('LIB360-10. revisión de menciones conserva TL, deja candidatos pendientes 
   assert.equal(snapshot.researchReview.sameRepositoryGroupsHeld, 13);
   assert.equal(snapshot.researchReview.nameCollisionHolds, 1);
   assert.equal(snapshot.researchReview.decision, 'NO_COMMERCIAL_RIGHTS_OR_ADOPTION_CERTIFIED');
-  assert.equal(snapshot.candidateReferences.length, 0);
-  assert.equal(snapshot.researchReview.holdCount, 314);
+  assert.equal(snapshot.candidateReferences.length, 272);
+  assert.equal(snapshot.researchReview.holdCount, 42);
+  const discovered = snapshot.candidateReferences;
+  const discoveredMentions = snapshot.researchMentionAudit.filter(
+    (item) => item.disposition === 'CANDIDATE_PENDING_REVIEW',
+  );
+  assert.equal(discoveredMentions.length, 272);
+  const allDiscoveryUnverified = discovered.every(
+    (item) =>
+      item.knowledgeStatus === 'DISCOVERED_NOT_VERIFIED' &&
+      item.testStatus === 'NOT_RUN' &&
+      item.adoptionStatus === 'NOT_AUTHORIZED',
+  );
+  assert.equal(allDiscoveryUnverified, true);
+  assert.equal(
+    discovered.some((item) => item.name === 'GitHub Copilot'),
+    true,
+  );
+  assert.equal(
+    discovered.some((item) => item.name === 'Docling'),
+    true,
+  );
+  assert.equal(
+    discovered.some((item) => item.name === 'WCAG 2.2'),
+    true,
+  );
+  const pwabuilderHold = snapshot.researchMentionAudit.some(
+    (item) => item.name === 'PWABuilder' && item.area === 'A01' && item.disposition === 'HOLD',
+  );
+  assert.equal(pwabuilderHold, true);
+  assert.equal(new Set(snapshot.candidateReferences.map((x) => x.identity)).size, 272);
   assert.equal(
     snapshot.researchMentionAudit.some(
       (mention) => mention.id === 'A01-P2-013' && mention.disposition === 'HOLD',
@@ -155,7 +184,7 @@ test('LIB360-11. la búsqueda unificada consulta casos, candidatos y conserva fi
     true,
   );
   assert.equal(
-    searchLibrary360Results(all, 'cardsort').some((result) => result.kind === 'hold'),
+    searchLibrary360Results(all, 'cardsort').some((result) => result.kind === 'candidate'),
     true,
   );
   assert.equal(
@@ -167,9 +196,12 @@ test('LIB360-11. la búsqueda unificada consulta casos, candidatos y conserva fi
     selectLibrary360Results(snapshot, 'A03_AI_MODELS').some((result) => result.areaCode === 'A01'),
     false,
   );
-  assert.equal(selectLibrary360Results(snapshot, 'ALL', 'hold').length, 314);
+  assert.equal(selectLibrary360Results(snapshot, 'ALL', 'hold').length, 42);
+  assert.equal(selectLibrary360Results(snapshot).length, 193 + 154 + 272);
   assert.equal(
-    searchLibrary360Results(all, 'ORVAL').some((result) => result.kind === 'hold'),
+    searchLibrary360Results(selectLibrary360Results(snapshot, 'ALL', 'hold'), 'ORVAL').some(
+      (result) => result.kind === 'hold',
+    ),
     true,
   );
 });
@@ -186,6 +218,13 @@ test('LIB360-12. los duplicados de contenido, pruebas ejecutadas falsas y adopci
   const adopted = structuredClone(payload);
   adopted.researchCases[0].adoptionStatus = 'AUTHORIZED';
   assert.equal(parseLibrary360Snapshot(adopted), null);
+
+  const fakeDiscovery = structuredClone(payload);
+  fakeDiscovery.candidateReferences[0].knowledgeStatus = 'VERIFIED';
+  assert.equal(parseLibrary360Snapshot(fakeDiscovery), null);
+  const fakeTrial = structuredClone(payload);
+  fakeTrial.candidateReferences[0].testStatus = 'EXECUTED';
+  assert.equal(parseLibrary360Snapshot(fakeTrial), null);
 });
 
 test('LIB360-02. cinco áreas sin fichas conservan referencia de investigación', () => {
