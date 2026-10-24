@@ -18,6 +18,7 @@ import {
 } from '@/lib/adapters/salud-period';
 import { formatNumber } from '@/lib/format';
 import type { GymSessionsSnapshot } from '@/lib/gym/sheets-sessions-port';
+import { HRV_MIN_BASELINE_DAYS } from '@/lib/health/hrv-policy';
 import { buildExplainableHealthScores, type HealthScoreboard } from '@/lib/health/scores';
 import type { NutritionCoverage, NutritionDashboardData } from '@/lib/nutrition/types';
 import type {
@@ -89,7 +90,7 @@ export const HEALTH_MONITORING_THRESHOLDS: Readonly<
     materialRelative: 0.15,
     mildRelative: 0.08,
     minAbsolute: 3,
-    minBaselineDays: 7,
+    minBaselineDays: HRV_MIN_BASELINE_DAYS,
   },
   steps: {
     label: 'Pasos',

@@ -1,3 +1,4 @@
+import { HRV_MIN_BASELINE_DAYS } from '@/lib/health/hrv-policy';
 import type { RhythmStabilityResult } from '@/lib/health/rhythm';
 import type {
   HealthBaselineSignal,
@@ -44,7 +45,7 @@ export interface HealthExplainableScore {
   trend: HealthScoreTrend;
   contributors: readonly HealthScoreContributor[];
   uncertainties: readonly string[];
-  calculationVersion: 'health-scores-v1.2.0';
+  calculationVersion: 'health-scores-v1.2.1';
 }
 
 export interface HealthMomentum {
@@ -78,7 +79,7 @@ const RELIABILITY_FACTOR: Readonly<Record<HealthScoreReliabilityTier, number>> =
   C: 0.62,
 };
 
-const SCORE_VERSION = 'health-scores-v1.2.0' as const;
+const SCORE_VERSION = 'health-scores-v1.2.1' as const;
 const MOMENTUM_VERSION = 'health-momentum-v1.1.0' as const;
 const STRONG_BASELINE_DAYS = 14;
 
@@ -537,8 +538,10 @@ function buildCardioScore(health: HealthPageData): HealthExplainableScore {
     resting !== null && restingCenter !== null
       ? personalDeviationScore(resting, restingCenter, 'higher-is-worse')
       : null;
+  // Display sparse HRV values, but do not let them change Cardio, Recovery or
+  // Readiness until at least seven comparable PRIOR nights exist.
   const hrvScore =
-    hrv !== null && hrvCenter !== null
+    hrv !== null && hrvCenter !== null && hrvBaseline.days >= HRV_MIN_BASELINE_DAYS
       ? personalDeviationScore(hrv, hrvCenter, 'lower-is-worse')
       : null;
 
@@ -581,7 +584,9 @@ function buildCardioScore(health: HealthPageData): HealthExplainableScore {
       detail:
         hrv === null || hrvCenter === null
           ? 'HRV no tiene cobertura/semántica suficiente para pesar hoy.'
-          : `${formatInt(hrv)} ms hoy vs base ${formatInt(hrvCenter)} ms.`,
+          : hrvBaseline.days < HRV_MIN_BASELINE_DAYS
+            ? `VFC registrada; base en formación (${hrvBaseline.days}/${HRV_MIN_BASELINE_DAYS} noches previas). Aún no pesa en el score.`
+            : `${formatInt(hrv)} ms hoy vs base ${formatInt(hrvCenter)} ms.`,
       evidenceRefs: ['hrv'],
       baselineDays: hrvBaseline.days,
     }),
