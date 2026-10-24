@@ -6,14 +6,14 @@ import type { HealthScoreboard } from '@/lib/health/scores';
 import styles from './HealthScoresOverview.module.scss';
 
 const MEANINGS = [
-  ['Readiness', 'Si baja, tu descanso o tus señales cardíacas no vienen tan bien como de costumbre.'],
-  ['Sueño', 'Si baja, quizá dormiste poco, estuviste más tiempo despierto en cama o venís durmiendo irregular.'],
-  ['Recuperación', 'Si baja, el sueño o el pulso sugieren menos recuperación. Todavía no mide tu esfuerzo en el gimnasio.'],
-  ['Actividad', 'Si baja, venís caminando poco o menos de lo habitual durante los últimos días.'],
-  ['Estabilidad cardio', 'Si baja, tu pulso en reposo estuvo más alto de lo habitual o la VFC más baja, si ya hay historial.'],
-  ['Movilidad', 'Si baja, caminaste más lento, con pasos más cortos o menos parejos que de costumbre.'],
-  ['Regularidad de sueño', 'Si baja, tus horarios de dormir o despertar cambiaron mucho entre días, o dormiste duraciones distintas.'],
-  ['Dirección reciente', 'Te muestra si en los últimos días venís mejorando, empeorando o parecido a antes. Cerca de 50 es estable.'],
+  ['Readiness', 'Si baja, tu sueño o tu pulso sugieren que hoy podrías estar menos descansado.'],
+  ['Sueño', 'Si baja, dormiste poco, pasaste tiempo despierto en cama o tu sueño fue irregular.'],
+  ['Recuperación', 'Si baja, tu sueño o pulso sugieren menor recuperación. No incluye gimnasio.'],
+  ['Actividad', 'Si baja, caminaste poco o menos que durante tus semanas habituales.'],
+  ['Estabilidad cardio', 'Si baja, subió tu pulso en reposo o bajó tu VFC (si hay historial).'],
+  ['Movilidad', 'Si baja, caminaste más lento, con pasos más cortos o desparejos que antes.'],
+  ['Regularidad de sueño', 'Si baja, te acostaste o despertaste a horas muy distintas entre días.'],
+  ['Dirección reciente', 'Cerca de 50: venís igual; lejos de 50: tus señales mejoran o empeoran.'],
 ] as const;
 
 type OverviewItem = {
