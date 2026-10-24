@@ -685,33 +685,71 @@ for (const row of candidateInputs.A12.data.selected_candidates) {
     }
   }
 }
-// The intake fields identify references, but do not certify each edition and its
-// commercial scope. Keep those rows visible in HOLD until that gate is complete.
-for (const candidate of candidateRefs) {
-  const auditRow = mentionAudit.find(
-    (item) => item.id === candidate.id && item.area === candidate.area,
-  );
-  if (!auditRow || auditRow.disposition !== 'CANDIDATE_PENDING_REVIEW') {
-    throw new Error('Candidate review row is missing from the mention audit: ' + candidate.id);
+// Discovery and recommendation are separate gates. A missing commercial licence
+// review is NOT a reason to hide a verifiable reference from the AI library.
+// Hold only explicit source restrictions, exclusions and unresolved cross-area identities.
+const sourceRows = {
+  A01: new Map(candidateInputs.A01.data.rows.map((row) => [row.a01_record_id, row])),
+  A02: new Map(candidateInputs.A02.data.rows.map((row) => [row.id, row])),
+  A12: new Map(
+    candidateInputs.A12.data.selected_candidates.map((row) => [row.candidate_id, row]),
+  ),
+};
+const discoveryReasons = new Set([
+  'Identity, repository, product or edition not sufficiently resolved',
+  'Rights, source identity or product edition not sufficiently verified',
+]);
+const newlyDiscoveredIds = new Set();
+for (const auditRow of mentionAudit) {
+  if (auditRow.disposition !== 'HOLD' || !discoveryReasons.has(auditRow.reason)) continue;
+  const row = sourceRows[auditRow.area]?.get(auditRow.id);
+  if (!row) throw new Error('Discovery source row missing: ' + auditRow.id);
+  // Archived/restricted A02 projects remain genuinely held.
+  if (auditRow.area === 'A02' && row.GPD_fit === 'HOLD_ARCHIVED_OR_RESTRICTED') continue;
+  const referenceUrl =
+    auditRow.area === 'A01' ? row.source_links?.[0] :
+    auditRow.area === 'A02' ? row.source_url : row.primary_reference_url;
+  if (typeof referenceUrl !== 'string' || !referenceUrl.startsWith('https://')) {
+    continue;
   }
-  const reason =
-    candidate.area === 'A02' &&
-    candidate.rightsStatus === 'ROOT_FILE_ONLY_COMMERCIAL_SCOPE_UNVERIFIED'
-      ? 'ROOT_LICENSE_CHECKED_BUT_COMMERCIAL_SCOPE_OR_EDITION_NOT_VERIFIED'
-      : candidate.area === 'A12'
-        ? 'COMMERCIAL_CONDITIONS_OR_EXACT_PRODUCT_EDITION_NOT_VERIFIED'
-        : 'COMMERCIAL_CONDITIONS_AND_PRODUCT_EDITION_NOT_VERIFIED';
-  auditRow.disposition = 'HOLD';
-  auditRow.reason = reason;
-  identityHolds.push({
-    id: candidate.id,
-    name: candidate.name,
-    area: candidate.area,
-    repository: candidate.identity.includes('/') ? candidate.identity : null,
-    reason,
+  const identity = auditRow.identity
+    ? 'repo:' + auditRow.identity
+    : 'source:' + auditRow.area + ':' + auditRow.id;
+  if (seenCandidateIdentities.has(identity)) continue; // do not auto-merge editions
+  seenCandidateIdentities.add(identity);
+  candidateRefs.push({
+    id: auditRow.id,
+    area: auditRow.area,
+    name: auditRow.name,
+    identity: auditRow.identity ?? identity,
+    referenceUrl,
+    subcategory: row.family ?? row.GPD_fit ?? row.subarea,
+    candidateStatus: 'CANDIDATE_PENDING_REVIEW',
+    rightsStatus: 'NOT_CERTIFIED_REVALIDATE_ON_USE',
+    testStatus: 'NOT_RUN',
+    adoptionStatus: 'NOT_AUTHORIZED',
+    sourcePath: auditRow.sourcePath,
+    sourceBlobSha: auditRow.sourceBlobSha,
+    sourceCheckedAt: row.checked_at ?? row.source_checked_at,
+    sourceScope: row.triage_decision ?? row.GPD_fit ?? row.research_status,
   });
+  auditRow.disposition = 'CANDIDATE_PENDING_REVIEW';
+  auditRow.reason = 'DISCOVERED_NOT_VERIFIED_RECHECK_FOR_RECOMMENDATION';
+  newlyDiscoveredIds.add(auditRow.area + ':' + auditRow.id);
 }
-candidateRefs.length = 0;
+for (let i = identityHolds.length - 1; i >= 0; i--) {
+  if (newlyDiscoveredIds.has(identityHolds[i].area + ':' + identityHolds[i].id)) {
+    identityHolds.splice(i, 1);
+  }
+}
+// No candidate is tested, licensed or adopted merely because it is discoverable.
+for (const candidate of candidateRefs) {
+  candidate.knowledgeStatus = 'DISCOVERED_NOT_VERIFIED';
+  candidate.sourceScope ??= candidate.triage ?? candidate.sourceResearchStatus ?? candidate.subcategory;
+  if (candidate.testStatus !== 'NOT_RUN' || candidate.adoptionStatus !== 'NOT_AUTHORIZED') {
+    throw new Error('Cannot expose source claiming a trial or adoption: ' + candidate.id);
+  }
+}
 
 for (const [tlId, refs] of attachedMentionRefs) {
   const resource = byId.get(tlId);
@@ -814,7 +852,12 @@ for (const candidate of candidateRefs) {
     .filter((value) => typeof value === 'string')
     .join(' ');
 }
-if (researchCases.length !== 154 || mentionAudit.length !== 356 || candidateRefs.length !== 0) {
+if (
+  researchCases.length !== 154 ||
+  mentionAudit.length !== 356 ||
+  candidateRefs.length !== 272 ||
+  mentionAudit.filter((row) => row.disposition === 'HOLD').length !== 42
+) {
   throw new Error(
     `Content intake mismatch: ${researchCases.length} dossiers, ${mentionAudit.length} mentions, ${candidateRefs.length} candidate references`,
   );

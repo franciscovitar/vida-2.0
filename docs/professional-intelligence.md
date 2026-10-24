@@ -147,3 +147,9 @@ Dedicated coverage lives in:
 - `tests/professional-v2.test.ts`
 
 Final implementation verification requires the repository test suite, static checks, production build and one coherent Preview before protected merge.
+
+## Library 360 discovery versus adoption (2026-10-24)
+
+The previously conservative derivative hid 314 research mentions as HOLD, including ordinary discovery references whose editions, rights or commercial conditions had merely not been rechecked. The **discovery gate is not the adoption gate**. This change retains the 42 existing TL links, makes 272 source-pinned references available to a reader/AI as `DISCOVERED_NOT_VERIFIED` (64 A01, 185 A02, 23 A12), and keeps 42 genuinely unresolved/restricted/excluded mentions in explicit HOLD. The previously existing 193 resource identities and 154 decision dossiers remain untouched. No new canonical TL entry, benchmark, entitlement, commercial licence or approval is asserted.
+
+A02 `D_SPECIALIST_ON_DEMAND` and `P_CONTEXTUAL_ONLY` may be *discovered*, but their `sourceScope` must constrain recommendations. A02 `HOLD_ARCHIVED_OR_RESTRICTED` remains HOLD, as do A01 `HOLD_OR_RESTRICTED`, identity collisions (13 shared repositories plus Orval) and A12 source exclusions. Check provider status, edition, price, licence, privacy and user permissions at recommendation/use time. The agent/MCP consumer should read PAS source pointers and the sanitized Vida derivative, never infer `ADOPTED` from `DISCOVERED_NOT_VERIFIED`.

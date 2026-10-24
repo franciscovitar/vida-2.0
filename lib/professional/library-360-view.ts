@@ -113,7 +113,11 @@ export function selectLibrary360Results(
     )
     .map((value) => ({ kind: 'hold' as const, id: value.id, areaCode: value.area, value }));
   const results: Library360Result[] = [...resources, ...cases, ...candidates, ...holds];
-  return type === 'ALL' ? results : results.filter((item) => item.kind === type);
+  // Genuine identity/restriction holds are still searchable behind the explicit HOLD filter,
+  // not ranked together with discoverable references by default.
+  return type === 'ALL'
+    ? results.filter((item) => item.kind !== 'hold')
+    : results.filter((item) => item.kind === type);
 }
 
 export function searchLibrary360Results(
