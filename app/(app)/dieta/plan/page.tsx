@@ -36,6 +36,17 @@ const EVIDENCE_LENSES = [
   },
 ] as const;
 
+const EVIDENCE_SOURCES = [
+  {
+    title: 'Envejecimiento saludable (2025)',
+    url: 'https://www.nature.com/articles/s41591-025-03570-5',
+  },
+  {
+    title: 'Prevención cardiovascular (2026)',
+    url: 'https://pubmed.ncbi.nlm.nih.gov/41914202/',
+  },
+] as const;
+
 const EVIDENCE_INTRO =
   'El asesor nutricional contrasta distintas perspectivas en lugar de seguir a un influencer o usar un único marcador, como un pico de glucosa.';
 const EVIDENCE_NOTE =
@@ -73,12 +84,11 @@ export default async function NutritionPlanPage() {
         <p>{EVIDENCE_NOTE}</p>
         <p>Fuentes científicas de referencia:</p>
         <ul>
-          <li>
-            <a href="https://www.nature.com/articles/s41591-025-03570-5">Envejecimiento saludable (2025)</a>
-          </li>
-          <li>
-            <a href="https://pubmed.ncbi.nlm.nih.gov/41914202/">Prevención cardiovascular (2026)</a>
-          </li>
+          {EVIDENCE_SOURCES.map((source) => (
+            <li key={source.url}>
+              <a href={source.url}>{source.title}</a>
+            </li>
+          ))}
         </ul>
       </Card>
     </div>
