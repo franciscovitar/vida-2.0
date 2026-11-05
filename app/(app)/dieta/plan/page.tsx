@@ -74,14 +74,10 @@ export default async function NutritionPlanPage() {
         <p>Fuentes científicas de referencia:</p>
         <ul>
           <li>
-            <a href="https://www.nature.com/articles/s41591-025-03570-5">
-              Envejecimiento saludable (2025)
-            </a>
+            <a href="https://www.nature.com/articles/s41591-025-03570-5">Envejecimiento saludable (2025)</a>
           </li>
           <li>
-            <a href="https://pubmed.ncbi.nlm.nih.gov/41914202/">
-              Prevención cardiovascular (2026)
-            </a>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/41914202/">Prevención cardiovascular (2026)</a>
           </li>
         </ul>
       </Card>
