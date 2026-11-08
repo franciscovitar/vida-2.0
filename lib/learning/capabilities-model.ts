@@ -221,13 +221,15 @@ export function validCapabilityDataset(
   const routeRows = rows(routing);
   const ids = inventoryRows.map((item) => text(item.id));
   const areas = new Set(inventoryRows.map((item) => text(item.pillar)));
+  // Accept additions while rejecting truncated or cross-file-inconsistent catalogs.
+  const inventorySize = inventoryRows.length;
   if (
-    inventoryRows.length !== 245 ||
-    new Set(ids).size !== 245 ||
+    inventorySize < 245 ||
+    new Set(ids).size !== inventorySize ||
     ids.some((id) => !id || !/^GC-\d{3}$/.test(id)) ||
-    cardRows.length !== 245 ||
-    timeRows.length !== 245 ||
-    routeRows.length !== 245 ||
+    cardRows.length !== inventorySize ||
+    timeRows.length !== inventorySize ||
+    routeRows.length !== inventorySize ||
     areas.size !== 7 ||
     [...areas].some(
       (area) =>
