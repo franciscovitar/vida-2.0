@@ -33,12 +33,12 @@ const AREAS = [
   'relationships',
   'experiences',
 ];
-function fixtures() {
+function fixtures(size = 245) {
   const inventory = { updated: '2030-01-01', items: [] as Record<string, unknown>[] };
   const cards = { items: [] as Record<string, unknown>[] };
   const times = { items: [] as Record<string, unknown>[] };
   const routing = { items: [] as Record<string, unknown>[] };
-  for (let index = 1; index <= 245; index += 1) {
+  for (let index = 1; index <= size; index += 1) {
     const id = `GC-${String(index).padStart(3, '0')}`;
     const pillar = AREAS[(index - 1) % AREAS.length] ?? 'skills';
     inventory.items.push({
@@ -110,6 +110,23 @@ test('capability dataset validates all 245 synthetic items and exactly 12 comple
   assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), true);
   data.inventory.items[1]!.id = data.inventory.items[0]!.id;
   assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), false);
+});
+
+test('capability dataset accepts 249 entries and rejects incomplete or truncated data', () => {
+  const data = fixtures(249);
+  assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), true);
+  assert.equal(projectCapabilityData(data.inventory, data.cards, data.times, data.routing).length, 249);
+
+  data.cards.items.pop();
+  assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), false);
+  data.cards.items.push({
+    generalist_item_id: 'GC-249', name: 'Capacidad 249', status: 'ON_DEMAND_UNWRITTEN', card: null,
+  });
+  data.routing.items.pop();
+  assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), false);
+
+  const truncated = fixtures(244);
+  assert.equal(validCapabilityDataset(truncated.inventory, truncated.cards, truncated.times, truncated.routing), false);
 });
 
 test('library projects only display fields, exposes no complete card for uncured items, and starts varied', () => {
