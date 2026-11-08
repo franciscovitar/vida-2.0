@@ -115,12 +115,18 @@ test('capability dataset validates all 245 synthetic items and exactly 12 comple
 test('capability dataset accepts 249 entries and rejects incomplete or truncated data', () => {
   const data = fixtures(249);
   assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), true);
-  assert.equal(projectCapabilityData(data.inventory, data.cards, data.times, data.routing).length, 249);
+  assert.equal(
+    projectCapabilityData(data.inventory, data.cards, data.times, data.routing).length,
+    249,
+  );
 
   data.cards.items.pop();
   assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), false);
   data.cards.items.push({
-    generalist_item_id: 'GC-249', name: 'Capacidad 249', status: 'ON_DEMAND_UNWRITTEN', card: null,
+    generalist_item_id: 'GC-249',
+    name: 'Capacidad 249',
+    status: 'ON_DEMAND_UNWRITTEN',
+    card: null,
   });
   data.routing.items.pop();
   assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), false);
