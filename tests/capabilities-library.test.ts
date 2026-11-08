@@ -132,10 +132,8 @@ test('capability dataset accepts 249 entries and rejects incomplete or truncated
   assert.equal(validCapabilityDataset(data.inventory, data.cards, data.times, data.routing), false);
 
   const truncated = fixtures(244);
-  assert.equal(
-    validCapabilityDataset(truncated.inventory, truncated.cards, truncated.times, truncated.routing),
-    false,
-  );
+  const { inventory, cards, times, routing } = truncated;
+  assert.equal(validCapabilityDataset(inventory, cards, times, routing), false);
 });
 
 test('library projects only display fields, exposes no complete card for uncured items, and starts varied', () => {
